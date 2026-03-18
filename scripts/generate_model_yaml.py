@@ -185,8 +185,8 @@ def main():
     input_path = args.input or str(ROOT / "data" / "scan_candidates.json")
 
     if not Path(input_path).exists():
-        print(f"Error: {input_path} not found. Run scan_arxiv.py first.", file=sys.stderr)
-        return 1
+        print(f"Warning: {input_path} not found. No candidates to process.")
+        return 0
 
     with open(input_path, "r") as f:
         data = json.load(f)
