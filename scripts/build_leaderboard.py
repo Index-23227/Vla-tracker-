@@ -16,6 +16,8 @@ MODELS_DIR = ROOT / "data" / "models"
 BENCHMARKS_DIR = ROOT / "data" / "benchmarks"
 OUTPUT_FILE = ROOT / "data" / "leaderboard.json"
 
+METADATA_KEYS = ("source", "date_reported", "eval_condition")
+
 
 def load_yaml(path: Path) -> dict:
     with open(path, "r", encoding="utf-8") as f:
@@ -40,6 +42,18 @@ def load_all_benchmarks() -> dict[str, dict]:
     return benchmarks
 
 
+def extract_scores(bench_data: dict) -> dict:
+    """Extract numeric scores and metadata from a benchmark entry."""
+    scores = {}
+    meta = {}
+    for k, v in bench_data.items():
+        if k in METADATA_KEYS:
+            meta[k] = v
+        elif isinstance(v, (int, float)):
+            scores[k] = v
+    return scores, meta
+
+
 def compute_libero_avg(benchmarks: dict) -> float | None:
     libero = benchmarks.get("libero")
     if not libero:
@@ -51,6 +65,27 @@ def compute_libero_avg(benchmarks: dict) -> float | None:
             scores.append(val)
     if len(scores) == 4:
         return round(sum(scores) / 4, 2)
+    return None
+
+
+def compute_calvin_avg(benchmarks: dict) -> float | None:
+    calvin = benchmarks.get("calvin")
+    if not calvin:
+        return None
+    val = calvin.get("calvin_abc_d_avg_len")
+    if val is not None and isinstance(val, (int, float)):
+        return round(val, 2)
+    return None
+
+
+def compute_simpler_avg(benchmarks: dict) -> float | None:
+    simpler = benchmarks.get("simpler_env")
+    if not simpler:
+        return None
+    scores = [v for k, v in simpler.items()
+              if k not in METADATA_KEYS and isinstance(v, (int, float))]
+    if scores:
+        return round(sum(scores) / len(scores), 2)
     return None
 
 
@@ -71,38 +106,32 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
                 "parameters": model.get("architecture", {}).get("parameters", "unknown"),
             },
             "benchmarks": {},
+            "eval_conditions": {},
         }
 
         model_benchmarks = model.get("benchmarks", {})
 
-        # Process LIBERO
-        if "libero" in model_benchmarks:
-            libero = model_benchmarks["libero"]
-            entry["benchmarks"]["libero"] = {
-                k: v for k, v in libero.items()
-                if k not in ("source", "date_reported") and isinstance(v, (int, float))
-            }
+        # Process each benchmark
+        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld"]:
+            if bench_name in model_benchmarks:
+                scores, meta = extract_scores(model_benchmarks[bench_name])
+                if scores:
+                    entry["benchmarks"][bench_name] = scores
+                if meta.get("eval_condition"):
+                    entry["eval_conditions"][bench_name] = meta["eval_condition"]
 
-        # Process CALVIN
-        if "calvin" in model_benchmarks:
-            calvin = model_benchmarks["calvin"]
-            entry["benchmarks"]["calvin"] = {
-                k: v for k, v in calvin.items()
-                if k not in ("source", "date_reported") and isinstance(v, (int, float))
-            }
-
-        # Process SimplerEnv
-        if "simpler_env" in model_benchmarks:
-            simpler = model_benchmarks["simpler_env"]
-            entry["benchmarks"]["simpler_env"] = {
-                k: v for k, v in simpler.items()
-                if k not in ("source", "date_reported") and isinstance(v, (int, float))
-            }
-
-        # Compute LIBERO average
+        # Compute averages per benchmark
         libero_avg = compute_libero_avg(model_benchmarks)
         if libero_avg is not None:
             entry["libero_avg"] = libero_avg
+
+        calvin_avg = compute_calvin_avg(model_benchmarks)
+        if calvin_avg is not None:
+            entry["calvin_avg"] = calvin_avg
+
+        simpler_avg = compute_simpler_avg(model_benchmarks)
+        if simpler_avg is not None:
+            entry["simpler_avg"] = simpler_avg
 
         leaderboard_entries.append(entry)
 
@@ -148,7 +177,16 @@ def main():
     print("\nTop 5 (LIBERO average):")
     for entry in leaderboard["models"][:5]:
         avg = entry.get("libero_avg", "N/A")
-        print(f"  #{entry['rank']} {entry['name']}: {avg}")
+        date = entry.get("date", "?")
+        print(f"  #{entry['rank']} {entry['name']} ({date}): {avg}")
+
+    # Print CALVIN rankings
+    calvin_models = [e for e in leaderboard["models"] if e.get("calvin_avg")]
+    if calvin_models:
+        calvin_models.sort(key=lambda x: x["calvin_avg"], reverse=True)
+        print("\nTop CALVIN models:")
+        for e in calvin_models[:5]:
+            print(f"  {e['name']}: {e['calvin_avg']} avg len")
 
     return 0
 

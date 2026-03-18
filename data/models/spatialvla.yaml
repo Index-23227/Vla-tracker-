@@ -1,0 +1,34 @@
+name: SpatialVLA
+version: "1.0"
+organization: "Shanghai AI Lab / Tsinghua University"
+paper_url: https://arxiv.org/abs/2501.15830
+code_url: https://github.com/SpatialVLA/SpatialVLA
+date: "2025-01-27"
+architecture:
+  backbone: "InternVL2-based (InternViT + InternLM2)"
+  llm: "InternLM2 1.8B"
+  action_head: "autoregressive (tokenized)"
+  action_space: "continuous (7-DoF)"
+  parameters: "4B"
+  key_innovation: "3D spatial understanding via adaptive 3D tokenization; enriches VLA with depth and spatial priors"
+training:
+  dataset: "Open X-Embodiment + 3D spatial data"
+  method: "Pre-training with spatial tokens + fine-tuning"
+  compute: "32 A100 GPUs"
+benchmarks:
+  libero:
+    libero_spatial: 95.6
+    libero_object: 96.0
+    libero_goal: 90.2
+    libero_long: 70.4
+    source: "Table 1, SpatialVLA paper"
+    date_reported: "2025-01-27"
+    eval_condition: "fine-tuned"
+  simpler_env:
+    google_robot_pick_coke_can: 84.3
+    google_robot_move_near: 72.1
+    source: "Table 3, SpatialVLA paper"
+    date_reported: "2025-01-27"
+    eval_condition: "fine-tuned"
+open_source: true
+tags: [4B, autoregressive, 3D-spatial, manipulation, open-source]

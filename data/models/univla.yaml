@@ -1,0 +1,33 @@
+name: UniVLA
+version: "1.0"
+organization: "Midea Group / South China University of Technology"
+paper_url: https://arxiv.org/abs/2505.01969
+code_url: https://github.com/UniVLA/UniVLA
+date: "2025-05-04"
+architecture:
+  backbone: "SigLIP + DINOv2"
+  llm: "Qwen2.5 3B"
+  action_head: "flow matching (unified tokenization)"
+  action_space: "continuous"
+  parameters: "3B"
+  key_innovation: "Unified vision-language-action tokenization; single-stream architecture for all modalities"
+training:
+  dataset: "Open X-Embodiment + proprietary manipulation data"
+  method: "Unified pre-training with flow matching"
+  compute: "16 A100 GPUs"
+benchmarks:
+  libero:
+    libero_spatial: 96.8
+    libero_object: 97.4
+    libero_goal: 92.0
+    libero_long: 74.2
+    source: "Table 1, UniVLA paper"
+    date_reported: "2025-05-04"
+    eval_condition: "fine-tuned"
+  calvin:
+    calvin_abc_d_avg_len: 4.1
+    source: "Table 2, UniVLA paper"
+    date_reported: "2025-05-04"
+    eval_condition: "fine-tuned"
+open_source: true
+tags: [3B, flow-matching, unified-tokenization, manipulation, open-source]

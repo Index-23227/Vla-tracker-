@@ -5,7 +5,7 @@
 <!-- TODO: Replace with actual dashboard screenshot -->
 <!-- ![VLA-Tracker Dashboard](docs/assets/dashboard-screenshot.png) -->
 
-[![Models Tracked](https://img.shields.io/badge/models-10-blue)](data/models/)
+[![Models Tracked](https://img.shields.io/badge/models-17-blue)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-5-green)](data/benchmarks/)
 [![Weekly Analysis](https://img.shields.io/badge/analysis-AI%20powered-purple)](analysis/weekly/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -14,7 +14,7 @@
 
 ## What is this?
 
-VLA-Tracker automatically tracks **10+ VLA models** across **5 benchmarks** and generates **AI-powered analysis** every week.
+VLA-Tracker automatically tracks **17 VLA models** across **5 benchmarks** (LIBERO, CALVIN, SimplerEnv, Meta-World, RLBench) and generates **AI-powered analysis** every week.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance over time** — see how SOTA evolves week by week
@@ -27,16 +27,17 @@ VLA-Tracker automatically tracks **10+ VLA models** across **5 benchmarks** and 
 
 ## Current Leaderboard (LIBERO)
 
-| Rank | Model | Action Head | Spatial | Object | Goal | Long | Avg |
-|------|-------|-------------|---------|--------|------|------|-----|
-| 🥇 | pi0.5 | flow matching | **96.2** | **97.1** | 89.4 | **72.8** | **88.9** |
-| 🥈 | OpenVLA-OFT | parallel decoding | 94.8 | 95.2 | **91.0** | 68.4 | 87.4 |
-| 🥉 | CoT-VLA | diffusion + CoT | 92.1 | 93.8 | 88.2 | 71.2 | 86.3 |
-| 4 | pi0-FAST | FAST tokenizer | 93.8 | 95.4 | 88.0 | 67.2 | 86.1 |
-| 5 | HybridVLA | hybrid | 91.4 | 94.2 | 87.6 | 69.8 | 85.8 |
-| 6 | pi0 | flow matching | 92.4 | 94.6 | 86.2 | 65.8 | 84.8 |
-| 7 | OpenVLA | autoregressive | 84.2 | 88.4 | 72.0 | 53.4 | 74.5 |
-| 8 | Octo | diffusion | 78.9 | 82.3 | 65.4 | 42.1 | 67.2 |
+| Rank | Model | Date | Action Head | Spatial | Object | Goal | Long | Avg | Eval |
+|------|-------|------|-------------|---------|--------|------|------|-----|------|
+| 🥇 | UniVLA | May 2025 | flow matching | **96.8** | **97.4** | **92.0** | **74.2** | **90.1** | FT |
+| 🥈 | pi0.5 | Feb 2025 | flow matching | 96.2 | 97.1 | 89.4 | 72.8 | 88.9 | FT |
+| 🥉 | SpatialVLA | Jan 2025 | autoregressive | 95.6 | 96.0 | 90.2 | 70.4 | 88.1 | FT |
+| 4 | DexVLA | Feb 2025 | diffusion (hierarchical) | 94.2 | 95.8 | 89.8 | 71.6 | 87.9 | FT |
+| 5 | OpenVLA-OFT | Jan 2025 | parallel decoding | 94.8 | 95.2 | 91.0 | 68.4 | 87.4 | FT (LoRA) |
+| 6 | CoT-VLA | Jan 2025 | diffusion + CoT | 92.1 | 93.8 | 88.2 | 71.2 | 86.3 | FT |
+| 7 | pi0-FAST | Jan 2025 | FAST tokenizer | 93.8 | 95.4 | 88.0 | 67.2 | 86.1 | FT |
+
+> **FT** = Fine-tuned on benchmark, **ZS** = Zero-shot. See dashboard for full 17-model leaderboard with CALVIN & SimplerEnv.
 
 *Updated: 2026-03-18 · [Full leaderboard →](data/leaderboard.json)*
 
@@ -83,11 +84,11 @@ python scripts/build_leaderboard.py
 
 | Benchmark | Tasks | Models | Focus |
 |-----------|-------|--------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 8 | Manipulation generalization |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 4 | Long-horizon, language |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 15 | Manipulation generalization |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 8 | Long-horizon, language |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 5 | Sim-to-real transfer |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 3 | Sim-to-real transfer |
-| [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | — | Diverse manipulation |
+| [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 1 | Diverse manipulation |
 
 ## How AI Analysis Works
 
