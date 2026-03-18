@@ -1,0 +1,41 @@
+name: X-VLA
+full_name: "X-VLA: Soft-Prompted Transformer as Scalable Cross-Embodiment Vision-Language-Action Model"
+organization: "Tsinghua University AIR / Shanghai AI Lab"
+date: "2025-10-14"
+paper_url: https://arxiv.org/abs/2510.10274
+code_url: https://github.com/2toinf/X-VLA
+venue: "ICLR 2026"
+open_source: true
+
+architecture:
+  backbone: "Transformer with soft prompts"
+  action_head: "autoregressive with embodiment-specific soft prompts"
+  parameters: "0.9B"
+
+key_innovation: >
+  Introduces soft-prompting mechanism where embodiment-specific learnable embeddings
+  guide a unified Transformer backbone for cross-embodiment policy learning.
+  Won 1st Place (Champion) at AgiBot World Challenge (IROS 2025).
+  Evaluated across 6 benchmarks spanning single-arm, bimanual, and autonomous driving.
+
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 98.8
+    libero_goal: 97.6
+    libero_long: 96.4
+  calvin:
+    calvin_abc_d_avg_len: 4.4
+  simpler_env:
+    simpler_widowx_vm: 80.4
+    simpler_widowx_va: 75.7
+  robotwin_v2:
+    robotwin_v2_avg: 72.5
+
+eval_conditions:
+  libero: "fine-tuned"
+  calvin: "fine-tuned (joint)"
+  simpler_env: "fine-tuned"
+  robotwin_v2: "fine-tuned"
+
+tags: [0.9B, soft-prompt, cross-embodiment, ICLR-2026, open-source, AgiBot-champion, efficient]

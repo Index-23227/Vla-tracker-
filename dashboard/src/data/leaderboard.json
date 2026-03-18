@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-03-18T13:34:24.669693",
-  "num_models": 32,
+  "generated_at": "2026-03-18T16:00:00.000000",
+  "num_models": 36,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -8,9 +8,148 @@
     "metaworld",
     "rlbench",
     "robotwin",
+    "robotwin_v2",
     "simpler_env"
   ],
   "models": [
+    {
+      "name": "SimpleVLA-RL",
+      "organization": "Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU",
+      "date": "2025-09-11",
+      "paper_url": "https://arxiv.org/abs/2509.09674",
+      "code_url": "https://github.com/PRIME-RL/SimpleVLA-RL",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "RL",
+        "GRPO",
+        "reinforcement-learning",
+        "ICLR-2026",
+        "open-source",
+        "SOTA",
+        "data-efficient"
+      ],
+      "architecture": {
+        "action_head": "autoregressive + GRPO reinforcement learning",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 99.1,
+          "libero_object": 99.2,
+          "libero_goal": 98.5,
+          "libero_long": 98.5
+        },
+        "robotwin": {
+          "robotwin_v1_avg": 70.4
+        },
+        "robotwin_v2": {
+          "robotwin_v2_short": 64.9,
+          "robotwin_v2_medium": 72.5,
+          "robotwin_v2_long": 69.0,
+          "robotwin_v2_avg": 68.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "RL fine-tuned (GRPO on top of SFT)",
+        "robotwin": "RL fine-tuned",
+        "robotwin_v2": "RL fine-tuned"
+      },
+      "libero_avg": 98.83,
+      "robotwin_avg": 70.4,
+      "robotwin_v2_avg": 68.8,
+      "rank": 1
+    },
+    {
+      "name": "X-VLA",
+      "organization": "Tsinghua University AIR / Shanghai AI Lab",
+      "date": "2025-10-14",
+      "paper_url": "https://arxiv.org/abs/2510.10274",
+      "code_url": "https://github.com/2toinf/X-VLA",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "0.9B",
+        "soft-prompt",
+        "cross-embodiment",
+        "ICLR-2026",
+        "open-source",
+        "AgiBot-champion",
+        "efficient"
+      ],
+      "architecture": {
+        "action_head": "autoregressive with embodiment-specific soft prompts",
+        "parameters": "0.9B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 98.4,
+          "libero_object": 98.8,
+          "libero_goal": 97.6,
+          "libero_long": 96.4
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.4
+        },
+        "simpler_env": {
+          "simpler_widowx_vm": 80.4,
+          "simpler_widowx_va": 75.7
+        },
+        "robotwin_v2": {
+          "robotwin_v2_avg": 72.5
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned (joint)",
+        "simpler_env": "fine-tuned",
+        "robotwin_v2": "fine-tuned"
+      },
+      "libero_avg": 97.8,
+      "calvin_avg": 4.4,
+      "simpler_avg": 78.05,
+      "robotwin_v2_avg": 72.5,
+      "rank": 2
+    },
+    {
+      "name": "MemoryVLA",
+      "organization": "PKU / Tsinghua University / Shanghai AI Lab",
+      "date": "2025-08-26",
+      "paper_url": "https://arxiv.org/abs/2508.19236",
+      "code_url": "https://github.com/shihao1895/MemoryVLA",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "memory",
+        "temporal-context",
+        "long-horizon",
+        "ICLR-2026",
+        "open-source",
+        "diffusion-transformer"
+      ],
+      "architecture": {
+        "action_head": "diffusion transformer + perceptual-cognitive memory bank",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_5_suite_avg": 96.5
+        },
+        "simpler_env": {
+          "simpler_bridge": 71.9,
+          "simpler_fractal": 72.7
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 96.5,
+      "simpler_avg": 72.3,
+      "rank": 3
+    },
     {
       "name": "pi0.5-Pro",
       "organization": "Physical Intelligence",
@@ -54,7 +193,7 @@
       "libero_avg": 93.25,
       "calvin_avg": 4.6,
       "robotwin_avg": 65.5,
-      "rank": 1
+      "rank": 4
     },
     {
       "name": "LingBot-VLA",
@@ -99,7 +238,7 @@
       "libero_avg": 92.55,
       "calvin_avg": 4.5,
       "robotwin_avg": 61.5,
-      "rank": 2
+      "rank": 5
     },
     {
       "name": "UD-VLA",
@@ -137,7 +276,7 @@
       },
       "libero_avg": 91.75,
       "calvin_avg": 4.5,
-      "rank": 3
+      "rank": 6
     },
     {
       "name": "InstructVLA",
@@ -181,7 +320,7 @@
       "libero_avg": 90.6,
       "calvin_avg": 4.4,
       "simpler_avg": 80.3,
-      "rank": 4
+      "rank": 7
     },
     {
       "name": "UniVLA",
@@ -219,7 +358,7 @@
       },
       "libero_avg": 90.1,
       "calvin_avg": 4.1,
-      "rank": 5
+      "rank": 8
     },
     {
       "name": "OpenVLA-v2",
@@ -263,7 +402,7 @@
       "libero_avg": 89.95,
       "calvin_avg": 4.3,
       "simpler_avg": 82.3,
-      "rank": 6
+      "rank": 9
     },
     {
       "name": "TRA-VLA",
@@ -301,7 +440,7 @@
       },
       "libero_avg": 89.25,
       "calvin_avg": 4.0,
-      "rank": 7
+      "rank": 10
     },
     {
       "name": "FLARE",
@@ -339,7 +478,7 @@
       },
       "libero_avg": 89.2,
       "calvin_avg": 4.1,
-      "rank": 8
+      "rank": 11
     },
     {
       "name": "pi0.5",
@@ -377,7 +516,7 @@
       },
       "libero_avg": 88.88,
       "calvin_avg": 4.2,
-      "rank": 9
+      "rank": 12
     },
     {
       "name": "SpatialVLA",
@@ -416,7 +555,7 @@
       },
       "libero_avg": 88.05,
       "simpler_avg": 78.2,
-      "rank": 10
+      "rank": 13
     },
     {
       "name": "DexVLA",
@@ -454,7 +593,7 @@
       },
       "libero_avg": 87.85,
       "calvin_avg": 4.0,
-      "rank": 11
+      "rank": 14
     },
     {
       "name": "OpenVLA-OFT",
@@ -493,7 +632,7 @@
       },
       "libero_avg": 87.35,
       "simpler_avg": 75.25,
-      "rank": 12
+      "rank": 15
     },
     {
       "name": "SparseVLA",
@@ -527,7 +666,7 @@
         "libero": "fine-tuned"
       },
       "libero_avg": 87.25,
-      "rank": 13
+      "rank": 16
     },
     {
       "name": "CoT-VLA",
@@ -560,7 +699,7 @@
         "libero": "fine-tuned"
       },
       "libero_avg": 86.32,
-      "rank": 14
+      "rank": 17
     },
     {
       "name": "pi0-FAST",
@@ -593,7 +732,7 @@
         "libero": "fine-tuned"
       },
       "libero_avg": 86.1,
-      "rank": 15
+      "rank": 18
     },
     {
       "name": "CogACT",
@@ -632,40 +771,7 @@
       },
       "libero_avg": 85.9,
       "simpler_avg": 70.35,
-      "rank": 16
-    },
-    {
-      "name": "GR00T-N1",
-      "organization": "NVIDIA",
-      "date": "2025-03-18",
-      "paper_url": "https://arxiv.org/abs/2503.14734",
-      "code_url": null,
-      "venue": null,
-      "open_source": true,
-      "tags": [
-        "2.2B",
-        "diffusion-transformer",
-        "dual-system",
-        "humanoid",
-        "open-model"
-      ],
-      "architecture": {
-        "action_head": "diffusion transformer (S1 system)",
-        "parameters": "2.2B"
-      },
-      "benchmarks": {
-        "libero": {
-          "libero_spatial": 93.2,
-          "libero_object": 94.8,
-          "libero_goal": 88.6,
-          "libero_long": 66.4
-        }
-      },
-      "eval_conditions": {
-        "libero": "fine-tuned"
-      },
-      "libero_avg": 85.75,
-      "rank": 17
+      "rank": 19
     },
     {
       "name": "HybridVLA",
@@ -703,7 +809,40 @@
       },
       "libero_avg": 85.75,
       "calvin_avg": 3.6,
-      "rank": 18
+      "rank": 20
+    },
+    {
+      "name": "GR00T-N1",
+      "organization": "NVIDIA",
+      "date": "2025-03-18",
+      "paper_url": "https://arxiv.org/abs/2503.14734",
+      "code_url": null,
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "2.2B",
+        "diffusion-transformer",
+        "dual-system",
+        "humanoid",
+        "open-model"
+      ],
+      "architecture": {
+        "action_head": "diffusion transformer (S1 system)",
+        "parameters": "2.2B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 93.2,
+          "libero_object": 94.8,
+          "libero_goal": 88.6,
+          "libero_long": 66.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 85.75,
+      "rank": 21
     },
     {
       "name": "pi0",
@@ -747,7 +886,7 @@
       "libero_avg": 84.75,
       "calvin_avg": 3.8,
       "robotwin_avg": 46.5,
-      "rank": 19
+      "rank": 22
     },
     {
       "name": "RoboVLM",
@@ -786,7 +925,7 @@
       },
       "libero_avg": 84.05,
       "calvin_avg": 3.5,
-      "rank": 20
+      "rank": 23
     },
     {
       "name": "RDT-1B",
@@ -831,7 +970,7 @@
       "libero_avg": 82.5,
       "calvin_avg": 3.4,
       "robotwin_avg": 28.5,
-      "rank": 21
+      "rank": 24
     },
     {
       "name": "FasT-VLA",
@@ -865,7 +1004,7 @@
         "libero": "fine-tuned"
       },
       "libero_avg": 81.55,
-      "rank": 22
+      "rank": 25
     },
     {
       "name": "SmolVLA",
@@ -904,7 +1043,7 @@
       },
       "libero_avg": 79.5,
       "simpler_avg": 64.8,
-      "rank": 23
+      "rank": 26
     },
     {
       "name": "HPT",
@@ -942,7 +1081,7 @@
       },
       "libero_avg": 77.5,
       "simpler_avg": 62.4,
-      "rank": 24
+      "rank": 27
     },
     {
       "name": "OpenVLA",
@@ -981,7 +1120,7 @@
       },
       "libero_avg": 74.5,
       "simpler_avg": 42.3,
-      "rank": 25
+      "rank": 28
     },
     {
       "name": "Octo",
@@ -1026,7 +1165,7 @@
       "libero_avg": 67.17,
       "calvin_avg": 2.4,
       "simpler_avg": 31.45,
-      "rank": 26
+      "rank": 29
     },
     {
       "name": "Diffusion Policy",
@@ -1066,7 +1205,138 @@
       },
       "libero_avg": 66.75,
       "robotwin_avg": 10.8,
-      "rank": 27
+      "rank": 30
+    },
+    {
+      "name": "Vlaser",
+      "organization": "USTC / Shanghai AI Lab / SJTU / Zhejiang University",
+      "date": "2025-10-14",
+      "paper_url": "https://arxiv.org/abs/2510.11027",
+      "code_url": "https://github.com/OpenGVLab/Vlaser",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "2B/8B",
+        "reasoning",
+        "embodied-reasoning",
+        "InternVL",
+        "ICLR-2026",
+        "open-source",
+        "flow-matching"
+      ],
+      "architecture": {
+        "action_head": "flow matching action expert",
+        "parameters": "2B / 8B"
+      },
+      "benchmarks": {
+        "simpler_env": {
+          "simpler_bridge_widowx": 78.6,
+          "simpler_google_robot": 68.4
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned"
+      },
+      "simpler_avg": 73.5,
+      "rank": 31
+    },
+    {
+      "name": "TraceVLA",
+      "organization": "University of Michigan / NVIDIA",
+      "date": "2024-12-13",
+      "paper_url": "https://arxiv.org/abs/2412.10345",
+      "code_url": null,
+      "venue": "ICLR 2025",
+      "open_source": false,
+      "tags": [
+        "7B",
+        "autoregressive",
+        "visual-trace",
+        "spatial-temporal",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "autoregressive + visual trace prompting",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "simpler_env": {
+          "google_robot_pick_coke_can": 72.8,
+          "google_robot_move_near": 56.4
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned"
+      },
+      "simpler_avg": 64.6,
+      "rank": 32
+    },
+    {
+      "name": "RT-2-X",
+      "organization": "Google DeepMind",
+      "date": "2023-10-13",
+      "paper_url": "https://arxiv.org/abs/2310.08864",
+      "code_url": null,
+      "venue": "ICRA 2024",
+      "open_source": false,
+      "tags": [
+        "55B",
+        "autoregressive",
+        "manipulation",
+        "cross-embodiment",
+        "web-pretrained"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (tokenized)",
+        "parameters": "55B"
+      },
+      "benchmarks": {
+        "simpler_env": {
+          "google_robot_pick_coke_can": 72.5,
+          "google_robot_move_near": 50.3,
+          "google_robot_open_drawer": 38.6
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned"
+      },
+      "simpler_avg": 53.8,
+      "rank": 33
+    },
+    {
+      "name": "GR-2",
+      "organization": "ByteDance",
+      "date": "2024-07-19",
+      "paper_url": "https://arxiv.org/abs/2407.14489",
+      "code_url": null,
+      "venue": "ICLR 2025",
+      "open_source": false,
+      "tags": [
+        "1.5B",
+        "autoregressive",
+        "video-prediction",
+        "manipulation",
+        "world-model"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (video prediction + action)",
+        "parameters": "1.5B"
+      },
+      "benchmarks": {
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.8,
+          "calvin_abc_d_1": 93.2,
+          "calvin_abc_d_2": 81.6,
+          "calvin_abc_d_3": 68.4,
+          "calvin_abc_d_4": 54.8,
+          "calvin_abc_d_5": 42.1
+        }
+      },
+      "eval_conditions": {
+        "calvin": "fine-tuned"
+      },
+      "calvin_avg": 3.8,
+      "rank": 34
     },
     {
       "name": "3D Diffuser Actor",
@@ -1107,7 +1377,7 @@
         "rlbench": "fine-tuned"
       },
       "calvin_avg": 3.2,
-      "rank": 28
+      "rank": 35
     },
     {
       "name": "GR-1",
@@ -1142,105 +1412,7 @@
         "calvin": "fine-tuned"
       },
       "calvin_avg": 3.1,
-      "rank": 29
-    },
-    {
-      "name": "GR-2",
-      "organization": "ByteDance",
-      "date": "2024-07-19",
-      "paper_url": "https://arxiv.org/abs/2407.14489",
-      "code_url": null,
-      "venue": "ICLR 2025",
-      "open_source": false,
-      "tags": [
-        "1.5B",
-        "autoregressive",
-        "video-prediction",
-        "manipulation",
-        "world-model"
-      ],
-      "architecture": {
-        "action_head": "autoregressive (video prediction + action)",
-        "parameters": "1.5B"
-      },
-      "benchmarks": {
-        "calvin": {
-          "calvin_abc_d_avg_len": 3.8,
-          "calvin_abc_d_1": 93.2,
-          "calvin_abc_d_2": 81.6,
-          "calvin_abc_d_3": 68.4,
-          "calvin_abc_d_4": 54.8,
-          "calvin_abc_d_5": 42.1
-        }
-      },
-      "eval_conditions": {
-        "calvin": "fine-tuned"
-      },
-      "calvin_avg": 3.8,
-      "rank": 30
-    },
-    {
-      "name": "RT-2-X",
-      "organization": "Google DeepMind",
-      "date": "2023-10-13",
-      "paper_url": "https://arxiv.org/abs/2310.08864",
-      "code_url": null,
-      "venue": "ICRA 2024",
-      "open_source": false,
-      "tags": [
-        "55B",
-        "autoregressive",
-        "manipulation",
-        "cross-embodiment",
-        "web-pretrained"
-      ],
-      "architecture": {
-        "action_head": "autoregressive (tokenized)",
-        "parameters": "55B"
-      },
-      "benchmarks": {
-        "simpler_env": {
-          "google_robot_pick_coke_can": 72.5,
-          "google_robot_move_near": 50.3,
-          "google_robot_open_drawer": 38.6
-        }
-      },
-      "eval_conditions": {
-        "simpler_env": "fine-tuned"
-      },
-      "simpler_avg": 53.8,
-      "rank": 31
-    },
-    {
-      "name": "TraceVLA",
-      "organization": "University of Michigan / NVIDIA",
-      "date": "2024-12-13",
-      "paper_url": "https://arxiv.org/abs/2412.10345",
-      "code_url": null,
-      "venue": "ICLR 2025",
-      "open_source": false,
-      "tags": [
-        "7B",
-        "autoregressive",
-        "visual-trace",
-        "spatial-temporal",
-        "manipulation"
-      ],
-      "architecture": {
-        "action_head": "autoregressive + visual trace prompting",
-        "parameters": "7B"
-      },
-      "benchmarks": {
-        "simpler_env": {
-          "google_robot_pick_coke_can": 72.8,
-          "google_robot_move_near": 56.4
-        }
-      },
-      "eval_conditions": {
-        "simpler_env": "fine-tuned"
-      },
-      "simpler_avg": 64.6,
-      "rank": 32
+      "rank": 36
     }
   ]
 }

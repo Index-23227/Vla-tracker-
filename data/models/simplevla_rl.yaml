@@ -1,0 +1,46 @@
+name: SimpleVLA-RL
+full_name: "SimpleVLA-RL: Scaling VLA Training via Reinforcement Learning"
+organization: "Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU"
+date: "2025-09-11"
+paper_url: https://arxiv.org/abs/2509.09674
+code_url: https://github.com/PRIME-RL/SimpleVLA-RL
+venue: "ICLR 2026"
+open_source: true
+
+architecture:
+  base_model: OpenVLA-OFT
+  backbone: LLaMA-2-7B
+  action_head: "autoregressive + GRPO reinforcement learning"
+  parameters: "7B"
+
+key_innovation: >
+  Efficient RL framework for VLA using Group Relative Policy Optimization (GRPO)
+  with simple outcome-based rewards (1 for success, 0 for failure). Inspired by
+  DeepSeek-R1, demonstrates that RL with simple rewards dramatically enhances
+  VLA performance. Discovers novel "pushcut" phenomenon where RL training finds
+  previously unseen action patterns.
+
+benchmarks:
+  libero:
+    libero_spatial: 99.1
+    libero_object: 99.2
+    libero_goal: 98.5
+    libero_long: 98.5
+  robotwin_v1:
+    hammer_beat: 92.6
+    block_handover: 89.6
+    blocks_stack: 40.2
+    shoe_place: 59.3
+    average: 70.4
+  robotwin_v2:
+    short_horizon: 64.9
+    medium_horizon: 72.5
+    long_horizon: 69.0
+    average: 68.8
+
+eval_conditions:
+  libero: "RL fine-tuned (on top of SFT)"
+  robotwin_v1: "RL fine-tuned"
+  robotwin_v2: "RL fine-tuned"
+
+tags: [7B, RL, GRPO, reinforcement-learning, ICLR-2026, open-source, SOTA, data-efficient]

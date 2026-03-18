@@ -8,15 +8,28 @@ versions:
   v1:
     description: "15 dual-arm manipulation tasks"
     num_tasks: 15
+    year: 2024
   v2:
-    description: "50 dual-arm tasks, 5 robot embodiments, domain randomization"
+    description: "50 dual-arm tasks, 5 robot embodiments, structured domain randomization along 5 axes"
     num_tasks: 50
+    num_embodiments: 5
+    num_trajectories: 100000+
     paper_url: https://arxiv.org/abs/2506.18088
+    year: 2025
+    authors: "Tianxing Chen, Zanxin Chen et al. (SJTU / HKU MMLab / Shanghai AI Lab)"
+    domain_randomization_axes: [clutter, lighting, background, tabletop_height, language_instructions]
+    object_library: "RoboTwin-OD (731 instances, 147 categories)"
 categories:
   robotwin_easy:
     description: "Standard scene conditions (demo_clean)"
   robotwin_hard:
     description: "Heavy domain randomization (clutter, lighting, backgrounds)"
+  robotwin_v2_short:
+    description: "Short horizon tasks (100-130 steps)"
+  robotwin_v2_medium:
+    description: "Medium horizon tasks (150-230 steps)"
+  robotwin_v2_long:
+    description: "Long & extra-long horizon tasks (280-650 steps)"
 metric: success_rate
 metric_unit: "%"
 higher_is_better: true
