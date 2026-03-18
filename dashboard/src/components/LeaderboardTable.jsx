@@ -22,11 +22,18 @@ const BENCHMARKS = {
     avgKey: 'simpler_avg',
     metric: 'Success Rate (%)',
   },
-  robotwin: {
-    label: 'RoboTwin',
+  robotwin_v1: {
+    label: 'RoboTwin v1',
     suites: ['robotwin_easy', 'robotwin_hard'],
     suiteLabels: { robotwin_easy: 'Easy', robotwin_hard: 'Hard (Randomized)' },
-    avgKey: 'robotwin_avg',
+    avgKey: 'robotwin_v1_avg',
+    metric: 'Success Rate (%)',
+  },
+  robotwin_v2: {
+    label: 'RoboTwin v2',
+    suites: ['short_horizon', 'medium_horizon', 'long_horizon'],
+    suiteLabels: { short_horizon: 'Short', medium_horizon: 'Medium', long_horizon: 'Long' },
+    avgKey: 'robotwin_v2_avg',
     metric: 'Success Rate (%)',
   },
 }
@@ -88,15 +95,22 @@ function getEvalStyle(model, benchKey) {
   return EVAL_COLORS['fine-tuned']
 }
 
+const MODEL_TYPE_FILTERS = {
+  all: { label: 'All' },
+  video: { label: 'Video Models' },
+}
+
 export default function LeaderboardTable({ models }) {
   const [activeBench, setActiveBench] = useState('libero')
   const [sortBy, setSortBy] = useState('avg')
+  const [typeFilter, setTypeFilter] = useState('all')
 
   const bench = BENCHMARKS[activeBench]
 
   const sorted = useMemo(() => {
     return [...models]
       .filter(m => m.benchmarks?.[activeBench])
+      .filter(m => typeFilter === 'all' || m.model_type === typeFilter)
       .map(m => {
         const scores = m.benchmarks[activeBench]
         const avg = m[bench.avgKey]
@@ -106,7 +120,7 @@ export default function LeaderboardTable({ models }) {
         if (sortBy === 'avg') return (b._avg ?? -1) - (a._avg ?? -1)
         return (b._scores?.[sortBy] ?? -1) - (a._scores?.[sortBy] ?? -1)
       })
-  }, [models, activeBench, sortBy, bench.avgKey])
+  }, [models, activeBench, sortBy, bench.avgKey, typeFilter])
 
   const medals = ['🥇', '🥈', '🥉']
 
@@ -131,6 +145,23 @@ export default function LeaderboardTable({ models }) {
             </button>
           )
         })}
+      </div>
+
+      {/* Model type filter */}
+      <div className="flex gap-1.5 mb-3 flex-wrap">
+        {Object.entries(MODEL_TYPE_FILTERS).map(([key, cfg]) => (
+          <button
+            key={key}
+            onClick={() => setTypeFilter(key)}
+            className={`px-2.5 py-1 text-[11px] rounded-md border transition-all ${
+              typeFilter === key
+                ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300 font-semibold'
+                : 'border-zinc-700/50 text-zinc-500 hover:border-zinc-600'
+            }`}
+          >
+            {cfg.label}
+          </button>
+        ))}
       </div>
 
       {/* Suite sort buttons */}
@@ -171,6 +202,7 @@ export default function LeaderboardTable({ models }) {
               <th className="px-3 py-3 text-left text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hidden sm:table-cell">Action Head</th>
               <th className="px-3 py-3 text-left text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hidden lg:table-cell">Venue</th>
               <th className="px-3 py-3 text-center text-[10px] font-semibold text-zinc-500 uppercase tracking-wider w-10 hidden sm:table-cell" title="Evaluation Condition">Eval</th>
+              <th className="px-3 py-3 text-right text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hidden lg:table-cell" title="Inference Speed (Hz)">Hz</th>
               <th className="px-3 py-3 text-right text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
                 {sortBy === 'avg' ? 'Avg' : bench.suiteLabels[sortBy]}
               </th>
@@ -236,6 +268,15 @@ export default function LeaderboardTable({ models }) {
                       </span>
                     ) : (
                       <span className="text-zinc-600 text-[10px]">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-3 text-right text-xs tabular-nums hidden lg:table-cell">
+                    {m.inference_hz ? (
+                      <span className={`font-medium ${m.inference_hz >= 30 ? 'text-emerald-400' : m.inference_hz >= 10 ? 'text-amber-400' : 'text-red-400'}`}>
+                        {m.inference_hz}
+                      </span>
+                    ) : (
+                      <span className="text-zinc-600">—</span>
                     )}
                   </td>
                   <td className={`px-3 py-3 text-right font-bold text-base tabular-nums ${

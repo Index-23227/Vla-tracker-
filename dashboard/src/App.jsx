@@ -64,7 +64,7 @@ export default function App() {
           <LeaderboardTable models={leaderboard.models} />
         )}
         {activeTab === 'trends' && (
-          <PerformanceChart modelHistory={modelHistory} />
+          <PerformanceChart modelHistory={modelHistory} models={leaderboard.models} />
         )}
         {activeTab === 'compare' && (
           <ModelCompare models={leaderboard.models} />

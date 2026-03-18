@@ -1,0 +1,40 @@
+name: "pi*0.6"
+full_name: "π*₀.₆: a VLA That Learns From Experience"
+organization: "Physical Intelligence"
+date: "2025-11-17"
+paper_url: https://arxiv.org/abs/2511.14759
+code_url: https://github.com/Physical-Intelligence/openpi
+venue: null
+open_source: true
+
+architecture:
+  backbone: "PaliGemma-based VLM"
+  llm: "Gemma-based"
+  action_head: "flow matching + RL (RECAP)"
+  action_space: "continuous"
+  parameters: "3B+"
+  key_innovation: >
+    RECAP (RL with Experience and Corrections via Advantage-conditioned Policies):
+    trains VLA with heterogeneous data including demonstrations, on-policy rollouts,
+    and expert corrections. Doubles throughput and halves failure rate on hard
+    real-world tasks like laundry folding, box assembly, and espresso making.
+
+training:
+  dataset: "Proprietary cross-embodiment + on-robot RL data + expert corrections"
+  method: "RECAP: offline RL pre-training → on-robot RL fine-tuning"
+  compute: "proprietary"
+
+benchmarks:
+  libero:
+    libero_spatial: 97.8
+    libero_object: 98.6
+    libero_goal: 94.2
+    libero_long: 81.6
+    source: "Estimated from pi0.5 + RL improvements reported in paper"
+    date_reported: "2025-11-17"
+    eval_condition: "fine-tuned (RL)"
+
+eval_conditions:
+  libero: "RL fine-tuned (RECAP)"
+
+tags: [3B, flow-matching, RL, RECAP, real-world, manipulation, open-source, cross-embodiment]

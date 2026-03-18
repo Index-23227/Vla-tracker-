@@ -94,10 +94,14 @@ def compute_simpler_avg(benchmarks: dict) -> float | None:
     return None
 
 
-def compute_robotwin_avg(benchmarks: dict) -> float | None:
-    robotwin = benchmarks.get("robotwin")
+def compute_robotwin_v1_avg(benchmarks: dict) -> float | None:
+    robotwin = benchmarks.get("robotwin_v1")
     if not robotwin:
         return None
+    # Use pre-computed average if available
+    avg = robotwin.get("average")
+    if avg is not None and isinstance(avg, (int, float)):
+        return round(avg, 2)
     scores = [v for k, v in robotwin.items()
               if k not in METADATA_KEYS and isinstance(v, (int, float))]
     if scores:
@@ -137,6 +141,8 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
                 "action_head": model.get("architecture", {}).get("action_head", "unknown"),
                 "parameters": model.get("architecture", {}).get("parameters", "unknown"),
             },
+            "model_type": model.get("model_type"),
+            "inference_hz": model.get("inference_hz"),
             "benchmarks": {},
             "eval_conditions": {},
         }
@@ -144,7 +150,7 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         model_benchmarks = model.get("benchmarks", {})
 
         # Process each benchmark
-        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin", "robotwin_v2"]:
+        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin_v1", "robotwin_v2"]:
             if bench_name in model_benchmarks:
                 scores, meta = extract_scores(model_benchmarks[bench_name])
                 if scores:
@@ -171,9 +177,9 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         if simpler_avg is not None:
             entry["simpler_avg"] = simpler_avg
 
-        robotwin_avg = compute_robotwin_avg(model_benchmarks)
-        if robotwin_avg is not None:
-            entry["robotwin_avg"] = robotwin_avg
+        robotwin_v1_avg = compute_robotwin_v1_avg(model_benchmarks)
+        if robotwin_v1_avg is not None:
+            entry["robotwin_v1_avg"] = robotwin_v1_avg
 
         robotwin_v2_avg = compute_robotwin_v2_avg(model_benchmarks)
         if robotwin_v2_avg is not None:

@@ -20,10 +20,16 @@ const BENCH_CONFIGS = {
     avgKey: 'simpler_avg',
     domain: [0, 100],
   },
-  robotwin: {
-    label: 'RoboTwin',
+  robotwin_v1: {
+    label: 'RoboTwin v1',
     suites: { robotwin_easy: 'Easy', robotwin_hard: 'Hard' },
-    avgKey: 'robotwin_avg',
+    avgKey: 'robotwin_v1_avg',
+    domain: [0, 100],
+  },
+  robotwin_v2: {
+    label: 'RoboTwin v2',
+    suites: { short_horizon: 'Short', medium_horizon: 'Medium', long_horizon: 'Long' },
+    avgKey: 'robotwin_v2_avg',
     domain: [0, 100],
   },
 }

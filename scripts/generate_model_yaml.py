@@ -125,7 +125,7 @@ def generate_yaml_content(candidate: dict) -> str:
             bench_lines.append(f"""  simpler_env:
     google_robot_pick_coke_can: TODO""")
         elif bench == "robotwin":
-            bench_lines.append(f"""  robotwin:
+            bench_lines.append(f"""  robotwin_v1:
     robotwin_easy: TODO
     robotwin_hard: TODO""")
         else:
