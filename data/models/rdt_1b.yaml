@@ -4,6 +4,7 @@ organization: "Tsinghua University / Shanghai Qi Zhi Institute"
 paper_url: https://arxiv.org/abs/2410.07864
 code_url: https://github.com/thu-ml/RoboticsDiffusionTransformer
 date: "2024-10-10"
+venue: "ICRA 2025"
 architecture:
   backbone: "SigLIP + language encoder"
   llm: null
@@ -28,6 +29,12 @@ benchmarks:
     calvin_abc_d_avg_len: 3.4
     source: "Table 3, RDT-1B paper"
     date_reported: "2024-10-10"
+    eval_condition: "fine-tuned"
+  robotwin:
+    robotwin_easy: 42.6
+    robotwin_hard: 14.4
+    source: "RoboTwin 2.0 paper"
+    date_reported: "2025-06-24"
     eval_condition: "fine-tuned"
 open_source: true
 tags: [1.2B, diffusion, manipulation, open-source, foundation-model, bimanual]

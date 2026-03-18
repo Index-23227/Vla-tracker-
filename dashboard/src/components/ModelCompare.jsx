@@ -20,6 +20,12 @@ const BENCH_CONFIGS = {
     avgKey: 'simpler_avg',
     domain: [0, 100],
   },
+  robotwin: {
+    label: 'RoboTwin',
+    suites: { robotwin_easy: 'Easy', robotwin_hard: 'Hard' },
+    avgKey: 'robotwin_avg',
+    domain: [0, 100],
+  },
 }
 
 const TOP_COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#3498DB']

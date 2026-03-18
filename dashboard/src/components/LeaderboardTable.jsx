@@ -22,6 +22,13 @@ const BENCHMARKS = {
     avgKey: 'simpler_avg',
     metric: 'Success Rate (%)',
   },
+  robotwin: {
+    label: 'RoboTwin',
+    suites: ['robotwin_easy', 'robotwin_hard'],
+    suiteLabels: { robotwin_easy: 'Easy', robotwin_hard: 'Hard (Randomized)' },
+    avgKey: 'robotwin_avg',
+    metric: 'Success Rate (%)',
+  },
 }
 
 const ACTION_HEAD_COLORS = {
@@ -37,6 +44,25 @@ const ACTION_HEAD_COLORS = {
 const EVAL_COLORS = {
   'fine-tuned': { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'FT' },
   'zero-shot': { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'ZS' },
+}
+
+const VENUE_COLORS = {
+  'ICML': '#E74C3C',
+  'NeurIPS': '#3498DB',
+  'ICLR': '#2ECC71',
+  'CoRL': '#9B59B6',
+  'RSS': '#F39C12',
+  'ICRA': '#1ABC9C',
+  'CVPR': '#E67E22',
+  'RA-L': '#7F8C8D',
+}
+
+function getVenueColor(venue) {
+  if (!venue) return null
+  for (const [key, color] of Object.entries(VENUE_COLORS)) {
+    if (venue.includes(key)) return color
+  }
+  return '#7F8C8D'
 }
 
 function getActionColor(actionHead) {
@@ -143,6 +169,7 @@ export default function LeaderboardTable({ models }) {
               <th className="px-3 py-3 text-left text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Model</th>
               <th className="px-3 py-3 text-left text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hidden md:table-cell">Date</th>
               <th className="px-3 py-3 text-left text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hidden sm:table-cell">Action Head</th>
+              <th className="px-3 py-3 text-left text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hidden lg:table-cell">Venue</th>
               <th className="px-3 py-3 text-center text-[10px] font-semibold text-zinc-500 uppercase tracking-wider w-10 hidden sm:table-cell" title="Evaluation Condition">Eval</th>
               <th className="px-3 py-3 text-right text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
                 {sortBy === 'avg' ? 'Avg' : bench.suiteLabels[sortBy]}
@@ -184,6 +211,21 @@ export default function LeaderboardTable({ models }) {
                     >
                       {m.architecture?.action_head || 'unknown'}
                     </span>
+                  </td>
+                  <td className="px-3 py-3 hidden lg:table-cell">
+                    {m.venue ? (
+                      <span
+                        className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-md"
+                        style={{
+                          backgroundColor: getVenueColor(m.venue) + '18',
+                          color: getVenueColor(m.venue),
+                        }}
+                      >
+                        {m.venue}
+                      </span>
+                    ) : (
+                      <span className="text-zinc-600 text-[10px]">preprint</span>
+                    )}
                   </td>
                   <td className="px-3 py-3 text-center hidden sm:table-cell">
                     {evalStyle ? (

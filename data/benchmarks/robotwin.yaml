@@ -1,0 +1,26 @@
+name: RoboTwin
+full_name: "RoboTwin: Dual-Arm Robot Benchmark with Generative Digital Twins"
+paper_url: https://arxiv.org/abs/2409.02920
+code_url: https://github.com/RoboTwin-Platform/RoboTwin
+year: 2024
+venue: "CVPR 2025 Highlight"
+versions:
+  v1:
+    description: "15 dual-arm manipulation tasks"
+    num_tasks: 15
+  v2:
+    description: "50 dual-arm tasks, 5 robot embodiments, domain randomization"
+    num_tasks: 50
+    paper_url: https://arxiv.org/abs/2506.18088
+categories:
+  robotwin_easy:
+    description: "Standard scene conditions (demo_clean)"
+  robotwin_hard:
+    description: "Heavy domain randomization (clutter, lighting, backgrounds)"
+metric: success_rate
+metric_unit: "%"
+higher_is_better: true
+evaluation_protocol: "100 rollouts per task per setting, average success rate across tasks"
+robot: "COBOT Magic (AgileX dual-arm)"
+environment: "simulation (ManiSkill3)"
+tags: [dual-arm, bimanual, manipulation, domain-randomization, dexterous]

@@ -5,8 +5,8 @@
 <!-- TODO: Replace with actual dashboard screenshot -->
 <!-- ![VLA-Tracker Dashboard](docs/assets/dashboard-screenshot.png) -->
 
-[![Models Tracked](https://img.shields.io/badge/models-17-blue)](data/models/)
-[![Benchmarks](https://img.shields.io/badge/benchmarks-5-green)](data/benchmarks/)
+[![Models Tracked](https://img.shields.io/badge/models-25-blue)](data/models/)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-6-green)](data/benchmarks/)
 [![Weekly Analysis](https://img.shields.io/badge/analysis-AI%20powered-purple)](analysis/weekly/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
@@ -14,7 +14,7 @@
 
 ## What is this?
 
-VLA-Tracker automatically tracks **17 VLA models** across **5 benchmarks** (LIBERO, CALVIN, SimplerEnv, Meta-World, RLBench) and generates **AI-powered analysis** every week.
+VLA-Tracker automatically tracks **25 VLA models** across **6 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin, Meta-World, RLBench) and generates **AI-powered analysis** every week. Each model includes publication venue, evaluation conditions, and release date.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance over time** — see how SOTA evolves week by week
@@ -27,17 +27,18 @@ VLA-Tracker automatically tracks **17 VLA models** across **5 benchmarks** (LIBE
 
 ## Current Leaderboard (LIBERO)
 
-| Rank | Model | Date | Action Head | Spatial | Object | Goal | Long | Avg | Eval |
-|------|-------|------|-------------|---------|--------|------|------|-----|------|
-| 🥇 | UniVLA | May 2025 | flow matching | **96.8** | **97.4** | **92.0** | **74.2** | **90.1** | FT |
-| 🥈 | pi0.5 | Feb 2025 | flow matching | 96.2 | 97.1 | 89.4 | 72.8 | 88.9 | FT |
-| 🥉 | SpatialVLA | Jan 2025 | autoregressive | 95.6 | 96.0 | 90.2 | 70.4 | 88.1 | FT |
-| 4 | DexVLA | Feb 2025 | diffusion (hierarchical) | 94.2 | 95.8 | 89.8 | 71.6 | 87.9 | FT |
-| 5 | OpenVLA-OFT | Jan 2025 | parallel decoding | 94.8 | 95.2 | 91.0 | 68.4 | 87.4 | FT (LoRA) |
-| 6 | CoT-VLA | Jan 2025 | diffusion + CoT | 92.1 | 93.8 | 88.2 | 71.2 | 86.3 | FT |
-| 7 | pi0-FAST | Jan 2025 | FAST tokenizer | 93.8 | 95.4 | 88.0 | 67.2 | 86.1 | FT |
+| Rank | Model | Date | Venue | Action Head | Avg | Long | Eval |
+|------|-------|------|-------|-------------|-----|------|------|
+| 🥇 | pi0.5-Pro | Sep 2025 | — | flow matching | **93.3** | **82.4** | FT |
+| 🥈 | UniVLA | May 2025 | — | flow matching | 90.1 | 74.2 | FT |
+| 🥉 | OpenVLA-v2 | Feb 2025 | — | flow matching | 90.0 | 74.6 | FT |
+| 4 | TRA-VLA | Mar 2025 | — | flow matching + reasoning | 89.3 | 73.8 | FT |
+| 5 | pi0.5 | Feb 2025 | — | flow matching | 88.9 | 72.8 | FT |
+| 6 | SpatialVLA | Jan 2025 | ICML 2025 | autoregressive | 88.1 | 70.4 | FT |
+| 7 | DexVLA | Feb 2025 | — | diffusion (hierarchical) | 87.9 | 71.6 | FT |
+| 8 | OpenVLA-OFT | Jan 2025 | ICML 2025 | parallel decoding | 87.4 | 68.4 | FT |
 
-> **FT** = Fine-tuned on benchmark, **ZS** = Zero-shot. See dashboard for full 17-model leaderboard with CALVIN & SimplerEnv.
+> **FT** = Fine-tuned, **ZS** = Zero-shot. Dashboard shows all 25 models across 6 benchmarks (LIBERO, CALVIN, SimplerEnv, RoboTwin).
 
 *Updated: 2026-03-18 · [Full leaderboard →](data/leaderboard.json)*
 
@@ -82,13 +83,14 @@ python scripts/build_leaderboard.py
 
 ## Tracked Benchmarks
 
-| Benchmark | Tasks | Models | Focus |
-|-----------|-------|--------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 15 | Manipulation generalization |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 8 | Long-horizon, language |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 5 | Sim-to-real transfer |
-| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity |
-| [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 1 | Diverse manipulation |
+| Benchmark | Tasks | Models | Focus | Venue |
+|-----------|-------|--------|-------|-------|
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 20+ | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 10+ | Long-horizon, language | RA-L 2022 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 5+ | Sim-to-real transfer | NeurIPS 2024 |
+| [RoboTwin](data/benchmarks/robotwin.yaml) | 50 tasks | 4 | Dual-arm, bimanual | CVPR 2025 Highlight |
+| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity | CoRL 2020 |
+| [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 1 | Diverse manipulation | RA-L 2020 |
 
 ## How AI Analysis Works
 

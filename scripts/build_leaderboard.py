@@ -89,6 +89,17 @@ def compute_simpler_avg(benchmarks: dict) -> float | None:
     return None
 
 
+def compute_robotwin_avg(benchmarks: dict) -> float | None:
+    robotwin = benchmarks.get("robotwin")
+    if not robotwin:
+        return None
+    scores = [v for k, v in robotwin.items()
+              if k not in METADATA_KEYS and isinstance(v, (int, float))]
+    if scores:
+        return round(sum(scores) / len(scores), 2)
+    return None
+
+
 def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> dict:
     leaderboard_entries = []
 
@@ -99,6 +110,7 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
             "date": model.get("date"),
             "paper_url": model.get("paper_url"),
             "code_url": model.get("code_url"),
+            "venue": model.get("venue"),
             "open_source": model.get("open_source", False),
             "tags": model.get("tags", []),
             "architecture": {
@@ -112,7 +124,7 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         model_benchmarks = model.get("benchmarks", {})
 
         # Process each benchmark
-        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld"]:
+        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin"]:
             if bench_name in model_benchmarks:
                 scores, meta = extract_scores(model_benchmarks[bench_name])
                 if scores:
@@ -132,6 +144,10 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         simpler_avg = compute_simpler_avg(model_benchmarks)
         if simpler_avg is not None:
             entry["simpler_avg"] = simpler_avg
+
+        robotwin_avg = compute_robotwin_avg(model_benchmarks)
+        if robotwin_avg is not None:
+            entry["robotwin_avg"] = robotwin_avg
 
         leaderboard_entries.append(entry)
 
