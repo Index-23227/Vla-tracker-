@@ -28,6 +28,25 @@ function parseParams(paramStr) {
   return num // assume M
 }
 
+const BENCH_KEYS = [
+  { key: 'libero_avg', label: 'LIBERO', max: 100 },
+  { key: 'calvin_avg', label: 'CALVIN', max: 5 },
+  { key: 'simpler_avg', label: 'SimplerEnv', max: 100 },
+  { key: 'robotwin_v1_avg', label: 'RTwin v1', max: 100 },
+  { key: 'robotwin_v2_avg', label: 'RTwin v2', max: 100 },
+  { key: 'rlbench_avg', label: 'RLBench', max: 100 },
+]
+
+function heatColor(value, max) {
+  if (value == null) return 'transparent'
+  const pct = Math.min(value / max, 1)
+  if (pct >= 0.9) return 'rgba(16, 185, 129, 0.7)'  // emerald
+  if (pct >= 0.7) return 'rgba(16, 185, 129, 0.4)'
+  if (pct >= 0.5) return 'rgba(250, 204, 21, 0.4)'   // yellow
+  if (pct >= 0.3) return 'rgba(249, 115, 22, 0.4)'   // orange
+  return 'rgba(239, 68, 68, 0.4)'                     // red
+}
+
 export default function AnalysisDashboard({ models }) {
   // --- Architecture Distribution ---
   const actionHeadDist = useMemo(() => {
@@ -104,6 +123,52 @@ export default function AnalysisDashboard({ models }) {
       name: b.label,
       count: models.filter(m => m[b.key] != null).length,
     }))
+  }, [models])
+
+  // --- Benchmark Heatmap data ---
+  const heatmapModels = useMemo(() => {
+    return [...models]
+      .filter(m => BENCH_KEYS.some(b => m[b.key] != null))
+      .sort((a, b) => (b.libero_avg ?? -1) - (a.libero_avg ?? -1))
+      .slice(0, 25)
+  }, [models])
+
+  // --- Action Head vs Performance ---
+  const actionHeadPerf = useMemo(() => {
+    const groups = {}
+    models.forEach(m => {
+      if (m.libero_avg == null) return
+      const head = m.architecture?.action_head || 'unknown'
+      const key = Object.keys(ACTION_HEAD_COLORS).find(k => head.toLowerCase().includes(k)) || 'other'
+      if (!groups[key]) groups[key] = { scores: [], count: 0 }
+      groups[key].scores.push(m.libero_avg)
+      groups[key].count++
+    })
+    return Object.entries(groups)
+      .map(([name, g]) => ({
+        name,
+        avg: +(g.scores.reduce((a, b) => a + b, 0) / g.scores.length).toFixed(1),
+        best: +Math.max(...g.scores).toFixed(1),
+        count: g.count,
+      }))
+      .sort((a, b) => b.avg - a.avg)
+  }, [models])
+
+  // --- Inference Speed distribution ---
+  const speedDist = useMemo(() => {
+    const buckets = [
+      { label: '<5 Hz', min: 0, max: 5, count: 0, models: [] },
+      { label: '5-10 Hz', min: 5, max: 10, count: 0, models: [] },
+      { label: '10-30 Hz', min: 10, max: 30, count: 0, models: [] },
+      { label: '30-60 Hz', min: 30, max: 60, count: 0, models: [] },
+      { label: '60+ Hz', min: 60, max: Infinity, count: 0, models: [] },
+    ]
+    models.forEach(m => {
+      if (m.inference_hz == null) return
+      const bucket = buckets.find(b => m.inference_hz >= b.min && m.inference_hz < b.max)
+      if (bucket) { bucket.count++; bucket.models.push(m.name) }
+    })
+    return buckets
   }, [models])
 
   // --- Venue Distribution ---
@@ -213,33 +278,40 @@ export default function AnalysisDashboard({ models }) {
         </h4>
         <p className="text-[10px] text-zinc-600 mb-3">Bubble size = parameter count · Green = open-source</p>
         {scatterData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={280}>
-            <ScatterChart margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+          <ResponsiveContainer width="100%" height={300}>
+            <ScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
               <XAxis
                 dataKey="params"
                 name="Parameters (M)"
+                type="number"
                 tick={{ fontSize: 10, fill: '#71717a' }}
-                scale="log"
-                domain={['auto', 'auto']}
-                label={{ value: 'Parameters (M)', position: 'bottom', fontSize: 10, fill: '#52525b', offset: -5 }}
+                tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}B` : `${v}M`}
+                label={{ value: 'Parameters', position: 'bottom', fontSize: 10, fill: '#52525b', offset: 0 }}
               />
               <YAxis
                 dataKey="score"
                 name="LIBERO Avg"
+                type="number"
                 tick={{ fontSize: 10, fill: '#71717a' }}
                 domain={[40, 100]}
                 label={{ value: 'LIBERO Avg (%)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#52525b' }}
               />
-              <ZAxis dataKey="params" range={[40, 400]} />
+              <ZAxis dataKey="params" range={[60, 300]} />
               <Tooltip
                 contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #3f3f46', backgroundColor: '#18181b', color: '#e5e5e5' }}
-                formatter={(value, name) => {
-                  if (name === 'Parameters (M)') return [`${value}M`, name]
-                  if (name === 'LIBERO Avg') return [`${value}%`, name]
-                  return [value, name]
+                content={({ payload }) => {
+                  if (!payload || !payload.length) return null
+                  const d = payload[0].payload
+                  return (
+                    <div style={{ fontSize: 11, borderRadius: 8, border: '1px solid #3f3f46', backgroundColor: '#18181b', color: '#e5e5e5', padding: '8px 10px' }}>
+                      <div style={{ fontWeight: 'bold', marginBottom: 3 }}>{d.name}</div>
+                      <div>Parameters: {d.params >= 1000 ? `${(d.params/1000).toFixed(1)}B` : `${d.params}M`}</div>
+                      <div>LIBERO: {d.score.toFixed(1)}%</div>
+                      <div>{d.oss ? '✓ Open Source' : '✗ Closed'}</div>
+                    </div>
+                  )
                 }}
-                labelFormatter={(_, payload) => payload?.[0]?.payload?.name || ''}
               />
               <Scatter data={scatterData}>
                 {scatterData.map((entry, i) => (
@@ -251,6 +323,14 @@ export default function AnalysisDashboard({ models }) {
         ) : (
           <div className="text-center py-8 text-zinc-500 text-xs">Not enough data with parameter counts</div>
         )}
+        <div className="flex gap-3 justify-center mt-1">
+          <span className="flex items-center gap-1 text-[10px] text-zinc-500">
+            <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: '#1D9E75' }} /> Open Source
+          </span>
+          <span className="flex items-center gap-1 text-[10px] text-zinc-500">
+            <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: '#D85A30' }} /> Closed
+          </span>
+        </div>
       </div>
 
       {/* Row 3: Timeline + Open Source */}
@@ -313,6 +393,117 @@ export default function AnalysisDashboard({ models }) {
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Benchmark Heatmap */}
+      <div className="border border-zinc-800 rounded-xl p-4">
+        <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">
+          Benchmark Coverage Heatmap
+        </h4>
+        <p className="text-[10px] text-zinc-600 mb-3">Top 25 models by LIBERO score · Color intensity = normalized performance</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[10px]">
+            <thead>
+              <tr>
+                <th className="text-left px-2 py-1.5 text-zinc-500 font-medium sticky left-0 bg-zinc-950 z-10">Model</th>
+                {BENCH_KEYS.map(b => (
+                  <th key={b.key} className="text-center px-2 py-1.5 text-zinc-500 font-medium whitespace-nowrap">{b.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {heatmapModels.map(m => (
+                <tr key={m.name} className="border-t border-zinc-800/30">
+                  <td className="px-2 py-1.5 text-zinc-300 font-medium whitespace-nowrap sticky left-0 bg-zinc-950 z-10">
+                    <div className="flex items-center gap-1">
+                      {m.name}
+                      {m.paper_url && (
+                        <a href={m.paper_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">↗</a>
+                      )}
+                    </div>
+                  </td>
+                  {BENCH_KEYS.map(b => {
+                    const val = m[b.key]
+                    return (
+                      <td key={b.key} className="text-center px-2 py-1.5 tabular-nums" style={{ backgroundColor: heatColor(val, b.max) }}>
+                        {val != null ? (b.max === 5 ? val.toFixed(1) : val.toFixed(1)) : '—'}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Row: Action Head Performance + Speed Distribution */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Action Head vs LIBERO Performance */}
+        <div className="border border-zinc-800 rounded-xl p-4">
+          <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            Action Head vs LIBERO Score
+          </h4>
+          <div className="space-y-2">
+            {actionHeadPerf.map(a => (
+              <div key={a.name}>
+                <div className="flex justify-between text-[10px] mb-0.5">
+                  <span className="text-zinc-300 font-medium">{a.name} <span className="text-zinc-600">({a.count})</span></span>
+                  <span className="text-zinc-400">avg {a.avg} · best {a.best}</span>
+                </div>
+                <div className="w-full h-4 bg-zinc-800 rounded-full overflow-hidden relative">
+                  <div
+                    className="h-full rounded-full opacity-40"
+                    style={{
+                      width: `${a.best}%`,
+                      backgroundColor: ACTION_HEAD_COLORS[a.name] || '#71717a',
+                    }}
+                  />
+                  <div
+                    className="h-full rounded-full absolute top-0 left-0"
+                    style={{
+                      width: `${a.avg}%`,
+                      backgroundColor: ACTION_HEAD_COLORS[a.name] || '#71717a',
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-zinc-600 mt-2">Solid = average · Faded = best score</p>
+        </div>
+
+        {/* Inference Speed Distribution */}
+        <div className="border border-zinc-800 rounded-xl p-4">
+          <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            Inference Speed Distribution
+          </h4>
+          <div className="space-y-2">
+            {speedDist.map(b => (
+              <div key={b.label}>
+                <div className="flex justify-between text-[10px] mb-0.5">
+                  <span className="text-zinc-300 font-medium">{b.label}</span>
+                  <span className="text-zinc-400">{b.count} models</span>
+                </div>
+                <div className="w-full h-4 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.max((b.count / models.length) * 100 * 3, b.count > 0 ? 4 : 0)}%`,
+                      backgroundColor: b.min >= 30 ? '#10b981' : b.min >= 10 ? '#f59e0b' : '#ef4444',
+                    }}
+                  />
+                </div>
+                {b.count > 0 && (
+                  <div className="text-[9px] text-zinc-600 mt-0.5 truncate">{b.models.join(', ')}</div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-zinc-600 mt-2">
+            {models.filter(m => m.inference_hz == null).length} models without reported speed
+          </p>
         </div>
       </div>
 
