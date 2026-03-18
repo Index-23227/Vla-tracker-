@@ -1,17 +1,14 @@
 import { useState } from 'react'
 import LeaderboardTable from './components/LeaderboardTable'
-import PerformanceChart from './components/PerformanceChart'
 import ModelCompare from './components/ModelCompare'
-import WeeklyDigest from './components/WeeklyDigest'
+import AnalysisDashboard from './components/AnalysisDashboard'
 import leaderboard from './data/leaderboard.json'
 import weeklyDigest from './data/weeklyDigest.json'
-import modelHistory from './data/modelHistory.json'
 
 const TABS = [
   { id: 'leaderboard', label: 'Leaderboard' },
-  { id: 'trends', label: 'Trends' },
   { id: 'compare', label: 'Compare' },
-  { id: 'digest', label: 'AI Analysis' },
+  { id: 'analysis', label: 'Analysis' },
 ]
 
 export default function App() {
@@ -63,14 +60,11 @@ export default function App() {
         {activeTab === 'leaderboard' && (
           <LeaderboardTable models={leaderboard.models} />
         )}
-        {activeTab === 'trends' && (
-          <PerformanceChart modelHistory={modelHistory} models={leaderboard.models} />
-        )}
         {activeTab === 'compare' && (
           <ModelCompare models={leaderboard.models} />
         )}
-        {activeTab === 'digest' && (
-          <WeeklyDigest digest={weeklyDigest} />
+        {activeTab === 'analysis' && (
+          <AnalysisDashboard models={leaderboard.models} />
         )}
       </div>
 
