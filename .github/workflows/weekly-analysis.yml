@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 9 * * 1'  # Every Monday 9AM UTC
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/**'
+      - 'data/**'
 
 permissions:
   contents: write
@@ -47,12 +52,20 @@ jobs:
     needs: build-leaderboard
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Only deploy from main branch
     if: github.ref == 'refs/heads/main'
+
+    # Required for official GitHub Pages deployment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+
+      - name: Pull latest changes
+        run: git pull origin main
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -67,8 +80,11 @@ jobs:
           npm ci
           npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dashboard/dist
+          path: ./dashboard/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
