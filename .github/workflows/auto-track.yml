@@ -39,7 +39,7 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install -r requirements.txt
 
       - name: Scan arXiv for new VLA papers
         id: scan
@@ -88,7 +88,7 @@ jobs:
               lines.append(f'| {i+1} | **{c[\"model_name\"]}** | [{c[\"arxiv_id\"]}]({c[\"paper_url\"]}) | {c[\"relevance_score\"]} | {venue} | {benches} |')
           lines.append('\n### Action Required\n')
           lines.append('Draft YAML files have been auto-generated. Please:\n')
-          lines.append('1. Review each YAML file and fill in `TODO` fields')
+          lines.append('1. Review each YAML file and fill in \`TODO\` fields')
           lines.append('2. Add benchmark scores from the papers')
           lines.append('3. Verify organization and architecture details')
           lines.append('4. Run \`python scripts/build_leaderboard.py\` to rebuild rankings')
@@ -118,18 +118,13 @@ jobs:
 
           git push origin "$BRANCH"
 
-          # Create PR (labels are optional - skip if they don't exist)
+          # Create PR
           gh pr create \
             --title "New VLA papers detected ($(date +%Y-%m-%d))" \
             --body-file /tmp/pr_body.md \
             --base main \
             --head "$BRANCH" || {
-            echo "::warning::PR creation failed, retrying without labels..."
-            gh pr create \
-              --title "New VLA papers detected ($(date +%Y-%m-%d))" \
-              --body-file /tmp/pr_body.md \
-              --base main \
-              --head "$BRANCH"
+            echo "::warning::PR creation failed"
           }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -139,12 +134,3 @@ jobs:
         run: |
           echo "No new VLA papers found in the last ${{ github.event.inputs.lookback_days || '14' }} days."
           echo "All detected papers are already tracked."
-
-  # Notify scan results (optional - only on failures or interesting findings)
-  notify:
-    needs: scan-and-propose
-    runs-on: ubuntu-latest
-    if: failure()
-    steps:
-      - name: Report failure
-        run: echo "Auto-track workflow failed. Check logs for details."
