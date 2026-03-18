@@ -16,9 +16,14 @@ permissions:
   id-token: write
 
 jobs:
-  build-leaderboard:
+  build-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v5
 
@@ -47,24 +52,6 @@ jobs:
           git add data/leaderboard.json dashboard/src/data/leaderboard.json
           git diff --staged --quiet || git commit -m "chore: update leaderboard [automated]"
           git push
-
-  deploy-dashboard:
-    needs: build-leaderboard
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.ref == 'refs/heads/main'
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: main
-
-      - name: Pull latest changes
-        run: git pull origin main
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
