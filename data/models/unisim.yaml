@@ -1,0 +1,23 @@
+name: UniSim
+version: "1.0"
+organization: "Google DeepMind"
+paper_url: https://arxiv.org/abs/2310.06680
+code_url: null
+date: "2023-10-10"
+venue: "ICLR 2024"
+architecture:
+  backbone: "Video Diffusion Model"
+  llm: null
+  action_head: "action-conditioned video generation (world simulator)"
+  action_space: "continuous"
+  parameters: null
+  key_innovation: "Universal simulator that generates realistic experience via video; supports action-conditioned and language-conditioned generation for robot learning"
+training:
+  dataset: "Internet video + robot interaction data"
+  method: "Train video generation model as universal simulator"
+  compute: null
+benchmarks: {}
+open_source: false
+model_type: "video"
+inference_hz: null
+tags: [world-model, video-generation, simulator, action-conditioned, language-conditioned]

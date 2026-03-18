@@ -28,7 +28,7 @@ ARXIV_API = "https://export.arxiv.org/api/query"
 # Semantic Scholar API (no auth required, 100 requests/5min for unauthenticated)
 S2_API = "https://api.semanticscholar.org/graph/v1/paper/search"
 
-# Search queries targeting VLA papers (arXiv format)
+# Search queries targeting VLA and video-based robot learning papers (arXiv format)
 SEARCH_QUERIES = [
     '"vision-language-action"',
     '"VLA" AND "robot"',
@@ -36,6 +36,11 @@ SEARCH_QUERIES = [
     '"VLA" AND ("LIBERO" OR "CALVIN" OR "SimplerEnv" OR "RoboTwin")',
     '"action chunking" AND "vision language"',
     '"robotic manipulation" AND ("flow matching" OR "diffusion policy")',
+    # Video-based robot learning
+    '"video prediction" AND ("robot" OR "manipulation" OR "action")',
+    '"video generation" AND ("robot" OR "manipulation" OR "planning")',
+    '"world model" AND ("robot" OR "manipulation" OR "embodied")',
+    '"video language model" AND ("robot" OR "action" OR "embodied")',
 ]
 
 # Semantic Scholar search queries (simpler keyword format)
@@ -45,6 +50,10 @@ S2_SEARCH_QUERIES = [
     "vision language action LIBERO CALVIN",
     "action chunking vision language model",
     "robotic manipulation flow matching diffusion policy",
+    # Video-based robot learning
+    "video prediction robot manipulation action",
+    "video generation robotic planning world model",
+    "video language model embodied robot",
 ]
 
 # Keywords that indicate a paper is VLA-related (in title or abstract)
@@ -62,6 +71,12 @@ VLA_KEYWORDS = [
     r"\bSimpler.?Env\b",
     r"\bRoboTwin\b",
     r"\bOpen.?X\b",
+    # Video-based robot learning
+    r"video.predict.*(robot|action|manipulat|control)",
+    r"video.generat.*(robot|action|manipulat|plan)",
+    r"world.model.*(robot|embodied|manipulat|action)",
+    r"video.language.*(model|action|robot)",
+    r"(robot|embodied).*(video|visual).*(generat|predict|world)",
 ]
 
 # Benchmark keywords to detect in abstract
