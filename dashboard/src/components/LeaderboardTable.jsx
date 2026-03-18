@@ -109,10 +109,10 @@ export default function LeaderboardTable({ models }) {
 
   const sorted = useMemo(() => {
     return [...models]
-      .filter(m => m.benchmarks?.[activeBench])
+      .filter(m => m.benchmarks?.[activeBench] || typeFilter === m.model_type)
       .filter(m => typeFilter === 'all' || m.model_type === typeFilter)
       .map(m => {
-        const scores = m.benchmarks[activeBench]
+        const scores = m.benchmarks?.[activeBench] || {}
         const avg = m[bench.avgKey]
         return { ...m, _scores: scores, _avg: avg }
       })

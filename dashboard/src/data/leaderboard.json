@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-03-18T17:49:57.645917",
-  "num_models": 37,
+  "generated_at": "2026-03-18T18:59:39.865870",
+  "num_models": 43,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -871,7 +871,7 @@
         "action_head": "diffusion transformer (S1 system)",
         "parameters": "2.2B"
       },
-      "model_type": "video",
+      "model_type": "vla",
       "inference_hz": 9,
       "benchmarks": {
         "libero": {
@@ -1352,6 +1352,58 @@
       "rank": 32
     },
     {
+      "name": "AVDC",
+      "organization": "CMU",
+      "date": "2023-10-25",
+      "paper_url": "https://arxiv.org/abs/2310.16828",
+      "code_url": "https://github.com/flow-diffusion/AVDC",
+      "venue": "NeurIPS 2023",
+      "open_source": true,
+      "tags": [
+        "video-diffusion",
+        "flow-prediction",
+        "inverse-dynamics",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "inverse dynamics from optical flow",
+        "parameters": null
+      },
+      "model_type": "video",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {
+        "rlbench": "fine-tuned"
+      },
+      "rank": 33
+    },
+    {
+      "name": "Genie",
+      "organization": "Google DeepMind",
+      "date": "2024-02-23",
+      "paper_url": "https://arxiv.org/abs/2402.15391",
+      "code_url": null,
+      "venue": "ICML 2024",
+      "open_source": false,
+      "tags": [
+        "11B",
+        "world-model",
+        "latent-actions",
+        "unsupervised",
+        "video-generation",
+        "interactive"
+      ],
+      "architecture": {
+        "action_head": "latent action model (unsupervised)",
+        "parameters": "11B"
+      },
+      "model_type": "video",
+      "inference_hz": 1,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 34
+    },
+    {
       "name": "GR-1",
       "organization": "ByteDance",
       "date": "2023-12-20",
@@ -1386,7 +1438,7 @@
         "calvin": "fine-tuned"
       },
       "calvin_avg": 3.1,
-      "rank": 33
+      "rank": 35
     },
     {
       "name": "GR-2",
@@ -1423,7 +1475,32 @@
         "calvin": "fine-tuned"
       },
       "calvin_avg": 3.8,
-      "rank": 34
+      "rank": 36
+    },
+    {
+      "name": "IRASim",
+      "organization": "Tsinghua University",
+      "date": "2024-06-20",
+      "paper_url": "https://arxiv.org/abs/2406.14540",
+      "code_url": "https://github.com/bytedance/IRASim",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "video-generation",
+        "action-conditioned",
+        "simulation",
+        "data-augmentation",
+        "DiT"
+      ],
+      "architecture": {
+        "action_head": "action-conditioned video generation",
+        "parameters": null
+      },
+      "model_type": "video",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 37
     },
     {
       "name": "RT-2-X",
@@ -1457,7 +1534,31 @@
         "simpler_env": "fine-tuned"
       },
       "simpler_avg": 53.8,
-      "rank": 35
+      "rank": 38
+    },
+    {
+      "name": "SuSIE",
+      "organization": "UC Berkeley",
+      "date": "2023-10-01",
+      "paper_url": "https://arxiv.org/abs/2310.00899",
+      "code_url": "https://github.com/rail-berkeley/susie",
+      "venue": "ICRA 2024",
+      "open_source": true,
+      "tags": [
+        "subgoal-generation",
+        "image-editing",
+        "hierarchical",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "low-level diffusion policy from subgoal image",
+        "parameters": null
+      },
+      "model_type": "video",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 39
     },
     {
       "name": "TraceVLA",
@@ -1490,7 +1591,56 @@
         "simpler_env": "fine-tuned"
       },
       "simpler_avg": 64.6,
-      "rank": 36
+      "rank": 40
+    },
+    {
+      "name": "UniPi",
+      "organization": "Google DeepMind",
+      "date": "2023-02-01",
+      "paper_url": "https://arxiv.org/abs/2302.00111",
+      "code_url": null,
+      "venue": "ICML 2023",
+      "open_source": false,
+      "tags": [
+        "video-diffusion",
+        "planning",
+        "language-conditioned",
+        "inverse-dynamics"
+      ],
+      "architecture": {
+        "action_head": "inverse dynamics from generated video",
+        "parameters": null
+      },
+      "model_type": "video",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 41
+    },
+    {
+      "name": "UniSim",
+      "organization": "Google DeepMind",
+      "date": "2023-10-10",
+      "paper_url": "https://arxiv.org/abs/2310.06680",
+      "code_url": null,
+      "venue": "ICLR 2024",
+      "open_source": false,
+      "tags": [
+        "world-model",
+        "video-generation",
+        "simulator",
+        "action-conditioned",
+        "language-conditioned"
+      ],
+      "architecture": {
+        "action_head": "action-conditioned video generation (world simulator)",
+        "parameters": null
+      },
+      "model_type": "video",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 42
     },
     {
       "name": "Vlaser",
@@ -1526,7 +1676,7 @@
         "simpler_env": "fine-tuned"
       },
       "simpler_avg": 73.5,
-      "rank": 37
+      "rank": 43
     }
   ]
 }
