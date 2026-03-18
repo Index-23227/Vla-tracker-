@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-03-18T18:59:39.865870",
-  "num_models": 43,
+  "generated_at": "2026-03-18T19:07:19.590088",
+  "num_models": 45,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -1349,7 +1349,34 @@
         "rlbench": "fine-tuned"
       },
       "calvin_avg": 3.2,
+      "rlbench_avg": 68.2,
       "rank": 32
+    },
+    {
+      "name": "AtomicVLA",
+      "organization": "TODO: check paper",
+      "date": "2026-03-08",
+      "paper_url": "https://arxiv.org/abs/2603.07648",
+      "code_url": null,
+      "venue": "CVPR2026",
+      "open_source": false,
+      "tags": [
+        "libero",
+        "calvin",
+        "CVPR2026"
+      ],
+      "architecture": {
+        "action_head": "TODO: check paper",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "rank": 33
     },
     {
       "name": "AVDC",
@@ -1371,37 +1398,41 @@
       },
       "model_type": "video",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "rlbench": {
+          "rlbench_18tasks": 51.8
+        }
+      },
       "eval_conditions": {
         "rlbench": "fine-tuned"
       },
-      "rank": 33
+      "rlbench_avg": 51.8,
+      "rank": 34
     },
     {
-      "name": "Genie",
-      "organization": "Google DeepMind",
-      "date": "2024-02-23",
-      "paper_url": "https://arxiv.org/abs/2402.15391",
+      "name": "Fast-WAM",
+      "organization": "TODO: check paper",
+      "date": "2026-03-17",
+      "paper_url": "https://arxiv.org/abs/2603.16666",
       "code_url": null,
-      "venue": "ICML 2024",
+      "venue": null,
       "open_source": false,
       "tags": [
-        "11B",
-        "world-model",
-        "latent-actions",
-        "unsupervised",
-        "video-generation",
-        "interactive"
+        "libero",
+        "robotwin"
       ],
       "architecture": {
-        "action_head": "latent action model (unsupervised)",
-        "parameters": "11B"
+        "action_head": "TODO: check paper",
+        "parameters": "TODO"
       },
-      "model_type": "video",
-      "inference_hz": 1,
+      "model_type": null,
+      "inference_hz": null,
       "benchmarks": {},
-      "eval_conditions": {},
-      "rank": 34
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "robotwin": "fine-tuned"
+      },
+      "rank": 35
     },
     {
       "name": "GR-1",
@@ -1438,7 +1469,7 @@
         "calvin": "fine-tuned"
       },
       "calvin_avg": 3.1,
-      "rank": 35
+      "rank": 36
     },
     {
       "name": "GR-2",
@@ -1475,32 +1506,32 @@
         "calvin": "fine-tuned"
       },
       "calvin_avg": 3.8,
-      "rank": 36
+      "rank": 37
     },
     {
-      "name": "IRASim",
-      "organization": "Tsinghua University",
-      "date": "2024-06-20",
-      "paper_url": "https://arxiv.org/abs/2406.14540",
-      "code_url": "https://github.com/bytedance/IRASim",
+      "name": "GST-VLA",
+      "organization": "TODO: check paper",
+      "date": "2026-03-10",
+      "paper_url": "https://arxiv.org/abs/2603.09079",
+      "code_url": null,
       "venue": null,
-      "open_source": true,
+      "open_source": false,
       "tags": [
-        "video-generation",
-        "action-conditioned",
-        "simulation",
-        "data-augmentation",
-        "DiT"
+        "libero",
+        "simpler_env"
       ],
       "architecture": {
-        "action_head": "action-conditioned video generation",
-        "parameters": null
+        "action_head": "TODO: check paper",
+        "parameters": "TODO"
       },
-      "model_type": "video",
+      "model_type": null,
       "inference_hz": null,
       "benchmarks": {},
-      "eval_conditions": {},
-      "rank": 37
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "rank": 38
     },
     {
       "name": "RT-2-X",
@@ -1534,7 +1565,7 @@
         "simpler_env": "fine-tuned"
       },
       "simpler_avg": 53.8,
-      "rank": 38
+      "rank": 39
     },
     {
       "name": "SuSIE",
@@ -1558,7 +1589,32 @@
       "inference_hz": null,
       "benchmarks": {},
       "eval_conditions": {},
-      "rank": 39
+      "rank": 40
+    },
+    {
+      "name": "TempoFit",
+      "organization": "TODO: check paper",
+      "date": "2026-03-08",
+      "paper_url": "https://arxiv.org/abs/2603.07647",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "libero",
+        "calvin"
+      ],
+      "architecture": {
+        "action_head": "TODO: check paper",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "rank": 41
     },
     {
       "name": "TraceVLA",
@@ -1591,7 +1647,7 @@
         "simpler_env": "fine-tuned"
       },
       "simpler_avg": 64.6,
-      "rank": 40
+      "rank": 42
     },
     {
       "name": "UniPi",
@@ -1615,32 +1671,33 @@
       "inference_hz": null,
       "benchmarks": {},
       "eval_conditions": {},
-      "rank": 41
+      "rank": 43
     },
     {
-      "name": "UniSim",
-      "organization": "Google DeepMind",
-      "date": "2023-10-10",
-      "paper_url": "https://arxiv.org/abs/2310.06680",
+      "name": "VLA-Thinker",
+      "organization": "TODO: check paper",
+      "date": "2026-03-15",
+      "paper_url": "https://arxiv.org/abs/2603.14523",
       "code_url": null,
-      "venue": "ICLR 2024",
+      "venue": null,
       "open_source": false,
       "tags": [
-        "world-model",
-        "video-generation",
-        "simulator",
-        "action-conditioned",
-        "language-conditioned"
+        "reasoning",
+        "libero",
+        "robotwin"
       ],
       "architecture": {
-        "action_head": "action-conditioned video generation (world simulator)",
-        "parameters": null
+        "action_head": "TODO: check paper",
+        "parameters": "TODO"
       },
-      "model_type": "video",
+      "model_type": null,
       "inference_hz": null,
       "benchmarks": {},
-      "eval_conditions": {},
-      "rank": 42
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "robotwin": "fine-tuned"
+      },
+      "rank": 44
     },
     {
       "name": "Vlaser",
@@ -1676,7 +1733,7 @@
         "simpler_env": "fine-tuned"
       },
       "simpler_avg": 73.5,
-      "rank": 43
+      "rank": 45
     }
   ]
 }

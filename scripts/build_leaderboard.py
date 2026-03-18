@@ -124,6 +124,20 @@ def compute_robotwin_v2_avg(benchmarks: dict) -> float | None:
     return None
 
 
+def compute_rlbench_avg(benchmarks: dict) -> float | None:
+    rlbench = benchmarks.get("rlbench")
+    if not rlbench:
+        return None
+    avg = rlbench.get("rlbench_avg")
+    if avg is not None and isinstance(avg, (int, float)):
+        return round(avg, 2)
+    scores = [v for k, v in rlbench.items()
+              if k not in METADATA_KEYS and isinstance(v, (int, float))]
+    if scores:
+        return round(sum(scores) / len(scores), 2)
+    return None
+
+
 def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> dict:
     leaderboard_entries = []
 
@@ -184,6 +198,10 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         robotwin_v2_avg = compute_robotwin_v2_avg(model_benchmarks)
         if robotwin_v2_avg is not None:
             entry["robotwin_v2_avg"] = robotwin_v2_avg
+
+        rlbench_avg = compute_rlbench_avg(model_benchmarks)
+        if rlbench_avg is not None:
+            entry["rlbench_avg"] = rlbench_avg
 
         leaderboard_entries.append(entry)
 

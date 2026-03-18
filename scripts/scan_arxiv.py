@@ -36,11 +36,10 @@ SEARCH_QUERIES = [
     '"VLA" AND ("LIBERO" OR "CALVIN" OR "SimplerEnv" OR "RoboTwin")',
     '"action chunking" AND "vision language"',
     '"robotic manipulation" AND ("flow matching" OR "diffusion policy")',
-    # Video-based robot learning
-    '"video prediction" AND ("robot" OR "manipulation" OR "action")',
-    '"video generation" AND ("robot" OR "manipulation" OR "planning")',
-    '"world model" AND ("robot" OR "manipulation" OR "embodied")',
-    '"video language model" AND ("robot" OR "action" OR "embodied")',
+    # Video-based action models (must generate actions, not just video)
+    '"video prediction" AND "action" AND ("robot" OR "manipulation")',
+    '"inverse dynamics" AND "video" AND ("robot" OR "manipulation")',
+    '"subgoal" AND "video" AND ("robot" OR "manipulation" OR "action")',
 ]
 
 # Semantic Scholar search queries (simpler keyword format)
@@ -50,10 +49,10 @@ S2_SEARCH_QUERIES = [
     "vision language action LIBERO CALVIN",
     "action chunking vision language model",
     "robotic manipulation flow matching diffusion policy",
-    # Video-based robot learning
-    "video prediction robot manipulation action",
-    "video generation robotic planning world model",
-    "video language model embodied robot",
+    # Video-based action models
+    "video prediction action robot manipulation",
+    "inverse dynamics video robot manipulation",
+    "subgoal image generation robot action policy",
 ]
 
 # Keywords that indicate a paper is VLA-related (in title or abstract)
@@ -71,12 +70,11 @@ VLA_KEYWORDS = [
     r"\bSimpler.?Env\b",
     r"\bRoboTwin\b",
     r"\bOpen.?X\b",
-    # Video-based robot learning
-    r"video.predict.*(robot|action|manipulat|control)",
-    r"video.generat.*(robot|action|manipulat|plan)",
-    r"world.model.*(robot|embodied|manipulat|action)",
-    r"video.language.*(model|action|robot)",
-    r"(robot|embodied).*(video|visual).*(generat|predict|world)",
+    # Video-based action models (predict actions via video)
+    r"video.predict.*(action|manipulat|control|policy)",
+    r"inverse.dynamics.*(video|visual)",
+    r"subgoal.*(image|video).*(action|policy|manipulat)",
+    r"video.*(action.model|action.predict|action.generat)",
 ]
 
 # Benchmark keywords to detect in abstract
