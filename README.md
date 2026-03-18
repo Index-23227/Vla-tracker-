@@ -1,57 +1,60 @@
-# 🔬 VLA-Tracker
+# VLA-Tracker
 
-### Real-time benchmark tracking & AI-powered analysis for Vision-Language-Action models
+### Real-time benchmark tracking for Vision-Language-Action models
 
-<!-- TODO: Replace with actual dashboard screenshot -->
-<!-- ![VLA-Tracker Dashboard](docs/assets/dashboard-screenshot.png) -->
-
-[![Models Tracked](https://img.shields.io/badge/models-32-blue)](data/models/)
+[![Models Tracked](https://img.shields.io/badge/models-37-blue)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-6-green)](data/benchmarks/)
-[![Weekly Analysis](https://img.shields.io/badge/analysis-AI%20powered-purple)](analysis/weekly/)
+[![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 ---
 
 ## What is this?
 
-VLA-Tracker automatically tracks **32 VLA models** (2023–2026) across **6 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin, Meta-World, RLBench) and generates **AI-powered analysis** every week. Each model includes publication venue (CoRL, RSS, ICML, ICLR, CVPR, etc.), evaluation conditions, and release date.
+VLA-Tracker tracks **37 VLA models** (2023-2026) across **6 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
-- **Tracks performance over time** — see how SOTA evolves week by week
-- **AI-generated insights** — Claude analyzes why Model A beats Model B on specific benchmarks
-- **Auto-updated** — GitHub Actions scrapes new results daily
-- **Interactive dashboard** — filter, compare, and explore
+- **Tracks performance across multiple benchmarks** with normalized, comparable scores
+- **Auto-discovers new papers** via arXiv + Semantic Scholar scanning (twice weekly)
+- **Validates data integrity** on every PR with automated CI checks
+- **Interactive dashboard** to filter, compare, and explore models
 
-> **Latest finding (Week 12, 2026):**
-> "Flow matching VLAs now dominate 4/5 LIBERO suites. The last holdout — LIBERO-Long — shows chain-of-thought models (CoT-VLA) closing the gap at 17.1%p vs 23.4%p for pi0.5, suggesting explicit reasoning benefits long-horizon planning."
+## Leaderboard
 
-## Current Leaderboard (LIBERO)
+### LIBERO (Top 10)
 
-| Rank | Model | Date | Venue | Action Head | Avg | Long | Eval |
-|------|-------|------|-------|-------------|-----|------|------|
-| 🥇 | pi0.5-Pro | Sep 2025 | — | flow matching | **93.3** | **82.4** | FT |
-| 🥈 | LingBot-VLA | Jan 2026 | — | MoT + flow matching | 92.6 | 80.6 | FT |
-| 🥉 | UD-VLA | Nov 2025 | ICLR 2026 | joint diffusion | 91.8 | 78.4 | FT |
-| 4 | InstructVLA | Jul 2025 | ICLR 2026 | flow matching | 90.6 | 76.8 | FT |
-| 5 | UniVLA | May 2025 | RSS 2025 | flow matching | 90.1 | 74.2 | FT |
-| 6 | OpenVLA-v2 | Feb 2025 | — | flow matching | 90.0 | 74.6 | FT |
-| 7 | TRA-VLA | Mar 2025 | — | flow matching + reasoning | 89.3 | 73.8 | FT |
-| 8 | pi0.5 | Feb 2025 | CoRL 2025 | flow matching | 88.9 | 72.8 | FT |
+| Rank | Model | Date | Venue | Action Head | Avg | Eval |
+|------|-------|------|-------|-------------|-----|------|
+| 1 | **SimpleVLA-RL** | Sep 2025 | ICLR 2026 | autoregressive + GRPO RL | **98.8** | FT |
+| 2 | **X-VLA** | Oct 2025 | ICLR 2026 | autoregressive w/ soft prompts | **97.8** | FT |
+| 3 | **MemoryVLA** | Aug 2025 | ICLR 2026 | diffusion transformer | **96.5** | FT |
+| 4 | pi0.5-Pro | Sep 2025 | - | flow matching | 93.3 | FT |
+| 5 | pi0.6 | Nov 2025 | - | flow matching + RL | 93.1 | FT |
+| 6 | LingBot-VLA | Jan 2026 | - | MoT + flow matching | 92.6 | FT |
+| 7 | UD-VLA | Nov 2025 | ICLR 2026 | joint diffusion | 91.8 | FT |
+| 8 | InstructVLA | Jul 2025 | ICLR 2026 | flow matching | 90.6 | FT |
+| 9 | UniVLA | May 2025 | RSS 2025 | flow matching | 90.1 | FT |
+| 10 | OpenVLA-v2 | Feb 2025 | - | flow matching | 90.0 | FT |
 
-> **FT** = Fine-tuned, **ZS** = Zero-shot. Dashboard shows all 32 models across 6 benchmarks (LIBERO, CALVIN, SimplerEnv, RoboTwin).
+> **FT** = Fine-tuned | [Full leaderboard (JSON) ->](data/leaderboard.json)
 
-*Updated: 2026-03-18 · [Full leaderboard →](data/leaderboard.json)*
+### Other Benchmarks (Top 3)
 
-## Weekly AI Analysis
+| Benchmark | #1 | #2 | #3 |
+|-----------|-----|-----|-----|
+| **CALVIN** (avg len) | pi0.5-Pro (4.6) | LingBot-VLA (4.5) | UD-VLA (4.5) |
+| **SimplerEnv** (avg) | OpenVLA-v2 (82.3) | InstructVLA (80.3) | SpatialVLA (78.2) |
+| **RoboTwin v1** (avg) | SimpleVLA-RL (70.4) | pi0.5-Pro (65.5) | LingBot-VLA (61.5) |
+| **RoboTwin v2** (avg) | X-VLA (72.5) | SimpleVLA-RL (68.8) | - |
 
-Latest: **[Week 12: Flow matching's dominance begins](analysis/weekly/)**
+## All Tracked Models
 
-Key insights:
-- **Action head paradigm shift**: 3/5 top models now use flow matching or diffusion (+12.3%p vs 6 months ago)
-- **Long-horizon remains unsolved**: LIBERO-Long scores lag 15-25%p behind other suites across all models
-- **Open-source catching up**: OpenVLA-OFT trails pi0.5 by only 1.5%p (was 6.8%p six months ago)
+<details>
+<summary>37 models (click to expand)</summary>
 
-[Past reports →](analysis/weekly/)
+3D Diffuser Actor, CogACT, CoT-VLA, DexVLA, Diffusion Policy, FAST-VLA, FLARE, GR-1, GR-2, GROOT-N1, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, Octo, OpenVLA, OpenVLA-OFT, OpenVLA-v2, pi0, pi0.5, pi0.5-Pro, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, Sparse-VLA, SpatialVLA, TRA-VLA, TraceVLA, UD-VLA, UniVLA, VLASER, X-VLA
+
+</details>
 
 ## Quick Start
 
@@ -81,71 +84,78 @@ pip install pyyaml
 python scripts/build_leaderboard.py
 ```
 
+### Scan for New Papers
+
+```bash
+# Auto mode: tries arXiv first, falls back to Semantic Scholar
+python scripts/scan_arxiv.py --days 14
+
+# Force Semantic Scholar only
+python scripts/scan_arxiv.py --source s2 --days 30
+
+# Generate draft YAMLs for top candidates
+python scripts/generate_model_yaml.py --top 5
+```
+
 ## Tracked Benchmarks
 
-| Benchmark | Tasks | Models | Focus | Venue |
-|-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 20+ | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 10+ | Long-horizon, language | RA-L 2022 |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 5+ | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin](data/benchmarks/robotwin.yaml) | 50 tasks | 4 | Dual-arm, bimanual | CVPR 2025 Highlight |
-| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity | CoRL 2020 |
+| Benchmark | Tasks | Models Tracked | Focus | Venue |
+|-----------|-------|----------------|-------|-------|
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 25+ | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 12+ | Long-horizon, language | RA-L 2022 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 8+ | Sim-to-real transfer | NeurIPS 2024 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 5+ | Dual-arm, bimanual | CVPR 2025 Highlight |
+| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 1 | Diverse manipulation | RA-L 2020 |
 
-## How AI Analysis Works
+## Automation
 
-1. GitHub Actions scrapes new papers & benchmarks daily
-2. Claude (Sonnet) analyzes the delta vs existing data
-3. Generates structured insights with specific numbers
-4. Commits analysis to `/analysis/weekly/`
-5. Dashboard rebuilds automatically
+Three GitHub Actions workflows keep the data up to date:
 
-**Token budget**: ~50K tokens/week
+| Workflow | Schedule | Description |
+|----------|----------|-------------|
+| [auto-track.yml](.github/workflows/auto-track.yml) | Wed & Sat 10:00 UTC | Scans arXiv + Semantic Scholar for new VLA papers, creates PRs with draft YAMLs |
+| [weekly-analysis.yml](.github/workflows/weekly-analysis.yml) | Mon 9:00 UTC | Validates data, builds leaderboard, deploys dashboard |
+| [validate-pr.yml](.github/workflows/validate-pr.yml) | On PR | Validates YAML integrity and rebuilds leaderboard as dry run |
 
 ## Project Structure
 
 ```
 ├── data/
-│   ├── benchmarks/     # Benchmark definitions (YAML)
-│   ├── models/         # Model data with benchmark scores (YAML)
-│   └── leaderboard.json  # Auto-generated unified leaderboard
-├── analysis/
-│   ├── weekly/         # AI-generated weekly analysis
-│   ├── model-cards/    # AI-generated model summaries
-│   └── trends/         # Quarterly trend reports
+│   ├── benchmarks/          # Benchmark definitions (6 YAML files)
+│   ├── models/              # Model data with benchmark scores (37 YAML files)
+│   ├── leaderboard.json     # Auto-generated unified leaderboard
+│   └── scan_candidates.json # Latest arXiv/S2 scan results
 ├── scripts/
-│   ├── build_leaderboard.py  # YAML → JSON conversion
-│   └── validate_data.py      # Data integrity checks
-├── dashboard/          # React + Recharts interactive dashboard
-└── .github/workflows/  # Automation pipelines
+│   ├── scan_arxiv.py        # Paper scanner (arXiv + Semantic Scholar)
+│   ├── generate_model_yaml.py  # Draft YAML generator from scan results
+│   ├── build_leaderboard.py # YAML -> JSON leaderboard builder
+│   └── validate_data.py     # Data integrity checks
+├── dashboard/               # React + Recharts interactive dashboard
+└── .github/workflows/       # CI/CD automation (3 workflows)
 ```
 
-## Contribute
+## Contributing
 
-We welcome contributions! The easiest way is to **add a new model**:
+The easiest way to contribute is to **add a new model**:
 
-1. Create a YAML file in `data/models/your_model.yaml`
-2. Follow the [schema guide](docs/data-format.md)
-3. Run `python scripts/validate_data.py` to verify
-4. Submit a PR
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full details.
+1. Create `data/models/your_model.yaml` (see existing files for format)
+2. Run `python scripts/validate_data.py` to verify
+3. Run `python scripts/build_leaderboard.py` to check rankings
+4. Submit a PR — CI will validate automatically
 
 ## Limitations
 
 - Benchmark numbers are manually verified from papers — errors possible
-- AI analysis may occasionally misinterpret results
 - Not all models report on all benchmarks (fair comparison is hard)
-- Real-world performance ≠ benchmark performance
-- Updates depend on paper availability and our review cycle
+- Real-world performance != benchmark performance
+- Evaluation conditions (fine-tuned vs zero-shot) vary across papers
 
 ## Citation
 
-If you use this data in your research:
-
 ```bibtex
 @misc{vla-tracker-2026,
-  title={VLA-Tracker: AI-Powered Benchmark Dashboard for Physical AI},
+  title={VLA-Tracker: Benchmark Dashboard for Vision-Language-Action Models},
   author={Hyeongjin Kim},
   year={2026},
   url={https://github.com/HyeongjinKim/Vla-tracker-}
@@ -155,8 +165,8 @@ If you use this data in your research:
 ## Acknowledgments
 
 Built with data from the VLA research community.
-Thanks to the authors of [LIBERO](https://arxiv.org/abs/2306.03310), [CALVIN](https://arxiv.org/abs/2112.03227), [VLA-Arena](https://arxiv.org/abs/2407.01511), and all model papers included here.
+Thanks to the authors of [LIBERO](https://arxiv.org/abs/2306.03310), [CALVIN](https://arxiv.org/abs/2112.03227), and all model papers tracked here.
 
 ---
 
-**Powered by Claude** · Analysis auto-generated weekly · [Star this repo](https://github.com/HyeongjinKim/Vla-tracker-) to stay updated
+[Star this repo](https://github.com/HyeongjinKim/Vla-tracker-) to stay updated
