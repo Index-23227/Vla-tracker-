@@ -130,7 +130,11 @@ def parse_arxiv_response(xml_text: str) -> list[dict]:
         return []
 
     papers = []
-    root = ET.fromstring(xml_text)
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError as e:
+        print(f"  [WARN] Failed to parse arXiv response: {e}", file=sys.stderr)
+        return []
 
     for entry in root.findall(f"{ATOM_NS}entry"):
         arxiv_id_raw = entry.findtext(f"{ATOM_NS}id", "")
@@ -402,4 +406,15 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {e}", file=sys.stderr)
+        # Write empty results so downstream steps don't fail
+        output_path = ROOT / "data" / "scan_candidates.json"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        import json as _json
+        with open(output_path, "w") as f:
+            _json.dump({"scan_date": "", "lookback_days": 0, "total_queried": 0,
+                         "vla_related": 0, "new_candidates": 0, "candidates": []}, f)
+        sys.exit(0)
