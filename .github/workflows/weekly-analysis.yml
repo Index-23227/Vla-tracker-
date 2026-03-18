@@ -29,7 +29,7 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install -r requirements.txt
 
       - name: Validate data
         run: python scripts/validate_data.py
@@ -54,7 +54,6 @@ jobs:
     timeout-minutes: 10
     if: github.ref == 'refs/heads/main'
 
-    # Required for official GitHub Pages deployment
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -70,7 +69,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: dashboard/package-lock.json
 
