@@ -36,6 +36,13 @@ const BENCHMARKS = {
     avgKey: 'robotwin_v2_avg',
     metric: 'Success Rate (%)',
   },
+  rlbench: {
+    label: 'RLBench',
+    suites: ['rlbench_18tasks'],
+    suiteLabels: { rlbench_18tasks: '18-Task Multi-Task' },
+    avgKey: 'rlbench_avg',
+    metric: 'Success Rate (%)',
+  },
 }
 
 const ACTION_HEAD_COLORS = {
