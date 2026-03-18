@@ -108,7 +108,7 @@ jobs:
 
           # Create branch and commit
           git checkout -b "$BRANCH"
-          git add data/models/*.yaml data/scan_candidates.json
+          git add data/models/*.yaml
           git diff --staged --quiet && echo "No changes to commit" && exit 0
 
           git commit -m "feat: auto-detect new VLA papers from arXiv scan
