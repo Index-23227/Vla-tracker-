@@ -397,7 +397,8 @@ def main():
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
     print(f"\nResults written to {output_path}")
-    return 0 if candidates else 1
+    # Always exit 0 — no new papers is not an error
+    return 0
 
 
 if __name__ == "__main__":
