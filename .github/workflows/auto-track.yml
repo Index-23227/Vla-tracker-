@@ -26,13 +26,17 @@ permissions:
 jobs:
   scan-and-propose:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: pip install pyyaml
@@ -43,6 +47,8 @@ jobs:
           DAYS="${{ github.event.inputs.lookback_days || '14' }}"
           MIN_SCORE="${{ github.event.inputs.min_score || '3.0' }}"
           python scripts/scan_arxiv.py --days "$DAYS" --min-score "$MIN_SCORE"
+        env:
+          PYTHONUNBUFFERED: '1'
 
       - name: Generate draft model YAMLs
         id: generate
@@ -112,13 +118,19 @@ jobs:
 
           git push origin "$BRANCH"
 
-          # Create PR
+          # Create PR (labels are optional - skip if they don't exist)
           gh pr create \
             --title "New VLA papers detected ($(date +%Y-%m-%d))" \
             --body-file /tmp/pr_body.md \
-            --label "auto-track,needs-review" \
             --base main \
-            --head "$BRANCH"
+            --head "$BRANCH" || {
+            echo "::warning::PR creation failed, retrying without labels..."
+            gh pr create \
+              --title "New VLA papers detected ($(date +%Y-%m-%d))" \
+              --body-file /tmp/pr_body.md \
+              --base main \
+              --head "$BRANCH"
+          }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
