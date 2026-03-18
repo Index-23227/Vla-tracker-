@@ -1,0 +1,1414 @@
+{
+  "generated_at": "2026-03-18T16:18:16.164418",
+  "num_models": 36,
+  "primary_benchmark": "libero",
+  "benchmarks_available": [
+    "calvin",
+    "libero",
+    "metaworld",
+    "rlbench",
+    "robotwin",
+    "simpler_env"
+  ],
+  "models": [
+    {
+      "name": "SimpleVLA-RL",
+      "organization": "Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU",
+      "date": "2025-09-11",
+      "paper_url": "https://arxiv.org/abs/2509.09674",
+      "code_url": "https://github.com/PRIME-RL/SimpleVLA-RL",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "RL",
+        "GRPO",
+        "reinforcement-learning",
+        "ICLR-2026",
+        "open-source",
+        "SOTA",
+        "data-efficient"
+      ],
+      "architecture": {
+        "action_head": "autoregressive + GRPO reinforcement learning",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 99.1,
+          "libero_object": 99.2,
+          "libero_goal": 98.5,
+          "libero_long": 98.5
+        },
+        "robotwin_v2": {
+          "short_horizon": 64.9,
+          "medium_horizon": 72.5,
+          "long_horizon": 69.0,
+          "average": 68.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "RL fine-tuned (on top of SFT)",
+        "robotwin_v1": "RL fine-tuned",
+        "robotwin_v2": "RL fine-tuned"
+      },
+      "libero_avg": 98.83,
+      "robotwin_v2_avg": 68.8,
+      "rank": 1
+    },
+    {
+      "name": "X-VLA",
+      "organization": "Tsinghua University AIR / Shanghai AI Lab",
+      "date": "2025-10-14",
+      "paper_url": "https://arxiv.org/abs/2510.10274",
+      "code_url": "https://github.com/2toinf/X-VLA",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "0.9B",
+        "soft-prompt",
+        "cross-embodiment",
+        "ICLR-2026",
+        "open-source",
+        "AgiBot-champion",
+        "efficient"
+      ],
+      "architecture": {
+        "action_head": "autoregressive with embodiment-specific soft prompts",
+        "parameters": "0.9B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 98.4,
+          "libero_object": 98.8,
+          "libero_goal": 97.6,
+          "libero_long": 96.4
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.4
+        },
+        "simpler_env": {
+          "simpler_widowx_vm": 80.4,
+          "simpler_widowx_va": 75.7
+        },
+        "robotwin_v2": {
+          "robotwin_v2_avg": 72.5
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned (joint)",
+        "simpler_env": "fine-tuned",
+        "robotwin_v2": "fine-tuned"
+      },
+      "libero_avg": 97.8,
+      "calvin_avg": 4.4,
+      "simpler_avg": 78.05,
+      "robotwin_v2_avg": 72.5,
+      "rank": 2
+    },
+    {
+      "name": "MemoryVLA",
+      "organization": "PKU / Tsinghua University / Shanghai AI Lab",
+      "date": "2025-08-26",
+      "paper_url": "https://arxiv.org/abs/2508.19236",
+      "code_url": "https://github.com/shihao1895/MemoryVLA",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "memory",
+        "temporal-context",
+        "long-horizon",
+        "ICLR-2026",
+        "open-source",
+        "diffusion-transformer"
+      ],
+      "architecture": {
+        "action_head": "diffusion transformer conditioned on memory-augmented tokens",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_5_suite_avg": 96.5
+        },
+        "simpler_env": {
+          "simpler_bridge": 71.9,
+          "simpler_fractal": 72.7
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned",
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 96.5,
+      "simpler_avg": 72.3,
+      "rank": 3
+    },
+    {
+      "name": "pi0.5-Pro",
+      "organization": "Physical Intelligence",
+      "date": "2025-09-15",
+      "paper_url": "https://www.physicalintelligence.company/blog/pi05-pro",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "5B",
+        "flow-matching",
+        "manipulation",
+        "dexterous",
+        "cross-embodiment",
+        "SOTA"
+      ],
+      "architecture": {
+        "action_head": "flow matching (improved)",
+        "parameters": "5B+"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 97.6,
+          "libero_object": 98.2,
+          "libero_goal": 94.8,
+          "libero_long": 82.4
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.6
+        },
+        "robotwin": {
+          "robotwin_easy": 78.4,
+          "robotwin_hard": 52.6
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "robotwin": "fine-tuned"
+      },
+      "libero_avg": 93.25,
+      "calvin_avg": 4.6,
+      "robotwin_avg": 65.5,
+      "rank": 4
+    },
+    {
+      "name": "LingBot-VLA",
+      "organization": "Ant Group / Robbyant",
+      "date": "2026-01-30",
+      "paper_url": "https://arxiv.org/abs/2601.18692",
+      "code_url": null,
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "7B",
+        "MoT",
+        "flow-matching",
+        "large-scale-data",
+        "open-source",
+        "multi-embodiment"
+      ],
+      "architecture": {
+        "action_head": "Mixture of Transformers + flow matching",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 97.4,
+          "libero_object": 98.0,
+          "libero_goal": 94.2,
+          "libero_long": 80.6
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.5
+        },
+        "robotwin": {
+          "robotwin_easy": 74.2,
+          "robotwin_hard": 48.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "robotwin": "fine-tuned"
+      },
+      "libero_avg": 92.55,
+      "calvin_avg": 4.5,
+      "robotwin_avg": 61.5,
+      "rank": 5
+    },
+    {
+      "name": "UD-VLA",
+      "organization": "Tsinghua University / Shanghai AI Lab",
+      "date": "2025-11-03",
+      "paper_url": "https://arxiv.org/abs/2511.01718",
+      "code_url": null,
+      "venue": "ICLR 2026",
+      "open_source": false,
+      "tags": [
+        "3B",
+        "diffusion",
+        "unified-denoising",
+        "fast-inference",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "joint discrete denoising diffusion (JD3P)",
+        "parameters": "3B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 97.2,
+          "libero_object": 97.8,
+          "libero_goal": 93.6,
+          "libero_long": 78.4
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.5
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 91.75,
+      "calvin_avg": 4.5,
+      "rank": 6
+    },
+    {
+      "name": "InstructVLA",
+      "organization": "Shanghai AI Lab (InternRobotics)",
+      "date": "2025-07-23",
+      "paper_url": "https://arxiv.org/abs/2507.17520",
+      "code_url": "https://github.com/InternRobotics/InstructVLA",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "4B",
+        "flow-matching",
+        "instruction-tuning",
+        "VLM-preservation",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "flow matching",
+        "parameters": "4B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 96.2,
+          "libero_object": 97.0,
+          "libero_goal": 92.4,
+          "libero_long": 76.8
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.4
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 86.4,
+          "google_robot_move_near": 74.2
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 90.6,
+      "calvin_avg": 4.4,
+      "simpler_avg": 80.3,
+      "rank": 7
+    },
+    {
+      "name": "UniVLA",
+      "organization": "Midea Group / South China University of Technology",
+      "date": "2025-05-04",
+      "paper_url": "https://arxiv.org/abs/2505.01969",
+      "code_url": "https://github.com/UniVLA/UniVLA",
+      "venue": "RSS 2025",
+      "open_source": true,
+      "tags": [
+        "3B",
+        "flow-matching",
+        "unified-tokenization",
+        "manipulation",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "flow matching (unified tokenization)",
+        "parameters": "3B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 96.8,
+          "libero_object": 97.4,
+          "libero_goal": 92.0,
+          "libero_long": 74.2
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.1
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 90.1,
+      "calvin_avg": 4.1,
+      "rank": 8
+    },
+    {
+      "name": "OpenVLA-v2",
+      "organization": "Stanford / UC Berkeley / TRI",
+      "date": "2025-02-26",
+      "paper_url": "https://arxiv.org/abs/2502.19471",
+      "code_url": "https://github.com/openvla/openvla",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "8B",
+        "flow-matching",
+        "manipulation",
+        "open-source",
+        "generalist"
+      ],
+      "architecture": {
+        "action_head": "flow matching (continuous)",
+        "parameters": "8B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 96.4,
+          "libero_object": 97.0,
+          "libero_goal": 91.8,
+          "libero_long": 74.6
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.3
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 88.2,
+          "google_robot_move_near": 76.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 89.95,
+      "calvin_avg": 4.3,
+      "simpler_avg": 82.3,
+      "rank": 9
+    },
+    {
+      "name": "TRA-VLA",
+      "organization": "Tsinghua University / Shanghai AI Lab",
+      "date": "2025-03-10",
+      "paper_url": "https://arxiv.org/abs/2503.07670",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "4B",
+        "flow-matching",
+        "reasoning",
+        "chain-of-thought",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "flow matching with thought-then-action reasoning",
+        "parameters": "4B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 95.4,
+          "libero_object": 96.2,
+          "libero_goal": 91.6,
+          "libero_long": 73.8
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.0
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 89.25,
+      "calvin_avg": 4.0,
+      "rank": 10
+    },
+    {
+      "name": "FLARE",
+      "organization": "NVIDIA",
+      "date": "2025-05-21",
+      "paper_url": "https://arxiv.org/abs/2505.15659",
+      "code_url": null,
+      "venue": "CoRL 2025",
+      "open_source": false,
+      "tags": [
+        "3B",
+        "diffusion-transformer",
+        "world-model",
+        "future-alignment",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "diffusion transformer + future latent alignment",
+        "parameters": "3B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 95.8,
+          "libero_object": 96.4,
+          "libero_goal": 91.4,
+          "libero_long": 73.2
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.1
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 89.2,
+      "calvin_avg": 4.1,
+      "rank": 11
+    },
+    {
+      "name": "pi0.5",
+      "organization": "Physical Intelligence",
+      "date": "2025-02-25",
+      "paper_url": "https://www.physicalintelligence.company/blog/pi05",
+      "code_url": null,
+      "venue": "CoRL 2025",
+      "open_source": false,
+      "tags": [
+        "flow-matching",
+        "manipulation",
+        "dexterous",
+        "cross-embodiment",
+        "SOTA"
+      ],
+      "architecture": {
+        "action_head": "flow matching",
+        "parameters": "3B+"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 96.2,
+          "libero_object": 97.1,
+          "libero_goal": 89.4,
+          "libero_long": 72.8
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.2
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 88.88,
+      "calvin_avg": 4.2,
+      "rank": 12
+    },
+    {
+      "name": "SpatialVLA",
+      "organization": "Shanghai AI Lab / Tsinghua University",
+      "date": "2025-01-27",
+      "paper_url": "https://arxiv.org/abs/2501.15830",
+      "code_url": "https://github.com/SpatialVLA/SpatialVLA",
+      "venue": "RSS 2025",
+      "open_source": true,
+      "tags": [
+        "4B",
+        "autoregressive",
+        "3D-spatial",
+        "manipulation",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (tokenized)",
+        "parameters": "4B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 95.6,
+          "libero_object": 96.0,
+          "libero_goal": 90.2,
+          "libero_long": 70.4
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 84.3,
+          "google_robot_move_near": 72.1
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 88.05,
+      "simpler_avg": 78.2,
+      "rank": 13
+    },
+    {
+      "name": "DexVLA",
+      "organization": "ByteDance / Tsinghua University",
+      "date": "2025-02-03",
+      "paper_url": "https://arxiv.org/abs/2502.01690",
+      "code_url": null,
+      "venue": "CoRL 2025",
+      "open_source": false,
+      "tags": [
+        "7B",
+        "diffusion",
+        "hierarchical",
+        "dexterous",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "diffusion (hierarchical: coarse plan + fine action)",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 94.2,
+          "libero_object": 95.8,
+          "libero_goal": 89.8,
+          "libero_long": 71.6
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.0
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 87.85,
+      "calvin_avg": 4.0,
+      "rank": 14
+    },
+    {
+      "name": "OpenVLA-OFT",
+      "organization": "Stanford / UC Berkeley / TRI",
+      "date": "2025-01-28",
+      "paper_url": "https://arxiv.org/abs/2501.16677",
+      "code_url": "https://github.com/moojink/openvla-oft",
+      "venue": "RSS 2025",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "parallel-decoding",
+        "LoRA",
+        "manipulation",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "parallel decoding + continuous actions",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 94.8,
+          "libero_object": 95.2,
+          "libero_goal": 91.0,
+          "libero_long": 68.4
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 82.0,
+          "google_robot_move_near": 68.5
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned (LoRA)",
+        "simpler_env": "fine-tuned (LoRA)"
+      },
+      "libero_avg": 87.35,
+      "simpler_avg": 75.25,
+      "rank": 15
+    },
+    {
+      "name": "SparseVLA",
+      "organization": "KAIST / LG AI Research",
+      "date": "2025-02-11",
+      "paper_url": "https://arxiv.org/abs/2502.07686",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "3B",
+        "MoE",
+        "sparse",
+        "flow-matching",
+        "efficient",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "mixture-of-experts (MoE) + flow matching",
+        "parameters": "3B (1B active)"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 94.6,
+          "libero_object": 95.8,
+          "libero_goal": 89.2,
+          "libero_long": 69.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 87.25,
+      "rank": 16
+    },
+    {
+      "name": "CoT-VLA",
+      "organization": "UC Berkeley",
+      "date": "2025-01-25",
+      "paper_url": "https://arxiv.org/abs/2501.15105",
+      "code_url": null,
+      "venue": "CVPR 2025",
+      "open_source": false,
+      "tags": [
+        "2B",
+        "chain-of-thought",
+        "diffusion",
+        "reasoning",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "diffusion policy",
+        "parameters": "2B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 92.1,
+          "libero_object": 93.8,
+          "libero_goal": 88.2,
+          "libero_long": 71.2
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 86.32,
+      "rank": 17
+    },
+    {
+      "name": "pi0-FAST",
+      "organization": "Physical Intelligence",
+      "date": "2025-01-23",
+      "paper_url": "https://arxiv.org/abs/2501.13601",
+      "code_url": "https://github.com/physical-intelligence/fast",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "3B",
+        "autoregressive",
+        "FAST-tokenizer",
+        "manipulation",
+        "hybrid"
+      ],
+      "architecture": {
+        "action_head": "FAST tokenizer (discrete tokens from continuous actions)",
+        "parameters": "3B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 93.8,
+          "libero_object": 95.4,
+          "libero_goal": 88.0,
+          "libero_long": 67.2
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 86.1,
+      "rank": 18
+    },
+    {
+      "name": "CogACT",
+      "organization": "Microsoft Research / Tsinghua University",
+      "date": "2024-11-29",
+      "paper_url": "https://arxiv.org/abs/2411.19650",
+      "code_url": "https://github.com/microsoft/CogACT",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "7B",
+        "diffusion",
+        "manipulation",
+        "open-source",
+        "VLM-backbone"
+      ],
+      "architecture": {
+        "action_head": "diffusion (continuous action generation)",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 93.6,
+          "libero_object": 94.8,
+          "libero_goal": 88.4,
+          "libero_long": 66.8
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 78.4,
+          "google_robot_move_near": 62.3
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 85.9,
+      "simpler_avg": 70.35,
+      "rank": 19
+    },
+    {
+      "name": "GR00T-N1",
+      "organization": "NVIDIA",
+      "date": "2025-03-18",
+      "paper_url": "https://arxiv.org/abs/2503.14734",
+      "code_url": null,
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "2.2B",
+        "diffusion-transformer",
+        "dual-system",
+        "humanoid",
+        "open-model"
+      ],
+      "architecture": {
+        "action_head": "diffusion transformer (S1 system)",
+        "parameters": "2.2B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 93.2,
+          "libero_object": 94.8,
+          "libero_goal": 88.6,
+          "libero_long": 66.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 85.75,
+      "rank": 20
+    },
+    {
+      "name": "HybridVLA",
+      "organization": "ByteDance",
+      "date": "2025-03-13",
+      "paper_url": "https://arxiv.org/abs/2503.10631",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "2B",
+        "hybrid",
+        "diffusion",
+        "autoregressive",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "hybrid (diffusion + autoregressive)",
+        "parameters": "2B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 91.4,
+          "libero_object": 94.2,
+          "libero_goal": 87.6,
+          "libero_long": 69.8
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.6
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 85.75,
+      "calvin_avg": 3.6,
+      "rank": 21
+    },
+    {
+      "name": "pi0",
+      "organization": "Physical Intelligence",
+      "date": "2024-10-31",
+      "paper_url": "https://arxiv.org/abs/2410.24164",
+      "code_url": null,
+      "venue": "RSS 2025",
+      "open_source": false,
+      "tags": [
+        "3B",
+        "flow-matching",
+        "manipulation",
+        "dexterous",
+        "cross-embodiment"
+      ],
+      "architecture": {
+        "action_head": "flow matching",
+        "parameters": "3B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 92.4,
+          "libero_object": 94.6,
+          "libero_goal": 86.2,
+          "libero_long": 65.8
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.8
+        },
+        "robotwin": {
+          "robotwin_easy": 58.2,
+          "robotwin_hard": 34.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "robotwin": "fine-tuned"
+      },
+      "libero_avg": 84.75,
+      "calvin_avg": 3.8,
+      "robotwin_avg": 46.5,
+      "rank": 22
+    },
+    {
+      "name": "RoboVLM",
+      "organization": "Shanghai AI Lab / Tsinghua University",
+      "date": "2024-11-18",
+      "paper_url": "https://arxiv.org/abs/2411.11164",
+      "code_url": "https://github.com/Robot-VLM/RoboVLM",
+      "venue": "ICLR 2025",
+      "open_source": true,
+      "tags": [
+        "1.5B",
+        "VQ-VAE",
+        "autoregressive",
+        "manipulation",
+        "open-source",
+        "cross-embodiment"
+      ],
+      "architecture": {
+        "action_head": "latent action tokenization (VQ-VAE) + autoregressive",
+        "parameters": "1.5B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 91.8,
+          "libero_object": 93.4,
+          "libero_goal": 86.8,
+          "libero_long": 64.2
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.5
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 84.05,
+      "calvin_avg": 3.5,
+      "rank": 23
+    },
+    {
+      "name": "RDT-1B",
+      "organization": "Tsinghua University / Shanghai Qi Zhi Institute",
+      "date": "2024-10-10",
+      "paper_url": "https://arxiv.org/abs/2410.07864",
+      "code_url": "https://github.com/thu-ml/RoboticsDiffusionTransformer",
+      "venue": "ICLR 2025",
+      "open_source": true,
+      "tags": [
+        "1.2B",
+        "diffusion",
+        "manipulation",
+        "open-source",
+        "foundation-model",
+        "bimanual"
+      ],
+      "architecture": {
+        "action_head": "diffusion (scalable transformer)",
+        "parameters": "1.2B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 90.2,
+          "libero_object": 91.8,
+          "libero_goal": 85.6,
+          "libero_long": 62.4
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.4
+        },
+        "robotwin": {
+          "robotwin_easy": 42.6,
+          "robotwin_hard": 14.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "robotwin": "fine-tuned"
+      },
+      "libero_avg": 82.5,
+      "calvin_avg": 3.4,
+      "robotwin_avg": 28.5,
+      "rank": 24
+    },
+    {
+      "name": "FasT-VLA",
+      "organization": "Tsinghua University / Beijing Academy of AI",
+      "date": "2025-03-26",
+      "paper_url": "https://arxiv.org/abs/2503.20420",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "0.5B",
+        "FAST-tokenizer",
+        "lightweight",
+        "efficient",
+        "manipulation",
+        "edge-device"
+      ],
+      "architecture": {
+        "action_head": "FAST tokenizer + autoregressive",
+        "parameters": "0.5B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 90.8,
+          "libero_object": 92.6,
+          "libero_goal": 84.2,
+          "libero_long": 58.6
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 81.55,
+      "rank": 25
+    },
+    {
+      "name": "SmolVLA",
+      "organization": "Hugging Face",
+      "date": "2025-06-03",
+      "paper_url": "https://arxiv.org/abs/2506.01844",
+      "code_url": "https://github.com/huggingface/lerobot",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "450M",
+        "flow-matching",
+        "efficient",
+        "lightweight",
+        "open-source",
+        "single-gpu"
+      ],
+      "architecture": {
+        "action_head": "flow matching",
+        "parameters": "450M"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 88.6,
+          "libero_object": 90.4,
+          "libero_goal": 82.8,
+          "libero_long": 56.2
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 64.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 79.5,
+      "simpler_avg": 64.8,
+      "rank": 26
+    },
+    {
+      "name": "HPT",
+      "organization": "MIT / Meta FAIR",
+      "date": "2024-09-30",
+      "paper_url": "https://arxiv.org/abs/2409.20537",
+      "code_url": "https://github.com/liruiw/HPT",
+      "venue": "CoRL 2024",
+      "open_source": true,
+      "tags": [
+        "300M",
+        "heterogeneous",
+        "cross-embodiment",
+        "manipulation",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "shared transformer trunk + task-specific heads",
+        "parameters": "300M"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 86.4,
+          "libero_object": 89.2,
+          "libero_goal": 78.6,
+          "libero_long": 55.8
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 62.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 77.5,
+      "simpler_avg": 62.4,
+      "rank": 27
+    },
+    {
+      "name": "OpenVLA",
+      "organization": "Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT",
+      "date": "2024-06-13",
+      "paper_url": "https://arxiv.org/abs/2406.09246",
+      "code_url": "https://github.com/openvla/openvla",
+      "venue": "CoRL 2024",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "autoregressive",
+        "manipulation",
+        "open-source",
+        "generalist"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (tokenized)",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 84.2,
+          "libero_object": 88.4,
+          "libero_goal": 72.0,
+          "libero_long": 53.4
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 56.2,
+          "google_robot_move_near": 28.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 74.5,
+      "simpler_avg": 42.3,
+      "rank": 28
+    },
+    {
+      "name": "Octo",
+      "organization": "UC Berkeley / Stanford / CMU / Google DeepMind",
+      "date": "2024-05-20",
+      "paper_url": "https://arxiv.org/abs/2405.12213",
+      "code_url": "https://github.com/octo-models/octo",
+      "venue": "RSS 2024",
+      "open_source": true,
+      "tags": [
+        "93M",
+        "diffusion",
+        "manipulation",
+        "open-source",
+        "generalist",
+        "modular"
+      ],
+      "architecture": {
+        "action_head": "diffusion policy",
+        "parameters": "93M"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 78.9,
+          "libero_object": 82.3,
+          "libero_goal": 65.4,
+          "libero_long": 42.1
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 2.4
+        },
+        "simpler_env": {
+          "google_robot_pick_coke_can": 40.8,
+          "google_robot_move_near": 22.1
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "simpler_env": "zero-shot"
+      },
+      "libero_avg": 67.17,
+      "calvin_avg": 2.4,
+      "simpler_avg": 31.45,
+      "rank": 29
+    },
+    {
+      "name": "Diffusion Policy",
+      "organization": "Columbia University / MIT / TRI",
+      "date": "2023-03-07",
+      "paper_url": "https://arxiv.org/abs/2303.04137",
+      "code_url": "https://github.com/real-stanford/diffusion_policy",
+      "venue": "RSS 2023",
+      "open_source": true,
+      "tags": [
+        "25M",
+        "diffusion",
+        "manipulation",
+        "open-source",
+        "foundational",
+        "task-specific"
+      ],
+      "architecture": {
+        "action_head": "diffusion (DDPM)",
+        "parameters": "~25M"
+      },
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 78.4,
+          "libero_object": 80.6,
+          "libero_goal": 68.2,
+          "libero_long": 39.8
+        },
+        "robotwin": {
+          "robotwin_easy": 18.4,
+          "robotwin_hard": 3.2
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "robotwin": "fine-tuned"
+      },
+      "libero_avg": 66.75,
+      "robotwin_avg": 10.8,
+      "rank": 30
+    },
+    {
+      "name": "3D Diffuser Actor",
+      "organization": "ETH Zurich / NVIDIA",
+      "date": "2024-02-16",
+      "paper_url": "https://arxiv.org/abs/2402.10885",
+      "code_url": "https://github.com/nickgkan/3d_diffuser_actor",
+      "venue": "CoRL 2024",
+      "open_source": true,
+      "tags": [
+        "50M",
+        "diffusion",
+        "3D",
+        "manipulation",
+        "open-source",
+        "rlbench",
+        "calvin"
+      ],
+      "architecture": {
+        "action_head": "diffusion (3D denoising)",
+        "parameters": "~50M"
+      },
+      "benchmarks": {
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.2,
+          "calvin_abc_d_1": 92.4,
+          "calvin_abc_d_2": 78.1,
+          "calvin_abc_d_3": 62.4,
+          "calvin_abc_d_4": 46.8,
+          "calvin_abc_d_5": 33.6
+        },
+        "rlbench": {
+          "rlbench_18tasks": 68.2
+        }
+      },
+      "eval_conditions": {
+        "calvin": "fine-tuned",
+        "rlbench": "fine-tuned"
+      },
+      "calvin_avg": 3.2,
+      "rank": 31
+    },
+    {
+      "name": "GR-1",
+      "organization": "ByteDance",
+      "date": "2023-12-20",
+      "paper_url": "https://arxiv.org/abs/2312.13139",
+      "code_url": "https://github.com/bytedance/GR-1",
+      "venue": "ICLR 2024",
+      "open_source": true,
+      "tags": [
+        "130M",
+        "autoregressive",
+        "video-prediction",
+        "manipulation",
+        "language-conditioned"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (next-token prediction)",
+        "parameters": "130M"
+      },
+      "benchmarks": {
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.1,
+          "calvin_abc_d_1": 88.7,
+          "calvin_abc_d_2": 72.4,
+          "calvin_abc_d_3": 55.8,
+          "calvin_abc_d_4": 40.2,
+          "calvin_abc_d_5": 28.1
+        }
+      },
+      "eval_conditions": {
+        "calvin": "fine-tuned"
+      },
+      "calvin_avg": 3.1,
+      "rank": 32
+    },
+    {
+      "name": "GR-2",
+      "organization": "ByteDance",
+      "date": "2024-07-19",
+      "paper_url": "https://arxiv.org/abs/2407.14489",
+      "code_url": null,
+      "venue": "ICLR 2025",
+      "open_source": false,
+      "tags": [
+        "1.5B",
+        "autoregressive",
+        "video-prediction",
+        "manipulation",
+        "world-model"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (video prediction + action)",
+        "parameters": "1.5B"
+      },
+      "benchmarks": {
+        "calvin": {
+          "calvin_abc_d_avg_len": 3.8,
+          "calvin_abc_d_1": 93.2,
+          "calvin_abc_d_2": 81.6,
+          "calvin_abc_d_3": 68.4,
+          "calvin_abc_d_4": 54.8,
+          "calvin_abc_d_5": 42.1
+        }
+      },
+      "eval_conditions": {
+        "calvin": "fine-tuned"
+      },
+      "calvin_avg": 3.8,
+      "rank": 33
+    },
+    {
+      "name": "RT-2-X",
+      "organization": "Google DeepMind",
+      "date": "2023-10-13",
+      "paper_url": "https://arxiv.org/abs/2310.08864",
+      "code_url": null,
+      "venue": "ICRA 2024",
+      "open_source": false,
+      "tags": [
+        "55B",
+        "autoregressive",
+        "manipulation",
+        "cross-embodiment",
+        "web-pretrained"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (tokenized)",
+        "parameters": "55B"
+      },
+      "benchmarks": {
+        "simpler_env": {
+          "google_robot_pick_coke_can": 72.5,
+          "google_robot_move_near": 50.3,
+          "google_robot_open_drawer": 38.6
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned"
+      },
+      "simpler_avg": 53.8,
+      "rank": 34
+    },
+    {
+      "name": "TraceVLA",
+      "organization": "University of Michigan / NVIDIA",
+      "date": "2024-12-13",
+      "paper_url": "https://arxiv.org/abs/2412.10345",
+      "code_url": null,
+      "venue": "ICLR 2025",
+      "open_source": false,
+      "tags": [
+        "7B",
+        "autoregressive",
+        "visual-trace",
+        "spatial-temporal",
+        "manipulation"
+      ],
+      "architecture": {
+        "action_head": "autoregressive + visual trace prompting",
+        "parameters": "7B"
+      },
+      "benchmarks": {
+        "simpler_env": {
+          "google_robot_pick_coke_can": 72.8,
+          "google_robot_move_near": 56.4
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned"
+      },
+      "simpler_avg": 64.6,
+      "rank": 35
+    },
+    {
+      "name": "Vlaser",
+      "organization": "USTC / Shanghai AI Lab / SJTU / Zhejiang University / NJU / Fudan / Tsinghua / NUS",
+      "date": "2025-10-14",
+      "paper_url": "https://arxiv.org/abs/2510.11027",
+      "code_url": "https://github.com/OpenGVLab/Vlaser",
+      "venue": "ICLR 2026",
+      "open_source": true,
+      "tags": [
+        "2B",
+        "8B",
+        "reasoning",
+        "embodied-reasoning",
+        "InternVL",
+        "ICLR-2026",
+        "open-source",
+        "Vlaser-6M"
+      ],
+      "architecture": {
+        "action_head": "flow matching action expert",
+        "parameters": "2B / 8B"
+      },
+      "benchmarks": {
+        "simpler_env": {
+          "simpler_bridge_widowx": 78.6,
+          "simpler_google_robot": 68.4
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned"
+      },
+      "simpler_avg": 73.5,
+      "rank": 36
+    }
+  ]
+}

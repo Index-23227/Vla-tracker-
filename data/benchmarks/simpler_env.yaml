@@ -1,0 +1,24 @@
+name: SimplerEnv
+full_name: "Simulated Manipulation Policy Evaluation for Real Robot Setups"
+paper_url: https://arxiv.org/abs/2405.05941
+code_url: https://github.com/simpler-env/SimplerEnv
+year: 2024
+venue: "NeurIPS 2024"
+categories:
+  google_robot_pick_coke_can:
+    description: "Pick up a coke can (Google Robot)"
+  google_robot_move_near:
+    description: "Move object near target (Google Robot)"
+  google_robot_open_drawer:
+    description: "Open a drawer (Google Robot)"
+  google_robot_close_drawer:
+    description: "Close a drawer (Google Robot)"
+  widowx_put_eggplant_in_basket:
+    description: "Put eggplant in basket (WidowX)"
+metric: success_rate
+metric_unit: "%"
+higher_is_better: true
+evaluation_protocol: "Visual matching & variant aggregation across sim environments"
+robot: "Google Robot / WidowX"
+environment: "simulation (ManiSkill2 / SAPIEN)"
+tags: [manipulation, sim-to-real, generalization, real-robot-proxy]

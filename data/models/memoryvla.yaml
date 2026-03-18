@@ -1,0 +1,32 @@
+name: MemoryVLA
+full_name: "MemoryVLA: Perceptual-Cognitive Memory in Vision-Language-Action Models for Robotic Manipulation"
+organization: "PKU / Tsinghua University / Shanghai AI Lab"
+date: "2025-08-26"
+paper_url: https://arxiv.org/abs/2508.19236
+code_url: https://github.com/shihao1895/MemoryVLA
+venue: "ICLR 2026"
+open_source: true
+
+architecture:
+  backbone: "Prismatic VLM (DINOv2 + SigLIP + LLaMA-7B)"
+  action_head: "diffusion transformer conditioned on memory-augmented tokens"
+  parameters: "7B"
+
+key_innovation: >
+  Inspired by cognitive science, introduces Cognition-Memory-Action framework with
+  Perceptual-Cognitive Memory Bank (PCMB). Working memory retrieves decision-relevant
+  entries from historical context, adaptively fuses with current tokens, and consolidates
+  by merging redundancies. Addresses non-Markovian nature of manipulation tasks.
+
+benchmarks:
+  simpler_env:
+    simpler_bridge: 71.9
+    simpler_fractal: 72.7
+  libero:
+    libero_5_suite_avg: 96.5
+
+eval_conditions:
+  simpler_env: "fine-tuned"
+  libero: "fine-tuned"
+
+tags: [7B, memory, temporal-context, long-horizon, ICLR-2026, open-source, diffusion-transformer]

@@ -1,0 +1,17 @@
+name: CALVIN
+full_name: "CALVIN: A Benchmark for Language-Conditioned Policy Learning for Long-Horizon Robot Manipulation Tasks"
+paper_url: https://arxiv.org/abs/2112.03227
+code_url: https://github.com/mees/calvin
+year: 2022
+venue: "RA-L 2022"
+categories:
+  calvin_abc_d:
+    description: "Train on environments A,B,C → test on unseen environment D"
+    chain_lengths: [1, 2, 3, 4, 5]
+metric: avg_len
+metric_description: "Average number of tasks completed in a chain of 5"
+higher_is_better: true
+evaluation_protocol: "1000 chains of 5 sequential language instructions, report avg completed"
+robot: "Franka Panda"
+environment: "simulation (PyBullet)"
+tags: [manipulation, language-conditioned, long-horizon, environment-generalization]

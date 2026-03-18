@@ -1,0 +1,40 @@
+name: Octo
+version: "1.0"
+organization: "UC Berkeley / Stanford / CMU / Google DeepMind"
+paper_url: https://arxiv.org/abs/2405.12213
+code_url: https://github.com/octo-models/octo
+date: "2024-05-20"
+venue: "RSS 2024"
+architecture:
+  backbone: "Transformer (custom encoder-decoder)"
+  llm: null
+  action_head: "diffusion policy"
+  action_space: "continuous"
+  parameters: "93M"
+  key_innovation: "Modular generalist policy with diffusion action head, supports variable observation/action spaces"
+training:
+  dataset: "Open X-Embodiment (800K+ trajectories)"
+  num_trajectories: 800000
+  compute: "TPU v4-128"
+benchmarks:
+  libero:
+    libero_spatial: 78.9
+    libero_object: 82.3
+    libero_goal: 65.4
+    libero_long: 42.1
+    source: "Table from Octo paper / community evaluation"
+    date_reported: "2024-05-20"
+    eval_condition: "fine-tuned"
+  simpler_env:
+    google_robot_pick_coke_can: 40.8
+    google_robot_move_near: 22.1
+    source: "SimplerEnv paper"
+    date_reported: "2024-05-20"
+    eval_condition: "zero-shot"
+  calvin:
+    calvin_abc_d_avg_len: 2.4
+    source: "Community evaluation"
+    date_reported: "2024-06-01"
+    eval_condition: "fine-tuned"
+open_source: true
+tags: [93M, diffusion, manipulation, open-source, generalist, modular]

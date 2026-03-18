@@ -1,0 +1,29 @@
+name: Vlaser
+full_name: "Vlaser: Vision-Language-Action Model with Synergistic Embodied Reasoning"
+organization: "USTC / Shanghai AI Lab / SJTU / Zhejiang University / NJU / Fudan / Tsinghua / NUS"
+date: "2025-10-14"
+paper_url: https://arxiv.org/abs/2510.11027
+code_url: https://github.com/OpenGVLab/Vlaser
+venue: "ICLR 2026"
+open_source: true
+
+architecture:
+  backbone: "InternVL3 (2B / 8B variants)"
+  action_head: "flow matching action expert"
+  parameters: "2B / 8B"
+
+key_innovation: >
+  Foundational VLA built on InternVL3 that integrates high-level embodied reasoning
+  with low-level control. Trained on curated Vlaser-6M dataset encompassing embodied
+  grounding, spatial reasoning, planning, and in-domain data. Achieves SOTA on 12
+  embodied reasoning benchmarks with 10% margin over prior work.
+
+benchmarks:
+  simpler_env:
+    simpler_bridge_widowx: 78.6
+    simpler_google_robot: 68.4
+
+eval_conditions:
+  simpler_env: "fine-tuned"
+
+tags: [2B, 8B, reasoning, embodied-reasoning, InternVL, ICLR-2026, open-source, Vlaser-6M]

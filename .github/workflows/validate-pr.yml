@@ -1,0 +1,26 @@
+name: Validate PR Data
+
+on:
+  pull_request:
+    paths:
+      - 'data/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate data integrity
+        run: python scripts/validate_data.py
+
+      - name: Build leaderboard (dry run)
+        run: python scripts/build_leaderboard.py

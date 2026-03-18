@@ -1,0 +1,35 @@
+name: CogACT
+version: "1.0"
+organization: "Microsoft Research / Tsinghua University"
+paper_url: https://arxiv.org/abs/2411.19650
+code_url: https://github.com/microsoft/CogACT
+date: "2024-11-29"
+venue: null
+architecture:
+  backbone: "SigLIP + DinoV2 (PrismaticVLM)"
+  llm: "Llama-2 7B"
+  action_head: "diffusion (continuous action generation)"
+  action_space: "continuous (7-DoF)"
+  parameters: "7B"
+  key_innovation: "Replaces autoregressive action tokenization with diffusion-based action generation on VLM backbone"
+training:
+  dataset: "Open X-Embodiment"
+  method: "VLM pre-training + diffusion action head fine-tuning"
+  compute: "32 A100 GPUs"
+benchmarks:
+  libero:
+    libero_spatial: 93.6
+    libero_object: 94.8
+    libero_goal: 88.4
+    libero_long: 66.8
+    source: "Table 1, CogACT paper"
+    date_reported: "2024-11-29"
+    eval_condition: "fine-tuned"
+  simpler_env:
+    google_robot_pick_coke_can: 78.4
+    google_robot_move_near: 62.3
+    source: "Table 3, CogACT paper"
+    date_reported: "2024-11-29"
+    eval_condition: "fine-tuned"
+open_source: true
+tags: [7B, diffusion, manipulation, open-source, VLM-backbone]

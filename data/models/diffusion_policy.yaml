@@ -1,0 +1,35 @@
+name: Diffusion Policy
+version: "1.0"
+organization: "Columbia University / MIT / TRI"
+paper_url: https://arxiv.org/abs/2303.04137
+code_url: https://github.com/real-stanford/diffusion_policy
+date: "2023-03-07"
+venue: "RSS 2023"
+architecture:
+  backbone: "ResNet-18 / Transformer"
+  llm: null
+  action_head: "diffusion (DDPM)"
+  action_space: "continuous"
+  parameters: "~25M"
+  key_innovation: "First to apply diffusion models to robot action generation; demonstrates multimodal action distributions"
+training:
+  dataset: "Task-specific demonstrations"
+  method: "Behavior cloning with diffusion denoising"
+  compute: "1 GPU per task"
+benchmarks:
+  libero:
+    libero_spatial: 78.4
+    libero_object: 80.6
+    libero_goal: 68.2
+    libero_long: 39.8
+    source: "Community evaluation / LIBERO paper"
+    date_reported: "2023-06-15"
+    eval_condition: "fine-tuned"
+  robotwin:
+    robotwin_easy: 18.4
+    robotwin_hard: 3.2
+    source: "RoboTwin 2.0 paper"
+    date_reported: "2025-06-24"
+    eval_condition: "fine-tuned"
+open_source: true
+tags: [25M, diffusion, manipulation, open-source, foundational, task-specific]

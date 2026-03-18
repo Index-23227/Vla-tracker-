@@ -1,0 +1,40 @@
+name: InstructVLA
+version: "1.0"
+organization: "Shanghai AI Lab (InternRobotics)"
+paper_url: https://arxiv.org/abs/2507.17520
+code_url: https://github.com/InternRobotics/InstructVLA
+date: "2025-07-23"
+venue: "ICLR 2026"
+architecture:
+  backbone: "InternVL2-based VLM"
+  llm: "InternLM2"
+  action_head: "flow matching"
+  action_space: "continuous"
+  parameters: "4B"
+  key_innovation: "Preserves pretrained VLM knowledge during VLA training via instruction-following formulation; 650K VLA-IT annotations"
+training:
+  dataset: "650K VLA instruction-tuning annotations + Open X-Embodiment"
+  method: "Instruction tuning preserving VLM capabilities"
+  compute: "32 A100 GPUs"
+benchmarks:
+  libero:
+    libero_spatial: 96.2
+    libero_object: 97.0
+    libero_goal: 92.4
+    libero_long: 76.8
+    source: "InstructVLA paper"
+    date_reported: "2025-07-23"
+    eval_condition: "fine-tuned"
+  calvin:
+    calvin_abc_d_avg_len: 4.4
+    source: "InstructVLA paper"
+    date_reported: "2025-07-23"
+    eval_condition: "fine-tuned"
+  simpler_env:
+    google_robot_pick_coke_can: 86.4
+    google_robot_move_near: 74.2
+    source: "InstructVLA paper"
+    date_reported: "2025-07-23"
+    eval_condition: "fine-tuned"
+open_source: true
+tags: [4B, flow-matching, instruction-tuning, VLM-preservation, open-source]
