@@ -5,7 +5,7 @@
 <!-- TODO: Replace with actual dashboard screenshot -->
 <!-- ![VLA-Tracker Dashboard](docs/assets/dashboard-screenshot.png) -->
 
-[![Models Tracked](https://img.shields.io/badge/models-25-blue)](data/models/)
+[![Models Tracked](https://img.shields.io/badge/models-32-blue)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-6-green)](data/benchmarks/)
 [![Weekly Analysis](https://img.shields.io/badge/analysis-AI%20powered-purple)](analysis/weekly/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -14,7 +14,7 @@
 
 ## What is this?
 
-VLA-Tracker automatically tracks **25 VLA models** across **6 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin, Meta-World, RLBench) and generates **AI-powered analysis** every week. Each model includes publication venue, evaluation conditions, and release date.
+VLA-Tracker automatically tracks **32 VLA models** (2023–2026) across **6 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin, Meta-World, RLBench) and generates **AI-powered analysis** every week. Each model includes publication venue (CoRL, RSS, ICML, ICLR, CVPR, etc.), evaluation conditions, and release date.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance over time** — see how SOTA evolves week by week
@@ -30,15 +30,15 @@ VLA-Tracker automatically tracks **25 VLA models** across **6 benchmarks** (LIBE
 | Rank | Model | Date | Venue | Action Head | Avg | Long | Eval |
 |------|-------|------|-------|-------------|-----|------|------|
 | 🥇 | pi0.5-Pro | Sep 2025 | — | flow matching | **93.3** | **82.4** | FT |
-| 🥈 | UniVLA | May 2025 | — | flow matching | 90.1 | 74.2 | FT |
-| 🥉 | OpenVLA-v2 | Feb 2025 | — | flow matching | 90.0 | 74.6 | FT |
-| 4 | TRA-VLA | Mar 2025 | — | flow matching + reasoning | 89.3 | 73.8 | FT |
-| 5 | pi0.5 | Feb 2025 | — | flow matching | 88.9 | 72.8 | FT |
-| 6 | SpatialVLA | Jan 2025 | ICML 2025 | autoregressive | 88.1 | 70.4 | FT |
-| 7 | DexVLA | Feb 2025 | — | diffusion (hierarchical) | 87.9 | 71.6 | FT |
-| 8 | OpenVLA-OFT | Jan 2025 | ICML 2025 | parallel decoding | 87.4 | 68.4 | FT |
+| 🥈 | LingBot-VLA | Jan 2026 | — | MoT + flow matching | 92.6 | 80.6 | FT |
+| 🥉 | UD-VLA | Nov 2025 | ICLR 2026 | joint diffusion | 91.8 | 78.4 | FT |
+| 4 | InstructVLA | Jul 2025 | ICLR 2026 | flow matching | 90.6 | 76.8 | FT |
+| 5 | UniVLA | May 2025 | RSS 2025 | flow matching | 90.1 | 74.2 | FT |
+| 6 | OpenVLA-v2 | Feb 2025 | — | flow matching | 90.0 | 74.6 | FT |
+| 7 | TRA-VLA | Mar 2025 | — | flow matching + reasoning | 89.3 | 73.8 | FT |
+| 8 | pi0.5 | Feb 2025 | CoRL 2025 | flow matching | 88.9 | 72.8 | FT |
 
-> **FT** = Fine-tuned, **ZS** = Zero-shot. Dashboard shows all 25 models across 6 benchmarks (LIBERO, CALVIN, SimplerEnv, RoboTwin).
+> **FT** = Fine-tuned, **ZS** = Zero-shot. Dashboard shows all 32 models across 6 benchmarks (LIBERO, CALVIN, SimplerEnv, RoboTwin).
 
 *Updated: 2026-03-18 · [Full leaderboard →](data/leaderboard.json)*
 

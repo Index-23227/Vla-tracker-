@@ -1,0 +1,41 @@
+name: LingBot-VLA
+version: "1.0"
+organization: "Ant Group / Robbyant"
+paper_url: https://arxiv.org/abs/2601.18692
+code_url: null
+date: "2026-01-30"
+venue: null
+architecture:
+  backbone: "Qwen2.5-VL"
+  llm: "Qwen2.5"
+  action_head: "Mixture of Transformers + flow matching"
+  action_space: "continuous"
+  parameters: "7B"
+  key_innovation: "Trained on 20,000 hours of real-world data from 9 robot platforms; depth distillation via LingBot-Depth"
+training:
+  dataset: "20K hours real-world data, 9 robot platforms"
+  method: "MoT action expert + flow matching"
+  compute: "128 A100 GPUs"
+benchmarks:
+  libero:
+    libero_spatial: 97.4
+    libero_object: 98.0
+    libero_goal: 94.2
+    libero_long: 80.6
+    source: "LingBot-VLA paper"
+    date_reported: "2026-01-30"
+    eval_condition: "fine-tuned"
+  calvin:
+    calvin_abc_d_avg_len: 4.5
+    source: "LingBot-VLA paper"
+    date_reported: "2026-01-30"
+    eval_condition: "fine-tuned"
+  robotwin:
+    robotwin_easy: 74.2
+    robotwin_hard: 48.8
+    source: "LingBot-VLA paper"
+    date_reported: "2026-01-30"
+    eval_condition: "fine-tuned"
+open_source: true
+open_source_note: "Apache-2.0 license"
+tags: [7B, MoT, flow-matching, large-scale-data, open-source, multi-embodiment]

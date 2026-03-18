@@ -1,0 +1,30 @@
+name: GR00T-N1
+version: "1.0"
+organization: "NVIDIA"
+paper_url: https://arxiv.org/abs/2503.14734
+code_url: null
+date: "2025-03-18"
+venue: null
+architecture:
+  backbone: "Eagle VLM (S2 system)"
+  llm: "Eagle VLM"
+  action_head: "diffusion transformer (S1 system)"
+  action_space: "continuous"
+  parameters: "2.2B"
+  key_innovation: "Dual-system architecture for humanoid robots; S2 (VLM at 7-9Hz) for high-level reasoning + S1 (diffusion at 120Hz) for motor control"
+training:
+  dataset: "Real robot data + synthetic (Isaac Sim)"
+  method: "Dual-system pre-training"
+  compute: "NVIDIA DGX"
+benchmarks:
+  libero:
+    libero_spatial: 93.2
+    libero_object: 94.8
+    libero_goal: 88.6
+    libero_long: 66.4
+    source: "GR00T-N1 technical report"
+    date_reported: "2025-03-18"
+    eval_condition: "fine-tuned"
+open_source: true
+open_source_note: "Open model weights"
+tags: [2.2B, diffusion-transformer, dual-system, humanoid, open-model]
