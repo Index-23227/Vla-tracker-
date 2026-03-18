@@ -1,0 +1,27 @@
+name: AVDC
+version: "1.0"
+organization: "CMU"
+paper_url: https://arxiv.org/abs/2310.16828
+code_url: https://github.com/flow-diffusion/AVDC
+date: "2023-10-25"
+venue: "NeurIPS 2023"
+architecture:
+  backbone: "Video Diffusion (flow generation)"
+  llm: null
+  action_head: "inverse dynamics from optical flow"
+  action_space: "continuous"
+  parameters: null
+  key_innovation: "Generates future video/flow conditioned on language, then extracts actions via flow-based inverse dynamics"
+training:
+  dataset: "Something-Something V2 + RLBench + real robot"
+  method: "Pre-train video flow diffusion on human videos, fine-tune on robot data"
+  compute: null
+benchmarks:
+  rlbench:
+    source: "Table 1, AVDC paper"
+    date_reported: "2023-10-25"
+    eval_condition: "fine-tuned"
+open_source: true
+model_type: "video"
+inference_hz: null
+tags: [video-diffusion, flow-prediction, inverse-dynamics, manipulation]
