@@ -58,6 +58,11 @@ def compute_libero_avg(benchmarks: dict) -> float | None:
     libero = benchmarks.get("libero")
     if not libero:
         return None
+    # Check for pre-computed suite average
+    suite_avg = libero.get("libero_5_suite_avg")
+    if suite_avg is not None and isinstance(suite_avg, (int, float)):
+        return round(suite_avg, 2)
+    # Compute from individual suite scores
     scores = []
     for key in ["libero_spatial", "libero_object", "libero_goal", "libero_long"]:
         val = libero.get(key)
@@ -100,6 +105,21 @@ def compute_robotwin_avg(benchmarks: dict) -> float | None:
     return None
 
 
+def compute_robotwin_v2_avg(benchmarks: dict) -> float | None:
+    robotwin_v2 = benchmarks.get("robotwin_v2")
+    if not robotwin_v2:
+        return None
+    # Use pre-computed average if available
+    avg = robotwin_v2.get("robotwin_v2_avg")
+    if avg is not None and isinstance(avg, (int, float)):
+        return round(avg, 2)
+    scores = [v for k, v in robotwin_v2.items()
+              if k not in METADATA_KEYS and isinstance(v, (int, float))]
+    if scores:
+        return round(sum(scores) / len(scores), 2)
+    return None
+
+
 def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> dict:
     leaderboard_entries = []
 
@@ -124,13 +144,19 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         model_benchmarks = model.get("benchmarks", {})
 
         # Process each benchmark
-        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin"]:
+        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin", "robotwin_v2"]:
             if bench_name in model_benchmarks:
                 scores, meta = extract_scores(model_benchmarks[bench_name])
                 if scores:
                     entry["benchmarks"][bench_name] = scores
                 if meta.get("eval_condition"):
                     entry["eval_conditions"][bench_name] = meta["eval_condition"]
+
+        # Also carry over eval_conditions from model YAML
+        model_eval = model.get("eval_conditions", {})
+        for bench_name, cond in model_eval.items():
+            if isinstance(cond, str):
+                entry["eval_conditions"][bench_name] = cond
 
         # Compute averages per benchmark
         libero_avg = compute_libero_avg(model_benchmarks)
@@ -148,6 +174,10 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         robotwin_avg = compute_robotwin_avg(model_benchmarks)
         if robotwin_avg is not None:
             entry["robotwin_avg"] = robotwin_avg
+
+        robotwin_v2_avg = compute_robotwin_v2_avg(model_benchmarks)
+        if robotwin_v2_avg is not None:
+            entry["robotwin_v2_avg"] = robotwin_v2_avg
 
         leaderboard_entries.append(entry)
 

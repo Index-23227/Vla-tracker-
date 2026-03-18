@@ -1,0 +1,138 @@
+name: Auto-Track New VLA Papers
+
+on:
+  schedule:
+    # Run every Wednesday and Saturday at 10:00 UTC
+    - cron: '0 10 * * 3,6'
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: 'How many days to look back for papers'
+        required: false
+        default: '14'
+      min_score:
+        description: 'Minimum relevance score threshold'
+        required: false
+        default: '3.0'
+      top_n:
+        description: 'Generate YAMLs for top N candidates'
+        required: false
+        default: '5'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  scan-and-propose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Scan arXiv for new VLA papers
+        id: scan
+        run: |
+          DAYS="${{ github.event.inputs.lookback_days || '14' }}"
+          MIN_SCORE="${{ github.event.inputs.min_score || '3.0' }}"
+          python scripts/scan_arxiv.py --days "$DAYS" --min-score "$MIN_SCORE"
+
+      - name: Generate draft model YAMLs
+        id: generate
+        run: |
+          TOP_N="${{ github.event.inputs.top_n || '5' }}"
+          python scripts/generate_model_yaml.py --top "$TOP_N" 2>&1 | tee /tmp/gen_output.txt
+
+          # Check if any new files were created
+          CREATED=$(grep -c "\[CREATED\]" /tmp/gen_output.txt || true)
+          echo "created=$CREATED" >> "$GITHUB_OUTPUT"
+
+      - name: Validate new data
+        if: steps.generate.outputs.created != '0'
+        run: python scripts/validate_data.py
+        continue-on-error: true
+
+      - name: Create summary
+        if: steps.generate.outputs.created != '0'
+        id: summary
+        run: |
+          python3 -c "
+          import json
+          with open('data/scan_candidates.json') as f:
+              data = json.load(f)
+          candidates = data.get('candidates', [])
+          lines = ['## New VLA Papers Detected\n']
+          lines.append(f'**Scan date:** {data[\"scan_date\"][:10]}')
+          lines.append(f'**Papers scanned:** {data[\"total_queried\"]}')
+          lines.append(f'**VLA-related:** {data[\"vla_related\"]}')
+          lines.append(f'**New candidates:** {data[\"new_candidates\"]}\n')
+          lines.append('### Top Candidates\n')
+          lines.append('| # | Model | arXiv | Score | Venue | Benchmarks |')
+          lines.append('|---|-------|-------|-------|-------|------------|')
+          for i, c in enumerate(candidates[:10]):
+              venue = c.get('venue') or '-'
+              benches = ', '.join(c.get('benchmarks_mentioned', [])) or '-'
+              lines.append(f'| {i+1} | **{c[\"model_name\"]}** | [{c[\"arxiv_id\"]}]({c[\"paper_url\"]}) | {c[\"relevance_score\"]} | {venue} | {benches} |')
+          lines.append('\n### Action Required\n')
+          lines.append('Draft YAML files have been auto-generated. Please:\n')
+          lines.append('1. Review each YAML file and fill in `TODO` fields')
+          lines.append('2. Add benchmark scores from the papers')
+          lines.append('3. Verify organization and architecture details')
+          lines.append('4. Run \`python scripts/build_leaderboard.py\` to rebuild rankings')
+          body = '\n'.join(lines)
+          # Write to file for PR body
+          with open('/tmp/pr_body.md', 'w') as f:
+              f.write(body)
+          print(body)
+          "
+
+      - name: Create Pull Request
+        if: steps.generate.outputs.created != '0'
+        run: |
+          BRANCH="auto-track/$(date +%Y-%m-%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create branch and commit
+          git checkout -b "$BRANCH"
+          git add data/models/*.yaml data/scan_candidates.json
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+
+          git commit -m "feat: auto-detect new VLA papers from arXiv scan
+
+          Auto-generated draft YAML files for newly detected VLA papers.
+          These drafts need human review to fill in benchmark scores and verify details."
+
+          git push origin "$BRANCH"
+
+          # Create PR
+          gh pr create \
+            --title "New VLA papers detected ($(date +%Y-%m-%d))" \
+            --body-file /tmp/pr_body.md \
+            --label "auto-track,needs-review" \
+            --base main \
+            --head "$BRANCH"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report no new papers
+        if: steps.generate.outputs.created == '0'
+        run: |
+          echo "No new VLA papers found in the last ${{ github.event.inputs.lookback_days || '14' }} days."
+          echo "All detected papers are already tracked."
+
+  # Notify scan results (optional - only on failures or interesting findings)
+  notify:
+    needs: scan-and-propose
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Report failure
+        run: echo "Auto-track workflow failed. Check logs for details."
