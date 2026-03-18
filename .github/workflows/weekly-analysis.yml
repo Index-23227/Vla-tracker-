@@ -1,0 +1,67 @@
+name: Weekly Analysis & Deploy
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday 9AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-leaderboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate data
+        run: python scripts/validate_data.py
+
+      - name: Build leaderboard
+        run: python scripts/build_leaderboard.py
+
+      - name: Copy leaderboard to dashboard
+        run: cp data/leaderboard.json dashboard/src/data/leaderboard.json
+
+      - name: Commit leaderboard update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/leaderboard.json dashboard/src/data/leaderboard.json
+          git diff --staged --quiet || git commit -m "chore: update leaderboard [automated]"
+          git push
+
+  deploy-dashboard:
+    needs: build-leaderboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install and build dashboard
+        working-directory: dashboard
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dashboard/dist

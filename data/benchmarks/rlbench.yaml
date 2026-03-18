@@ -1,0 +1,18 @@
+name: RLBench
+full_name: "RLBench: The Robot Learning Benchmark"
+paper_url: https://arxiv.org/abs/1909.12271
+code_url: https://github.com/stepjam/RLBench
+year: 2020
+categories:
+  rlbench_18tasks:
+    description: "18-task multi-task evaluation"
+    num_tasks: 18
+  rlbench_single:
+    description: "Single-task evaluation per task"
+metric: success_rate
+metric_unit: "%"
+higher_is_better: true
+evaluation_protocol: "25 episodes per task, multi-view observation"
+robot: "Franka Panda"
+environment: "simulation (CoppeliaSim / PyRep)"
+tags: [manipulation, multi-task, 3d-observation, language-conditioned]

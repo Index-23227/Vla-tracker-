@@ -1,0 +1,25 @@
+name: Meta-World
+full_name: "Meta-World: A Benchmark and Evaluation for Multi-Task and Meta Reinforcement Learning"
+paper_url: https://arxiv.org/abs/1910.10897
+code_url: https://github.com/Farama-Foundation/Metaworld
+year: 2020
+categories:
+  ml10:
+    description: "Multi-task learning with 10 tasks"
+    num_tasks: 10
+  ml45:
+    description: "Multi-task learning with 45 tasks"
+    num_tasks: 45
+  mt10:
+    description: "Meta-testing with 10 tasks"
+    num_tasks: 10
+  mt50:
+    description: "Meta-testing with 50 tasks"
+    num_tasks: 50
+metric: success_rate
+metric_unit: "%"
+higher_is_better: true
+evaluation_protocol: "Average success rate across tasks"
+robot: "Sawyer"
+environment: "simulation (MuJoCo)"
+tags: [manipulation, multi-task, meta-learning, dexterity]

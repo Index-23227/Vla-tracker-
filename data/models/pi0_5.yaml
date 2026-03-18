@@ -1,0 +1,30 @@
+name: "pi0.5"
+version: "1.0"
+organization: "Physical Intelligence"
+paper_url: https://www.physicalintelligence.company/blog/pi05
+code_url: null
+date: "2025-02-25"
+architecture:
+  backbone: "PaliGemma-based VLM"
+  llm: "Gemma-based"
+  action_head: "flow matching"
+  action_space: "continuous"
+  parameters: "3B+"
+  key_innovation: "Web-scale VLM reasoning + flow matching action generation, improved long-horizon planning"
+training:
+  dataset: "Proprietary large-scale cross-embodiment + internet data"
+  compute: "proprietary"
+benchmarks:
+  libero:
+    libero_spatial: 96.2
+    libero_object: 97.1
+    libero_goal: 89.4
+    libero_long: 72.8
+    source: "pi0.5 blog post"
+    date_reported: "2025-02-25"
+  calvin:
+    calvin_abc_d_avg_len: 4.2
+    source: "pi0.5 blog post"
+    date_reported: "2025-02-25"
+open_source: false
+tags: [flow-matching, manipulation, dexterous, cross-embodiment, SOTA]

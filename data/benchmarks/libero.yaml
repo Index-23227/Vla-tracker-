@@ -1,0 +1,25 @@
+name: LIBERO
+full_name: "LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning"
+paper_url: https://arxiv.org/abs/2306.03310
+code_url: https://github.com/Lifelong-Robot-Learning/LIBERO
+year: 2023
+categories:
+  libero_spatial:
+    description: "Spatial relationship understanding"
+    num_tasks: 10
+  libero_object:
+    description: "Object generalization"
+    num_tasks: 10
+  libero_goal:
+    description: "Goal specification"
+    num_tasks: 10
+  libero_long:
+    description: "Long-horizon tasks (10 sequential steps)"
+    num_tasks: 10
+metric: success_rate
+metric_unit: "%"
+higher_is_better: true
+evaluation_protocol: "50 rollouts per task, average across 10 tasks per suite"
+robot: "Franka Panda"
+environment: "simulation (robosuite)"
+tags: [manipulation, tabletop, long-horizon, generalization]

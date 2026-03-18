@@ -1,0 +1,32 @@
+name: OpenVLA-OFT
+version: "1.0"
+organization: "Stanford / UC Berkeley / TRI"
+paper_url: https://arxiv.org/abs/2501.16677
+code_url: https://github.com/moojink/openvla-oft
+date: "2025-01-28"
+architecture:
+  backbone: "PrismaticVLM (SigLIP + DinoV2)"
+  llm: "Llama-2 7B"
+  action_head: "parallel decoding + continuous actions"
+  action_space: "continuous (7-DoF)"
+  parameters: "7B"
+  key_changes: "Removes autoregressive action tokenization, adds action chunking, fine-tuning with LoRA"
+training:
+  dataset: "Open X-Embodiment + task-specific fine-tuning"
+  method: "LoRA fine-tuning"
+  compute: "8 A100 GPUs"
+benchmarks:
+  libero:
+    libero_spatial: 94.8
+    libero_object: 95.2
+    libero_goal: 91.0
+    libero_long: 68.4
+    source: "Table 1, OFT paper"
+    date_reported: "2025-01-28"
+  simpler_env:
+    google_robot_pick_coke_can: 82.0
+    google_robot_move_near: 68.5
+    source: "Table 2, OFT paper"
+    date_reported: "2025-01-28"
+open_source: true
+tags: [7B, parallel-decoding, LoRA, manipulation, open-source]

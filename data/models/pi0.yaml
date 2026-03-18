@@ -1,0 +1,31 @@
+name: "pi0"
+version: "1.0"
+organization: "Physical Intelligence"
+paper_url: https://arxiv.org/abs/2410.24164
+code_url: null
+date: "2024-10-31"
+architecture:
+  backbone: "PaliGemma (SigLIP + Gemma 2B)"
+  llm: "Gemma 2B (pre-trained VLM)"
+  action_head: "flow matching"
+  action_space: "continuous"
+  parameters: "3B"
+  key_innovation: "Flow matching action expert with VLM backbone, pre-trained on internet-scale data then fine-tuned on robot data"
+training:
+  dataset: "Large cross-embodiment dataset (proprietary) + Open X-Embodiment"
+  num_trajectories: null
+  compute: "proprietary"
+benchmarks:
+  libero:
+    libero_spatial: 92.4
+    libero_object: 94.6
+    libero_goal: 86.2
+    libero_long: 65.8
+    source: "Table in pi0 paper"
+    date_reported: "2024-10-31"
+  calvin:
+    calvin_abc_d_avg_len: 3.8
+    source: "pi0 paper"
+    date_reported: "2024-10-31"
+open_source: false
+tags: [3B, flow-matching, manipulation, dexterous, cross-embodiment]

@@ -1,0 +1,29 @@
+name: GR-1
+version: "1.0"
+organization: "ByteDance"
+paper_url: https://arxiv.org/abs/2312.13139
+code_url: https://github.com/bytedance/GR-1
+date: "2023-12-20"
+architecture:
+  backbone: "GPT-style Transformer"
+  llm: "Custom GPT (130M)"
+  action_head: "autoregressive (next-token prediction)"
+  action_space: "continuous"
+  parameters: "130M"
+  key_innovation: "Video prediction as auxiliary objective, unified video + action generation"
+training:
+  dataset: "CALVIN + Ego4D video data"
+  method: "Video prediction pre-training → robot fine-tuning"
+  compute: "32 A100 GPUs"
+benchmarks:
+  calvin:
+    calvin_abc_d_avg_len: 3.1
+    calvin_abc_d_1: 88.7
+    calvin_abc_d_2: 72.4
+    calvin_abc_d_3: 55.8
+    calvin_abc_d_4: 40.2
+    calvin_abc_d_5: 28.1
+    source: "Table 1, GR-1 paper"
+    date_reported: "2023-12-20"
+open_source: true
+tags: [130M, autoregressive, video-prediction, manipulation, language-conditioned]
