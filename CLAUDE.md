@@ -5,14 +5,66 @@
 VLA-Tracker tracks Vision-Language-Action (VLA) models and their benchmark scores.
 Data lives in YAML files, gets compiled to `leaderboard.json`, and is displayed via a React dashboard.
 
+## Quick Start (Agent Onboarding)
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+cd dashboard && npm install && cd ..
+
+# 2. Build leaderboard from YAML sources
+python scripts/build_leaderboard.py
+
+# 3. Validate everything
+python scripts/validate_data.py       # Data integrity
+python scripts/validate_counts.py     # Count consistency
+
+# 4. (Optional) Start dashboard dev server
+cd dashboard && npm run dev
+```
+
 ## Architecture
 
 ```
-data/models/*.yaml       → Source of truth (one YAML per model)
-data/benchmarks/*.yaml   → Benchmark definitions
-scripts/build_leaderboard.py → Compiles YAMLs → data/leaderboard.json
-dashboard/               → React + Vite app that reads leaderboard.json
+data/models/*.yaml              → Source of truth (one YAML per model)
+data/benchmarks/*.yaml          → Benchmark definitions
+schemas/model.schema.json       → JSON Schema for model YAMLs
+schemas/benchmark.schema.json   → JSON Schema for benchmark YAMLs
+scripts/build_leaderboard.py    → Compiles YAMLs → data/leaderboard.json
+dashboard/                      → React + Vite app that reads leaderboard.json
 ```
+
+## Data Schemas
+
+Model and benchmark YAML files have formal JSON Schemas in `schemas/`. Use them for:
+- **Validation**: Verify YAML structure before committing
+- **Generation**: Agents can read the schema to produce correct YAML without guessing
+- **IDE support**: Auto-completion and inline validation in editors that support JSON Schema
+
+### Model YAML Required Fields
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Model identifier (matches filename) |
+| `organization` | string | Lab/company name |
+| `date` | string | `YYYY-MM-DD` publication date |
+| `architecture` | object | Must contain `action_head` |
+| `benchmarks` | object | Keyed by benchmark name (can be `{}`) |
+
+### Model YAML Optional Fields
+`full_name`, `paper_url`, `code_url`, `venue`, `open_source` (bool), `model_type`, `inference_hz`, `tags` (array), `training`, `eval_conditions`
+
+See `schemas/model.schema.json` for the complete specification with types, constraints, and examples.
+
+## Scripts Reference
+
+| Script | Purpose | Key Arguments |
+|--------|---------|---------------|
+| `build_leaderboard.py` | Compile YAMLs → JSON | (none) |
+| `validate_data.py` | Check YAML integrity | (none) |
+| `validate_counts.py` | Check doc count sync | (none) |
+| `generate_model_yaml.py` | Create YAML stubs | `--input FILE`, `--top N`, `--dry-run` |
+| `scan_arxiv.py` | Find new VLA papers | `--days N`, `--source {arxiv,s2,auto}`, `--min-score F` |
+| `restore_missing_models.py` | Recover from backup | `<path_to_old_leaderboard.json>` |
 
 ## Critical Rules: Adding or Removing Models
 
@@ -56,6 +108,12 @@ Keep the table sorted by LIBERO Avg descending.
 | VLABench    | `vlabench_avg`      | `benchmarks.vlabench` |
 | RoboCasa    | `robocasa_avg`      | `benchmarks.robocasa` |
 
+### Average Computation Rules
+- **LIBERO**: `libero_5_suite_avg` → mean of 4 suites → `libero_avg` fallback
+- **CALVIN**: `calvin_abc_d_avg_len` → `calvin_avg` fallback
+- **Others**: mean of all numeric fields (excluding `source`, `date_reported`, `eval_condition`)
+- **Ranking**: Primary sort by `libero_avg` descending; models without LIBERO sorted to end
+
 ## Dashboard Hardcoded Values
 
 These values in the dashboard should stay consistent with the data:
@@ -68,13 +126,14 @@ These values in the dashboard should stay consistent with the data:
 
 ### Add a new model
 ```bash
-# 1. Create YAML from template
+# 1. Create YAML from template (or manually using schemas/model.schema.json as reference)
 python scripts/generate_model_yaml.py --top 1
 
 # 2. Edit the generated YAML with actual scores
 
 # 3. Rebuild & validate
 python scripts/build_leaderboard.py
+python scripts/validate_data.py
 python scripts/validate_counts.py
 
 # 4. Update README counts + leaderboard table
@@ -85,6 +144,24 @@ python scripts/validate_counts.py
 python scripts/scan_arxiv.py --days 7
 python scripts/generate_model_yaml.py --input data/scan_candidates.json --top 10
 ```
+
+### Full rebuild from scratch
+```bash
+pip install -r requirements.txt
+python scripts/build_leaderboard.py
+python scripts/validate_data.py
+python scripts/validate_counts.py
+```
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `leaderboard.json` has wrong model count | Run `python scripts/build_leaderboard.py` |
+| `validate_counts.py` reports mismatches | Update hardcoded counts in README.md / blueprint |
+| YAML parse errors | Check 2-space indent, no tabs, scores are numbers not strings |
+| Model missing from dashboard | Verify YAML exists, rebuild leaderboard, check dashboard reads updated JSON |
+| arXiv scan returns 0 results | Check internet access; try `--source arxiv` or `--source s2` |
 
 ## Code Style
 - Python: standard library preferred, type hints used
