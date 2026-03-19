@@ -2,12 +2,13 @@ import { useState, useMemo } from 'react'
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ZAxis,
 } from 'recharts'
+import { BENCHMARK_LIST } from '../constants/benchmarks'
 
-const BENCH_OPTIONS = [
-  { key: 'libero_avg', label: 'LIBERO', max: 100, unit: '%' },
-  { key: 'calvin_avg', label: 'CALVIN', max: 5, unit: 'avg len' },
-  { key: 'robotwin_v1_avg', label: 'RoboTwin v1', max: 100, unit: '%' },
-]
+// Derive benchmark options from centralized definitions, adding unit info
+const BENCH_OPTIONS = BENCHMARK_LIST.map(b => ({
+  ...b,
+  unit: b.max === 5 ? 'avg len' : '%',
+}))
 
 const AXIS_OPTIONS = [
   { key: 'params', label: 'Parameters' },

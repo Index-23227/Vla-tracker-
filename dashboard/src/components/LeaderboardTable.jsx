@@ -227,8 +227,11 @@ export default function LeaderboardTable({ models, onModelClick }) {
                   </td>
                   <td className="px-3 py-3 text-right text-xs tabular-nums hidden lg:table-cell">
                     {m.inference_hz ? (
-                      <span className={`font-medium ${m.inference_hz >= 30 ? 'text-emerald-400' : m.inference_hz >= 10 ? 'text-amber-400' : 'text-red-400'}`}>
-                        {m.inference_hz}
+                      <span
+                        className={`font-medium ${m.inference_hz >= 30 ? 'text-emerald-400' : m.inference_hz >= 10 ? 'text-amber-400' : 'text-red-400'}`}
+                        title={m.inference_hz >= 30 ? 'Fast (≥30Hz)' : m.inference_hz >= 10 ? 'Medium (≥10Hz)' : 'Slow (<10Hz)'}
+                      >
+                        {m.inference_hz}{m.inference_hz >= 30 ? '↑' : m.inference_hz < 10 ? '↓' : ''}
                       </span>
                     ) : (
                       <span className="text-zinc-600">—</span>
