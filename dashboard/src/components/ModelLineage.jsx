@@ -266,6 +266,8 @@ function TreeNode({ node, family, depth, models, childCount, isCollapsed, onTogg
   const [showPopover, setShowPopover] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const modelData = models.find(m => m.name === node.id)
+  const displayDate = (modelData?.date || node.date || '').slice(0, 7)
+  const displayParams = modelData?.architecture?.parameters || node.params
   const hasScore = modelData?.libero_avg != null
   const hoverTimeout = useRef(null)
   const nodeRef = useRef(null)
@@ -327,9 +329,9 @@ function TreeNode({ node, family, depth, models, childCount, isCollapsed, onTogg
                 )}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[10px] text-zinc-500">{node.date}</span>
+                <span className="text-[10px] text-zinc-500">{displayDate}</span>
                 <span className="text-[10px] text-zinc-600">·</span>
-                <span className="text-[10px] text-zinc-500">{node.params}</span>
+                <span className="text-[10px] text-zinc-500">{displayParams}</span>
                 {hasScore && (
                   <>
                     <span className="text-[10px] text-zinc-600">·</span>
