@@ -267,7 +267,9 @@ function TreeNode({ node, family, depth, models, childCount, isCollapsed, onTogg
   const [showTooltip, setShowTooltip] = useState(false)
   const modelData = models.find(m => m.name === node.id)
   const displayDate = (modelData?.date || node.date || '').slice(0, 7)
-  const displayParams = modelData?.architecture?.parameters || node.params
+  const rawParams = modelData?.architecture?.parameters
+  // Use leaderboard data only if it's a short size label; fall back to curated node.params for verbose descriptions
+  const displayParams = rawParams && rawParams.length <= 10 ? rawParams : node.params
   const hasScore = modelData?.libero_avg != null
   const hoverTimeout = useRef(null)
   const nodeRef = useRef(null)
