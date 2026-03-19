@@ -374,11 +374,11 @@ See [CONTRIBUTING.md](link) — we welcome:
 
 | Benchmark | Tasks | Models | Focus |
 |-----------|-------|--------|-------|
-| LIBERO | 4 suites | 25+ | Manipulation generalization |
-| CALVIN | ABC→D | 20+ | Long-horizon, language |
-| Meta-World | ML-10/45 | 15+ | Multi-task dexterity |
-| SimplerEnv | 4 tasks | 18+ | Sim-to-real transfer |
-| RLBench | 18 tasks | 12+ | Diverse manipulation |
+| LIBERO | 4 suites | 40 | Manipulation generalization |
+| CALVIN | ABC→D | 22 | Long-horizon, language |
+| Meta-World | ML-10/45 | - | Multi-task dexterity |
+| SimplerEnv | 4 tasks | 17 | Sim-to-real transfer |
+| RLBench | 18 tasks | 3 | Diverse manipulation |
 
 ## 🤖 How AI Analysis Works
 
@@ -538,7 +538,7 @@ Month 12:  2000-5000 stars (VLA 분야 "필수 참고" 정착)
   - 한국 AI 커뮤니티 포스트
 
 ### Week 5-8: 확장 & 마케팅
-- [ ] 모델 수를 10 → 25+로 확장
+- [ ] 모델 수를 10 → 84로 확장
 - [ ] Reddit r/MachineLearning "Show" 포스트
 - [ ] Twitter/X 스레드 작성
 - [ ] Hacker News "Show HN" 시도
