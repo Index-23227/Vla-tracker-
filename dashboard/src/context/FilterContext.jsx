@@ -83,10 +83,11 @@ export function FilterProvider({ children, allModels }) {
         if (cat !== filters.actionHead) return false
       }
 
-      // Parameter range
+      // Parameter range — exclude models with unparseable params when filter is active
       const paramNum = parseParamNumber(m.architecture?.parameters)
-      if (filters.paramMin && paramNum !== null && paramNum < parseFloat(filters.paramMin)) return false
-      if (filters.paramMax && paramNum !== null && paramNum > parseFloat(filters.paramMax)) return false
+      if ((filters.paramMin || filters.paramMax) && paramNum === null) return false
+      if (filters.paramMin && paramNum < parseFloat(filters.paramMin)) return false
+      if (filters.paramMax && paramNum > parseFloat(filters.paramMax)) return false
 
       // Date range
       if (filters.dateFrom && m.date && m.date < filters.dateFrom) return false

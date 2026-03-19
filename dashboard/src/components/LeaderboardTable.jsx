@@ -19,9 +19,9 @@ function getActionColor(actionHead) {
 
 function formatDate(dateStr) {
   if (!dateStr) return '—'
-  const d = new Date(dateStr)
+  const d = new Date(dateStr + 'T00:00:00Z')
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  return `${months[d.getMonth()]} ${d.getFullYear()}`
+  return `${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`
 }
 
 function getEvalStyle(model, benchKey) {
@@ -46,7 +46,7 @@ export default function LeaderboardTable({ models, onModelClick }) {
 
   const sorted = useMemo(() => {
     return [...models]
-      .filter(m => m.benchmarks?.[activeBench] || typeFilter === m.model_type)
+      .filter(m => m.benchmarks?.[activeBench])
       .filter(m => typeFilter === 'all' || m.model_type === typeFilter)
       .map(m => {
         const scores = m.benchmarks?.[activeBench] || {}
