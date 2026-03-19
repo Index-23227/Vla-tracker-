@@ -4,17 +4,9 @@ import {
   ScatterChart, Scatter, ZAxis, Cell,
   PieChart, Pie,
 } from 'recharts'
+import { BENCHMARK_LIST, ACTION_HEAD_COLORS, COLORS, heatColor } from '../constants/benchmarks'
 
-const ACTION_HEAD_COLORS = {
-  'flow matching': '#7F77DD',
-  'autoregressive': '#1D9E75',
-  'diffusion': '#D85A30',
-  'diffusion transformer': '#D4537E',
-  'chain-of-thought': '#F39C12',
-  'unknown': '#71717a',
-}
-
-const PIE_COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#3498DB', '#F39C12', '#E74C3C', '#71717a']
+const PIE_COLORS = COLORS
 
 function parseParams(paramStr) {
   if (!paramStr || paramStr === 'unknown') return null
@@ -28,27 +20,7 @@ function parseParams(paramStr) {
   return num // assume M
 }
 
-const BENCH_KEYS = [
-  { key: 'libero_avg', label: 'LIBERO', max: 100 },
-  { key: 'calvin_avg', label: 'CALVIN', max: 5 },
-  { key: 'simpler_avg', label: 'SimplerEnv', max: 100 },
-  { key: 'robotwin_v1_avg', label: 'RTwin v1', max: 100 },
-  { key: 'robotwin_v2_avg', label: 'RTwin v2', max: 100 },
-  { key: 'rlbench_avg', label: 'RLBench', max: 100 },
-  { key: 'maniskill_avg', label: 'ManiSkill', max: 100 },
-  { key: 'vlabench_avg', label: 'VLABench', max: 100 },
-  { key: 'robocasa_avg', label: 'RoboCasa', max: 100 },
-]
-
-function heatColor(value, max) {
-  if (value == null) return 'transparent'
-  const pct = Math.min(value / max, 1)
-  if (pct >= 0.9) return 'rgba(16, 185, 129, 0.7)'  // emerald
-  if (pct >= 0.7) return 'rgba(16, 185, 129, 0.4)'
-  if (pct >= 0.5) return 'rgba(250, 204, 21, 0.4)'   // yellow
-  if (pct >= 0.3) return 'rgba(249, 115, 22, 0.4)'   // orange
-  return 'rgba(239, 68, 68, 0.4)'                     // red
-}
+const BENCH_KEYS = BENCHMARK_LIST
 
 export default function AnalysisDashboard({ models }) {
   // --- Architecture Distribution ---
@@ -114,18 +86,7 @@ export default function AnalysisDashboard({ models }) {
 
   // --- Benchmark Coverage ---
   const benchCoverage = useMemo(() => {
-    const benches = [
-      { key: 'libero_avg', label: 'LIBERO' },
-      { key: 'calvin_avg', label: 'CALVIN' },
-      { key: 'simpler_avg', label: 'SimplerEnv' },
-      { key: 'robotwin_v1_avg', label: 'RoboTwin v1' },
-      { key: 'robotwin_v2_avg', label: 'RoboTwin v2' },
-      { key: 'rlbench_avg', label: 'RLBench' },
-      { key: 'maniskill_avg', label: 'ManiSkill' },
-      { key: 'vlabench_avg', label: 'VLABench' },
-      { key: 'robocasa_avg', label: 'RoboCasa' },
-    ]
-    return benches.map(b => ({
+    return BENCH_KEYS.map(b => ({
       name: b.label,
       count: models.filter(m => m[b.key] != null).length,
     }))
@@ -136,7 +97,7 @@ export default function AnalysisDashboard({ models }) {
     return [...models]
       .filter(m => BENCH_KEYS.some(b => m[b.key] != null))
       .sort((a, b) => (b.libero_avg ?? -1) - (a.libero_avg ?? -1))
-      .slice(0, 40)
+      .slice(0, Math.min(40, models.length))
   }, [models])
 
   // --- Action Head vs Performance ---
@@ -176,6 +137,59 @@ export default function AnalysisDashboard({ models }) {
     })
     return buckets
   }, [models])
+
+  // --- VLM Backbone Distribution ---
+  const backboneDist = useMemo(() => {
+    const counts = {}
+    models.forEach(m => {
+      const bb = m.architecture?.backbone || ''
+      if (!bb) { counts['unknown'] = (counts['unknown'] || 0) + 1; return }
+      // Normalize to family names
+      const lower = bb.toLowerCase()
+      let key
+      if (lower.includes('prismatic') || (lower.includes('siglip') && lower.includes('dino'))) key = 'PrismaticVLM'
+      else if (lower.includes('paligemma') || (lower.includes('siglip') && lower.includes('gemma'))) key = 'PaliGemma'
+      else if (lower.includes('internvl') || lower.includes('internvit')) key = 'InternVL'
+      else if (lower.includes('qwen')) key = 'Qwen-VL'
+      else if (lower.includes('eagle') || lower.includes('cosmos')) key = 'NVIDIA VLM'
+      else if (lower.includes('siglip') && !lower.includes('dino') && !lower.includes('gemma')) key = 'SigLIP'
+      else if (lower.includes('clip')) key = 'CLIP'
+      else if (lower.includes('diffusion') || lower.includes('video')) key = 'Video/Diffusion'
+      else key = 'Other'
+      counts[key] = (counts[key] || 0) + 1
+    })
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value]) => ({ name, value }))
+  }, [models])
+
+  const BACKBONE_COLORS = {
+    'PrismaticVLM': '#8b5cf6', 'PaliGemma': '#06b6d4', 'InternVL': '#f59e0b',
+    'Qwen-VL': '#ef4444', 'NVIDIA VLM': '#22c55e', 'SigLIP': '#ec4899',
+    'CLIP': '#3b82f6', 'Video/Diffusion': '#f97316', 'Other': '#6b7280', 'unknown': '#404040',
+  }
+
+  // --- Eval Condition Distribution ---
+  const evalCondDist = useMemo(() => {
+    const counts = { 'Fine-tuned': 0, 'RL-trained': 0, 'Zero-shot': 0, 'Unknown': 0 }
+    models.forEach(m => {
+      const conds = m.eval_conditions || {}
+      const vals = Object.values(conds)
+      if (vals.length === 0) { counts['Unknown']++; return }
+      const hasRL = vals.some(v => /rl|grpo|reinforcement/i.test(v))
+      const hasZS = vals.some(v => /zero.?shot/i.test(v))
+      if (hasRL) counts['RL-trained']++
+      else if (hasZS) counts['Zero-shot']++
+      else counts['Fine-tuned']++
+    })
+    return Object.entries(counts)
+      .filter(([, v]) => v > 0)
+      .map(([name, value]) => ({ name, value }))
+  }, [models])
+
+  const EVAL_COND_COLORS = {
+    'Fine-tuned': '#3b82f6', 'RL-trained': '#f43f5e', 'Zero-shot': '#f59e0b', 'Unknown': '#404040',
+  }
 
   // --- Venue Distribution ---
   const venueDist = useMemo(() => {
@@ -273,6 +287,69 @@ export default function AnalysisDashboard({ models }) {
               />
               <Bar dataKey="count" fill="#7F77DD" radius={[0, 4, 4, 0]} barSize={14} />
             </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Row 1b: VLM Backbone + Eval Condition */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* VLM Backbone Distribution */}
+        <div className="border border-zinc-800 rounded-xl p-4">
+          <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            VLM Backbone Distribution
+          </h4>
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie
+                data={backboneDist}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={70}
+                innerRadius={35}
+                strokeWidth={0}
+                label={({ name, value }) => `${name} (${value})`}
+                labelLine={false}
+              >
+                {backboneDist.map((entry) => (
+                  <Cell key={entry.name} fill={BACKBONE_COLORS[entry.name] || '#6b7280'} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #3f3f46', backgroundColor: '#18181b', color: '#e5e5e5' }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Eval Condition Distribution */}
+        <div className="border border-zinc-800 rounded-xl p-4">
+          <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            Evaluation Condition Distribution
+          </h4>
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie
+                data={evalCondDist}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={70}
+                innerRadius={35}
+                strokeWidth={0}
+                label={({ name, value }) => `${name} (${value})`}
+                labelLine={false}
+              >
+                {evalCondDist.map((entry) => (
+                  <Cell key={entry.name} fill={EVAL_COND_COLORS[entry.name] || '#6b7280'} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #3f3f46', backgroundColor: '#18181b', color: '#e5e5e5' }}
+              />
+            </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -407,7 +484,7 @@ export default function AnalysisDashboard({ models }) {
         <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">
           Benchmark Coverage Heatmap
         </h4>
-        <p className="text-[10px] text-zinc-600 mb-3">Top 40 models by LIBERO score · Color intensity = normalized performance</p>
+        <p className="text-[10px] text-zinc-600 mb-3">Top {heatmapModels.length} models by LIBERO score · Color intensity = normalized performance</p>
         <div className="overflow-x-auto">
           <table className="w-full text-[10px]">
             <thead>

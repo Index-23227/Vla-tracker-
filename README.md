@@ -3,7 +3,7 @@
 ### Real-time benchmark tracking for Vision-Language-Action models
 
 [![Models Tracked](https://img.shields.io/badge/models-73-blue)](data/models/)
-[![Benchmarks](https://img.shields.io/badge/benchmarks-9-green)](data/benchmarks/)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-10-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **73 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **73 VLA models** (2023-2026) across **10 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa, Real-World). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -25,7 +25,7 @@ VLA-Tracker tracks **73 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 
 | Rank | Model | Date | Venue | Action Head | Avg | Eval |
 |------|-------|------|-------|-------------|-----|------|
-| 1 | **PLD** | Nov 2025 | ICLR 2026 | residual RL (probe → learn → distill) | **99.0** | FT |
+| 1 | **PLD** | Oct 2025 | ICLR 2026 | residual RL (probe → learn → distill) | **99.0** | FT |
 | 2 | **SimpleVLA-RL** | Sep 2025 | ICLR 2026 | autoregressive + GRPO RL | **98.8** | FT |
 | 3 | **X-VLA** | Oct 2025 | ICLR 2026 | autoregressive w/ soft prompts | **97.8** | FT |
 | 4 | Fast-WAM | Mar 2026 | - | flow matching + video DiT | 97.6 | FT |
@@ -33,7 +33,7 @@ VLA-Tracker tracks **73 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 | 6 | DreamVLA | Jul 2025 | - | inverse dynamics from world knowledge | 97.2 | FT |
 | 7 | AtomicVLA | Mar 2026 | CVPR 2026 | flow matching + SG-MoE | 96.6 | FT |
 | 8 | MemoryVLA | Aug 2025 | ICLR 2026 | diffusion transformer | 96.5 | FT |
-| 9 | dVLA | Sep 2025 | - | discrete diffusion + multimodal CoT | 96.4 | FT |
+| 9 | dVLA | Sep 2025 | ICLR 2026 | discrete diffusion + multimodal CoT | 96.4 | FT |
 | 10 | GST-VLA | Mar 2026 | - | flow matching + Depth-Aware CoT | 96.3 | FT |
 
 > **FT** = Fine-tuned | [Full leaderboard (JSON) ->](data/leaderboard.json)
@@ -52,7 +52,7 @@ VLA-Tracker tracks **73 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 <details>
 <summary>73 models (click to expand)</summary>
 
-3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, pi0, pi0.5, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, SpatialVLA, SuSIE, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
+3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, pi0, pi0.5, pi*0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, SpatialVLA, SuSIE, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
 
 </details>
 
@@ -107,6 +107,9 @@ python scripts/generate_model_yaml.py --top 5
 | [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 7 | Dual-arm, bimanual | CVPR 2025 Highlight |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
+| [ManiSkill](data/benchmarks/maniskill.yaml) | Various | 0 | Generalizable manipulation | ICLR 2024 |
+| [VLABench](data/benchmarks/vlabench.yaml) | Various | 0 | VLA evaluation | 2024 |
+| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 0 | Home robot tasks | RSS 2024 |
 
 ### LIBERO Leaderboard (35 models)
 
@@ -162,7 +165,7 @@ Three GitHub Actions workflows keep the data up to date:
 
 ```
 ├── data/
-│   ├── benchmarks/          # Benchmark definitions (6 YAML files)
+│   ├── benchmarks/          # Benchmark definitions (10 YAML files)
 │   ├── models/              # Model data with benchmark scores (73 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results

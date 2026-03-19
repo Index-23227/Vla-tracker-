@@ -11,6 +11,8 @@ venue: null
 open_source: true
 
 architecture:
+  backbone: "PrismaticVLM (SigLIP + DinoV2)"
+  llm: "Llama-2 7B"
   action_head: "autoregressive"
   parameters: "7B"
 
@@ -26,6 +28,7 @@ benchmarks:
     libero_goal: 95.2
     libero_long: 96.9
 
-eval_conditions: {}
+eval_conditions:
+  libero: "SFT + RL fine-tuned (GRPO)"
 
 tags: [reasoning, libero, robotwin]

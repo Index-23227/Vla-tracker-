@@ -10,6 +10,28 @@ const ACTION_HEAD_CATEGORIES = {
   'FAST Tokenizer': 'fast',
 }
 
+function categorizeBackbone(backbone) {
+  if (!backbone) return 'Unknown'
+  const lower = backbone.toLowerCase()
+  if (lower.includes('prismatic') || (lower.includes('siglip') && lower.includes('dino'))) return 'PrismaticVLM'
+  if (lower.includes('paligemma') || (lower.includes('siglip') && lower.includes('gemma'))) return 'PaliGemma'
+  if (lower.includes('internvl') || lower.includes('internvit')) return 'InternVL'
+  if (lower.includes('qwen')) return 'Qwen-VL'
+  if (lower.includes('eagle') || lower.includes('cosmos')) return 'NVIDIA VLM'
+  if (lower.includes('siglip') && !lower.includes('dino') && !lower.includes('gemma')) return 'SigLIP'
+  if (lower.includes('clip')) return 'CLIP'
+  return 'Other'
+}
+
+function categorizeEvalCondition(model) {
+  const conds = model.eval_conditions || {}
+  const vals = Object.values(conds)
+  if (vals.length === 0) return 'unknown'
+  if (vals.some(v => /rl|grpo|reinforcement/i.test(v))) return 'rl'
+  if (vals.some(v => /zero.?shot/i.test(v))) return 'zero-shot'
+  return 'fine-tuned'
+}
+
 function parseParamNumber(paramStr) {
   if (!paramStr) return null
   const match = paramStr.match(/([\d.]+)\s*[Bb]/)
@@ -33,6 +55,8 @@ const DEFAULT_FILTERS = {
   search: '',
   openSource: 'all',      // 'all' | 'oss' | 'closed'
   actionHead: 'all',      // 'all' | category name
+  backbone: 'all',        // 'all' | category name
+  evalCondition: 'all',   // 'all' | 'fine-tuned' | 'rl' | 'zero-shot' | 'unknown'
   paramMin: '',
   paramMax: '',
   dateFrom: '',
@@ -45,6 +69,8 @@ export function FilterProvider({ children, allModels }) {
 
   const filterMeta = useMemo(() => {
     const actionHeadCounts = {}
+    const backboneCounts = {}
+    const evalCondCounts = {}
     let ossCount = 0
     let closedCount = 0
     let withBench = 0
@@ -53,12 +79,16 @@ export function FilterProvider({ children, allModels }) {
     for (const m of allModels) {
       const cat = categorizeActionHead(m.architecture?.action_head)
       actionHeadCounts[cat] = (actionHeadCounts[cat] || 0) + 1
+      const bbCat = categorizeBackbone(m.architecture?.backbone)
+      backboneCounts[bbCat] = (backboneCounts[bbCat] || 0) + 1
+      const ecCat = categorizeEvalCondition(m)
+      evalCondCounts[ecCat] = (evalCondCounts[ecCat] || 0) + 1
       if (m.open_source) ossCount++; else closedCount++
       const hasBench = m.benchmarks && Object.keys(m.benchmarks).length > 0
       if (hasBench) withBench++; else withoutBench++
     }
 
-    return { actionHeadCounts, ossCount, closedCount, withBench, withoutBench }
+    return { actionHeadCounts, backboneCounts, evalCondCounts, ossCount, closedCount, withBench, withoutBench }
   }, [allModels])
 
   const filteredModels = useMemo(() => {
@@ -83,10 +113,23 @@ export function FilterProvider({ children, allModels }) {
         if (cat !== filters.actionHead) return false
       }
 
-      // Parameter range
+      // Backbone filter
+      if (filters.backbone !== 'all') {
+        const bbCat = categorizeBackbone(m.architecture?.backbone)
+        if (bbCat !== filters.backbone) return false
+      }
+
+      // Eval condition filter
+      if (filters.evalCondition !== 'all') {
+        const ecCat = categorizeEvalCondition(m)
+        if (ecCat !== filters.evalCondition) return false
+      }
+
+      // Parameter range — exclude models with unparseable params when filter is active
       const paramNum = parseParamNumber(m.architecture?.parameters)
-      if (filters.paramMin && paramNum !== null && paramNum < parseFloat(filters.paramMin)) return false
-      if (filters.paramMax && paramNum !== null && paramNum > parseFloat(filters.paramMax)) return false
+      if ((filters.paramMin || filters.paramMax) && paramNum === null) return false
+      if (filters.paramMin && paramNum < parseFloat(filters.paramMin)) return false
+      if (filters.paramMax && paramNum > parseFloat(filters.paramMax)) return false
 
       // Date range
       if (filters.dateFrom && m.date && m.date < filters.dateFrom) return false
@@ -109,6 +152,8 @@ export function FilterProvider({ children, allModels }) {
     if (filters.search) count++
     if (filters.openSource !== 'all') count++
     if (filters.actionHead !== 'all') count++
+    if (filters.backbone !== 'all') count++
+    if (filters.evalCondition !== 'all') count++
     if (filters.paramMin || filters.paramMax) count++
     if (filters.dateFrom || filters.dateTo) count++
     if (filters.hasBenchmarks !== 'all') count++
@@ -141,4 +186,4 @@ export function useFilters() {
   return ctx
 }
 
-export { DEFAULT_FILTERS, ACTION_HEAD_CATEGORIES, categorizeActionHead, parseParamNumber }
+export { DEFAULT_FILTERS, ACTION_HEAD_CATEGORIES, categorizeActionHead, categorizeBackbone, categorizeEvalCondition, parseParamNumber }

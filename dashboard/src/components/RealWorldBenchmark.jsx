@@ -1,86 +1,5 @@
 import { useMemo } from 'react'
-
-// Curated real-world deployment data from published papers
-// Only includes data explicitly stated in papers; "~" prefix = approximate/inferred from paper figures
-const REAL_WORLD_DATA = [
-  {
-    name: 'pi*0.6',
-    organization: 'Physical Intelligence',
-    date: '2025-11',
-    source: 'arXiv:2511.14759',
-    tasks: [
-      { task: 'Laundry Folding', metric: 'throughput', value: '2x baseline', setting: 'Real homes' },
-      { task: 'Box Assembly', metric: 'failure_rate', value: '~50% reduction', setting: 'Real deployment' },
-      { task: 'Espresso Making', metric: 'failure_rate', value: '~50% reduction', setting: 'Professional machine' },
-    ],
-    method: 'RECAP (RL with corrections)',
-    robot: 'Custom',
-    highlight: true,
-    verified: true,
-  },
-  {
-    name: 'pi0',
-    organization: 'Physical Intelligence',
-    date: '2024-10',
-    source: 'arXiv:2410.24164',
-    tasks: [
-      { task: 'Laundry Folding', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab' },
-      { task: 'Table Bussing', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab' },
-    ],
-    method: 'Flow matching VLA',
-    robot: 'Multiple embodiments',
-    verified: true,
-  },
-  {
-    name: 'RT-2-X',
-    organization: 'Google DeepMind',
-    date: '2023-10',
-    source: 'arXiv:2310.08864',
-    tasks: [
-      { task: 'Emergent Skills (Drawer)', metric: 'success_rate', value: '76%', setting: 'Lab (Google Robot)' },
-      { task: 'Emergent Skills (Cabinet)', metric: 'success_rate', value: '59%', setting: 'Lab (Google Robot)' },
-    ],
-    method: 'VLM → action tokens',
-    robot: 'Google Robot',
-    verified: true,
-  },
-  {
-    name: 'OpenVLA',
-    organization: 'Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT',
-    date: '2024-06',
-    source: 'arXiv:2406.09246',
-    tasks: [
-      { task: 'WidowX Tasks (7 tasks avg)', metric: 'success_rate', value: '~84.7%', setting: 'Lab (WidowX)' },
-    ],
-    method: 'Fine-tuned VLM',
-    robot: 'WidowX',
-    verified: true,
-  },
-  {
-    name: 'GR00T-N1',
-    organization: 'NVIDIA',
-    date: '2025-03',
-    source: 'arXiv:2503.14734',
-    tasks: [
-      { task: 'Manipulation (multiple tasks)', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab (SO-100 / GR-1)' },
-    ],
-    method: 'Dual-system VLA',
-    robot: 'SO-100 / GR-1',
-    verified: false,
-  },
-  {
-    name: 'Octo',
-    organization: 'UC Berkeley / Stanford / CMU / Google DeepMind',
-    date: '2024-05',
-    source: 'arXiv:2405.12213',
-    tasks: [
-      { task: 'WidowX Pick & Place', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab (WidowX / Franka)' },
-    ],
-    method: 'Generalist policy',
-    robot: 'WidowX / Franka',
-    verified: true,
-  },
-]
+import realWorldResults from '../data/realWorldResults.json'
 
 const METRIC_COLORS = {
   success_rate: { bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
@@ -90,13 +9,13 @@ const METRIC_COLORS = {
 
 export default function RealWorldBenchmark({ models }) {
   const stats = useMemo(() => {
-    const robots = [...new Set(REAL_WORLD_DATA.map(d => d.robot))].length
-    const tasks = REAL_WORLD_DATA.reduce((s, d) => s + d.tasks.length, 0)
+    const robots = [...new Set(realWorldResults.map(d => d.robot))].length
+    const tasks = realWorldResults.reduce((s, d) => s + d.tasks.length, 0)
     return {
-      models: REAL_WORLD_DATA.length,
+      models: realWorldResults.length,
       robots,
       tasks,
-      latest: REAL_WORLD_DATA[0]?.date,
+      latest: realWorldResults[0]?.date,
     }
   }, [])
 
@@ -105,7 +24,6 @@ export default function RealWorldBenchmark({ models }) {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <h3 className="text-sm font-semibold text-white">Real-World Benchmarks</h3>
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-medium">NEW</span>
         </div>
         <p className="text-[11px] text-zinc-500">
           Physical robot deployment results — tasks that simulation cannot capture.
@@ -130,7 +48,7 @@ export default function RealWorldBenchmark({ models }) {
 
       {/* Model cards */}
       <div className="space-y-3">
-        {REAL_WORLD_DATA.map(d => {
+        {realWorldResults.map(d => {
           const modelData = models.find(m => m.name === d.name)
           return (
             <div
@@ -152,7 +70,7 @@ export default function RealWorldBenchmark({ models }) {
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">OSS</span>
                     )}
                   </div>
-                  <div className="text-[11px] text-zinc-500">{modelData?.organization || d.organization} · {(modelData?.date || d.date).slice(0, 7)}</div>
+                  <div className="text-[11px] text-zinc-500">{modelData?.organization || 'Unknown'} · {(modelData?.date || '').slice(0, 7)}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-[10px] text-zinc-500">{d.robot}</div>

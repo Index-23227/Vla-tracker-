@@ -1,16 +1,8 @@
 import { useEffect } from 'react'
+import { BENCHMARKS } from '../constants/benchmarks'
 
-const BENCHMARKS = {
-  libero: { label: 'LIBERO', avgKey: 'libero_avg', metric: 'Success Rate (%)' },
-  calvin: { label: 'CALVIN', avgKey: 'calvin_avg', metric: 'Avg chain length' },
-  simpler_env: { label: 'SimplerEnv', avgKey: 'simpler_avg', metric: 'Success Rate (%)' },
-  robotwin_v1: { label: 'RoboTwin v1', avgKey: 'robotwin_v1_avg', metric: 'Success Rate (%)' },
-  robotwin_v2: { label: 'RoboTwin v2', avgKey: 'robotwin_v2_avg', metric: 'Success Rate (%)' },
-  rlbench: { label: 'RLBench', avgKey: 'rlbench_avg', metric: 'Success Rate (%)' },
-  maniskill: { label: 'ManiSkill', avgKey: 'maniskill_avg', metric: 'Success Rate (%)' },
-  vlabench: { label: 'VLABench', avgKey: 'vlabench_avg', metric: 'Success Rate (%)' },
-  robocasa: { label: 'RoboCasa', avgKey: 'robocasa_avg', metric: 'Success Rate (%)' },
-}
+// Keys that are metadata, not numeric scores
+const META_KEYS = new Set(['source', 'date_reported', 'eval_condition', 'note', 'average'])
 
 function ScoreBar({ value, max = 100 }) {
   if (value == null) return <span className="text-zinc-600 text-xs">—</span>
@@ -97,6 +89,8 @@ export default function ModelDetailModal({ model, onClose }) {
               { label: 'Parameters', value: model.architecture?.parameters || '—' },
               { label: 'Inference', value: model.inference_hz ? `${model.inference_hz} Hz` : '—' },
               { label: 'Action Head', value: model.architecture?.action_head || '—' },
+              { label: 'VLM Backbone', value: model.architecture?.backbone || '—' },
+              { label: 'LLM', value: model.architecture?.llm || '—' },
               { label: 'Benchmark Coverage', value: `${benchCount} / ${totalBenchmarks}` },
             ].map(({ label, value }) => (
               <div key={label} className="bg-zinc-800/50 rounded-lg px-3 py-2">
@@ -132,7 +126,7 @@ export default function ModelDetailModal({ model, onClose }) {
                 {Object.entries(BENCHMARKS).map(([key, bench]) => {
                   const scores = model.benchmarks?.[key]
                   if (!scores) return null
-                  const avg = model[bench.avgKey]
+                  const avg = model[bench.key]
                   return (
                     <div key={key} className="bg-zinc-800/30 rounded-lg p-2.5">
                       <div className="flex justify-between items-center mb-1.5">
@@ -144,6 +138,9 @@ export default function ModelDetailModal({ model, onClose }) {
                       <div className="space-y-1">
                         {Object.entries(scores).map(([suiteKey, val]) => {
                           if (suiteKey.endsWith('_avg')) return null
+                          if (META_KEYS.has(suiteKey)) return null
+                          if (suiteKey.endsWith('_note')) return null
+                          if (typeof val !== 'number') return null
                           const label = suiteKey
                             .replace(/^(libero_|calvin_|google_robot_|robotwin_|rlbench_|maniskill_|vlabench_|robocasa_)/, '')
                             .replace(/_/g, ' ')

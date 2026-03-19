@@ -1,0 +1,67 @@
+[
+  {
+    "name": "pi*0.6",
+    "source": "arXiv:2511.14759",
+    "tasks": [
+      { "task": "Laundry Folding", "metric": "throughput", "value": "2x baseline", "setting": "Real homes" },
+      { "task": "Box Assembly", "metric": "failure_rate", "value": "~50% reduction", "setting": "Real deployment" },
+      { "task": "Espresso Making", "metric": "failure_rate", "value": "~50% reduction", "setting": "Professional machine" }
+    ],
+    "method": "RECAP (RL with corrections)",
+    "robot": "Custom",
+    "highlight": true,
+    "verified": true
+  },
+  {
+    "name": "pi0",
+    "source": "arXiv:2410.24164",
+    "tasks": [
+      { "task": "Laundry Folding", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab" },
+      { "task": "Table Bussing", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab" }
+    ],
+    "method": "Flow matching VLA",
+    "robot": "Multiple embodiments",
+    "verified": true
+  },
+  {
+    "name": "RT-2-X",
+    "source": "arXiv:2310.08864",
+    "tasks": [
+      { "task": "Emergent Skills (Drawer)", "metric": "success_rate", "value": "76%", "setting": "Lab (Google Robot)" },
+      { "task": "Emergent Skills (Cabinet)", "metric": "success_rate", "value": "59%", "setting": "Lab (Google Robot)" }
+    ],
+    "method": "VLM → action tokens",
+    "robot": "Google Robot",
+    "verified": true
+  },
+  {
+    "name": "OpenVLA",
+    "source": "arXiv:2406.09246",
+    "tasks": [
+      { "task": "WidowX Tasks (7 tasks avg)", "metric": "success_rate", "value": "~84.7%", "setting": "Lab (WidowX)" }
+    ],
+    "method": "Fine-tuned VLM",
+    "robot": "WidowX",
+    "verified": true
+  },
+  {
+    "name": "GR00T-N1",
+    "source": "arXiv:2503.14734",
+    "tasks": [
+      { "task": "Manipulation (multiple tasks)", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab (SO-100 / GR-1)" }
+    ],
+    "method": "Dual-system VLA",
+    "robot": "SO-100 / GR-1",
+    "verified": false
+  },
+  {
+    "name": "Octo",
+    "source": "arXiv:2405.12213",
+    "tasks": [
+      { "task": "WidowX Pick & Place", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab (WidowX / Franka)" }
+    ],
+    "method": "Generalist policy",
+    "robot": "WidowX / Franka",
+    "verified": true
+  }
+]

@@ -13,8 +13,9 @@ tags:
 - video-DiT
 - open-source
 architecture:
-  action_head: "flow matching (velocity field) + Wan2.2-5B video DiT backbone"
-  parameters: "6B (5B video DiT + 1B action expert)"
+  backbone: "Wan2.2 Video DiT (5B)"
+  action_head: "flow matching (velocity field)"
+  parameters: "6B"
 benchmarks:
   libero:
     libero_avg: 97.6

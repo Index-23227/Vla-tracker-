@@ -1,16 +1,27 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { FilterProvider, useFilters } from './context/FilterContext'
+import ErrorBoundary from './components/ErrorBoundary'
 import GlobalFilterBar from './components/GlobalFilterBar'
 import LeaderboardTable from './components/LeaderboardTable'
-import ModelCompare from './components/ModelCompare'
-import AnalysisDashboard from './components/AnalysisDashboard'
-import ModelLineage from './components/ModelLineage'
-import EfficiencyRanking from './components/EfficiencyRanking'
-import RealWorldBenchmark from './components/RealWorldBenchmark'
-import CoverageHeatmap from './components/CoverageHeatmap'
 import ModelDetailModal from './components/ModelDetailModal'
 import leaderboard from './data/leaderboard.json'
 import weeklyDigest from './data/weeklyDigest.json'
+
+// Lazy-load heavy tabs to reduce initial bundle size
+const ModelCompare = lazy(() => import('./components/ModelCompare'))
+const AnalysisDashboard = lazy(() => import('./components/AnalysisDashboard'))
+const ModelLineage = lazy(() => import('./components/ModelLineage'))
+const EfficiencyRanking = lazy(() => import('./components/EfficiencyRanking'))
+const RealWorldBenchmark = lazy(() => import('./components/RealWorldBenchmark'))
+const CoverageHeatmap = lazy(() => import('./components/CoverageHeatmap'))
+
+function TabLoading() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <div className="text-sm text-zinc-500">Loading...</div>
+    </div>
+  )
+}
 
 const TABS = [
   { id: 'leaderboard', label: 'Leaderboard' },
@@ -76,24 +87,26 @@ function AppContent() {
         {activeTab === 'leaderboard' && (
           <LeaderboardTable models={filteredModels} onModelClick={setSelectedModel} />
         )}
-        {activeTab === 'compare' && (
-          <ModelCompare models={filteredModels} />
-        )}
-        {activeTab === 'lineage' && (
-          <ModelLineage models={filteredModels} />
-        )}
-        {activeTab === 'efficiency' && (
-          <EfficiencyRanking models={filteredModels} />
-        )}
-        {activeTab === 'realworld' && (
-          <RealWorldBenchmark models={filteredModels} />
-        )}
-        {activeTab === 'coverage' && (
-          <CoverageHeatmap models={filteredModels} />
-        )}
-        {activeTab === 'analysis' && (
-          <AnalysisDashboard models={filteredModels} />
-        )}
+        <Suspense fallback={<TabLoading />}>
+          {activeTab === 'compare' && (
+            <ModelCompare models={filteredModels} />
+          )}
+          {activeTab === 'lineage' && (
+            <ModelLineage models={filteredModels} />
+          )}
+          {activeTab === 'efficiency' && (
+            <EfficiencyRanking models={filteredModels} />
+          )}
+          {activeTab === 'realworld' && (
+            <RealWorldBenchmark models={filteredModels} />
+          )}
+          {activeTab === 'coverage' && (
+            <CoverageHeatmap models={filteredModels} />
+          )}
+          {activeTab === 'analysis' && (
+            <AnalysisDashboard models={filteredModels} />
+          )}
+        </Suspense>
       </div>
 
       {/* Model Detail Modal */}
@@ -124,8 +137,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <FilterProvider allModels={leaderboard.models}>
-      <AppContent />
-    </FilterProvider>
+    <ErrorBoundary>
+      <FilterProvider allModels={leaderboard.models}>
+        <AppContent />
+      </FilterProvider>
+    </ErrorBoundary>
   )
 }

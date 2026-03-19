@@ -202,6 +202,57 @@ export default function GlobalFilterBar() {
             </div>
           </div>
 
+          {/* Row 2b: VLM Backbone */}
+          <div>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1.5 block">VLM Backbone</span>
+            <div className="flex flex-wrap gap-1.5">
+              {Object.entries(filterMeta.backboneCounts || {})
+                .sort(([,a], [,b]) => b - a)
+                .map(([cat, count]) => (
+                <button
+                  key={cat}
+                  onClick={() => update('backbone', toggleBtn(filters.backbone, cat))}
+                  className={`px-2.5 py-1 text-[11px] rounded-md border transition-all ${
+                    filters.backbone === cat
+                      ? 'border-purple-500/50 bg-purple-500/10 text-purple-300 font-semibold'
+                      : 'border-zinc-700/50 text-zinc-500 hover:border-zinc-600'
+                  }`}
+                >
+                  {cat} ({count})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2c: Eval Condition */}
+          <div>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1.5 block">Eval Condition</span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { key: 'fine-tuned', label: 'Fine-tuned', active: 'border-blue-500/50 bg-blue-500/10 text-blue-300 font-semibold' },
+                { key: 'rl', label: 'RL-trained', active: 'border-rose-500/50 bg-rose-500/10 text-rose-300 font-semibold' },
+                { key: 'zero-shot', label: 'Zero-shot', active: 'border-amber-500/50 bg-amber-500/10 text-amber-300 font-semibold' },
+                { key: 'unknown', label: 'Unknown', active: 'border-zinc-500/50 bg-zinc-500/10 text-zinc-300 font-semibold' },
+              ].map(({ key, label, active }) => {
+                const count = filterMeta.evalCondCounts?.[key] || 0
+                if (count === 0) return null
+                return (
+                  <button
+                    key={key}
+                    onClick={() => update('evalCondition', toggleBtn(filters.evalCondition, key))}
+                    className={`px-2.5 py-1 text-[11px] rounded-md border transition-all ${
+                      filters.evalCondition === key
+                        ? active
+                        : 'border-zinc-700/50 text-zinc-500 hover:border-zinc-600'
+                    }`}
+                  >
+                    {label} ({count})
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Row 3: Parameters + Date range */}
           <div className="flex flex-wrap gap-4">
             <div>

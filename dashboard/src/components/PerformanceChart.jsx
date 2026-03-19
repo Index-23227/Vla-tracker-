@@ -4,8 +4,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const BENCH_OPTIONS = {
   libero: { label: 'LIBERO', avgKey: 'libero_avg', domain: [60, 100] },
   calvin: { label: 'CALVIN', avgKey: 'calvin_avg', domain: [0, 5] },
+  simpler_env: { label: 'SimplerEnv', avgKey: 'simpler_avg', domain: [0, 100] },
   robotwin_v1: { label: 'RoboTwin v1', avgKey: 'robotwin_v1_avg', domain: [0, 100] },
   robotwin_v2: { label: 'RoboTwin v2', avgKey: 'robotwin_v2_avg', domain: [0, 100] },
+  rlbench: { label: 'RLBench', avgKey: 'rlbench_avg', domain: [0, 100] },
   maniskill: { label: 'ManiSkill', avgKey: 'maniskill_avg', domain: [0, 100] },
   vlabench: { label: 'VLABench', avgKey: 'vlabench_avg', domain: [0, 100] },
   robocasa: { label: 'RoboCasa', avgKey: 'robocasa_avg', domain: [0, 100] },
