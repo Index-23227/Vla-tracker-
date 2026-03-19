@@ -50,7 +50,7 @@ export default function CoverageHeatmap({ models }) {
       })
   }, [models, sortBy])
 
-  const displayed = showAll ? sorted : sorted.slice(0, 30)
+  const displayed = showAll ? sorted : sorted.slice(0, 40)
 
   // Coverage statistics
   const stats = useMemo(() => {
@@ -172,7 +172,7 @@ export default function CoverageHeatmap({ models }) {
           onClick={() => setShowAll(!showAll)}
           className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
         >
-          {showAll ? 'Show top 30' : `Show all ${sorted.length}`}
+          {showAll ? 'Show top 40' : `Show all ${sorted.length}`}
         </button>
       </div>
 

@@ -101,7 +101,7 @@ python scripts/generate_model_yaml.py --top 5
 
 | Benchmark | Tasks | Models Tracked | Focus | Venue |
 |-----------|-------|----------------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 25+ | Manipulation generalization | NeurIPS 2023 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 40 | Manipulation generalization | NeurIPS 2023 |
 | [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 12+ | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 8+ | Sim-to-real transfer | NeurIPS 2024 |
 | [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 5+ | Dual-arm, bimanual | CVPR 2025 Highlight |
