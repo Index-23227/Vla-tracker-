@@ -264,7 +264,17 @@ export default function LeaderboardTable({ models, onModelClick }) {
                         <a href={m.code_url} target="_blank" rel="noopener noreferrer" className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-medium hover:bg-blue-500/20 transition-colors">Code</a>
                       )}
                     </div>
-                    <div className="text-[11px] text-zinc-500">{m.organization}</div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] text-zinc-500">{m.organization}</span>
+                      {(() => {
+                        const count = Object.keys(m.benchmarks || {}).length
+                        return (
+                          <span className={`text-[9px] tabular-nums ${count >= 3 ? 'text-emerald-600' : count >= 1 ? 'text-zinc-600' : 'text-zinc-700'}`}>
+                            {count}/9
+                          </span>
+                        )
+                      })()}
+                    </div>
                   </td>
                   <td className="px-3 py-3 text-xs text-zinc-400 hidden md:table-cell">
                     {formatDate(m.date)}

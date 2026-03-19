@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 const BENCHMARKS = {
   libero: { label: 'LIBERO', avgKey: 'libero_avg', metric: 'Success Rate (%)' },
   calvin: { label: 'CALVIN', avgKey: 'calvin_avg', metric: 'Avg chain length' },
@@ -25,6 +27,12 @@ function ScoreBar({ value, max = 100 }) {
 }
 
 export default function ModelDetailModal({ model, onClose }) {
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
   if (!model) return null
 
   const benchEntries = Object.entries(model.benchmarks || {})
