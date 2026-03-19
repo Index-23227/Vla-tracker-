@@ -168,7 +168,7 @@ Three GitHub Actions workflows keep the data up to date:
 ```
 ├── data/
 │   ├── benchmarks/          # Benchmark definitions (6 YAML files)
-│   ├── models/              # Model data with benchmark scores (37 YAML files)
+│   ├── models/              # Model data with benchmark scores (54 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results
 ├── scripts/

@@ -136,7 +136,7 @@ export default function AnalysisDashboard({ models }) {
     return [...models]
       .filter(m => BENCH_KEYS.some(b => m[b.key] != null))
       .sort((a, b) => (b.libero_avg ?? -1) - (a.libero_avg ?? -1))
-      .slice(0, 25)
+      .slice(0, 40)
   }, [models])
 
   // --- Action Head vs Performance ---
@@ -407,7 +407,7 @@ export default function AnalysisDashboard({ models }) {
         <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">
           Benchmark Coverage Heatmap
         </h4>
-        <p className="text-[10px] text-zinc-600 mb-3">Top 25 models by LIBERO score · Color intensity = normalized performance</p>
+        <p className="text-[10px] text-zinc-600 mb-3">Top 40 models by LIBERO score · Color intensity = normalized performance</p>
         <div className="overflow-x-auto">
           <table className="w-full text-[10px]">
             <thead>
