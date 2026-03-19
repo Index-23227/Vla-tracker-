@@ -102,11 +102,56 @@ python scripts/generate_model_yaml.py --top 5
 | Benchmark | Tasks | Models Tracked | Focus | Venue |
 |-----------|-------|----------------|-------|-------|
 | [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 40 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 12+ | Long-horizon, language | RA-L 2022 |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 8+ | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 5+ | Dual-arm, bimanual | CVPR 2025 Highlight |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 22 | Long-horizon, language | RA-L 2022 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 17 | Sim-to-real transfer | NeurIPS 2024 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 7 | Dual-arm, bimanual | CVPR 2025 Highlight |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
-| [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 1 | Diverse manipulation | RA-L 2020 |
+| [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
+
+### LIBERO Leaderboard (40 models)
+
+| Rank | Model | Organization | LIBERO Avg |
+|------|-------|-------------|------------|
+| 1 | PLD | NVIDIA GEAR Lab | 99.0 |
+| 2 | SimpleVLA-RL | Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU | 98.83 |
+| 3 | X-VLA | Tsinghua University AIR / Shanghai AI Lab | 97.8 |
+| 4 | Fast-WAM | Tsinghua University (IIIS) / Galaxea AI | 97.6 |
+| 5 | VLA-Thinker | University of Central Florida / University of Wurzburg / USC / NVIDIA Research | 97.45 |
+| 6 | DreamVLA | Shanghai AI Lab / Fudan University / NUS | 97.2 |
+| 7 | AtomicVLA | Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology | 96.6 |
+| 8 | MemoryVLA | PKU / Tsinghua University / Shanghai AI Lab | 96.5 |
+| 9 | dVLA | Shanghai AI Lab | 96.4 |
+| 10 | GST-VLA | Yeungnam University / KAIST | 96.33 |
+| 11 | DD-VLA | PKU / Shanghai AI Lab | 96.3 |
+| 12 | pi0.5-Pro | Physical Intelligence | 93.25 |
+| 13 | pi*0.6 | Physical Intelligence | 93.1 |
+| 14 | LingBot-VLA | Ant Group / Robbyant | 92.55 |
+| 15 | UD-VLA | Tsinghua University / Shanghai AI Lab | 91.75 |
+| 16 | ECoT | UC Berkeley / Stanford / University of Warsaw | 90.8 |
+| 17 | InstructVLA | Shanghai AI Lab (InternRobotics) | 90.6 |
+| 18 | UniVLA | Midea Group / South China University of Technology | 90.1 |
+| 19 | OpenVLA-v2 | Stanford / UC Berkeley / TRI | 89.95 |
+| 20 | TRA-VLA | Tsinghua University / Shanghai AI Lab | 89.25 |
+| 21 | FLARE | NVIDIA | 89.2 |
+| 22 | pi0.5 | Physical Intelligence | 88.88 |
+| 23 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
+| 24 | DexVLA | ByteDance / Tsinghua University | 87.85 |
+| 25 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
+| 26 | SparseVLA | KAIST / LG AI Research | 87.25 |
+| 27 | CoT-VLA | UC Berkeley | 86.32 |
+| 28 | pi0-FAST | Physical Intelligence | 86.1 |
+| 29 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
+| 30 | GR00T-N1 | NVIDIA | 85.75 |
+| 31 | HybridVLA | ByteDance | 85.75 |
+| 32 | pi0 | Physical Intelligence | 84.75 |
+| 33 | RoboVLM | Shanghai AI Lab / Tsinghua University | 84.05 |
+| 34 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
+| 35 | FasT-VLA | Tsinghua University / Beijing Academy of AI | 81.55 |
+| 36 | SmolVLA | Hugging Face | 79.5 |
+| 37 | HPT | MIT / Meta FAIR | 77.5 |
+| 38 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
+| 39 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
+| 40 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
 
 ## Automation
 
