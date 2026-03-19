@@ -198,7 +198,7 @@ export default function CoverageHeatmap({ models }) {
                       >
                         {hasData ? (
                           <span className="text-white font-medium">
-                            {b.max === 5 ? val.toFixed(1) : val.toFixed(0)}
+                            {b.max === 5 ? val.toFixed(1) : val.toFixed(1)}
                           </span>
                         ) : (
                           <span className="text-zinc-700">·</span>
