@@ -43,7 +43,7 @@ VLA-Tracker tracks **74 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
 | **CALVIN** (avg len) | LingBot-VLA (4.5) | UD-VLA (4.5) | DreamVLA (4.44) |
-| **SimplerEnv** (avg) | OpenVLA-v2 (82.3) | InstructVLA (80.3) | SpatialVLA (78.2) |
+| **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.05) |
 | **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
 | **RoboTwin v2** (avg) | X-VLA (72.5) | SimpleVLA-RL (68.8) | - |
 
