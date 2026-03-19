@@ -1,27 +1,7 @@
 import { useState, useMemo } from 'react'
+import { BENCHMARK_LIST, heatColor } from '../constants/benchmarks'
 
-const ALL_BENCHMARKS = [
-  { key: 'libero_avg', label: 'LIBERO', max: 100 },
-  { key: 'calvin_avg', label: 'CALVIN', max: 5 },
-  { key: 'simpler_avg', label: 'SimplerEnv', max: 100 },
-  { key: 'robotwin_v1_avg', label: 'RTwin v1', max: 100 },
-  { key: 'robotwin_v2_avg', label: 'RTwin v2', max: 100 },
-  { key: 'rlbench_avg', label: 'RLBench', max: 100 },
-  { key: 'maniskill_avg', label: 'ManiSkill', max: 100 },
-  { key: 'vlabench_avg', label: 'VLABench', max: 100 },
-  { key: 'robocasa_avg', label: 'RoboCasa', max: 100 },
-]
-
-function heatColor(value, max) {
-  if (value == null) return 'transparent'
-  const pct = Math.min(value / max, 1)
-  if (pct >= 0.9) return 'rgba(16, 185, 129, 0.8)'
-  if (pct >= 0.75) return 'rgba(16, 185, 129, 0.5)'
-  if (pct >= 0.6) return 'rgba(250, 204, 21, 0.5)'
-  if (pct >= 0.4) return 'rgba(249, 115, 22, 0.5)'
-  if (pct >= 0.2) return 'rgba(239, 68, 68, 0.5)'
-  return 'rgba(239, 68, 68, 0.3)'
-}
+const ALL_BENCHMARKS = BENCHMARK_LIST
 
 const SORT_OPTIONS = [
   { key: 'coverage', label: 'Coverage' },

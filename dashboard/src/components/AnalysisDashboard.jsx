@@ -4,17 +4,9 @@ import {
   ScatterChart, Scatter, ZAxis, Cell,
   PieChart, Pie,
 } from 'recharts'
+import { BENCHMARK_LIST, ACTION_HEAD_COLORS, COLORS, heatColor } from '../constants/benchmarks'
 
-const ACTION_HEAD_COLORS = {
-  'flow matching': '#7F77DD',
-  'autoregressive': '#1D9E75',
-  'diffusion': '#D85A30',
-  'diffusion transformer': '#D4537E',
-  'chain-of-thought': '#F39C12',
-  'unknown': '#71717a',
-}
-
-const PIE_COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#3498DB', '#F39C12', '#E74C3C', '#71717a']
+const PIE_COLORS = COLORS
 
 function parseParams(paramStr) {
   if (!paramStr || paramStr === 'unknown') return null
@@ -28,27 +20,7 @@ function parseParams(paramStr) {
   return num // assume M
 }
 
-const BENCH_KEYS = [
-  { key: 'libero_avg', label: 'LIBERO', max: 100 },
-  { key: 'calvin_avg', label: 'CALVIN', max: 5 },
-  { key: 'simpler_avg', label: 'SimplerEnv', max: 100 },
-  { key: 'robotwin_v1_avg', label: 'RTwin v1', max: 100 },
-  { key: 'robotwin_v2_avg', label: 'RTwin v2', max: 100 },
-  { key: 'rlbench_avg', label: 'RLBench', max: 100 },
-  { key: 'maniskill_avg', label: 'ManiSkill', max: 100 },
-  { key: 'vlabench_avg', label: 'VLABench', max: 100 },
-  { key: 'robocasa_avg', label: 'RoboCasa', max: 100 },
-]
-
-function heatColor(value, max) {
-  if (value == null) return 'transparent'
-  const pct = Math.min(value / max, 1)
-  if (pct >= 0.9) return 'rgba(16, 185, 129, 0.7)'  // emerald
-  if (pct >= 0.7) return 'rgba(16, 185, 129, 0.4)'
-  if (pct >= 0.5) return 'rgba(250, 204, 21, 0.4)'   // yellow
-  if (pct >= 0.3) return 'rgba(249, 115, 22, 0.4)'   // orange
-  return 'rgba(239, 68, 68, 0.4)'                     // red
-}
+const BENCH_KEYS = BENCHMARK_LIST
 
 export default function AnalysisDashboard({ models }) {
   // --- Architecture Distribution ---
@@ -114,18 +86,7 @@ export default function AnalysisDashboard({ models }) {
 
   // --- Benchmark Coverage ---
   const benchCoverage = useMemo(() => {
-    const benches = [
-      { key: 'libero_avg', label: 'LIBERO' },
-      { key: 'calvin_avg', label: 'CALVIN' },
-      { key: 'simpler_avg', label: 'SimplerEnv' },
-      { key: 'robotwin_v1_avg', label: 'RoboTwin v1' },
-      { key: 'robotwin_v2_avg', label: 'RoboTwin v2' },
-      { key: 'rlbench_avg', label: 'RLBench' },
-      { key: 'maniskill_avg', label: 'ManiSkill' },
-      { key: 'vlabench_avg', label: 'VLABench' },
-      { key: 'robocasa_avg', label: 'RoboCasa' },
-    ]
-    return benches.map(b => ({
+    return BENCH_KEYS.map(b => ({
       name: b.label,
       count: models.filter(m => m[b.key] != null).length,
     }))
@@ -136,7 +97,7 @@ export default function AnalysisDashboard({ models }) {
     return [...models]
       .filter(m => BENCH_KEYS.some(b => m[b.key] != null))
       .sort((a, b) => (b.libero_avg ?? -1) - (a.libero_avg ?? -1))
-      .slice(0, 40)
+      .slice(0, Math.min(40, models.length))
   }, [models])
 
   // --- Action Head vs Performance ---
@@ -407,7 +368,7 @@ export default function AnalysisDashboard({ models }) {
         <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">
           Benchmark Coverage Heatmap
         </h4>
-        <p className="text-[10px] text-zinc-600 mb-3">Top 40 models by LIBERO score · Color intensity = normalized performance</p>
+        <p className="text-[10px] text-zinc-600 mb-3">Top {heatmapModels.length} models by LIBERO score · Color intensity = normalized performance</p>
         <div className="overflow-x-auto">
           <table className="w-full text-[10px]">
             <thead>

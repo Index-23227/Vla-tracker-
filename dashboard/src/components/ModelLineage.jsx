@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { BENCHMARK_LIST } from '../constants/benchmarks'
 
 // Cross-family influence data
 const CROSS_REFERENCES = [
@@ -211,14 +212,8 @@ function NodePopover({ node, modelData, family, onClose }) {
 }
 
 // ─── Tooltip component for hover ───
-// CALVIN uses 0-5 scale, others use 0-100; normalize for display
-const BENCHMARK_FIELDS = [
-  { key: 'libero_avg', label: 'LIBERO', max: 100 },
-  { key: 'calvin_avg', label: 'CALVIN', max: 5 },
-  { key: 'robotwin_v1_avg', label: 'RoboTwin v1', max: 100 },
-  { key: 'robotwin_v2_avg', label: 'RoboTwin v2', max: 100 },
-  { key: 'simpler_avg', label: 'SimplerEnv', max: 100 },
-]
+// Use top 5 most popular benchmarks for the compact tooltip display
+const BENCHMARK_FIELDS = BENCHMARK_LIST.slice(0, 5)
 
 function NodeTooltip({ node, modelData }) {
   const scores = BENCHMARK_FIELDS.filter(f => modelData?.[f.key] != null)

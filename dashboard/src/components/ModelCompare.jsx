@@ -3,64 +3,20 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts'
+import { BENCHMARKS, BENCHMARK_LIST, COLORS } from '../constants/benchmarks'
 
-const COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#3498DB', '#F39C12', '#E74C3C', '#2ECC71']
+// Radar axes derived from centralized benchmark definitions
+const RADAR_AXES = BENCHMARK_LIST
 
-// All benchmark suites for radar normalization (0-100 scale)
-const RADAR_AXES = [
-  { key: 'libero_avg', label: 'LIBERO', max: 100 },
-  { key: 'calvin_avg', label: 'CALVIN', max: 5 },
-  { key: 'simpler_avg', label: 'SimplerEnv', max: 100 },
-  { key: 'robotwin_v1_avg', label: 'RoboTwin v1', max: 100 },
-  { key: 'robotwin_v2_avg', label: 'RoboTwin v2', max: 100 },
-  { key: 'rlbench_avg', label: 'RLBench', max: 100 },
-  { key: 'maniskill_avg', label: 'ManiSkill', max: 100 },
-  { key: 'vlabench_avg', label: 'VLABench', max: 100 },
-  { key: 'robocasa_avg', label: 'RoboCasa', max: 100 },
-]
-
-const DETAIL_SUITES = {
-  libero: {
-    label: 'LIBERO',
-    avgKey: 'libero_avg',
-    suites: [
-      { key: 'libero_spatial', label: 'Spatial' },
-      { key: 'libero_object', label: 'Object' },
-      { key: 'libero_goal', label: 'Goal' },
-      { key: 'libero_long', label: 'Long' },
-    ],
-  },
-  calvin: {
-    label: 'CALVIN',
-    avgKey: 'calvin_avg',
-    suites: [{ key: 'calvin_abc_d_avg_len', label: 'ABC→D Avg Len' }],
-  },
-  robotwin_v1: {
-    label: 'RoboTwin v1',
-    avgKey: 'robotwin_v1_avg',
-    suites: [
-      { key: 'robotwin_easy', label: 'Easy' },
-      { key: 'robotwin_hard', label: 'Hard' },
-    ],
-  },
-  robotwin_v2: {
-    label: 'RoboTwin v2',
-    avgKey: 'robotwin_v2_avg',
-    suites: [
-      { key: 'short_horizon', label: 'Short' },
-      { key: 'medium_horizon', label: 'Medium' },
-      { key: 'long_horizon', label: 'Long' },
-    ],
-  },
-  vlabench: {
-    label: 'VLABench',
-    avgKey: 'vlabench_avg',
-    suites: [
-      { key: 'vlabench_primitive', label: 'Primitive' },
-      { key: 'vlabench_composite', label: 'Composite' },
-    ],
-  },
-}
+// Detail suites for bar chart breakdowns (only benchmarks with multiple suites)
+const DETAIL_SUITES = Object.fromEntries(
+  Object.entries(BENCHMARKS)
+    .filter(([, b]) => b.suites.length > 0)
+    .map(([id, b]) => [id, {
+      label: b.label,
+      suites: b.suites.map(s => ({ key: s, label: b.suiteLabels[s] })),
+    }])
+)
 
 function normalize(value, max) {
   if (value == null) return 0

@@ -1,96 +1,5 @@
 import { useState, useMemo } from 'react'
-
-const BENCHMARKS = {
-  libero: {
-    label: 'LIBERO',
-    suites: ['libero_spatial', 'libero_object', 'libero_goal', 'libero_long'],
-    suiteLabels: { libero_spatial: 'Spatial', libero_object: 'Object', libero_goal: 'Goal', libero_long: 'Long' },
-    avgKey: 'libero_avg',
-    metric: 'Success Rate (%)',
-  },
-  calvin: {
-    label: 'CALVIN',
-    suites: ['calvin_abc_d_avg_len'],
-    suiteLabels: { calvin_abc_d_avg_len: 'ABC→D Avg Len' },
-    avgKey: 'calvin_avg',
-    metric: 'Avg chain length (max 5)',
-  },
-  simpler_env: {
-    label: 'SimplerEnv',
-    suites: ['google_robot_pick_coke_can', 'google_robot_move_near'],
-    suiteLabels: { google_robot_pick_coke_can: 'Pick Can', google_robot_move_near: 'Move Near' },
-    avgKey: 'simpler_avg',
-    metric: 'Success Rate (%)',
-  },
-  robotwin_v1: {
-    label: 'RoboTwin v1',
-    suites: ['robotwin_easy', 'robotwin_hard'],
-    suiteLabels: { robotwin_easy: 'Easy', robotwin_hard: 'Hard (Randomized)' },
-    avgKey: 'robotwin_v1_avg',
-    metric: 'Success Rate (%)',
-  },
-  robotwin_v2: {
-    label: 'RoboTwin v2',
-    suites: ['short_horizon', 'medium_horizon', 'long_horizon'],
-    suiteLabels: { short_horizon: 'Short', medium_horizon: 'Medium', long_horizon: 'Long' },
-    avgKey: 'robotwin_v2_avg',
-    metric: 'Success Rate (%)',
-  },
-  rlbench: {
-    label: 'RLBench',
-    suites: ['rlbench_18tasks'],
-    suiteLabels: { rlbench_18tasks: '18-Task Multi-Task' },
-    avgKey: 'rlbench_avg',
-    metric: 'Success Rate (%)',
-  },
-  maniskill: {
-    label: 'ManiSkill',
-    suites: ['maniskill_pick_and_place', 'maniskill_assembly'],
-    suiteLabels: { maniskill_pick_and_place: 'Pick & Place', maniskill_assembly: 'Assembly' },
-    avgKey: 'maniskill_avg',
-    metric: 'Success Rate (%)',
-  },
-  vlabench: {
-    label: 'VLABench',
-    suites: ['vlabench_primitive', 'vlabench_composite'],
-    suiteLabels: { vlabench_primitive: 'Primitive', vlabench_composite: 'Composite' },
-    avgKey: 'vlabench_avg',
-    metric: 'Success Rate (%)',
-  },
-  robocasa: {
-    label: 'RoboCasa',
-    suites: ['robocasa_pick_and_place', 'robocasa_open_close'],
-    suiteLabels: { robocasa_pick_and_place: 'Pick & Place', robocasa_open_close: 'Open/Close' },
-    avgKey: 'robocasa_avg',
-    metric: 'Success Rate (%)',
-  },
-}
-
-const ACTION_HEAD_COLORS = {
-  'flow matching': '#7F77DD',
-  'autoregressive': '#1D9E75',
-  'diffusion': '#D85A30',
-  'chain-of-thought': '#D4537E',
-  'parallel decoding': '#3498DB',
-  'hybrid': '#E67E22',
-  'fast tokenizer': '#2ECC71',
-}
-
-const EVAL_COLORS = {
-  'fine-tuned': { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'FT' },
-  'zero-shot': { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'ZS' },
-}
-
-const VENUE_COLORS = {
-  'ICML': '#E74C3C',
-  'NeurIPS': '#3498DB',
-  'ICLR': '#2ECC71',
-  'CoRL': '#9B59B6',
-  'RSS': '#F39C12',
-  'ICRA': '#1ABC9C',
-  'CVPR': '#E67E22',
-  'RA-L': '#7F8C8D',
-}
+import { BENCHMARKS, ACTION_HEAD_COLORS, VENUE_COLORS, EVAL_COLORS } from '../constants/benchmarks'
 
 function getVenueColor(venue) {
   if (!venue) return null
@@ -141,14 +50,14 @@ export default function LeaderboardTable({ models, onModelClick }) {
       .filter(m => typeFilter === 'all' || m.model_type === typeFilter)
       .map(m => {
         const scores = m.benchmarks?.[activeBench] || {}
-        const avg = m[bench.avgKey]
+        const avg = m[bench.key]
         return { ...m, _scores: scores, _avg: avg }
       })
       .sort((a, b) => {
         if (sortBy === 'avg') return (b._avg ?? -1) - (a._avg ?? -1)
         return (b._scores?.[sortBy] ?? -1) - (a._scores?.[sortBy] ?? -1)
       })
-  }, [models, activeBench, sortBy, bench.avgKey, typeFilter])
+  }, [models, activeBench, sortBy, bench.key, typeFilter])
 
   const medals = ['🥇', '🥈', '🥉']
 
@@ -270,7 +179,7 @@ export default function LeaderboardTable({ models, onModelClick }) {
                         const count = Object.keys(m.benchmarks || {}).length
                         return (
                           <span className={`text-[9px] tabular-nums ${count >= 3 ? 'text-emerald-600' : count >= 1 ? 'text-zinc-600' : 'text-zinc-700'}`}>
-                            {count}/9
+                            {count}/{Object.keys(BENCHMARKS).length}
                           </span>
                         )
                       })()}
