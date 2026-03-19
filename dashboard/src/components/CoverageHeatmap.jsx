@@ -186,7 +186,7 @@ export default function CoverageHeatmap({ models }) {
                 <th className="text-center px-1 py-2 text-zinc-500 font-medium w-8">#</th>
                 {ALL_BENCHMARKS.map(b => (
                   <th key={b.key} className="text-center px-1.5 py-2 text-zinc-500 font-medium whitespace-nowrap">
-                    <div className="writing-mode-vertical" style={{ writingMode: 'vertical-lr', transform: 'rotate(180deg)', fontSize: '9px' }}>
+                    <div style={{ writingMode: 'vertical-lr', transform: 'rotate(180deg)', fontSize: '9px' }}>
                       {b.label}
                     </div>
                   </th>

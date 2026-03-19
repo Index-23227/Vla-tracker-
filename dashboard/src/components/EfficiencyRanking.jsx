@@ -3,8 +3,6 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ZAxis,
 } from 'recharts'
 
-const COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#3498DB', '#F39C12', '#E74C3C', '#2ECC71']
-
 const BENCH_OPTIONS = [
   { key: 'libero_avg', label: 'LIBERO', max: 100, unit: '%' },
   { key: 'calvin_avg', label: 'CALVIN', max: 5, unit: 'avg len' },

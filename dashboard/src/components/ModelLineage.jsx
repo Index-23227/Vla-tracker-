@@ -26,13 +26,13 @@ const FAMILIES = [
   },
   {
     id: 'gr',
-    name: 'ByteDance GR Series',
+    name: 'ByteDance',
     color: '#D85A30',
     nodes: [
       { id: 'GR-1', label: 'GR-1', date: '2023-12', params: '130M' },
       { id: 'GR-2', label: 'GR-2', date: '2024-07', params: '1.5B', parent: 'GR-1', relation: 'video generation + action' },
-      { id: 'DexVLA', label: 'DexVLA', date: '2025-02', params: '7B', parent: 'GR-2', relation: 'dexterous + hierarchical' },
-      { id: 'HybridVLA', label: 'HybridVLA', date: '2025-03', params: '2B', parent: 'GR-2', relation: 'hybrid action space' },
+      { id: 'DexVLA', label: 'DexVLA', date: '2025-02', params: '7B' },
+      { id: 'HybridVLA', label: 'HybridVLA', date: '2025-03', params: '2B' },
     ],
   },
   {
@@ -69,15 +69,15 @@ const FAMILIES = [
     color: '#D4537E',
     nodes: [
       { id: 'RoboVLM', label: 'RoboVLM', date: '2024-11', params: '1.5B' },
-      { id: 'SpatialVLA', label: 'SpatialVLA', date: '2025-01', params: '4B', parent: 'RoboVLM', relation: 'spatial awareness' },
-      { id: 'InstructVLA', label: 'InstructVLA', date: '2025-07', params: '4B', parent: 'SpatialVLA', relation: 'instruction-tuned' },
+      { id: 'SpatialVLA', label: 'SpatialVLA', date: '2025-01', params: '4B' },
+      { id: 'InstructVLA', label: 'InstructVLA', date: '2025-07', params: '4B' },
       { id: 'UD-VLA', label: 'UD-VLA', date: '2025-11', params: '3B' },
       { id: 'TRA-VLA', label: 'TRA-VLA', date: '2025-03', params: '4B' },
     ],
   },
 ]
 
-function TreeNode({ node, family, depth, isLast, models }) {
+function TreeNode({ node, family, depth, models }) {
   const modelData = models.find(m => m.name === node.id)
   const hasScore = modelData?.libero_avg != null
 

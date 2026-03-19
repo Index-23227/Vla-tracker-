@@ -35,6 +35,9 @@ const BENCH_KEYS = [
   { key: 'robotwin_v1_avg', label: 'RTwin v1', max: 100 },
   { key: 'robotwin_v2_avg', label: 'RTwin v2', max: 100 },
   { key: 'rlbench_avg', label: 'RLBench', max: 100 },
+  { key: 'maniskill_avg', label: 'ManiSkill', max: 100 },
+  { key: 'vlabench_avg', label: 'VLABench', max: 100 },
+  { key: 'robocasa_avg', label: 'RoboCasa', max: 100 },
 ]
 
 function heatColor(value, max) {
@@ -118,6 +121,9 @@ export default function AnalysisDashboard({ models }) {
       { key: 'robotwin_v1_avg', label: 'RoboTwin v1' },
       { key: 'robotwin_v2_avg', label: 'RoboTwin v2' },
       { key: 'rlbench_avg', label: 'RLBench' },
+      { key: 'maniskill_avg', label: 'ManiSkill' },
+      { key: 'vlabench_avg', label: 'VLABench' },
+      { key: 'robocasa_avg', label: 'RoboCasa' },
     ]
     return benches.map(b => ({
       name: b.label,

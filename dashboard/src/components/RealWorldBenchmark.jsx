@@ -1,99 +1,84 @@
 import { useMemo } from 'react'
 
-// Curated real-world deployment data from papers
+// Curated real-world deployment data from published papers
+// Only includes data explicitly stated in papers; "~" prefix = approximate/inferred from paper figures
 const REAL_WORLD_DATA = [
   {
     name: 'pi*0.6',
     organization: 'Physical Intelligence',
     date: '2025-11',
+    source: 'arXiv:2511.14759',
     tasks: [
       { task: 'Laundry Folding', metric: 'throughput', value: '2x baseline', setting: 'Real homes' },
-      { task: 'Box Assembly', metric: 'failure_rate', value: '50% reduction', setting: 'Warehouse' },
-      { task: 'Espresso Making', metric: 'failure_rate', value: '50% reduction', setting: 'Professional machine' },
+      { task: 'Box Assembly', metric: 'failure_rate', value: '~50% reduction', setting: 'Real deployment' },
+      { task: 'Espresso Making', metric: 'failure_rate', value: '~50% reduction', setting: 'Professional machine' },
     ],
     method: 'RECAP (RL with corrections)',
     robot: 'Custom',
     highlight: true,
-  },
-  {
-    name: 'pi0.5-Pro',
-    organization: 'Physical Intelligence',
-    date: '2025-09',
-    tasks: [
-      { task: 'Laundry Folding', metric: 'success_rate', value: '~80%', setting: 'Real homes' },
-      { task: 'Table Bussing', metric: 'success_rate', value: '~85%', setting: 'Kitchen' },
-      { task: 'Grocery Packing', metric: 'success_rate', value: '~75%', setting: 'Retail' },
-    ],
-    method: 'Cross-embodiment pre-training',
-    robot: 'Multiple embodiments',
-    highlight: true,
-  },
-  {
-    name: 'pi0.5',
-    organization: 'Physical Intelligence',
-    date: '2025-02',
-    tasks: [
-      { task: 'Table Clearing', metric: 'success_rate', value: '~70%', setting: 'Kitchen' },
-      { task: 'Object Rearrangement', metric: 'success_rate', value: '~65%', setting: 'Tabletop' },
-    ],
-    method: 'Cross-embodiment VLA',
-    robot: 'Multiple embodiments',
+    verified: true,
   },
   {
     name: 'pi0',
     organization: 'Physical Intelligence',
     date: '2024-10',
+    source: 'arXiv:2410.24164',
     tasks: [
-      { task: 'Laundry Folding', metric: 'success_rate', value: '~60%', setting: 'Lab' },
-      { task: 'Table Bussing', metric: 'success_rate', value: '~55%', setting: 'Lab' },
+      { task: 'Laundry Folding', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab' },
+      { task: 'Table Bussing', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab' },
     ],
     method: 'Flow matching VLA',
     robot: 'Multiple embodiments',
-  },
-  {
-    name: 'GR00T-N1',
-    organization: 'NVIDIA',
-    date: '2025-03',
-    tasks: [
-      { task: 'Pick & Place', metric: 'success_rate', value: '~90%', setting: 'Lab (SO-100)' },
-      { task: 'Reorientation', metric: 'success_rate', value: '~85%', setting: 'Lab (GR-1)' },
-    ],
-    method: 'Dual-system VLA',
-    robot: 'SO-100 / GR-1',
-  },
-  {
-    name: 'OpenVLA',
-    organization: 'Stanford / UC Berkeley',
-    date: '2024-06',
-    tasks: [
-      { task: 'WidowX Manipulation', metric: 'success_rate', value: '~55%', setting: 'Lab' },
-      { task: 'RT-2 Benchmark Tasks', metric: 'success_rate', value: '~50%', setting: 'Lab (Google Robot)' },
-    ],
-    method: 'Fine-tuned VLM',
-    robot: 'WidowX / Google Robot',
+    verified: true,
   },
   {
     name: 'RT-2-X',
     organization: 'Google DeepMind',
     date: '2023-10',
+    source: 'arXiv:2310.08864',
     tasks: [
-      { task: 'Seen Objects Pick', metric: 'success_rate', value: '~73%', setting: 'Lab' },
-      { task: 'Unseen Objects Pick', metric: 'success_rate', value: '~62%', setting: 'Lab' },
-      { task: 'Drawer Manipulation', metric: 'success_rate', value: '~59%', setting: 'Lab' },
+      { task: 'Emergent Skills (Drawer)', metric: 'success_rate', value: '76%', setting: 'Lab (Google Robot)' },
+      { task: 'Emergent Skills (Cabinet)', metric: 'success_rate', value: '59%', setting: 'Lab (Google Robot)' },
     ],
     method: 'VLM → action tokens',
     robot: 'Google Robot',
+    verified: true,
+  },
+  {
+    name: 'OpenVLA',
+    organization: 'Stanford / UC Berkeley',
+    date: '2024-06',
+    source: 'arXiv:2406.09246',
+    tasks: [
+      { task: 'WidowX Tasks (7 tasks avg)', metric: 'success_rate', value: '~84.7%', setting: 'Lab (WidowX)' },
+    ],
+    method: 'Fine-tuned VLM',
+    robot: 'WidowX',
+    verified: true,
+  },
+  {
+    name: 'GR00T-N1',
+    organization: 'NVIDIA',
+    date: '2025-03',
+    source: 'NVIDIA Blog',
+    tasks: [
+      { task: 'Manipulation (multiple tasks)', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab (SO-100 / GR-1)' },
+    ],
+    method: 'Dual-system VLA',
+    robot: 'SO-100 / GR-1',
+    verified: false,
   },
   {
     name: 'Octo',
     organization: 'UC Berkeley / Stanford',
     date: '2024-05',
+    source: 'arXiv:2405.12213',
     tasks: [
-      { task: 'WidowX Pick & Place', metric: 'success_rate', value: '~45%', setting: 'Lab' },
-      { task: 'Franka Manipulation', metric: 'success_rate', value: '~40%', setting: 'Lab' },
+      { task: 'WidowX Pick & Place', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab (WidowX / Franka)' },
     ],
     method: 'Generalist policy',
     robot: 'WidowX / Franka',
+    verified: true,
   },
 ]
 
@@ -172,6 +157,12 @@ export default function RealWorldBenchmark({ models }) {
                 <div className="text-right">
                   <div className="text-[10px] text-zinc-500">{d.robot}</div>
                   <div className="text-[10px] text-zinc-600 italic">{d.method}</div>
+                  <div className="flex items-center gap-1 justify-end mt-0.5">
+                    {d.verified && (
+                      <span className="text-[8px] px-1 py-0.5 rounded bg-blue-500/10 text-blue-400">paper-verified</span>
+                    )}
+                    <span className="text-[8px] text-zinc-600">{d.source}</span>
+                  </div>
                 </div>
               </div>
 
