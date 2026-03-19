@@ -40,8 +40,8 @@ const FAMILIES = [
     name: 'NVIDIA',
     color: '#2ECC71',
     nodes: [
-      { id: 'FLARE', label: 'FLARE', date: '2025-05', params: '3B' },
       { id: 'GR00T-N1', label: 'GR00T-N1', date: '2025-03', params: '2.2B' },
+      { id: 'FLARE', label: 'FLARE', date: '2025-05', params: '3B' },
     ],
   },
   {
@@ -49,8 +49,8 @@ const FAMILIES = [
     name: 'Google DeepMind',
     color: '#3498DB',
     nodes: [
-      { id: 'RT-2-X', label: 'RT-2-X', date: '2023-10', params: '55B' },
       { id: 'UniPi', label: 'UniPi', date: '2023-02', params: '—' },
+      { id: 'RT-2-X', label: 'RT-2-X', date: '2023-10', params: '55B' },
     ],
   },
   {
@@ -58,9 +58,9 @@ const FAMILIES = [
     name: 'UC Berkeley / Stanford',
     color: '#F39C12',
     nodes: [
+      { id: 'SuSIE', label: 'SuSIE', date: '2023-10', params: '—' },
       { id: 'Octo', label: 'Octo', date: '2024-05', params: '93M' },
       { id: 'CoT-VLA', label: 'CoT-VLA', date: '2025-01', params: '2B' },
-      { id: 'SuSIE', label: 'SuSIE', date: '2023-10', params: '—' },
     ],
   },
   {
@@ -70,9 +70,9 @@ const FAMILIES = [
     nodes: [
       { id: 'RoboVLM', label: 'RoboVLM', date: '2024-11', params: '1.5B' },
       { id: 'SpatialVLA', label: 'SpatialVLA', date: '2025-01', params: '4B' },
+      { id: 'TRA-VLA', label: 'TRA-VLA', date: '2025-03', params: '4B' },
       { id: 'InstructVLA', label: 'InstructVLA', date: '2025-07', params: '4B' },
       { id: 'UD-VLA', label: 'UD-VLA', date: '2025-11', params: '3B' },
-      { id: 'TRA-VLA', label: 'TRA-VLA', date: '2025-03', params: '4B' },
     ],
   },
 ]
@@ -130,10 +130,14 @@ function TreeNode({ node, family, depth, models }) {
   )
 }
 
+function sortByDate(nodes) {
+  return [...nodes].sort((a, b) => a.date.localeCompare(b.date))
+}
+
 function FamilyTree({ family, models }) {
-  // Build tree structure
-  const roots = family.nodes.filter(n => !n.parent)
-  const getChildren = (parentId) => family.nodes.filter(n => n.parent === parentId)
+  // Build tree structure, sorted chronologically
+  const roots = sortByDate(family.nodes.filter(n => !n.parent))
+  const getChildren = (parentId) => sortByDate(family.nodes.filter(n => n.parent === parentId))
 
   function renderNode(node, depth = 0) {
     const children = getChildren(node.id)
