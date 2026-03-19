@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { FilterProvider, useFilters } from './context/FilterContext'
+import GlobalFilterBar from './components/GlobalFilterBar'
 import LeaderboardTable from './components/LeaderboardTable'
 import ModelCompare from './components/ModelCompare'
 import AnalysisDashboard from './components/AnalysisDashboard'
@@ -6,6 +8,7 @@ import ModelLineage from './components/ModelLineage'
 import EfficiencyRanking from './components/EfficiencyRanking'
 import RealWorldBenchmark from './components/RealWorldBenchmark'
 import CoverageHeatmap from './components/CoverageHeatmap'
+import ModelDetailModal from './components/ModelDetailModal'
 import leaderboard from './data/leaderboard.json'
 import weeklyDigest from './data/weeklyDigest.json'
 
@@ -19,8 +22,10 @@ const TABS = [
   { id: 'analysis', label: 'Analysis' },
 ]
 
-export default function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState('leaderboard')
+  const [selectedModel, setSelectedModel] = useState(null)
+  const { filteredModels } = useFilters()
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -46,6 +51,9 @@ export default function App() {
         <div className="text-sm text-white">{weeklyDigest.headline}</div>
       </div>
 
+      {/* Global Filter Bar */}
+      <GlobalFilterBar />
+
       {/* Tab navigation */}
       <div className="flex gap-1.5 mb-5 flex-wrap">
         {TABS.map(tab => (
@@ -66,27 +74,35 @@ export default function App() {
       {/* Tab content */}
       <div className="min-h-[400px]">
         {activeTab === 'leaderboard' && (
-          <LeaderboardTable models={leaderboard.models} />
+          <LeaderboardTable models={filteredModels} onModelClick={setSelectedModel} />
         )}
         {activeTab === 'compare' && (
-          <ModelCompare models={leaderboard.models} />
+          <ModelCompare models={filteredModels} />
         )}
         {activeTab === 'lineage' && (
-          <ModelLineage models={leaderboard.models} />
+          <ModelLineage models={filteredModels} />
         )}
         {activeTab === 'efficiency' && (
-          <EfficiencyRanking models={leaderboard.models} />
+          <EfficiencyRanking models={filteredModels} />
         )}
         {activeTab === 'realworld' && (
-          <RealWorldBenchmark models={leaderboard.models} />
+          <RealWorldBenchmark models={filteredModels} />
         )}
         {activeTab === 'coverage' && (
-          <CoverageHeatmap models={leaderboard.models} />
+          <CoverageHeatmap models={filteredModels} />
         )}
         {activeTab === 'analysis' && (
-          <AnalysisDashboard models={leaderboard.models} />
+          <AnalysisDashboard models={filteredModels} />
         )}
       </div>
+
+      {/* Model Detail Modal */}
+      {selectedModel && (
+        <ModelDetailModal
+          model={selectedModel}
+          onClose={() => setSelectedModel(null)}
+        />
+      )}
 
       {/* Footer */}
       <div className="mt-8 p-3 bg-zinc-900 rounded-xl flex justify-between items-center text-[11px] text-zinc-500">
@@ -103,5 +119,13 @@ export default function App() {
         </a>
       </div>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <FilterProvider allModels={leaderboard.models}>
+      <AppContent />
+    </FilterProvider>
   )
 }

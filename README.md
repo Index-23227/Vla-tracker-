@@ -2,7 +2,7 @@
 
 ### Real-time benchmark tracking for Vision-Language-Action models
 
-[![Models Tracked](https://img.shields.io/badge/models-74-blue)](data/models/)
+[![Models Tracked](https://img.shields.io/badge/models-73-blue)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-9-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **74 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **73 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -43,16 +43,16 @@ VLA-Tracker tracks **74 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
 | **CALVIN** (avg len) | LingBot-VLA (4.5) | UD-VLA (4.5) | DreamVLA (4.44) |
-| **SimplerEnv** (avg) | OpenVLA-v2 (82.3) | InstructVLA (80.3) | SpatialVLA (78.2) |
+| **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.05) |
 | **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
 | **RoboTwin v2** (avg) | X-VLA (72.5) | SimpleVLA-RL (68.8) | - |
 
 ## All Tracked Models
 
 <details>
-<summary>74 models (click to expand)</summary>
+<summary>73 models (click to expand)</summary>
 
-3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, pi0, pi0.5, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, SpatialVLA, SuSIE, TempoFit, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
+3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, pi0, pi0.5, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, SpatialVLA, SuSIE, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
 
 </details>
 
@@ -163,7 +163,7 @@ Three GitHub Actions workflows keep the data up to date:
 ```
 ├── data/
 │   ├── benchmarks/          # Benchmark definitions (6 YAML files)
-│   ├── models/              # Model data with benchmark scores (74 YAML files)
+│   ├── models/              # Model data with benchmark scores (73 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results
 ├── scripts/

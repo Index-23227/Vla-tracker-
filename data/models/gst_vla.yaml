@@ -1,4 +1,3 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: GST-VLA: Structured Gaussian Spatial Tokens for 3D Depth-Aware Vision-Language-Action Models
 # arXiv: 2603.09079
 
@@ -7,16 +6,18 @@ full_name: "GST-VLA: Structured Gaussian Spatial Tokens for 3D Depth-Aware Visio
 organization: "Yeungnam University / KAIST"
 date: "2026-03-10"
 paper_url: https://arxiv.org/abs/2603.09079
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  parameters: "TODO"
+  action_head: "flow matching"
+  parameters: "300M action expert"
 
 key_innovation: >
-  TODO: Read paper and summarize key contribution in 2-3 sentences.
+  Gaussian Spatial Tokenizer converts depth and semantic features into 3D Gaussian primitives,
+  paired with 3D Depth-Aware Chain-of-Thought reasoning. A 300M flow-matching action expert
+  with MoE feedforward sublayers decodes actions via conditional ODE integration.
 
 benchmarks:
   libero:
