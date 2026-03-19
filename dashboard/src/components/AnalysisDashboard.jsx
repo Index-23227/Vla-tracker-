@@ -138,6 +138,59 @@ export default function AnalysisDashboard({ models }) {
     return buckets
   }, [models])
 
+  // --- VLM Backbone Distribution ---
+  const backboneDist = useMemo(() => {
+    const counts = {}
+    models.forEach(m => {
+      const bb = m.architecture?.backbone || ''
+      if (!bb) { counts['unknown'] = (counts['unknown'] || 0) + 1; return }
+      // Normalize to family names
+      const lower = bb.toLowerCase()
+      let key
+      if (lower.includes('prismatic') || (lower.includes('siglip') && lower.includes('dino'))) key = 'PrismaticVLM'
+      else if (lower.includes('paligemma') || (lower.includes('siglip') && lower.includes('gemma'))) key = 'PaliGemma'
+      else if (lower.includes('internvl') || lower.includes('internvit')) key = 'InternVL'
+      else if (lower.includes('qwen')) key = 'Qwen-VL'
+      else if (lower.includes('eagle') || lower.includes('cosmos')) key = 'NVIDIA VLM'
+      else if (lower.includes('siglip') && !lower.includes('dino') && !lower.includes('gemma')) key = 'SigLIP'
+      else if (lower.includes('clip')) key = 'CLIP'
+      else if (lower.includes('diffusion') || lower.includes('video')) key = 'Video/Diffusion'
+      else key = 'Other'
+      counts[key] = (counts[key] || 0) + 1
+    })
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value]) => ({ name, value }))
+  }, [models])
+
+  const BACKBONE_COLORS = {
+    'PrismaticVLM': '#8b5cf6', 'PaliGemma': '#06b6d4', 'InternVL': '#f59e0b',
+    'Qwen-VL': '#ef4444', 'NVIDIA VLM': '#22c55e', 'SigLIP': '#ec4899',
+    'CLIP': '#3b82f6', 'Video/Diffusion': '#f97316', 'Other': '#6b7280', 'unknown': '#404040',
+  }
+
+  // --- Eval Condition Distribution ---
+  const evalCondDist = useMemo(() => {
+    const counts = { 'Fine-tuned': 0, 'RL-trained': 0, 'Zero-shot': 0, 'Unknown': 0 }
+    models.forEach(m => {
+      const conds = m.eval_conditions || {}
+      const vals = Object.values(conds)
+      if (vals.length === 0) { counts['Unknown']++; return }
+      const hasRL = vals.some(v => /rl|grpo|reinforcement/i.test(v))
+      const hasZS = vals.some(v => /zero.?shot/i.test(v))
+      if (hasRL) counts['RL-trained']++
+      else if (hasZS) counts['Zero-shot']++
+      else counts['Fine-tuned']++
+    })
+    return Object.entries(counts)
+      .filter(([, v]) => v > 0)
+      .map(([name, value]) => ({ name, value }))
+  }, [models])
+
+  const EVAL_COND_COLORS = {
+    'Fine-tuned': '#3b82f6', 'RL-trained': '#f43f5e', 'Zero-shot': '#f59e0b', 'Unknown': '#404040',
+  }
+
   // --- Venue Distribution ---
   const venueDist = useMemo(() => {
     const counts = {}
@@ -234,6 +287,69 @@ export default function AnalysisDashboard({ models }) {
               />
               <Bar dataKey="count" fill="#7F77DD" radius={[0, 4, 4, 0]} barSize={14} />
             </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Row 1b: VLM Backbone + Eval Condition */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* VLM Backbone Distribution */}
+        <div className="border border-zinc-800 rounded-xl p-4">
+          <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            VLM Backbone Distribution
+          </h4>
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie
+                data={backboneDist}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={70}
+                innerRadius={35}
+                strokeWidth={0}
+                label={({ name, value }) => `${name} (${value})`}
+                labelLine={false}
+              >
+                {backboneDist.map((entry) => (
+                  <Cell key={entry.name} fill={BACKBONE_COLORS[entry.name] || '#6b7280'} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #3f3f46', backgroundColor: '#18181b', color: '#e5e5e5' }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Eval Condition Distribution */}
+        <div className="border border-zinc-800 rounded-xl p-4">
+          <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            Evaluation Condition Distribution
+          </h4>
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie
+                data={evalCondDist}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={70}
+                innerRadius={35}
+                strokeWidth={0}
+                label={({ name, value }) => `${name} (${value})`}
+                labelLine={false}
+              >
+                {evalCondDist.map((entry) => (
+                  <Cell key={entry.name} fill={EVAL_COND_COLORS[entry.name] || '#6b7280'} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #3f3f46', backgroundColor: '#18181b', color: '#e5e5e5' }}
+              />
+            </PieChart>
           </ResponsiveContainer>
         </div>
       </div>

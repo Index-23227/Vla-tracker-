@@ -152,6 +152,18 @@ function NodePopover({ node, modelData, family, onClose }) {
             <span className="text-zinc-300 text-right text-[9px]">{modelData.organization}</span>
           </div>
         )}
+        {modelData?.architecture?.backbone && (
+          <div className="flex justify-between gap-3">
+            <span className="text-zinc-500 shrink-0">Backbone</span>
+            <span className="text-zinc-300 text-right text-[9px]">{modelData.architecture.backbone}</span>
+          </div>
+        )}
+        {modelData?.architecture?.llm && (
+          <div className="flex justify-between gap-3">
+            <span className="text-zinc-500 shrink-0">LLM</span>
+            <span className="text-zinc-300 text-right text-[9px]">{modelData.architecture.llm}</span>
+          </div>
+        )}
         {modelData?.architecture?.action_head && (
           <div className="flex justify-between gap-3">
             <span className="text-zinc-500 shrink-0">Action Head</span>
@@ -246,9 +258,14 @@ function NodeTooltip({ node, modelData }) {
       ) : (
         <div className="text-[9px] text-zinc-600 italic">No benchmark data</div>
       )}
-      {modelData?.architecture?.action_head && (
-        <div className="mt-1.5 pt-1.5 border-t border-zinc-800 text-[9px] text-zinc-500">
-          <span className="text-zinc-400">Arch:</span> {modelData.architecture.action_head}
+      {(modelData?.architecture?.action_head || modelData?.architecture?.backbone) && (
+        <div className="mt-1.5 pt-1.5 border-t border-zinc-800 text-[9px] text-zinc-500 space-y-0.5">
+          {modelData?.architecture?.backbone && (
+            <div><span className="text-zinc-400">VLM:</span> {modelData.architecture.backbone}</div>
+          )}
+          {modelData?.architecture?.action_head && (
+            <div><span className="text-zinc-400">Head:</span> {modelData.architecture.action_head}</div>
+          )}
         </div>
       )}
       <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-zinc-700" />

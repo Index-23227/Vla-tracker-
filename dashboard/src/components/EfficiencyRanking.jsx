@@ -68,6 +68,8 @@ export default function EfficiencyRanking({ models }) {
         params: parseParams(m.architecture?.parameters),
         hz: m.inference_hz,
         oss: m.open_source,
+        backbone: m.architecture?.backbone || null,
+        llm: m.architecture?.llm || null,
         x: axisKey === 'params' ? parseParams(m.architecture?.parameters) : m.inference_hz,
       }))
   }, [models, benchKey, axisKey])
@@ -189,6 +191,8 @@ export default function EfficiencyRanking({ models }) {
                       </div>
                       <div>{benchCfg.label}: {benchCfg.max === 5 ? d.score.toFixed(2) : d.score.toFixed(1)}{benchCfg.unit === '%' ? '%' : ` ${benchCfg.unit}`}</div>
                       {d.params && <div>Params: {formatParams(d.params)}</div>}
+                      {d.backbone && <div>VLM: {d.backbone}</div>}
+                      {d.llm && <div>LLM: {d.llm}</div>}
                       {d.hz && <div>Speed: {d.hz} Hz</div>}
                       <div>{d.oss ? 'Open Source' : 'Closed'}</div>
                       {paretoNames.includes(d.name) && <div style={{ color: '#f59e0b', marginTop: 2 }}>Pareto Optimal</div>}

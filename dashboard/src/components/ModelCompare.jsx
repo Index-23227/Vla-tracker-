@@ -3,7 +3,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts'
-import { BENCHMARKS, BENCHMARK_LIST, COLORS } from '../constants/benchmarks'
+import { BENCHMARKS, BENCHMARK_LIST, COLORS, classifyEvalCondition } from '../constants/benchmarks'
 
 // Radar axes derived from centralized benchmark definitions
 const RADAR_AXES = BENCHMARK_LIST
@@ -117,10 +117,22 @@ export default function ModelCompare({ models }) {
       { label: 'Action Head', get: m => m.architecture?.action_head || '—' },
       { label: 'Inference Hz', get: m => m.inference_hz ? `${m.inference_hz} Hz` : '—' },
       { label: 'Open Source', get: m => m.open_source ? '✓' : '✗' },
-      { label: 'Eval Condition', get: m => {
+      { label: 'Eval Condition', render: (m) => {
         const conds = m.eval_conditions || {}
         const vals = [...new Set(Object.values(conds))]
-        return vals.length > 0 ? vals.join(', ') : '—'
+        if (vals.length === 0) return <span className="text-zinc-600">—</span>
+        return (
+          <span className="flex items-center justify-center gap-1 flex-wrap">
+            {vals.map((v, i) => {
+              const style = classifyEvalCondition(v)
+              return (
+                <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${style.bg} ${style.text}`} title={v}>
+                  {style.label}
+                </span>
+              )
+            })}
+          </span>
+        )
       }},
       { label: 'Venue', get: m => m.venue || 'preprint' },
       { label: 'Date', get: m => m.date || '—' },
@@ -260,7 +272,7 @@ export default function ModelCompare({ models }) {
                       <td className="px-3 py-2 text-zinc-500 font-medium">{row.label}</td>
                       {selectedModels.map(m => (
                         <td key={m.name} className="px-3 py-2 text-center text-zinc-300">
-                          {row.get(m)}
+                          {row.render ? row.render(m) : row.get(m)}
                         </td>
                       ))}
                     </tr>
