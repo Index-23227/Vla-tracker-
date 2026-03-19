@@ -6,9 +6,12 @@ const CROSS_REFERENCES = [
   { from: 'RT-2-X', to: 'pi0', label: 'RT-2 influence on early VLA paradigm' },
   { from: 'OpenVLA', to: 'SpatialVLA', label: 'OpenVLA framework adapted for spatial reasoning' },
   { from: 'Octo', to: 'OpenVLA', label: 'Octo data pipeline & cross-embodiment ideas' },
+  { from: 'Octo', to: 'CrossFormer', label: 'CrossFormer built on Octo codebase' },
   { from: 'UniPi', to: 'SuSIE', label: 'Video prediction approach shared' },
   { from: 'GR-1', to: 'GR00T-N1', label: 'Humanoid-focused video-to-action paradigm' },
   { from: 'pi0', to: 'DexVLA', label: 'Flow matching action head approach' },
+  { from: 'OpenVLA', to: 'ECoT', label: 'ECoT adds embodied CoT reasoning to OpenVLA' },
+  { from: 'OpenVLA-OFT', to: 'VLA-Thinker', label: 'Visual CoT + GRPO RL on OpenVLA-OFT' },
 ]
 
 // Model lineage data - curated family trees
@@ -31,8 +34,10 @@ const FAMILIES = [
     color: '#1D9E75',
     nodes: [
       { id: 'OpenVLA', label: 'OpenVLA', date: '2024-06', params: '7B' },
+      { id: 'ECoT', label: 'ECoT', date: '2024-07', params: '7B', parent: 'OpenVLA', relation: 'embodied chain-of-thought' },
       { id: 'OpenVLA-OFT', label: 'OpenVLA-OFT', date: '2025-01', params: '7B', parent: 'OpenVLA', relation: 'orthogonal fine-tuning' },
       { id: 'OpenVLA-v2', label: 'OpenVLA-v2', date: '2025-02', params: '8B', parent: 'OpenVLA', relation: 'multi-modal action, SFT' },
+      { id: 'VLA-Thinker', label: 'VLA-Thinker', date: '2026-03', params: '7B', parent: 'OpenVLA-OFT', relation: 'visual CoT + GRPO RL' },
     ],
   },
   {
@@ -53,6 +58,8 @@ const FAMILIES = [
     nodes: [
       { id: 'GR00T-N1', label: 'GR00T-N1', date: '2025-03', params: '2.2B' },
       { id: 'FLARE', label: 'FLARE', date: '2025-05', params: '3B' },
+      { id: 'NaVILA', label: 'NaVILA', date: '2024-12', params: '8B' },
+      { id: 'SAM2Act', label: 'SAM2Act', date: '2025-01', params: '—' },
     ],
   },
   {
@@ -62,6 +69,8 @@ const FAMILIES = [
     nodes: [
       { id: 'UniPi', label: 'UniPi', date: '2023-02', params: '—' },
       { id: 'RT-2-X', label: 'RT-2-X', date: '2023-10', params: '55B' },
+      { id: 'Mobility VLA', label: 'Mobility VLA', date: '2024-07', params: '—' },
+      { id: 'Gemini Robotics', label: 'Gemini Robotics', date: '2025-03', params: '—' },
     ],
   },
   {
@@ -71,6 +80,8 @@ const FAMILIES = [
     nodes: [
       { id: 'SuSIE', label: 'SuSIE', date: '2023-10', params: '—' },
       { id: 'Octo', label: 'Octo', date: '2024-05', params: '93M' },
+      { id: 'LLARVA', label: 'LLARVA', date: '2024-06', params: '7B' },
+      { id: 'CrossFormer', label: 'CrossFormer', date: '2024-08', params: '—', parent: 'Octo', relation: 'cross-embodiment scaling' },
       { id: 'CoT-VLA', label: 'CoT-VLA', date: '2025-01', params: '2B' },
     ],
   },
@@ -79,10 +90,12 @@ const FAMILIES = [
     name: 'Shanghai AI Lab Ecosystem',
     color: '#D4537E',
     nodes: [
+      { id: 'DeeR-VLA', label: 'DeeR-VLA', date: '2024-11', params: '3B' },
       { id: 'RoboVLM', label: 'RoboVLM', date: '2024-11', params: '1.5B' },
       { id: 'SpatialVLA', label: 'SpatialVLA', date: '2025-01', params: '4B' },
       { id: 'TRA-VLA', label: 'TRA-VLA', date: '2025-03', params: '4B' },
       { id: 'InstructVLA', label: 'InstructVLA', date: '2025-07', params: '4B' },
+      { id: 'RoboDual', label: 'RoboDual', date: '2024-10', params: '7B+20M' },
       { id: 'UD-VLA', label: 'UD-VLA', date: '2025-11', params: '3B' },
     ],
   },

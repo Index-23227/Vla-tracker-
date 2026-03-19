@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-03-19T03:17:12.442482",
-  "num_models": 45,
+  "num_models": 58,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -1798,6 +1798,350 @@
       },
       "simpler_avg": 73.5,
       "rank": 45
+    },
+    {
+      "name": "ECoT",
+      "organization": "UC Berkeley / Stanford / University of Warsaw",
+      "date": "2024-07-11",
+      "paper_url": "https://arxiv.org/abs/2407.08693",
+      "code_url": "https://github.com/MichalZawalski/embodied-CoT",
+      "venue": "CoRL 2024",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "chain-of-thought",
+        "embodied-reasoning",
+        "autoregressive",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "autoregressive (OpenVLA base) + structured reasoning chain (TASK/PLAN/SUBTASK/MOVE)",
+        "parameters": "7B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_90_avg": 90.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned with CoT reasoning"
+      },
+      "libero_avg": 90.8,
+      "rank": 46
+    },
+    {
+      "name": "DeeR-VLA",
+      "organization": "Tsinghua University / Shanghai AI Lab",
+      "date": "2024-11-04",
+      "paper_url": "https://arxiv.org/abs/2411.02359",
+      "code_url": "https://github.com/yueyang130/DeeR-VLA",
+      "venue": "NeurIPS 2024",
+      "open_source": true,
+      "tags": [
+        "3B",
+        "dynamic-inference",
+        "early-exit",
+        "efficient",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "multi-exit early-stopping with action consistency metric",
+        "parameters": "3B (OpenFlamingo backbone)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "calvin": {
+          "calvin_note": "competitive with GR-1 SOTA; 5.2-6.5x compute reduction"
+        }
+      },
+      "eval_conditions": {
+        "calvin": "fine-tuned (dynamic inference)"
+      },
+      "rank": 47
+    },
+    {
+      "name": "TinyVLA",
+      "organization": "Midea Group / East China Normal University",
+      "date": "2024-09-19",
+      "paper_url": "https://arxiv.org/abs/2409.12514",
+      "code_url": "https://github.com/JayceWen/tinyvla",
+      "venue": "RA-L 2025",
+      "open_source": true,
+      "tags": [
+        "422M-1.3B",
+        "diffusion",
+        "efficient",
+        "lightweight",
+        "open-source",
+        "LoRA"
+      ],
+      "architecture": {
+        "action_head": "diffusion-based continuous action head",
+        "parameters": "422M–1.3B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 48
+    },
+    {
+      "name": "3D-VLA",
+      "organization": "UMass Amherst / MIT / MIT-IBM Watson AI Lab",
+      "date": "2024-03-14",
+      "paper_url": "https://arxiv.org/abs/2403.09631",
+      "code_url": "https://github.com/UMass-Embodied-AGI/3D-VLA",
+      "venue": "ICML 2024",
+      "open_source": true,
+      "tags": [
+        "3D",
+        "world-model",
+        "point-cloud",
+        "diffusion",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "embodied diffusion model aligned to 3D-LLM for goal generation + action prediction",
+        "parameters": "3B–11B (FlanT5 backbone)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 49
+    },
+    {
+      "name": "RoboMamba",
+      "organization": "Chinese Academy of Sciences (CAS) / UCAS",
+      "date": "2024-06-06",
+      "paper_url": "https://arxiv.org/abs/2406.04339",
+      "code_url": null,
+      "venue": "NeurIPS 2024",
+      "open_source": false,
+      "tags": [
+        "3.2B",
+        "Mamba-SSM",
+        "MLP-action-head",
+        "efficient"
+      ],
+      "architecture": {
+        "action_head": "lightweight MLP policy head (3.7M) for SE(3) pose",
+        "parameters": "3.2B (2.7B Mamba + CLIP)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 50
+    },
+    {
+      "name": "LLARVA",
+      "organization": "UC Berkeley",
+      "date": "2024-06-17",
+      "paper_url": "https://arxiv.org/abs/2406.11815",
+      "code_url": null,
+      "venue": "CoRL 2024",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "visual-trace",
+        "LLaVA",
+        "autoregressive",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "autoregressive text-based action + 2D visual trace prediction",
+        "parameters": "7B (LLaVA-based)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 51
+    },
+    {
+      "name": "CrossFormer",
+      "organization": "UC Berkeley / Carnegie Mellon University",
+      "date": "2024-08-21",
+      "paper_url": "https://arxiv.org/abs/2408.11812",
+      "code_url": "https://github.com/rail-berkeley/crossformer",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "cross-embodiment",
+        "decoder-only",
+        "manipulation",
+        "navigation",
+        "locomotion",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "embodiment-class-specific action heads (variable-dim)",
+        "parameters": "not disclosed (Octo-based transformer)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 52
+    },
+    {
+      "name": "SAM2Act",
+      "organization": "University of Washington / NVIDIA",
+      "date": "2025-01-30",
+      "paper_url": "https://arxiv.org/abs/2501.18564",
+      "code_url": "https://github.com/sam2act/sam2act",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "SAM2",
+        "multi-view",
+        "RLBench-SOTA",
+        "memory-bank",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "RVT-2 multi-view transformer (coarse-to-fine heatmap) + SAM2 memory",
+        "parameters": "not disclosed (SAM2 encoder + RVT-2)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "rlbench": {
+          "rlbench_18tasks": 86.8,
+          "memorybench": 94.3
+        }
+      },
+      "eval_conditions": {
+        "rlbench": "fine-tuned"
+      },
+      "rlbench_avg": 86.8,
+      "rank": 53
+    },
+    {
+      "name": "NaVILA",
+      "organization": "NVIDIA Research / UC San Diego / USC",
+      "date": "2024-12-05",
+      "paper_url": "https://arxiv.org/abs/2412.04453",
+      "code_url": "https://github.com/AnjieCheng/NaVILA",
+      "venue": "RSS 2025",
+      "open_source": true,
+      "tags": [
+        "8B",
+        "navigation",
+        "hierarchical",
+        "legged-robot",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "hierarchical: NVILA-8B high-level VLA + low-level visual locomotion RL",
+        "parameters": "8B (SigLIP + LLaMA 3 8B)"
+      },
+      "model_type": "navigation",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 54
+    },
+    {
+      "name": "RoboDual",
+      "organization": "Shanghai AI Lab (OpenDriveLab)",
+      "date": "2024-10-10",
+      "paper_url": "https://arxiv.org/abs/2410.08001",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "7B+20M",
+        "dual-system",
+        "diffusion-transformer",
+        "cross-attention"
+      ],
+      "architecture": {
+        "action_head": "dual-system: OpenVLA 7B generalist + 20M Diffusion Transformer specialist via cross-attention",
+        "parameters": "7B + 20M"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 55
+    },
+    {
+      "name": "Humanoid-VLA",
+      "organization": "Multiple Chinese institutions",
+      "date": "2025-02-20",
+      "paper_url": "https://arxiv.org/abs/2502.14795",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "humanoid",
+        "whole-body-control",
+        "language-motion-alignment",
+        "egocentric"
+      ],
+      "architecture": {
+        "action_head": "language-motion pre-alignment + egocentric video-conditioned fine-tuning",
+        "parameters": "not disclosed"
+      },
+      "model_type": "humanoid",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 56
+    },
+    {
+      "name": "Gemini Robotics",
+      "organization": "Google DeepMind",
+      "date": "2025-03-12",
+      "paper_url": "https://arxiv.org/abs/2503.20020",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "Gemini-2.0",
+        "cross-embodiment",
+        "end-to-end",
+        "embodied-reasoning",
+        "proprietary"
+      ],
+      "architecture": {
+        "action_head": "Gemini 2.0 foundation model: VLA (end-to-end) + ER (embodied reasoning) + On-Device variants",
+        "parameters": "not disclosed (Gemini 2.0 scale)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 57
+    },
+    {
+      "name": "Mobility VLA",
+      "organization": "Google DeepMind",
+      "date": "2024-07-10",
+      "paper_url": "https://arxiv.org/abs/2407.07775",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "navigation",
+        "long-context-VLM",
+        "topological-graph",
+        "multimodal-instruction"
+      ],
+      "architecture": {
+        "action_head": "hierarchical: long-context VLM goal identification + topological graph navigation",
+        "parameters": "not disclosed (Gemini-based)"
+      },
+      "model_type": "navigation",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 58
     }
   ]
 }
