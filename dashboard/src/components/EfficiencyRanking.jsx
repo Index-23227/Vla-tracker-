@@ -61,18 +61,14 @@ export default function EfficiencyRanking({ models }) {
         if (axisKey === 'hz') return m.inference_hz != null
         return false
       })
-      .map(m => {
-        const isPareto = false // computed later
-        return {
-          name: m.name,
-          score: m[benchKey],
-          params: parseParams(m.architecture?.parameters),
-          hz: m.inference_hz,
-          oss: m.open_source,
-          x: axisKey === 'params' ? parseParams(m.architecture?.parameters) : m.inference_hz,
-          size: 1, // will be updated with pareto info
-        }
-      })
+      .map(m => ({
+        name: m.name,
+        score: m[benchKey],
+        params: parseParams(m.architecture?.parameters),
+        hz: m.inference_hz,
+        oss: m.open_source,
+        x: axisKey === 'params' ? parseParams(m.architecture?.parameters) : m.inference_hz,
+      }))
   }, [models, benchKey, axisKey])
 
   const paretoNames = useMemo(() => {
