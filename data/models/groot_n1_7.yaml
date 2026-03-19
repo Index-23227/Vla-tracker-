@@ -1,0 +1,23 @@
+name: GR00T-N1.7
+version: "1.7"
+organization: "NVIDIA"
+paper_url: null
+code_url: https://github.com/NVIDIA/Isaac-GR00T
+date: "2026-03-18"
+venue: "GTC 2026"
+architecture:
+  backbone: "Reasoning VLM"
+  llm: "Reasoning VLM"
+  action_head: "diffusion transformer"
+  action_space: "continuous"
+  parameters: "~3B"
+  key_innovation: "Reasoning VLA for production-ready real-world deployment; first version with commercial licensing (early access)"
+training:
+  dataset: "Real robot data + synthetic data"
+  method: "Pre-training + reasoning alignment"
+  compute: "NVIDIA DGX"
+benchmarks: {}
+open_source: true
+open_source_note: "Available on GitHub, HuggingFace, and build.nvidia.com with NIM microservices"
+model_type: "vla"
+tags: [3B, diffusion-transformer, humanoid, reasoning-vla, commercial, NIM, open-model]

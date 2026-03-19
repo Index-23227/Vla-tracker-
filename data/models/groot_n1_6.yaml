@@ -1,0 +1,23 @@
+name: GR00T-N1.6
+version: "1.6"
+organization: "NVIDIA"
+paper_url: https://research.nvidia.com/labs/gear/gr00t-n1_6/
+code_url: https://github.com/NVIDIA/Isaac-GR00T
+date: "2025-09-29"
+venue: "CoRL 2025"
+architecture:
+  backbone: "Cosmos-Reason-2B VLM (flexible resolution, native aspect ratio)"
+  llm: "Cosmos-Reason-2B"
+  action_head: "large diffusion transformer (32 layers)"
+  action_space: "continuous (state-relative action chunks)"
+  parameters: "3B"
+  key_innovation: "2x larger DiT (32 layers vs 16); Cosmos-Reason VLM for step-by-step task planning; state-relative action prediction; full-body humanoid control"
+training:
+  dataset: "Real robot data + synthetic data"
+  method: "Pre-training with top 4 VLM layers unfrozen"
+  compute: "300K steps, batch size 16384"
+benchmarks: {}
+open_source: true
+open_source_note: "Open model weights on HuggingFace (nvidia/GR00T-N1.6-3B)"
+model_type: "vla"
+tags: [3B, diffusion-transformer, dual-system, humanoid, cosmos-reason, full-body-control, open-model]
