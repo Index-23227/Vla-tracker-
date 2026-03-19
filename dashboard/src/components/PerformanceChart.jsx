@@ -6,6 +6,9 @@ const BENCH_OPTIONS = {
   calvin: { label: 'CALVIN', avgKey: 'calvin_avg', domain: [0, 5] },
   robotwin_v1: { label: 'RoboTwin v1', avgKey: 'robotwin_v1_avg', domain: [0, 100] },
   robotwin_v2: { label: 'RoboTwin v2', avgKey: 'robotwin_v2_avg', domain: [0, 100] },
+  maniskill: { label: 'ManiSkill', avgKey: 'maniskill_avg', domain: [0, 100] },
+  vlabench: { label: 'VLABench', avgKey: 'vlabench_avg', domain: [0, 100] },
+  robocasa: { label: 'RoboCasa', avgKey: 'robocasa_avg', domain: [0, 100] },
 }
 
 export default function PerformanceChart({ modelHistory, models }) {

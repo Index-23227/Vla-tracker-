@@ -2,12 +2,20 @@ import { useState } from 'react'
 import LeaderboardTable from './components/LeaderboardTable'
 import ModelCompare from './components/ModelCompare'
 import AnalysisDashboard from './components/AnalysisDashboard'
+import ModelLineage from './components/ModelLineage'
+import EfficiencyRanking from './components/EfficiencyRanking'
+import RealWorldBenchmark from './components/RealWorldBenchmark'
+import CoverageHeatmap from './components/CoverageHeatmap'
 import leaderboard from './data/leaderboard.json'
 import weeklyDigest from './data/weeklyDigest.json'
 
 const TABS = [
   { id: 'leaderboard', label: 'Leaderboard' },
   { id: 'compare', label: 'Compare' },
+  { id: 'lineage', label: 'Lineage' },
+  { id: 'efficiency', label: 'Efficiency' },
+  { id: 'realworld', label: 'Real-World' },
+  { id: 'coverage', label: 'Coverage' },
   { id: 'analysis', label: 'Analysis' },
 ]
 
@@ -62,6 +70,18 @@ export default function App() {
         )}
         {activeTab === 'compare' && (
           <ModelCompare models={leaderboard.models} />
+        )}
+        {activeTab === 'lineage' && (
+          <ModelLineage models={leaderboard.models} />
+        )}
+        {activeTab === 'efficiency' && (
+          <EfficiencyRanking models={leaderboard.models} />
+        )}
+        {activeTab === 'realworld' && (
+          <RealWorldBenchmark models={leaderboard.models} />
+        )}
+        {activeTab === 'coverage' && (
+          <CoverageHeatmap models={leaderboard.models} />
         )}
         {activeTab === 'analysis' && (
           <AnalysisDashboard models={leaderboard.models} />

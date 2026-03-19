@@ -138,6 +138,48 @@ def compute_rlbench_avg(benchmarks: dict) -> float | None:
     return None
 
 
+def compute_maniskill_avg(benchmarks: dict) -> float | None:
+    maniskill = benchmarks.get("maniskill")
+    if not maniskill:
+        return None
+    avg = maniskill.get("maniskill_avg")
+    if avg is not None and isinstance(avg, (int, float)):
+        return round(avg, 2)
+    scores = [v for k, v in maniskill.items()
+              if k not in METADATA_KEYS and isinstance(v, (int, float))]
+    if scores:
+        return round(sum(scores) / len(scores), 2)
+    return None
+
+
+def compute_vlabench_avg(benchmarks: dict) -> float | None:
+    vlabench = benchmarks.get("vlabench")
+    if not vlabench:
+        return None
+    avg = vlabench.get("vlabench_avg")
+    if avg is not None and isinstance(avg, (int, float)):
+        return round(avg, 2)
+    scores = [v for k, v in vlabench.items()
+              if k not in METADATA_KEYS and isinstance(v, (int, float))]
+    if scores:
+        return round(sum(scores) / len(scores), 2)
+    return None
+
+
+def compute_robocasa_avg(benchmarks: dict) -> float | None:
+    robocasa = benchmarks.get("robocasa")
+    if not robocasa:
+        return None
+    avg = robocasa.get("robocasa_avg")
+    if avg is not None and isinstance(avg, (int, float)):
+        return round(avg, 2)
+    scores = [v for k, v in robocasa.items()
+              if k not in METADATA_KEYS and isinstance(v, (int, float))]
+    if scores:
+        return round(sum(scores) / len(scores), 2)
+    return None
+
+
 def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> dict:
     leaderboard_entries = []
 
@@ -164,7 +206,7 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         model_benchmarks = model.get("benchmarks", {})
 
         # Process each benchmark
-        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin_v1", "robotwin_v2"]:
+        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin_v1", "robotwin_v2", "maniskill", "vlabench", "robocasa"]:
             if bench_name in model_benchmarks:
                 scores, meta = extract_scores(model_benchmarks[bench_name])
                 if scores:
@@ -202,6 +244,18 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         rlbench_avg = compute_rlbench_avg(model_benchmarks)
         if rlbench_avg is not None:
             entry["rlbench_avg"] = rlbench_avg
+
+        maniskill_avg = compute_maniskill_avg(model_benchmarks)
+        if maniskill_avg is not None:
+            entry["maniskill_avg"] = maniskill_avg
+
+        vlabench_avg = compute_vlabench_avg(model_benchmarks)
+        if vlabench_avg is not None:
+            entry["vlabench_avg"] = vlabench_avg
+
+        robocasa_avg = compute_robocasa_avg(model_benchmarks)
+        if robocasa_avg is not None:
+            entry["robocasa_avg"] = robocasa_avg
 
         leaderboard_entries.append(entry)
 

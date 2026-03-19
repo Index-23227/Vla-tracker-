@@ -43,6 +43,27 @@ const BENCHMARKS = {
     avgKey: 'rlbench_avg',
     metric: 'Success Rate (%)',
   },
+  maniskill: {
+    label: 'ManiSkill',
+    suites: ['maniskill_pick_and_place', 'maniskill_assembly'],
+    suiteLabels: { maniskill_pick_and_place: 'Pick & Place', maniskill_assembly: 'Assembly' },
+    avgKey: 'maniskill_avg',
+    metric: 'Success Rate (%)',
+  },
+  vlabench: {
+    label: 'VLABench',
+    suites: ['vlabench_primitive', 'vlabench_composite'],
+    suiteLabels: { vlabench_primitive: 'Primitive', vlabench_composite: 'Composite' },
+    avgKey: 'vlabench_avg',
+    metric: 'Success Rate (%)',
+  },
+  robocasa: {
+    label: 'RoboCasa',
+    suites: ['robocasa_pick_and_place', 'robocasa_open_close'],
+    suiteLabels: { robocasa_pick_and_place: 'Pick & Place', robocasa_open_close: 'Open/Close' },
+    avgKey: 'robocasa_avg',
+    metric: 'Success Rate (%)',
+  },
 }
 
 const ACTION_HEAD_COLORS = {

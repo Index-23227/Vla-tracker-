@@ -14,6 +14,9 @@ const RADAR_AXES = [
   { key: 'robotwin_v1_avg', label: 'RoboTwin v1', max: 100 },
   { key: 'robotwin_v2_avg', label: 'RoboTwin v2', max: 100 },
   { key: 'rlbench_avg', label: 'RLBench', max: 100 },
+  { key: 'maniskill_avg', label: 'ManiSkill', max: 100 },
+  { key: 'vlabench_avg', label: 'VLABench', max: 100 },
+  { key: 'robocasa_avg', label: 'RoboCasa', max: 100 },
 ]
 
 const DETAIL_SUITES = {
@@ -47,6 +50,14 @@ const DETAIL_SUITES = {
       { key: 'short_horizon', label: 'Short' },
       { key: 'medium_horizon', label: 'Medium' },
       { key: 'long_horizon', label: 'Long' },
+    ],
+  },
+  vlabench: {
+    label: 'VLABench',
+    avgKey: 'vlabench_avg',
+    suites: [
+      { key: 'vlabench_primitive', label: 'Primitive' },
+      { key: 'vlabench_composite', label: 'Composite' },
     ],
   },
 }
