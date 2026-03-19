@@ -61,19 +61,31 @@ export default function EfficiencyRanking({ models }) {
         if (axisKey === 'hz') return m.inference_hz != null
         return false
       })
-      .map(m => ({
-        name: m.name,
-        score: m[benchKey],
-        params: parseParams(m.architecture?.parameters),
-        hz: m.inference_hz,
-        oss: m.open_source,
-        x: axisKey === 'params' ? parseParams(m.architecture?.parameters) : m.inference_hz,
-      }))
+      .map(m => {
+        const isPareto = false // computed later
+        return {
+          name: m.name,
+          score: m[benchKey],
+          params: parseParams(m.architecture?.parameters),
+          hz: m.inference_hz,
+          oss: m.open_source,
+          x: axisKey === 'params' ? parseParams(m.architecture?.parameters) : m.inference_hz,
+          size: 1, // will be updated with pareto info
+        }
+      })
   }, [models, benchKey, axisKey])
 
   const paretoNames = useMemo(() => {
     return computePareto(data, 'x', axisKey === 'hz')
   }, [data, axisKey])
+
+  // Update size field for ZAxis-based sizing (Pareto = larger)
+  const chartData = useMemo(() => {
+    return data.map(d => ({
+      ...d,
+      size: paretoNames.includes(d.name) ? 300 : 100,
+    }))
+  }, [data, paretoNames])
 
   // Efficiency score: performance / log(params) or performance * log(hz)
   const ranking = useMemo(() => {
@@ -149,7 +161,7 @@ export default function EfficiencyRanking({ models }) {
             ? 'Stars = Pareto optimal (best performance for given size or smaller)'
             : 'Stars = Pareto optimal (best performance for given speed or faster)'}
         </p>
-        {data.length > 0 ? (
+        {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={350}>
             <ScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 25 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -168,7 +180,7 @@ export default function EfficiencyRanking({ models }) {
                 tick={{ fontSize: 10, fill: '#71717a' }}
                 label={{ value: `${benchCfg.label} (${benchCfg.unit})`, angle: -90, position: 'insideLeft', fontSize: 10, fill: '#52525b' }}
               />
-              <ZAxis range={[80, 200]} />
+              <ZAxis dataKey="size" range={[60, 250]} />
               <Tooltip
                 content={({ payload }) => {
                   if (!payload || !payload.length) return null
@@ -187,15 +199,14 @@ export default function EfficiencyRanking({ models }) {
                   )
                 }}
               />
-              <Scatter data={data}>
-                {data.map((entry, i) => (
+              <Scatter data={chartData}>
+                {chartData.map((entry) => (
                   <Cell
                     key={entry.name}
                     fill={paretoNames.includes(entry.name) ? '#f59e0b' : entry.oss ? '#1D9E75' : '#7F77DD'}
                     fillOpacity={paretoNames.includes(entry.name) ? 1 : 0.7}
                     stroke={paretoNames.includes(entry.name) ? '#f59e0b' : 'none'}
                     strokeWidth={paretoNames.includes(entry.name) ? 2 : 0}
-                    r={paretoNames.includes(entry.name) ? 7 : 5}
                   />
                 ))}
               </Scatter>
