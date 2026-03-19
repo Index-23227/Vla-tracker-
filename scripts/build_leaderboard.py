@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "data" / "models"
 BENCHMARKS_DIR = ROOT / "data" / "benchmarks"
 OUTPUT_FILE = ROOT / "data" / "leaderboard.json"
+DASHBOARD_COPY = ROOT / "dashboard" / "src" / "data" / "leaderboard.json"
 
 METADATA_KEYS = ("source", "date_reported", "eval_condition")
 
@@ -70,6 +71,10 @@ def compute_libero_avg(benchmarks: dict) -> float | None:
             scores.append(val)
     if len(scores) == 4:
         return round(sum(scores) / 4, 2)
+    # Fallback: pre-computed libero_avg in YAML
+    fallback = libero.get("libero_avg")
+    if fallback is not None and isinstance(fallback, (int, float)):
+        return round(fallback, 2)
     return None
 
 
@@ -80,6 +85,10 @@ def compute_calvin_avg(benchmarks: dict) -> float | None:
     val = calvin.get("calvin_abc_d_avg_len")
     if val is not None and isinstance(val, (int, float)):
         return round(val, 2)
+    # Fallback: pre-computed calvin_avg in YAML
+    fallback = calvin.get("calvin_avg")
+    if fallback is not None and isinstance(fallback, (int, float)):
+        return round(fallback, 2)
     return None
 
 
@@ -295,6 +304,13 @@ def main():
         json.dump(leaderboard, f, indent=2, ensure_ascii=False)
 
     print(f"Leaderboard written to {OUTPUT_FILE}")
+
+    # Sync to dashboard
+    if DASHBOARD_COPY.parent.exists():
+        import shutil
+        shutil.copy2(OUTPUT_FILE, DASHBOARD_COPY)
+        print(f"Synced to {DASHBOARD_COPY}")
+
     print(f"  {leaderboard['num_models']} models ranked")
 
     # Print top 5

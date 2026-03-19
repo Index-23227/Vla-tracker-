@@ -1,0 +1,24 @@
+name: Fast-WAM
+organization: "Tsinghua University (IIIS) / Galaxea AI"
+date: "2026-03-17"
+paper_url: https://arxiv.org/abs/2603.16666
+code_url: https://github.com/yuantianyuan01/FastWAM
+venue: null
+open_source: true
+inference_hz: 5
+tags:
+- 6B
+- world-action-model
+- flow-matching
+- video-DiT
+- open-source
+architecture:
+  action_head: "flow matching (velocity field) + Wan2.2-5B video DiT backbone"
+  parameters: "6B (5B video DiT + 1B action expert)"
+benchmarks:
+  libero:
+    libero_avg: 97.6
+    eval_condition: fine-tuned
+  robotwin_v1:
+    average: 91.8
+    eval_condition: fine-tuned

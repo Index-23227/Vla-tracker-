@@ -1,0 +1,20 @@
+name: SAM2Act
+organization: University of Washington / NVIDIA
+date: '2025-01-30'
+paper_url: https://arxiv.org/abs/2501.18564
+code_url: https://github.com/sam2act/sam2act
+open_source: true
+tags:
+- SAM2
+- multi-view
+- RLBench-SOTA
+- memory-bank
+- open-source
+architecture:
+  action_head: RVT-2 multi-view transformer (coarse-to-fine heatmap) + SAM2 memory
+  parameters: not disclosed (SAM2 encoder + RVT-2)
+benchmarks:
+  rlbench:
+    rlbench_18tasks: 86.8
+    memorybench: 94.3
+    eval_condition: fine-tuned
