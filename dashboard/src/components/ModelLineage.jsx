@@ -89,25 +89,14 @@ const FAMILIES = [
 ]
 
 // ─── Popover component for node click ───
-function NodePopover({ node, modelData, family, onClose, anchorRect }) {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (ref.current && !ref.current.contains(e.target)) onClose()
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [onClose])
-
+function NodePopover({ node, modelData, family, onClose }) {
   const hasPaper = modelData?.paper_url
   const hasCode = modelData?.code_url
   const hasAny = hasPaper || hasCode
 
   return (
     <div
-      ref={ref}
-      className="absolute z-50 mt-1 min-w-[200px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl shadow-black/40 p-3 animate-in fade-in"
+      className="absolute z-50 mt-1 min-w-[200px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl shadow-black/40 p-3"
       style={{ left: 0, top: '100%' }}
     >
       <div className="flex items-center justify-between mb-2">
@@ -189,38 +178,45 @@ function NodePopover({ node, modelData, family, onClose, anchorRect }) {
 }
 
 // ─── Tooltip component for hover ───
+// CALVIN uses 0-5 scale, others use 0-100; normalize for display
+const BENCHMARK_FIELDS = [
+  { key: 'libero_avg', label: 'LIBERO', max: 100 },
+  { key: 'calvin_avg', label: 'CALVIN', max: 5 },
+  { key: 'robotwin_v1_avg', label: 'RoboTwin v1', max: 100 },
+  { key: 'robotwin_v2_avg', label: 'RoboTwin v2', max: 100 },
+  { key: 'simpler_avg', label: 'SimplerEnv', max: 100 },
+]
+
 function NodeTooltip({ node, modelData }) {
-  const benchmarks = modelData?.benchmarks || {}
-  const benchmarkNames = Object.keys(benchmarks)
-  const avgFields = [
-    { key: 'libero_avg', label: 'LIBERO' },
-    { key: 'calvin_avg', label: 'CALVIN' },
-    { key: 'robotwin_v1_avg', label: 'RoboTwin v1' },
-    { key: 'robotwin_v2_avg', label: 'RoboTwin v2' },
-    { key: 'simpler_avg', label: 'SimplerEnv' },
-  ]
-  const scores = avgFields.filter(f => modelData?.[f.key] != null)
+  const scores = BENCHMARK_FIELDS.filter(f => modelData?.[f.key] != null)
 
   return (
     <div className="absolute z-40 bottom-full left-1/2 -translate-x-1/2 mb-2 min-w-[180px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl shadow-black/40 p-2.5 pointer-events-none">
       <div className="text-[10px] font-semibold text-white mb-1.5">{node.label}</div>
       {scores.length > 0 ? (
         <div className="space-y-1">
-          {scores.map(s => (
-            <div key={s.key} className="flex items-center gap-1.5">
-              <span className="text-[9px] text-zinc-500 w-16 shrink-0">{s.label}</span>
-              <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(modelData[s.key], 100)}%`,
-                    backgroundColor: modelData[s.key] >= 90 ? '#10b981' : modelData[s.key] >= 70 ? '#f59e0b' : '#ef4444',
-                  }}
-                />
+          {scores.map(s => {
+            const raw = modelData[s.key]
+            const pct = (raw / s.max) * 100
+            const normalized = raw / s.max * 100 // 0-100 scale for color
+            return (
+              <div key={s.key} className="flex items-center gap-1.5">
+                <span className="text-[9px] text-zinc-500 w-16 shrink-0">{s.label}</span>
+                <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(pct, 100)}%`,
+                      backgroundColor: normalized >= 90 ? '#10b981' : normalized >= 70 ? '#f59e0b' : '#ef4444',
+                    }}
+                  />
+                </div>
+                <span className="text-[9px] font-medium text-zinc-300 w-8 text-right">
+                  {s.max === 5 ? raw.toFixed(1) : raw.toFixed(1)}
+                </span>
               </div>
-              <span className="text-[9px] font-medium text-zinc-300 w-8 text-right">{modelData[s.key].toFixed(1)}</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
       ) : (
         <div className="text-[9px] text-zinc-600 italic">No benchmark data</div>
@@ -242,6 +238,23 @@ function TreeNode({ node, family, depth, models, childCount, isCollapsed, onTogg
   const modelData = models.find(m => m.name === node.id)
   const hasScore = modelData?.libero_avg != null
   const hoverTimeout = useRef(null)
+  const nodeRef = useRef(null)
+
+  // Close popover on outside click (excluding the node itself to avoid toggle conflict)
+  useEffect(() => {
+    if (!showPopover) return
+    function handleClickOutside(e) {
+      if (nodeRef.current && nodeRef.current.contains(e.target)) return
+      setShowPopover(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showPopover])
+
+  // Cleanup hover timeout on unmount
+  useEffect(() => {
+    return () => clearTimeout(hoverTimeout.current)
+  }, [])
 
   const handleMouseEnter = () => {
     hoverTimeout.current = setTimeout(() => setShowTooltip(true), 400)
@@ -261,7 +274,7 @@ function TreeNode({ node, family, depth, models, childCount, isCollapsed, onTogg
           </div>
         )}
         {/* Node */}
-        <div className="relative">
+        <div className="relative" ref={nodeRef}>
           {showTooltip && !showPopover && modelData && (
             <NodeTooltip node={node} modelData={modelData} />
           )}
@@ -368,7 +381,7 @@ function FamilyTimeline({ family }) {
               style={{ left: `${Math.max(2, Math.min(98, pos))}%` }}
             >
               <div
-                className={`w-2.5 h-2.5 rounded-full border-2 transition-transform hover:scale-150 ${isRoot ? '' : ''}`}
+                className="w-2.5 h-2.5 rounded-full border-2 transition-transform hover:scale-150"
                 style={{
                   backgroundColor: isRoot ? family.color : 'transparent',
                   borderColor: family.color,
@@ -454,7 +467,7 @@ function FamilyTree({ family, models }) {
 }
 
 // ─── Cross-family references section ───
-function CrossReferences({ models }) {
+function CrossReferences() {
   const [expanded, setExpanded] = useState(false)
 
   // Find family for a model id
@@ -693,7 +706,7 @@ export default function ModelLineage({ models }) {
       </div>
 
       {/* Cross-family influences */}
-      <CrossReferences models={models} />
+      <CrossReferences />
 
       {/* Independent models */}
       <IndependentModels models={models} />
