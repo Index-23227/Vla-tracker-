@@ -144,6 +144,18 @@ export const VENUE_COLORS = {
 export const EVAL_COLORS = {
   'fine-tuned': { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'FT' },
   'zero-shot': { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'ZS' },
+  'rl': { bg: 'bg-rose-500/10', text: 'text-rose-400', label: 'RL' },
+}
+
+/**
+ * Classify an eval_condition string into a category.
+ */
+export function classifyEvalCondition(cond) {
+  if (!cond) return null
+  const lower = cond.toLowerCase()
+  if (lower.includes('rl') || lower.includes('grpo') || lower.includes('reinforcement')) return EVAL_COLORS['rl']
+  if (lower.includes('zero-shot') || lower.includes('zero shot')) return EVAL_COLORS['zero-shot']
+  return EVAL_COLORS['fine-tuned']
 }
 
 /**

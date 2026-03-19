@@ -112,9 +112,16 @@ export default function ModelCompare({ models }) {
     return [
       { label: 'Organization', get: m => m.organization || '—' },
       { label: 'Parameters', get: m => m.architecture?.parameters || '—' },
+      { label: 'VLM Backbone', get: m => m.architecture?.backbone || '—' },
+      { label: 'LLM', get: m => m.architecture?.llm || '—' },
       { label: 'Action Head', get: m => m.architecture?.action_head || '—' },
       { label: 'Inference Hz', get: m => m.inference_hz ? `${m.inference_hz} Hz` : '—' },
       { label: 'Open Source', get: m => m.open_source ? '✓' : '✗' },
+      { label: 'Eval Condition', get: m => {
+        const conds = m.eval_conditions || {}
+        const vals = [...new Set(Object.values(conds))]
+        return vals.length > 0 ? vals.join(', ') : '—'
+      }},
       { label: 'Venue', get: m => m.venue || 'preprint' },
       { label: 'Date', get: m => m.date || '—' },
     ]

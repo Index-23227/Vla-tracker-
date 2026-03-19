@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-19T15:54:54.005747",
+  "generated_at": "2026-03-19T22:46:12.859835",
   "num_models": 73,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -171,8 +171,8 @@
         "open-source"
       ],
       "architecture": {
-        "action_head": "flow matching (velocity field) + Wan2.2-5B video DiT backbone",
-        "parameters": "6B (5B video DiT + 1B action expert)"
+        "action_head": "flow matching (velocity field)",
+        "parameters": "6B"
       },
       "model_type": null,
       "inference_hz": 5,
@@ -219,7 +219,9 @@
           "libero_long": 96.9
         }
       },
-      "eval_conditions": {},
+      "eval_conditions": {
+        "libero": "SFT + RL fine-tuned (GRPO)"
+      },
       "libero_avg": 97.45,
       "rank": 5
     },
@@ -290,7 +292,9 @@
           "libero_avg": 96.6
         }
       },
-      "eval_conditions": {},
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
       "libero_avg": 96.6,
       "rank": 7
     },
@@ -391,7 +395,9 @@
           "libero_long": 92.6
         }
       },
-      "eval_conditions": {},
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
       "libero_avg": 96.33,
       "rank": 10
     },
@@ -1551,7 +1557,7 @@
       ],
       "architecture": {
         "action_head": "multi-exit early-stopping with action consistency metric",
-        "parameters": "3B (OpenFlamingo backbone)"
+        "parameters": "3B"
       },
       "model_type": null,
       "inference_hz": null,
@@ -1903,7 +1909,7 @@
         "open-source"
       ],
       "architecture": {
-        "action_head": "Hierarchical MoE action module with Action-Space MoE at boundary layers (pi0-based)",
+        "action_head": "Hierarchical MoE action module with Action-Space MoE at boundary layers",
         "parameters": "3B+"
       },
       "model_type": null,
@@ -2004,7 +2010,7 @@
       ],
       "architecture": {
         "action_head": "autoregressive text-based action + 2D visual trace prediction",
-        "parameters": "7B (LLaVA-based)"
+        "parameters": "7B"
       },
       "model_type": null,
       "inference_hz": null,
@@ -2078,7 +2084,7 @@
       ],
       "architecture": {
         "action_head": "hierarchical: NVILA-8B high-level VLA + low-level visual locomotion RL",
-        "parameters": "8B (SigLIP + LLaMA 3 8B)"
+        "parameters": "8B"
       },
       "model_type": "navigation",
       "inference_hz": null,
@@ -2102,7 +2108,7 @@
         "open-source"
       ],
       "architecture": {
-        "action_head": "FAST+ action tokenizer + Qwen-2.5-VL-3B backbone",
+        "action_head": "FAST+ action tokenizer",
         "parameters": "3B"
       },
       "model_type": null,
@@ -2268,7 +2274,7 @@
       ],
       "architecture": {
         "action_head": "diffusion-based continuous action head",
-        "parameters": "422M–1.3B"
+        "parameters": "422M-1.3B"
       },
       "model_type": null,
       "inference_hz": null,

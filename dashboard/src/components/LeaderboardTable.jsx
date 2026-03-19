@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { BENCHMARKS, ACTION_HEAD_COLORS, VENUE_COLORS, EVAL_COLORS } from '../constants/benchmarks'
+import { BENCHMARKS, ACTION_HEAD_COLORS, VENUE_COLORS, EVAL_COLORS, classifyEvalCondition } from '../constants/benchmarks'
 
 function getVenueColor(venue) {
   if (!venue) return null
@@ -27,9 +27,7 @@ function formatDate(dateStr) {
 function getEvalStyle(model, benchKey) {
   const cond = model.eval_conditions?.[benchKey]
   if (!cond) return null
-  const lower = cond.toLowerCase()
-  if (lower.includes('zero-shot')) return EVAL_COLORS['zero-shot']
-  return EVAL_COLORS['fine-tuned']
+  return classifyEvalCondition(cond)
 }
 
 const MODEL_TYPE_FILTERS = {
@@ -257,6 +255,9 @@ export default function LeaderboardTable({ models, onModelClick }) {
         <span className="flex items-center gap-2">
           <span className="flex items-center gap-1">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400" />FT = Fine-tuned
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-400" />RL = RL-trained
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />ZS = Zero-shot

@@ -11,6 +11,7 @@ tags:
 - diffusion-transformer
 - cross-attention
 architecture:
-  action_head: 'dual-system: OpenVLA 7B generalist + 20M Diffusion Transformer specialist
-    via cross-attention'
+  backbone: "PrismaticVLM (SigLIP + DinoV2)"
+  llm: "Llama-2 7B"
+  action_head: 'dual-system: OpenVLA 7B generalist + 20M Diffusion Transformer specialist via cross-attention'
   parameters: 7B + 20M

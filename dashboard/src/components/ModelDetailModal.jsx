@@ -89,6 +89,8 @@ export default function ModelDetailModal({ model, onClose }) {
               { label: 'Parameters', value: model.architecture?.parameters || '—' },
               { label: 'Inference', value: model.inference_hz ? `${model.inference_hz} Hz` : '—' },
               { label: 'Action Head', value: model.architecture?.action_head || '—' },
+              { label: 'VLM Backbone', value: model.architecture?.backbone || '—' },
+              { label: 'LLM', value: model.architecture?.llm || '—' },
               { label: 'Benchmark Coverage', value: `${benchCount} / ${totalBenchmarks}` },
             ].map(({ label, value }) => (
               <div key={label} className="bg-zinc-800/50 rounded-lg px-3 py-2">
