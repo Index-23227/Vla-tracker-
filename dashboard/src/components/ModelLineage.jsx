@@ -198,7 +198,6 @@ function NodeTooltip({ node, modelData }) {
           {scores.map(s => {
             const raw = modelData[s.key]
             const pct = (raw / s.max) * 100
-            const normalized = raw / s.max * 100 // 0-100 scale for color
             return (
               <div key={s.key} className="flex items-center gap-1.5">
                 <span className="text-[9px] text-zinc-500 w-16 shrink-0">{s.label}</span>
@@ -207,13 +206,11 @@ function NodeTooltip({ node, modelData }) {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${Math.min(pct, 100)}%`,
-                      backgroundColor: normalized >= 90 ? '#10b981' : normalized >= 70 ? '#f59e0b' : '#ef4444',
+                      backgroundColor: pct >= 90 ? '#10b981' : pct >= 70 ? '#f59e0b' : '#ef4444',
                     }}
                   />
                 </div>
-                <span className="text-[9px] font-medium text-zinc-300 w-8 text-right">
-                  {s.max === 5 ? raw.toFixed(1) : raw.toFixed(1)}
-                </span>
+                <span className="text-[9px] font-medium text-zinc-300 w-8 text-right">{raw.toFixed(1)}</span>
               </div>
             )
           })}
@@ -414,6 +411,12 @@ function FamilyTree({ family, models }) {
   const roots = sortByDate(family.nodes.filter(n => !n.parent))
   const getChildren = (parentId) => sortByDate(family.nodes.filter(n => n.parent === parentId))
 
+  // Count all descendants (not just direct children)
+  const countDescendants = (nodeId) => {
+    const children = family.nodes.filter(n => n.parent === nodeId)
+    return children.reduce((sum, c) => sum + 1 + countDescendants(c.id), 0)
+  }
+
   function renderNode(node, depth = 0) {
     const children = getChildren(node.id)
     const isCollapsed = collapsed[node.id] || false
@@ -442,7 +445,7 @@ function FamilyTree({ family, models }) {
               className="text-[9px] px-1.5 py-0.5 rounded-full"
               style={{ color: family.color, backgroundColor: family.color + '15' }}
             >
-              +{children.length} collapsed
+              +{countDescendants(node.id)} collapsed
             </span>
           </div>
         )}
