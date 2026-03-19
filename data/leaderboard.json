@@ -1319,25 +1319,41 @@
     },
     {
       "name": "AtomicVLA",
-      "organization": "TODO: check paper",
+      "organization": "Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology",
       "date": "2026-03-08",
       "paper_url": "https://arxiv.org/abs/2603.07648",
-      "code_url": null,
-      "venue": "CVPR2026",
-      "open_source": false,
+      "code_url": "https://github.com/zhanglk9/AtomicVLA",
+      "venue": "CVPR 2026",
+      "open_source": true,
       "tags": [
-        "libero",
-        "calvin",
-        "CVPR2026"
+        "3B-5B",
+        "flow-matching",
+        "MoE",
+        "atomic-skill",
+        "CVPR-2026",
+        "open-source"
       ],
       "architecture": {
-        "action_head": "TODO: check paper",
-        "parameters": "TODO"
+        "action_head": "flow matching + Skill-Guided Mixture-of-Experts (SG-MoE)",
+        "parameters": "3.24B–5.65B"
       },
       "model_type": null,
-      "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "inference_hz": 10,
+      "benchmarks": {
+        "libero": {
+          "libero_long": 95.2,
+          "libero_avg": 96.6
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.09
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned (atomic skill decomposition)",
+        "calvin": "fine-tuned"
+      },
+      "libero_avg": 96.6,
+      "calvin_avg": 4.09,
       "rank": 32
     },
     {
@@ -1373,24 +1389,39 @@
     },
     {
       "name": "Fast-WAM",
-      "organization": "TODO: check paper",
+      "organization": "Tsinghua University (IIIS) / Galaxea AI",
       "date": "2026-03-17",
       "paper_url": "https://arxiv.org/abs/2603.16666",
-      "code_url": null,
+      "code_url": "https://github.com/yuantianyuan01/FastWAM",
       "venue": null,
-      "open_source": false,
+      "open_source": true,
       "tags": [
-        "libero",
-        "robotwin"
+        "6B",
+        "world-action-model",
+        "flow-matching",
+        "video-DiT",
+        "open-source"
       ],
       "architecture": {
-        "action_head": "TODO: check paper",
-        "parameters": "TODO"
+        "action_head": "flow matching (velocity field) + Wan2.2-5B video DiT backbone",
+        "parameters": "6B (5B video DiT + 1B action expert)"
       },
       "model_type": null,
-      "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "inference_hz": 5,
+      "benchmarks": {
+        "libero": {
+          "libero_avg": 97.6
+        },
+        "robotwin_v1": {
+          "average": 91.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "robotwin_v1": "fine-tuned"
+      },
+      "libero_avg": 97.6,
+      "robotwin_v1_avg": 91.8,
       "rank": 34
     },
     {
@@ -1469,24 +1500,45 @@
     },
     {
       "name": "GST-VLA",
-      "organization": "TODO: check paper",
+      "organization": "Yeungnam University / KAIST",
       "date": "2026-03-10",
       "paper_url": "https://arxiv.org/abs/2603.09079",
       "code_url": null,
       "venue": null,
       "open_source": false,
       "tags": [
-        "libero",
-        "simpler_env"
+        "300M-action-expert",
+        "3D-Gaussian",
+        "depth-aware",
+        "flow-matching",
+        "CoT"
       ],
       "architecture": {
-        "action_head": "TODO: check paper",
-        "parameters": "TODO"
+        "action_head": "flow matching (300M action expert) + Gaussian Spatial Tokenizer + Depth-Aware CoT",
+        "parameters": "300M (action expert)"
       },
       "model_type": null,
-      "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "inference_hz": 6,
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 98.2,
+          "libero_object": 97.4,
+          "libero_goal": 97.1,
+          "libero_long": 92.6
+        },
+        "simpler_env": {
+          "simpler_pick_can": 83.1,
+          "simpler_move_near": 77.5,
+          "simpler_drawer_open": 75.6,
+          "simpler_drawer_close": 84.7
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 96.33,
+      "simpler_avg": 80.23,
       "rank": 37
     },
     {
@@ -1577,24 +1629,38 @@
     },
     {
       "name": "TempoFit",
-      "organization": "TODO: check paper",
+      "organization": "Xi'an Jiaotong-Liverpool University",
       "date": "2026-03-08",
       "paper_url": "https://arxiv.org/abs/2603.07647",
-      "code_url": null,
+      "code_url": "https://github.com/LucioSunj/TempoFit",
       "venue": null,
-      "open_source": false,
+      "open_source": true,
       "tags": [
-        "libero",
-        "calvin"
+        "training-free",
+        "plug-and-play",
+        "temporal-memory",
+        "KV-cache",
+        "long-horizon",
+        "open-source"
       ],
       "architecture": {
-        "action_head": "TODO: check paper",
-        "parameters": "TODO"
+        "action_head": "training-free plug-in (Layer-Wise Temporal KV Memory + Frame-Gap Temporal Bias)",
+        "parameters": "0 (no new trainable params; retrofits existing VLAs)"
       },
       "model_type": null,
-      "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "inference_hz": 13,
+      "benchmarks": {
+        "libero": {
+          "libero_long_pi05_tempofit": 96.6
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len_pi05_tempofit": 3.87
+        }
+      },
+      "eval_conditions": {
+        "libero": "plug-in on pi0.5 (training-free)",
+        "calvin": "plug-in on pi0.5 (training-free)"
+      },
       "rank": 41
     },
     {
@@ -1656,25 +1722,45 @@
     },
     {
       "name": "VLA-Thinker",
-      "organization": "TODO: check paper",
+      "organization": "University of Central Florida / University of Wurzburg / USC / NVIDIA Research",
       "date": "2026-03-15",
       "paper_url": "https://arxiv.org/abs/2603.14523",
-      "code_url": null,
+      "code_url": "https://github.com/CYWang735/VLAThinker",
       "venue": null,
-      "open_source": false,
+      "open_source": true,
       "tags": [
+        "7B",
+        "visual-CoT",
+        "GRPO",
         "reasoning",
-        "libero",
-        "robotwin"
+        "thinking-with-image",
+        "open-source"
       ],
       "architecture": {
-        "action_head": "TODO: check paper",
-        "parameters": "TODO"
+        "action_head": "autoregressive + parallel decoding (OpenVLA-OFT base) + visual CoT + GRPO RL",
+        "parameters": "7B"
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 98.7,
+          "libero_object": 99.0,
+          "libero_goal": 95.2,
+          "libero_long": 96.9
+        },
+        "robotwin_v2": {
+          "short_horizon": 62.3,
+          "medium_horizon": 70.7,
+          "long_horizon": 64.6
+        }
+      },
+      "eval_conditions": {
+        "libero": "SFT + GRPO RL",
+        "robotwin_v2": "fine-tuned"
+      },
+      "libero_avg": 97.45,
+      "robotwin_v2_avg": 65.87,
       "rank": 44
     },
     {
