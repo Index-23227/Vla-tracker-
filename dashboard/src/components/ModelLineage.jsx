@@ -25,7 +25,7 @@ const FAMILIES = [
       { id: 'pi0', label: 'pi0', date: '2024-10', params: '3B' },
       { id: 'pi0-FAST', label: 'pi0-FAST', date: '2025-01', params: '3B', parent: 'pi0', relation: 'FAST tokenizer variant' },
       { id: 'pi0.5', label: 'pi0.5', date: '2025-04', params: '3B+', parent: 'pi0', relation: 'cross-embodiment scaling' },
-      { id: 'pi*0.6', label: 'pi0.6', date: '2025-11', params: '3B+', parent: 'pi0', relation: 'RL (RECAP)' },
+      { id: 'pi*0.6', label: 'pi*0.6', date: '2025-11', params: '3B+', parent: 'pi0', relation: 'RL (RECAP)' },
     ],
   },
   {

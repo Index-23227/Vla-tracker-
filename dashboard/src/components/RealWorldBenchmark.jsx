@@ -46,7 +46,7 @@ const REAL_WORLD_DATA = [
   },
   {
     name: 'OpenVLA',
-    organization: 'Stanford / UC Berkeley',
+    organization: 'Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT',
     date: '2024-06',
     source: 'arXiv:2406.09246',
     tasks: [
@@ -60,7 +60,7 @@ const REAL_WORLD_DATA = [
     name: 'GR00T-N1',
     organization: 'NVIDIA',
     date: '2025-03',
-    source: 'NVIDIA Blog',
+    source: 'arXiv:2503.14734',
     tasks: [
       { task: 'Manipulation (multiple tasks)', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab (SO-100 / GR-1)' },
     ],
@@ -70,7 +70,7 @@ const REAL_WORLD_DATA = [
   },
   {
     name: 'Octo',
-    organization: 'UC Berkeley / Stanford',
+    organization: 'UC Berkeley / Stanford / CMU / Google DeepMind',
     date: '2024-05',
     source: 'arXiv:2405.12213',
     tasks: [
