@@ -1,0 +1,20 @@
+name: ECoT
+organization: UC Berkeley / Stanford / University of Warsaw
+date: '2024-07-11'
+paper_url: https://arxiv.org/abs/2407.08693
+code_url: https://github.com/MichalZawalski/embodied-CoT
+venue: CoRL 2024
+open_source: true
+tags:
+- 7B
+- chain-of-thought
+- embodied-reasoning
+- autoregressive
+- open-source
+architecture:
+  action_head: autoregressive (OpenVLA base) + structured reasoning chain (TASK/PLAN/SUBTASK/MOVE)
+  parameters: 7B
+benchmarks:
+  libero:
+    libero_avg: 90.8
+    eval_condition: fine-tuned with CoT reasoning

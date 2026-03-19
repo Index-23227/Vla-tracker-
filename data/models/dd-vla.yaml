@@ -1,0 +1,23 @@
+name: DD-VLA
+organization: PKU / Shanghai AI Lab
+date: '2025-08-28'
+paper_url: https://arxiv.org/abs/2508.20072
+code_url: https://github.com/Liang-ZX/DiscreteDiffusionVLA
+open_source: true
+tags:
+- 7B
+- discrete-diffusion
+- adaptive-decoding
+- open-source
+architecture:
+  action_head: discrete diffusion over tokenized action chunks with adaptive decoding
+    order
+  parameters: 7B
+benchmarks:
+  libero:
+    libero_avg: 96.3
+    eval_condition: fine-tuned
+  simpler_env:
+    simpler_fractal: 71.2
+    simpler_bridge: 54.2
+    eval_condition: fine-tuned

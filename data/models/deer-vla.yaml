@@ -1,0 +1,20 @@
+name: DeeR-VLA
+organization: Tsinghua University / Shanghai AI Lab
+date: '2024-11-04'
+paper_url: https://arxiv.org/abs/2411.02359
+code_url: https://github.com/yueyang130/DeeR-VLA
+venue: NeurIPS 2024
+open_source: true
+tags:
+- 3B
+- dynamic-inference
+- early-exit
+- efficient
+- open-source
+architecture:
+  action_head: multi-exit early-stopping with action consistency metric
+  parameters: 3B (OpenFlamingo backbone)
+benchmarks:
+  calvin:
+    calvin_note: competitive with GR-1 SOTA; 5.2-6.5x compute reduction
+    eval_condition: fine-tuned (dynamic inference)

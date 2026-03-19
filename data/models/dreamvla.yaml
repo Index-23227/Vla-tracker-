@@ -1,0 +1,25 @@
+name: DreamVLA
+organization: Shanghai AI Lab / Fudan University / NUS
+date: '2025-07-07'
+paper_url: https://arxiv.org/abs/2507.04447
+code_url: https://github.com/DreamLM/Dream-VLX
+open_source: true
+tags:
+- 7B
+- world-knowledge-forecasting
+- inverse-dynamics
+- open-source
+architecture:
+  action_head: inverse dynamics from world knowledge forecasts (depth, DINOv2, SAM)
+  parameters: 7B
+benchmarks:
+  libero:
+    libero_avg: 97.2
+    eval_condition: fine-tuned
+  calvin:
+    calvin_abc_d_avg_len: 4.44
+    eval_condition: fine-tuned
+  simpler_env:
+    simpler_bridge: 71.4
+    simpler_fractal: 60.5
+    eval_condition: fine-tuned

@@ -1,0 +1,17 @@
+name: VLA-RL
+organization: ByteDance / Tsinghua University
+date: '2025-05-24'
+paper_url: https://arxiv.org/abs/2505.18719
+open_source: false
+tags:
+- 7B
+- RL
+- trajectory-level
+- VLM-reward
+architecture:
+  action_head: trajectory-level RL on OpenVLA-7B with VLM process reward model
+  parameters: 7B
+benchmarks:
+  libero:
+    libero_note: +4.5% over strongest baseline on 40 LIBERO tasks
+    eval_condition: RL fine-tuned

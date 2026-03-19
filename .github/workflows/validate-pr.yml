@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - 'data/**'
+      - 'README.md'
+      - 'dashboard/**'
+      - 'physical-ai-dashboard-blueprint.md'
 
 jobs:
   validate:
@@ -25,3 +28,6 @@ jobs:
 
       - name: Build leaderboard (dry run)
         run: python scripts/build_leaderboard.py
+
+      - name: Validate documentation counts
+        run: python scripts/validate_counts.py
