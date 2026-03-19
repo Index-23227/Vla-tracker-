@@ -1,0 +1,20 @@
+name: VLABench
+full_name: "VLABench: A Large-Scale Benchmark for Language-Conditioned Robotic Manipulation"
+paper_url: https://arxiv.org/abs/2412.18194
+code_url: https://github.com/OpenMOSS/VLABench
+year: 2024
+venue: "ICLR 2025"
+categories:
+  vlabench_primitive:
+    description: "60 primitive single-step manipulation tasks"
+    num_tasks: 60
+  vlabench_composite:
+    description: "40 composite multi-step tasks requiring reasoning"
+    num_tasks: 40
+metric: success_rate
+metric_unit: "%"
+higher_is_better: true
+evaluation_protocol: "Success rate across 100 task categories with 2000+ objects"
+robot: "Franka Panda"
+environment: "simulation (ManiSkill2)"
+tags: [manipulation, world-knowledge, common-sense, long-horizon, language-grounding]

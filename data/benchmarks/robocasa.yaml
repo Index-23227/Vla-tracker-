@@ -1,0 +1,20 @@
+name: RoboCasa
+full_name: "RoboCasa: Large-Scale Simulation of Everyday Tasks for Generalist Robots"
+paper_url: https://arxiv.org/abs/2406.02523
+code_url: https://github.com/robocasa/robocasa
+year: 2024
+venue: "RSS 2024"
+categories:
+  robocasa_pick_and_place:
+    description: "Kitchen pick and place tasks"
+  robocasa_open_close:
+    description: "Opening and closing cabinets, drawers, appliances"
+  robocasa_avg:
+    description: "Average across all RoboCasa tasks"
+metric: success_rate
+metric_unit: "%"
+higher_is_better: true
+evaluation_protocol: "Average success rate across 100 household tasks in 120 kitchen scenes with 2500+ 3D objects"
+robot: "Franka Panda / Hello Robot Stretch"
+environment: "simulation (robosuite)"
+tags: [manipulation, household, kitchen, large-scale, generalization]
