@@ -24,17 +24,8 @@ training:
   method: "RECAP: offline RL pre-training → on-robot RL fine-tuning"
   compute: "proprietary"
 
-benchmarks:
-  libero:
-    libero_spatial: 97.8
-    libero_object: 98.6
-    libero_goal: 94.2
-    libero_long: 81.6
-    source: "Estimated from pi0.5 + RL improvements reported in paper"
-    date_reported: "2025-11-17"
-    eval_condition: "fine-tuned (RL)"
+benchmarks: {}
 
-eval_conditions:
-  libero: "RL fine-tuned (RECAP)"
+eval_conditions: {}
 
 tags: [3B, flow-matching, RL, RECAP, real-world, manipulation, open-source, cross-embodiment]
