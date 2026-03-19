@@ -2,7 +2,7 @@
 
 ### Real-time benchmark tracking for Vision-Language-Action models
 
-[![Models Tracked](https://img.shields.io/badge/models-80-blue)](data/models/)
+[![Models Tracked](https://img.shields.io/badge/models-74-blue)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-9-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **80 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **79 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -42,17 +42,17 @@ VLA-Tracker tracks **80 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
-| **CALVIN** (avg len) | pi0.5-Pro (4.6) | LingBot-VLA (4.5) | UD-VLA (4.5) |
+| **CALVIN** (avg len) | LingBot-VLA (4.5) | UD-VLA (4.5) | DreamVLA (4.44) |
 | **SimplerEnv** (avg) | OpenVLA-v2 (82.3) | InstructVLA (80.3) | SpatialVLA (78.2) |
-| **RoboTwin v1** (avg) | SimpleVLA-RL (70.4) | pi0.5-Pro (65.5) | LingBot-VLA (61.5) |
+| **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
 | **RoboTwin v2** (avg) | X-VLA (72.5) | SimpleVLA-RL (68.8) | - |
 
 ## All Tracked Models
 
 <details>
-<summary>80 models (click to expand)</summary>
+<summary>79 models (click to expand)</summary>
 
-3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-VLA, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, OpenVLA-v2, pi0, pi0.5, pi0.5-Pro, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, Sparse-VLA, SpatialVLA, SuSIE, TempoFit, TRA-VLA, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
+3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-VLA, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, OpenVLA-v2, pi0, pi0.5, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, Sparse-VLA, SpatialVLA, SuSIE, TempoFit, TRA-VLA, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
 
 </details>
 
@@ -101,14 +101,14 @@ python scripts/generate_model_yaml.py --top 5
 
 | Benchmark | Tasks | Models Tracked | Focus | Venue |
 |-----------|-------|----------------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 40 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 20 | Long-horizon, language | RA-L 2022 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 39 | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 19 | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 16 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 8 | Dual-arm, bimanual | CVPR 2025 Highlight |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 7 | Dual-arm, bimanual | CVPR 2025 Highlight |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
 
-### LIBERO Leaderboard (40 models)
+### LIBERO Leaderboard (39 models)
 
 | Rank | Model | Organization | LIBERO Avg |
 |------|-------|-------------|------------|
@@ -123,35 +123,34 @@ python scripts/generate_model_yaml.py --top 5
 | 9 | dVLA | Shanghai AI Lab | 96.4 |
 | 10 | GST-VLA | Yeungnam University / KAIST | 96.33 |
 | 11 | DD-VLA | PKU / Shanghai AI Lab | 96.3 |
-| 12 | pi0.5-Pro | Physical Intelligence | 93.25 |
-| 13 | pi*0.6 | Physical Intelligence | 93.1 |
-| 14 | LingBot-VLA | Ant Group / Robbyant | 92.55 |
-| 15 | UD-VLA | Tsinghua University / Shanghai AI Lab | 91.75 |
-| 16 | ECoT | UC Berkeley / Stanford / University of Warsaw | 90.8 |
-| 17 | InstructVLA | Shanghai AI Lab (InternRobotics) | 90.6 |
-| 18 | UniVLA | Midea Group / South China University of Technology | 90.1 |
-| 19 | OpenVLA-v2 | Stanford / UC Berkeley / TRI | 89.95 |
-| 20 | TRA-VLA | Tsinghua University / Shanghai AI Lab | 89.25 |
-| 21 | FLARE | NVIDIA | 89.2 |
-| 22 | pi0.5 | Physical Intelligence | 88.88 |
-| 23 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
-| 24 | DexVLA | ByteDance / Tsinghua University | 87.85 |
-| 25 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
-| 26 | SparseVLA | KAIST / LG AI Research | 87.25 |
-| 27 | CoT-VLA | UC Berkeley | 86.32 |
-| 28 | pi0-FAST | Physical Intelligence | 86.1 |
-| 29 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
-| 30 | GR00T-N1 | NVIDIA | 85.75 |
-| 31 | HybridVLA | ByteDance | 85.75 |
-| 32 | pi0 | Physical Intelligence | 84.75 |
-| 33 | RoboVLM | Shanghai AI Lab / Tsinghua University | 84.05 |
-| 34 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
-| 35 | FasT-VLA | Tsinghua University / Beijing Academy of AI | 81.55 |
-| 36 | SmolVLA | Hugging Face | 79.5 |
-| 37 | HPT | MIT / Meta FAIR | 77.5 |
-| 38 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
-| 39 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
-| 40 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
+| 12 | pi*0.6 | Physical Intelligence | 93.1 |
+| 13 | LingBot-VLA | Ant Group / Robbyant | 92.55 |
+| 14 | UD-VLA | Tsinghua University / Shanghai AI Lab | 91.75 |
+| 15 | ECoT | UC Berkeley / Stanford / University of Warsaw | 90.8 |
+| 16 | InstructVLA | Shanghai AI Lab (InternRobotics) | 90.6 |
+| 17 | UniVLA | Midea Group / South China University of Technology | 90.1 |
+| 18 | OpenVLA-v2 | Stanford / UC Berkeley / TRI | 89.95 |
+| 19 | TRA-VLA | Tsinghua University / Shanghai AI Lab | 89.25 |
+| 20 | FLARE | NVIDIA | 89.2 |
+| 21 | pi0.5 | Physical Intelligence | 88.88 |
+| 22 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
+| 23 | DexVLA | ByteDance / Tsinghua University | 87.85 |
+| 24 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
+| 25 | SparseVLA | KAIST / LG AI Research | 87.25 |
+| 26 | CoT-VLA | UC Berkeley | 86.32 |
+| 27 | pi0-FAST | Physical Intelligence | 86.1 |
+| 28 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
+| 29 | GR00T-N1 | NVIDIA | 85.75 |
+| 30 | HybridVLA | ByteDance | 85.75 |
+| 31 | pi0 | Physical Intelligence | 84.75 |
+| 32 | RoboVLM | Shanghai AI Lab / Tsinghua University | 84.05 |
+| 33 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
+| 34 | FasT-VLA | Tsinghua University / Beijing Academy of AI | 81.55 |
+| 35 | SmolVLA | Hugging Face | 79.5 |
+| 36 | HPT | MIT / Meta FAIR | 77.5 |
+| 37 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
+| 38 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
+| 39 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
 
 ## Automation
 
@@ -168,7 +167,7 @@ Three GitHub Actions workflows keep the data up to date:
 ```
 ├── data/
 │   ├── benchmarks/          # Benchmark definitions (6 YAML files)
-│   ├── models/              # Model data with benchmark scores (80 YAML files)
+│   ├── models/              # Model data with benchmark scores (79 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results
 ├── scripts/
