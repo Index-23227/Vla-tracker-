@@ -46,7 +46,7 @@ const REAL_WORLD_DATA = [
   },
   {
     name: 'OpenVLA',
-    organization: 'Stanford / UC Berkeley',
+    organization: 'Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT',
     date: '2024-06',
     source: 'arXiv:2406.09246',
     tasks: [
@@ -60,7 +60,7 @@ const REAL_WORLD_DATA = [
     name: 'GR00T-N1',
     organization: 'NVIDIA',
     date: '2025-03',
-    source: 'NVIDIA Blog',
+    source: 'arXiv:2503.14734',
     tasks: [
       { task: 'Manipulation (multiple tasks)', metric: 'success_rate', value: 'Demonstrated', setting: 'Lab (SO-100 / GR-1)' },
     ],
@@ -70,7 +70,7 @@ const REAL_WORLD_DATA = [
   },
   {
     name: 'Octo',
-    organization: 'UC Berkeley / Stanford',
+    organization: 'UC Berkeley / Stanford / CMU / Google DeepMind',
     date: '2024-05',
     source: 'arXiv:2405.12213',
     tasks: [
@@ -152,7 +152,7 @@ export default function RealWorldBenchmark({ models }) {
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">OSS</span>
                     )}
                   </div>
-                  <div className="text-[11px] text-zinc-500">{d.organization} · {d.date}</div>
+                  <div className="text-[11px] text-zinc-500">{modelData?.organization || d.organization} · {(modelData?.date || d.date).slice(0, 7)}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-[10px] text-zinc-500">{d.robot}</div>
@@ -161,7 +161,11 @@ export default function RealWorldBenchmark({ models }) {
                     {d.verified && (
                       <span className="text-[8px] px-1 py-0.5 rounded bg-blue-500/10 text-blue-400">paper-verified</span>
                     )}
-                    <span className="text-[8px] text-zinc-600">{d.source}</span>
+                    <span className="text-[8px] text-zinc-600">{
+                      modelData?.paper_url
+                        ? `arXiv:${modelData.paper_url.match(/(\d{4}\.\d{4,5})/)?.[1] || d.source}`
+                        : d.source
+                    }</span>
                   </div>
                 </div>
               </div>

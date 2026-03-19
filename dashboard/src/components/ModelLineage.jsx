@@ -24,8 +24,8 @@ const FAMILIES = [
     nodes: [
       { id: 'pi0', label: 'pi0', date: '2024-10', params: '3B' },
       { id: 'pi0-FAST', label: 'pi0-FAST', date: '2025-01', params: '3B', parent: 'pi0', relation: 'FAST tokenizer variant' },
-      { id: 'pi0.5', label: 'pi0.5', date: '2025-02', params: '3B+', parent: 'pi0', relation: 'cross-embodiment scaling' },
-      { id: 'pi*0.6', label: 'pi0.6', date: '2025-11', params: '3B+', parent: 'pi0', relation: 'RL (RECAP)' },
+      { id: 'pi0.5', label: 'pi0.5', date: '2025-04', params: '3B+', parent: 'pi0', relation: 'cross-embodiment scaling' },
+      { id: 'pi*0.6', label: 'pi*0.6', date: '2025-11', params: '3B+', parent: 'pi0', relation: 'RL (RECAP)' },
     ],
   },
   {
@@ -59,8 +59,8 @@ const FAMILIES = [
     nodes: [
       { id: 'GR00T-N1', label: 'GR00T-N1', date: '2025-03', params: '2.2B' },
       { id: 'FLARE', label: 'FLARE', date: '2025-05', params: '3B' },
-      { id: 'GR00T-N1.5', label: 'GR00T-N1.5', date: '2025-05', params: '3B', parent: 'GR00T-N1', relation: 'FLARE + GR00T-Dreams' },
-      { id: 'GR00T-N1.6', label: 'GR00T-N1.6', date: '2025-09', params: '3B', parent: 'GR00T-N1.5', relation: 'Cosmos-Reason VLM + larger DiT' },
+      { id: 'GR00T-N1.5', label: 'GR00T-N1.5', date: '2025-06', params: '3B', parent: 'GR00T-N1', relation: 'FLARE + GR00T-Dreams' },
+      { id: 'GR00T-N1.6', label: 'GR00T-N1.6', date: '2025-12', params: '3B', parent: 'GR00T-N1.5', relation: 'Cosmos-Reason VLM + larger DiT' },
       { id: 'GR00T-N1.7', label: 'GR00T-N1.7', date: '2026-03', params: '~3B', parent: 'GR00T-N1.6', relation: 'reasoning VLA, commercial' },
       { id: 'GR00T-N2', label: 'GR00T-N2', date: '2026-03', params: '—', parent: 'GR00T-N1.7', relation: 'DreamZero world action model' },
       { id: 'NaVILA', label: 'NaVILA', date: '2024-12', params: '8B' },
@@ -129,7 +129,7 @@ function NodePopover({ node, modelData, family, onClose }) {
 
   return (
     <div
-      className="absolute z-50 mt-1 min-w-[200px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl shadow-black/40 p-3"
+      className="absolute z-50 mt-1 min-w-[220px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl shadow-black/40 p-3"
       style={{ left: 0, top: '100%' }}
     >
       <div className="flex items-center justify-between mb-2">
@@ -139,11 +139,11 @@ function NodePopover({ node, modelData, family, onClose }) {
       <div className="space-y-1.5 text-[10px]">
         <div className="flex justify-between">
           <span className="text-zinc-500">Date</span>
-          <span className="text-zinc-300">{node.date}</span>
+          <span className="text-zinc-300">{modelData?.date || node.date}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-zinc-500">Params</span>
-          <span className="text-zinc-300">{node.params}</span>
+          <span className="text-zinc-300">{modelData?.architecture?.parameters || node.params}</span>
         </div>
         {modelData?.organization && (
           <div className="flex justify-between gap-3">
@@ -266,6 +266,10 @@ function TreeNode({ node, family, depth, models, childCount, isCollapsed, onTogg
   const [showPopover, setShowPopover] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const modelData = models.find(m => m.name === node.id)
+  const displayDate = (modelData?.date || node.date || '').slice(0, 7)
+  const rawParams = modelData?.architecture?.parameters
+  // Use leaderboard data only if it's a short size label; fall back to curated node.params for verbose descriptions
+  const displayParams = rawParams && rawParams.length <= 10 ? rawParams : node.params
   const hasScore = modelData?.libero_avg != null
   const hoverTimeout = useRef(null)
   const nodeRef = useRef(null)
@@ -327,9 +331,9 @@ function TreeNode({ node, family, depth, models, childCount, isCollapsed, onTogg
                 )}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[10px] text-zinc-500">{node.date}</span>
+                <span className="text-[10px] text-zinc-500">{displayDate}</span>
                 <span className="text-[10px] text-zinc-600">·</span>
-                <span className="text-[10px] text-zinc-500">{node.params}</span>
+                <span className="text-[10px] text-zinc-500">{displayParams}</span>
                 {hasScore && (
                   <>
                     <span className="text-[10px] text-zinc-600">·</span>
