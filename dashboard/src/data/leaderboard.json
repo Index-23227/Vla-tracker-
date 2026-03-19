@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-03-19T03:17:12.442482",
-  "num_models": 75,
+  "num_models": 84,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -2641,6 +2641,181 @@
       "benchmarks": {},
       "eval_conditions": {},
       "rank": 75
+    },
+    {
+      "name": "GR00T-N1.5",
+      "organization": "NVIDIA",
+      "date": "2025-05-19",
+      "paper_url": "https://research.nvidia.com/labs/gear/gr00t-n1_5/",
+      "code_url": "https://github.com/NVIDIA/Isaac-GR00T",
+      "venue": "Computex 2025",
+      "open_source": true,
+      "tags": ["3B", "diffusion-transformer", "dual-system", "humanoid", "FLARE", "synthetic-data", "open-model"],
+      "architecture": {
+        "action_head": "diffusion transformer + FLARE objective",
+        "parameters": "3B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 76
+    },
+    {
+      "name": "GR00T-N1.6",
+      "organization": "NVIDIA",
+      "date": "2025-09-29",
+      "paper_url": "https://research.nvidia.com/labs/gear/gr00t-n1_6/",
+      "code_url": "https://github.com/NVIDIA/Isaac-GR00T",
+      "venue": "CoRL 2025",
+      "open_source": true,
+      "tags": ["3B", "diffusion-transformer", "dual-system", "humanoid", "cosmos-reason", "full-body-control", "open-model"],
+      "architecture": {
+        "action_head": "large diffusion transformer (32 layers)",
+        "parameters": "3B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 77
+    },
+    {
+      "name": "GR00T-N1.7",
+      "organization": "NVIDIA",
+      "date": "2026-03-18",
+      "paper_url": null,
+      "code_url": "https://github.com/NVIDIA/Isaac-GR00T",
+      "venue": "GTC 2026",
+      "open_source": true,
+      "tags": ["3B", "diffusion-transformer", "humanoid", "reasoning-vla", "commercial", "NIM", "open-model"],
+      "architecture": {
+        "action_head": "diffusion transformer with reasoning",
+        "parameters": "~3B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 78
+    },
+    {
+      "name": "GR00T-N2",
+      "organization": "NVIDIA",
+      "date": "2026-03-18",
+      "paper_url": null,
+      "code_url": null,
+      "venue": "GTC 2026 (preview)",
+      "open_source": false,
+      "tags": ["world-action-model", "DreamZero", "humanoid", "preview"],
+      "architecture": {
+        "action_head": "DreamZero world action model",
+        "parameters": null
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 79
+    },
+    {
+      "name": "FLOWER",
+      "organization": "Karlsruhe Institute of Technology (KIT)",
+      "date": "2025-09-08",
+      "paper_url": "https://arxiv.org/abs/2509.04996",
+      "code_url": "https://github.com/intuitive-robots/flower_vla_calvin",
+      "venue": "CoRL 2025",
+      "open_source": true,
+      "tags": ["950M", "flow-matching", "efficient", "manipulation", "open-source"],
+      "architecture": {
+        "action_head": "flow matching",
+        "parameters": "950M"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 80
+    },
+    {
+      "name": "FALCON",
+      "organization": "ByteDance Seed",
+      "date": "2025-10-23",
+      "paper_url": "https://arxiv.org/abs/2510.17439",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": ["2.9B", "spatial-grounding", "Kosmos-2", "manipulation"],
+      "architecture": {
+        "action_head": "spatial-grounded action head",
+        "parameters": "2.9B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 81
+    },
+    {
+      "name": "dVLA",
+      "organization": "Midea Group / East China Normal University",
+      "date": "2025-09-30",
+      "paper_url": "https://arxiv.org/abs/2509.25681",
+      "code_url": null,
+      "venue": "ICLR 2026 submission",
+      "open_source": false,
+      "tags": ["diffusion", "chain-of-thought", "multimodal-CoT", "manipulation"],
+      "architecture": {
+        "action_head": "diffusion with multimodal chain-of-thought",
+        "parameters": null
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_avg_success": 96.4
+        }
+      },
+      "eval_conditions": {},
+      "rank": 82
+    },
+    {
+      "name": "E0",
+      "organization": "Sun Yat-sen University",
+      "date": "2025-11-26",
+      "paper_url": "https://arxiv.org/abs/2511.21542",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": ["discrete-diffusion", "continuized", "fine-grained-control", "manipulation"],
+      "architecture": {
+        "action_head": "continuized discrete diffusion",
+        "parameters": null
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 83
+    },
+    {
+      "name": "NanoVLA",
+      "organization": "Xiaomi EV",
+      "date": "2025-10-31",
+      "paper_url": "https://arxiv.org/abs/2510.25122",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": ["nano", "edge-device", "efficient", "52x-faster", "manipulation"],
+      "architecture": {
+        "action_head": "efficient action head",
+        "parameters": "~50M"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 84
     }
   ]
 }

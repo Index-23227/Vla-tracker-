@@ -9,6 +9,7 @@ const CROSS_REFERENCES = [
   { from: 'Octo', to: 'CrossFormer', label: 'CrossFormer built on Octo codebase' },
   { from: 'UniPi', to: 'SuSIE', label: 'Video prediction approach shared' },
   { from: 'GR-1', to: 'GR00T-N1', label: 'Humanoid-focused video-to-action paradigm' },
+  { from: 'FLARE', to: 'GR00T-N1.5', label: 'FLARE objective integrated into N1.5' },
   { from: 'pi0', to: 'DexVLA', label: 'Flow matching action head approach' },
   { from: 'OpenVLA', to: 'ECoT', label: 'ECoT adds embodied CoT reasoning to OpenVLA' },
   { from: 'OpenVLA-OFT', to: 'VLA-Thinker', label: 'Visual CoT + GRPO RL on OpenVLA-OFT' },
@@ -60,6 +61,10 @@ const FAMILIES = [
     nodes: [
       { id: 'GR00T-N1', label: 'GR00T-N1', date: '2025-03', params: '2.2B' },
       { id: 'FLARE', label: 'FLARE', date: '2025-05', params: '3B' },
+      { id: 'GR00T-N1.5', label: 'GR00T-N1.5', date: '2025-05', params: '3B', parent: 'GR00T-N1', relation: 'FLARE + GR00T-Dreams' },
+      { id: 'GR00T-N1.6', label: 'GR00T-N1.6', date: '2025-09', params: '3B', parent: 'GR00T-N1.5', relation: 'Cosmos-Reason VLM + larger DiT' },
+      { id: 'GR00T-N1.7', label: 'GR00T-N1.7', date: '2026-03', params: '~3B', parent: 'GR00T-N1.6', relation: 'reasoning VLA, commercial' },
+      { id: 'GR00T-N2', label: 'GR00T-N2', date: '2026-03', params: '—', parent: 'GR00T-N1.7', relation: 'DreamZero world action model' },
       { id: 'NaVILA', label: 'NaVILA', date: '2024-12', params: '8B' },
       { id: 'SAM2Act', label: 'SAM2Act', date: '2025-01', params: '—' },
     ],
@@ -103,6 +108,18 @@ const FAMILIES = [
       { id: 'UD-VLA', label: 'UD-VLA', date: '2025-11', params: '3B' },
       { id: 'HiMoE-VLA', label: 'HiMoE-VLA', date: '2025-12', params: '3B+' },
       { id: 'InternVLA-A1', label: 'InternVLA-A1', date: '2026-01', params: '2B-3B' },
+    ],
+  },
+  {
+    id: 'emerging',
+    name: 'Emerging VLAs',
+    color: '#9B59B6',
+    nodes: [
+      { id: 'FLOWER', label: 'FLOWER', date: '2025-09', params: '950M' },
+      { id: 'FALCON', label: 'FALCON', date: '2025-10', params: '2.9B' },
+      { id: 'dVLA', label: 'dVLA', date: '2025-09', params: '—' },
+      { id: 'E0', label: 'E0', date: '2025-11', params: '—' },
+      { id: 'NanoVLA', label: 'NanoVLA', date: '2025-10', params: '~50M' },
     ],
   },
 ]

@@ -2,8 +2,8 @@
 
 ### Real-time benchmark tracking for Vision-Language-Action models
 
-[![Models Tracked](https://img.shields.io/badge/models-37-blue)](data/models/)
-[![Benchmarks](https://img.shields.io/badge/benchmarks-6-green)](data/benchmarks/)
+[![Models Tracked](https://img.shields.io/badge/models-84-blue)](data/models/)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-9-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **37 VLA models** (2023-2026) across **6 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **84 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -50,9 +50,9 @@ VLA-Tracker tracks **37 VLA models** (2023-2026) across **6 benchmarks** (LIBERO
 ## All Tracked Models
 
 <details>
-<summary>37 models (click to expand)</summary>
+<summary>84 models (click to expand)</summary>
 
-3D Diffuser Actor, CogACT, CoT-VLA, DexVLA, Diffusion Policy, FAST-VLA, FLARE, GR-1, GR-2, GROOT-N1, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, Octo, OpenVLA, OpenVLA-OFT, OpenVLA-v2, pi0, pi0.5, pi0.5-Pro, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, Sparse-VLA, SpatialVLA, TRA-VLA, TraceVLA, UD-VLA, UniVLA, VLASER, X-VLA
+3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-VLA, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, OpenVLA-v2, pi0, pi0.5, pi0.5-Pro, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, Sparse-VLA, SpatialVLA, SuSIE, TempoFit, TRA-VLA, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
 
 </details>
 
