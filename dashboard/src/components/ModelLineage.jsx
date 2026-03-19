@@ -49,6 +49,8 @@ const FAMILIES = [
       { id: 'GR-2', label: 'GR-2', date: '2024-07', params: '1.5B', parent: 'GR-1', relation: 'video generation + action' },
       { id: 'DexVLA', label: 'DexVLA', date: '2025-02', params: '7B' },
       { id: 'HybridVLA', label: 'HybridVLA', date: '2025-03', params: '2B' },
+      { id: 'VLA-RL', label: 'VLA-RL', date: '2025-05', params: '7B' },
+      { id: 'GR-Dexter', label: 'GR-Dexter', date: '2025-12', params: '—' },
     ],
   },
   {
@@ -95,8 +97,12 @@ const FAMILIES = [
       { id: 'SpatialVLA', label: 'SpatialVLA', date: '2025-01', params: '4B' },
       { id: 'TRA-VLA', label: 'TRA-VLA', date: '2025-03', params: '4B' },
       { id: 'InstructVLA', label: 'InstructVLA', date: '2025-07', params: '4B' },
+      { id: 'DreamVLA', label: 'DreamVLA', date: '2025-07', params: '7B' },
       { id: 'RoboDual', label: 'RoboDual', date: '2024-10', params: '7B+20M' },
+      { id: 'InternVLA-M1', label: 'InternVLA-M1', date: '2025-10', params: '—' },
       { id: 'UD-VLA', label: 'UD-VLA', date: '2025-11', params: '3B' },
+      { id: 'HiMoE-VLA', label: 'HiMoE-VLA', date: '2025-12', params: '3B+' },
+      { id: 'InternVLA-A1', label: 'InternVLA-A1', date: '2026-01', params: '2B-3B' },
     ],
   },
 ]

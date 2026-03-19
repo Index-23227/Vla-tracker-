@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-03-19T03:17:12.442482",
-  "num_models": 58,
+  "num_models": 75,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -2142,6 +2142,505 @@
       "benchmarks": {},
       "eval_conditions": {},
       "rank": 58
+    },
+    {
+      "name": "DreamVLA",
+      "organization": "Shanghai AI Lab / Fudan University / NUS",
+      "date": "2025-07-07",
+      "paper_url": "https://arxiv.org/abs/2507.04447",
+      "code_url": "https://github.com/DreamLM/Dream-VLX",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "7B",
+        "world-knowledge-forecasting",
+        "inverse-dynamics",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "inverse dynamics from world knowledge forecasts (depth, DINOv2, SAM)",
+        "parameters": "7B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_avg": 97.2
+        },
+        "calvin": {
+          "calvin_abc_d_avg_len": 4.44
+        },
+        "simpler_env": {
+          "simpler_bridge": 71.4,
+          "simpler_fractal": 60.5
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "calvin": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 97.2,
+      "calvin_avg": 4.44,
+      "simpler_avg": 65.95,
+      "rank": 59
+    },
+    {
+      "name": "FLOWER",
+      "organization": "Unknown",
+      "date": "2025-09-08",
+      "paper_url": "https://arxiv.org/abs/2509.04996",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "950M",
+        "flow-matching",
+        "efficient",
+        "Global-AdaLN",
+        "compact"
+      ],
+      "architecture": {
+        "action_head": "flow matching with intermediate-modality fusion + Global-AdaLN conditioning",
+        "parameters": "950M"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "calvin": {
+          "calvin_abc_avg_len": 4.53
+        }
+      },
+      "eval_conditions": {
+        "calvin": "fine-tuned"
+      },
+      "calvin_avg": 4.53,
+      "rank": 60
+    },
+    {
+      "name": "PLD",
+      "organization": "NVIDIA GEAR Lab",
+      "date": "2025-11-01",
+      "paper_url": "https://arxiv.org/abs/2511.00091",
+      "code_url": null,
+      "venue": "ICLR 2026",
+      "open_source": false,
+      "tags": [
+        "residual-RL",
+        "probe-learn-distill",
+        "post-training",
+        "ICLR-2026"
+      ],
+      "architecture": {
+        "action_head": "plug-and-play residual RL framework (probe → learn → distill back to generalist)",
+        "parameters": "varies (applied on top of existing VLAs)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_avg": 99.0
+        },
+        "simpler_env": {
+          "simpler_avg_note": ">50% gain over baseline"
+        }
+      },
+      "eval_conditions": {
+        "libero": "RL post-trained",
+        "simpler_env": "RL post-trained"
+      },
+      "libero_avg": 99.0,
+      "rank": 61
+    },
+    {
+      "name": "dVLA",
+      "organization": "Shanghai AI Lab",
+      "date": "2025-09-30",
+      "paper_url": "https://arxiv.org/abs/2509.25681",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "7B",
+        "discrete-diffusion",
+        "multimodal-CoT",
+        "unified"
+      ],
+      "architecture": {
+        "action_head": "discrete diffusion backbone (MMaDA) with multimodal chain-of-thought",
+        "parameters": "7B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_avg": 96.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "libero_avg": 96.4,
+      "rank": 62
+    },
+    {
+      "name": "DD-VLA",
+      "organization": "PKU / Shanghai AI Lab",
+      "date": "2025-08-28",
+      "paper_url": "https://arxiv.org/abs/2508.20072",
+      "code_url": "https://github.com/Liang-ZX/DiscreteDiffusionVLA",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "7B",
+        "discrete-diffusion",
+        "adaptive-decoding",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "discrete diffusion over tokenized action chunks with adaptive decoding order",
+        "parameters": "7B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_avg": 96.3
+        },
+        "simpler_env": {
+          "simpler_fractal": 71.2,
+          "simpler_bridge": 54.2
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned",
+        "simpler_env": "fine-tuned"
+      },
+      "libero_avg": 96.3,
+      "simpler_avg": 62.7,
+      "rank": 63
+    },
+    {
+      "name": "Diffusion-VLA",
+      "organization": "PKU / HKU",
+      "date": "2024-12-04",
+      "paper_url": "https://arxiv.org/abs/2412.03293",
+      "code_url": null,
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "2B-72B",
+        "diffusion-action",
+        "autoregressive-reasoning",
+        "fast-inference",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "autoregressive reasoning + diffusion action prediction with reasoning injection",
+        "parameters": "2B–72B (multi-scale)"
+      },
+      "model_type": null,
+      "inference_hz": 82,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 64
+    },
+    {
+      "name": "UP-VLA",
+      "organization": "Tsinghua University",
+      "date": "2025-01-31",
+      "paper_url": "https://arxiv.org/abs/2501.18867",
+      "code_url": "https://github.com/CladernyJorn/UP-VLA",
+      "venue": "ICML 2025",
+      "open_source": true,
+      "tags": [
+        "7B",
+        "future-prediction",
+        "unified-understanding",
+        "ICML-2025",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "unified understanding + future image prediction for spatial awareness",
+        "parameters": "7B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "calvin": {
+          "calvin_note": "+33% over prior SOTA on ABC→D"
+        }
+      },
+      "eval_conditions": {
+        "calvin": "fine-tuned"
+      },
+      "rank": 65
+    },
+    {
+      "name": "InternVLA-A1",
+      "organization": "Shanghai AI Lab (InternRobotics)",
+      "date": "2026-01-28",
+      "paper_url": "https://arxiv.org/abs/2601.15197",
+      "code_url": "https://github.com/InternRobotics/InternVLA-A1",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "2B-3B",
+        "MoT",
+        "unified-UGA",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "Mixture-of-Transformers unifying understanding, generation, and action experts",
+        "parameters": "2B / 3B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 66
+    },
+    {
+      "name": "InternVLA-M1",
+      "organization": "Shanghai AI Lab (InternRobotics)",
+      "date": "2025-10-17",
+      "paper_url": "https://arxiv.org/abs/2510.13778",
+      "code_url": "https://github.com/InternRobotics/InternVLA-M1",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "Qwen2.5-VL",
+        "spatial-grounding",
+        "dual-system",
+        "DiT-action",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "dual-system: Qwen2.5-VL spatial planner + DiT action head",
+        "parameters": "based on Qwen2.5-VL"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "simpler_env": {
+          "simpler_note": "SOTA on SimplerEnv"
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "fine-tuned"
+      },
+      "rank": 67
+    },
+    {
+      "name": "HiMoE-VLA",
+      "organization": "Tsinghua University / Shanghai AI Lab",
+      "date": "2025-12-07",
+      "paper_url": "https://arxiv.org/abs/2512.05693",
+      "code_url": "https://github.com/ZhiyingDu/HiMoE-VLA",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "3B+",
+        "hierarchical-MoE",
+        "action-space-MoE",
+        "pi0-based",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "Hierarchical MoE action module with Action-Space MoE at boundary layers (pi0-based)",
+        "parameters": "3B+"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 68
+    },
+    {
+      "name": "NORA",
+      "organization": "Declare Lab",
+      "date": "2025-04-28",
+      "paper_url": "https://arxiv.org/abs/2504.19854",
+      "code_url": "https://github.com/declare-lab/nora",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "3B",
+        "FAST+",
+        "compact",
+        "970k-demos",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "FAST+ action tokenizer + Qwen-2.5-VL-3B backbone",
+        "parameters": "3B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 69
+    },
+    {
+      "name": "NanoVLA",
+      "organization": "Unknown",
+      "date": "2025-10-30",
+      "paper_url": "https://arxiv.org/abs/2510.25122",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "<100M",
+        "edge-deployment",
+        "vision-language-decoupling",
+        "ultra-efficient"
+      ],
+      "architecture": {
+        "action_head": "late-fusion VL decoupling + long-short action chunking + dynamic routing",
+        "parameters": "<100M (ResNet18 + BERT-base/Qwen2.5-0.5B)"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_note": "competitive with OpenVLA, pi0, TraceVLA"
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "rank": 70
+    },
+    {
+      "name": "E0",
+      "organization": "Unknown",
+      "date": "2025-11-30",
+      "paper_url": "https://arxiv.org/abs/2511.21542",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "continuized-discrete-diffusion",
+        "iterative-denoising",
+        "quantized-action"
+      ],
+      "architecture": {
+        "action_head": "continuized discrete diffusion with iterative denoising over quantized action tokens",
+        "parameters": "not disclosed"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_note": "+10.7% avg over baselines"
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned"
+      },
+      "rank": 71
+    },
+    {
+      "name": "VLA-RL",
+      "organization": "ByteDance / Tsinghua University",
+      "date": "2025-05-24",
+      "paper_url": "https://arxiv.org/abs/2505.18719",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "7B",
+        "RL",
+        "trajectory-level",
+        "VLM-reward"
+      ],
+      "architecture": {
+        "action_head": "trajectory-level RL on OpenVLA-7B with VLM process reward model",
+        "parameters": "7B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_note": "+4.5% over strongest baseline on 40 LIBERO tasks"
+        }
+      },
+      "eval_conditions": {
+        "libero": "RL fine-tuned"
+      },
+      "rank": 72
+    },
+    {
+      "name": "FALCON",
+      "organization": "Unknown",
+      "date": "2025-10-22",
+      "paper_url": "https://arxiv.org/abs/2510.17439",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "3D-spatial",
+        "RGB-only-3D",
+        "spatial-foundation-model"
+      ],
+      "architecture": {
+        "action_head": "3D spatial token injection from spatial foundation models into action head (RGB-only 3D)",
+        "parameters": "not disclosed"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 73
+    },
+    {
+      "name": "GR-Dexter",
+      "organization": "ByteDance Seed",
+      "date": "2025-12-31",
+      "paper_url": "https://arxiv.org/abs/2512.24210",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "bimanual",
+        "dexterous-hands",
+        "56-DoF",
+        "cross-embodiment"
+      ],
+      "architecture": {
+        "action_head": "VLM backbone + action head for 56-DoF bimanual dexterous hands (ByteDexter V2)",
+        "parameters": "not disclosed"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 74
+    },
+    {
+      "name": "TwinBrainVLA",
+      "organization": "ZGC EmbodyAI",
+      "date": "2026-01-21",
+      "paper_url": "https://arxiv.org/abs/2601.14133",
+      "code_url": "https://github.com/ZGC-EmbodyAI/TwinBrainVLA",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "7B",
+        "asymmetric-MoT",
+        "anti-forgetting",
+        "dual-brain",
+        "open-source"
+      ],
+      "architecture": {
+        "action_head": "Asymmetric MoT: frozen Left Brain (generalist) + trainable Right Brain (specialist)",
+        "parameters": "7B"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "rank": 75
     }
   ]
 }
