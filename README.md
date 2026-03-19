@@ -25,16 +25,16 @@ VLA-Tracker tracks **84 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 
 | Rank | Model | Date | Venue | Action Head | Avg | Eval |
 |------|-------|------|-------|-------------|-----|------|
-| 1 | **SimpleVLA-RL** | Sep 2025 | ICLR 2026 | autoregressive + GRPO RL | **98.8** | FT |
-| 2 | **X-VLA** | Oct 2025 | ICLR 2026 | autoregressive w/ soft prompts | **97.8** | FT |
-| 3 | **MemoryVLA** | Aug 2025 | ICLR 2026 | diffusion transformer | **96.5** | FT |
-| 4 | pi0.5-Pro | Sep 2025 | - | flow matching | 93.3 | FT |
-| 5 | pi0.6 | Nov 2025 | - | flow matching + RL | 93.1 | FT |
-| 6 | LingBot-VLA | Jan 2026 | - | MoT + flow matching | 92.6 | FT |
-| 7 | UD-VLA | Nov 2025 | ICLR 2026 | joint diffusion | 91.8 | FT |
-| 8 | InstructVLA | Jul 2025 | ICLR 2026 | flow matching | 90.6 | FT |
-| 9 | UniVLA | May 2025 | RSS 2025 | flow matching | 90.1 | FT |
-| 10 | OpenVLA-v2 | Feb 2025 | - | flow matching | 90.0 | FT |
+| 1 | **PLD** | Nov 2025 | ICLR 2026 | residual RL (probe → learn → distill) | **99.0** | FT |
+| 2 | **SimpleVLA-RL** | Sep 2025 | ICLR 2026 | autoregressive + GRPO RL | **98.8** | FT |
+| 3 | **X-VLA** | Oct 2025 | ICLR 2026 | autoregressive w/ soft prompts | **97.8** | FT |
+| 4 | Fast-WAM | Mar 2026 | - | flow matching + video DiT | 97.6 | FT |
+| 5 | VLA-Thinker | Mar 2026 | - | autoregressive + visual CoT + GRPO RL | 97.5 | FT |
+| 6 | DreamVLA | Jul 2025 | - | inverse dynamics from world knowledge | 97.2 | FT |
+| 7 | AtomicVLA | Mar 2026 | CVPR 2026 | flow matching + SG-MoE | 96.6 | FT |
+| 8 | MemoryVLA | Aug 2025 | ICLR 2026 | diffusion transformer | 96.5 | FT |
+| 9 | dVLA | Sep 2025 | - | discrete diffusion + multimodal CoT | 96.4 | FT |
+| 10 | GST-VLA | Mar 2026 | - | flow matching + Depth-Aware CoT | 96.3 | FT |
 
 > **FT** = Fine-tuned | [Full leaderboard (JSON) ->](data/leaderboard.json)
 
@@ -101,7 +101,7 @@ python scripts/generate_model_yaml.py --top 5
 
 | Benchmark | Tasks | Models Tracked | Focus | Venue |
 |-----------|-------|----------------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 25+ | Manipulation generalization | NeurIPS 2023 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 40 | Manipulation generalization | NeurIPS 2023 |
 | [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 12+ | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 8+ | Sim-to-real transfer | NeurIPS 2024 |
 | [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 5+ | Dual-arm, bimanual | CVPR 2025 Highlight |
