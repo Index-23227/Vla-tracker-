@@ -1,4 +1,3 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: VLA-Thinker: Boosting Vision-Language-Action Models through Thinking-with-Image Reasoning
 # arXiv: 2603.14523
 
@@ -7,16 +6,18 @@ full_name: "VLA-Thinker: Boosting Vision-Language-Action Models through Thinking
 organization: "University of Central Florida / University of Wurzburg / USC / NVIDIA Research"
 date: "2026-03-15"
 paper_url: https://arxiv.org/abs/2603.14523
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  parameters: "TODO"
+  action_head: "MLP"
+  parameters: "7B"
 
 key_innovation: >
-  TODO: Read paper and summarize key contribution in 2-3 sentences.
+  Thinking-with-image reasoning framework that models perception as a dynamically invocable
+  reasoning action. Uses two-stage training: SFT cold-start with visual CoT data, then
+  GRPO-based RL to align reasoning-action trajectories with task-level success.
 
 benchmarks:
   libero:
