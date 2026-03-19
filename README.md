@@ -132,24 +132,25 @@ python scripts/generate_model_yaml.py --top 5
 | 18 | OpenVLA-v2 | Stanford / UC Berkeley / TRI | 89.95 |
 | 19 | TRA-VLA | Tsinghua University / Shanghai AI Lab | 89.25 |
 | 20 | FLARE | NVIDIA | 89.2 |
-| 21 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
-| 22 | DexVLA | ByteDance / Tsinghua University | 87.85 |
-| 23 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
-| 24 | SparseVLA | KAIST / LG AI Research | 87.25 |
-| 25 | CoT-VLA | UC Berkeley | 86.32 |
-| 26 | pi0-FAST | Physical Intelligence | 86.1 |
-| 27 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
-| 28 | GR00T-N1 | NVIDIA | 85.75 |
-| 29 | HybridVLA | ByteDance | 85.75 |
-| 30 | pi0 | Physical Intelligence | 84.75 |
-| 31 | RoboVLM | Shanghai AI Lab / Tsinghua University | 84.05 |
-| 32 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
-| 33 | FasT-VLA | Tsinghua University / Beijing Academy of AI | 81.55 |
-| 34 | SmolVLA | Hugging Face | 79.5 |
-| 35 | HPT | MIT / Meta FAIR | 77.5 |
-| 36 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
-| 37 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
-| 38 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
+| 21 | pi0.5 | Physical Intelligence | 88.88 |
+| 22 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
+| 23 | DexVLA | ByteDance / Tsinghua University | 87.85 |
+| 24 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
+| 25 | SparseVLA | KAIST / LG AI Research | 87.25 |
+| 26 | CoT-VLA | UC Berkeley | 86.32 |
+| 27 | pi0-FAST | Physical Intelligence | 86.1 |
+| 28 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
+| 29 | GR00T-N1 | NVIDIA | 85.75 |
+| 30 | HybridVLA | ByteDance | 85.75 |
+| 31 | pi0 | Physical Intelligence | 84.75 |
+| 32 | RoboVLM | Shanghai AI Lab / Tsinghua University | 84.05 |
+| 33 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
+| 34 | FasT-VLA | Tsinghua University / Beijing Academy of AI | 81.55 |
+| 35 | SmolVLA | Hugging Face | 79.5 |
+| 36 | HPT | MIT / Meta FAIR | 77.5 |
+| 37 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
+| 38 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
+| 39 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
 
 ## Automation
 
