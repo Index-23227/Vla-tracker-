@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **79 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **78 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -50,7 +50,7 @@ VLA-Tracker tracks **79 VLA models** (2023-2026) across **9 benchmarks** (LIBERO
 ## All Tracked Models
 
 <details>
-<summary>79 models (click to expand)</summary>
+<summary>78 models (click to expand)</summary>
 
 3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-VLA, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, OpenVLA-v2, pi0, pi0.5, pi0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, Sparse-VLA, SpatialVLA, SuSIE, TempoFit, TRA-VLA, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
 
@@ -120,7 +120,7 @@ python scripts/generate_model_yaml.py --top 5
 | 6 | DreamVLA | Shanghai AI Lab / Fudan University / NUS | 97.2 |
 | 7 | AtomicVLA | Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology | 96.6 |
 | 8 | MemoryVLA | PKU / Tsinghua University / Shanghai AI Lab | 96.5 |
-| 9 | dVLA | Shanghai AI Lab | 96.4 |
+| 9 | dVLA | Midea Group | 96.4 |
 | 10 | GST-VLA | Yeungnam University / KAIST | 96.33 |
 | 11 | DD-VLA | PKU / Shanghai AI Lab | 96.3 |
 | 12 | pi*0.6 | Physical Intelligence | 93.1 |
@@ -167,7 +167,7 @@ Three GitHub Actions workflows keep the data up to date:
 ```
 ├── data/
 │   ├── benchmarks/          # Benchmark definitions (6 YAML files)
-│   ├── models/              # Model data with benchmark scores (79 YAML files)
+│   ├── models/              # Model data with benchmark scores (78 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results
 ├── scripts/

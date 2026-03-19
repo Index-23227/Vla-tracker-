@@ -337,11 +337,11 @@ and generates **AI-powered analysis** every week.
 
 | Rank | Model | Spatial | Object | Goal | Long | Avg |
 |------|-------|---------|--------|------|------|-----|
-| 🥇 | π₀.5 | **96.2** | **97.1** | 89.4 | **72.8** | **88.9** |
-| 🥈 | OpenVLA-OFT | 94.8 | 95.2 | **91.0** | 68.4 | 87.4 |
-| 🥉 | CoT-VLA | 92.1 | 93.8 | 88.2 | 71.2 | 86.3 |
+| 🥇 | PLD | - | - | - | - | **99.0** |
+| 🥈 | SimpleVLA-RL | **99.1** | **99.2** | **98.5** | **98.5** | **98.83** |
+| 🥉 | X-VLA | 98.4 | 98.8 | 97.6 | 96.4 | **97.8** |
 
-*Updated: 2026-03-15 · [Full leaderboard →](link)*
+*Updated: 2026-03-19 · [Full leaderboard →](link)*
 
 ## 📖 Weekly AI Analysis
 
@@ -378,6 +378,7 @@ See [CONTRIBUTING.md](link) — we welcome:
 | CALVIN | ABC→D | 19 | Long-horizon, language |
 | Meta-World | ML-10/45 | - | Multi-task dexterity |
 | SimplerEnv | 4 tasks | 16 | Sim-to-real transfer |
+| RoboTwin v1/v2 | 50 tasks | 7 | Dual-arm, bimanual |
 | RLBench | 18 tasks | 3 | Diverse manipulation |
 
 ## 🤖 How AI Analysis Works
