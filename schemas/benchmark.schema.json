@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vla-tracker/schemas/benchmark.schema.json",
+  "title": "VLA Benchmark",
+  "description": "Schema for VLA-Tracker benchmark definition files (data/benchmarks/*.yaml)",
+  "type": "object",
+  "required": ["name", "metric", "higher_is_better"],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Benchmark short name",
+      "examples": ["LIBERO", "CALVIN", "SimplerEnv"]
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full descriptive benchmark name"
+    },
+    "paper_url": {
+      "type": "string",
+      "description": "URL to the benchmark paper"
+    },
+    "code_url": {
+      "type": "string",
+      "description": "URL to the benchmark code/repo"
+    },
+    "year": {
+      "type": "integer",
+      "description": "Publication year",
+      "minimum": 2015,
+      "maximum": 2030
+    },
+    "venue": {
+      "type": "string",
+      "description": "Publication venue",
+      "examples": ["NeurIPS 2023", "CoRL 2024"]
+    },
+    "metric": {
+      "type": "string",
+      "description": "Primary evaluation metric",
+      "examples": ["success_rate", "avg_len"]
+    },
+    "metric_unit": {
+      "type": "string",
+      "description": "Unit of the metric",
+      "examples": ["%", "tasks completed"]
+    },
+    "metric_description": {
+      "type": "string",
+      "description": "Detailed description of the metric"
+    },
+    "higher_is_better": {
+      "type": "boolean",
+      "description": "Whether higher metric values indicate better performance"
+    },
+    "evaluation_protocol": {
+      "type": "string",
+      "description": "How models are evaluated on this benchmark"
+    },
+    "robot": {
+      "type": "string",
+      "description": "Target robot platform(s)"
+    },
+    "environment": {
+      "type": "string",
+      "description": "Environment type",
+      "examples": ["simulation (robosuite)", "simulation (ManiSkill)", "real-world"]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Semantic tags"
+    },
+    "categories": {
+      "type": "object",
+      "description": "Task categories/suites within the benchmark",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "num_tasks": { "type": "integer", "minimum": 0 },
+          "num_embodiments": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "description": "Version-specific metadata (for multi-version benchmarks like RoboTwin)",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "num_tasks": { "type": "integer" },
+          "year": { "type": "integer" },
+          "paper_url": { "type": "string" },
+          "authors": { "type": "string" }
+        }
+      }
+    }
+  }
+}

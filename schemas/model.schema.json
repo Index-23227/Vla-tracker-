@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vla-tracker/schemas/model.schema.json",
+  "title": "VLA Model",
+  "description": "Schema for VLA-Tracker model YAML files (data/models/*.yaml)",
+  "type": "object",
+  "required": ["name", "organization", "date", "architecture", "benchmarks"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Model identifier (must match filename without .yaml)"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema or entry version",
+      "examples": ["1.0"]
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full model name or paper title"
+    },
+    "organization": {
+      "type": "string",
+      "description": "Lab or company that created the model"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication date in YYYY-MM-DD format",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "paper_url": {
+      "type": ["string", "null"],
+      "description": "URL to the paper (typically arXiv)",
+      "examples": ["https://arxiv.org/abs/2406.09246"]
+    },
+    "code_url": {
+      "type": ["string", "null"],
+      "description": "URL to source code repository"
+    },
+    "venue": {
+      "type": ["string", "null"],
+      "description": "Publication venue",
+      "examples": ["NeurIPS 2023", "CoRL 2024", "ICRA 2025"]
+    },
+    "open_source": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether model weights/code are publicly available"
+    },
+    "model_type": {
+      "type": "string",
+      "description": "Model category",
+      "examples": ["vla", "diffusion_policy", "generalist"]
+    },
+    "inference_hz": {
+      "type": ["number", "null"],
+      "description": "Inference speed in Hz",
+      "minimum": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Semantic tags for filtering and search",
+      "examples": [["flow-matching", "multi-embodiment", "real-world"]]
+    },
+    "architecture": {
+      "type": "object",
+      "required": ["action_head"],
+      "additionalProperties": true,
+      "properties": {
+        "backbone": {
+          "type": "string",
+          "description": "Vision backbone",
+          "examples": ["SigLIP + DINOv2", "PaliGemma-based VLM"]
+        },
+        "llm": {
+          "type": "string",
+          "description": "Language model component",
+          "examples": ["Gemma-2B", "Llama-3-8B", "Qwen2.5-3B"]
+        },
+        "action_head": {
+          "type": "string",
+          "description": "Action prediction mechanism",
+          "examples": ["flow matching", "autoregressive", "diffusion", "hybrid (diffusion + autoregressive)"]
+        },
+        "action_space": {
+          "type": "string",
+          "enum": ["continuous", "discrete"],
+          "description": "Action space type"
+        },
+        "parameters": {
+          "type": ["string", "null"],
+          "description": "Model size (keep ≤10 chars for display)",
+          "examples": ["3B", "7B", "55B", "93M"]
+        },
+        "key_innovation": {
+          "type": "string",
+          "description": "Brief description of novel contribution"
+        }
+      }
+    },
+    "training": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "dataset": {
+          "type": "string",
+          "description": "Training data sources"
+        },
+        "method": {
+          "type": "string",
+          "description": "Training approach"
+        },
+        "num_trajectories": {
+          "type": ["integer", "null"],
+          "description": "Number of training trajectories",
+          "minimum": 0
+        },
+        "compute": {
+          "type": "string",
+          "description": "Computational resources used"
+        }
+      }
+    },
+    "benchmarks": {
+      "type": "object",
+      "description": "Benchmark scores keyed by benchmark name. Each value is an object with numeric score fields and optional metadata.",
+      "additionalProperties": false,
+      "properties": {
+        "libero": { "$ref": "#/$defs/benchmark_scores" },
+        "calvin": { "$ref": "#/$defs/benchmark_scores" },
+        "simpler_env": { "$ref": "#/$defs/benchmark_scores" },
+        "rlbench": { "$ref": "#/$defs/benchmark_scores" },
+        "robotwin_v1": { "$ref": "#/$defs/benchmark_scores" },
+        "robotwin_v2": { "$ref": "#/$defs/benchmark_scores" },
+        "maniskill": { "$ref": "#/$defs/benchmark_scores" },
+        "vlabench": { "$ref": "#/$defs/benchmark_scores" },
+        "robocasa": { "$ref": "#/$defs/benchmark_scores" },
+        "metaworld": { "$ref": "#/$defs/benchmark_scores" },
+        "real_world": { "$ref": "#/$defs/benchmark_scores" }
+      }
+    },
+    "eval_conditions": {
+      "type": "object",
+      "description": "Evaluation condition per benchmark (e.g. fine-tuned, zero-shot)",
+      "additionalProperties": {
+        "type": "string",
+        "examples": ["fine-tuned", "zero-shot", "in-context learning"]
+      }
+    }
+  },
+  "$defs": {
+    "benchmark_scores": {
+      "type": "object",
+      "description": "Score fields (numeric) + optional metadata (source, date_reported, eval_condition). All numeric values should be 0-100 (percentage).",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "number", "minimum": 0, "maximum": 100 },
+          { "type": "string" },
+          { "type": "null" }
+        ]
+      }
+    }
+  }
+}
