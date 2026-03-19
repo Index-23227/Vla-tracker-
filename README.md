@@ -3,7 +3,7 @@
 ### Real-time benchmark tracking for Vision-Language-Action models
 
 [![Models Tracked](https://img.shields.io/badge/models-73-blue)](data/models/)
-[![Benchmarks](https://img.shields.io/badge/benchmarks-9-green)](data/benchmarks/)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-10-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **73 VLA models** (2023-2026) across **9 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **73 VLA models** (2023-2026) across **10 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa, Real-World). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -162,7 +162,7 @@ Three GitHub Actions workflows keep the data up to date:
 
 ```
 ├── data/
-│   ├── benchmarks/          # Benchmark definitions (6 YAML files)
+│   ├── benchmarks/          # Benchmark definitions (10 YAML files)
 │   ├── models/              # Model data with benchmark scores (73 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results
