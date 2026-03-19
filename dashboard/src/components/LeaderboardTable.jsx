@@ -128,7 +128,7 @@ const MODEL_TYPE_FILTERS = {
   video: { label: 'Video Models' },
 }
 
-export default function LeaderboardTable({ models }) {
+export default function LeaderboardTable({ models, onModelClick }) {
   const [activeBench, setActiveBench] = useState('libero')
   const [sortBy, setSortBy] = useState('avg')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -251,11 +251,12 @@ export default function LeaderboardTable({ models }) {
                   </td>
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-1.5">
-                      {m.paper_url ? (
-                        <a href={m.paper_url} target="_blank" rel="noopener noreferrer" className="font-semibold text-white hover:text-blue-400 transition-colors">{m.name}</a>
-                      ) : (
-                        <span className="font-semibold text-white">{m.name}</span>
-                      )}
+                      <button
+                        onClick={() => onModelClick?.(m)}
+                        className="font-semibold text-white hover:text-blue-400 transition-colors text-left cursor-pointer"
+                      >
+                        {m.name}
+                      </button>
                       {m.open_source && (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">OSS</span>
                       )}
