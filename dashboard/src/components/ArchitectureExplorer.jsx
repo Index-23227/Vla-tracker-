@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ACTION_HEAD_COLORS } from '../constants/benchmarks'
+import DetailedPipelineCard from './DetailedPipelineCard'
 
 // ── Normalizers ──────────────────────────────────────────────────────────────
 
@@ -584,7 +585,7 @@ export default function ArchitectureExplorer({ models }) {
             {displayModels
               .sort((a, b) => (b.libero_avg ?? -1) - (a.libero_avg ?? -1))
               .map(m => (
-                <ArchitectureCard key={m.name} model={m} />
+                <DetailedPipelineCard key={m.name} model={m} />
               ))}
           </div>
         </>
