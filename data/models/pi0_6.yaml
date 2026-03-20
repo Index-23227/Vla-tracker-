@@ -8,11 +8,11 @@ venue: null
 open_source: true
 
 architecture:
-  backbone: "PaliGemma-based VLM"
-  llm: "Gemma-based"
+  backbone: "Gemma 3 4B VLM"
+  llm: "Gemma 3 4B"
   action_head: "flow matching + RL (RECAP)"
   action_space: "continuous"
-  parameters: "3B+"
+  parameters: "~5B (4B VLM + ~860M action expert)"
   key_innovation: >
     RECAP (RL with Experience and Corrections via Advantage-conditioned Policies):
     trains VLA with heterogeneous data including demonstrations, on-policy rollouts,
