@@ -18,7 +18,12 @@ training:
   dataset: "Real robot data + synthetic data"
   method: "Pre-training with top 4 VLM layers unfrozen"
   compute: "300K steps, batch size 16384"
-benchmarks: {}
+benchmarks:
+  robocasa:
+    robocasa_avg: 47.6
+    source: "LangForce paper (Isaac-GR00T evaluation, 24 tasks)"
+    date_reported: "2026-01-28"
+    eval_condition: "fine-tuned"
 open_source: true
 open_source_note: "Open model weights on HuggingFace (nvidia/GR00T-N1.6-3B)"
 model_type: "vla"
