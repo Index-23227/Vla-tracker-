@@ -702,4 +702,207 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'Diffusion', loop: 'K-step denoising', notes: ['Cross-embodiment generalization', 'Multi-view fusion'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #31  SpatialVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'SpatialVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Depth maps', sub: 'spatial priors', color: 't' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'PaliGemma2 VLM', sub: '4B', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Gemma 2', sub: 'language model', color: 'i' },
+      ]},
+      { label: '3D spatial tokenizer', sub: 'depth → adaptive spatial tokens', color: 't' },
+      { label: 'AR action decoder', sub: 'tokenized 7-DoF', color: 'o' },
+    ],
+    output: { label: 'Tokenized actions', sub: '7-DoF, spatially-grounded', color: 'e' },
+    meta: { loss: 'Cross-entropy (next-token)', notes: ['4B params', '3D spatial tokenization'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #32  SmolVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'SmolVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'SmolVLM2', sub: '450M total', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'SmolLM2', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Flow matching head', sub: 'continuous denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'flow-matched', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['450M params', 'Single GPU trainable', 'Competitive with 10x larger'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #33  TinyVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'TinyVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Compact VLM', sub: '422M–1.3B', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Phi-2', sub: '2.7B language model', color: 'i' },
+      ]},
+      { label: 'LoRA adapters', sub: 'parameter-efficient fine-tuning', color: 'x' },
+      { label: 'Diffusion action head', sub: 'continuous denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'lightweight diffusion', color: 'e' },
+    meta: { loss: 'Diffusion', notes: ['422M–1.3B params', 'LoRA-based training'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #34  NanoVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'NanoVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { label: 'ResNet-18', sub: 'lightweight vision encoder', color: 'k' },
+      { label: 'BERT-base / Qwen2.5-0.5B', sub: 'language encoder', color: 'i' },
+      { label: 'Routing-decoupled fusion', sub: 'separate vision-language pathways', color: 'x' },
+      { label: 'Efficient action head', sub: 'edge-optimized', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'edge-device, ~50M params', color: 'e' },
+    meta: { loss: 'Action prediction', notes: ['~50M params', '52x faster on edge', '98% fewer params vs SOTA'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #35  SAM2Act
+  // ═══════════════════════════════════════════════════════════════════════════
+  'SAM2Act': {
+    inputs: [
+      { label: 'Multi-view RGB', sub: 'multiple cameras', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { label: 'SAM2 encoder', sub: 'Segment Anything 2', color: 'k' },
+      { label: 'SAM2 memory bank', sub: 'temporal tracking across frames', color: 'c' },
+      { group: 'RVT-2 multi-view transformer', sub: 'coarse-to-fine', color: 'p', children: [
+        { label: 'Coarse heatmap', sub: 'approximate location', color: 'r' },
+        { label: 'Fine heatmap', sub: 'precise action point', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Action keypoints', sub: 'coarse-to-fine heatmap', color: 'e' },
+    meta: { loss: 'Heatmap + action regression', notes: ['SAM2 memory for temporal reasoning', 'SOTA RLBench 86.8%'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #36  RoboDual
+  // ═══════════════════════════════════════════════════════════════════════════
+  'RoboDual': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Generalist: OpenVLA 7B', sub: 'high-level reasoning', color: 'p', children: [
+        { label: 'SigLIP + DinoV2', sub: 'vision encoders', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language backbone', color: 'i' },
+      ]},
+      { label: 'Cross-attention fusion', sub: 'generalist → specialist bridge', color: 'x' },
+      { label: 'Specialist: DiT 20M', sub: 'diffusion transformer, low-level motor', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'dual-system fused', color: 'e' },
+    meta: { loss: 'Diffusion (specialist) + CE (generalist)', notes: ['7B + 20M dual system', 'Cross-attention fusion'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #37  RT-2-X
+  // ═══════════════════════════════════════════════════════════════════════════
+  'RT-2-X': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'PaLI-X VLM', sub: '55B', color: 'p', children: [
+        { label: 'ViT-22B', sub: 'vision encoder', color: 'k' },
+        { label: 'PaLM-E', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Web-scale co-training', sub: 'internet + robot data', color: 'c' },
+      { label: 'AR action decoder', sub: 'tokenized actions', color: 'o' },
+    ],
+    output: { label: 'Tokenized actions', sub: 'discretized 7-DoF', color: 'e' },
+    meta: { loss: 'Cross-entropy (next-token)', notes: ['55B params', 'First large-scale cross-embodiment VLA'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #38  HPT
+  // ═══════════════════════════════════════════════════════════════════════════
+  'HPT': {
+    inputs: [
+      { label: 'RGB frames', sub: 'per-embodiment view', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { label: 'Heterogeneous stem encoders', sub: 'per-embodiment specialized', color: 'k' },
+      { group: 'Shared transformer trunk', sub: '300M params', color: 'p', children: [
+        { label: 'Universal representation', sub: 'cross-embodiment features', color: 'x' },
+      ]},
+      { label: 'Task-specific heads', sub: 'per-embodiment action decoders', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'per-embodiment output', color: 'e' },
+    meta: { loss: 'Action prediction', notes: ['300M params', '52 diverse datasets', 'Heterogeneous pre-training'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #39  FALCON
+  // ═══════════════════════════════════════════════════════════════════════════
+  'FALCON': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Spatial annotations', sub: 'grounding priors', color: 't' },
+    ],
+    stages: [
+      { group: 'Kosmos-2 VLM', sub: '1.6B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Kosmos-2', color: 'k' },
+        { label: 'Language model', sub: 'Kosmos-2', color: 'i' },
+      ]},
+      { label: 'Embodied Spatial Model', sub: '1.0B, spatial grounding', color: 't' },
+      { label: 'Spatial-grounded action head', sub: 'location-aware actions', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'spatially-grounded', color: 'e' },
+    meta: { loss: 'Spatial grounding + action', notes: ['2.9B total (1.6B + 1.0B)', 'Decoupled spatial understanding'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #40  FLARE
+  // ═══════════════════════════════════════════════════════════════════════════
+  'FLARE': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'SigLIP2-Large', sub: 'vision encoder (frozen)', color: 'k' },
+      { label: 'Q-Former', sub: 'visual feature compression', color: 'x' },
+      { label: 'Future latent alignment', sub: 'implicit world modeling', color: 'c' },
+      { group: 'Diffusion Transformer', sub: '3B params', color: 'r', children: [
+        { label: 'DiT backbone', sub: 'FLARE-conditioned denoiser', color: 'r' },
+        { label: 'State encoder', sub: 'proprioception', color: 'g' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'future-aligned', color: 'e' },
+    meta: { loss: 'Diffusion + future latent alignment', loop: 'K-step denoising', notes: ['3B params', 'Implicit world model'] },
+  },
+
 }
