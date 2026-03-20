@@ -6,11 +6,11 @@ code_url: null
 date: "2025-02-03"
 venue: "CoRL 2025"
 architecture:
-  backbone: "Qwen2-VL"
-  llm: "Qwen2 7B"
+  backbone: "Qwen2-VL-2B"
+  llm: "Qwen2 ~1.5B (via Qwen2-VL-2B)"
   action_head: "diffusion (hierarchical: coarse plan + fine action)"
   action_space: "continuous"
-  parameters: "7B"
+  parameters: "~3B (2B VLM + 1B diffusion expert)"
   key_innovation: "Hierarchical action planning with VLM — generates language plan then fine-grained actions via diffusion"
 training:
   dataset: "Cross-embodiment robot data + dexterous manipulation"
@@ -31,4 +31,4 @@ benchmarks:
     date_reported: "2025-02-03"
     eval_condition: "fine-tuned"
 open_source: false
-tags: [7B, diffusion, hierarchical, dexterous, manipulation]
+tags: [3B, diffusion, hierarchical, dexterous, manipulation]

@@ -6,11 +6,11 @@ code_url: null
 date: "2026-01-26"
 venue: null
 architecture:
-  backbone: "Qwen2.5-VL"
-  llm: "Qwen2.5"
+  backbone: "Qwen2.5-VL-3B"
+  llm: "Qwen2.5 3B"
   action_head: "Mixture of Transformers + flow matching"
   action_space: "continuous"
-  parameters: "7B"
+  parameters: "~4B (3B VLM + action expert)"
   key_innovation: "Trained on 20,000 hours of real-world data from 9 robot platforms; depth distillation via LingBot-Depth"
 training:
   dataset: "20K hours real-world data, 9 robot platforms"
@@ -38,4 +38,4 @@ benchmarks:
     eval_condition: "fine-tuned"
 open_source: true
 open_source_note: "Apache-2.0 license"
-tags: [7B, MoT, flow-matching, large-scale-data, open-source, multi-embodiment]
+tags: [3B, MoT, flow-matching, large-scale-data, open-source, multi-embodiment]

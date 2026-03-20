@@ -6,11 +6,11 @@ code_url: https://github.com/Robot-VLM/RoboVLM
 date: "2024-11-18"
 venue: "ICLR 2025"
 architecture:
-  backbone: "SigLIP + language model"
-  llm: "Qwen2 1.5B"
+  backbone: "KosMos VLM (best config; framework supports 8 VLM backbones)"
+  llm: "KosMos 2B (best config)"
   action_head: "latent action tokenization (VQ-VAE) + autoregressive"
   action_space: "discrete latent → continuous"
-  parameters: "1.5B"
+  parameters: "2B"
   key_innovation: "Unified visual-action tokenization via VQ-VAE; treats actions as latent visual tokens for cross-embodiment transfer"
 training:
   dataset: "Open X-Embodiment"
@@ -31,4 +31,4 @@ benchmarks:
     date_reported: "2024-11-18"
     eval_condition: "fine-tuned"
 open_source: true
-tags: [1.5B, VQ-VAE, autoregressive, manipulation, open-source, cross-embodiment]
+tags: [2B, VQ-VAE, autoregressive, manipulation, open-source, cross-embodiment]

@@ -4,16 +4,21 @@ date: '2026-01-20'
 paper_url: https://arxiv.org/abs/2601.14133
 code_url: https://github.com/ZGC-EmbodyAI/TwinBrainVLA
 open_source: true
-benchmarks: {}
+benchmarks:
+  robocasa:
+    robocasa_avg: 54.6
+    source: "TwinBrainVLA paper (RoboCasa GR1 Tabletop 24 tasks, Qwen3VL variant)"
+    date_reported: "2026-01-30"
+    eval_condition: "fine-tuned"
 
 tags:
-- 7B
+- 3B-4B
 - asymmetric-MoT
 - anti-forgetting
 - dual-brain
 - open-source
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
+  backbone: "Qwen2.5-VL-3B / Qwen3-VL-4B"
+  llm: "Qwen2.5 3B / Qwen3 4B"
   action_head: 'Asymmetric MoT: frozen Left Brain (generalist) + trainable Right Brain (specialist)'
-  parameters: "7B"
+  parameters: "3B-4B"

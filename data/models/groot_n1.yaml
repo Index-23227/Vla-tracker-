@@ -6,8 +6,8 @@ code_url: null
 date: "2025-03-18"
 venue: null
 architecture:
-  backbone: "Eagle VLM (S2 system)"
-  llm: "Eagle VLM"
+  backbone: "Eagle-2 VLM (SigLIP-2 + SmolLM2)"
+  llm: "SmolLM2 (within Eagle-2 VLM)"
   action_head: "diffusion transformer (S1 system)"
   action_space: "continuous"
   parameters: "2.2B"
@@ -25,8 +25,13 @@ benchmarks:
     source: "GR00T-N1 technical report"
     date_reported: "2025-03-18"
     eval_condition: "fine-tuned"
+  robocasa:
+    robocasa_avg: 32.1
+    source: "GR00T-N1 paper Table 2 (100-demo regime, 24 atomic kitchen tasks)"
+    date_reported: "2025-03-18"
+    eval_condition: "fine-tuned"
 open_source: true
 open_source_note: "Open model weights"
 model_type: "vla"
 inference_hz: 9
-tags: [2.2B, diffusion-transformer, dual-system, humanoid, open-model]
+tags: [2.2B, diffusion-transformer, dual-system, humanoid, open-model, open-source]

@@ -6,11 +6,11 @@ code_url: null
 date: "2025-03-13"
 venue: null
 architecture:
-  backbone: "InternVL2-based VLM"
-  llm: "InternLM2-based"
+  backbone: "PrismaticVLM (SigLIP + DinoV2)"
+  llm: "Llama-2 7B"
   action_head: "hybrid (diffusion + autoregressive)"
   action_space: "continuous"
-  parameters: "2B"
+  parameters: "7B"
   key_innovation: "Dual action heads - autoregressive for coarse planning + diffusion for fine-grained actions"
 training:
   dataset: "Cross-embodiment robot data + language instructions"
@@ -30,4 +30,4 @@ benchmarks:
     date_reported: "2025-03-13"
     eval_condition: "fine-tuned"
 open_source: false
-tags: [2B, hybrid, diffusion, autoregressive, manipulation]
+tags: [7B, hybrid, diffusion, autoregressive, manipulation]
