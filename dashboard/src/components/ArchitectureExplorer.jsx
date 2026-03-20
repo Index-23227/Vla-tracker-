@@ -12,12 +12,16 @@ function normalizeBackbone(raw) {
   if (l.includes('internvl') || l.includes('internvit')) return 'InternVL'
   if (l.includes('qwen')) return 'Qwen-VL'
   if (l.includes('eagle') || l.includes('cosmos')) return 'Eagle VLM'
+  if (l.includes('gemini')) return 'Gemini'
+  if (l.includes('pali-x') || l.includes('palix') || l.includes('pali_x')) return 'PaLI-X'
   if (l.includes('florence')) return 'Florence'
+  if (l.includes('kosmos') || l.includes('kosmo')) return 'Kosmos'
+  if (l.includes('flamingo')) return 'OpenFlamingo'
   if (l.includes('siglip') && !l.includes('dino') && !l.includes('gemma')) return 'SigLIP'
   if (l.includes('clip') || l.includes('show-o')) return 'CLIP'
   if (l.includes('blip')) return 'BLIP'
   if (l.includes('mamba')) return 'Mamba'
-  if (l.includes('diffusion') || l.includes('video')) return 'Video/Diffusion'
+  if (l.includes('diffusion') || l.includes('video') || l.includes('pix2pix')) return 'Video/Diffusion'
   if (l.includes('resnet') || l.includes('cnn')) return 'CNN'
   if (l.includes('sam2')) return 'SAM2'
   if (l.includes('transformer') || l.includes('gpt')) return 'Transformer'
@@ -57,6 +61,7 @@ const BACKBONE_COLORS = {
   'PrismaticVLM': '#8b5cf6', 'PaliGemma': '#06b6d4', 'InternVL': '#f59e0b',
   'Qwen-VL': '#ef4444', 'Eagle VLM': '#22c55e', 'SigLIP': '#ec4899',
   'CLIP': '#3b82f6', 'Florence': '#a855f7', 'BLIP': '#14b8a6',
+  'Gemini': '#4285f4', 'PaLI-X': '#ea4335', 'Kosmos': '#fbbf24', 'OpenFlamingo': '#f472b6',
   'Video/Diffusion': '#f97316', 'CNN': '#94a3b8', 'SAM2': '#fb923c',
   'Mamba': '#a78bfa', 'Transformer': '#38bdf8', 'Other': '#6b7280', 'Unknown': '#404040',
 }
