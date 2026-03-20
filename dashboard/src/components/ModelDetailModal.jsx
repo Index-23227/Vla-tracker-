@@ -142,7 +142,7 @@ export default function ModelDetailModal({ model, onClose }) {
                           if (suiteKey.endsWith('_note')) return null
                           if (typeof val !== 'number') return null
                           const label = suiteKey
-                            .replace(/^(libero_|calvin_|google_robot_|robotwin_|rlbench_|maniskill_|vlabench_|robocasa_)/, '')
+                            .replace(/^(libero_|calvin_|google_robot_|robotwin_|rlbench_|robocasa_)/, '')
                             .replace(/_/g, ' ')
                           return (
                             <div key={suiteKey} className="flex items-center justify-between">

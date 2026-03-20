@@ -3,7 +3,7 @@
 ### Real-time benchmark tracking for Vision-Language-Action models
 
 [![Models Tracked](https://img.shields.io/badge/models-73-blue)](data/models/)
-[![Benchmarks](https://img.shields.io/badge/benchmarks-10-green)](data/benchmarks/)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-8-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **73 VLA models** (2023-2026) across **10 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, ManiSkill, VLABench, RoboCasa, Real-World). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **73 VLA models** (2023-2026) across **8 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, RoboCasa, Real-World). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -107,9 +107,7 @@ python scripts/generate_model_yaml.py --top 5
 | [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 7 | Dual-arm, bimanual | CVPR 2025 Highlight |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
-| [ManiSkill](data/benchmarks/maniskill.yaml) | Various | 0 | Generalizable manipulation | ICLR 2024 |
-| [VLABench](data/benchmarks/vlabench.yaml) | Various | 0 | VLA evaluation | 2024 |
-| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 0 | Home robot tasks | RSS 2024 |
+| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 5 | Home robot tasks | RSS 2024 |
 
 ### LIBERO Leaderboard (35 models)
 

@@ -22,8 +22,6 @@ BENCH_AVG_TO_SECTION = {
     "robotwin_v1_avg": "robotwin_v1",
     "robotwin_v2_avg": "robotwin_v2",
     "rlbench_avg": "rlbench",
-    "maniskill_avg": "maniskill",
-    "vlabench_avg": "vlabench",
     "robocasa_avg": "robocasa",
 }
 
