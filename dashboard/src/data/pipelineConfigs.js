@@ -46,6 +46,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PrismaticVLM', sub: '7B', color: 'p', children: [
@@ -184,6 +185,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -253,6 +255,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PrismaticVLM', sub: '7B, LoRA fine-tuned', color: 'p', children: [
@@ -341,6 +344,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PrismaticVLM', sub: '7B (OpenVLA base)', color: 'p', children: [
@@ -408,6 +412,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PrismaticVLM', sub: '7B', color: 'p', children: [
@@ -710,6 +715,7 @@ export const PIPELINE_CONFIGS = {
       { label: 'RGB frames', color: 'b' },
       { label: 'Depth maps', sub: 'spatial priors', color: 't' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PaliGemma2 VLM', sub: '4B', color: 'p', children: [
@@ -730,6 +736,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -750,6 +757,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -771,6 +779,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { label: 'ResNet-18', sub: 'lightweight vision encoder', color: 'k' },
@@ -1030,6 +1039,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { label: 'MAGViT-v2', sub: 'vision tokenizer', color: 'k' },
@@ -1168,6 +1178,7 @@ export const PIPELINE_CONFIGS = {
       { label: 'RGB frames', color: 'b' },
       { label: 'Depth maps', color: 't' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -1551,6 +1562,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
