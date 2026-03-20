@@ -905,4 +905,199 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'Diffusion + future latent alignment', loop: 'K-step denoising', notes: ['3B params', 'Implicit world model'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #41  3D-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  '3D-VLA': {
+    inputs: [
+      { label: '3D point clouds', sub: 'multi-view', color: 't' },
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'Q-Former', sub: '3D multi-view features', color: 'k' },
+      { group: 'BLIP2 + FlanT5', sub: '3B–11B', color: 'p', children: [
+        { label: '3D-LLM backbone', sub: 'point-cloud aligned', color: 'i' },
+      ]},
+      { label: '3D world model', sub: 'goal generation', color: 'c' },
+      { label: 'Embodied diffusion', sub: 'action denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: '3D-grounded', color: 'e' },
+    meta: { loss: 'Diffusion + 3D alignment', loop: 'K-step denoising', notes: ['3B–11B params', '3D point-cloud world model'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #42  3D Diffuser Actor
+  // ═══════════════════════════════════════════════════════════════════════════
+  '3D Diffuser Actor': {
+    inputs: [
+      { label: '3D scene point cloud', color: 't' },
+      { label: 'Language instr.', sub: 'CLIP embeddings', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: '3D scene encoder', sub: 'point cloud features', color: 'k' },
+      { label: 'CLIP language encoder', sub: 'task conditioning', color: 'i' },
+      { label: '3D diffusion denoiser', sub: 'SE(3) pose denoising', color: 'r' },
+    ],
+    output: { label: 'SE(3) poses', sub: '3D action trajectories', color: 'e' },
+    meta: { loss: 'Diffusion (3D)', loop: 'K-step denoising', notes: ['~50M params', 'Diffusion over SE(3)'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #43  AtomicVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'AtomicVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'PaliGemma VLM', sub: '4.17B total', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Gemma 2B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Flexible routing encoder', sub: 'atomic skill decomposition', color: 'x' },
+      { label: 'SG-MoE action head', sub: 'Skill-Guided Mixture of Experts', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'skill-routed', color: 'e' },
+    meta: { loss: 'Skill-guided MoE', notes: ['4.17B params', 'Continual skill acquisition'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #44  AVDC
+  // ═══════════════════════════════════════════════════════════════════════════
+  'AVDC': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { label: 'Video diffusion model', sub: 'future frame generation', color: 'r' },
+      { label: 'Optical flow extraction', sub: 'motion fields', color: 'c' },
+      { label: 'Inverse dynamics', sub: 'flow → actions', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'flow-derived', color: 'e' },
+    meta: { loss: 'Video diffusion + inverse dynamics', notes: ['No explicit LLM', 'Video as intermediate representation'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #45  DeeR-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DeeR-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'OpenFlamingo VLM', sub: '3B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'OpenFlamingo', color: 'k' },
+        { label: 'MPT-1B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Multi-exit layers', sub: 'early stopping via action consistency', color: 'x' },
+      { label: 'Action head', sub: 'adaptive compute depth', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'early-exit optimized', color: 'e' },
+    meta: { loss: 'Action prediction + consistency', notes: ['3B params', '5.2–6.5x compute reduction'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #46  Diffusion-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Diffusion-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Qwen2 VLM', sub: '2B–72B', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Qwen2', sub: 'language + reasoning', color: 'i' },
+      ]},
+      { label: 'AR reasoning tokens', sub: 'chain-of-thought injection', color: 'c' },
+      { label: 'Diffusion action head', sub: 'reasoning-injected denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: '82 Hz inference', color: 'e' },
+    meta: { loss: 'CE (reasoning) + diffusion (actions)', loop: 'K-step denoising', notes: ['2B–72B variants', '82 Hz fast inference'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #47  dVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'dVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { label: 'MAGViT-v2', sub: 'vision tokenizer', color: 'k' },
+      { group: 'LLaDA-8B-Instruct', sub: 'discrete diffusion LM', color: 'p', children: [
+        { label: 'Multimodal CoT', sub: 'chain-of-thought reasoning', color: 'c' },
+      ]},
+      { label: 'Discrete diffusion head', sub: 'token-level denoising', color: 'r' },
+    ],
+    output: { label: 'Action tokens', sub: 'discrete diffusion', color: 'e' },
+    meta: { loss: 'Discrete diffusion + CoT', notes: ['8B params', 'Multimodal chain-of-thought'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #48  E0
+  // ═══════════════════════════════════════════════════════════════════════════
+  'E0': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'PaliGemma VLM', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Gemma', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Action quantizer', sub: 'continuous → discrete tokens', color: 'x' },
+      { label: 'Continuized discrete diffusion', sub: 'hybrid denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'de-quantized', color: 'e' },
+    meta: { loss: 'Continuized discrete diffusion', notes: ['Bridges discrete & continuous diffusion'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #49  FLOWER
+  // ═══════════════════════════════════════════════════════════════════════════
+  'FLOWER': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'Florence-2-Large', sub: 'vision encoder (encoder only)', color: 'k' },
+      { label: 'Flow matching head', sub: 'continuous action denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'flow-matched', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['950M params', 'Sub-1B generalist', 'No LLM backbone'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #50  Gemini Robotics
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Gemini Robotics': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'Gemini 2.0 VLM', sub: 'foundation model', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Gemini multimodal', color: 'k' },
+        { label: 'Language model', sub: 'Gemini 2.0', color: 'i' },
+      ]},
+      { label: 'Embodied reasoning', sub: 'spatial + temporal understanding', color: 'c' },
+      { label: 'End-to-end action head', sub: 'VLA output', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'end-to-end VLA', color: 'e' },
+    meta: { loss: 'End-to-end VLA', notes: ['Gemini 2.0 scale', 'Proprietary', 'On-device variants'] },
+  },
+
 }
