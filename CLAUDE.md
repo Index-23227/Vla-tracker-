@@ -104,8 +104,6 @@ Keep the table sorted by LIBERO Avg descending.
 | RoboTwin v1 | `robotwin_v1_avg`   | `benchmarks.robotwin_v1` |
 | RoboTwin v2 | `robotwin_v2_avg`   | `benchmarks.robotwin_v2` |
 | RLBench     | `rlbench_avg`       | `benchmarks.rlbench` |
-| ManiSkill   | `maniskill_avg`     | `benchmarks.maniskill` |
-| VLABench    | `vlabench_avg`      | `benchmarks.vlabench` |
 | RoboCasa    | `robocasa_avg`      | `benchmarks.robocasa` |
 
 ### Average Computation Rules

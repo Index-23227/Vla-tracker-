@@ -15,7 +15,7 @@
 | 기존 프로젝트 | 한계 | 우리의 차별화 |
 |---|---|---|
 | VLA-Arena | 자체 벤치마크의 raw 수치만 제공 | 다중 벤치마크 크로스 분석 |
-| VLABench | 자체 평가 프레임워크 | 모든 주요 벤치마크 통합 뷰 |
+| VLABench* | 자체 평가 프레임워크 | 모든 주요 벤치마크 통합 뷰 |
 | sota.evomind-tech.com | LIBERO/CALVIN/Meta-World 수치 나열 | AI 생성 인사이트 + 시계열 추적 |
 | awesome-VLA 리스트들 (5개+) | 정적 논문 링크 모음 | 동적 업데이트 + 분석 + 시각화 |
 | Open VLM Leaderboard | VLM에 집중, VLA action 성능 미포함 | Physical AI (VLA) 전문 |

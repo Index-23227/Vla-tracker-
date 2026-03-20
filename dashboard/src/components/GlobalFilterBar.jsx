@@ -34,7 +34,7 @@ export default function GlobalFilterBar() {
   }, [filteredModels])
 
   const exportCSV = useCallback(() => {
-    const benchKeys = ['libero_avg', 'calvin_avg', 'simpler_avg', 'robotwin_v1_avg', 'robotwin_v2_avg', 'rlbench_avg', 'maniskill_avg', 'vlabench_avg', 'robocasa_avg']
+    const benchKeys = ['libero_avg', 'calvin_avg', 'simpler_avg', 'robotwin_v1_avg', 'robotwin_v2_avg', 'rlbench_avg', 'robocasa_avg']
     const headers = ['Name', 'Organization', 'Date', 'Venue', 'Open Source', 'Parameters', 'Action Head', 'Inference Hz', ...benchKeys]
     const rows = filteredModels.map(m => [
       m.name, m.organization, m.date, m.venue || '', m.open_source ? 'Yes' : 'No',

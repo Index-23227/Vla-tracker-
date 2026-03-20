@@ -64,22 +64,6 @@ export const BENCHMARKS = {
     suites: ['rlbench_18tasks'],
     suiteLabels: { rlbench_18tasks: '18-Task Multi-Task' },
   },
-  maniskill: {
-    key: 'maniskill_avg',
-    label: 'ManiSkill',
-    max: 100,
-    metric: 'Success Rate (%)',
-    suites: [],
-    suiteLabels: {},
-  },
-  vlabench: {
-    key: 'vlabench_avg',
-    label: 'VLABench',
-    max: 100,
-    metric: 'Success Rate (%)',
-    suites: [],
-    suiteLabels: {},
-  },
   robocasa: {
     key: 'robocasa_avg',
     label: 'RoboCasa',
