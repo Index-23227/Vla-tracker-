@@ -1100,4 +1100,214 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'End-to-end VLA', notes: ['Gemini 2.0 scale', 'Proprietary', 'On-device variants'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #51  GR-Dexter
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GR-Dexter': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Qwen2.5-VL-3B', sub: 'VLM backbone', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Qwen2.5-VL', color: 'k' },
+        { label: 'Qwen2.5 3B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Flow-matching DiT', sub: '56-DoF bimanual dexterous', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: '56-DoF bimanual hands', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['56-DoF dexterous hands', 'ByteDexter V2'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #52  GR-1
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GR-1': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'GPT-style transformer', sub: '130M', color: 'p', children: [
+        { label: 'Vision tokenizer', sub: 'frame encoding', color: 'k' },
+        { label: 'Language tokens', sub: 'task conditioning', color: 'i' },
+      ]},
+      { label: 'Video prediction', sub: 'auxiliary future frames', color: 'c' },
+      { label: 'AR action decoder', sub: 'next-token prediction', color: 'o' },
+    ],
+    output: { label: 'Actions + video', sub: 'unified generation', color: 'e' },
+    meta: { loss: 'Cross-entropy (video + action)', notes: ['130M params', 'Video as auxiliary objective'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #53  GR-2
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GR-2': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'Video GPT transformer', sub: '1.5B', color: 'p', children: [
+        { label: 'Vision tokenizer', sub: 'video encoding', color: 'k' },
+        { label: 'Language tokens', sub: 'task conditioning', color: 'i' },
+      ]},
+      { label: 'World model', sub: '38M video pre-training', color: 'c' },
+      { label: 'AR action decoder', sub: 'video prediction + action', color: 'o' },
+    ],
+    output: { label: 'Actions + video', sub: 'world-model grounded', color: 'e' },
+    meta: { loss: 'Cross-entropy (video + action)', notes: ['1.5B params', '38M internet videos pre-training'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #54  GST-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GST-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Depth maps', color: 't' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'PrismaticVLM backbone', sub: 'OpenVLA-based', color: 'p', children: [
+        { label: 'SigLIP + DinoV2', sub: 'vision encoders', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Gaussian Spatial Tokenizer', sub: 'depth + semantic → 3D Gaussian primitives', color: 't' },
+      { label: '3D Depth-Aware CoT', sub: 'spatial reasoning', color: 'c' },
+      { label: 'Flow matching action expert', sub: '300M denoiser', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: '3D-aware flow-matched', color: 'e' },
+    meta: { loss: 'Flow matching + CoT', notes: ['300M action expert', '3D Gaussian spatial tokens'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #55  HiMoE-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'HiMoE-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'PaliGemma VLM', sub: '3B+', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Gemma 2B', sub: 'language model', color: 'i' },
+      ]},
+      { group: 'Hierarchical MoE', sub: 'multi-level expert routing', color: 'x', children: [
+        { label: 'Task-level experts', sub: 'high-level routing', color: 'x' },
+        { label: 'Action-Space MoE', sub: 'boundary layer experts', color: 'o' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'MoE-routed', color: 'e' },
+    meta: { loss: 'MoE routing + action prediction', notes: ['3B+ params', 'Hierarchical MoE', 'pi0-based'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #56  Humanoid-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Humanoid-VLA': {
+    inputs: [
+      { label: 'Egocentric video', sub: 'first-person view', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { label: 'CLIP ViT', sub: 'egocentric video encoder', color: 'k' },
+      { label: 'Language-motion pre-alignment', sub: 'LLM + motion tokens', color: 'i' },
+      { label: 'Egocentric fine-tuning', sub: 'video-conditioned adaptation', color: 'x' },
+      { label: 'Whole-body action head', sub: 'humanoid control', color: 'o' },
+    ],
+    output: { label: 'Whole-body actions', sub: 'humanoid joints', color: 'e' },
+    meta: { loss: 'Language-motion alignment', notes: ['Humanoid embodiment', 'Egocentric video'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #57  InstructVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'InstructVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'InternVL2 VLM', sub: '4B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'InternVL2', color: 'k' },
+        { label: 'InternLM2', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Instruction-following formulation', sub: 'preserves VLM knowledge', color: 'c' },
+      { label: 'Flow matching head', sub: 'continuous actions', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'instruction-aligned', color: 'e' },
+    meta: { loss: 'Flow matching + instruction', notes: ['4B params', '650K VLA-IT annotations'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #58  InternVLA-A1
+  // ═══════════════════════════════════════════════════════════════════════════
+  'InternVLA-A1': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'InternVL3 / Qwen3-VL', sub: '2B–3B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'InternVL3 / Qwen3-VL', color: 'k' },
+        { label: 'Qwen2.5 / Qwen3', sub: 'language model', color: 'i' },
+      ]},
+      { group: 'Mixture-of-Transformers', sub: 'UGA experts', color: 'x', children: [
+        { label: 'Understanding expert', sub: 'perception', color: 'x' },
+        { label: 'Generation expert', sub: 'planning', color: 'c' },
+        { label: 'Action expert', sub: 'motor control', color: 'o' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'MoT-unified', color: 'e' },
+    meta: { loss: 'MoT multi-expert', notes: ['2B–3B params', 'Unified understanding-generation-action'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #59  InternVLA-M1
+  // ═══════════════════════════════════════════════════════════════════════════
+  'InternVLA-M1': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Qwen2.5-VL', sub: 'VLM backbone', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Qwen2.5-VL', color: 'k' },
+        { label: 'Qwen2.5', sub: 'language + spatial planner', color: 'i' },
+      ]},
+      { label: 'Spatial grounding', sub: 'dual-system planning', color: 'c' },
+      { label: 'DiT action head', sub: 'diffusion transformer', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'spatially grounded', color: 'e' },
+    meta: { loss: 'Diffusion + spatial planning', notes: ['Qwen2.5-VL based', 'SOTA SimplerEnv'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #60  LingBot-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'LingBot-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Qwen2.5-VL-3B', sub: 'VLM backbone', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Qwen2.5-VL', color: 'k' },
+        { label: 'Qwen2.5 3B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'LingBot-Depth distillation', sub: 'depth feature injection', color: 't' },
+      { label: 'MoT + flow matching', sub: 'Mixture of Transformers action expert', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'multi-embodiment', color: 'e' },
+    meta: { loss: 'Flow matching + depth distillation', notes: ['~4B params', '20K hours real-world data', '9 robot platforms'] },
+  },
+
 }
