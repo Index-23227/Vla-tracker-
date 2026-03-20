@@ -12,5 +12,7 @@ tags:
 - MLP-action-head
 - efficient
 architecture:
+  backbone: "CLIP ViT-L/14"
+  llm: "Mamba 2.7B (SSM, not transformer LLM)"
   action_head: lightweight MLP policy head (3.7M) for SE(3) pose
   parameters: 3.2B (2.7B Mamba + CLIP)

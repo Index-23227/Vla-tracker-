@@ -14,6 +14,7 @@ tags:
 - diffusion
 - open-source
 architecture:
-  action_head: embodied diffusion model aligned to 3D-LLM for goal generation + action
-    prediction
+  backbone: "3D point cloud encoder (ScanNet pre-trained)"
+  llm: "FlanT5"
+  action_head: embodied diffusion model aligned to 3D-LLM for goal generation + action prediction
   parameters: 3B–11B (FlanT5 backbone)
