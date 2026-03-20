@@ -1201,6 +1201,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -1286,6 +1287,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
