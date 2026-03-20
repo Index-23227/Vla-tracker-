@@ -46,6 +46,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PrismaticVLM', sub: '7B', color: 'p', children: [
@@ -184,6 +185,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -253,6 +255,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PrismaticVLM', sub: '7B, LoRA fine-tuned', color: 'p', children: [
@@ -297,18 +300,17 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
-      { label: 'Noise ε', color: 'o' },
     ],
     stages: [
       { group: 'VILA-U VLM', sub: '7B', color: 'p', children: [
-        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'VILA-U vision tower', sub: 'discrete visual tokens', color: 'k' },
         { label: 'LLaMA-2 7B', sub: 'language model', color: 'i' },
       ]},
-      { label: 'Chain-of-thought reasoning', sub: 'intermediate language rationale', color: 'a' },
-      { label: 'Diffusion policy head', sub: 'conditioned on CoT + VLM features', color: 'r' },
+      { label: 'Visual CoT reasoning', sub: 'generate subgoal image (causal attention)', color: 'a' },
+      { label: 'Action chunking', sub: 'full-attention parallel decode', color: 'o' },
     ],
-    output: { label: 'Continuous actions', sub: 'reasoning-guided', color: 'e' },
-    meta: { loss: 'Cross-entropy (CoT) + diffusion (action)', notes: ['8 A100s', 'Two-stage training'] },
+    output: { label: 'Continuous actions', sub: 'subgoal-guided, chunked', color: 'e' },
+    meta: { loss: 'Cross-entropy (next-token)', notes: ['8 A100s', 'Hybrid attention: causal (CoT) + full (action)'] },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -387,18 +389,17 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
-      { label: 'Noise ε', color: 'o' },
     ],
     stages: [
       { group: 'PrismaticVLM', sub: '7B', color: 'p', children: [
         { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
         { label: 'DinoV2', sub: 'vision encoder', color: 'k' },
       ], bottom: { label: 'Llama-2 7B', sub: 'language model', color: 'i' } },
-      { label: 'Unified tokenization', sub: 'vision + language + action in one space', color: 'a' },
-      { label: 'Flow matching head', sub: 'continuous denoising', color: 'r' },
+      { label: 'VQ-VAE latent action tokenizer', sub: 'task-centric latent actions from video', color: 'a' },
+      { label: 'AR latent action decoder', sub: 'next-token prediction over ACT tokens', color: 'o' },
     ],
-    output: { label: 'Continuous actions', sub: 'flow-matched', color: 'e' },
-    meta: { loss: 'Flow matching', notes: ['16 A100s', 'Unified token space'] },
+    output: { label: 'Latent action tokens', sub: 'decoded via embodiment-specific head (12M)', color: 'e' },
+    meta: { loss: 'Cross-entropy (next-token)', notes: ['1/20 compute vs OpenVLA', 'Task-centric latent actions from video'] },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -408,21 +409,24 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
     ],
     stages: [
-      { group: 'PrismaticVLM', sub: '7B', color: 'p', children: [
-        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
-        { label: 'DinoV2', sub: 'vision encoder', color: 'k' },
-      ], bottom: { label: 'Llama-2 7B', sub: 'language model', color: 'i' } },
-      { group: 'World knowledge forecasts', sub: 'predict future representations', color: 'c', children: [
-        { label: 'Depth pred.', sub: 'future depth', color: 'c' },
-        { label: 'DINOv2 pred.', sub: 'future features', color: 'k' },
-        { label: 'SAM pred.', sub: 'future segments', color: 't' },
+      { group: 'Modality-specific encoders', color: 'p', children: [
+        { label: 'MAE ViT-B', sub: 'vision encoder (spatiotemporal)', color: 'k' },
+        { label: 'CLIP text', sub: 'language encoder', color: 'i' },
+        { label: 'Conv + FC', sub: 'proprioceptive encoder', color: 'g' },
+      ], bottom: { label: 'GPT-2', sub: 'central LLM backbone', color: 'i' } },
+      { group: 'World knowledge forecasts', sub: '<dream> queries', color: 'c', children: [
+        { label: 'Dynamic pred.', sub: 'future dynamics', color: 'c' },
+        { label: 'Depth pred.', sub: 'future depth', color: 't' },
+        { label: 'Semantic pred.', sub: 'future segments', color: 'k' },
       ]},
-      { label: 'Inverse dynamics', sub: 'forecast → actions', color: 'o' },
+      { label: 'Diffusion action head', sub: 'disentangled action transformer', color: 'r' },
     ],
-    output: { label: 'Actions', sub: 'from world-knowledge inverse dynamics', color: 'e' },
-    meta: { loss: 'Forecast loss + inverse dynamics', notes: ['Dream-based world model', 'No explicit action labels needed'] },
+    output: { label: 'Continuous actions', sub: 'world-knowledge guided', color: 'e' },
+    meta: { loss: 'World knowledge forecast + diffusion', notes: ['CLIP + MAE + GPT-2 backbone', 'Block-wise structured attention'] },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -710,6 +714,7 @@ export const PIPELINE_CONFIGS = {
       { label: 'RGB frames', color: 'b' },
       { label: 'Depth maps', sub: 'spatial priors', color: 't' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { group: 'PaliGemma2 VLM', sub: '4B', color: 'p', children: [
@@ -730,17 +735,21 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
-      { group: 'SmolVLM2', sub: '450M total', color: 'p', children: [
-        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
-        { label: 'SmolLM2', sub: 'language model', color: 'i' },
+      { group: 'SmolVLM2', sub: '~350M (frozen, first 16 layers)', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder (64 tokens/frame)', color: 'k' },
+        { label: 'SmolLM2', sub: 'language decoder', color: 'i' },
       ]},
-      { label: 'Flow matching head', sub: 'continuous denoising', color: 'r' },
+      { group: 'Flow Matching Action Expert', sub: '~100M, interleaved attention', color: 'r', children: [
+        { label: 'Cross-attention', sub: 'attend to VLM features', color: 'r' },
+        { label: 'Causal self-attention', sub: 'temporal action coherence', color: 'o' },
+      ]},
     ],
-    output: { label: 'Continuous actions', sub: 'flow-matched', color: 'e' },
-    meta: { loss: 'Flow matching', notes: ['450M params', 'Single GPU trainable', 'Competitive with 10x larger'] },
+    output: { label: 'Continuous actions', sub: 'flow-matched action chunks', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['450M total', 'Single GPU trainable', 'Interleaved CA + SA'] },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -750,6 +759,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -771,6 +781,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { label: 'ResNet-18', sub: 'lightweight vision encoder', color: 'k' },
@@ -1030,6 +1041,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
     ],
     stages: [
       { label: 'MAGViT-v2', sub: 'vision tokenizer', color: 'k' },
@@ -1072,11 +1084,17 @@ export const PIPELINE_CONFIGS = {
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
-      { label: 'Florence-2-Large', sub: 'vision encoder (encoder only)', color: 'k' },
-      { label: 'Flow matching head', sub: 'continuous action denoising', color: 'r' },
+      { group: 'Florence-2-Large (encoder only)', sub: 'decoder removed for efficiency', color: 'p', children: [
+        { label: 'DaViT', sub: 'vision encoder', color: 'k' },
+        { label: 'Encoder LLM layers', sub: 'multimodal features', color: 'i' },
+      ]},
+      { group: 'Flow Transformer (DiT)', sub: '18 layers, 1024 dim', color: 'r', children: [
+        { label: 'Cross-attention', sub: 'from VLM intermediate features', color: 'r' },
+        { label: 'AdaLN-Zero', sub: 'timestep + embodiment cond.', color: 'a' },
+      ]},
     ],
-    output: { label: 'Continuous actions', sub: 'flow-matched', color: 'e' },
-    meta: { loss: 'Flow matching', notes: ['950M params', 'Sub-1B generalist', 'No LLM backbone'] },
+    output: { label: 'Continuous actions', sub: 'rectified flow, 4 denoise steps', color: 'e' },
+    meta: { loss: 'Rectified flow matching', notes: ['947M params', '200 GPU-hours pretrain', '<8GB VRAM inference'] },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1168,6 +1186,7 @@ export const PIPELINE_CONFIGS = {
       { label: 'RGB frames', color: 'b' },
       { label: 'Depth maps', color: 't' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -1190,6 +1209,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -1275,6 +1295,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
@@ -1551,6 +1572,7 @@ export const PIPELINE_CONFIGS = {
     inputs: [
       { label: 'RGB frames', color: 'b' },
       { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
