@@ -8,11 +8,11 @@ paper_url: https://arxiv.org/abs/2509.25681
 code_url: null
 venue: "ICLR 2026 submission"
 architecture:
-  backbone: "VLM-based"
-  llm: "VLM-based"
-  action_head: "diffusion with multimodal chain-of-thought"
-  action_space: "continuous"
-  parameters: null
+  backbone: "MMaDA (MAGViT-v2 vision tokenizer)"
+  llm: "LLaDA-8B-Instruct (discrete diffusion LM)"
+  action_head: "discrete diffusion with multimodal chain-of-thought"
+  action_space: "discrete tokens (FAST)"
+  parameters: "8B"
   key_innovation: "Combines diffusion-based action generation with multimodal chain-of-thought reasoning for improved task planning and execution"
 training:
   dataset: "Cross-embodiment robot data"
