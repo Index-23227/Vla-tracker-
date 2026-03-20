@@ -471,4 +471,235 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'Flow matching', loop: 'K-step denoising', notes: ['50 Hz inference', '3B params'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #21  pi0.5
+  // ═══════════════════════════════════════════════════════════════════════════
+  'pi0.5': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'PaliGemma VLM', sub: '3B, web-scale pre-training', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Gemma 2B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Long-horizon planner', sub: 'improved reasoning over pi0', color: 'a' },
+      { group: 'Flow matching action expert', sub: 'denoising DiT', color: 'r', children: [
+        { label: 'Action DiT', sub: 'transformer denoiser', color: 'r' },
+        { label: 'State encoder', sub: 'proprioception', color: 'g' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'long-horizon, flow-matched', color: 'e' },
+    meta: { loss: 'Flow matching', loop: 'K-step denoising', notes: ['45 Hz inference', '3B+ params'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #22  pi0-FAST
+  // ═══════════════════════════════════════════════════════════════════════════
+  'pi0-FAST': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'PaliGemma VLM', sub: '3B', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'Gemma 2B', sub: 'language model', color: 'i' },
+      ]},
+      { group: 'FAST tokenizer', sub: 'DCT → discrete tokens', color: 'a', children: [
+        { label: 'DCT transform', sub: 'continuous → frequency domain', color: 'a' },
+        { label: 'Quantization', sub: 'frequency → discrete tokens', color: 'o' },
+      ]},
+      { label: 'AR token decoder', sub: 'next-token prediction', color: 'o' },
+    ],
+    output: { label: 'Action tokens', sub: 'iDCT → continuous, 230 Hz', color: 'e' },
+    meta: { loss: 'Cross-entropy (next-token)', notes: ['230 Hz inference', 'FAST tokenization (DCT)'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #23  GR00T-N1
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GR00T-N1': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'System 2 — Reasoning (7-9 Hz)', sub: 'Eagle-2 VLM', color: 'p', children: [
+        { label: 'SigLIP-2', sub: 'vision encoder', color: 'k' },
+        { label: 'SmolLM2', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'S2 → S1 conditioning', sub: 'latent goal tokens', color: 'x' },
+      { group: 'System 1 — Motor (120 Hz)', sub: 'diffusion transformer', color: 'r', children: [
+        { label: 'DiT denoiser', sub: 'fast motor policy', color: 'r' },
+        { label: 'State encoder', sub: 'proprioception', color: 'g' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'dual-system, 120 Hz motor', color: 'e' },
+    meta: { loss: 'Diffusion (S1) + VLM (S2)', loop: 'K-step denoising', notes: ['2.2B params', 'Humanoid-optimized'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #24  GR00T-N1.5
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GR00T-N1.5': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Eagle 2.5 VLM', sub: 'reasoning backbone', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Eagle 2.5', color: 'k' },
+        { label: 'Language model', sub: 'Eagle 2.5', color: 'i' },
+      ]},
+      { label: 'FLARE objective', sub: 'future latent representation alignment', color: 'c' },
+      { group: 'Diffusion transformer', sub: 'motor policy', color: 'r', children: [
+        { label: 'DiT denoiser', sub: 'FLARE-conditioned', color: 'r' },
+        { label: 'State encoder', sub: 'proprioception', color: 'g' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'FLARE-guided', color: 'e' },
+    meta: { loss: 'Diffusion + FLARE', notes: ['3B params', '1K H100s, 36h training', 'Learns from human video'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #25  GR00T-N1.7
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GR00T-N1.7': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Reasoning VLM', sub: '~3B, production-grade', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'reasoning-capable', color: 'k' },
+        { label: 'Language model', sub: 'reasoning VLM', color: 'i' },
+      ]},
+      { label: 'Reasoning module', sub: 'first reasoning VLA for deployment', color: 'a' },
+      { label: 'Diffusion transformer', sub: 'motor policy', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'reasoning-guided', color: 'e' },
+    meta: { loss: 'Diffusion + reasoning', notes: ['~3B params', 'Commercial license', 'NIM microservices'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #26  GR00T-N2
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GR00T-N2': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'World Action Model', sub: 'non-VLM architecture', color: 'c', children: [
+        { label: 'World model encoder', sub: 'state + dynamics', color: 'c' },
+        { label: 'Action planner', sub: 'DreamZero-based', color: 'r' },
+      ]},
+      { label: 'Imagination rollouts', sub: 'plan via simulated futures', color: 't' },
+      { label: 'Action decoder', sub: 'planned trajectory → motor', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'world-model planned', color: 'e' },
+    meta: { loss: 'World model + planning', notes: ['Non-VLM architecture', '2x+ success vs leading VLAs', 'Preview (late 2026)'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #27  Octo
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Octo': {
+    inputs: [
+      { label: 'RGB frames', sub: 'variable cameras', color: 'b' },
+      { label: 'Language instr.', sub: 'optional', color: 'b' },
+      { label: 'Robot state', sub: 'variable dims', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Modular encoder', sub: 'variable obs/action spaces', color: 'p', children: [
+        { label: 'Image tokenizer', sub: 'ViT patches', color: 'k' },
+        { label: 'Language tokenizer', sub: 'T5 embeddings', color: 'i' },
+        { label: 'State tokenizer', sub: 'proprioception MLP', color: 'g' },
+      ]},
+      { label: 'Transformer backbone', sub: '93M params, encoder-decoder', color: 'x' },
+      { label: 'Diffusion action head', sub: 'continuous denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'variable dims per embodiment', color: 'e' },
+    meta: { loss: 'Diffusion (DDPM)', loop: 'K-step denoising', notes: ['93M params', '800K+ OXE trajectories'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #28  RDT-1B
+  // ═══════════════════════════════════════════════════════════════════════════
+  'RDT-1B': {
+    inputs: [
+      { label: 'RGB frames', sub: 'multi-view', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'SigLIP-So400m', sub: 'vision encoder (frozen)', color: 'k' },
+      { label: 'T5-XXL', sub: 'language encoder (frozen)', color: 'i' },
+      { group: 'Scalable diffusion transformer', sub: '1.2B params', color: 'r', children: [
+        { label: 'DiT backbone', sub: 'largest robotic diffusion model', color: 'r' },
+        { label: 'State encoder', sub: 'bimanual proprioception', color: 'g' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'bimanual, multi-embodiment', color: 'e' },
+    meta: { loss: 'Diffusion', loop: 'K-step denoising', notes: ['1.2B params', '64 A100s', 'Bimanual support'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #29  Diffusion Policy
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Diffusion Policy': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'ResNet-18', sub: 'visual feature extractor', color: 'k' },
+      { group: 'Diffusion denoiser', sub: 'DDPM, ~25M params', color: 'r', children: [
+        { label: 'U-Net / Transformer', sub: 'noise prediction network', color: 'r' },
+        { label: 'FiLM conditioning', sub: 'obs features → denoiser', color: 'x' },
+      ]},
+      { label: 'Action chunking', sub: 'multi-step prediction', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'multi-step, multimodal dist.', color: 'e' },
+    meta: { loss: 'Diffusion (DDPM)', loop: 'K-step denoising', notes: ['~25M params', 'Task-specific', 'Foundational work (2023)'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #30  CrossFormer
+  // ═══════════════════════════════════════════════════════════════════════════
+  'CrossFormer': {
+    inputs: [
+      { label: 'RGB frames', sub: 'multi-view', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'ResNet encoder', sub: 'per-view image features', color: 'k' },
+      { label: 'Language encoder', sub: 'instruction embeddings', color: 'i' },
+      { group: 'Cross-embodiment transformer', sub: 'shared backbone', color: 'p', children: [
+        { label: 'Cross-attention layers', sub: 'multi-view + language fusion', color: 'x' },
+        { label: 'Embodiment tokens', sub: 'robot-specific adapters', color: 'g' },
+      ]},
+      { label: 'Diffusion action head', sub: 'continuous denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'cross-embodiment', color: 'e' },
+    meta: { loss: 'Diffusion', loop: 'K-step denoising', notes: ['Cross-embodiment generalization', 'Multi-view fusion'] },
+  },
+
 }
