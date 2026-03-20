@@ -8,15 +8,19 @@ function normalizeBackbone(raw) {
   const l = raw.toLowerCase()
   if (l.includes('prismatic') || (l.includes('siglip') && l.includes('dino'))) return 'PrismaticVLM'
   if (l.includes('paligemma') || (l.includes('siglip') && l.includes('gemma'))) return 'PaliGemma'
+  if (l.includes('gemma') && !l.includes('siglip')) return 'PaliGemma'
   if (l.includes('internvl') || l.includes('internvit')) return 'InternVL'
   if (l.includes('qwen')) return 'Qwen-VL'
   if (l.includes('eagle') || l.includes('cosmos')) return 'Eagle VLM'
+  if (l.includes('florence')) return 'Florence'
   if (l.includes('siglip') && !l.includes('dino') && !l.includes('gemma')) return 'SigLIP'
-  if (l.includes('clip')) return 'CLIP'
+  if (l.includes('clip') || l.includes('show-o')) return 'CLIP'
+  if (l.includes('blip')) return 'BLIP'
   if (l.includes('mamba')) return 'Mamba'
   if (l.includes('diffusion') || l.includes('video')) return 'Video/Diffusion'
   if (l.includes('resnet') || l.includes('cnn')) return 'CNN'
-  if (l.includes('transformer')) return 'Transformer'
+  if (l.includes('sam2')) return 'SAM2'
+  if (l.includes('transformer') || l.includes('gpt')) return 'Transformer'
   return 'Other'
 }
 
@@ -34,6 +38,8 @@ function normalizeLLM(raw) {
   if (l.includes('phi')) return 'Phi'
   if (l.includes('mamba')) return 'Mamba'
   if (l.includes('internlm')) return 'InternLM'
+  if (l.includes('smollm')) return 'SmolLM'
+  if (l.includes('kosmos') || l.includes('kosmo')) return 'Kosmos'
   if (l === 'null' || l === 'none' || l === 'n/a') return 'None'
   return 'Other'
 }
@@ -50,7 +56,8 @@ function normalizeActionHead(raw) {
 const BACKBONE_COLORS = {
   'PrismaticVLM': '#8b5cf6', 'PaliGemma': '#06b6d4', 'InternVL': '#f59e0b',
   'Qwen-VL': '#ef4444', 'Eagle VLM': '#22c55e', 'SigLIP': '#ec4899',
-  'CLIP': '#3b82f6', 'Video/Diffusion': '#f97316', 'CNN': '#94a3b8',
+  'CLIP': '#3b82f6', 'Florence': '#a855f7', 'BLIP': '#14b8a6',
+  'Video/Diffusion': '#f97316', 'CNN': '#94a3b8', 'SAM2': '#fb923c',
   'Mamba': '#a78bfa', 'Transformer': '#38bdf8', 'Other': '#6b7280', 'Unknown': '#404040',
 }
 
@@ -58,7 +65,8 @@ const LLM_COLORS = {
   'Llama-2': '#ef4444', 'Llama-3': '#f87171', 'Qwen': '#f59e0b',
   'Gemma': '#06b6d4', 'Gemini': '#3b82f6', 'Eagle': '#22c55e',
   'T5/FlanT5': '#a78bfa', 'GPT': '#10b981', 'Phi': '#ec4899',
-  'Mamba': '#8b5cf6', 'InternLM': '#f97316', 'Other': '#6b7280', 'None': '#404040',
+  'Mamba': '#8b5cf6', 'InternLM': '#f97316', 'SmolLM': '#34d399',
+  'Kosmos': '#fbbf24', 'Other': '#6b7280', 'None': '#404040',
 }
 
 const AH_COLORS = { ...ACTION_HEAD_COLORS, 'other': '#71717a' }

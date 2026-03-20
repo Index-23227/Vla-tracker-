@@ -149,11 +149,14 @@ export default function AnalysisDashboard({ models }) {
       let key
       if (lower.includes('prismatic') || (lower.includes('siglip') && lower.includes('dino'))) key = 'PrismaticVLM'
       else if (lower.includes('paligemma') || (lower.includes('siglip') && lower.includes('gemma'))) key = 'PaliGemma'
+      else if (lower.includes('gemma') && !lower.includes('siglip')) key = 'PaliGemma'
       else if (lower.includes('internvl') || lower.includes('internvit')) key = 'InternVL'
       else if (lower.includes('qwen')) key = 'Qwen-VL'
       else if (lower.includes('eagle') || lower.includes('cosmos')) key = 'NVIDIA VLM'
+      else if (lower.includes('florence')) key = 'Florence'
       else if (lower.includes('siglip') && !lower.includes('dino') && !lower.includes('gemma')) key = 'SigLIP'
-      else if (lower.includes('clip')) key = 'CLIP'
+      else if (lower.includes('clip') || lower.includes('show-o')) key = 'CLIP'
+      else if (lower.includes('blip')) key = 'BLIP'
       else if (lower.includes('diffusion') || lower.includes('video')) key = 'Video/Diffusion'
       else key = 'Other'
       counts[key] = (counts[key] || 0) + 1
@@ -166,7 +169,8 @@ export default function AnalysisDashboard({ models }) {
   const BACKBONE_COLORS = {
     'PrismaticVLM': '#8b5cf6', 'PaliGemma': '#06b6d4', 'InternVL': '#f59e0b',
     'Qwen-VL': '#ef4444', 'NVIDIA VLM': '#22c55e', 'SigLIP': '#ec4899',
-    'CLIP': '#3b82f6', 'Video/Diffusion': '#f97316', 'Other': '#6b7280', 'unknown': '#404040',
+    'CLIP': '#3b82f6', 'Florence': '#a855f7', 'BLIP': '#14b8a6',
+    'Video/Diffusion': '#f97316', 'Other': '#6b7280', 'unknown': '#404040',
   }
 
   // --- Eval Condition Distribution ---

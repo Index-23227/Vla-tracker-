@@ -203,6 +203,8 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
             "open_source": model.get("open_source", False),
             "tags": model.get("tags", []),
             "architecture": {
+                "backbone": model.get("architecture", {}).get("backbone"),
+                "llm": model.get("architecture", {}).get("llm"),
                 "action_head": model.get("architecture", {}).get("action_head", "unknown"),
                 "parameters": model.get("architecture", {}).get("parameters", "unknown"),
             },
