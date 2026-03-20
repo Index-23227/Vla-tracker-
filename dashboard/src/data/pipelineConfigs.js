@@ -1310,4 +1310,259 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'Flow matching + depth distillation', notes: ['~4B params', '20K hours real-world data', '9 robot platforms'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #61  LLARVA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'LLARVA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'LLaVA backbone', sub: '7B', color: 'p', children: [
+        { label: 'CLIP ViT-L', sub: 'vision encoder', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language model', color: 'i' },
+      ]},
+      { label: '2D visual trace prediction', sub: 'trajectory waypoints', color: 'c' },
+      { label: 'AR action decoder', sub: 'text-based actions', color: 'o' },
+    ],
+    output: { label: 'Actions + traces', sub: 'text + 2D trajectories', color: 'e' },
+    meta: { loss: 'Cross-entropy', notes: ['7B params', 'Visual trace prediction'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #62  Mobility VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Mobility VLA': {
+    inputs: [
+      { label: 'RGB frames', sub: 'navigation view', color: 'b' },
+      { label: 'Language goal', color: 'b' },
+    ],
+    stages: [
+      { group: 'Gemini 1.5 Pro', sub: 'long-context VLM', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Gemini multimodal', color: 'k' },
+        { label: 'Language model', sub: 'Gemini 1.5 Pro', color: 'i' },
+      ]},
+      { label: 'Goal identification', sub: 'long-context reasoning', color: 'c' },
+      { label: 'Topological graph nav', sub: 'path planning', color: 'o' },
+    ],
+    output: { label: 'Navigation actions', sub: 'hierarchical waypoints', color: 'e' },
+    meta: { loss: 'Hierarchical planning', notes: ['Gemini 1.5 Pro', 'Navigation specialized'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #63  NaVILA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'NaVILA': {
+    inputs: [
+      { label: 'RGB frames', sub: 'legged robot view', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'NVILA-8B VLM', sub: 'high-level VLA', color: 'p', children: [
+        { label: 'SigLIP', sub: 'vision encoder', color: 'k' },
+        { label: 'LLaMA 3 8B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'High-level policy', sub: 'VLA goal commands', color: 'c' },
+      { label: 'Low-level RL controller', sub: 'visual locomotion', color: 'o' },
+    ],
+    output: { label: 'Locomotion actions', sub: 'hierarchical VLA + RL', color: 'e' },
+    meta: { loss: 'VLA + RL', notes: ['8B params', 'Legged robot navigation'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #64  NORA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'NORA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'Qwen2.5-VL', sub: '3B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Qwen2.5-VL', color: 'k' },
+        { label: 'Qwen2.5 3B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'FAST+ tokenizer', sub: 'action tokenization', color: 'o' },
+    ],
+    output: { label: 'Tokenized actions', sub: 'FAST+ encoded', color: 'e' },
+    meta: { loss: 'Cross-entropy (next-token)', notes: ['3B params', '970K demos', 'FAST+ action tokens'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #65  RoboMamba
+  // ═══════════════════════════════════════════════════════════════════════════
+  'RoboMamba': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { label: 'CLIP ViT-L/14', sub: 'vision encoder', color: 'k' },
+      { label: 'Mamba 2.7B', sub: 'state-space model (not transformer)', color: 'i' },
+      { label: 'MLP policy head', sub: '3.7M, SE(3) pose', color: 'o' },
+    ],
+    output: { label: 'SE(3) poses', sub: 'lightweight MLP output', color: 'e' },
+    meta: { loss: 'Action regression', notes: ['3.2B total', 'SSM instead of transformer', '3.7M action head'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #66  RoboVLM
+  // ═══════════════════════════════════════════════════════════════════════════
+  'RoboVLM': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'KosMos VLM', sub: '2B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'KosMos', color: 'k' },
+        { label: 'KosMos 2B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'VQ-VAE latent tokenizer', sub: 'actions → visual tokens', color: 'x' },
+      { label: 'AR action decoder', sub: 'latent token prediction', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'VQ-VAE decoded', color: 'e' },
+    meta: { loss: 'Cross-entropy + VQ-VAE', notes: ['2B params', 'Latent action tokenization'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #67  SuSIE
+  // ═══════════════════════════════════════════════════════════════════════════
+  'SuSIE': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'InstructPix2Pix', sub: 'high-level subgoal image generator', color: 'c' },
+      { label: 'Subgoal image', sub: 'visual plan', color: 'b' },
+      { label: 'Low-level diffusion policy', sub: 'reach subgoal', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'subgoal-conditioned', color: 'e' },
+    meta: { loss: 'Diffusion (two-level)', loop: 'K-step denoising', notes: ['No explicit LLM', 'Hierarchical image subgoals'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #68  TwinBrainVLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'TwinBrainVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Qwen2.5-VL / Qwen3-VL', sub: '3B–4B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Qwen VL', color: 'k' },
+        { label: 'Qwen LM', sub: 'language backbone', color: 'i' },
+      ]},
+      { group: 'Asymmetric MoT', sub: 'dual-brain', color: 'x', children: [
+        { label: 'Left Brain (frozen)', sub: 'generalist knowledge', color: 'c' },
+        { label: 'Right Brain (trainable)', sub: 'specialist motor skills', color: 'o' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'dual-brain fused', color: 'e' },
+    meta: { loss: 'MoT + anti-forgetting', notes: ['3B–4B params', 'Frozen generalist + trainable specialist'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #69  UD-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'UD-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'Emu3 VLM', sub: '3B', color: 'p', children: [
+        { label: 'MOVQ tokenizer', sub: 'visual tokenization', color: 'k' },
+        { label: 'Emu3 LM', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'JD3P', sub: 'joint discrete denoising diffusion', color: 'r' },
+    ],
+    output: { label: 'Action tokens', sub: 'unified discrete diffusion', color: 'e' },
+    meta: { loss: 'Discrete denoising diffusion', notes: ['3B params', '4x faster than AR', 'Joint vision-action diffusion'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #70  UniPi
+  // ═══════════════════════════════════════════════════════════════════════════
+  'UniPi': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { label: 'Video diffusion model', sub: 'text-conditioned future generation', color: 'r' },
+      { label: 'Generated video plan', sub: 'visual trajectory', color: 'c' },
+      { label: 'Inverse dynamics model', sub: 'video → actions', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'video-plan derived', color: 'e' },
+    meta: { loss: 'Video diffusion + inverse dynamics', notes: ['No explicit LLM', 'Video as universal interface'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #71  UP-VLA
+  // ═══════════════════════════════════════════════════════════════════════════
+  'UP-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'Show-o backbone', sub: '1.3B', color: 'p', children: [
+        { label: 'CLIP ViT', sub: 'vision encoder', color: 'k' },
+        { label: 'Phi-1.5', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Future image prediction', sub: 'spatial awareness', color: 'c' },
+      { label: 'Unified action head', sub: 'understanding + prediction', color: 'o' },
+    ],
+    output: { label: 'Continuous actions', sub: 'future-aware', color: 'e' },
+    meta: { loss: 'Unified understanding + prediction', notes: ['1.3B params', 'Lightweight'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #72  VLA-RL
+  // ═══════════════════════════════════════════════════════════════════════════
+  'VLA-RL': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+    ],
+    stages: [
+      { group: 'OpenVLA backbone', sub: '7B', color: 'p', children: [
+        { label: 'SigLIP + DinoV2', sub: 'vision encoders', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'VLM process reward model', sub: 'trajectory-level feedback', color: 'c' },
+      { label: 'RL fine-tuning', sub: 'trajectory-level optimization', color: 'x' },
+    ],
+    output: { label: 'Continuous actions', sub: 'RL-refined', color: 'e' },
+    meta: { loss: 'RL (trajectory-level) + VLM reward', notes: ['7B params', 'RL on top of VLA'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #73  Vlaser
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Vlaser': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'InternVL3 VLM', sub: '2B–8B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'InternVL3', color: 'k' },
+        { label: 'Qwen2.5', sub: '1.5B or 7B', color: 'i' },
+      ]},
+      { label: 'Embodied reasoning', sub: 'integrated CoT', color: 'c' },
+      { label: 'Flow matching action expert', sub: 'continuous denoising', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'reasoning-guided', color: 'e' },
+    meta: { loss: 'Flow matching + reasoning', notes: ['2B–8B params', 'Vlaser-6M dataset'] },
+  },
+
 }
