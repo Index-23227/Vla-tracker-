@@ -1,0 +1,35 @@
+# Paper: Motus: A Unified Latent Action World Model
+# arXiv: 2512.13030
+
+name: Motus
+full_name: "Motus: A Unified Latent Action World Model"
+organization: "Tsinghua University / Peking University / Horizon Robotics"
+date: "2025-12-25"
+paper_url: https://arxiv.org/abs/2512.13030
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Mixture-of-Transformers (Wan 2.2 5B video + Qwen3-VL-2B)"
+  llm: "Qwen3-VL-2B"
+  action_head: "transformer action expert (30 layers, 641.5M)"
+  parameters: "~8B (VGM 5.0B + VLM 2.13B + Action 641.5M + Understanding 253.5M)"
+
+key_innovation: >
+  Unified embodied foundation model integrating vision-language understanding,
+  video generation, inverse dynamics, world modeling, and action prediction
+  through Mixture-of-Transformers with optical flow-based latent actions.
+
+benchmarks:
+  libero:
+    libero_long: 97.6
+  robotwin_v2:
+    robotwin_v2_easy_avg: 88.66
+    robotwin_v2_hard_avg: 87.02
+
+eval_conditions:
+  libero: "fine-tuned"
+  robotwin_v2: "fine-tuned"
+
+tags: [world-action-model, MoT, latent-action, optical-flow, cross-embodiment]

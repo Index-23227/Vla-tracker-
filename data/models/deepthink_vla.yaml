@@ -1,0 +1,38 @@
+# Paper: DeepThinkVLA: Enhancing Reasoning Capability of Vision-Language-Action Models
+# arXiv: 2511.15669
+
+name: DeepThinkVLA
+full_name: "DeepThinkVLA: Enhancing Reasoning Capability of Vision-Language-Action Models"
+organization: "Huazhong University of Science and Technology / Tsinghua University / Renmin University of China"
+date: "2025-11-24"
+paper_url: https://arxiv.org/abs/2511.15669
+code_url: https://github.com/wadeKeith/DeepThinkVLA
+venue: null
+open_source: true
+
+architecture:
+  backbone: "pi0-FAST (PaliGemma 2)"
+  llm: "Gemma-2 2B"
+  action_head: "hybrid-attention decoder (causal CoT → bidirectional parallel action)"
+  parameters: "2.9B"
+
+key_innovation: >
+  Hybrid-attention decoder that resolves the conflict between sequential reasoning
+  and parallel motor control. Two-stage training: SFT for foundational reasoning
+  followed by outcome-based RL (GRPO) for causal alignment between thought and action.
+
+training:
+  dataset: "LIBERO demonstrations (273,465 annotated frames)"
+  compute: "8x NVIDIA A800 GPUs"
+
+benchmarks:
+  libero:
+    libero_spatial: 96.6
+    libero_object: 99.0
+    libero_goal: 96.4
+    libero_long: 96.2
+
+eval_conditions:
+  libero: "SFT + RL fine-tuned (GRPO)"
+
+tags: [reasoning, chain-of-thought, RL, GRPO, open-source]
