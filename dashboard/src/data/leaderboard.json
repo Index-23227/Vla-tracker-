@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-20T07:24:18.420922",
+  "generated_at": "2026-03-21T12:31:39.312697",
   "num_models": 73,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -210,6 +210,7 @@
         "reasoning",
         "libero",
         "robotwin",
+        "robotwin_v2",
         "open-source"
       ],
       "architecture": {
@@ -226,12 +227,31 @@
           "libero_object": 99.0,
           "libero_goal": 95.2,
           "libero_long": 96.9
+        },
+        "robotwin_v2": {
+          "lift_pot": 64.8,
+          "beat_hammer_block": 82.5,
+          "pick_dual_bottles": 65.4,
+          "place_phone_stand": 36.6,
+          "move_can_pot": 61.0,
+          "place_a2b_left": 39.1,
+          "place_empty_cup": 92.7,
+          "handover_mic": 89.9,
+          "handover_block": 52.8,
+          "stack_bowls_two": 71.1,
+          "blocks_rank_rgb": 79.3,
+          "put_bottles_dustbin": 55.4,
+          "short_horizon_avg": 62.3,
+          "medium_horizon_avg": 70.7,
+          "long_horizon_avg": 64.6
         }
       },
       "eval_conditions": {
-        "libero": "SFT + RL fine-tuned (GRPO)"
+        "libero": "SFT + RL fine-tuned (GRPO)",
+        "robotwin_v2": "SFT + RL fine-tuned (GRPO)"
       },
       "libero_avg": 97.45,
+      "robotwin_v2_avg": 65.88,
       "rank": 5
     },
     {

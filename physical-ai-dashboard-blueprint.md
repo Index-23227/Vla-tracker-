@@ -378,7 +378,7 @@ See [CONTRIBUTING.md](link) — we welcome:
 | CALVIN | ABC→D | 17 | Long-horizon, language |
 | Meta-World | ML-10/45 | - | Multi-task dexterity |
 | SimplerEnv | 5 tasks | 15 | Sim-to-real transfer |
-| RoboTwin v1/v2 | 50 tasks | 7 | Dual-arm, bimanual |
+| RoboTwin v1/v2 | 50 tasks | 8 | Dual-arm, bimanual |
 | RLBench | 18 tasks | 3 | Diverse manipulation |
 
 ## 🤖 How AI Analysis Works

@@ -45,7 +45,7 @@ VLA-Tracker tracks **73 VLA models** (2023-2026) across **8 benchmarks** (LIBERO
 | **CALVIN** (avg len) | LingBot-VLA (4.5) | UD-VLA (4.5) | DreamVLA (4.44) |
 | **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.05) |
 | **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
-| **RoboTwin v2** (avg) | X-VLA (72.5) | SimpleVLA-RL (68.8) | - |
+| **RoboTwin v2** (avg) | X-VLA (72.5) | SimpleVLA-RL (68.8) | VLA-Thinker (65.87) |
 
 ## All Tracked Models
 
@@ -104,7 +104,7 @@ python scripts/generate_model_yaml.py --top 5
 | [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 35 | Manipulation generalization | NeurIPS 2023 |
 | [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 17 | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 15 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 7 | Dual-arm, bimanual | CVPR 2025 Highlight |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 8 | Dual-arm, bimanual | CVPR 2025 Highlight |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
 | [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 5 | Home robot tasks | RSS 2024 |
