@@ -160,9 +160,7 @@ open_source: false  # TODO: verify
 architecture:
   action_head: "{action_head}"
   parameters: "TODO"
-
-key_innovation: >
-  TODO: Read paper and summarize key contribution in 2-3 sentences.
+  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
 
 benchmarks:
 {benchmarks_yaml}

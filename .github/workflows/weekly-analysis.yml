@@ -26,10 +26,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -43,11 +43,8 @@ jobs:
       - name: Build leaderboard
         run: python scripts/build_leaderboard.py
 
-      - name: Copy leaderboard to dashboard
-        run: cp data/leaderboard.json dashboard/src/data/leaderboard.json
-
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
