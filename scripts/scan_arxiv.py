@@ -85,6 +85,7 @@ BENCHMARK_PATTERNS = {
     "robotwin": r"\bRoboTwin\b",
     "rlbench": r"\bRLBench\b",
     "metaworld": r"\bMeta.?World\b",
+    "robocasa": r"\bRoboCasa\b",
 }
 
 # Venue patterns in comments

@@ -134,6 +134,9 @@ def generate_yaml_content(candidate: dict) -> str:
         elif bench == "metaworld":
             bench_lines.append(f"""  metaworld:
     metaworld_avg: TODO""")
+        elif bench == "robocasa":
+            bench_lines.append(f"""  robocasa:
+    robocasa_avg: TODO""")
 
     if not bench_lines:
         bench_lines.append("""  libero:
