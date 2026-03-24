@@ -128,9 +128,12 @@ def generate_yaml_content(candidate: dict) -> str:
             bench_lines.append(f"""  robotwin_v1:
     robotwin_easy: TODO
     robotwin_hard: TODO""")
-        else:
-            bench_lines.append(f"""  {bench}:
-    TODO: TODO""")
+        elif bench == "rlbench":
+            bench_lines.append(f"""  rlbench:
+    rlbench_avg: TODO""")
+        elif bench == "metaworld":
+            bench_lines.append(f"""  metaworld:
+    metaworld_avg: TODO""")
 
     if not bench_lines:
         bench_lines.append("""  libero:

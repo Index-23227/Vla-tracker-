@@ -96,6 +96,8 @@ jobs:
           lines.append('2. Add benchmark scores from the papers')
           lines.append('3. Verify organization and architecture details')
           lines.append('4. Run \`python scripts/build_leaderboard.py\` to rebuild rankings')
+          lines.append('5. Update model counts in README.md (see CLAUDE.md for locations)')
+          lines.append('6. Run \`python scripts/validate_counts.py\` to verify counts')
           body = '\n'.join(lines)
           # Write to file for PR body
           with open('/tmp/pr_body.md', 'w') as f:
