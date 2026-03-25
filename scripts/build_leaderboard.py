@@ -14,6 +14,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "data" / "models"
 BENCHMARKS_DIR = ROOT / "data" / "benchmarks"
+REVIEWS_FILE = ROOT / "data" / "paper_reviews.json"
 OUTPUT_FILE = ROOT / "data" / "leaderboard.json"
 DASHBOARD_COPY = ROOT / "dashboard" / "src" / "data" / "leaderboard.json"
 
@@ -32,6 +33,15 @@ def load_all_models() -> list[dict]:
         data["_file"] = yaml_file.name
         models.append(data)
     return models
+
+
+def load_reviews() -> dict[str, dict]:
+    """Load paper reviews indexed by model name."""
+    if not REVIEWS_FILE.exists():
+        return {}
+    with open(REVIEWS_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return {p["model_name"]: p for p in data.get("papers", []) if p.get("venue")}
 
 
 def load_all_benchmarks() -> dict[str, dict]:
@@ -162,7 +172,8 @@ def compute_robocasa_avg(benchmarks: dict) -> float | None:
     return None
 
 
-def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> dict:
+def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
+                      reviews: dict[str, dict] | None = None) -> dict:
     leaderboard_entries = []
 
     for model in models:
@@ -233,6 +244,18 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict]) -> d
         if robocasa_avg is not None:
             entry["robocasa_avg"] = robocasa_avg
 
+        # Merge peer-review data if available
+        if reviews and model["name"] in reviews:
+            rev = reviews[model["name"]]
+            entry["peer_review"] = {
+                "venue": rev.get("venue"),
+                "decision": rev.get("decision"),
+                "review_avg": rev.get("review_avg"),
+                "confidence_avg": rev.get("confidence_avg"),
+                "num_reviews": rev.get("num_reviews", 0),
+                "openreview_url": rev.get("openreview_url"),
+            }
+
         leaderboard_entries.append(entry)
 
     # Sort by LIBERO average (descending), models without LIBERO go to end
@@ -263,8 +286,12 @@ def main():
     benchmarks_meta = load_all_benchmarks()
     print(f"  Found {len(benchmarks_meta)} benchmarks")
 
+    print("Loading reviews...")
+    reviews = load_reviews()
+    print(f"  Found reviews for {len(reviews)} models")
+
     print("Building leaderboard...")
-    leaderboard = build_leaderboard(models, benchmarks_meta)
+    leaderboard = build_leaderboard(models, benchmarks_meta, reviews)
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

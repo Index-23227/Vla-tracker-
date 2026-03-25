@@ -1,0 +1,1230 @@
+{
+  "generated_at": "2026-03-25T04:47:25.253276",
+  "venues_searched": [
+    "ICLR 2026",
+    "ICLR 2025",
+    "NeurIPS 2025",
+    "CoLM 2025"
+  ],
+  "num_models": 82,
+  "num_matched": 8,
+  "papers": [
+    {
+      "model_name": "3D-VLA",
+      "paper_url": "https://arxiv.org/abs/2403.09631",
+      "arxiv_id": "2403.09631",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.316
+    },
+    {
+      "model_name": "3D Diffuser Actor",
+      "paper_url": "https://arxiv.org/abs/2402.10885",
+      "arxiv_id": "2402.10885",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.529
+    },
+    {
+      "model_name": "AcceRL",
+      "paper_url": "https://arxiv.org/abs/2603.18464",
+      "arxiv_id": "2603.18464",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.646
+    },
+    {
+      "model_name": "AtomicVLA",
+      "paper_url": "https://arxiv.org/abs/2603.07648",
+      "arxiv_id": "2603.07648",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.612
+    },
+    {
+      "model_name": "AVDC",
+      "paper_url": "https://arxiv.org/abs/2310.08576",
+      "arxiv_id": "2310.08576",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.333
+    },
+    {
+      "model_name": "CogACT",
+      "paper_url": "https://arxiv.org/abs/2411.19650",
+      "arxiv_id": "2411.19650",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.414
+    },
+    {
+      "model_name": "CoT-VLA",
+      "paper_url": "https://arxiv.org/abs/2503.22020",
+      "arxiv_id": "2503.22020",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.435
+    },
+    {
+      "model_name": "CrossFormer",
+      "paper_url": "https://arxiv.org/abs/2408.11812",
+      "arxiv_id": "2408.11812",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.593
+    },
+    {
+      "model_name": "DD-VLA",
+      "paper_url": "https://arxiv.org/abs/2508.20072",
+      "arxiv_id": "2508.20072",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.316
+    },
+    {
+      "model_name": "DeepThinkVLA",
+      "paper_url": "https://arxiv.org/abs/2511.15669",
+      "arxiv_id": "2511.15669",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=kCrE9uvxlo",
+      "num_reviews": 4,
+      "review_avg": 4.5,
+      "confidence_avg": 3.25,
+      "reviews": [
+        {
+          "rating": 2,
+          "confidence": 3,
+          "summary": "This paper introduces DeepThinkVLA, a vision-language-action (VLA) model that enables robots to \"think before acting\" through explicit Chain-of-Thought (CoT) reasoning. The authors point out that existing VLAs face a fundamental architectural conflict, as a single autoregressive decoder must handle both sequential reasoning and parallel, high-dimensional actions. DeepThinkVLA addresses this by employing a hybrid-attention decoder, using causal attention for CoT generation and bidirectional atten",
+          "strengths": "- The paper points out a fundamental yet previously underexplored architectural conflict between sequential reasoning and parallel action prediction in VLAs.\n\n- It proposes a novel hybrid-attention decoder, combining causal attention for reasoning and bidirectional attention for action generation, effectively bridging this gap.\n\n- The authors recognize the potential mismatch between CoT reasoning and task success, introducing an outcome-based RL stage that directly aligns the reasoning-action se",
+          "weaknesses": "- Annotating CoT is crucial for the proposed approach, yet the paper lacks sufficient evidence showing that the pipeline for constructing an embodied CoT dataset performs well in more diverse or realistic settings.\n\n- Although the outcome-based RL stage improves task success by 2% on the LIBERO-Long suite, this gain is relatively modest, and the paper does not explore why the improvement is limited or how the method might scale with larger datasets or more complex tasks.\n\n- The description of th"
+        },
+        {
+          "rating": 4,
+          "confidence": 2,
+          "summary": "This paper is about enabling chain-of-thought in vision-language-action models for applications in robotics. The claimed contributions are by introducing (a) a hybrid-attention decoder that switched between causal attention and bidirectional attention and (b) a training strategy consisting of supervised fine-tuning of the model followed by reinforcement learning with a success-based reward function. According to the presented results, this approach reached high success rated on a common benchmar",
+          "strengths": "- The paper identifies and acts upon an important and relevant problem in the robotics and embodied AI community.\n\n- The paper is written clearly and has a good structure. Particularly, the description in form of the \"probabilistic decomposition\" is appreciated relative to the common \"diagram with arrows approach\" used in many other submissions. \n\n- The approach seems innovative and original in the way CoT and action generation are combined, but given the large body of work on VLA models and CoT",
+          "weaknesses": "- The benchmark / dataset used in experiments only focusses on robotic manipulation tasks. It is clear that the authors have to use what is available, but from a robotics perspective, these are still fairly limited tasks. \n\n- One of the main issues of using VLAs in this way is the question of what happens when the robot or its abilities are different from the training data. The paper does not test the case there the robot has to learn to solve the tasks in a different way from what the VLA think"
+        },
+        {
+          "rating": 8,
+          "confidence": 4,
+          "summary": "This paper introduces DeepThink VLA, which make improvements from base model pi zero -FAST by doing the following \n\n1) On architecture, uses a hybrid-attention architecture to enable both autoregressive CoT reasoning and efficient parallel action decoding. \n2) On training, uses a two stage pipeline. First do SFT on reasoning data curated by querying key frames from a large model, then do RL with task success as reward to fully ground reasoning in robot task.",
+          "strengths": "This is a strong paper with good results. It is well-written and easy to read. The core idea of using CoT to enrich the model's internal representations is novel. This approach appears to be very effective, as demonstrated by the strong experimental results, particularly on long-horizon tasks. The ablation study on the role of CoT is convincing, showing it strengthens representations during training.",
+          "weaknesses": "1) The benefits of the RL stage is not obvious to me, especially given the strong results of SFT. The paper would be strengthened if it could further demonstrate the unique benefits of RL. For example, are there OOD or more complex generalization experiments where the RL-trained model significantly outperforms the SFT-only model? Such experiments would provide stronger evidence that RL is crucial for aligning reasoning for novel scenarios, rather than just providing a minor boost on in-distribut"
+        },
+        {
+          "rating": 4,
+          "confidence": 4,
+          "summary": "The authors study VLAs, and want to update VLAs from models that directly predict action chunks to ones that first generate CoT tokens in language space before generating action chunks.\n\nTo do so, the authors construct a CoT dataset out of robot episodes. Assuming that changes in the gripper state correspond to semantically important intermediate steps of the episode, they pull out image frames with gripper change and ask for language descriptions by a more powerful VLM. Then, the remaining inte",
+          "strengths": "The ways to construct a good embodied dataset for robot control is still pretty open and further work there is interesting. RL is also an interesting area of study, given that many VLA approaches have focused on just doing imitation learning and have not done as much exploration into further RL work on top.",
+          "weaknesses": "In terms of the attention decoding, I don't think the proposed Hybrid-Attention is meaningfully different from the CoT-VLA-7B Zhao et al 2025b cited work, which generates subgoals as a CoT using causal autorgressive attention, then a full parallel attention for actions like this work. The only difference seems to be using text based subgoals compared to image based subgoals.\n\nThe paper spends little time acknowledging that the results for DeepThinkVLA use an additional wrist-mounted camera, whic"
+        }
+      ],
+      "match_score": 1.0
+    },
+    {
+      "model_name": "DeeR-VLA",
+      "paper_url": "https://arxiv.org/abs/2411.02359",
+      "arxiv_id": "2411.02359",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.389
+    },
+    {
+      "model_name": "DepthCache",
+      "paper_url": "https://arxiv.org/abs/2603.10469",
+      "arxiv_id": "2603.10469",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.66
+    },
+    {
+      "model_name": "DexVLA",
+      "paper_url": "https://arxiv.org/abs/2502.05855",
+      "arxiv_id": "2502.05855",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.357
+    },
+    {
+      "model_name": "Diffusion-VLA",
+      "paper_url": "https://arxiv.org/abs/2412.03293",
+      "arxiv_id": "2412.03293",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.621
+    },
+    {
+      "model_name": "Diffusion Policy",
+      "paper_url": "https://arxiv.org/abs/2303.04137",
+      "arxiv_id": "2303.04137",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.727
+    },
+    {
+      "model_name": "DiT4DiT",
+      "paper_url": "https://arxiv.org/abs/2603.10448",
+      "arxiv_id": "2603.10448",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.558
+    },
+    {
+      "model_name": "DreamVLA",
+      "paper_url": "https://arxiv.org/abs/2507.04447",
+      "arxiv_id": "2507.04447",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.387
+    },
+    {
+      "model_name": "dVLA",
+      "paper_url": "https://arxiv.org/abs/2509.25681",
+      "arxiv_id": "2509.25681",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=2rxgospB5s",
+      "num_reviews": 4,
+      "review_avg": 4.0,
+      "confidence_avg": 3.75,
+      "reviews": [
+        {
+          "rating": 4,
+          "confidence": 4,
+          "summary": "This paper introduces dVLA, a novel Vision-Language-Action (VLA) model built upon a discrete diffusion language model (DLM) backbone. The authors identify key limitations in existing VLA frameworks, namely the gradient conflicts arising from co-training with disparate objectives (e.g., for action prediction and vision-language understanding) and the architectural difficulty of integrating multimodal generation, such as visual Chain-of-Thought (CoT), into standard autoregressive models.  To addre",
+          "strengths": "- The core idea of unifying multimodal understanding and generation (including actions) under a single diffusion-based training objective is elegant. \n- The authors proactively address the primary drawback of diffusion models—inference latency—by incorporating and evaluating acceleration strategies. This shows a thoughtful consideration of the practical requirements for deploying robotic policies and strengthens the overall contribution.\n- The paper is easy to follow.",
+          "weaknesses": "- The multimodal CoT paradigm requires a complex data pipeline that involves generating visual subgoals (future frames) and textual reasoning (using a model like SEED-1.5VL). The paper could provide more details on the practicalities and potential costs or biases associated with this data generation process, which is a critical component of the overall framework.\n- The paper makes the strong claim that the model learns \"underlying physical laws\" because it can predict failure images. While a fas"
+        },
+        {
+          "rating": 2,
+          "confidence": 4,
+          "summary": "The paper introduces dVLA, a diffusion-based vision-language-action model that integrates multimodal chain-of-thought reasoning into robotic control. By unifying visual reasoning, textual understanding, and action prediction within a single diffusion framework, dVLA aims to address gradient conflicts and cross-modal inconsistency present in prior VLA systems. The model demonstrates strong results on the LIBERO benchmark and real-world manipulation tasks, with notable performance gains attributed",
+          "strengths": "1.\tThe paper proposes a unified diffusion-based objective for jointly optimizing vision, language, and action, which is a conceptually elegant and potentially impactful framework for robotic reasoning.\n2.\tThe authors conduct comprehensive experiments on both simulation (LIBERO) and real-world tasks, showing consistent improvements over several competitive baselines.",
+          "weaknesses": "1.\tA major weakness is that several recent works already integrate image/video generation and multimodal reasoning for robotic control, yet the paper fails to adequately discuss or compare against these, which undermines claims of novelty. Examples include:\n  1.  Zhu et al. Unified World Models: Coupling Video and Action Diffusion for Pretraining on Large Robotic Datasets (RSS 2025)\n  2.  Li et al. Unified Video Action Model (RSS 2025)\n  3.  Cheang et al. GR-2: A Generative Video-Language-Action"
+        },
+        {
+          "rating": 6,
+          "confidence": 3,
+          "summary": "The authors study VLAs, VLMs which have been adapted to output action data. They argue that typical co-training of VLAs tends to degrade either the general common sense knowledge or the ability to learn robot actions, with it difficult to learn both. Additionally, VLMs are able to do multimodal generation, an underutilized modality. The authors proposed training a VLA to predict subgoal images and subgoal text, given the current image and a high level language instruction. This is trained via ma",
+          "strengths": "It's been shown in other contexts that adding additional prediction tasks improves the amount of signal extractable from a data source, and so adding additional image and text prediction tasks before action prediction makes sense. The generated visual CoT images are interesting generations as well. The paper is clear on how many trials were done per eval, which is good to see. There are quite a few baselines. The inference improvements are the kind of useful work which is nice to see. Gains are ",
+          "weaknesses": "As noted by the paper, this approach increases the inference time of the method, and although this is mitigated by the prefix attention + KV caching, these improvements could have also been added to the base model which does not do multimodal predictions. So although the paper shows improvement over not using visual CoT, it feels like there is a missing comparison to a larger base VLM with KV caching that does not predict intermediate subgoals.\n\nAt its core, the paper is about adding extra subgo"
+        },
+        {
+          "rating": 4,
+          "confidence": 4,
+          "summary": "This paper introduces dVLA, a novel vision-language-action (VLA) framework for robotic control built upon a discrete diffusion language model (DLM). The central contribution is the use of a **unified diffusion-based objective** to jointly optimize visual reasoning, language comprehension, and robotic action generation. The authors frame this as a solution to the gradient conflicts  and architectural gaps  that arise in traditional auto-regressive models, especially when trying to integrate gener",
+          "strengths": "1.  **Novel and Sound Methodology:** The core idea of using a unified discrete diffusion objective to harmonize perception, reasoning (both visual and textual), and action is elegant and well-motivated. It directly addresses a clear and significant limitation in prior work: the difficulty of integrating generative reasoning (like predicting future images) with action prediction in a single, non-conflicting framework. Building this upon a discrete diffusion model (MMaDA)  and employing discrete t",
+          "weaknesses": "1.  **Unclear Explanation of Acceleration Method:** The description of the \"Prefix Attention Mask\" in Section 3.4 is confusing and difficult to follow. The text describes a \"blockwise causal attention mask with two blocks\"  and \"full bidirectional attention within each block\" , but then states \"tokens in one block restricted from attending to tokens in subsequent blocks\". This description is ambiguous. For the KV caching of the prefix (Block 1) to be useful, the generated tokens (Block 2) must b"
+        }
+      ],
+      "match_score": 1.0
+    },
+    {
+      "model_name": "E0",
+      "paper_url": "https://arxiv.org/abs/2511.21542",
+      "arxiv_id": "2511.21542",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.547
+    },
+    {
+      "model_name": "ECoT",
+      "paper_url": "https://arxiv.org/abs/2407.08693",
+      "arxiv_id": "2407.08693",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.333
+    },
+    {
+      "model_name": "FALCON",
+      "paper_url": "https://arxiv.org/abs/2510.17439",
+      "arxiv_id": "2510.17439",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=fzmittHfq3",
+      "num_reviews": 4,
+      "review_avg": 6.5,
+      "confidence_avg": 4.0,
+      "reviews": [
+        {
+          "rating": 8,
+          "confidence": 4,
+          "summary": "The paper proposes FALCON, a Vision-Language-Action (VLA) architecture designed to enhance 3D spatial reasoning by injecting rich 3D spatial tokens—derived from a Spatial Foundation Model—into a dedicated \"Spatial-Enhanced Action Head,\" rather than forcing them through the VLM (Vision Language Model) backbone. It introduces an \"Embodied Spatial Model\" (ESM) that (i) can operate RGB-only via VGGT-like spatial priors and (ii) optionally fuses depth and pose information without retraining or archit",
+          "strengths": "1. Clear problem framing: Identifies the 2D–3D gap in VLA spatial reasoning and the modality transferability and alignment issues with prior explicit 3D pipelines and weak 3D cues.\n\n2. Architectural novelty at the integration point: Instead of injecting spatial tokens into the VLM (which can disturb alignment), FALCON routes rich spatial tokens to a Spatial-Enhanced Action Head. This design decision is well-motivated and experimentally supported by a key ablation.\n\n3. Practical modality transfer",
+          "weaknesses": "1. Positioning vs. contemporaneous 3D-enhanced VLAs: The related work section is broad, but could better differentiate FALCON from the latest VLA methods employing similar spatial decoupling strategies (e.g., avoiding direct modification of the VLM backbone). Clearer articulation of FALCON's specific innovations compared to potentially similar works and a systematic comparison of training costs (e.g., compute requirements) and data dependencies are recommended.\n\n2. Theoretical grounding of fusio"
+        },
+        {
+          "rating": 4,
+          "confidence": 4,
+          "summary": "FALCON is a VLA that also accepts optional depth and camera pose inputs. These additional modalities can help with fine-grained manipulation tasks.  The approach will benefit from continued improvement in pointmap and camera pose estimation, and that technology is itself rapidly improving beginning with Dust3r). \n\nThe proposed approach is to start with an off-the-shelf RGB + text VLA, Kosmos, and add a large downstream transformer that accepts the Kosmos original output plus optional additional ",
+          "strengths": "### Overall\nOverall I feel the paper makes a useful empirical contribution -- especially if weights and code are released.\n\n* Strong empirical results\n* Straightforward method (this is a good thing!) with clear use case\n* Clear description of the approach\n* Good ablations of different design decisions\n* Clear figures\n\nPlease don't take the length of this section an indicator. Mainly, these are the strengths that I'm seeing -- hopefully these are the same things the authors see too.",
+          "weaknesses": "### Presentation\nI found the paper a bit hard to read in its current form, and I feel the paper's impact may be limited by the writing and presentation.  Many parts of the paper could be tightened through removing unnecessary adjectives and reorganizing sections. \n\n**Organization:**\nIn the current version, even basic information about the training approach, including the losses, learning algorithm, and datasets are left entirely to the appendix. In contrast, the method section focuses almost exc"
+        },
+        {
+          "rating": 6,
+          "confidence": 4,
+          "summary": "The paper introduces FALCON, a spatial to action paradigm that injects richer and more representative 3D spatial tokens into VLAs through an improved injection scheme. The approach combines a 2D VLM backbone, an embodied spatial model for 3D encoding, and a spatial-enhanced action head for fusion. Experiments on CALVIN, SimplerEnv, and real-world tasks show better performance and improved modality transferability.",
+          "strengths": "1. This paper focus on spatial reasoning in VLAs, which is a crucial research problem.\n2. The experiments cover multiple benchmarks on both simulation and real-world. \n3. Clear qualitative visualizations are provided to support the contribution.\n4. The pipeline is complete, which combines 2D VLM backbone, embodied spatial model for 3D encoding, and spatial-enhanced action head for fusion.",
+          "weaknesses": "1. The core concept of this paper “3D spatial tokens” is ill-defined. This paper claims that 3D spatial tokens provide robust geometric priors. However, in line 132, the depth information is optional, and in line 224, the depth and/or pose is randomly injected. The resulting spatial tokens Tspl derives from DINO and an encoder with cross/self-attention. Thus, these spatial tokens are not truly 3D, they are 2D correlations.\n2. In Eq. 4, they randomly inject depth and/or pose. The proposed stochas"
+        },
+        {
+          "rating": 8,
+          "confidence": 4,
+          "summary": "The paper proposes a new VLA model, FALCON, which tries to incorporate the spatial 3D information into the VLA implicitly. The goal is to be able to utilize 3D information, if available, or otherwise be robust to different modality setups (full 3D, depth only, camera only, no 3D). The idea to achieve this is to utilize 3D feature information in models like VGGT, and additionally supply 3D information to the encoders of these models if they are available. Then, these spatial features are added to",
+          "strengths": "- The paper is very well-written and easy to follow\n- The model design and ideas are clearly novel and overall make sense\n- The problem setting is interesting and important — to utilize 3D information when available, but be robust in cases when it is not available. \n- The ablations are adequate and clearly show that the model is robust to various modality scenarios and can benefit form 3D data, when available.",
+          "weaknesses": "My main concern is that the evaluation benchmarks chosen, especially the simulation ones are weak and do not necessarily benefit from 3D understanding and information. \n\nFor instance, the paper makes this statement: “FALCON surpasses previous methods that rely on ground-truth point clouds (e.g., 3DDP (Ze et al., 2024) and 3D Diffuser Actor (Ke et al., 2024)), improving the Avg.\nLen. by 4.13 and 1.05, respectively. This provides clear evidence of the effectiveness of our implicit\nspatial informat"
+        }
+      ],
+      "match_score": 1.0
+    },
+    {
+      "model_name": "Fast-WAM",
+      "paper_url": "https://arxiv.org/abs/2603.16666",
+      "arxiv_id": "2603.16666",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.333
+    },
+    {
+      "model_name": "FLARE",
+      "paper_url": "https://arxiv.org/abs/2505.15659",
+      "arxiv_id": "2505.15659",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.385
+    },
+    {
+      "model_name": "FLOWER",
+      "paper_url": "https://arxiv.org/abs/2509.04996",
+      "arxiv_id": "2509.04996",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.57
+    },
+    {
+      "model_name": "Gemini Robotics",
+      "paper_url": "https://arxiv.org/abs/2503.20020",
+      "arxiv_id": "2503.20020",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.526
+    },
+    {
+      "model_name": "GigaWorld-Policy",
+      "paper_url": "https://arxiv.org/abs/2603.17240",
+      "arxiv_id": "2603.17240",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.571
+    },
+    {
+      "model_name": "GR-Dexter",
+      "paper_url": "https://arxiv.org/abs/2512.24210",
+      "arxiv_id": "2512.24210",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.424
+    },
+    {
+      "model_name": "GR-1",
+      "paper_url": "https://arxiv.org/abs/2312.13139",
+      "arxiv_id": "2312.13139",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.5
+    },
+    {
+      "model_name": "GR-2",
+      "paper_url": "https://arxiv.org/abs/2410.06158",
+      "arxiv_id": "2410.06158",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.25
+    },
+    {
+      "model_name": "GR00T-N1",
+      "paper_url": "https://arxiv.org/abs/2503.14734",
+      "arxiv_id": "2503.14734",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.348
+    },
+    {
+      "model_name": "GR00T-N1.5",
+      "paper_url": null,
+      "arxiv_id": null,
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.333
+    },
+    {
+      "model_name": "GR00T-N1.6",
+      "paper_url": null,
+      "arxiv_id": null,
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.333
+    },
+    {
+      "model_name": "GR00T-N1.7",
+      "paper_url": null,
+      "arxiv_id": null,
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.333
+    },
+    {
+      "model_name": "GR00T-N2",
+      "paper_url": null,
+      "arxiv_id": null,
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.348
+    },
+    {
+      "model_name": "GST-VLA",
+      "paper_url": "https://arxiv.org/abs/2603.09079",
+      "arxiv_id": "2603.09079",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.646
+    },
+    {
+      "model_name": "HiMoE-VLA",
+      "paper_url": "https://arxiv.org/abs/2512.05693",
+      "arxiv_id": "2512.05693",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "HPT",
+      "paper_url": "https://arxiv.org/abs/2409.20537",
+      "arxiv_id": "2409.20537",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.316
+    },
+    {
+      "model_name": "Humanoid-VLA",
+      "paper_url": "https://arxiv.org/abs/2502.14795",
+      "arxiv_id": "2502.14795",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.429
+    },
+    {
+      "model_name": "HybridVLA",
+      "paper_url": "https://arxiv.org/abs/2503.10631",
+      "arxiv_id": "2503.10631",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.368
+    },
+    {
+      "model_name": "InstructVLA",
+      "paper_url": "https://arxiv.org/abs/2507.17520",
+      "arxiv_id": "2507.17520",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.429
+    },
+    {
+      "model_name": "InternVLA-A1",
+      "paper_url": "https://arxiv.org/abs/2601.02456",
+      "arxiv_id": "2601.02456",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.471
+    },
+    {
+      "model_name": "InternVLA-M1",
+      "paper_url": "https://arxiv.org/abs/2510.13778",
+      "arxiv_id": "2510.13778",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.471
+    },
+    {
+      "model_name": "LingBot-VLA",
+      "paper_url": "https://arxiv.org/abs/2601.18692",
+      "arxiv_id": "2601.18692",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.45
+    },
+    {
+      "model_name": "LLARVA",
+      "paper_url": "https://arxiv.org/abs/2406.11815",
+      "arxiv_id": "2406.11815",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "LLaVA-VLA",
+      "paper_url": "https://arxiv.org/abs/2602.22663",
+      "arxiv_id": "2602.22663",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.686
+    },
+    {
+      "model_name": "MemoryVLA",
+      "paper_url": "https://arxiv.org/abs/2508.19236",
+      "arxiv_id": "2508.19236",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=54U3XHf7qq",
+      "num_reviews": 4,
+      "review_avg": 4.5,
+      "confidence_avg": 4.25,
+      "reviews": [
+        {
+          "rating": 6,
+          "confidence": 4,
+          "summary": "This paper introduces MemoryVLA, a Cognition-Memory-Action framework for robotic manipulation that addresses the limitation of mainstream VLA models in handling long-horizon, temporally dependent tasks. Inspired by human memory systems, the approach features a Perceptual-Cognitive Memory Bank that consolidates low-level visual details and high-level semantic information, which working memory retrieves and fuses with current observations to condition a diffusion-based action expert.",
+          "strengths": "1. The paper identifies a concrete limitation in existing VLA models (ignoring temporal context) and proposes a practical memory bank mechanism with retrieval, fusion, and consolidation operations. The dual-stream design (perceptual + cognitive tokens) with gated fusion is technically sound and the memory consolidation strategy effectively manages computational costs.\n\n2. The method achieves substantial improvements over strong baselines, with comprehensive experiments across 3 robots, and thoro",
+          "weaknesses": "1. The paper does not report inference time and memory footprint comparison with baselines. The memory retrieval via cross-attention at each timestep, especially with memory lengths up to 256, likely incurs significant computational overhead that could limit real-time deployment.\n\n2. The paper lacks visualization or analysis of retrieved memory contents. It's unclear whether the memory bank actually retrieves semantically/temporally relevant contexts or if the gains simply come from having more "
+        },
+        {
+          "rating": 4,
+          "confidence": 4,
+          "summary": "The paper tackles core gap in VLA which is weak temporal reasoning for long-horizon, non-markovian manipulation, and they do so by drawing on cognition-memory-action architecture with two complementary memory systems. A pretrained VLM converts observations into (i) perceptual tokens and (ii) higher-level cognitive tokens that together serve as working memory for immediate control. In parallel, a Perceptual-Cognitive Memory Bank accumulates both low-level details and high-level semantic “gist.” A",
+          "strengths": "1. The working-memory vs. long-term (episodic + semantic) split is directly inspired by human memory and mapped cleanly to a VLA stack (perceptual/cognitive tokens + Perceptual-Cognitive Memory Bank). This makes the temporal modeling choice easy to justify and reason about.\n\n2. Converting observations into perceptual and cogntiive tokens enable lightweight retrieval, fusion and consolidations.\n\n3. Good performance on SimplerEnv-Bridge benchmark and LIBERO.",
+          "weaknesses": "1,Benchmark mismatch (memory not actually required).\n\nFundamentally, the simulation benchmark used does not evaluate memory: the tasks appear in-distribution, short-horizon, and solvable without non-Markovian reasoning. I recommend evaluating on a benchmark that explicitly requires memory, such as Memory-Bench (from SAM2Act), to substantiate the paper’s claims.\n\n2.Inadequate baselines (no memory or long-context retrieval).\n\nThe chosen baselines are not memory-enhanced and do not leverage long co"
+        },
+        {
+          "rating": 2,
+          "confidence": 5,
+          "summary": "The paper introduces a new model, MemoryVLA, which employs a specialized memory bank designed to better handle temporal dependencies.",
+          "strengths": "1. Incorporating memory mechanisms into VLAs is a highly relevant and important research direction.\n2. The paper presents a large number of experiments, including those conducted on a real robot.\n3. The work is well written and easy to read.",
+          "weaknesses": "1. Despite the large number of experiments, the main drawback of the paper is that most of the tasks used do not actually require a memory mechanism.  The authors should conduct comparisons on specialized robotics benchmarks focused on memory-based tasks, such as Mikasa-Robo [1] and MemoryBench [2]. Without these experiments, it is impossible to properly evaluate the effectiveness of the proposed memory mechanism.\n2. The results on LIBERO outperform Discrete Diffusion VLA [3] by only 0.3, even t"
+        },
+        {
+          "rating": 6,
+          "confidence": 4,
+          "summary": "The paper tackles non-Markovian, long-horizon robotic manipulation where single-frame VLAs fail. It proposes MemoryVLA, a Cognition-Memory–Action framework that (i) converts a single RGB frame + instruction into perceptual tokens (DINOv2+SigLIP compressed via SE-bottleneck) and a single cognitive token (EOS from LLaMA-7B), (ii) stores both streams in a Perceptual–Cognitive Memory Bank (PCMB), and (iii) performs retrieval (cross-attention + timestep PE), gate fusion, and consolidation (adjacent-p",
+          "strengths": "* Clear structure with good motivation: the task of handling of non-Markovian tasks is interesting and significant in robotics, where the motivation fused memory term within the architecture design.\n* Extensive evaluation: the authors evaluate MemoryVLA across three different robots, three distinct simulation benchmarks (SimplerEnv-Bridge, SimplerEnv-Fractal, LIBERO), and a set of 12 real-world tasks. This comprehensive evaluation on 150+ tasks with 500+ variations provides high confidence in th",
+          "weaknesses": "* The ambiguity of optimal memory length: from the ablation study in Table 5, it suggests that a memory length of $L=16$ is optimal (71.9% success), while the performance worsens at $L=64$ (67.7%). However, in the Appendix, the authors state that a memory length of $L=256$ was used for real-world long-horizon tasks. There lacks of in-depth analysis of how memory length is associated with the actual performance.\n* The mechanism of using single cognitive token: for complex tasks require multiple l"
+        }
+      ],
+      "match_score": 1.0
+    },
+    {
+      "model_name": "Mobility VLA",
+      "paper_url": "https://arxiv.org/abs/2407.07775",
+      "arxiv_id": "2407.07775",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.417
+    },
+    {
+      "model_name": "Motus",
+      "paper_url": "https://arxiv.org/abs/2512.13030",
+      "arxiv_id": "2512.13030",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.718
+    },
+    {
+      "model_name": "NanoVLA",
+      "paper_url": "https://arxiv.org/abs/2510.25122",
+      "arxiv_id": "2510.25122",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=yeHBrNVZoV",
+      "num_reviews": 4,
+      "review_avg": 3.5,
+      "confidence_avg": 3.75,
+      "reviews": [
+        {
+          "rating": 4,
+          "confidence": 3,
+          "summary": "This paper introduces NanoVLA, which enables VLA to run efficiently. The authors propose to do save computations by several proposed techniques like decoupling vision and language models, action chunking and dynamic routing. The results show that with fewer computations, it can achieve good performance and efficiency in simulation and real-world scenarios.",
+          "strengths": "This paper tries to tackle an important issue in robotics of running efficiency. The method contains a lot of careful designs.\n\nThe paper shows good results on performance and speed on LIBERO given the number of parameters tuned.",
+          "weaknesses": "More discussion on the advantages of the late fusion technique is needed.\n\nComparison with other baselines on improving VLA efficiency is needed.\n\nSee the questions below for other minor points."
+        },
+        {
+          "rating": 2,
+          "confidence": 5,
+          "summary": "The paper proposes NanoVLA, a lightweight visual-language architecture (VLA) optimized for deploying visual-language fusion on c. NanoVLA adopts late-stage modality fusion to avoid excessive cross-attention computations, while its dynamic routing allows the model to adaptively allocate computing resources for complex, reasoning-intensive tasks. Experiments conducted in the Libero simulator and real-world scenarios show that NanoVLA outperforms baseline methods in performance.",
+          "strengths": "- Employed two strategies to optimize the long latency issue in VLA,  save 62% inference time compared to the traditional VLA approach.\n- Detailed latency and performance analysis.",
+          "weaknesses": "- The model structure is overly simplistic and similar to exist work. Both Diffusion Policy[1] and Scaling-Up Diffusion Policy[2] utilize lightweight transformer to late integrate various different modalities in an End-to-end training manner. NanoVLA and these method exactly has very low latency, but it loses the language-vision alignment capability that VLMs have acquired through extensive training, which greatly affects the generalization ability of VLA.\n- The experiments on real world are ove"
+        },
+        {
+          "rating": 4,
+          "confidence": 4,
+          "summary": "The paper proposes NanoVLA, a lightweight design of vision-language-action models that is compatible with edge devices like Jetson Orin Nano. The method combines three core components: (1) vision-language decoupling (late fusion of representations of multiple modalities), (2) \"long-short action chunking\" (also known as receding horizon control), and (3) dynamic routing with Bayesian uncertainty that allows switching between small and large language model backbones depending on task difficulty. I",
+          "strengths": "* The problem of deploying VLA policies on edge devices is well motivated and addresses a real practical constraint for many robotics practitioners who do not have access to server-grade hardware for model deployment.\n* The experiments include both simulated and real-world robot tasks, validating the effectiveness of NanoVLA across various tasks and domains.\n* Simulated evaluations in LIBERO show superior performance of NanoVLA compared to various prior methods, including OpenVLA, $\\pi_0$, SmolV",
+          "weaknesses": "* LIBERO experimental results do not include several state-of-the-art prior works from early 2025, including OpenVLA-OFT (97.1% success rate - RSS 2025) and UniVLA (95.2% success rate - RSS 2025). These works use earlier fusion of language and vision representations and obtain substantially higher performance in LIBERO than the proposed NanoVLA (84.1% success rate).\n* The authors argue that late fusion of the modalities is a superior approach, but analysis of an early fusion alternative with the"
+        },
+        {
+          "rating": 4,
+          "confidence": 3,
+          "summary": "This paper introduces NanoVLA, a family of light-weight vision-language-action (VLA) policies  for deployment on edge hardware (e.g., Jetson Orin Nano). The core idea is to rethink inference rather than merely shrink parameters, via three components: (i) late, decoupled fusion of vision and language with caching of instruction features to eliminate redundant cross-modal computation; (ii) long-short action chunking (LSAC), which plans long sequences but executes short sequences; and (iii) dynamic",
+          "strengths": "The paper is well-structured with clear motivation. It demonstrates on-edge VLA control with improved success and major latency gains, addressing a potential deployment blocker for household and mobile manipulation. Reported numbers are compelling: SOTA-competitive LIBERO performance with far fewer parameters, strong LeRobot success rates, and notably higher FPS on Orin Nano.",
+          "weaknesses": "**LSAC**: While LSAC is effective, the idea of predicting longer sequences and executing shorter sub-segments with periodic replans has been used in Diffusion Policy and Pi0; the paper could better articulate what is novel.\n\n**Routing signal is text-only.** The router is trained as a text-conditioned comparator over models. This assumes that instruction phrasing correlates tightly with task difficulty. However, “pick up the banana” may range from trivial on a clear table to hard in a fruit pile "
+        }
+      ],
+      "match_score": 1.0
+    },
+    {
+      "model_name": "NaVILA",
+      "paper_url": "https://arxiv.org/abs/2412.04453",
+      "arxiv_id": "2412.04453",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.435
+    },
+    {
+      "model_name": "NORA",
+      "paper_url": "https://arxiv.org/abs/2504.19854",
+      "arxiv_id": "2504.19854",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.444
+    },
+    {
+      "model_name": "Octo",
+      "paper_url": "https://arxiv.org/abs/2405.12213",
+      "arxiv_id": "2405.12213",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.429
+    },
+    {
+      "model_name": "OpenVLA",
+      "paper_url": "https://arxiv.org/abs/2406.09246",
+      "arxiv_id": "2406.09246",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "OpenVLA-OFT",
+      "paper_url": "https://arxiv.org/abs/2502.19645",
+      "arxiv_id": "2502.19645",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.5
+    },
+    {
+      "model_name": "pi0",
+      "paper_url": "https://arxiv.org/abs/2410.24164",
+      "arxiv_id": "2410.24164",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.364
+    },
+    {
+      "model_name": "pi0.5",
+      "paper_url": "https://arxiv.org/abs/2504.16054",
+      "arxiv_id": "2504.16054",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.333
+    },
+    {
+      "model_name": "pi*0.6",
+      "paper_url": "https://arxiv.org/abs/2511.14759",
+      "arxiv_id": "2511.14759",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.583
+    },
+    {
+      "model_name": "pi0-FAST",
+      "paper_url": "https://arxiv.org/abs/2501.09747",
+      "arxiv_id": "2501.09747",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "PLD",
+      "paper_url": "https://arxiv.org/abs/2511.00091",
+      "arxiv_id": "2511.00091",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "RDT-1B",
+      "paper_url": "https://arxiv.org/abs/2410.07864",
+      "arxiv_id": "2410.07864",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "RoboDual",
+      "paper_url": "https://arxiv.org/abs/2410.08001",
+      "arxiv_id": "2410.08001",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.424
+    },
+    {
+      "model_name": "RoboMamba",
+      "paper_url": "https://arxiv.org/abs/2406.04339",
+      "arxiv_id": "2406.04339",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.368
+    },
+    {
+      "model_name": "RoboVLM",
+      "paper_url": "https://arxiv.org/abs/2412.14058",
+      "arxiv_id": "2412.14058",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.414
+    },
+    {
+      "model_name": "RT-2-X",
+      "paper_url": "https://arxiv.org/abs/2310.08864",
+      "arxiv_id": "2310.08864",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.286
+    },
+    {
+      "model_name": "SAM2Act",
+      "paper_url": "https://arxiv.org/abs/2501.18564",
+      "arxiv_id": "2501.18564",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "SAMoE-VLA",
+      "paper_url": "https://arxiv.org/abs/2603.08113",
+      "arxiv_id": "2603.08113",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.651
+    },
+    {
+      "model_name": "SimpleVLA-RL",
+      "paper_url": "https://arxiv.org/abs/2509.09674",
+      "arxiv_id": "2509.09674",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=TQhSodCM4r",
+      "num_reviews": 4,
+      "review_avg": 7.5,
+      "confidence_avg": 4.25,
+      "reviews": [
+        {
+          "rating": 10,
+          "confidence": 5,
+          "summary": "This paper proposes SimpleVLA-RL, a practical online RL framework for Vision-Language-Action (VLA) models that scales beyond limited demonstration data. Building on veRL, the authors implement VLA-specific interactive rollout (closed-loop env stepping with token-based action distributions), simple outcome-only (0/1) trajectory rewards, and GRPO training with three exploration enhancers: dynamic sampling (discard all-success/all-failure groups), higher clipping range (0.8–1.28), and higher rollou",
+          "strengths": "1. Clear, simple RL recipe for VLAs (outcome-only rewards + GRPO) that removes reward-engineering and reference-model overhead; the method details (interactive rollout, reward assignment, GRPO objective) are explicit and easy to reproduce.\n\n2. Exploration enhancements are well-motivated and ablated (dynamic sampling / higher clip / higher temperature), each contributing sizable gains. \n\n3. Strong, broad empirical gains: SOTA-level LIBERO (~99% avg), large improvements across short/medium/long/ex",
+          "weaknesses": "(1) pic 5.1 is a bit confusing for me. I am not sure why the upper half has the different background to the bottom half. I think the best way to show emergent behavior is comparing behaviors under same conditions.\n\n(2) Compute/throughput transparency: The paper lacks precise reporting of wall-clock training time, GPU type.\n\n(3) Ablations indicate RL fails when the base success rate is ~0% and remains weak <5%; this limits plug-and-play use in very hard tasks without warm-starts."
+        },
+        {
+          "rating": 6,
+          "confidence": 4,
+          "summary": "This paper proposes **SimpleVLA-RL**, a framework designed to overcome the dependence of Vision-Language-Action (VLA) models on large-scale demonstration data during supervised fine-tuning. Building upon the veRL framework, the authors introduce tailored optimizations for reinforcement learning on autoregressive VLA models and validate their approach through both simulation benchmarks and real-world robotic experiments.",
+          "strengths": "The paper is well-written, clearly structured, and presents a concise yet precise problem formulation. The experimental design is robust and the results are solid, demonstrating substantial improvements over existing state-of-the-art models across multiple benchmarks. Notably, the experiment using only a single demonstration during the RL phase provides compelling evidence that reinforcement learning can effectively mitigate the challenge of demonstration data scarcity.",
+          "weaknesses": "Although the experimental results are comprehensive and detailed, the methodological innovation appears somewhat limited. The proposed parameter adjustments effectively improve performance, yet the paper does not sufficiently justify the suitability of directly transferring RL algorithms from large language models to VLA settings. \n\nMoreover, the removal of the KL regularization term lacks supporting ablation studies, and the sparsity of the outcome-based reward may weaken the gradient signal, p"
+        },
+        {
+          "rating": 8,
+          "confidence": 4,
+          "summary": "The paper demonstrates how advances in LLM post-training can be ported over to robotics domains by finetuning VLA models in simulation with simple modifications to GRPO. Specifically, the paper introduces best practices to encourage exploration and ensure stable training, such as dynamic sampling of batches to ensure only informative gradients are propagated, best practices for clipping policy updates, and high-temperature sampling. The approach only uses sparse rewards. The paper demonstrates i",
+          "strengths": "$\\textbf{Simplicity + Scalability}$: The approach is extremely simple and scalable, and I expect the community to adopt and build on the work. Specifically, the approach is much simpler than recently proposed techniques for training diffusion-based policy heads, and opens the door for porting over new insights from LLM finetuning to robotics. \n\n$\\textbf{Strong Results}$:  To my knowledge, this is the first work to demonstrate reliable improvement with RL for VLAs in simulated domains. The paper ",
+          "weaknesses": "$\\textbf{Additional Related Work}$: The discussion of related work focuses primarily on other approaches for post-training VLAs. However, the paper would be strengthened by additional discussion one recent works which finetune diffusion policy heads, such as Diffusion Policy Policy Optimization. We know that modifications to GRPO are effective at post-training LLMs, but to me the most surprising thing about this paper is that it was able to stably optimize through a diffusion head. Some addition"
+        },
+        {
+          "rating": 6,
+          "confidence": 4,
+          "summary": "This paper introduces SimpleVLA-RL, an RL framework built on top of VeRL to train Vision-Language-Action (VLA) models for robotic manipulation tasks. The work addresses two fundamental challenges in current VLA training: (1) the scarcity and high cost of large-scale robotic trajectory data required for supervised fine-tuning (SFT), and (2) limited generalization to tasks under distribution shift. SimpleVLA-RL leverages all recent findings from LLM RL finetuning literature such as GRPO with dynam",
+          "strengths": "1. Application of RL for training low-level control policies for manipulation to scale VLA training without relying on  large amounts of demonstration data.\n2. The experimental results clearly show performance improvements achievable through RL training are significant\n3. The analysis section is interesting and studies valuable questions with well thought out experiments",
+          "weaknesses": "1. The experiments section doesn’t mention details about the training datasets and benchmarks. From the current description it is a bit unclear to me on what task, episodes, and bechmarks was the RL finetuning for the VLA policies done? My understanding is OpenVLA-OFT was first trained on real world robotics datasets and then for benchmarking on libero it was finetuned with small amounts of simulation only trajectories. I would like to understand for experiments presented in tables 1, 2 and 3 di"
+        }
+      ],
+      "match_score": 1.0
+    },
+    {
+      "model_name": "SmolVLA",
+      "paper_url": "https://arxiv.org/abs/2506.01844",
+      "arxiv_id": "2506.01844",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.429
+    },
+    {
+      "model_name": "SpatialVLA",
+      "paper_url": "https://arxiv.org/abs/2501.15830",
+      "arxiv_id": "2501.15830",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.486
+    },
+    {
+      "model_name": "SuSIE",
+      "paper_url": "https://arxiv.org/abs/2310.10639",
+      "arxiv_id": "2310.10639",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.462
+    },
+    {
+      "model_name": "TacVLA",
+      "paper_url": "https://arxiv.org/abs/2603.12665",
+      "arxiv_id": "2603.12665",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.688
+    },
+    {
+      "model_name": "TinyVLA",
+      "paper_url": "https://arxiv.org/abs/2409.12514",
+      "arxiv_id": "2409.12514",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "TraceVLA",
+      "paper_url": "https://arxiv.org/abs/2412.10345",
+      "arxiv_id": "2412.10345",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.414
+    },
+    {
+      "model_name": "TwinBrainVLA",
+      "paper_url": "https://arxiv.org/abs/2601.14133",
+      "arxiv_id": "2601.14133",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.457
+    },
+    {
+      "model_name": "UD-VLA",
+      "paper_url": "https://arxiv.org/abs/2511.01718",
+      "arxiv_id": "2511.01718",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "UniPi",
+      "paper_url": "https://arxiv.org/abs/2302.00111",
+      "arxiv_id": "2302.00111",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.348
+    },
+    {
+      "model_name": "UniVLA",
+      "paper_url": "https://arxiv.org/abs/2505.06111",
+      "arxiv_id": "2505.06111",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.421
+    },
+    {
+      "model_name": "UP-VLA",
+      "paper_url": "https://arxiv.org/abs/2501.18867",
+      "arxiv_id": "2501.18867",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "VLA-RL",
+      "paper_url": "https://arxiv.org/abs/2505.18719",
+      "arxiv_id": "2505.18719",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.4
+    },
+    {
+      "model_name": "VLA-Thinker",
+      "paper_url": "https://arxiv.org/abs/2603.14523",
+      "arxiv_id": "2603.14523",
+      "venue": null,
+      "decision": null,
+      "num_reviews": 0,
+      "review_avg": null,
+      "confidence_avg": null,
+      "reviews": [],
+      "match_score": 0.698
+    },
+    {
+      "model_name": "Vlaser",
+      "paper_url": "https://arxiv.org/abs/2510.11027",
+      "arxiv_id": "2510.11027",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=8xTDnj39Ti",
+      "num_reviews": 4,
+      "review_avg": 5.0,
+      "confidence_avg": 3.25,
+      "reviews": [
+        {
+          "rating": 4,
+          "confidence": 4,
+          "summary": "This paper proposes VLASER, a VLA model with collaborative embodied inference ability, which aims to solve the domain gap between upstream VLM inference and downstream VLA strategy learning. VLASER is based on InternVL3, including a two-stage training process of \"VLM pre-training + VLA fine-tuning\", and relies on the Vlaser-6M dataset to achieve SOTA performance on 12 embodied inference benchmarks (Vlaser-8B average score of 51.3), while in WidowX Achieve the best results on the robot benchmark ",
+          "strengths": "See Summary",
+          "weaknesses": "1. In Section 3.2, the authors said there is no positive correlation between common embodied reasoning benchmarks and the closed-loop control performance of robot-specific embodied subordinates, but there is a lack of corresponding quantitative analysis or visualization support.\n2. Figure 2 aims to show the two-stage training process of Vlaser, but the data flow and processing logic within each stage are not clear enough, and the relationship between the steps is unclear.\n3. The description of t"
+        },
+        {
+          "rating": 6,
+          "confidence": 3,
+          "summary": "This paper introduces an embodied vision-language-action model built on InternVL together with the Vlaser-6M data engine. It uses a two-stage recipe, embodied VLM pretraining followed by VLA fine-tuning with a flow-matching action expert for low-level control. The paper provides an analysis of which pretraining data streams transfer best to VLA policy learning, giving practical guidance on building task-aware data mixtures. Vlaser attains state-of-the-art results across embodied reasoning benchm",
+          "strengths": "* The paper is clearly written and easy to follow.\n* This paper tackles an important problem: bridging VLMs and VLAs via embodied-data pretraining and in-domain fine-tuning.\n* Results on embodied reasoning benchmarks and SimplerEnv are promising.",
+          "weaknesses": "* For a more informative study, I suggest the authors to include ablations on the pretaining dataset, quantifying how each source contributes to embodied reasoning and robot control.\n\n* In the planning data curation, the authors collected data from Habitat. Did you avoid overlap with the EB-Habitat evaluation set? Additionally, please elaborate more on why Habitat was chosen for planning data over alternatives such as ALFRED.\n\n* For in-domain data curation, how are the questions and answers in t"
+        },
+        {
+          "rating": 4,
+          "confidence": 3,
+          "summary": "This paper introduces Vlaser, a vision-language-action model that unifies embodied reasoning and robot control through a large-scale dataset and a dual-stage training pipeline. Built on InternVL3 and Qwen2.5 backbones with a flow-matching action expert, Vlaser achieves state-of-the-art results on 12 embodied reasoning benchmarks and strong performance on real-robot tasks like WidowX and Google Robot. The authors also provide a systematic analysis of data transfer, showing that in-domain embodied",
+          "strengths": "1. The paper presents a unified framework for embodied tasks and introduces the Vlaser-6M dataset.\n2. The dataset is large, diverse, and carefully curated, covering grounding, spatial reasoning, planning, and simulation tasks.\n3. The study offers useful observations on the gap between vision-language reasoning and low-level control, providing practical guidance for future model design.",
+          "weaknesses": "1. The detailed architecture of the action expert is not presented. In Figure 2, the structure of the action expert is not shown.\n2. I think the authors could provide more explanations or figures to help readers understand the structure of the action expert and the training process.\n3. Since the paper emphasizes the impact of VLM reasoning on VLA performance, I think the authors could add some experiments on real robots or additional simulators to demonstrate the model’s generalization capabilit"
+        },
+        {
+          "rating": 6,
+          "confidence": 3,
+          "summary": "This paper presents Vlaser, a vision-language-action framework that couples a VLM for embodied reasoning with a flow-matching action expert for low-level control generation, supported by the large-scale Vlaser-6M data engine. The approach unifies grounding, spatial reasoning, and planning with closed-loop execution. Evaluations across 12 embodied benchmarks and SimplerEnv on WidowX and Google Robot demonstrate state-of-the-art performance and reveal that in-domain robot-view data drives the larg",
+          "strengths": "1. The paper is well-written, with clear figures and detailed explanations that make the work easy to follow.\n\n2. The method introduces a clean end-to-end VLA design that decouples vision-language reasoning from an action expert and leverages flow matching for low-level control, enabling seamless closed-loop execution.\n\n3. The paper demonstrates state-of-the-art performance across 12 embodied-reasoning benchmarks and consistently surpasses strong baselines.\n\n4. It also conducts a systematic anal",
+          "weaknesses": "1. The paper compares only two model scales within a single architecture and concludes that smaller models are better at point-based grounding while larger models excel at multi-step planning and closed-loop simulation; however, this scale–performance relationship may not generalize to other model families, and the work provides little deeper analysis or mechanistic explanation to substantiate it.\n\n2. The policy relies on single-frame observations and fixed-length action sequences, with the acti"
+        }
+      ],
+      "match_score": 1.0
+    },
+    {
+      "model_name": "X-VLA",
+      "paper_url": "https://arxiv.org/abs/2510.10274",
+      "arxiv_id": "2510.10274",
+      "venue": "ICLR 2026",
+      "decision": "poster",
+      "openreview_url": "https://openreview.net/forum?id=kt51kZH4aG",
+      "num_reviews": 3,
+      "review_avg": 7.33,
+      "confidence_avg": 4.0,
+      "reviews": [
+        {
+          "rating": 8,
+          "confidence": 5,
+          "summary": "This paper addresses the significant challenge of training a single, generalist Vision-Language-Action (VLA) model on large-scale, heterogeneous, and cross-embodiment robotic datasets. The authors propose **X-VLA**, a flow-matching-based VLA architecture. The core contribution is a **\"Soft Prompt\" mechanism**, which assigns a unique set of learnable embeddings to each distinct data source (i.e., hardware configuration). These prompts condition a standard Transformer backbone, enabling it to hand",
+          "strengths": "1.  **Clear Problem, Elegant Solution:** The paper tackles a critical and timely problem in large-scale robotics: how to effectively leverage diverse, heterogeneous datasets. The proposed \"Soft Prompt\" mechanism  is an elegant and simple solution that integrates cleanly into a standard Transformer architecture. This approach is more deeply integrated than using domain-specific action heads (Fig 2a)  and more flexible and scalable than relying on hand-crafted language prompts (Fig 2c).\n\n2.  **Exc",
+          "weaknesses": "1.  **Limited Methodological Novelty of Soft Prompts:** The core mechanism, \"Soft Prompting,\" is not a new invention. It is a well-established technique from the NLP community (e.g., Lester et al., 2021)  and has been used in multi-task and multi-domain learning , as the paper acknowledges. The novelty here lies in its *application* to the *cross-embodiment robotics* domain. While the *results* are novel and SOTA, the *methodological* leap is more of an effective and well-executed application ra"
+        },
+        {
+          "rating": 8,
+          "confidence": 4,
+          "summary": "The paper proposes X-VLA, a vision-language-action model that leverages \"soft prompts\" (learnable embeddings of heterogeneous hardware platforms) to effectively address heterogeneity across different robot platforms when learning multi-task policies. The method learns domain-specific soft prompt embeddings that encode individual embodiments, with a shared VLM backbone that utilizes the soft prompts to ultimately generate high-quality actions across multiple embodiments and tasks. The model is pr",
+          "strengths": "* The paper conducts extensive and thorough experimental evaluation which includes six simulation benchmarks and three real-world robotic platforms. A variety of prior methods are compared against, including $\\pi_0$, OpenVLA, Octo, ACT, and several other VLAs (UniVLA, GR00T-N1, FLOWER, UniVLA, etc.).\n* The results across all settings are consistently strong, nearly outperforming all other prior methods and even matching $\\pi_0$ (3B parameters) with a PEFT version that use only 9M trainable param",
+          "weaknesses": "* Soft prompts, the core contribution of the paper, is borrowed from prior natural language processing research (Lester et al., 2021), which suggests limited technical novelty. While the application of soft prompts to vision-language-action models in robotics is novel, the paper reads more like an engineering project that obtained a strong model through various careful techniques employed during training.\n* Some important details are missing: How many tokens are used in the soft prompts, how is "
+        },
+        {
+          "rating": 6,
+          "confidence": 3,
+          "summary": "The paper proposes X-VLA policy for learning across different robot setups using soft prompts for each data source. The pipeline is trained with a flow-matching objective for action chunk generation. The training involves first pretraining on ~290k episodes across seven setups, then prompt warm-up with frozen backbone for new embodiment and finally joint PEFT (LoRA) that tunes ~1% of parameters. The evaluation shows strong performance across six simulation benchmarks and three real-robot platfor",
+          "strengths": "The idea of soft prompts is motivated well, and is shown to be better than the language templates and HPT-style projections. \nThe overall proposal seems a scalable solution, as it is based on standard transformer with shared params for encoders and validation errors suggest room to grow. \nThe paper explores how reduced LR leads to better performance for their experiments and report consistent gains in performance across the simulated benchmarks.",
+          "weaknesses": "Prompts are queried by dataset/hardware ID; this assumes reliable domain labels during training and may risk overfitting to source IDs unless carefully regularized. There are no experimental evidence of zero-shot generalization to unseen tasks with known robots and unseen robots.\n\nWhile the experiment results has a wide coverage, the current focus is on tabletop tasks with focus on the end-effector movements, and do not require much reasoning of the differences in the embodiment. It is unclear i"
+        }
+      ],
+      "match_score": 1.0
+    }
+  ]
+}
