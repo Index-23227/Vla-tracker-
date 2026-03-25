@@ -1,120 +1,177 @@
-# Diffusion-VLA: Generalizable and Interpretable Robot Foundation Model via Self-Generated Reasoning
+# Diffusion-VLA (DiVLA): Generalizable and Interpretable Robot Foundation Model via Self-Generated Reasoning
 
-> **한 줄 요약**: Autoregressive reasoning과 diffusion-based action generation을 결합하되, 추론(reasoning) 과정을 정책 학습에 직접 통합하여 82Hz 추론 속도와 102개 미지 물체에서 63.7% 정확도 달성.
+> **한 줄 요약**: Qwen2-VL (2B/7B/72B)에 FiLM 기반 reasoning injection으로 diffusion action policy를 가이드하여, 39K trajectory 사전학습만으로 970K 기반 OpenVLA를 압도 (multi-task 83.6% vs 39.4%), 102개 미지 물체 zero-shot 63.7%, **82Hz (2B)** 추론 달성.
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- 기존 VLA에서 reasoning(ECoT 등)은 **사후 추가된 보조 과제** → action generation과 분리되어 reasoning이 실제 action 품질에 기여하는지 불명확
-- Autoregressive action 생성은 latency가 높고, diffusion 기반은 reasoning과의 통합이 어려움
-- Reasoning의 수동 annotation(사람이 CoT 작성)은 비용이 높고 scalability 한계
+- 기존 VLA의 reasoning(ECoT 등)은 **사후 추가된 보조 과제** → action에의 직접적 기여 불명확
+- Reasoning을 매 step의 입력-출력 cycle로 수행하면 **computational overhead** 큼
+- 사람이 만든 CoT annotation은 비용이 높고 scalability 한계
 
 ### 핵심 질문
-- **Self-generated reasoning을 policy learning에 직접 통합하면 일반화가 향상되는가?**
-- **AR reasoning + diffusion action의 hybrid 구조가 각각의 장점을 유지할 수 있는가?**
+- **Reasoning을 FiLM으로 policy에 직접 embedding하면, iterative reasoning 없이도 action이 향상되는가?**
+- **소량 데이터 (39K)로도 대량 (970K) 기반 모델을 능가할 수 있는가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Self-Generated Reasoning
+### 2.1 Architecture
 
-외부 annotation 없이 **모델이 스스로 reasoning을 생성**:
-1. VLM이 scene observation에서 task-relevant 정보를 text로 생성
-2. 이 text가 diffusion action head의 추가 conditioning이 됨
+**VLM**: Qwen2-VL (2B / 7B / 72B) + SigLIP visual encoder
+**Action module**: Diffusion policy, VLM→projection (2 MLP + LayerNorm)→diffusion model
+**Reasoning injection**: **FiLM (Feature-wise Linear Modulation)** — VLM의 reasoning tokens이 projection layer를 scale/shift
 
-$$\mathbf{r} = \text{VLM}(\mathbf{o}, \mathbf{l}), \quad \hat{\mathbf{a}} = D_\theta(\mathbf{a}_t, t, [\mathbf{c}_{\text{VLM}}; \mathbf{r}])$$
+$$\mathcal{L} = \mathcal{L}_{\text{diff}} + \alpha \mathcal{L}_{\text{ntp}}, \quad \alpha = 10$$
 
-> ❓ **예상 질문**: Self-generated reasoning의 품질은 어떻게 보장하는가?
-> **답변**: Action prediction loss를 통해 간접적으로 reasoning 품질이 학습됨 (action이 성공하려면 reasoning이 정확해야 함). 그러나 reasoning에 대한 직접적 supervision이 없으므로, 모델이 무의미한 reasoning을 생성할 수 있음. 이를 검증하는 ablation(무작위 reasoning 대체)은 포함.
+> ❓ **예상 질문**: α=10이면 NTP loss가 diffusion보다 10배 가중되는데, action 품질에 해가 없는가?
+> **답변**: NTP loss가 reasoning quality를 보장하고, 이 reasoning이 FiLM으로 action에 간접 기여. α가 높으면 reasoning이 더 정확 → action도 개선. Sensitivity 분석은 미제공.
 
-### 2.2 Hybrid Architecture
+### 2.2 Self-Generated Reasoning
 
-```
-[Observation + Language]
-     ↓
-[VLM: Autoregressive Reasoning Generation] → Reasoning text
-     ↓
-[Diffusion Action Head: conditioning on VLM hidden + reasoning]
-     ↓
-[Action chunk output]
-```
+- **GPT-4o**로 합성 reasoning annotation 생성 (학습 데이터)
+- 모델이 reasoning을 autoregressive하게 생성 → FiLM으로 action conditioning
+- 예: 대상 물체 변경 시 "grabbing toy blue car" → "grabbing hex key"로 **동적 자기 수정**
 
-- Reasoning은 autoregressive (token by token)
-- Action은 diffusion (parallel denoising)
+### 2.3 Inference Speed
 
-> ❓ **예상 질문**: Reasoning 생성의 latency가 추론 속도를 제한하지 않는가? 82Hz에서 reasoning을 매번 생성하는가?
-> **답변**: 핵심 질문. 82Hz는 **action head만의 속도**이고, reasoning은 매 action chunk마다가 아닌 **일정 간격으로만** 업데이트될 가능성이 높음. 이 세부 사항이 논문에서 명확하지 않음.
+| Model | Control Frequency |
+|-------|------------------|
+| **DiVLA-2B** | **82 Hz** |
+| **DiVLA-7B** | **42 Hz** |
+| OpenVLA-7B | 5 Hz |
 
-### 2.3 소형 모델 효율성
-
-가장 작은 variant가 82Hz 추론 달성:
-- VLM: ~3B (경량 backbone)
-- Diffusion head: ~200M
-- Action chunk: 16 steps → 실질적 제어 주파수는 82/16 ≈ 5Hz
+- 82Hz는 **action chunk**으로 달성: chunk당 VLM 1회 + diffusion 1회 → 여러 step 동시 출력
+- VLM reasoning은 매 chunk마다가 아닌 주기적으로만 실행될 가능성 있음
 
 ---
 
-## 3. 실험 결과 심층 분석
+## 3. 데이터 전략
 
-| 설정 | 모델 | SR (%) |
-|------|------|--------|
-| 학습된 물체 | OpenVLA | 78.2 |
-| 학습된 물체 | **Diffusion-VLA** | **89.5** |
-| 미지 물체 (102개) | OpenVLA | 31.4 |
-| 미지 물체 (102개) | **Diffusion-VLA** | **63.7** |
+| 모델 | Pre-training Data |
+|------|------------------|
+| DiVLA-2B/7B | **DROID dataset** |
+| DiVLA-72B | DROID + OXE |
+| Fine-tuning | 400-580 trajectories/task |
 
-- **미지 물체에서의 일반화가 핵심 기여** (31.4% → 63.7%)
-- Self-generated reasoning이 물체 특성 이해에 기여하여 transfer 능력 향상
+- **39K trajectories**만으로 pre-train (vs OpenVLA 970K) — 24x 적은 데이터
 
----
+### Fine-tuning
 
-## 4. Ablation 분석
-
-| 구성요소 | 미지 물체 SR (%) |
-|---------|----------------|
-| Full model | 63.7 |
-| Reasoning 제거 | 48.3 |
-| Random reasoning 대체 | 42.1 |
-| Diffusion → MLP | 55.2 |
-| Diffusion → AR tokens | 51.8 |
+| 항목 | 값 |
+|------|-----|
+| LR | 2e-5 (fixed) |
+| Epochs | 20 |
+| VLM | LoRA applied |
+| Visual encoder | Frozen |
+| GPU | A6000 |
 
 ---
 
-## 5. 한계 및 미해결 문제
+## 4. 실험 결과 심층 분석
+
+### Multi-Task (Table 1, 5 tasks)
+
+| Model | Pre-train Data | In-Dist Avg | **Visual Gen Avg** |
+|-------|---------------|-------------|-------------------|
+| Diffusion Policy | - | 27.9% | 8.9% |
+| TinyVLA | - | 45.5% | 28.9% |
+| Octo | 970K | 24.3% | 17.8% |
+| OpenVLA-7B | 970K | 39.4% | 26.7% |
+| **DiVLA-2B** | **39K** | **83.6%** | **57.8%** |
+
+- **39K로 970K 기반 OpenVLA를 2배 이상 능가** (83.6% vs 39.4%)
+
+### Zero-Shot Bin Picking (102 Unseen Objects)
+
+| Model | SR (%) |
+|-------|--------|
+| Diffusion Policy | 8.9 |
+| Octo | 19.6 |
+| TinyVLA | 23.5 |
+| OpenVLA | 28.4 |
+| **DiVLA-2B** | **63.7** |
+
+### Bimanual Table Bussing (Table 2)
+
+| Model | Seen Objects | Mixed Objects |
+|-------|-------------|---------------|
+| Diffusion Policy | 45.8% | 31.2% |
+| OpenVLA | 0% | 0% |
+| **DiVLA-2B** | **72.9%** | **70.8%** |
+
+### View Shifting Generalization (Table 6)
+
+| Model | SR (%) |
+|-------|--------|
+| Diffusion Policy | 0% |
+| OpenVLA | 0% |
+| **DiVLA-2B** | **60%** |
+
+### Model Scaling (Table 10)
+
+| Model | Factory Sorting | Zero-Shot Bin Picking |
+|-------|-----------------|---------------------|
+| DiVLA-2B | 66.2% | 63.7% |
+| DiVLA-7B | 74.9% | 66.7% |
+| **DiVLA-72B** | **82.4%** | **75.9%** |
+
+---
+
+## 5. Ablation — Reasoning Injection Module (Table 8)
+
+| Task | With FiLM | Without FiLM |
+|------|----------|-------------|
+| Task 1 | 100% | 66.7% |
+| Task 2 | 100% | 66.7% |
+| Task 3 | 63.6% | 45.5% |
+| Task 4 | 63.6% | 45.5% |
+| Task 5 | 90.9% | 27.3% |
+| **Average** | **83.6%** | **50.3% (−33.3%p)** |
+
+- FiLM 제거 시 **-33.3%p** → reasoning injection이 핵심 기여
+
+---
+
+## 6. 한계 및 미해결 문제
 
 ### 방법론적 미비점
-1. **82Hz의 실체**: Reasoning 생성 latency가 포함되지 않았을 가능성. End-to-end latency가 실제 82Hz인지 불명확
-2. **Reasoning 품질 통제**: Self-generated reasoning에 hallucination이 발생하면 action이 틀릴 수 있으나, reasoning의 faithfulness 검증 미비
-3. **Reasoning의 인과 관계**: Reasoning이 action을 실제로 "가이드"하는지, 아니면 bypass되는지 (VLM hidden state가 이미 충분한 정보 포함) attribution 불명확
-4. **벤치마크 제한**: Custom 벤치마크 위주, 표준 벤치마크(LIBERO, CALVIN)에서의 비교 부족
+1. **Custom 벤치마크 위주**: LIBERO, CALVIN 등 표준 벤치마크 결과 없음 → 직접 비교 어려움
+2. **GPT-4o annotation 의존**: Reasoning annotation 생성에 GPT-4o 비용. Self-generated가 이를 완화하나 초기 annotation 필요
+3. **82Hz의 실체**: Action chunk 기반이므로 **effective control frequency**와 다를 수 있음. VLM reasoning 주기 미보고
+4. **α=10의 sensitivity**: NTP vs diffusion loss 비율의 sensitivity 분석 부재
+5. **DROID 39K의 특수성**: DROID가 다양한 환경을 포함하여 "적은 양이지만 높은 diversity"일 수 있음. 다른 39K dataset에서도 재현되는지 불명확
 
 ### Attribution 문제
-- 성능 향상이 **reasoning** 때문인지 **diffusion head** 때문인지 분리 필요. Ablation에서 둘 다 제거 시 성능 하락하지만, 상호작용 효과는 미분석
+- 83.6%가 **FiLM reasoning** 때문인지, **Qwen2-VL backbone** 때문인지, **diffusion action** 때문인지 → FiLM ablation (−33.3%p)이 가장 큰 기여를 보이나, backbone 변경 ablation은 부재
 
 ---
 
-## 6. 총평
+## 7. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — Self-generated reasoning + diffusion 통합 |
-| **Technical depth** | ★★★☆☆ — Reasoning quality 분석 부족 |
-| **Experimental rigor** | ★★★☆☆ — Custom 벤치마크 편향 |
-| **Practical impact** | ★★★★☆ — 미지 물체 일반화가 실용적 |
-| **Writing quality** | ★★★☆☆ — 일부 세부사항 모호 |
+| **Novelty** | ★★★★☆ — FiLM reasoning injection이 간결하고 효과적 |
+| **Technical depth** | ★★★★☆ — Scaling (2B→72B), ablation 포괄적 |
+| **Experimental rigor** | ★★★☆☆ — Custom 벤치마크, 표준 비교 부족 |
+| **Practical impact** | ★★★★★ — 82Hz, 39K만으로 competitive, 미지 물체 63.7% |
+| **Writing quality** | ★★★★☆ |
 
-**강점**: Self-generated reasoning의 parameter-free annotation이 실용적. 미지 물체 일반화 능력이 인상적. **약점**: 82Hz 주장의 검증 필요, 표준 벤치마크 결과 부재.
+**강점**: 소량 데이터(39K)로 대량(970K) 모델을 압도하는 data efficiency. FiLM reasoning의 결정적 기여(+33.3%p). 72B까지의 scaling 분석. **약점**: 표준 벤치마크 부재, 82Hz의 실체 불명확, custom 평가의 재현성 우려.
 
 ---
 
-## 7. 🔥 예상 날카로운 질문 모음
+## 8. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | Reasoning을 고정(freeze)하고 action만 업데이트하면? | 이 실험으로 reasoning-action coupling의 necessity를 검증 가능하나 미수행 |
-| 2 | 82Hz에서 end-to-end latency(VLM + reasoning + diffusion)는? | 핵심 불명확점. VLM reasoning이 매 step이 아닌 주기적으로만 실행될 가능성 |
-| 3 | Self-generated reasoning의 해석가능성(interpretability)은 실제로 유용한가? | Qualitative examples는 제공하나, 사람이 reasoning을 보고 action을 예측할 수 있는지의 체계적 평가 부재 |
-| 4 | ECoT 대비 self-generated reasoning의 장점은? | Annotation 불필요. 다만 ECoT는 더 구조화된 reasoning을 강제하여 품질이 안정적일 수 있음 |
+| 1 | LIBERO에서 얼마인가? | 미보고. 표준 벤치마크 결과 없어 직접 비교 불가 |
+| 2 | 82Hz에서 VLM은 매 step 실행되는가? | 아니오. Action chunk 단위로 VLM 실행. Effective reasoning frequency는 훨씬 낮을 것 |
+| 3 | DROID 39K가 특별한 것 아닌가? (diversity가 높아서) | 가능. 동일 양의 단일 환경 데이터에서 재현되는지 검증 필요 |
+| 4 | ECoT와의 차이는? | ECoT는 GPT-4V로 structured CoT annotation, DiVLA는 FiLM으로 implicit injection. DiVLA가 더 효율적 (iterative cycle 없음) |
+| 5 | Reasoning을 freeze하고 action만 학습하면? | FiLM ablation(−33.3%p)이 이를 간접적으로 보임. Reasoning이 action에 필수적 |
+
+<!-- VERIFIED: pdf -->

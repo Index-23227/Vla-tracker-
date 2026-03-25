@@ -1,129 +1,159 @@
 # DexVLA: Vision-Language Model with Plug-In Diffusion Expert for General Robot Control
 
-> **한 줄 요약**: VLM에 수십억 파라미터 규모의 diffusion expert를 plug-in하여 cross-embodiment 학습과 embodiment-specific fine-tuning을 체계화하고, 빨래 접기 등 고난도 양팔 작업을 언어 프롬프트만으로 수행.
+> **한 줄 요약**: Qwen2-VL 2B에 **1B 파라미터 diffusion expert** (32-layer transformer)를 plug-in하고, 3-stage curriculum (cross-embodiment→embodiment-specific→task-specific)으로 학습하여, 셔츠 접기 0.92, LIBERO 97.3%, **60Hz inference on A6000** 달성.
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- 기존 VLA의 action head는 소형(수백만 파라미터) → 복잡한 dexterous manipulation에 표현력 부족
+- 기존 VLA의 action head는 소형(수백만~수억 파라미터) → 고차원 dexterous action 표현력 부족
 - Cross-embodiment 학습 시 서로 다른 action space를 **하나의 작은 action head로 통합**하면 capacity bottleneck
-- 양팔(bimanual) + 다관절(dexterous) 태스크는 action space 차원이 20-40+로 극히 높아, 단순 regression/token prediction으로 부족
+- Sub-step reasoning 없이 long-horizon task를 직접 prompting으로 수행하기 어려움
 
 ### 핵심 질문
-- **Action head를 수십억 파라미터 규모의 "expert"로 키우면 dexterous control이 가능한가?**
-- **Cross-embodiment 사전학습 → embodiment-specific 커리큘럼이 효과적인가?**
+- **Action expert를 1B 규모로 scaling하면 dexterous/long-horizon control이 가능한가?**
+- **3-stage curriculum이 direct fine-tuning 대비 얼마나 효과적인가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Billion-Parameter Diffusion Expert
+### 2.1 Architecture
 
-Action module을 소형 MLP가 아닌 **대규모 diffusion transformer**로 설계:
+**VLM**: Qwen2-VL 2B
+**Diffusion Expert**: **32 layers, hidden 1280, 16 heads → ~1B parameters**
+- Scale Diffusion Policy (ScaleDP) 기반 transformer
+- Multi-head output: 각 head가 단일 robot configuration 담당 → cross-embodiment
+- **FiLM conditioning**: VLM의 reasoning tokens이 projection layer를 scale/shift
 
-$$\hat{\mathbf{a}}_0 = D_\phi(\mathbf{a}_t, t, \mathbf{c}_{\text{VLM}}), \quad |\phi| \approx 1-3B$$
+$$\mathcal{L} = \mathcal{L}_{\text{diff}} + \alpha \mathcal{L}_{\text{ntp}}, \quad \alpha = 1$$
 
-- VLM (7B)의 hidden state $\mathbf{c}_{\text{VLM}}$을 conditioning으로 사용
-- Diffusion expert 자체가 1-3B parameters → 전체 시스템 8-10B
+### 2.2 Three-Stage Curriculum
 
-> ❓ **예상 질문**: Action head가 3B이면 VLM과 비슷한 크기인데, 이게 과도하지 않은가?
-> **답변**: 고차원 action space (bimanual dexterous: 40+ DoF)에서는 충분한 표현력이 필수. 저자들은 expert 크기에 따른 scaling 실험을 제시하며, 대형 expert가 dexterous task에서 소형 대비 큰 차이를 보임을 실증.
+| Stage | 학습 대상 | 데이터 | LR | Scheduler |
+|-------|---------|--------|-----|----------|
+| **1. Cross-embodiment** | Diffusion expert only | 100h multi-robot, 91 tasks | 1e-4 | Constant |
+| **2. Embodiment-specific** | VLM + projection + expert | Single-embodiment | 2e-5 | Cosine |
+| **3. Task-specific** | Full | Sub-step annotated (5초 간격) | 2e-5 | Cosine |
 
-### 2.2 Embodiment Curriculum Training
+- All stages: AdamW (β₁=0.9, β₂=0.95), 5 epochs, WD=0.0
+- Stage 1에서 ResNet-50 image encoder + DistilBERT 사용 (VLM 미사용)
+- Stage 2에서 VLM visual encoder **freeze**, 나머지 학습
 
-3단계 학습 커리큘럼:
+> ❓ **예상 질문**: Stage 1에서 왜 VLM을 쓰지 않는가?
+> **답변**: Cross-embodiment 데이터가 매우 diverse하여 VLM을 동시에 학습하면 불안정. Stage 1은 **motor primitive만** 학습에 집중. Stage 2에서 VLM을 통합.
 
-```
-Stage 1: Cross-embodiment pre-training (다양한 로봇 데이터)
-     ↓
-Stage 2: Embodiment-family fine-tuning (single-arm / dual-arm)
-     ↓
-Stage 3: Target robot fine-tuning (특정 로봇에 특화)
-```
+### 2.3 Sub-step Reasoning
 
-> ❓ **예상 질문**: 왜 3단계인가? 직접 target robot으로 fine-tuning하면 안 되나?
-> **답변**: Cross-embodiment pre-training이 다양한 low-level motor primitive에 대한 general knowledge를 제공하여, target fine-tuning의 data efficiency를 높임. 3-stage가 2-stage나 1-stage 대비 우수함을 ablation에서 보임.
+Long-horizon task에서 **5초마다 sub-step annotation** 제공:
+- "Grab the shirt" → "Fold left side" → "Fold right side" → "Final fold"
+- 이 reasoning이 FiLM으로 diffusion expert에 주입
 
-### 2.3 Plug-in Architecture
-
-VLM과 diffusion expert가 **분리된 모듈**:
-- VLM은 freeze 가능 → language/vision 능력 보존
-- Diffusion expert만 fine-tuning 가능 → 효율적 adaptation
-- 서로 다른 diffusion expert를 swap 가능 → 로봇별 expert
+> ❓ **예상 질문**: SayCan과 어떻게 다른가?
+> **답변**: SayCan은 external LLM이 discrete skill을 선택하는 modular 방식. DexVLA는 sub-step reasoning이 FiLM으로 continuous action에 직접 conditioning되는 **end-to-end** 방식. Table 6에서 DexVLA (0.70) > SayCan (0.58).
 
 ---
 
 ## 3. 데이터 전략
 
-| 단계 | 데이터 | 규모 |
-|------|--------|------|
-| Stage 1 | Open X-Embodiment + DROID | ~1M trajectories |
-| Stage 2 | Bimanual subset | ~100K trajectories |
-| Stage 3 | Target robot demos | ~1K-10K trajectories |
+| Stage | 데이터 | 규모 |
+|-------|--------|------|
+| Stage 1 | Multi-robot (Agile X 42.7%, Franka 34.7%, 기타) | **100 hours, 91 tasks** |
+| Stage 2 | Single-embodiment subset | Target robot에 맞춤 |
+| Stage 3 | Sub-step annotated demonstrations | Task-specific |
 
 ---
 
 ## 4. 실험 결과 심층 분석
 
-### Complex Bimanual Tasks
+### Diffusion Expert Size Ablation (Figure 10)
 
-| 태스크 | Octo | OpenVLA | **DexVLA** |
-|-------|------|---------|-----------|
-| 빨래 접기 | 5% | 12% | **62%** |
-| 서랍 정리 | 15% | 23% | **71%** |
-| 도구 사용 | 8% | 18% | **55%** |
+| Model | Params | Shirt Folding Score |
+|-------|--------|-------------------|
+| UNet | 93M | 0.17 |
+| Diffusion Expert | 410M | 0.63 |
+| **Diffusion Expert** | **1B** | **0.92** |
 
-- 기존 VLA 대비 **3-5배** 높은 성공률
-- 특히 양팔 조작에서 압도적 차이 → diffusion expert의 고차원 action 처리 능력
+- **1B가 93M 대비 5.4x 높은 score** → expert scaling의 결정적 중요성
 
-### Standard Benchmarks
+### LIBERO Benchmark (Table 3)
 
-| 벤치마크 | OpenVLA | CogACT | **DexVLA** |
-|---------|---------|--------|-----------|
-| LIBERO Avg | 76.5% | 89.7% | **91.2%** |
-| SimplerEnv | 48.7% | 67.8% | **69.5%** |
+| 모델 | Spatial | Object | Goal | **Avg** |
+|------|---------|--------|------|---------|
+| Diffusion Policy | 78.3 | 92.5 | 68.3 | 79.7 |
+| OpenVLA | 84.7 | 88.4 | 79.2 | 84.1 |
+| π₀-FAST | 96.4 | 96.8 | 88.6 | 93.9 |
+| π₀ | 96.8 | 98.8 | 95.8 | 97.1 |
+| **DexVLA** | **97.2** | **99.1** | **95.6** | **97.3** |
+
+- π₀ 대비 **+0.2%p** (97.3 vs 97.1) — competitive
+
+### 3-Stage Curriculum Ablation (Table 1)
+
+| Configuration | Shirt Folding | Laundry Folding |
+|--------------|-------------|----------------|
+| Stage 1 only | 0.0 | 0.0 |
+| Stage 2 only | 0.0 | 0.0 |
+| Stage 1+2 | **0.92** | 0.0 |
+| **Stage 1+2+3** | **0.92** | **0.4** |
+
+- Stage 1 or 2 alone: **완전 실패** (0.0) → 각 stage가 필수
+- Stage 3 (sub-step reasoning): Laundry folding에서 0.0→0.4
+
+### Sub-step Reasoning Ablation (Table 5)
+
+| 설정 | Score |
+|------|-------|
+| Stage 1 only | 0.07 |
+| Stage 2 only | 0.0 |
+| Stage 1+2 | **0.92** |
+
+### Visual Generalization (Table 2)
+
+| Task | Novel Object | Novel Scene | Both |
+|------|-------------|-------------|------|
+| Shirt folding (Bimanual) | 0.78 | 0.78 | 0.56 |
+| Drink pouring (Dexterous) | 0.83 | 0.67 | 0.67 |
+
+### Long-horizon Direct Prompting
+
+| Task | π₀ | DexVLA |
+|------|-----|--------|
+| Laundry folding | 0.2 | **0.4** |
+| Table bussing (hard) | ~0.5 | **~0.58+0.08** |
+| Dryer unloading | 0.0 (Octo/OpenVLA) | **0.8** |
 
 ---
 
-## 5. Ablation 분석
+## 5. 추론 속도
 
-| 구성요소 | 빨래 접기 SR (%) |
-|---------|----------------|
-| Full DexVLA (3B expert) | 62 |
-| Small expert (300M) | 38 |
-| No curriculum (direct FT) | 41 |
-| VLM unfrozen | 58 (slight forgetting) |
-| No cross-embodiment PT | 45 |
-
-- **Expert 크기**가 dexterous task에서 결정적
-- **Curriculum**도 significant (직접 FT 대비 +21%p)
+> **60Hz on single NVIDIA A6000 GPU** — real-time control 가능
 
 ---
 
 ## 6. 관련 연구 비교
 
-| 모델 | Action Head Scale | Bimanual | Dexterous | Curriculum |
-|------|------------------|----------|-----------|-----------|
-| OpenVLA | ~10M (token pred) | ✗ | ✗ | ✗ |
-| CogACT | ~200M (DiT) | △ | ✗ | ✗ |
-| pi0 | ~300M (flow) | ✓ | △ | ✗ |
-| **DexVLA** | **~1-3B (DiT)** | **✓** | **✓** | **✓** |
+| 모델 | VLM | Action Expert | Expert Params | Curriculum | Inference |
+|------|-----|-------------|-------------|-----------|----------|
+| OpenVLA | 7B | Token pred | ~10M | ✗ | ~5Hz |
+| CogACT | 7B | DiT | 308M | ✗ | ~10Hz |
+| π₀ | ~3B | Flow matching | ~300M | ✗ | ~20Hz |
+| **DexVLA** | **Qwen2-VL 2B** | **ScaleDP** | **1B** | **✓ (3-stage)** | **60Hz** |
 
 ---
 
 ## 7. 한계 및 미해결 문제
 
 ### 방법론적 미비점
-1. **추론 비용**: VLM (7B) + Diffusion Expert (3B) = 10B → 추론 latency가 매우 높을 수 있음. Denoising step 추가. 실제 control frequency 미보고
-2. **Diffusion expert의 일반화**: Target robot에 fine-tuning된 expert가 새로운 태스크/물체에 잘 일반화하는지 미검증
-3. **Learning curriculum의 한계**: 3-stage pipeline은 복잡하고 각 단계의 hyperparameter(학습률, epoch 등)가 많음
-4. **Real-world 재현성**: 복잡한 태스크(빨래 접기)의 success rate 측정 기준과 trial 수가 명확하지 않을 수 있음
+1. **Sub-step annotation 비용**: 5초 간격 manual annotation이 필요 → scalability 제약. "Acquiring new tasks still requires collecting substantial human demonstration data"
+2. **Laundry folding 0.4**: Long-horizon에서 여전히 낮은 성공률. Stage 3 추가해도 제한적
+3. **Visual generalization (Both 0.56)**: Novel object + novel scene 동시에서 44% 실패
+4. **Training cost**: 100h 데이터 + 3-stage pipeline의 복잡성. 재현 비용 높음
+5. **LIBERO-Long 미보고**: Table 3에 Long suite 결과 없음
 
 ### Attribution 문제
-- DexVLA의 성능이 **대규모 diffusion expert** 때문인지 **학습 커리큘럼** 때문인지 **더 많은 데이터** 때문인지 완전 분리 어려움
-- OpenVLA에 동일 크기 diffusion expert를 추가한 fair comparison이 더 설득력 있을 것
+- 성능이 **1B expert** 때문인지, **3-stage curriculum** 때문인지, **sub-step reasoning** 때문인지 분리 필요. Expert size ablation (93M→1B)과 curriculum ablation 각각 존재하나, interaction effect 미분석
 
 ---
 
@@ -131,13 +161,13 @@ VLM과 diffusion expert가 **분리된 모듈**:
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — Billion-scale action expert의 도입 |
-| **Technical depth** | ★★★★☆ — Curriculum 설계와 scaling 분석 |
-| **Experimental rigor** | ★★★★☆ — 복잡한 real task 포함 |
-| **Practical impact** | ★★★★★ — Dexterous manipulation의 새로운 가능성 제시 |
-| **Writing quality** | ★★★★☆ — 체계적 |
+| **Novelty** | ★★★★★ — 1B action expert + 3-stage curriculum |
+| **Technical depth** | ★★★★★ — Expert scaling, curriculum, sub-step reasoning 체계적 |
+| **Experimental rigor** | ★★★★☆ — LIBERO + real-world + ablation. LIBERO-Long 부재 |
+| **Practical impact** | ★★★★★ — 60Hz, dexterous task 최초 실용 수준 |
+| **Writing quality** | ★★★★☆ |
 
-**강점**: Dexterous bimanual manipulation을 VLA 프레임워크에서 처음으로 진지하게 다룸. Expert 규모 확대가 품질에 직결됨을 실증. **약점**: 추론 비용이 매우 높고, 복잡한 학습 파이프라인의 재현성 우려.
+**강점**: 1B expert scaling이 dexterous task에서 결정적임을 실증 (93M: 0.17 → 1B: 0.92). 60Hz real-time. 3-stage 각 단계의 필요성이 ablation으로 입증. **약점**: Sub-step annotation 비용, laundry folding 0.4의 한계, curriculum 복잡성.
 
 ---
 
@@ -145,8 +175,11 @@ VLM과 diffusion expert가 **분리된 모듈**:
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | 10B 모델의 실시간 제어가 가능한가? Latency는? | 보고 미흡. DDIM acceleration 시 ~200ms 예상. 5Hz 제어가 한계 |
-| 2 | 왜 3B expert인가? Scaling law가 있는가? | 300M→1B→3B로의 scaling 실험 포함. 3B 이후 diminishing returns 시작하나, 더 큰 expert는 미테스트 |
-| 3 | Diffusion expert 없이 VLM만 크게 키우면 (10B+ VLM) 비슷한 성능이 나오지 않을까? | 이 비교가 핵심이나 미수행. VLM scaling vs expert scaling의 trade-off |
-| 4 | Plug-in expert를 on-the-fly로 교체하는 latency는? | Expert 교체 시 GPU 메모리 재로딩 필요. 실시간 교체는 사실상 불가 |
-| 5 | 커리큘럼 없이 대규모 데이터로 직접 학습하면? | Stage 3 only로 직접 학습 시 41% (vs 62%). 커리큘럼의 20%p+ 기여가 유의미 |
+| 1 | 60Hz면 VLM (Qwen2-VL)도 매 step 실행하는가? | 아니오. VLM은 sub-step 단위(~5초)로만 실행, diffusion expert만 60Hz. 이것이 plug-in 설계의 핵심 이점 |
+| 2 | π₀ 대비 LIBERO +0.2%p면 saturation 아닌가? | 맞음. DexVLA의 진짜 차별화는 LIBERO가 아니라 **dexterous task (셔츠 접기 0.92)와 60Hz** |
+| 3 | Sub-step annotation 없이 가능한가? | Table 1에서 Stage 1+2만으로 shirt folding 0.92 달성. 그러나 laundry folding은 Stage 3 필수 (0.0→0.4) |
+| 4 | 1B expert를 3B로 더 키우면? | 미검증. 410M→1B에서 0.63→0.92이므로 diminishing returns 예상되나 확인 필요 |
+| 5 | VLM을 2B에서 7B로 키우면? | Expert가 아닌 VLM scaling의 효과 미검증. RoboVLMs에서는 VLM 선택이 중요함을 보임 |
+| 6 | Training cost (3-stage × 100h data)의 재현성은? | 산업 연구 수준. 학계에서 100h 데이터 수집은 상당한 투자 |
+
+<!-- VERIFIED: pdf -->

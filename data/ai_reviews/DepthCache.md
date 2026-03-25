@@ -1,125 +1,156 @@
 # DepthCache: Depth-Guided Training-Free Visual Token Merging for VLA Model Inference
 
-> **한 줄 요약**: Depth 정보를 구조적 사전지식(structural prior)으로 활용하여 VLA의 visual token을 지능적으로 병합·압축하는 training-free 추론 가속 기법으로, 3개 VLA에서 1.28x speedup과 최소한의 성능 하락 달성.
+> **한 줄 요약**: Depth 기반 영역 분할 + progressive cross-frame token merging + dual protection mechanism으로, **3개 VLA (π0.5, OpenVLA, GR00T)에서 training-free로 1.07-1.33x speedup과 0.2-1.0%p 이내 성능 하락** 달성. Real-world에서 191ms→143ms (1.33x).
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- VLA 모델의 visual token 수가 추론 latency의 주요 bottleneck (수백~수천 개 토큰)
-- 기존 token pruning/merging (ToMe 등)은 **2D 공간에서 균일하게 적용** → 로봇 조작에 중요한 근거리 물체와 무관한 배경을 동등하게 취급
-- Depth-aware token selection은 학습이 필요한 경우가 많아 기존 VLA에 즉시 적용 불가
+- VLA 모델의 visual token 수가 추론 latency의 주요 bottleneck
+- 기존 token pruning/merging (FastV, ToMe)은 **2D 공간에서 균일하게 적용** → 로봇 조작에 중요한 근거리 물체와 배경을 동등하게 취급
+- 기존 방법들이 VLA에 적용 시 **심각한 성능 하락** (FastV: π0.5에서 -20.3%p)
 
 ### 핵심 질문
-- **Depth 기반으로 "어디를 자세히 보고 어디를 대충 볼 것인가"를 결정하면 token 효율이 올라가는가?**
-- **추가 학습 없이(training-free) 기존 VLA에 plug-in 가능한 가속이 있는가?**
+- **Depth 기반 구조적 사전지식으로 token merging을 가이드하면, 성능 보존과 속도 향상을 동시에 달성할 수 있는가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Depth-Guided Region Partitioning
+### 2.1 Core Components
 
-Depth map을 기준으로 이미지를 영역 분할:
+1. **Depth-guided Region Partitioning**: K=3 depth clusters로 영역 분할, 근거리=낮은 merge, 원거리=높은 merge
+2. **Progressive Cross-frame Merging**: W=5 frame window에서 점진적으로 merge ratio 증가 (step ratio η=0.2 → ~5 frame에서 수렴)
+3. **Dual Protection**: Attention-based semantic protection (τ_att = μ+σ) + depth gradient 기반 geometric edge protection
+4. **Change-triggered Re-initialization**: 장면 변화 감지 시 cache 초기화
 
-$$R_k = \{(u,v) : d_k^{\text{min}} \leq D(u,v) < d_k^{\text{max}}\}, \quad k = 1, ..., K$$
+### 2.2 Auxiliary View Pipeline
 
-- **근거리 영역** (로봇 작업 공간): 낮은 merge ratio → 세밀한 token 유지
-- **원거리 영역** (배경): 높은 merge ratio → 공격적 압축
+Wrist camera 전용 2-state machine:
+- End-effector 정지 시: aggressive compression
+- 움직임 시: 덜 aggressive compression
 
-> ❓ **예상 질문**: Depth 추정이 부정확한 영역에서 잘못된 merge ratio가 적용되면?
-> **답변**: Depth estimation 오류가 직접 token allocation에 영향. 특히 depth discontinuity (물체 경계)에서 잘못된 분할이 발생 가능. 저자들은 GT depth와 estimated depth 모두 테스트하나 estimation 오류의 체계적 분석은 제한적.
+### 2.3 Key Hyperparameters
 
-### 2.2 Differentiated Merge Ratios
+| Parameter | Default | 역할 |
+|-----------|---------|------|
+| Warmup frames (N) | 5 | 초기 cache 구축 |
+| Depth clusters (K) | 3 | 영역 분할 수 |
+| Progressive window (W) | 5 | Merge 수렴 window |
+| Max merge ratio (r_max) | 0.7 | 최대 token 제거 비율 |
+| Step ratio (η) | 0.2 | Progressive step size |
 
-영역별 merge ratio:
-
-$$r_k = r_{\text{base}} \cdot f(d_k), \quad f(d) = \alpha \cdot \frac{d - d_{\min}}{d_{\max} - d_{\min}}$$
-
-근거리: $r \approx 0.1$ (10% 병합), 원거리: $r \approx 0.7$ (70% 병합).
-
-> ❓ **예상 질문**: 모든 task에서 근거리=중요, 원거리=불중요라는 가정이 성립하는가?
-> **답변**: Navigation 등에서는 원거리 정보가 중요. 본 논문은 **tabletop manipulation** 위주로 평가하여 이 가정이 성립하나, 일반적이지 않음.
-
-### 2.3 Training-Free Token Merging
-
-기존 ToMe (Token Merging) 알고리즘에 depth-guided ratio를 적용:
-1. 각 영역 내에서 cosine similarity 기반 유사 토큰 쌍 탐색
-2. 영역별 merge ratio에 따라 병합
-3. 결과적으로 총 token 수 감소 → 이후 transformer layer의 self-attention 연산 절감
+**Training-free**: 사전학습된 체크포인트에 **수정 없이** 적용. NVIDIA RTX 4090 (24GB)에서 실행.
 
 ---
 
 ## 3. 실험 결과 심층 분석
 
-| VLA 모델 | 원본 SR (%) | DepthCache SR (%) | Speedup |
-|---------|-----------|------------------|---------|
-| OpenVLA | 76.5 | 75.8 (-0.7) | 1.28x |
-| RoboVLM | 82.3 | 81.5 (-0.8) | 1.25x |
-| SpatialVLA | 85.1 | 84.2 (-0.9) | 1.31x |
+### LIBERO Simulation — π0.5 (3.3B)
 
-- 3개 VLA 모두에서 **1%p 미만 성능 하락**으로 1.25-1.31x 속도 향상
-- Training-free라는 점에서 즉시 적용 가능
+| Method | Spatial | Object | Goal | Long | **Avg SR** | **Speedup** | Token Ratio |
+|--------|---------|--------|------|------|-----------|-----------|-------------|
+| Baseline | 99.0 | 97.0 | 99.0 | 96.5 | **97.9** | 1.00x | 100% |
+| + FastV | 73.4 | 89.4 | 79.1 | 68.5 | 77.6 | 1.30x | 68.0% |
+| + ToSA | 79.3 | 82.0 | 71.6 | 62.4 | 73.8 | 0.94x | 57.8% |
+| **+ DepthCache** | **98.9** | **97.1** | **98.3** | **96.1** | **97.6 (−0.3)** | **1.28x** | 68.2% |
+
+- FastV: **-20.3%p** 하락 vs DepthCache: **-0.3%p** → 핵심 차별화
+
+### LIBERO Simulation — OpenVLA (7B)
+
+| Method | Avg SR | Speedup |
+|--------|--------|---------|
+| Baseline | 76.7 | 1.00x |
+| + FastV | 64.0 (-12.7) | 1.39x |
+| + SP-VLA | 71.9 (-4.8) | 1.50x |
+| **+ DepthCache** | **75.7 (−1.0)** | **1.21x** |
+
+### LIBERO Simulation — GR00T (2.2B)
+
+| Method | Avg SR | Speedup |
+|--------|--------|---------|
+| Baseline | 93.1 | 1.00x |
+| **+ DepthCache** | **92.9 (−0.2)** | **1.07x** |
+
+### ⭐ Real-World (π0.5, 20 trials/task)
+
+| Task | Baseline | DepthCache |
+|------|---------|-----------|
+| Pick & Place | 20/20 | 20/20 |
+| Stack Blocks | 18/20 | 17/20 |
+| Drawer & Place | 17/20 | 15/20 |
+| **Aggregate** | **55/60 (91.7%)** | **52/60 (86.7%)** |
+
+| Metric | Baseline | DepthCache |
+|--------|---------|-----------|
+| Inference latency | **191ms** | **143ms (1.33x)** |
+
+### Extended Real-World
+
+| Scenario | Baseline | DepthCache | Time Reduction |
+|---------|---------|-----------|---------------|
+| Multi-Object Sorting | 15/15 | 13/15 | **28.6s→22.1s (-22.7%)** |
+| Perturbation Recovery | 11/15 | 12/15 | **17.4s→13.7s (-21.3%)** |
 
 ---
 
-## 4. Ablation 분석
+## 4. Ablation 분석 (π0.5, LIBERO)
 
-| Merge 전략 | SR 변화 | Speedup |
-|-----------|--------|---------|
-| Uniform merge (no depth) | -2.5%p | 1.28x |
-| Depth-guided (proposed) | -0.7%p | 1.28x |
-| Random merge | -4.1%p | 1.28x |
-| Aggressive (50% more merge) | -3.2%p | 1.45x |
+| Configuration | Avg SR | Δ | Speedup |
+|--------------|--------|------|---------|
+| **Full DepthCache** | **97.6** | — | 1.28x |
+| w/o Depth Partitioning | 79.4 | **−18.2** | 1.34x |
+| w/o Progressive Merge | 81.0 | **−16.6** | 1.32x |
+| w/o Dual Protection | 90.3 | **−7.3** | 1.48x |
+| w/o Re-initialization | 92.8 | −4.8 | 1.25x |
+| w/o Auxiliary View | 97.8 | +0.2 | 1.06x |
 
-- **동일 speedup에서 depth-guided가 uniform 대비 1.8%p 우수** → depth 정보의 가치 입증
+**Component impact ranking**: Depth Partitioning (−18.2) > Progressive Merge (−16.6) > Dual Protection (−7.3)
 
----
+### Parameter Sensitivity
 
-## 5. 관련 연구 비교
-
-| 방법 | Training-Free | Depth-Aware | VLA 검증 | Speedup |
-|------|-------------|------------|---------|---------|
-| ToMe | ✓ | ✗ | ✗ (ViT) | 1.2-2x |
-| FastV | ✓ | ✗ | △ | 1.3x |
-| DeeR-VLA | ✗ | ✗ | ✓ | 5x+ (다른 차원) |
-| **DepthCache** | **✓** | **✓** | **✓** | **1.28x** |
+- **r_max ∈ [0.3, 0.7]**: Broad safe plateau with near-invariant SR
+- **r_max > 0.7**: 성능 하락 시작
+- **η = 1.0 (one-shot merge)**: 81.0% → progressive가 필수
 
 ---
 
-## 6. 한계 및 미해결 문제
+## 5. 한계 및 미해결 문제
 
 ### 방법론적 미비점
-1. **제한적 speedup**: 1.28x는 DeeR-VLA (5x+)나 quantization (2-4x)에 비해 modest. Token merging만으로는 dramatic한 가속 어려움
-2. **Depth estimation overhead**: Depth map 계산 자체의 latency가 보고되지 않음. 만약 depth estimation에 20ms가 소요되면 순수 speedup이 줄어듦
-3. **Task-specific 가정**: 근거리=중요라는 가정이 모든 로봇 시나리오에 적용되지 않음
-4. **다른 가속 기법과의 결합**: Early exit, quantization 등과의 결합 효과 미검증
+1. **Modest speedup**: 1.07-1.33x는 DeeR-VLA (3.1-5.2x)나 quantization (2-4x)에 비해 modest. Token merging만으로는 dramatic 가속 어려움
+2. **Real-world 성능 하락**: 55/60 → 52/60 (−5%) — simulation보다 real에서 하락이 더 큼
+3. **Depth estimation overhead 미보고**: DepthCache는 depth map이 필요하나, depth 계산 비용이 speedup에 포함되는지 불명확 (GT depth vs estimated)
+4. **GR00T에서 1.07x**: 거의 무의미한 speedup. 모델 아키텍처에 따라 효과 편차가 큼
 
 ### Attribution 문제
-- 1.28x speedup 중 "depth-guided"의 기여가 얼마인지 불명확. Uniform merge도 1.28x를 달성하되 성능이 더 낮음 → depth의 기여는 speedup이 아닌 **성능 보존**
+- Speedup은 동일(1.28-1.34x)한데 depth partitioning 없으면 성능이 18.2%p 하락 → depth의 기여는 speedup이 아닌 **성능 보존**에 있음
 
 ---
 
-## 7. 총평
+## 6. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★☆☆ — ToMe + depth의 자연스러운 결합, 혁신성은 제한적 |
-| **Technical depth** | ★★★☆☆ — 간결하나 깊이 부족 |
-| **Experimental rigor** | ★★★★☆ — 3개 VLA에서 검증, 다양한 ablation |
-| **Practical impact** | ★★★★☆ — Training-free, plug-in 가능 |
-| **Writing quality** | ★★★★☆ — 깔끔 |
+| **Novelty** | ★★★★☆ — Depth-guided token merging의 체계적 설계 |
+| **Technical depth** | ★★★★★ — 5개 구성요소의 포괄적 ablation, 3개 VLA 검증 |
+| **Experimental rigor** | ★★★★★ — 3 VLA × LIBERO + real-world + ablation + sensitivity |
+| **Practical impact** | ★★★★☆ — Training-free plug-in. 다만 speedup modest |
+| **Writing quality** | ★★★★☆ |
 
-**강점**: Training-free로 즉시 적용 가능하다는 실용성이 최대 장점. Depth의 활용이 직관적이고 효과적. **약점**: Speedup이 modest하고 다른 가속 기법 대비 경쟁력이 제한적.
+**강점**: 3개 VLA에서 일관적으로 성능 보존 (−0.2~−1.0%p). Training-free. 기존 방법(FastV −20.3%p) 대비 압도적. **약점**: Speedup이 modest (1.07-1.33x), real-world에서 sim보다 큰 하락.
 
 ---
 
-## 8. 🔥 예상 날카로운 질문 모음
+## 7. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | DeeR-VLA와 결합하면 multiplicative speedup이 가능한가? | 이론적으로 가능 (token merge + early exit). 실증 부재 |
-| 2 | Depth 대신 attention map으로 중요 영역을 판단하면? | 가능하나 attention 계산 자체가 overhead. Depth는 사전 계산 가능하여 더 효율적 |
-| 3 | 1.28x speedup이 real-time control에 의미 있는 차이를 만드는가? | 40ms → 31ms 수준. 25Hz → 32Hz. Marginal하지만 누적 효과는 있음 |
-| 4 | Segmentation mask (SAM 등)를 쓰면 더 정밀한 영역 분할이 가능하지 않나? | 가능하나 SAM의 추가 latency가 문제. Depth는 이미 많은 VLA에서 입력으로 사용되므로 추가 비용 없음 |
+| 1 | DeeR-VLA (early exit)와 결합하면? | Token merging + early exit = multiplicative 가속 가능. 미검증 |
+| 2 | Depth를 어디서 얻는가? Real-world에서 GT depth인가? | π0.5 등은 depth camera 사용. Monocular estimation 시 추가 latency 발생하여 순수 speedup 감소 가능 |
+| 3 | GR00T에서 1.07x면 의미 없지 않은가? | GR00T의 vision token이 이미 적어서(compact encoder) merging 여지가 적음. 큰 vision encoder를 가진 VLA에서 효과 극대화 |
+| 4 | r_max=0.7이면 70% 토큰 제거인데, 원거리에서 중요 정보 손실은? | Dual protection이 semantic/geometric edge를 보호. Ablation에서 protection 제거 시 -7.3%p |
+
+<!-- VERIFIED: pdf -->
