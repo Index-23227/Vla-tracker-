@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -59,6 +59,10 @@ jobs:
           # Check if any new files were created
           CREATED=$(grep -c "\[CREATED\]" /tmp/gen_output.txt || true)
           echo "created=$CREATED" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild leaderboard
+        if: steps.generate.outputs.created != '0'
+        run: python scripts/build_leaderboard.py
 
       - name: Validate new data
         if: steps.generate.outputs.created != '0'
@@ -92,6 +96,8 @@ jobs:
           lines.append('2. Add benchmark scores from the papers')
           lines.append('3. Verify organization and architecture details')
           lines.append('4. Run \`python scripts/build_leaderboard.py\` to rebuild rankings')
+          lines.append('5. Update model counts in README.md (see CLAUDE.md for locations)')
+          lines.append('6. Run \`python scripts/validate_counts.py\` to verify counts')
           body = '\n'.join(lines)
           # Write to file for PR body
           with open('/tmp/pr_body.md', 'w') as f:
@@ -108,7 +114,7 @@ jobs:
 
           # Create branch and commit
           git checkout -b "$BRANCH"
-          git add data/models/*.yaml data/scan_candidates.json
+          git add data/models/*.yaml data/scan_candidates.json data/leaderboard.json dashboard/src/data/leaderboard.json
           git diff --staged --quiet && echo "No changes to commit" && exit 0
 
           git commit -m "feat: auto-detect new VLA papers from arXiv scan

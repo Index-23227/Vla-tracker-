@@ -2,7 +2,7 @@
 
 ### Real-time benchmark tracking for Vision-Language-Action models
 
-[![Models Tracked](https://img.shields.io/badge/models-77-blue)](data/models/)
+[![Models Tracked](https://img.shields.io/badge/models-82-blue)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-8-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -165,7 +165,7 @@ Three GitHub Actions workflows keep the data up to date:
 ```
 ├── data/
 │   ├── benchmarks/          # Benchmark definitions (10 YAML files)
-│   ├── models/              # Model data with benchmark scores (77 YAML files)
+│   ├── models/              # Model data with benchmark scores (82 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results
 ├── scripts/

@@ -128,9 +128,15 @@ def generate_yaml_content(candidate: dict) -> str:
             bench_lines.append(f"""  robotwin_v1:
     robotwin_easy: TODO
     robotwin_hard: TODO""")
-        else:
-            bench_lines.append(f"""  {bench}:
-    TODO: TODO""")
+        elif bench == "rlbench":
+            bench_lines.append(f"""  rlbench:
+    rlbench_avg: TODO""")
+        elif bench == "metaworld":
+            bench_lines.append(f"""  metaworld:
+    metaworld_avg: TODO""")
+        elif bench == "robocasa":
+            bench_lines.append(f"""  robocasa:
+    robocasa_avg: TODO""")
 
     if not bench_lines:
         bench_lines.append("""  libero:
@@ -160,9 +166,7 @@ open_source: false  # TODO: verify
 architecture:
   action_head: "{action_head}"
   parameters: "TODO"
-
-key_innovation: >
-  TODO: Read paper and summarize key contribution in 2-3 sentences.
+  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
 
 benchmarks:
 {benchmarks_yaml}
