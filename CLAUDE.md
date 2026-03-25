@@ -65,6 +65,9 @@ See `schemas/model.schema.json` for the complete specification with types, const
 | `generate_model_yaml.py` | Create YAML stubs | `--input FILE`, `--top N`, `--dry-run` |
 | `scan_arxiv.py` | Find new VLA papers | `--days N`, `--source {arxiv,s2,auto}`, `--min-score F` |
 | `restore_missing_models.py` | Recover from backup | `<path_to_old_leaderboard.json>` |
+| `check_reviews.py` | Check AI review coverage | (none) |
+| `generate_llms_full.py` | Generate llms-full.txt | (none) |
+| `push_to_hf.py` | Push dataset to HuggingFace | `--repo NAME`, `--dry-run` |
 
 ## Critical Rules: Adding or Removing Models
 
