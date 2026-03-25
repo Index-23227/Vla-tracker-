@@ -8,10 +8,10 @@ venue: CVPR 2025
 architecture:
   backbone: SigLIP (via VILA-U)
   llm: LLaMA-2 7B
-  action_head: diffusion policy
-  action_space: continuous
+  action_head: autoregressive (256-bin discretized, 7 tokens × 10-step chunks via VILA-U)
+  action_space: discrete (256 bins per dimension)
   parameters: 7B
-  key_innovation: Chain-of-thought reasoning in VLM before action generation via diffusion head
+  key_innovation: Visual chain-of-thought (future image prediction) before autoregressive action generation, with hybrid attention (causal for images, bidirectional for actions)
   action_head_category: autoregressive
 training:
   dataset: LIBERO + cross-embodiment data
