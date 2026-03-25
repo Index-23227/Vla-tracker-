@@ -71,3 +71,5 @@
 | 1 | GR00T-N1과의 차이는? | GR00T은 더 큰 규모·데이터, Humanoid-VLA는 language-motion alignment에 특화 |
 | 2 | 넘어짐(falling) recovery는 가능한가? | 미다뤄짐. Safety-critical한 failure mode |
 | 3 | Egocentric 대신 third-person을 추가하면? | 성능 향상 예상되나 deployment 제약. Head-mounted camera가 현실적 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

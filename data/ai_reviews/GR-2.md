@@ -83,3 +83,5 @@
 | 1 | 38M videos의 curation은 어떻게 했는가? | 미공개. 데이터 품질이 핵심이나 세부사항 없음 |
 | 2 | 동일 아키텍처에서 데이터를 1/10로 줄이면? | Scaling 분석에서 데이터 규모의 영향 부분적 보고하나 상세하지 않음 |
 | 3 | OpenVLA와 동일 벤치마크에서의 직접 비교는? | LIBERO/CALVIN 등 표준 벤치마크 결과 미제공 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

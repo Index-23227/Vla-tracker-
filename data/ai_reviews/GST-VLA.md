@@ -100,3 +100,5 @@ SimplerEnv에서의 5.4% 향상이 더 주목할 만함 → **3D spatial underst
 | 2 | Gaussian primitive 수를 256으로 늘리면? | 미검증. Token budget 증가로 인한 latency 대비 성능 이득의 trade-off |
 | 3 | DA-CoT 없이 Gaussian token만으로는 부족한가? | Ablation에서 −1.6%p. DA-CoT는 보조적이며 Gaussian이 주된 기여 |
 | 4 | Real-world depth estimation 오류에 얼마나 robust한가? | 체계적 noise injection 실험 부재 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

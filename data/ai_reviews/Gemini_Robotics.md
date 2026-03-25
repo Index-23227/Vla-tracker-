@@ -135,3 +135,5 @@ Gemini 2.0의 multimodal 능력을 활용하여:
 | 4 | Open-source VLA (OpenVLA, FLOWER)와 공정하게 비교하면? | 표준 벤치마크(LIBERO, CALVIN)에서의 직접 비교가 없어 판단 불가 |
 | 5 | Safety framework이 adversarial 공격에 대해 얼마나 강건한가? | Red-teaming 결과 미공개. Jailbreak 가능성에 대한 체계적 분석 필요 |
 | 6 | 100 demo few-shot이 진정한 few-shot인가? | 100개도 특정 도메인에서는 많은 양. 1-5 shot에서의 성능 미보고 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

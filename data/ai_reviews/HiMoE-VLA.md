@@ -84,3 +84,5 @@ $$h_l = \sum_{i \in \text{shared}} E_i^s(x) + \sum_{j \in \text{selected}} g_j(x
 | 1 | Embodiment 수가 100개면 expert 몇 개 필요한가? | Linear scaling이면 비실용적. Expert sharing/clustering이 필요하나 미탐구 |
 | 2 | 단일 MoE (hierarchical 아닌)와의 차이는 얼마인가? | Ablation 포함. Hierarchical이 flat MoE 대비 ~3%p 향상 |
 | 3 | Load balancing은 어떻게 하는가? | Auxiliary loss로 balanced routing 유도하나, 특정 embodiment에 expert가 편중될 수 있음 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

@@ -80,3 +80,5 @@ Aligner: embodiment-specific lightweight MLP/Conv.
 | 1 | 52 datasets 중 가장 유용한 subset은? | Data selection/pruning 분석 부분적. 일부 dataset 제거 시 성능 하락하는 것도, 상승하는 것도 존재 |
 | 2 | VLM backbone (OpenVLA처럼) 위에 HPT를 쌓으면? | 유망한 결합이나 미탐구. VLM의 language 능력 + HPT의 motor primitive 지식 |
 | 3 | Aligner 없이 universal tokenization이 가능한가? | CrossFormer가 이를 시도. Aligner는 오히려 필수적 유연성을 제공 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

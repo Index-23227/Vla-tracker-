@@ -87,3 +87,5 @@ End-to-end joint training으로 세 종류의 데이터를 동시 활용.
 | 1 | CogACT (VLM + DiT)와 구조적으로 어떻게 다른가? | 본질적으로 유사. GR00T은 humanoid 특화 데이터와 embodiment에 초점 |
 | 2 | Locomotion을 추가하면 negative transfer가 발생하는가? | 미검증. CrossFormer는 locomotion 추가 시 manipulation에 minimal impact 보고 |
 | 3 | Synthetic data (Isaac Sim)가 실제로 성능에 기여하는가? | Ablation 부분적. Sim-only → real 전이의 gap이 어느 정도인지 상세 분석 부족 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

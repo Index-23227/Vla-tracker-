@@ -89,3 +89,5 @@ GR-2 backbone 기반:
 | 2 | 그리퍼로 동일 태스크를 수행하면 성능 차이는? | 핵심 비교이나 미수행. Dexterous hand의 부가가치 정량화 필요 |
 | 3 | Teleoperation의 retargeting 오류가 데이터 품질에 미치는 영향은? | 인간 손 → 로봇 핸드 매핑의 불완전성이 action label noise로 작용 가능 |
 | 4 | 이 시스템을 다른 dexterous hand (LEAP, Allegro)에 적용할 수 있는가? | VLA 부분은 cross-embodiment로 확장 가능하나, hardware-specific teleoperation 재설계 필요 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->
