@@ -1,144 +1,171 @@
 # CrossFormer: Scaling Cross-Embodied Learning — One Policy for Manipulation, Navigation, Locomotion and Aviation
 
-> **한 줄 요약**: 20종 이상의 이종(heterogeneous) 로봇 데이터 90만 trajectory에서 단일 transformer 정책을 학습하여, observation-action alignment 없이도 manipulator·바퀴 로봇·쿼드콥터·사족보행 로봇 모두를 하나의 정책으로 제어.
+> **한 줄 요약**: 130M 파라미터의 경량 transformer로 20+ 이종 로봇의 900K trajectory를 학습하여, 단일 팔·양팔·바퀴 로봇·쿼드콥터·사족보행 모두를 하나의 정책으로 제어하고 **specialist와 동등(73% vs 67%)**, 쿼드콥터 zero-shot 82% 달성.
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- 기존 cross-embodiment 학습(RT-X, Octo 등)은 **manipulation에 편향** → navigation, locomotion, aviation 미포함
-- 서로 다른 로봇의 **observation space**(카메라 수·위치, proprioception 차원)와 **action space**(관절 수, 제어 모드)가 상이 → 수동 alignment 필요
-- 단일 정책의 capacity 한계: 너무 다양한 embodiment를 하나로 학습하면 **negative transfer** 발생
+- 기존 cross-embodiment 학습(RT-X, Octo)은 **manipulation에 편향**
+- 서로 다른 로봇의 observation/action space를 수동으로 alignment해야 함 (Yang et al.)
+- "단일 정책"이 specialist를 능가하지 못하면 실용적 의미 부재
 
 ### 핵심 질문
-- **Manipulator, 바퀴 로봇, 드론, 사족 로봇을 하나의 정책이 의미있게 학습할 수 있는가?**
-- **수동 observation-action alignment 없이 heterogeneous 데이터를 활용할 수 있는가?**
+- **수동 alignment 없이 4개 도메인(manipulation, navigation, locomotion, aviation)을 하나의 정책으로 학습할 수 있는가?**
+- **Cross-embodiment 학습이 specialist 대비 positive transfer를 보이는가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Flexible Input/Output Tokenization
+### 2.1 Architecture
 
-각 embodiment의 observation과 action을 **가변 길이 토큰 시퀀스**로 변환:
+| 항목 | 값 |
+|------|-----|
+| Total params | **130M** |
+| Transformer | 12 layers, 8 heads |
+| MLP dim | 2048 |
+| Token embedding | 512 |
+| Context window | **2135 tokens** (5 timesteps) |
+| Image encoder | ResNet-26 (ImageNet init) |
 
-$$\mathbf{z}^{obs}_i = \text{Tokenizer}_{obs}^{(e_i)}(\mathbf{o}_i), \quad \mathbf{z}^{act}_i = \text{Tokenizer}_{act}^{(e_i)}(\mathbf{a}_i)$$
+### 2.2 Modality-based Tokenization
 
-- Embodiment별 tokenizer가 다양한 차원의 input/output을 공통 token space로 매핑
-- 패딩이나 truncation 없이 자연스럽게 가변 길이 처리
+관측을 modality별로 토큰화 (로봇별 adapter 불필요):
+- **Images**: ResNet-26 → flattened spatial features → projection to 512
+- **Proprioception**: Direct projection to 512
+- 4가지 이미지 encoder variant: workspace, egocentric, wrist (2종)
+- **같은 카메라 유형이면 encoder weight 공유**
 
-> ❓ **예상 질문**: Embodiment별 tokenizer가 필요하면 진정한 "universal"이 아닌 것 아닌가?
-> **답변**: Tokenizer는 단순 linear projection으로, 새 embodiment 추가 시 입출력 차원만 맞추면 됨. 공유 trunk이 핵심이며, tokenizer는 adapter에 해당. 다만 완전히 새로운 modality(촉각 등) 추가 시 더 복잡한 adaptation 필요.
+### 2.3 Action Prediction Heads (4 Types)
 
-### 2.2 Shared Transformer Trunk
+| Head | Dimensions | Chunk Size | Freq |
+|------|-----------|-----------|------|
+| Single-arm Cartesian | 7D (EE delta) | 4 | 5-15Hz |
+| Navigation waypoints | 2D (xy delta) | 4 | 4Hz |
+| Bimanual joint | 14D | **100** | 20Hz |
+| Quadruped joint | 12D | 1 | 20Hz |
 
-모든 embodiment의 토큰이 **동일한 transformer**를 통과:
+- **L1 regression loss** (diffusion/classification 아닌 — bimanual high-freq에 적합)
 
-$$\mathbf{h} = \text{Transformer}([\mathbf{z}^{obs}; \mathbf{z}^{lang}; \mathbf{z}^{proprio}])$$
-
-- Self-attention으로 cross-embodiment knowledge transfer
-- Embodiment ID를 conditioning으로 사용하지 **않음** → 모델이 자동으로 embodiment 구분 학습
-
-> ❓ **예상 질문**: Embodiment ID 없이 어떻게 서로 다른 로봇을 구분하는가?
-> **답변**: Proprioception과 observation 패턴 자체에서 embodiment 정보가 implicit하게 인코딩됨. 이는 장점(unseen embodiment에 대한 일반화)이자 단점(구분이 불명확할 때 confusion 가능).
+> ❓ **예상 질문**: L1 regression은 multimodal action에 취약하지 않은가?
+> **답변**: 맞음. 이론적으로 diffusion이 multimodal에 강하지만, 저자들은 "prior work on high-frequency bimanual manipulation에서의 성공"을 근거로 L1 선택. Bimanual 100-step chunk에서 diffusion의 latency가 더 큰 문제.
 
 ---
 
 ## 3. 데이터 전략
 
-| Category | Embodiments | Trajectories |
-|----------|------------|-------------|
-| Manipulation | Franka, WidowX, Kuka, xArm 등 12종 | ~600K |
-| Navigation | TurtleBot, LoCoBot 등 4종 | ~150K |
-| Locomotion | Unitree Go1 등 2종 | ~80K |
-| Aviation | Crazyflie 등 2종 | ~70K |
-| **Total** | **20+** | **~900K** |
+### 900K Trajectories 구성
 
-- Open X-Embodiment 데이터 + 추가 navigation/locomotion 수집
+| 소스 | 비율 | Domain |
+|------|------|--------|
+| Fractal (OXE) | 17% | Single-arm manipulation |
+| Bridge | 17% | Single-arm manipulation |
+| GNM navigation | 17% | Navigation |
+| ALOHA multi-task | 17% | Bimanual |
+| Go1 quadruped | 8.5% | Locomotion |
+| Franka tabletop | 8.5% | Single-arm manipulation |
+| Others (DROID 등) | 나머지 | Mixed |
+
+### 학습 설정
+
+| 항목 | 값 |
+|------|-----|
+| Steps | 300K |
+| Batch size | 512 |
+| Hardware | **TPU V5e-256 pod** |
+| Duration | **47 hours** |
+| Optimizer | AdamW, LR 3e-4, WD 0.1 |
+| Goal relabeling | Hindsight (random future obs) |
 
 ---
 
 ## 4. 실험 결과 심층 분석
 
-### Manipulation (WidowX, BridgeV2)
+### Cross-Embodiment Results (Table 3)
 
-| 모델 | Success Rate (%) |
-|------|-----------------|
-| RT-1-X | 48.2 |
-| Octo | 55.3 |
-| **CrossFormer** | **61.7** |
-| Specialist (single embodiment) | 63.2 |
+| Platform | Tasks | Single-Robot | Best Prior | **CrossFormer** |
+|---------|-------|-------------|-----------|----------------|
+| WidowX | 4 | 0.42 | 0.34 (Octo) | **0.50** |
+| Franka | 2 | 0.62 | 0.60 (OpenVLA) | **0.62** |
+| ALOHA | 2 | 0.50 | 0.50 (ACT) | **0.70** |
+| LoCoBot | 3 | 0.92 | 0.48 (ViNT) | **0.93** |
+| Tello Quadcopter | 1 | 0.68 | 0.68 (ViNT) | **0.82** |
+| Go1 Walking | 1 | 1.0 | N/A | **1.0** |
 
-### Cross-domain Transfer
+**Overall**: CrossFormer **73%** vs Single-Robot 67% vs Best Prior 51%
 
-| 도메인 | Zero-shot SR (%) | Fine-tuned SR (%) |
-|-------|-----------------|-----------------|
-| New manipulator | 35.2 | 68.5 |
-| New navigation env | 28.7 | 55.3 |
-| New quadrotor task | 22.1 | 48.9 |
+### 핵심 발견
 
-- **Specialist 정책의 ~97%까지 접근** → negative transfer가 심하지 않음
-- Zero-shot transfer는 제한적이나 fine-tuning 시 빠르게 adaptation
+1. **ALOHA에서 +20%p** (0.50→0.70): Cross-embodiment data가 bimanual에 가장 큰 positive transfer
+2. **Tello zero-shot 82%**: 학습 데이터에 쿼드콥터 없이 navigation head로 zero-shot 성공
+3. **Franka에서 동등** (0.62 vs 0.62): OpenVLA와 비슷하지만 모델이 53x 작음 (130M vs 7B)
 
----
+### Trial 수
 
-## 5. Ablation 분석
+| Platform | Trials |
+|---------|--------|
+| WidowX | 48 (12×4 tasks) |
+| Franka | 39 |
+| ALOHA | 20 (10×2 tasks) |
+| LoCoBot | 6 (1×6 locations) |
+| Tello | 3 |
+| Go1 | 25-min normalized |
 
-| 구성요소 | Manipulation SR 변화 |
-|---------|-------------------|
-| Cross-embodiment 학습 → single only | -6%p (new tasks) |
-| Shared trunk → embodiment-specific | +1%p (in-domain), -8%p (transfer) |
-| Manipulation data only | -5%p (manipulation), N/A (others) |
-| Action chunking 제거 | -4%p |
-
----
-
-## 6. 관련 연구 비교
-
-| 모델 | Embodiments | Domains | Data Scale | Architecture |
-|------|------------|---------|-----------|-------------|
-| RT-1-X | ~7 (manip.) | Manipulation | 130K | RT-1 Transformer |
-| Octo | ~9 (manip.) | Manipulation | 800K | Transformer |
-| HPT | ~52 datasets | Manip. + video | Mixed | Pre-trained trunk |
-| **CrossFormer** | **20+ (diverse)** | **Manip.+Nav+Loco+Air** | **900K** | **Flexible Transformer** |
+> ⚠️ **Trial 수가 적음**: 특히 Tello (3), LoCoBot (6)은 통계적 유의성 우려
 
 ---
 
-## 7. 한계 및 미해결 문제
+## 5. 관련 연구 비교
 
-### 방법론적 미비점
-1. **Domain imbalance**: Manipulation 데이터가 ~67%로 편향. Navigation/locomotion/aviation 성능이 이 편향의 영향을 받을 수 있음
-2. **Specialist 대비 성능 격차**: Zero-shot에서 specialist 대비 상당한 격차. "하나의 정책"이 실용적 이점을 가지려면 이 격차 축소 필요
-3. **Negative transfer 분석 부족**: 어떤 embodiment 조합이 서로 도움/방해가 되는지 체계적 분석 없음
-4. **Long-horizon 미평가**: 대부분 short-horizon task. 복잡한 multi-step task에서의 cross-embodiment 성능 미검증
+| 모델 | Params | Embodiments | Domains | Manual Align | Overall SR |
+|------|--------|------------|---------|-------------|-----------|
+| RT-1-X | Large | ~7 (manip.) | 1 | ✗ | - |
+| Octo | 93M | ~9 (manip.) | 1 | ✗ | 0.34 (WidowX) |
+| Yang et al. | ~100M | Multi | 2 | **✓** | 0 (WidowX) |
+| **CrossFormer** | **130M** | **20+** | **4** | **✗** | **0.73** |
+
+---
+
+## 6. 한계 및 미해결 문제
+
+### 방법론적 미비점 (저자 명시 포함)
+1. **Positive transfer 미미**: 저자 직접 인정 — "Our results do not yet show significant positive transfer across embodiments." CrossFormer가 specialist와 비슷하지만 명확히 넘지는 못함
+2. **Hand-picked sampling weights**: 데이터 비율을 수동으로 조정. "Ideal scaling would eliminate need" — 자동 data mixture 전략 부재
+3. **Inference speed**: 130M이지만 2135 token context → 고주파 제어(>20Hz)에서 한계. 저자 명시
+4. **Trial 수 부족**: Tello 3회, LoCoBot 6회로는 통계적 신뢰 불충분
+5. **Long-horizon 미평가**: 대부분 short-horizon. Multi-step task에서의 cross-embodiment 성능 미검증
+6. **Manipulation 편향**: 데이터의 ~50%가 manipulation → navigation/locomotion은 상대적으로 under-represented
 
 ### Attribution 문제
-- 성능 향상이 **cross-embodiment transfer learning**에서 오는지, **단순히 더 많은 데이터**에서 오는지 분리 어려움
+- 73% overall이 **cross-embodiment transfer** 덕분인지, **단순히 더 많은 데이터 (900K)** 덕분인지 불명확
 - 동일 데이터 양에서 in-domain data만 사용한 비교가 더 공정
 
 ---
 
-## 8. 총평
+## 7. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — 4개 도메인 통합이 야심적 |
+| **Novelty** | ★★★★★ — 4개 도메인 통합이 야심적이고 실현됨 |
 | **Technical depth** | ★★★☆☆ — 아키텍처는 간결, 깊은 분석 부족 |
-| **Experimental rigor** | ★★★★☆ — 다양한 embodiment 실험 |
-| **Practical impact** | ★★★★☆ — Universal policy의 실현 가능성 입증 |
+| **Experimental rigor** | ★★★☆☆ — 다양한 embodiment이나 trial 수 부족 |
+| **Practical impact** | ★★★★☆ — 130M으로 multi-domain이 가능하다는 증거 |
 | **Writing quality** | ★★★★☆ — 명확하고 읽기 쉬움 |
 
-**강점**: 4개 로봇 도메인을 하나의 정책으로 통합하는 야심적 시도, negative transfer가 예상보다 적음을 실증. **약점**: Specialist 대비 성능 격차가 여전히 존재하며, data imbalance와 negative transfer에 대한 심층 분석 부족.
+**강점**: 4개 도메인을 130M 모델로 통합, manual alignment 불필요, Tello zero-shot 성공. **약점**: 저자 스스로 인정한 "significant positive transfer 부재", 적은 trial 수, data sampling weight 수동 설정.
 
 ---
 
-## 9. 🔥 예상 날카로운 질문 모음
+## 8. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | 900K trajectory가 핵심이 아닌가? Octo에 같은 양의 diverse data를 주면? | 공정한 비교를 위해 Octo + navigation/locomotion data 실험 필요. Architecture vs data의 기여 분리 미흡 |
-| 2 | 어떤 도메인 조합이 가장 시너지를 내는가? | 이 분석이 없음. Manipulation + locomotion은 "물체를 밀면서 걷기" 등에서 시너지 가능하나 미검증 |
-| 3 | 완전히 새로운 embodiment(인간형 로봇)에 zero-shot 적용이 가능한가? | 현 구조에서는 새 tokenizer 추가 필요. Zero-shot은 사실상 불가, fine-tuning은 빠를 것으로 기대 |
-| 4 | MoE를 적용하면 negative transfer를 더 줄일 수 있지 않나? | 매우 유망한 방향. HPT 등이 유사한 접근. MoE의 capacity 확장이 cross-domain 충돌 완화 가능 |
-| 5 | 실시간 드론 제어에 이 모델의 latency가 적합한가? | Transformer 기반으로 ~50ms+. 고주파 드론 제어(>100Hz)에는 부적합 |
+| 1 | "Positive transfer가 없다"면 왜 cross-embodiment 학습을 하는가? | Transfer는 미미하나 **negative transfer도 거의 없음** (specialist와 동등). 하나의 모델로 여러 로봇을 운용하는 **실용적 가치** |
+| 2 | ALOHA +20%p가 진짜 transfer인가? | 가장 설득력 있는 positive transfer 사례. Manipulation data가 bimanual coordination에 도움 |
+| 3 | Tello 3 trials로 82%를 주장하는 것이 타당한가? | 통계적으로 불충분. 95% CI가 매우 넓을 것. 더 많은 trial 필요 |
+| 4 | 130M이면 VLM이 아닌데, language understanding은? | 텍스트 지시 대신 **goal image conditioning** 사용. Language 이해는 제한적 |
+| 5 | 900K를 더 키우면 (9M?) transfer가 emergence하는가? | Scaling 분석 부재. Octo→RT-X에서도 규모가 커지면 transfer가 더 명확해짐을 시사 |
+
+<!-- VERIFIED: pdf -->
