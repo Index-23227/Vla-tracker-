@@ -1,118 +1,172 @@
 # AVDC: Learning to Act from Actionless Videos through Dense Correspondences
 
-> **한 줄 요약**: Action annotation 없는 일반 비디오에서 dense frame correspondence를 활용해 로봇 정책을 학습하는 프레임워크로, 소량의 비디오 시연만으로 다양한 로봇·환경에서 동작하는 정책을 구축.
+> **한 줄 요약**: Action annotation 없는 비디오에서 text-conditioned video diffusion model로 미래 프레임을 생성하고, optical flow 기반 dense correspondence + rigid body transformation으로 3D action을 역추론하여, 165개 비디오만으로 Meta-World 43.1% (BC 16.2% 대비 2.7배) 달성.
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- 로봇 학습 데이터는 **action annotation이 필수** → 수집 비용이 극도로 높음 (텔레오퍼레이션, 키네스테틱 티칭 필요)
-- 인터넷 비디오(YouTube 등)는 방대하지만 **action label이 없음** → 직접적 policy learning 불가
-- 기존 video-based 접근(R3M, VIP 등)은 representation learning에 국한 → 직접 action을 생성하지 못함
+- 로봇 학습 데이터는 **action annotation이 필수** → 수집 비용이 극도로 높음
+- 인터넷 비디오에는 풍부한 manipulation dynamics가 있으나 action label 없음
+- 기존 video-based 접근(R3M, VIP)은 representation learning에 국한 → action 직접 생성 불가
+- UniPi는 video→action을 시도했으나, **inverse dynamics model에 action label이 필요** → 모순
 
 ### 핵심 질문
-- **Action annotation 없이 비디오만으로 로봇의 실행 가능한 정책(executable policy)을 만들 수 있는가?**
-- **Frame correspondence를 통해 action을 역추론(inverse dynamics)할 수 있는가?**
+- **Action label 없이 비디오만으로 로봇의 실행 가능한 3D action을 생성할 수 있는가?**
+- **Dense optical flow correspondence로 정확한 rigid body transformation을 복원할 수 있는가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 비디오 합성 (Hallucinated Robot Actions)
+### 2.1 Video Diffusion Model
 
-관찰 비디오에 가상의 로봇 동작을 합성:
-1. 원본 비디오에서 물체 움직임 추출
-2. 해당 움직임을 수행할 로봇의 가상 trajectory 생성
-3. 합성된 비디오로 정책 학습
+Modified U-Net with **factorized spatial-temporal convolution**:
+- Spatial conv: 각 timestep에 독립 적용
+- Temporal conv: 각 spatial location에 독립 적용
+- **CLIP-Text encoder (63M params)** → Perceiver attention pooling → time embedding injection
+- Input: 첫 프레임을 noisy future frames에 concatenate하여 conditioning
 
-> ❓ **예상 질문**: "Hallucinated" 로봇 동작이 물리적으로 실현 가능한(feasible) action인지 어떻게 보장하는가?
-> **답변**: 보장하지 않음. 이것이 핵심 약점. 물체 움직임에서 역추론된 로봇 action이 kinematic/dynamic 제약을 위반할 수 있으며, 이를 필터링하는 메커니즘이 제한적.
+| 환경 | Params | Resolution | Batch | Steps | GPU |
+|------|--------|-----------|-------|-------|-----|
+| Meta-World | 201M | 128×128 | 16 | 60K | 4× V100, ~24h |
+| iTHOR | 109M | 64×64 | 32 | 80K | 4× V100, ~24h |
+| Bridge | 166M | 48×64 | 32 | 180K | 4× V100, ~48h |
 
-### 2.2 Dense Frame Correspondence
+### 2.2 Dense Correspondence → 3D Action
 
-연속 프레임 간 pixel-level correspondence를 계산하여 motion field 추출:
+핵심 파이프라인:
 
-$$\mathbf{d}_{t \to t+1}(u, v) = \mathbf{p}_{t+1}(\text{corr}(u,v)) - \mathbf{p}_t(u, v)$$
+```
+Generated video → GMFlow (optical flow) → Dense correspondence
+     → Object mask (Language-SAM) → Contact point sampling (N=500)
+     → RANSAC → 2D transformation → 3D rigid body transform via camera intrinsics
+     → Subgoal sequence → Position controller
+```
 
-이 motion field를 카메라 intrinsic/extrinsic + robot kinematics를 이용해 closed-form action으로 변환:
+Rigid body transformation:
 
-$$\mathbf{a}_t = J^{-1}(\mathbf{q}_t) \cdot \Delta\mathbf{x}_t$$
+$$\mathcal{L}_{\text{Trans}} = \sum_i \left\|\mathbf{u}_t^i - \frac{(K T_t \mathbf{x}_i)_1}{(K T_t \mathbf{x}_i)_3}\right\|_2^2 + \left\|\mathbf{v}_t^i - \frac{(K T_t \mathbf{x}_i)_2}{(K T_t \mathbf{x}_i)_3}\right\|_2^2$$
 
-여기서 $J$는 로봇 Jacobian, $\Delta\mathbf{x}_t$는 end-effector displacement.
+> ❓ **예상 질문**: Rigid body transformation 가정이 얼마나 제약적인가?
+> **답변**: 변형 가능한 물체(천, 로프)에는 부적합. Rigid assumption이 Meta-World의 단단한 물체에서는 적합하나, 실제 환경의 다양한 물체에서는 한계. 논문도 이를 인정.
 
-> ❓ **예상 질문**: Dense correspondence의 정확도가 action 품질을 직접 결정하는데, occlusion이나 textureless surface에서는?
-> **답변**: Dense correspondence는 RAFT/optical flow 기반이므로 occlusion과 textureless 영역에서 실패 가능. 저자들은 이를 인정하나 구체적 해결책을 제시하지 않음. 실제로 이런 failure case의 빈도가 높을 수 있음.
+### 2.3 Replanning
 
-### 2.3 Few-shot Policy Learning
+Open-loop 실행 중 실패 감지 시 replan:
+- **Trigger**: "로봇 움직임 < 1mm for 15 consecutive steps while task unfulfilled"
+- 새로운 observation으로 video regeneration → action 재계산
+- 1-6회 replanning per episode
 
-합성된 action-annotated 비디오를 학습 데이터로 사용:
-- 5~20개 비디오 시연만으로 새로운 태스크 학습 가능
-- GPU 제약 환경(single GPU)에서도 학습 가능
-
-> ❓ **예상 질문**: Few-shot이면 분산이 클 텐데, 성능의 variance는?
-> **답변**: 논문에서 variance 보고가 부족. Few-shot 특성상 seed에 따른 성능 변동이 클 것으로 예상되며, 이는 reliability 우려를 야기.
+> ❓ **예상 질문**: Replanning이 비용이 높지 않은가?
+> **답변**: 매우 비쌈. Video generation 10.57초 + flow 0.28초/frame + action regression 1.31초 + execution 1.53초 = **~18초/replan** (RTX 3080Ti). 1-6회 replan하면 총 30초~2분 per episode. Real-time 제어와는 거리가 멂.
 
 ---
 
 ## 3. 데이터 전략
 
-| 소스 | Action Label | 활용 방식 |
-|------|-------------|----------|
-| 인터넷 비디오 | ✗ | Motion field 추출 → action 역추론 |
-| 로봇 시연 (few-shot) | ✓ | Calibration & validation |
-| 합성 비디오 | 합성된 | Policy training |
+| 데이터셋 | 비디오 수 | Resolution | Action Label | 용도 |
+|---------|---------|-----------|-------------|------|
+| Meta-World | **165** (5 demo × 11 task × 3 cam) | 128×128 | ✗ | 주요 평가 |
+| iTHOR | **240** (12 obj × 4 room × 5 ep) | 64×64 | ✗ | Navigation |
+| Visual Pusher | **198** (human videos) | Variable | ✗ | Cross-embodiment |
+| Bridge | **33,078** | 48×64 | ✗ | Pre-training |
+| Real-world FT | **20** | Variable | ✗ | Fine-tuning |
+
+핵심: **165-240개 비디오만으로 학습** — action label 전혀 불필요.
 
 ---
 
 ## 4. 실험 결과 심층 분석
 
-| 설정 | 모델 | Success Rate (%) |
-|------|------|-----------------|
-| 5-shot (Franka) | BC (from demos) | 35.2 |
-| 5-shot (Franka) | R3M + BC | 42.8 |
-| 5-shot (Franka) | **AVDC** | **58.3** |
-| Cross-robot | BC (transfer) | 15.4 |
-| Cross-robot | **AVDC** | **41.7** |
+### Meta-World (Table 1, 11 Tasks)
 
-- Few-shot 설정에서 기존 방법 대비 유의미한 개선
-- **Cross-robot transfer** 능력이 특히 주목할 만함 → action annotation이 로봇-specific인 한계를 우회
+| 모델 | Action Labels | Overall SR (%) |
+|------|-------------|---------------|
+| BC-Scratch | ✓ (15,216 pairs) | 16.2 |
+| BC-R3M | ✓ | 15.4 |
+| UniPi | ✓ (inverse dynamics) | 6.1 |
+| AVDC-Flow (direct) | ✗ | 13.7 |
+| AVDC-NoReplan | ✗ | 19.6 |
+| **AVDC-Full** | **✗** | **43.1** |
+
+**태스크별 편차가 매우 큼**:
+- Best: Door-Close **89.3%**, Handle-Press **81.3%**, Door-Open **72.0%**
+- Worst: Assembly **6.7%**, Hammer **8.0%**
+- Assembly, Hammer처럼 **정밀 접촉이 필요한 태스크에서 극도로 약함**
+
+### iTHOR Navigation (Table 2)
+
+| 모델 | Overall SR (%) |
+|------|---------------|
+| BC-Scratch | 2.1 |
+| BC-R3M | 0.4 |
+| **AVDC** | **31.3** |
+
+- Navigation에서 BC 대비 압도적 (2.1% → 31.3%)
+- Camera motion = inverse object motion 이중성 활용
+
+### Cross-Embodiment (Visual Pusher)
+
+- **90% zero-shot success rate** (40 runs)
+- Human video만으로 학습 → 로봇에서 zero-shot 실행
+
+### Segmentation Ablation
+
+| Masks | SR (%) |
+|-------|--------|
+| GT masks | 43.1 |
+| Predicted masks (Language-SAM) | 34.5 (-8.6%p) |
 
 ---
 
 ## 5. Ablation 분석
 
-| 구성요소 | 성능 변화 |
-|---------|----------|
-| Dense correspondence → sparse keypoint | -12%p |
-| Hallucinated action → no action | 학습 불가 |
-| Single camera → stereo | +5%p |
-| Motion threshold filtering 제거 | -8%p |
+| Variant | Overall SR (%) | 특징 |
+|---------|---------------|------|
+| AVDC (ID) = UniPi style | 6.1 | Inverse dynamics (action label 필요) |
+| AVDC (Flow) | 13.7 | Direct flow → action (no video gen) |
+| AVDC (No Replan) | 19.6 | Open-loop (replan 없음) |
+| **AVDC (Full)** | **43.1** | **Two-stage + replanning** |
+
+- Replanning 기여: **+23.5%p** (19.6→43.1)
+- Video generation 기여: +5.9%p (direct flow 13.7 vs no-replan 19.6 → video gen 없이도 어느 정도)
+
+### DDIM Acceleration
+
+| Steps | SR (%) | Speedup |
+|-------|--------|---------|
+| 100 (DDPM) | 43.1 | 1x |
+| 10 (DDIM) | 37.5 (-5.6%p) | 10x |
 
 ---
 
-## 6. 관련 연구 비교
+## 6. 추론 비용 (RTX 3080Ti)
 
-| 방법 | Action Needed | Cross-Robot | Scalability | Policy Type |
-|------|-------------|-------------|-------------|-------------|
-| BC | ✓ (full) | ✗ | Low | Direct |
-| R3M/VIP | ✗ (repr only) | △ | High (pre-train) | Requires BC |
-| UniPi | ✗ (video plan) | △ | Medium | Video → action |
-| **AVDC** | **✗ (correspondence)** | **✓** | **Medium** | **Dense corr → action** |
+| 단계 | 시간 |
+|------|------|
+| Video generation | **10.57s** (~1.51s/frame) |
+| Flow prediction | 0.28s/frame pair |
+| Action regression | 1.31s |
+| Execution | 1.53s |
+| **Total per replan** | **~18s** |
 
 ---
 
 ## 7. 한계 및 미해결 문제
 
-### 방법론적 미비점
-1. **물리적 타당성 미보장**: Hallucinated action이 물리적으로 실현 불가능할 수 있으며, collision detection이나 torque limit 체크가 없음
-2. **카메라 calibration 의존**: Dense correspondence → 3D action 변환에 정확한 camera intrinsic/extrinsic 필요 → 배포 환경에서 제약
-3. **Contact task 한계**: Pick-and-place 수준의 태스크에 적합하나, contact-rich task(삽입, 조립)에서 dense correspondence의 정확도가 불충분
-4. **Scalability 의문**: Few-shot은 장점이지만 수백 태스크로 확장 시 각 태스크마다 reference 비디오 필요
+### 방법론적 미비점 (저자 명시 포함)
+1. **Occlusion**: 저자 명시 — "when majority of object occluded by robot arm, algorithm may lose track"
+2. **Optical flow 한계**: 저자 명시 — "struggles under rapidly changing lighting or large object movements." 특히 작은 물체의 pixel-level 오류가 3D 공간에서 큰 오류로 증폭
+3. **Force 정보 부재**: 저자 명시 — "force information crucial for manipulation, unobtainable from RGB videos"
+4. **Grasp/contact 예측**: 저자 명시 — 비디오에서 로봇의 grasp 방식을 직접 유추 불가 (사람 손 vs 로봇 그리퍼)
+5. **극도로 느린 추론**: ~18s/replan × 1-6회 = 30s~2min per episode. Real-time 제어와 거리가 멂
+6. **정밀 조작 약점**: Assembly 6.7%, Hammer 8.0% — contact-rich task에서 거의 실패
+7. **Real-world 실패 분석**: 10건 중 8건 실패: 75%가 wrong plan (잘못된 물체/목표), 25%가 video generation discontinuity
 
 ### Attribution 문제
-- 성능 향상이 **dense correspondence** 자체의 우수성인지, 단순히 **더 많은 학습 데이터(합성 포함)** 효과인지 분리 어려움
-- Hallucinated video의 품질 vs 실제 로봇 시연의 품질 비교가 정량적이지 않음
+- 43.1%의 성능이 **video generation** 품질 때문인지, **replanning 전략** 때문인지 분리 필요. Ablation에서 replanning 기여(+23.5%p)가 video gen 기여보다 훨씬 큼 → "좋은 action 추출"보다 "실패 시 재시도"가 핵심 요인일 수 있음
 
 ---
 
@@ -120,13 +174,13 @@ $$\mathbf{a}_t = J^{-1}(\mathbf{q}_t) \cdot \Delta\mathbf{x}_t$$
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★★ — Actionless video → policy의 패러다임이 매우 참신 |
-| **Technical depth** | ★★★☆☆ — Correspondence 기반 접근은 간결하나 robustness 분석 부족 |
-| **Experimental rigor** | ★★★☆☆ — Cross-robot 실험은 좋으나 variance 미보고 |
-| **Practical impact** | ★★★★☆ — 데이터 수집 병목 해소에 큰 잠재력 |
-| **Writing quality** | ★★★★☆ — 명확한 동기와 직관적 방법 |
+| **Novelty** | ★★★★★ — Actionless video → executable policy의 패러다임이 매우 참신 |
+| **Technical depth** | ★★★★☆ — Dense correspondence + rigid transform의 기하학적 접근이 우아 |
+| **Experimental rigor** | ★★★★☆ — 4개 환경, cross-embodiment, ablation 포괄적 |
+| **Practical impact** | ★★★☆☆ — 18s/replan의 latency, 43.1% SR로 실용성 제한 |
+| **Writing quality** | ★★★★☆ — 명확한 동기와 체계적 실험 |
 
-**강점**: Action 없는 비디오 활용이라는 근본적으로 중요한 문제를 다루며, cross-robot transfer 가능성을 실증. **약점**: 물리적 타당성 보장 부재와 contact-rich task에서의 한계가 practical deployment를 제약.
+**강점**: Action 없는 비디오 활용이라는 근본적으로 중요한 문제를 다루며, cross-embodiment (human→robot) 가능성을 실증. **약점**: 43.1% SR, ~18s latency, contact-rich 실패로 practical deployment는 아직 먼 미래.
 
 ---
 
@@ -134,8 +188,11 @@ $$\mathbf{a}_t = J^{-1}(\mathbf{q}_t) \cdot \Delta\mathbf{x}_t$$
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | 비디오의 시점(viewpoint)이 로봇 카메라와 다르면? | View transformation이 필요하며, 이 과정에서의 오류가 action 품질에 직접 영향. Cross-view robustness 미검증 |
-| 2 | Hallucinated action의 물리적 타당성을 어떻게 검증하는가? | 체계적 검증 없음. Post-hoc filtering(kinematic feasibility check)을 적용할 수 있으나 논문에서 미구현 |
-| 3 | Dense correspondence 실패 시 graceful degradation이 가능한가? | Confidence-based filtering 가능하나 미구현. 실패가 silent하게 잘못된 action을 생성할 위험 |
-| 4 | YouTube 비디오와 로봇 환경의 domain gap은? | Visual domain gap은 인정하나 구체적 domain adaptation 전략 미제시 |
-| 5 | 이 방법이 RT-2나 OpenVLA 같은 대규모 VLA와 상보적으로 사용될 수 있는가? | 가능. AVDC를 data augmentation pipeline으로 활용하여 VLA 학습 데이터 확장 가능. 실증은 미수행 |
+| 1 | Replanning이 +23.5%p면, 좋은 video보다 "많이 시도"가 핵심 아닌가? | 맞음. Replanning = closed-loop retry. Video 품질보다 failure recovery가 성능의 주요 요인. Replanning 없으면 19.6%에 불과 |
+| 2 | 165개 비디오 vs 15,216개 action-labeled frames — 공정한 비교인가? | AVDC는 label 없이 165 video, BC는 15K labeled. 데이터 "양"은 BC가 많으나 "annotation 비용"은 AVDC가 훨씬 적음 |
+| 3 | Rigid body assumption이 깨지는 경우는? | Deformable objects (천, 로프), articulated objects (서랍 내부 물체). Meta-World는 rigid 위주라 유리 |
+| 4 | RT-2나 OpenVLA 같은 대규모 VLA와 비교하면? | 직접 비교 없음. 그러나 action label 없이 학습한다는 점에서 상보적 — AVDC를 VLA의 data augmentation에 활용 가능 |
+| 5 | 추론 10.57초를 줄이려면? | DDIM 10-step으로 10x 가속 가능하나 -5.6%p 하락. Consistency model이나 latent diffusion으로 추가 가속 가능 |
+| 6 | 왜 Assembly와 Hammer에서 실패하는가? | 두 태스크 모두 정밀한 접촉 제어 필요. Optical flow의 pixel-level 오류가 3D에서 증폭되어 contact positioning 실패 |
+
+<!-- VERIFIED: pdf -->
