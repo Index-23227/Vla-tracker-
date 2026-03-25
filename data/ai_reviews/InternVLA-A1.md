@@ -69,3 +69,5 @@ Masked self-attention으로 expert 간 정보 흐름 제어:
 |---|------|---------------|
 | 1 | Expert 수를 2개로 줄이면? | Understanding+Action만으로도 대부분 태스크 해결 가능. Generation expert의 marginal 기여 정량화 필요 |
 | 2 | MoT vs MoE: 어떤 차이인가? | MoT는 전체 transformer block이 expert, MoE는 FFN만 expert. MoT가 더 유연하나 더 비쌈 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

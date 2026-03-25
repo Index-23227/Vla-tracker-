@@ -68,3 +68,5 @@ MoE adapter가 instruction 유형에 따라 적절한 expert를 routing.
 |---|------|---------------|
 | 1 | Understanding 성능을 VLM 수준으로 올릴 수 있는가? | VLM 크기 확대 + 더 많은 VL 데이터로 가능하나 action과의 trade-off |
 | 2 | 사용자가 자유형 지시를 내리면 어떤 expert가 활성화되는가? | Router가 자동 결정하나, ambiguous 지시에서의 routing 정확도 미검증 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

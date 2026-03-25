@@ -64,3 +64,5 @@
 |---|------|---------------|
 | 1 | Quantization (INT4)을 적용하면 7B도 RTX 4090에서 되지 않는가? | 가능하나 quantization 성능 하락과 LLaVA-VLA의 native 경량이 더 나을 수 있음 |
 | 2 | FLOWER (950M)와 비교하면? | FLOWER가 더 작으면서 성능 우수. LLaVA-VLA는 navigation까지 포함하는 점이 차별화 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

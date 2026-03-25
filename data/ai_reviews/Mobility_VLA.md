@@ -57,3 +57,5 @@
 |---|------|---------------|
 | 1 | Map 없이 작동할 수 있는가? | 현 구조에서 불가. Online mapping과의 결합 필요 |
 | 2 | NaVILA와의 차이는? | NaVILA는 legged robot locomotion 포함, Mobility VLA는 wheeled robot navigation 특화 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

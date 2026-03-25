@@ -70,3 +70,5 @@
 |---|------|---------------|
 | 1 | 20,000시간 중 실제로 유용한 데이터는 얼마인가? | Data quality filtering 미보고. Noisy/failed trajectories 비율 불명확 |
 | 2 | 동일 데이터로 OpenVLA를 학습하면? | 이 비교가 핵심이나 미수행. 아키텍처 vs 데이터의 기여 분리 불가 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

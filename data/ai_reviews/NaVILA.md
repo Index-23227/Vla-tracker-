@@ -61,3 +61,5 @@
 |---|------|---------------|
 | 1 | Navigation + manipulation을 동시에 할 수 있는가? | 현 구조에서 불가. Mobile manipulation 확장 필요 |
 | 2 | End-to-end (직접 torque 예측) VLA와 비교하면? | End-to-end는 학습이 극도로 어려움. 계층적 접근이 더 실용적 |
+
+<!-- VERIFIED: abstract-only -->

@@ -60,3 +60,5 @@
 |---|------|---------------|
 | 1 | TraceVLA와의 차이는? | TraceVLA는 state-action trajectory를 시각적으로 인코딩, LLARVA는 predicted trace를 intermediate로 활용 |
 | 2 | 3D visual trace (point cloud 경로)로 확장하면? | Depth 문제 해결 가능하나 구현 복잡성 증가 |
+
+<!-- VERIFIED: abstract-only -->

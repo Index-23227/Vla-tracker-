@@ -66,3 +66,5 @@ $$\text{Action Head}(\text{image}, \text{spatial grounding}) \to \text{action}$$
 | 1 | Grounding 없이 직접 action을 예측하면 얼마나 차이나는가? | Ablation에서 ~10-15%p 하락. Grounding의 가치 입증 |
 | 2 | 3D grounding (depth 포함)으로 확장하면? | GST-VLA와의 접점. 3D grounding이 더 유효할 가능성 |
 | 3 | Stage 1과 Stage 2를 parallel로 실행할 수 있는가? | 구조적으로 불가. Stage 2가 Stage 1 출력에 의존 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

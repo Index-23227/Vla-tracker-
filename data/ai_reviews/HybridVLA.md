@@ -84,3 +84,5 @@ $$\hat{\mathbf{a}} = D_\theta(\mathbf{a}_t, t, \mathbf{h}_{\text{shared}}, \math
 | 1 | Reasoning을 제거하고 diffusion만 하면? (= CogACT) | 성능 하락 예상. Reasoning의 conditioning 효과를 분리하는 ablation 포함 |
 | 2 | 두 branch의 gradient conflict는? | 실험적으로 관찰되나 심각하지 않음. Gradient scaling으로 완화 |
 | 3 | Diffusion step과 reasoning token 수의 trade-off는? | 총 latency budget 내에서 allocation 최적화 필요. 미탐구 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->

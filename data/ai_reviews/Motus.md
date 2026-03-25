@@ -68,3 +68,5 @@ Inverse dynamics로 latent action을 추출하고, 이를 통해 action-unlabele
 |---|------|---------------|
 | 1 | Fast-WAM처럼 test-time video를 제거하면? | 이후 GigaWorld-Policy가 이를 검증. Motus에서의 직접 실험은 부재 |
 | 2 | Latent action space의 차원은 성능에 얼마나 민감한가? | Ablation 부분적. 너무 작으면 정보 손실, 너무 크면 학습 어려움 |
+
+<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->
