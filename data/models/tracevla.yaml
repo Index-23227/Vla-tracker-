@@ -1,27 +1,34 @@
 name: TraceVLA
-version: "1.0"
-organization: "University of Michigan / NVIDIA"
+version: '1.0'
+organization: University of Michigan / NVIDIA
 paper_url: https://arxiv.org/abs/2412.10345
 code_url: null
-date: "2024-12-13"
-venue: "ICLR 2025"
+date: '2024-12-13'
+venue: ICLR 2025
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
-  action_head: "autoregressive + visual trace prompting"
-  action_space: "continuous (7-DoF)"
-  parameters: "7B"
-  key_innovation: "Encodes state-action trajectories as visual traces overlaid on images; provides spatial-temporal awareness to VLA"
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B
+  action_head: autoregressive + visual trace prompting
+  action_space: continuous (7-DoF)
+  parameters: 7B
+  key_innovation: Encodes state-action trajectories as visual traces overlaid on images; provides spatial-temporal awareness
+    to VLA
+  action_head_category: autoregressive
 training:
-  dataset: "Open X-Embodiment + visual trace augmentation"
-  method: "Fine-tuning OpenVLA with trace-conditioned inputs"
-  compute: "16 A100 GPUs"
+  dataset: Open X-Embodiment + visual trace augmentation
+  method: Fine-tuning OpenVLA with trace-conditioned inputs
+  compute: 16 A100 GPUs
 benchmarks:
   simpler_env:
     google_robot_pick_coke_can: 72.8
     google_robot_move_near: 56.4
-    source: "TraceVLA paper"
-    date_reported: "2024-12-13"
-    eval_condition: "fine-tuned"
+    source: TraceVLA paper
+    date_reported: '2024-12-13'
+    eval_condition: fine-tuned
 open_source: false
-tags: [7B, autoregressive, visual-trace, spatial-temporal, manipulation]
+tags:
+- 7B
+- autoregressive
+- visual-trace
+- spatial-temporal
+- manipulation

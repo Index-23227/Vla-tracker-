@@ -3,11 +3,13 @@ import { createContext, useContext, useState, useMemo } from 'react'
 const FilterContext = createContext(null)
 
 const ACTION_HEAD_CATEGORIES = {
-  'Flow Matching': 'flow matching',
   'Autoregressive': 'autoregressive',
   'Diffusion': 'diffusion',
-  'MoE': 'moe',
-  'FAST Tokenizer': 'fast',
+  'Flow Matching': 'flow_matching',
+  'Discrete Diffusion': 'discrete_diffusion',
+  'Regression': 'regression',
+  'Inverse Dynamics': 'inverse_dynamics',
+  'Hybrid': 'hybrid',
 }
 
 function categorizeBackbone(backbone) {
@@ -41,12 +43,10 @@ function parseParamNumber(paramStr) {
   return null
 }
 
-function categorizeActionHead(actionHead) {
-  if (!actionHead) return 'Other'
-  const lower = actionHead.toLowerCase()
-  for (const [category, keyword] of Object.entries(ACTION_HEAD_CATEGORIES)) {
-    if (lower.includes(keyword)) return category
-    if (category === 'MoE' && lower.includes('mixture')) return category
+function categorizeActionHead(actionHeadCategory) {
+  if (!actionHeadCategory) return 'Other'
+  for (const [label, value] of Object.entries(ACTION_HEAD_CATEGORIES)) {
+    if (actionHeadCategory === value) return label
   }
   return 'Other'
 }
@@ -77,7 +77,7 @@ export function FilterProvider({ children, allModels }) {
     let withoutBench = 0
 
     for (const m of allModels) {
-      const cat = categorizeActionHead(m.architecture?.action_head)
+      const cat = categorizeActionHead(m.architecture?.action_head_category)
       actionHeadCounts[cat] = (actionHeadCounts[cat] || 0) + 1
       const bbCat = categorizeBackbone(m.architecture?.backbone)
       backboneCounts[bbCat] = (backboneCounts[bbCat] || 0) + 1
@@ -109,7 +109,7 @@ export function FilterProvider({ children, allModels }) {
 
       // Action head filter
       if (filters.actionHead !== 'all') {
-        const cat = categorizeActionHead(m.architecture?.action_head)
+        const cat = categorizeActionHead(m.architecture?.action_head_category)
         if (cat !== filters.actionHead) return false
       }
 

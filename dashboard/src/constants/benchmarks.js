@@ -102,16 +102,31 @@ export function getBenchmarkShortLabel(key) {
  */
 export const COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#3498DB', '#F39C12', '#E74C3C', '#2ECC71']
 
+/**
+ * Action head category colors.
+ * Categories are based on the core action generation mechanism.
+ * See docs/action-head-taxonomy.md for classification criteria.
+ */
 export const ACTION_HEAD_COLORS = {
-  'flow matching': '#7F77DD',
   'autoregressive': '#1D9E75',
   'diffusion': '#D85A30',
-  'diffusion transformer': '#D4537E',
-  'chain-of-thought': '#F39C12',
-  'parallel decoding': '#3498DB',
+  'flow_matching': '#7F77DD',
+  'discrete_diffusion': '#D4537E',
+  'regression': '#3498DB',
+  'inverse_dynamics': '#F39C12',
   'hybrid': '#E67E22',
-  'fast tokenizer': '#2ECC71',
-  'unknown': '#71717a',
+  'other': '#71717a',
+}
+
+export const ACTION_HEAD_LABELS = {
+  'autoregressive': 'Autoregressive',
+  'diffusion': 'Diffusion',
+  'flow_matching': 'Flow Matching',
+  'discrete_diffusion': 'Discrete Diffusion',
+  'regression': 'Regression',
+  'inverse_dynamics': 'Inverse Dynamics',
+  'hybrid': 'Hybrid',
+  'other': 'Other',
 }
 
 export const VENUE_COLORS = {

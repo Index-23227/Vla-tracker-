@@ -27,9 +27,7 @@ export default function AnalysisDashboard({ models }) {
   const actionHeadDist = useMemo(() => {
     const counts = {}
     models.forEach(m => {
-      const head = m.architecture?.action_head || 'unknown'
-      // Normalize
-      const key = Object.keys(ACTION_HEAD_COLORS).find(k => head.toLowerCase().includes(k)) || 'other'
+      const key = m.architecture?.action_head_category || 'other'
       counts[key] = (counts[key] || 0) + 1
     })
     return Object.entries(counts)
@@ -105,8 +103,7 @@ export default function AnalysisDashboard({ models }) {
     const groups = {}
     models.forEach(m => {
       if (m.libero_avg == null) return
-      const head = m.architecture?.action_head || 'unknown'
-      const key = Object.keys(ACTION_HEAD_COLORS).find(k => head.toLowerCase().includes(k)) || 'other'
+      const key = m.architecture?.action_head_category || 'other'
       if (!groups[key]) groups[key] = { scores: [], count: 0 }
       groups[key].scores.push(m.libero_avg)
       groups[key].count++

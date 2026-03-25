@@ -1,34 +1,30 @@
-# Paper: GST-VLA: Structured Gaussian Spatial Tokens for 3D Depth-Aware Vision-Language-Action Models
-# arXiv: 2603.09079
-
 name: GST-VLA
-full_name: "GST-VLA: Structured Gaussian Spatial Tokens for 3D Depth-Aware Vision-Language-Action Models"
-organization: "Yeungnam University / KAIST"
-date: "2026-03-10"
+full_name: 'GST-VLA: Structured Gaussian Spatial Tokens for 3D Depth-Aware Vision-Language-Action Models'
+organization: Yeungnam University / KAIST
+date: '2026-03-10'
 paper_url: https://arxiv.org/abs/2603.09079
 code_url: null
 venue: null
 open_source: false
-
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2, via OpenVLA)"
-  llm: "Llama-2 7B"
-  action_head: "flow matching"
-  parameters: "300M action expert"
+  backbone: PrismaticVLM (SigLIP + DinoV2, via OpenVLA)
+  llm: Llama-2 7B
+  action_head: flow matching
+  parameters: 300M action expert
+  action_head_category: flow_matching
+key_innovation: 'Gaussian Spatial Tokenizer converts depth and semantic features into 3D Gaussian primitives, paired with
+  3D Depth-Aware Chain-of-Thought reasoning. A 300M flow-matching action expert with MoE feedforward sublayers decodes actions
+  via conditional ODE integration.
 
-key_innovation: >
-  Gaussian Spatial Tokenizer converts depth and semantic features into 3D Gaussian primitives,
-  paired with 3D Depth-Aware Chain-of-Thought reasoning. A 300M flow-matching action expert
-  with MoE feedforward sublayers decodes actions via conditional ODE integration.
-
+  '
 benchmarks:
   libero:
     libero_spatial: 98.2
     libero_object: 97.4
     libero_goal: 97.1
     libero_long: 92.6
-
 eval_conditions:
-  libero: "fine-tuned"
-
-tags: [libero, simpler_env]
+  libero: fine-tuned
+tags:
+- libero
+- simpler_env

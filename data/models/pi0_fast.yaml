@@ -1,30 +1,36 @@
-name: "pi0-FAST"
-version: "1.0"
-organization: "Physical Intelligence"
+name: pi0-FAST
+version: '1.0'
+organization: Physical Intelligence
 paper_url: https://arxiv.org/abs/2501.09747
 code_url: https://github.com/physical-intelligence/fast
-date: "2025-01-23"
+date: '2025-01-23'
 venue: null
 architecture:
-  backbone: "PaliGemma-based VLM"
-  llm: "Gemma-based"
-  action_head: "FAST tokenizer (discrete tokens from continuous actions)"
-  action_space: "discrete tokens → continuous actions"
-  parameters: "3B"
-  key_innovation: "Frequency-space Action Sequence Tokenization - converts continuous actions to discrete tokens via DCT"
+  backbone: PaliGemma-based VLM
+  llm: Gemma-based
+  action_head: FAST tokenizer (discrete tokens from continuous actions)
+  action_space: discrete tokens → continuous actions
+  parameters: 3B
+  key_innovation: Frequency-space Action Sequence Tokenization - converts continuous actions to discrete tokens via DCT
+  action_head_category: autoregressive
 training:
-  dataset: "Cross-embodiment robot data"
-  compute: "proprietary"
+  dataset: Cross-embodiment robot data
+  compute: proprietary
 benchmarks:
   libero:
     libero_spatial: 93.8
     libero_object: 95.4
     libero_goal: 88.0
     libero_long: 67.2
-    source: "FAST paper"
-    date_reported: "2025-01-23"
-    eval_condition: "fine-tuned"
+    source: FAST paper
+    date_reported: '2025-01-23'
+    eval_condition: fine-tuned
 open_source: true
-open_source_note: "FAST tokenizer is open-sourced, but full model weights are not"
+open_source_note: FAST tokenizer is open-sourced, but full model weights are not
 inference_hz: 230
-tags: [3B, autoregressive, FAST-tokenizer, manipulation, hybrid]
+tags:
+- 3B
+- autoregressive
+- FAST-tokenizer
+- manipulation
+- hybrid

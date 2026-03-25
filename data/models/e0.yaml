@@ -1,24 +1,30 @@
 name: E0
-version: "1.0"
-full_name: "E0: Enhancing Generalization and Fine-Grained Control in VLA Models via Continuized Discrete Diffusion"
-organization: "Sun Yat-sen University"
+version: '1.0'
+full_name: 'E0: Enhancing Generalization and Fine-Grained Control in VLA Models via Continuized Discrete Diffusion'
+organization: Sun Yat-sen University
 inference_hz: null
-date: "2025-11-26"
+date: '2025-11-26'
 paper_url: https://arxiv.org/abs/2511.21542
 code_url: null
 venue: null
 architecture:
-  backbone: "PaliGemma (SigLIP + Gemma)"
-  llm: "Gemma (via PaliGemma)"
-  action_head: "continuized discrete diffusion"
-  action_space: "discrete (quantized action tokens)"
+  backbone: PaliGemma (SigLIP + Gemma)
+  llm: Gemma (via PaliGemma)
+  action_head: continuized discrete diffusion
+  action_space: discrete (quantized action tokens)
   parameters: null
-  key_innovation: "Continuized discrete diffusion for action generation over quantized action tokens; bridges discrete and continuous diffusion for fine-grained robot control"
+  key_innovation: Continuized discrete diffusion for action generation over quantized action tokens; bridges discrete and
+    continuous diffusion for fine-grained robot control
+  action_head_category: discrete_diffusion
 training:
-  dataset: "Cross-embodiment robot data"
-  method: "Continuized discrete diffusion"
-  compute: "not specified"
+  dataset: Cross-embodiment robot data
+  method: Continuized discrete diffusion
+  compute: not specified
 benchmarks: {}
 open_source: false
-model_type: "vla"
-tags: [discrete-diffusion, continuized, fine-grained-control, manipulation]
+model_type: vla
+tags:
+- discrete-diffusion
+- continuized
+- fine-grained-control
+- manipulation

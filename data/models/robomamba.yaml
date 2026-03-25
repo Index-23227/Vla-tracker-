@@ -5,14 +5,14 @@ paper_url: https://arxiv.org/abs/2406.04339
 venue: NeurIPS 2024
 open_source: false
 benchmarks: {}
-
 tags:
 - 3.2B
 - Mamba-SSM
 - MLP-action-head
 - efficient
 architecture:
-  backbone: "CLIP ViT-L/14"
-  llm: "Mamba 2.7B (SSM, not transformer LLM)"
+  backbone: CLIP ViT-L/14
+  llm: Mamba 2.7B (SSM, not transformer LLM)
   action_head: lightweight MLP policy head (3.7M) for SE(3) pose
   parameters: 3.2B (2.7B Mamba + CLIP)
+  action_head_category: regression
