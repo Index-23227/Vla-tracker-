@@ -2,7 +2,7 @@
 
 ### Real-time benchmark tracking for Vision-Language-Action models
 
-[![Models Tracked](https://img.shields.io/badge/models-73-blue)](data/models/)
+[![Models Tracked](https://img.shields.io/badge/models-82-blue)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-8-green)](data/benchmarks/)
 [![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-VLA-Tracker tracks **73 VLA models** (2023-2026) across **8 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, RoboCasa, Real-World). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+VLA-Tracker tracks **77 VLA models** (2023-2026) across **8 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, RoboCasa, Real-World). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
 
 **Unlike static awesome-lists**, this project:
 - **Tracks performance across multiple benchmarks** with normalized, comparable scores
@@ -45,12 +45,12 @@ VLA-Tracker tracks **73 VLA models** (2023-2026) across **8 benchmarks** (LIBERO
 | **CALVIN** (avg len) | LingBot-VLA (4.5) | UD-VLA (4.5) | DreamVLA (4.44) |
 | **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.05) |
 | **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
-| **RoboTwin v2** (avg) | X-VLA (72.5) | SimpleVLA-RL (68.8) | - |
+| **RoboTwin v2** (avg) | Motus (87.84) | GigaWorld-Policy (86.0) | X-VLA (72.5) |
 
 ## All Tracked Models
 
 <details>
-<summary>73 models (click to expand)</summary>
+<summary>77 models (click to expand)</summary>
 
 3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, pi0, pi0.5, pi*0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, SpatialVLA, SuSIE, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
 
@@ -101,15 +101,15 @@ python scripts/generate_model_yaml.py --top 5
 
 | Benchmark | Tasks | Models Tracked | Focus | Venue |
 |-----------|-------|----------------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 35 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 17 | Long-horizon, language | RA-L 2022 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 36 | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 18 | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 15 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 7 | Dual-arm, bimanual | CVPR 2025 Highlight |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 11 | Dual-arm, bimanual | CVPR 2025 Highlight |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
 | [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 5 | Home robot tasks | RSS 2024 |
 
-### LIBERO Leaderboard (35 models)
+### LIBERO Leaderboard (36 models)
 
 | Rank | Model | Organization | LIBERO Avg |
 |------|-------|-------------|------------|
@@ -119,35 +119,36 @@ python scripts/generate_model_yaml.py --top 5
 | 4 | Fast-WAM | Tsinghua University (IIIS) / Galaxea AI | 97.6 |
 | 5 | VLA-Thinker | University of Central Florida / University of Wurzburg / USC / NVIDIA Research | 97.45 |
 | 6 | DreamVLA | Shanghai AI Lab / Fudan University / NUS | 97.2 |
-| 7 | AtomicVLA | Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology | 96.6 |
-| 8 | MemoryVLA | PKU / Tsinghua University / Shanghai AI Lab | 96.5 |
-| 9 | dVLA | Midea Group | 96.4 |
-| 10 | GST-VLA | Yeungnam University / KAIST | 96.33 |
-| 11 | DD-VLA | PKU / Shanghai AI Lab | 96.3 |
-| 12 | pi*0.6 | Physical Intelligence | 93.1 |
-| 13 | LingBot-VLA | Ant Group / Robbyant | 92.55 |
-| 14 | UD-VLA | Tsinghua University / Shanghai AI Lab | 91.75 |
-| 15 | ECoT | UC Berkeley / Stanford / University of Warsaw | 90.8 |
-| 16 | InstructVLA | Shanghai AI Lab (InternRobotics) | 90.6 |
-| 17 | UniVLA | HKU / OpenDriveLab / AgiBot | 90.1 |
-| 18 | FLARE | NVIDIA | 89.2 |
-| 19 | pi0.5 | Physical Intelligence | 88.88 |
-| 20 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
-| 21 | DexVLA | ByteDance / Tsinghua University | 87.85 |
-| 22 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
-| 23 | CoT-VLA | UC Berkeley | 86.32 |
-| 24 | pi0-FAST | Physical Intelligence | 86.1 |
-| 25 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
-| 26 | GR00T-N1 | NVIDIA | 85.75 |
-| 27 | HybridVLA | ByteDance | 85.75 |
-| 28 | pi0 | Physical Intelligence | 84.75 |
-| 29 | RoboVLM | Tsinghua University / ByteDance Research / CASIA / SJTU / NUS | 84.05 |
-| 30 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
-| 31 | SmolVLA | Hugging Face | 79.5 |
-| 32 | HPT | MIT / Meta FAIR | 77.5 |
-| 33 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
-| 34 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
-| 35 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
+| 7 | DeepThinkVLA | Huazhong University / Tsinghua University / Renmin University | 97.05 |
+| 8 | AtomicVLA | Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology | 96.6 |
+| 9 | MemoryVLA | PKU / Tsinghua University / Shanghai AI Lab | 96.5 |
+| 10 | dVLA | Midea Group | 96.4 |
+| 11 | GST-VLA | Yeungnam University / KAIST | 96.33 |
+| 12 | DD-VLA | PKU / Shanghai AI Lab | 96.3 |
+| 13 | pi*0.6 | Physical Intelligence | 93.1 |
+| 14 | LingBot-VLA | Ant Group / Robbyant | 92.55 |
+| 15 | UD-VLA | Tsinghua University / Shanghai AI Lab | 91.75 |
+| 16 | ECoT | UC Berkeley / Stanford / University of Warsaw | 90.8 |
+| 17 | InstructVLA | Shanghai AI Lab (InternRobotics) | 90.6 |
+| 18 | UniVLA | HKU / OpenDriveLab / AgiBot | 90.1 |
+| 19 | FLARE | NVIDIA | 89.2 |
+| 20 | pi0.5 | Physical Intelligence | 88.88 |
+| 21 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
+| 22 | DexVLA | ByteDance / Tsinghua University | 87.85 |
+| 23 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
+| 24 | CoT-VLA | UC Berkeley | 86.32 |
+| 25 | pi0-FAST | Physical Intelligence | 86.1 |
+| 26 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
+| 27 | GR00T-N1 | NVIDIA | 85.75 |
+| 28 | HybridVLA | ByteDance | 85.75 |
+| 29 | pi0 | Physical Intelligence | 84.75 |
+| 30 | RoboVLM | Tsinghua University / ByteDance Research / CASIA / SJTU / NUS | 84.05 |
+| 31 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
+| 32 | SmolVLA | Hugging Face | 79.5 |
+| 33 | HPT | MIT / Meta FAIR | 77.5 |
+| 34 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
+| 35 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
+| 36 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
 
 ## Automation
 
@@ -164,7 +165,7 @@ Three GitHub Actions workflows keep the data up to date:
 ```
 ├── data/
 │   ├── benchmarks/          # Benchmark definitions (10 YAML files)
-│   ├── models/              # Model data with benchmark scores (78 YAML files)
+│   ├── models/              # Model data with benchmark scores (82 YAML files)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── scan_candidates.json # Latest arXiv/S2 scan results
 ├── scripts/
