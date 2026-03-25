@@ -46,11 +46,10 @@ $$\hat{\mathbf{a}} = D_\theta(\mathbf{a}_t, t, \mathbf{h}_{\text{shared}}, \math
 | 모델 | LIBERO (%) | CALVIN Avg Len |
 |------|-----------|---------------|
 | OpenVLA (AR only) | 76.5 | 3.45 |
-| CogACT (separate DiT) | 89.7 | - |
-| **HybridVLA** | **92.3** | **4.15** |
+| CogACT (separate DiT) | N/A (SIMPLER 평가) | - |
+| **HybridVLA** | **92.3** (abstract 기반, 미검증) | **4.15** (abstract 기반, 미검증) |
 
-- AR-only와 separate diffusion 모두 능가
-- **Reasoning과 action의 collaborative 이점** 입증
+> ⚠️ 주의: HybridVLA의 수치는 abstract 기반 추정이며 PDF 검증 미완료. CogACT는 LIBERO가 아닌 SIMPLER에서 평가되었으므로 직접 비교 불가.
 
 ---
 

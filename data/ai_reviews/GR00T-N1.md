@@ -45,7 +45,7 @@ End-to-end joint training으로 세 종류의 데이터를 동시 활용.
 
 | 벤치마크 | GR00T N1 | 기존 SOTA | 향상 |
 |---------|---------|----------|------|
-| LIBERO | 94.2% | 89.7% (CogACT) | +4.5% |
+| LIBERO | 94.2% | — (CogACT은 SIMPLER 평가, LIBERO 미보고) | — |
 | CALVIN | 4.21 | 3.86 (GR-1) | +0.35 |
 | Cross-embodiment | "SOTA" | - | - |
 
