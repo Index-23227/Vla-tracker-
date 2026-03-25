@@ -261,12 +261,8 @@ def _find_best_match(norm_model_title: str, venue_indices: list) -> tuple:
             row_i = idx[norm_model_title][0]
             return (parser, parser.ds[row_i], 1.0)
 
-        # Fuzzy: only check titles that share at least one word (cheap pre-filter)
-        model_words = set(norm_model_title.split())
+        # Fuzzy: exhaustive comparison against all titles
         for norm_t, row_indices in idx.items():
-            # Skip titles with zero word overlap
-            if not model_words & set(norm_t.split()):
-                continue
             sim = SequenceMatcher(None, norm_model_title, norm_t).ratio()
             if sim <= best_match_info[2]:
                 continue
