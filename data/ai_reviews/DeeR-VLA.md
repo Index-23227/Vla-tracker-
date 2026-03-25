@@ -1,161 +1,188 @@
 # DeeR-VLA: Dynamic Inference of Multimodal LLMs for Efficient Robot Execution
 
-> **한 줄 요약**: VLA의 추론 효율성을 위해 Dynamic Early-Exit 프레임워크를 제안하여, 태스크 난이도에 따라 LLM의 활성화 크기를 자동 조절하고 **5.2-6.5배 연산 절감과 2-6배 GPU 메모리 절감**을 성능 저하 없이 달성.
+> **한 줄 요약**: OpenFlamingo (3B/9B) 기반 MLLM에 multi-exit 구조를 추가하여, action consistency 기반 early-exit으로 LLM GFLOPs를 **3.1-5.2x 절감** (31.2→6.0 GFLOPs), 실제 latency **68.1% 감소** (55→17.5ms)하면서 CALVIN 성능 유지(4.08 vs 4.07).
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- 대형 VLA(7B+)는 **모든 시점(timestep)에서 전체 모델을 실행** → 단순 동작("빈 공간에서 이동")에도 수십억 파라미터 연산
-- 로봇 플랫폼의 GPU 제약(Jetson Orin 등)에서 대형 VLA 실행이 사실상 불가
-- 기존 모델 압축(pruning, quantization, distillation)은 **모든 입력에 동일한 축소 모델** 적용 → easy/hard case 구분 없음
+- 대형 MLLM 기반 로봇 정책이 **모든 시점에서 전체 모델을 실행** → 단순 동작에도 과다 연산
+- 기존 모델 압축(pruning, quantization)은 **정적** → easy/hard 구분 없음
+- "파지 직전"에는 깊은 reasoning, "빈 공간 이동"에는 얕은 처리로 충분
 
 ### 핵심 질문
-- **로봇 태스크의 각 시점마다 필요한 "사고의 깊이"가 다른데, 이를 동적으로 조절할 수 있는가?**
-- **Early exit으로 성능 저하 없이 실시간 추론이 가능한가?**
+- **태스크 난이도에 따라 동적으로 LLM depth를 조절하면 성능 저하 없이 얼마나 절감 가능한가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Multi-Exit Architecture
+### 2.1 아키텍처
 
-VLM의 각 transformer layer에 exit head 부착:
+**Base**: OpenFlamingo (3B: 24 layers, 9B: 32 layers)
+- Vision encoder: ViT + Perceiver Resampler
+- Action head: **4-layer LSTM + 3-layer MLP** (경량)
+- **N개 exit point**: 매 2 self-attention layer마다 exit (3B: 6 exits from 12 layers)
 
-$$\hat{a}_l = f_l^{\text{exit}}(h_l), \quad l \in \{L_1, L_2, ..., L_K\}$$
+### 2.2 Exit Decision: Action Consistency
 
-여기서 $h_l$은 layer $l$의 hidden state, $f_l^{\text{exit}}$은 해당 layer의 action prediction head.
+연속 exit의 action 예측 간 L2 distance로 수렴 판단:
 
-- 쉬운 시점: 초기 layer에서 exit → 연산 대폭 절감
-- 어려운 시점: 최종 layer까지 실행 → 풀 capacity 활용
+$$\|\pi_\theta(\tilde{x}_t^i, h_{t-1}) - \pi_\theta(\tilde{x}_t^{i-1}, h_{t-1})\|_2 < \eta_i$$
 
-> ❓ **예상 질문**: Exit head를 여러 layer에 추가하면 학습 시 gradient interference가 없는가?
-> **답변**: Multi-exit 학습에서 각 exit의 loss가 간섭할 수 있음. 저자들은 이를 auxiliary loss weighting으로 완화하나, 최적 weighting의 sensitivity 분석은 제한적.
+- 두 연속 exit의 action이 유사하면 → 이미 수렴, early exit
+- Feature similarity나 time-based 기준보다 **action consistency가 최우수** (Table 4)
 
-### 2.2 Exit Decision Criterion
+> ❓ **예상 질문**: Overconfident early exit의 위험은?
+> **답변**: Action consistency는 confidence 자체가 아닌 **action 변화의 안정성**을 측정하므로, overconfidence 문제를 부분적으로 회피. 그러나 두 exit 모두 같은 방식으로 틀릴 수 있는 경우는 포착 불가.
 
-언제 exit할지 결정하는 메커니즘:
+### 2.3 Threshold 결정
 
-$$\text{Exit at layer } l \quad \text{if} \quad \text{Conf}(f_l^{\text{exit}}(h_l)) > \tau_l$$
+두 가지 방식:
+1. **Dataset-based**: 지수분포 가정으로 target exit proportion에서 threshold 도출
+2. **Online**: Bayesian Optimization으로 constraint violation penalty 최소화
 
-Confidence 메트릭: action prediction의 entropy 또는 variance 기반.
+### 2.4 학습 전략
 
-> ❓ **예상 질문**: Confidence가 높다고 prediction이 정확하다는 보장이 있는가? (overconfident but wrong)
-> **답변**: 핵심 우려. Neural network의 과신(overconfidence)은 잘 알려진 문제. 저자들은 calibration 분석을 수행하나, distribution shift 상황(새로운 물체, 환경)에서의 calibration은 미검증. Overconfident early exit가 치명적 실패로 이어질 수 있음.
-
-### 2.3 Dynamic Compute Allocation
-
-시퀀스 내에서 시점별 compute 분배 예시:
-
-```
-시점 1 (빈 공간 이동): Layer 4에서 exit → 12.5% compute
-시점 2 (물체 접근):     Layer 12에서 exit → 37.5% compute
-시점 3 (파지 직전):     Layer 32 full → 100% compute
-시점 4 (파지 중):       Layer 32 full → 100% compute
-시점 5 (운반):          Layer 8에서 exit → 25% compute
-```
-
-> ❓ **예상 질문**: 이 dynamic allocation이 action의 시간적 일관성(temporal consistency)을 해치지 않는가?
-> **답변**: 서로 다른 layer에서 exit하면 hidden representation의 특성이 달라질 수 있어, action의 jerk/불연속성이 발생 가능. 이에 대한 분석이 논문에서 부족.
+| 항목 | 값 |
+|------|-----|
+| Sampling s₁ | Uniform random exit per timestep |
+| Sampling s₂ | Segment-based (연속 temporal window에서 같은 exit) |
+| Auxiliary loss | 각 exit에 independent prediction head |
+| Total loss | $\mathcal{L}_{total} = \mathcal{L}^* + \mathcal{L}_{aux}$ |
 
 ---
 
-## 3. 시스템/최적화
+## 3. 학습 설정
 
-| 기법 | 효과 |
-|------|------|
-| KV-cache reuse | Exit 후 깊은 layer의 KV cache 불필요 → 메모리 절감 |
-| Batch-level exit | Batch 내 모든 sample의 exit layer가 같을 필요 없음 |
-| Quantization (INT8) + Early exit | 복합 적용으로 추가 절감 |
+| 항목 | 값 |
+|------|-----|
+| Batch size | 32 (4×8 distributed) |
+| LSTM window | 12 timesteps |
+| Dropout | LSTM 0.3, MLP 0.4 |
+| LR | MLLM 1e-4, action head 2.5e-5 |
+| Epochs | 3B: 4+4 (D→D), 3+1 (ABCD→D); 9B: ~24h A100 |
+| GPU | 8× V100 (3B) / 8× A100 (9B) |
 
 ---
 
 ## 4. 실험 결과 심층 분석
 
-### CALVIN (ABC→D)
+### CALVIN Benchmark (Table 2)
 
-| 모델 | Avg. Len | LLM FLOPs | GPU Memory |
-|------|---------|-----------|-----------|
-| OpenVLA (full) | 3.2 | 1.0x | 1.0x |
-| OpenVLA (pruned 50%) | 2.8 | 0.5x | 0.55x |
-| **DeeR-VLA** | **3.1** | **0.15-0.19x** | **0.17-0.5x** |
+| Setting | 모델 | Avg Len | LLM GFLOPs |
+|---------|------|---------|-----------|
+| D→D | RoboFlamingo++ | 2.71 | 31.2 |
+| D→D | **DeeR** | **2.83** | **8.6 (3.6x↓)** |
+| ABCD→D | RoboFlamingo++ | 4.07 | 31.2 |
+| ABCD→D | **DeeR** | **4.13** | **10.0 (3.1x↓)** |
+| ABC→D | RoboFlamingo++ | 2.59 | 31.2 |
+| ABC→D | **DeeR** | **2.82** | **12.5 (2.5x↓)** |
 
-- **성능 3.1 (vs 3.2 full)로 거의 유지하면서 5.2-6.5배 연산 절감**
-- Static pruning 대비: pruning은 성능 하락(-0.4), DeeR는 유지(-0.1)
+- **성능 유지/약간 향상 + 3.1-3.6x GFLOPs 절감**
 
-### Layer Exit Distribution
+### 실제 추론 효율 (Table 5, ABCD→D)
 
-| 태스크 난이도 | 평균 exit layer | 전체 대비 compute |
-|------------|---------------|----------------|
-| Easy (open space) | 4-8 | 12-25% |
-| Medium (approach) | 12-20 | 37-62% |
-| Hard (grasp, insert) | 28-32 | 87-100% |
+| 모델 | Inference Time | GFLOPs | Avg Len |
+|------|--------------|--------|---------|
+| RoboFlamingo++ | 55ms | 31.2 | 4.07 |
+| **DeeR** | **17.5ms** | **6.0** | **4.08** |
+
+- **Wall-clock 68.1% 감소** (55ms → 17.5ms)
+- **5.2x GFLOPs 절감** (31.2 → 6.0)
+- 성능은 4.07 → 4.08으로 **오히려 약간 향상**
+
+### Quantization 결합 (Table 6, ABCD→D)
+
+| Precision | Memory | Avg Len |
+|----------|--------|---------|
+| Float32 | 6GB | 4.13 |
+| Float16 | 3GB | 4.12 |
+| Int4 | **1.7GB** | 3.91 |
+
+- FP16: 성능 거의 동일하며 메모리 절반
+- Int4: -0.22 하락이지만 1.7GB로 edge device 가능
 
 ---
 
 ## 5. Ablation 분석
 
-| 구성요소 | CALVIN Avg. Len |
-|---------|---------------|
-| Full DeeR-VLA | 3.1 |
-| Fixed exit (layer 16) | 2.7 |
-| Random exit | 2.4 |
-| Confidence → entropy | 3.1 |
-| Confidence → variance | 3.0 |
-| Exit heads: 4 → 8 | 3.1 (no gain, more overhead) |
+### Auxiliary Loss (Table 3, ABCD→D)
 
-- Dynamic exit가 fixed exit 대비 확실히 우수
-- 4개 exit point이면 충분, 더 많은 exit은 marginal
+| 설정 | Avg Len | GFLOPs |
+|------|---------|--------|
+| Without auxiliary losses | 2.64 | 4.9 |
+| **With auxiliary losses** | **2.71** | 10.0 |
 
----
+- Auxiliary loss가 성능을 **유의미하게 향상** (2.64 → 2.71)
 
-## 6. 관련 연구 비교
+### Exit Criterion 비교 (Table 4)
 
-| 방법 | 압축 유형 | Dynamic | 성능 보존 | VLA 적용 |
-|------|---------|---------|----------|---------|
-| Pruning | Static | ✗ | △ | ✓ |
-| Quantization (INT4/8) | Static | ✗ | ✓ | ✓ |
-| Knowledge Distillation | Static | ✗ | △ | △ |
-| SpecInfer | Speculative | △ | ✓ | ✗ |
-| **DeeR-VLA** | **Dynamic Early Exit** | **✓** | **✓** | **✓** |
+- **Action consistency**: 최우수
+- Feature similarity: 차선
+- Time-based: 최하
 
 ---
 
-## 7. 한계 및 미해결 문제
+## 6. 메모리 사용량
+
+| 모델 | LLM Memory |
+|------|-----------|
+| OpenFlamingo 3B DeeR-S | **2GB** |
+| OpenFlamingo 3B DeeR-B | 6GB |
+| OpenFlamingo 9B DeeR-S | 8GB |
+| OpenFlamingo 9B DeeR-B | 12GB |
+
+---
+
+## 7. 관련 연구 비교
+
+| 방법 | 압축 유형 | Dynamic | 성능 보존 | Latency 감소 |
+|------|---------|---------|----------|------------|
+| Pruning | Static | ✗ | △ | ~2x |
+| Quantization (INT4) | Static | ✗ | △ | ~2x |
+| **DeeR-VLA** | **Dynamic Early Exit** | **✓** | **✓** | **3.1x (wall-clock 68.1%)** |
+
+---
+
+## 8. 한계 및 미해결 문제
 
 ### 방법론적 미비점
-1. **Exit 판단의 신뢰성**: Overconfident early exit가 safety-critical 상황에서 치명적 오류를 야기할 수 있음. Worst-case 분석 부재
-2. **Temporal consistency**: Layer마다 다른 representation에서 action이 나오므로, 시간적 매끄러움이 보장되지 않음
-3. **Training overhead**: Multi-exit 학습은 기본 모델 학습보다 복잡하고 비용이 높음. 이 추가 비용 대비 추론 시 절감의 ROI 분석 부족
-4. **새로운 환경 적응**: Exit threshold가 학습 환경에 calibration됨. 새로운 환경에서 threshold 재조정 필요성 미검토
+1. **OpenFlamingo backbone**: 3B/9B 규모이며 최신 VLM (7B LLaMA 등) 대비 구형. 최신 VLA에서의 적용성 미검증
+2. **CALVIN only**: LIBERO, SimplerEnv 등 다른 벤치마크 결과 없음
+3. **Temporal consistency**: 시점마다 다른 depth에서 exit하면 action의 시간적 일관성 문제 → 논문에서 "segment-based sampling (s₂)"으로 완화하나 정량적 분석 부족
+4. **Action consistency 기준의 한계**: 두 exit이 동일하게 틀리는 경우 (같은 방향의 오류) 포착 불가
+5. **Threshold tuning**: Dataset-based 또는 Bayesian Optimization — 새 환경에서 재조정 필요
 
 ### Attribution 문제
-- 연산 절감의 실질적 효과가 **wall-clock latency 감소**로 이어지는지 불명확. GPU utilization, memory bandwidth 등 하드웨어 수준 분석 필요
-- "5.2x 연산 절감"이 실제 inference speed 5.2x 향상을 의미하지 않을 수 있음 (memory-bound 등)
+- 성능 유지가 **early exit 설계**의 효과인지, **auxiliary loss가 각 exit의 독립적 학습 품질을 보장**했기 때문인지 분리 필요
+- Auxiliary loss 없으면 2.64 (vs 2.71) → auxiliary가 핵심
 
 ---
 
-## 8. 총평
+## 9. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — Early exit의 VLA 적용, adaptive compute 아이디어 |
-| **Technical depth** | ★★★★☆ — Exit mechanism 설계가 체계적 |
-| **Experimental rigor** | ★★★☆☆ — CALVIN 위주, real-robot 부재 |
-| **Practical impact** | ★★★★★ — Edge deployment의 핵심 문제 해결 |
-| **Writing quality** | ★★★★☆ — 명확한 motivation과 결과 |
+| **Novelty** | ★★★★☆ — Early exit의 VLA 적용, action consistency criterion |
+| **Technical depth** | ★★★★★ — Exit mechanism, threshold 결정, quantization 결합 등 체계적 |
+| **Experimental rigor** | ★★★☆☆ — CALVIN 단일 벤치마크 |
+| **Practical impact** | ★★★★★ — Edge deployment의 핵심 문제 해결. 17.5ms, 2GB |
+| **Writing quality** | ★★★★☆ |
 
-**강점**: VLA deployment의 가장 실질적인 문제(추론 비용)를 정면으로 다룸. 5x+ 절감이면서 성능 거의 유지는 인상적. **약점**: Safety-critical 상황에서의 early exit 위험성, temporal consistency 미보장, 실제 하드웨어 벤치마크 부족.
+**강점**: 55ms→17.5ms (68.1% 감소)의 실제 wall-clock 절감이 인상적. 성능 유지가 확실. Quantization과 결합하면 1.7GB까지 축소 가능 → Jetson 등 edge device 배포 가능. **약점**: CALVIN only, 구형 backbone, temporal consistency 분석 부족.
 
 ---
 
-## 9. 🔥 예상 날카로운 질문 모음
+## 10. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | Edge device(Jetson)에서 실제 latency 벤치마크는? | FLOPs 감소만 보고. 실제 하드웨어에서의 wall-clock 측정 필요 |
-| 2 | Safety-critical task에서 early exit가 위험하지 않은가? | Overconfident exit의 worst case 미분석. 안전 임계 상황에서는 항상 full compute가 바람직 |
-| 3 | Exit threshold를 task별로 다르게 설정해야 하는가? | 현재 단일 threshold. Task-adaptive threshold가 성능을 더 높일 수 있으나 미탐구 |
-| 4 | 이 방법이 quantization과 결합되면? | 복합 적용 시 추가 절감 가능. INT8 + early exit = 10x+ 절감 가능성. 일부 실험 포함 |
-| 5 | 왜 vision encoder에는 early exit를 적용하지 않는가? | Vision encoder는 상대적으로 작고, 모든 시점에서 동일한 perception이 필요하기 때문. 다만 visual token pruning과 결합 가능 |
+| 1 | OpenVLA (7B)에 적용하면 얼마나 절감되는가? | 직접 검증 없음. 7B에서는 절감 폭이 더 클 것으로 예상 (deeper model = more early-exit 기회) |
+| 2 | 17.5ms면 57Hz인데, 이게 action quality를 향상시키는가? | 빈번한 re-planning이 closed-loop 성능을 높일 수 있음. 다만 실험에서 이를 직접 보이지 않음 |
+| 3 | Safety-critical 상황에서 early exit가 위험하지 않은가? | Action consistency가 "변화 없음 = 안전"으로 판단. 하지만 두 exit이 동일하게 위험한 action을 예측할 수 있음 |
+| 4 | DepthCache (visual token merging)와 결합하면? | Multiplicative 절감 가능 — token 수 감소 + early exit = 더 빠른 추론 |
+| 5 | 어떤 layer에서 주로 exit하는가? | "Easy" 상황(approach): 초기 layer, "Hard" 상황(stacking, push switch): 깊은 layer. 시각화 포함 |
+
+<!-- VERIFIED: pdf -->

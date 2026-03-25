@@ -1,146 +1,206 @@
 # DD-VLA: Discrete Diffusion VLA — Bringing Discrete Diffusion to Action Decoding
 
-> **한 줄 요약**: 기존 VLA의 autoregressive 또는 continuous diffusion 방식 대신, **이산 확산(discrete diffusion)**으로 action chunk를 생성하여 적응적 디코딩 순서와 오류 교정을 지원하고 LIBERO 96.3% 달성.
+> **한 줄 요약**: OpenVLA의 Prismatic-7B backbone 내에서 **bidirectional discrete diffusion**을 구현하여, autoregressive 대비 2x 빠른 추론(68.8ms vs 136.2ms)과 LIBERO 96.3%, SimplerEnv-Fractal 64.1%를 달성하며, 적응적 디코딩 순서와 secondary re-masking으로 오류 교정 지원.
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- **Autoregressive VLA** (OpenVLA, RT-2): 왼쪽→오른쪽 순서로 action token 생성 → 초기 토큰 오류가 후속 토큰에 전파(exposure bias)
-- **Continuous diffusion VLA** (CogACT, pi0): 고품질 action 생성 가능하지만, VLM의 discrete token 공간과 action의 continuous 공간 간 **아키텍처적 단절** → 별도 diffusion head 필요
-- 두 패러다임을 통합하는 시도 부재: discrete token 기반이면서도 diffusion의 iterative refinement 이점을 갖는 방법
+- **Autoregressive VLA** (OpenVLA): 왼→오른 순차 생성으로 56 NFE (neural function evaluation) 필요 → 느림, 초기 토큰 오류 전파
+- **Continuous diffusion VLA** (CogACT): 별도 diffusion head 필요 → VLM과 아키텍처 단절
+- DD-VLA의 핵심: **같은 cross-entropy loss**를 사용하면서 diffusion 프레임워크를 VLM 내부에 통합
 
 ### 핵심 질문
-- **Discrete diffusion이 autoregressive와 continuous diffusion의 장점을 모두 취할 수 있는가?**
-- **비순차적(non-sequential) 디코딩이 action 생성에 실질적 이점이 있는가?**
+- **Discrete diffusion을 VLM backbone 내에서 통합하여, AR과 continuous diffusion 양쪽을 능가할 수 있는가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Discrete Diffusion for Actions
+### 2.1 아키텍처
 
-Action chunk를 discretized token sequence로 표현하고, **마스킹 기반 discrete diffusion**으로 생성:
+**Base**: OpenVLA의 Prismatic-7B (SigLIP + DINOv2 + Llama 2)
+- Causal attention mask를 **action 위치에서만 bidirectional**로 수정
+- Vision, language token은 causal, **action token은 서로 bidirectional attention**
+- 별도 adapter/head 없이 **동일 transformer 내에서 discrete diffusion 수행**
 
-$$q(\mathbf{a}_t | \mathbf{a}_0) = \text{Cat}(\mathbf{a}_t; (1-\beta_t)\mathbf{a}_0 + \beta_t \mathbf{m})$$
+### 2.2 Action Tokenization
 
-여기서 $\mathbf{m}$은 [MASK] token, $\beta_t$는 마스킹 스케줄.
+- 7-DoF action: 3 translation + 3 rotation + 1 gripper
+- **256 bins** (quantile-based scheme)
+- Action chunk: **H=8** (LIBERO, SimplerEnv-Fractal), **H=3** (SimplerEnv-Bridge)
+- Total tokens per chunk: 7 × H
 
-Reverse process:
-$$p_\theta(\mathbf{a}_0 | \mathbf{a}_t, \mathbf{c}) = \prod_{i} p_\theta(a_0^{(i)} | \mathbf{a}_t, \mathbf{c})$$
+### 2.3 Masked Cross-Entropy Loss
 
-> ❓ **예상 질문**: Discrete diffusion과 BERT-style masked prediction의 차이는?
-> **답변**: 핵심 차이는 **iterative refinement**. BERT는 한 번에 모든 [MASK]를 예측하지만, discrete diffusion은 여러 step에 걸쳐 점진적으로 unmask → 이전 step의 예측을 조건으로 다음 예측이 개선됨. 이것이 "diffusion"의 본질.
+$$\mathcal{L} = -\sum_{i \in \mathcal{M}_{\gamma_t}} \log p_\theta(a_{0,i} | \tilde{a}_t, c)$$
 
-### 2.2 Adaptive Decoding Order
+- $\mathcal{M}_{\gamma_t}$: 마스킹된 위치 집합 (mask ratio $\gamma_t$)
+- **VLM과 동일한 cross-entropy 목적함수** 유지 → pre-trained VLM prior 보존
 
-Autoregressive와 달리, **모델이 자체적으로 디코딩 순서를 결정**:
-- Confidence가 높은 토큰을 먼저 unmask
-- 어려운(불확실한) 토큰은 나중에, 더 많은 context를 활용하여 예측
+### 2.4 Adaptive Decoding
 
-$$\text{order} = \text{argsort}(-\text{confidence}(\hat{a}_0^{(i)}))$$
+**12-step refinement** (cosine schedule):
+1. 모든 action token을 [MASK]로 시작
+2. 각 step에서 confidence ranking으로 unmask 순서 결정
+3. **Confidence gap** (top-1 vs top-2 확률 차이) 기반 ranking이 최적
 
-> ❓ **예상 질문**: 적응적 순서가 고정 순서(왼→오른) 대비 정말 유리한가? 어떤 task에서 차이가 큰가?
-> **답변**: Ablation에서 적응적 순서가 고정 순서 대비 ~2%p 향상. Bimanual task처럼 양팔의 동기화가 중요한 경우, 한 팔의 action을 먼저 결정하고 다른 팔을 조건부로 예측하는 것이 유리할 수 있음.
+### 2.5 Secondary Re-masking (2-check)
 
-### 2.3 Secondary Re-masking for Error Correction
+1. **Threshold check**: $\text{confidence} < \eta_t^{abs} = 0.5 \times (1 - t/T)$이면 re-mask
+2. **Residual-drop check**: 이전 step 대비 confidence 큰 하락 시 re-mask
 
-생성 후 **low-confidence token을 다시 마스킹하고 재생성**:
-
-$$\mathbf{a}' = \text{ReMask}(\hat{\mathbf{a}}_0, \text{threshold}=\tau) \to \hat{\mathbf{a}}'_0 = p_\theta(\mathbf{a}_0 | \mathbf{a}')$$
-
-> ❓ **예상 질문**: Re-masking이 수렴하지 않고 oscillate할 수 있지 않은가?
-> **답변**: 이론적으로 가능하나, 실험에서 1-2회 re-masking으로 충분. Re-masking 횟수와 threshold의 trade-off는 ablation에서 다뤄지나 수렴 보장에 대한 이론적 분석은 없음.
+> ❓ **예상 질문**: Re-masking이 수렴을 보장하는가?
+> **답변**: "Bayes reverse kernel과의 alignment을 유지하면서 cross-iteration consistency를 개선한다"고 주장. 실험적으로 re-masking이 +0.4%p 기여하며 수렴 문제 미보고.
 
 ---
 
-## 3. 데이터 전략
+## 3. 학습 설정
 
-- 기존 VLA 학습 데이터를 그대로 활용
-- Action discretization: Uniform binning (256 bins per dimension)
-- 연속 action → discrete token 변환의 quantization error는 bin 수로 조절
+| 항목 | 값 |
+|------|-----|
+| GPU | **4× NVIDIA A800** |
+| Batch size | 32 |
+| LIBERO-Spatial/Object | 150K steps |
+| LIBERO-Goal/Long | 300K steps |
+| SimplerEnv | 100K steps |
 
 ---
 
 ## 4. 실험 결과 심층 분석
 
-| 모델 | LIBERO Avg (%) | SimplerEnv Avg (%) |
-|------|---------------|-------------------|
-| OpenVLA (AR) | 76.5 | 48.7 |
-| OpenVLA-OFT (parallel) | 84.2 | 53.1 |
-| CogACT (cont. diffusion) | 89.7 | 67.8 |
-| **DD-VLA (discrete diffusion)** | **96.3** | **72.5** |
+### LIBERO (Table 1)
 
-- LIBERO에서 **96.3%**는 near-saturation 수준
-- SimplerEnv에서도 continuous diffusion(CogACT) 대비 우위
+| 모델 | Spatial | Object | Goal | Long | **Avg** |
+|------|---------|--------|------|------|---------|
+| OpenVLA (AR) | - | - | - | - | 76.5 |
+| OpenVLA-OFT (Discrete) | - | - | - | - | 95.5 |
+| OpenVLA-OFT (Cont-Diffusion) | - | - | - | - | 95.6 |
+| π₀ | - | - | - | - | 94.2 |
+| **DD-VLA** | **97.2** | **98.6** | **97.4** | **92.0** | **96.3** |
 
-### Parallel Decoding
+- OpenVLA-OFT 대비 **+0.7~0.9%p** (discrete 95.5 vs DD-VLA 96.3)
+- π₀ 대비 **+2.1%p**
 
-| 디코딩 방식 | LIBERO (%) | Wall-clock (ms) |
-|-----------|-----------|----------------|
-| Full iterative (T=10) | 96.3 | 120 |
-| Accelerated (T=5) | 95.8 | 65 |
-| 1-step (parallel) | 93.2 | 15 |
+### SimplerEnv — Fractal Google Robot (Table 2)
+
+| 메트릭 | π₀ | π₀-FAST | OpenVLA-OFT | **DD-VLA** |
+|-------|-----|---------|------------|-----------|
+| Visual Matching | 58.8% | 61.9% | 63.0% | **71.2%** |
+| Variant Agg. | - | - | - | **56.9%** |
+| **Overall** | - | - | - | **64.1%** |
+
+- π₀ 대비 **+12.4%p** (visual matching)
+
+### SimplerEnv — Bridge WidowX (Table 3)
+
+| 모델 | π₀ | π₀-FAST | GR00T-N1 | **DD-VLA** |
+|------|-----|---------|---------|-----------|
+| Task SR | 40.1% | 48.3% | 49.5% | **54.2%** |
+
+### OOD Robustness (Tables 4-5)
+
+| Augmentation | DD-VLA Drop | OpenVLA-OFT (Discrete) Drop |
+|-------------|------------|---------------------------|
+| Language | **-1.4%p** | -8.0%p |
+| Vision (Goal) | -21.0%p | - |
+| Vision (Spatial) | **-1.0%p** | - |
+
+- **Language robustness가 DD-VLA의 큰 강점** (-1.4% vs -8.0%)
 
 ---
 
 ## 5. Ablation 분석
 
-| 구성요소 | LIBERO 변화 |
-|---------|-----------|
-| Discrete diffusion → Autoregressive | -8%p |
-| Discrete diffusion → Continuous diffusion | -3%p |
-| Adaptive order → Fixed L→R | -2%p |
-| Re-masking 제거 | -1.5%p |
-| 256 bins → 64 bins | -2%p |
+### Decoding Strategy (Table 6, LIBERO-Goal)
+
+| 전략 | SR (%) |
+|------|--------|
+| Parallel Decoding | 95.6 |
+| + Random Order | 95.8 |
+| + Confidence Gap | 96.6 |
+| + Max Confidence | 97.0 |
+| **+ Secondary Re-mask** | **97.4** |
+
+### Temperature Schedule (Table 7)
+
+| Temperature | SR (%) |
+|------------|--------|
+| Hard (τ=0) | 96.2 |
+| Fixed (τ=1) | 96.4 |
+| **Linear Decay** | **97.4** |
+
+### Denoising Steps
+
+- T=8~12에서 대부분의 gain
+- T≥16: <1% 추가 향상, throughput 감소
+- **T=12 optimal**
 
 ---
 
-## 6. 관련 연구 비교
+## 6. 추론 효율 (Table 8)
 
-| 모델 | Token Type | Generation | Error Correction | Unified Architecture |
-|------|-----------|-----------|-----------------|---------------------|
-| OpenVLA | Discrete | Autoregressive | ✗ | ✓ |
-| CogACT | Continuous | Continuous diffusion | Implicit (denoising) | ✗ (separate head) |
-| **DD-VLA** | **Discrete** | **Discrete diffusion** | **✓ (re-masking)** | **✓** |
+| 방법 | Latency (ms) | Speed (Hz) | NFE |
+|------|-------------|-----------|-----|
+| OpenVLA (AR) | 136.2 | 7.34 | 56 |
+| OpenVLA (no KVcache) | 209.5 | 4.77 | 56 |
+| OpenVLA-OFT (Parallel) | **31.1** | **32.14** | **1** |
+| Cont-Diffusion (50 steps) | 199.9 | 5.00 | 50 |
+| Cont-Diffusion (12 steps) | 67.1 | 14.91 | 12 |
+| **DD-VLA (12 steps)** | **68.8** | **14.53** | **12** |
+
+- AR 대비 **2x 빠름** (136.2→68.8ms), **4.7x 적은 NFE** (56→12)
+- OpenVLA-OFT parallel (31.1ms)보다는 느림 — 12-step denoising overhead
+- Continuous diffusion 12-step (67.1ms)과 **동등한 latency**
 
 ---
 
-## 7. 한계 및 미해결 문제
+## 7. 관련 연구 비교
+
+| 모델 | Token Type | Generation | Error Correction | VLM Prior 보존 | LIBERO |
+|------|-----------|-----------|-----------------|-------------|--------|
+| OpenVLA | Discrete | AR | ✗ | ✓ | 76.5% |
+| OpenVLA-OFT | Continuous | Parallel | ✗ | △ | 95.6% |
+| **DD-VLA** | **Discrete** | **Discrete Diffusion** | **✓ (re-masking)** | **✓ (same CE loss)** | **96.3%** |
+
+---
+
+## 8. 한계 및 미해결 문제
 
 ### 방법론적 미비점
-1. **Quantization error**: 256-bin discretization은 action space의 precision을 ~1/256로 제한. 고정밀 task(삽입, 조립)에서 이 quantization error가 dominant error source가 될 수 있음
-2. **Iterative decoding latency**: Full 10-step에서 120ms → 10Hz 제어에는 적합하나, 더 높은 주파수에서는 병목. 1-step으로 줄이면 3%p 성능 하락
-3. **Discrete diffusion의 이론적 한계**: Continuous diffusion의 score matching에 비해 discrete diffusion의 수렴 보장이 약함
-4. **Real-robot 결과 미포함**: LIBERO, SimplerEnv 모두 시뮬레이션
+1. **Quantization error**: 256-bin discretization의 precision 한계. Quantile-based이므로 data distribution에 의존
+2. **Vision OOD 약점**: LIBERO-Goal에서 vision augmentation -21%p → 시각 변화에 취약
+3. **OpenVLA-OFT parallel (31.1ms)에 비해 2x 느림**: DD-VLA는 12 NFE 필요, parallel은 1 NFE. Latency 우선 시 parallel이 유리
+4. **Real-robot 결과 부재**: LIBERO, SimplerEnv 모두 시뮬레이션
+5. **LIBERO near-saturation**: 96.3%에서 추가 개선의 의미 제한
 
 ### Attribution 문제
-- 96.3%라는 높은 수치가 **discrete diffusion** 덕분인지, **학습 레시피·데이터 전처리** 최적화 때문인지 분리 어려움
-- CogACT와의 비교에서 모델 크기, 학습 데이터, epoch이 완전히 동일한지 불명확
+- DD-VLA vs OpenVLA-OFT의 차이(+0.7%p)가 **discrete diffusion** 때문인지 **bidirectional attention** 때문인지 분리 필요
 
 ---
 
-## 8. 총평
+## 9. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★★ — Discrete diffusion의 VLA 적용이 매우 참신 |
-| **Technical depth** | ★★★★☆ — Re-masking, adaptive order 등 깊은 설계 |
-| **Experimental rigor** | ★★★☆☆ — Sim-only, LIBERO near-saturation |
-| **Practical impact** | ★★★★☆ — Unified architecture의 실용적 가치 |
-| **Writing quality** | ★★★★☆ — 깔끔한 구조 |
+| **Novelty** | ★★★★★ — VLM 내부에서 discrete diffusion, 동일 CE loss 유지 |
+| **Technical depth** | ★★★★★ — Adaptive decoding, re-masking, temperature schedule 등 세밀 |
+| **Experimental rigor** | ★★★★☆ — LIBERO + SimplerEnv + OOD + 효율 분석. Real-world 부재 |
+| **Practical impact** | ★★★★☆ — Unified architecture, language robustness |
+| **Writing quality** | ★★★★★ — 매우 체계적 |
 
-**강점**: Autoregressive와 diffusion의 장점을 결합하는 새로운 패러다임 제시. Error correction이 구조적으로 가능. **약점**: Sim-only 평가, quantization error의 근본적 한계, 실제 배포에서의 검증 부재.
+**강점**: VLM prior를 보존하면서 diffusion의 이점을 얻는 우아한 설계. Language robustness와 adaptive decoding이 차별화. **약점**: Sim-only, vision OOD 취약, parallel decoding 대비 latency 불리.
 
 ---
 
-## 9. 🔥 예상 날카로운 질문 모음
+## 10. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | 256 bins이면 precision이 ~0.4%인데, 이것으로 mm 단위 정밀도가 가능한가? | Action range에 따라 다름. ±1m range면 ~7.8mm resolution. 정밀 삽입(~1mm)에는 부족 |
-| 2 | Continuous diffusion 대비 discrete diffusion의 이론적 장점은? | Unified token space(LLM과 동일), error correction 가능, parallel decoding. 다만 precision 손실 |
-| 3 | LIBERO 96.3%는 saturation 아닌가? 차별화 가능한 더 어려운 벤치마크에서의 결과는? | 맞음. LIBERO-Long이나 real-robot에서의 차이가 더 의미 있을 것 |
-| 4 | Re-masking을 무한 반복하면 성능이 계속 올라가는가? | 실험에서 2회 이후 수렴. Diminishing returns + latency 증가 |
-| 5 | 이 방법이 language token 생성에도 적용 가능한가? | 이론적으로 가능(masked language model). VLA에서 언어 이해와 action 생성을 동일 프레임워크로 통합 가능 |
+| 1 | OpenVLA-OFT parallel (31.1ms)이 더 빠른데, DD-VLA의 이점은? | DD-VLA는 error correction (re-masking), language robustness (-1.4% vs -8.0%), confidence-based ordering. Latency가 아닌 **품질**에서 차별화 |
+| 2 | 12 step을 4 step으로 줄이면? | 미보고. T=8에서 "대부분의 gain"이므로 T=4에서도 competitive할 가능성. Latency ~23ms 예상 |
+| 3 | Vision OOD -21%p를 어떻게 개선하는가? | Data augmentation이나 robust visual encoder로 완화 가능. 현 구조의 구조적 한계보다는 학습 데이터 문제 |
+| 4 | Continuous diffusion과 latency가 동일하면, discrete의 이점은? | VLM prior 보존 (same CE loss), language robustness, 별도 head 불필요. 성능도 +0.7%p |
+
+<!-- VERIFIED: pdf -->
