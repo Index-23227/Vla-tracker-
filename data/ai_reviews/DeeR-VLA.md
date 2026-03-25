@@ -1,6 +1,6 @@
 # DeeR-VLA: Dynamic Inference of Multimodal LLMs for Efficient Robot Execution
 
-> **한 줄 요약**: OpenFlamingo (3B/9B) 기반 MLLM에 multi-exit 구조를 추가하여, action consistency 기반 early-exit으로 LLM GFLOPs를 **3.1-5.2x 절감** (31.2→6.0 GFLOPs), 실제 latency **68.1% 감소** (55→17.5ms)하면서 CALVIN 성능 유지(4.08 vs 4.07).
+> **한 줄 요약**: OpenFlamingo (3B/9B) 기반 MLLM에 multi-exit 구조를 추가하여, action consistency 기반 early-exit으로 LLM GFLOPs를 **2.5-5.2x 절감** (Table 2: 31.2→10.0~12.5 GFLOPs, Table 5 best: 31.2→6.0), 실제 latency **68.1% 감소** (55→17.5ms)하면서 CALVIN 성능 유지(4.08 vs 4.07).
 
 ---
 

@@ -1,6 +1,6 @@
 # CogACT: A Foundational VLA Model for Synergizing Cognition and Action in Robotic Manipulation
 
-> **한 줄 요약**: DINOv2+SigLIP vision encoder와 LLaMA-2 backbone으로 "cognition feature"를 추출하고, 별도의 Diffusion Transformer (DiT) action module로 action을 생성하는 componentized VLA로, RT-2-X (55B) 대비 18%p 우위를 7.6B로 달성하고 action head scaling law를 실증.
+> **한 줄 요약**: DINOv2+SigLIP vision encoder와 LLaMA-2 backbone으로 "cognition feature"를 추출하고, 별도의 Diffusion Transformer (DiT) action module로 action을 생성하는 componentized VLA로, OpenVLA 대비 +35%p (sim), +59%p (real) 향상을 7.6B로 달성하고 action head scaling law를 실증.
 
 ---
 
