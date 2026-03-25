@@ -14,7 +14,7 @@
 
 **82 VLA models** · **8 benchmarks** · **70 AI paper reviews** · **Auto-updated from arXiv**
 
-[Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/data/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
+[Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
 
 </div>
 
@@ -96,7 +96,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 |--------|-----|-------------|
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
 | **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (1700+ lines) |
-| **JSON API** | [/data/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/data/leaderboard.json) | Structured JSON with all scores + AI reviews |
+| **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
 | **YAML** | [data/models/](data/models/) | Individual model files (82 files) |
 
 ### Quick Start (Python)
@@ -105,7 +105,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 import json, urllib.request
 
 # Fetch latest leaderboard
-url = "https://hyeongjinkim.github.io/Vla-tracker-/data/leaderboard.json"
+url = "https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json"
 data = json.loads(urllib.request.urlopen(url).read())
 
 # Top 5 LIBERO models
