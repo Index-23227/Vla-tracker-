@@ -15,6 +15,7 @@ const EfficiencyRanking = lazy(() => import('./components/EfficiencyRanking'))
 const RealWorldBenchmark = lazy(() => import('./components/RealWorldBenchmark'))
 const CoverageHeatmap = lazy(() => import('./components/CoverageHeatmap'))
 const ArchitectureExplorer = lazy(() => import('./components/ArchitectureExplorer'))
+const PaperReviews = lazy(() => import('./components/PaperReviews'))
 
 function TabLoading() {
   return (
@@ -32,6 +33,7 @@ const TABS = [
   { id: 'realworld', label: 'Real-World' },
   { id: 'architecture', label: 'Architecture' },
   { id: 'coverage', label: 'Coverage' },
+  { id: 'reviews', label: 'Reviews' },
   { id: 'analysis', label: 'Analysis' },
 ]
 
@@ -107,6 +109,9 @@ function AppContent() {
           )}
           {activeTab === 'coverage' && (
             <CoverageHeatmap models={filteredModels} />
+          )}
+          {activeTab === 'reviews' && (
+            <PaperReviews models={filteredModels} />
           )}
           {activeTab === 'analysis' && (
             <AnalysisDashboard models={filteredModels} />
