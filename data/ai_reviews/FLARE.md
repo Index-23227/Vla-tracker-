@@ -1,140 +1,158 @@
 # FLARE: Robot Learning with Implicit World Modeling
 
-> **한 줄 요약**: 명시적 비디오 생성 대신 **암묵적(implicit) latent world modeling**을 diffusion transformer에 통합하여, 최소한의 아키텍처 수정으로 multi-task 벤치마크에서 최대 26% 성능 향상 달성.
+> **한 줄 요약**: DiT에 M=32 learnable future token을 추가하고, SigLIP-2 기반 action-aware embedding의 cosine alignment loss로 latent world modeling을 수행하여, RoboCasa 24-task에서 **70.1%** (baseline 61.9%, +8.2%p), GR1 24-task에서 **55.0%** (+11%p), 추론 overhead **zero**.
 
 ---
 
 ## 1. 배경 및 동기
 
-### 기존 연구의 구조적 한계
-- **Explicit world model** (GR-1, UniPi): 미래 프레임을 pixel space에서 생성 → 높은 latency, 생성 품질에 action이 의존
-- **No world model** (Diffusion Policy): 현재 observation만으로 action 예측 → temporal dynamics 미활용
-- **Train-only world model** (Fast-WAM): 학습 시에만 활용 → 추론 시 representation은 간접적으로만 영향
-
-### 핵심 질문
-- **Latent space에서의 implicit world modeling이 explicit video generation의 이점을 유지하면서 overhead를 제거할 수 있는가?**
-- **Predictive latent representation이 action quality를 직접 향상시키는 메커니즘은?**
+- **Explicit world model** (GR-1, UniPi): 미래 프레임을 pixel space에서 생성 → latency
+- **No world model** (Diffusion Policy): Temporal dynamics 미활용
+- **FLARE의 핵심**: Latent space에서 implicit하게 world model → **추론 시 overhead 없음**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Implicit World Modeling via Latent Prediction
+### 2.1 Architecture
 
-미래 상태를 pixel이 아닌 **latent space에서 예측**:
+DiT input sequence에 **M=32 learnable future token embeddings** 추가:
 
-$$\hat{\mathbf{z}}_{t+1} = f_\theta(\mathbf{z}_t, \mathbf{a}_t)$$
-
-이 latent prediction을 diffusion transformer의 내부 representation에 통합:
-
-$$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{action}} + \lambda \mathcal{L}_{\text{latent\_pred}}$$
-
-> ❓ **예상 질문**: Latent prediction의 target은 어떻게 정의하는가? (stop-gradient? EMA target?)
-> **답변**: BYOL/JEPA 스타일의 EMA target encoder 사용. $\mathbf{z}_{t+1}^{\text{target}} = f_{\bar{\theta}}(\mathbf{o}_{t+1})$, $\bar{\theta}$는 EMA 업데이트. 이는 representational collapse를 방지하면서 predictive representation 학습.
-
-### 2.2 Minimal Architectural Modification
-
-핵심 장점: **기존 diffusion policy에 단 하나의 prediction head만 추가**:
-
-```python
-# Pseudo-code
-z_t = encoder(obs_t)
-z_t1_pred = prediction_head(z_t)  # 추가된 부분
-z_t1_target = ema_encoder(obs_t1).detach()
-loss_pred = mse(z_t1_pred, z_t1_target)
-loss_action = diffusion_loss(action, z_t)
-loss = loss_action + lambda * loss_pred
+```
+[Proprioceptive state] + [Noised action chunk] + [M future tokens]
+                            ↓
+                     DiT Transformer (8 layers)
+                            ↓
+        Action prediction + Future token activations (at layer L=6)
+                            ↓
+        MLP projection → Cosine alignment with target embedding
 ```
 
-> ❓ **예상 질문**: 이렇게 간단한 modification으로 26% 향상이 가능한 메커니즘이 무엇인가?
-> **답변**: Predictive loss가 encoder에 **temporal dynamics awareness**를 부여. 물체가 어떻게 움직일 것인지의 implicit 이해가 action prediction을 가이드. 이는 self-supervised learning(BYOL 등)에서 augmentation prediction이 representation을 향상시키는 것과 유사한 원리.
+### 2.2 Target Embedding: Action-Aware Q-Former
+
+- **SigLIP-2 encoder**: Images (256 tokens) + text (32 tokens)
+- **4 transformer layers** for fusion
+- **Q-Former cross-attention**: 32 learnable query tokens으로 compression
+- 이 target embedding이 **frozen** (EMA, ρ=0.995)
+
+$$\mathcal{L}_{\text{FLARE}} = 1 - \cos(\text{MLP}(h_L^{\text{future}}), f_{\bar{\theta}}(o_{t+1}))$$
+
+### 2.3 Total Loss
+
+$$\mathcal{L} = \mathcal{L}_{\text{action}} + \lambda \mathcal{L}_{\text{FLARE}}, \quad \lambda = 0.2$$
+
+- **Inference 시 FLARE loss 미사용** → future tokens 제거 가능 → **overhead 없음**
+
+### 2.4 학습 설정
+
+| 단계 | GPU | Batch | Steps |
+|------|-----|-------|-------|
+| Embedding model pre-train | **256× H100** | 8192 | 150K |
+| Policy training | **32× H100** | 1024 | 80K |
+
+- Optimizer: AdamW (β₁=0.95, β₂=0.999)
+- Data: **~2,000 hours** robotic data (GR00T N1 + 7 OXE datasets)
 
 ---
 
 ## 3. 실험 결과 심층 분석
 
-### Multi-task Benchmarks
+### RoboCasa (24 tasks)
 
-| 모델 | LIBERO Avg (%) | CALVIN Avg Len | Improvement |
-|------|---------------|---------------|-------------|
-| Diffusion Policy | 85.2 | 2.64 | baseline |
-| DP + explicit WM | 89.5 | 2.95 | +5~12% |
-| **DP + FLARE** | **93.8 (+26%)** | **3.21** | **up to +26%** |
+| Model | Pick/Place | Doors/Drawers | Others | **Avg** |
+|-------|-----------|--------------|--------|---------|
+| Diffusion Policy | 29.2 | 78.7 | 61.3 | 51.7 |
+| UWM | 35.6 | 82.0 | 74.2 | 60.8 |
+| GR00T N1 (scratch) | 44.1 | 80.0 | 69.6 | 60.6 |
+| Policy Only (no FLARE) | 43.8 | 78.7 | 75.2 | 61.9 |
+| **FLARE** | **53.2** | **88.8** | **80.0** | **70.1 (+8.2%p)** |
 
-- **26% 향상은 최대치** (특정 task subset). 평균적으로 10-15% 향상
-- Explicit world model 대비도 우수 → latent prediction이 pixel prediction보다 효과적
+- **Pick/Place에서 +9.4%p** (43.8→53.2) — 가장 큰 향상. 정밀 manipulation에서 이점
 
-### Latency Comparison
+### GR1 (24 tasks)
 
-| 방법 | Latency (ms) |
-|------|-------------|
-| DP + explicit video WM | ~500 |
-| DP + FLARE | ~55 (= DP alone) |
+| Model | Pick/Place | Articulated | **Avg** |
+|-------|-----------|-------------|---------|
+| UWM | 30.1 | 38.4 | 29.5 |
+| GR00T N1 | 51.8 | 42.8 | 45.1 |
+| Policy Only | 46.6 | 47.4 | 44.0 |
+| **FLARE** | **58.2** | **51.3** | **55.0 (+11%p)** |
 
-- FLARE는 추론 시 prediction head 사용 안 함 → **latency 추가 없음**
+### Real Robot (GR1 humanoid)
+
+- 100 trajectories: **95.1%** (baseline 81.1%, **+14%p**)
+- "Avoids knocking over fragile objects" → implicit dynamics understanding
+
+### Human Video Learning
+
+- 150 human egocentric demos + 10 robot demos: **80%** on novel objects
+- 1 robot demo alone: 60%
+- → FLARE alignment loss가 human video에서도 유용
 
 ---
 
 ## 4. Ablation 분석
 
-| 구성요소 | LIBERO (%) |
-|---------|-----------|
-| Full FLARE | 93.8 |
-| No latent prediction (DP only) | 85.2 |
-| Pixel prediction (explicit WM) | 89.5 |
-| Random target (collapse prevention check) | 83.1 |
-| λ = 0.1 | 91.2 |
-| λ = 1.0 (default) | 93.8 |
-| λ = 5.0 | 92.5 |
+### Target Embedding Model (Table 2)
+
+| Method | SR (%) |
+|--------|--------|
+| No FLARE (baseline) | 43.9 |
+| SigLIP-2 (256 raw tokens) | 49.6 |
+| SigLIP-2 (64 pooled) | 50.9 |
+| **Action-aware Q-Former** | **55.0** |
+
+### DiT Layer Selection (Figure 8)
+- **Layer 6 (of 8): Optimal**
+- Layer 4: "Notable drop" — 초기 layer에서 action과 future alignment이 충돌
+- Layer 8: 약간 하락 (pixel reconstruction에 특화)
+
+### λ Coefficient (Figure 8)
+- **λ=0.2: Optimal**
+- Robust across range ("strong performance across setups")
+
+### EMA Update Rate (Figure 9)
+- **ρ=0.995: Best** (72.7% RoboCasa)
+- ρ=0.999: 71.6%
+- ρ=0.99: 70.8% (instability)
+- ρ=1.0 (no EMA): 71.5% (still outperforms baseline)
 
 ---
 
-## 5. 관련 연구 비교
+## 5. 한계 및 미해결 문제
 
-| 모델 | World Model | Space | Test-time WM | Latency Overhead |
-|------|-----------|-------|-------------|-----------------|
-| GR-1 | Explicit | Pixel | ✓ | High |
-| Fast-WAM | Train-only | Pixel | ✗ | None |
-| JEPA/BYOL | Implicit | Latent | ✗ | None |
-| **FLARE** | **Implicit** | **Latent** | **✗** | **None** |
-
-핵심 차이: FLARE = JEPA-style latent prediction을 robot policy에 특화 적용. Fast-WAM 대비 pixel → latent로 전환.
-
----
-
-## 6. 한계 및 미해결 문제
-
-### 방법론적 미비점
-1. **Long-term prediction**: 1-step latent prediction만 수행. Multi-step prediction ($t+2, t+3, ...$)으로 확장 시의 효과 미검증
-2. **Representation collapse risk**: EMA target으로 완화하지만, 특정 학습 설정에서 collapse 가능성 존재
-3. **λ sensitivity**: λ=1.0이 default이나, 태스크/도메인에 따라 최적값이 다를 수 있음. Adaptive λ 미탐구
-4. **"26% 향상"의 맥락**: 최대값이며, 전체 평균은 이보다 낮음. Cherry-picking 우려
+1. **Compute cost**: Embedding model pre-training에 **256× H100** 필요. 대규모 연구 인프라
+2. **Latency 미보고**: "Minimal modifications"이라 주장하나 **구체적 inference ms 수치 없음**
+3. **"26% 향상"의 맥락**: RoboCasa pick-and-place에서의 최대값. 전체 평균은 +8.2%p
+4. **Single-step prediction**: 1-step latent prediction만. Multi-step prediction의 효과 미검증
+5. **GR00T N1에 의존**: GR00T 아키텍처 위에서만 검증. 다른 VLA backbone에서의 일반성 미확인
 
 ### Attribution 문제
-- Latent prediction의 효과가 **dynamics understanding**인지 **representation regularization**인지 완전히 분리되지 않음
-- 비교: (1) 미래가 아닌 현재의 augmented view를 predict해도 비슷한 효과가 나올 수 있음 (contrastive learning처럼)
+- FLARE의 효과가 **dynamics understanding**인지 **representation regularization**인지 불완전 분리. Contrastive learning (augmented current view predict)으로도 비슷할 수 있으나 이 비교 부재
 
 ---
 
-## 7. 총평
+## 6. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — Implicit WM의 robot policy 적용 |
-| **Technical depth** | ★★★★☆ — JEPA 연결, 체계적 ablation |
-| **Experimental rigor** | ★★★★☆ — 다중 벤치마크 |
-| **Practical impact** | ★★★★★ — Zero overhead, 큰 성능 향상 |
-| **Writing quality** | ★★★★☆ — 깔끔 |
+| **Novelty** | ★★★★★ — Latent implicit WM, Q-Former alignment |
+| **Technical depth** | ★★★★★ — Layer selection, EMA, λ 포괄적 ablation |
+| **Experimental rigor** | ★★★★★ — 48 tasks (RoboCasa+GR1) + Real + Human video |
+| **Practical impact** | ★★★★★ — Zero inference overhead, +8-14%p consistent |
+| **Writing quality** | ★★★★★ |
 
-**강점**: 추론 시 overhead가 전혀 없으면서 큰 성능 향상. 극도로 간단한 modification. **약점**: "26%"가 최대치이며 일반적 개선은 덜 dramatic. Dynamics vs regularization 분리 불완전.
+**강점**: Inference overhead가 zero이면서 +8-14%p 일관적 향상. Human video에서도 학습 가능. Layer/λ/EMA ablation이 매우 체계적. **약점**: 256×H100 pre-training, 정확한 latency 미보고.
 
 ---
 
-## 8. 🔥 예상 날카로운 질문 모음
+## 7. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | Contrastive loss (SimCLR 등)로 대체하면 비슷한 효과인가? | 이 비교가 핵심이나 부재. 만약 비슷하다면 FLARE의 "world modeling" 주장이 약화됨 |
-| 2 | Multi-step latent prediction (t+1, t+2, t+3)이 더 좋은가? | 이론적으로 longer-horizon dynamics 이해에 유리하나 error accumulation 위험. 미검증 |
-| 3 | 추론 시 latent prediction을 활용하면 (Fast-WAM의 역) 추가 이득이 있는가? | 가능성 있으나, latent에서 action으로의 직접 conditioning 메커니즘 설계 필요 |
-| 4 | 어떤 종류의 task에서 가장 큰 이점이 있는가? | Dynamics가 중요한 task (물체가 많이 움직이는)에서 이점이 크고, 정적 task에서는 미미할 것으로 예상 |
+| 1 | Contrastive loss (SimCLR)로 대체하면? | 이 비교가 핵심이나 부재. Future prediction vs current augmentation의 차이를 분리해야 함 |
+| 2 | Multi-step prediction (t+2, t+3)이 더 좋은가? | 미검증. Error accumulation vs longer-horizon dynamics의 trade-off |
+| 3 | 256×H100 없이 embedding model을 학습할 수 있는가? | Pre-trained SigLIP-2를 frozen으로 사용하면 pre-training 불필요하나 성능 하락 (55.0→50.9) |
+| 4 | Fast-WAM과의 관계는? | 원리 동일 (학습 시에만 WM 활용). Fast-WAM은 pixel-level video, FLARE는 latent-level. FLARE가 더 효율적 |
+
+<!-- VERIFIED: pdf -->

@@ -1,148 +1,164 @@
 # DiT4DiT: Jointly Modeling Video Dynamics and Actions for Generalizable Robot Control
 
-> **한 줄 요약**: Video Diffusion Transformer와 Action Diffusion Transformer를 cascaded 구조로 결합하여 비디오 dynamics와 action을 동시 모델링, LIBERO 98.6% 달성과 함께 10배 이상의 sample efficiency 개선.
+> **한 줄 요약**: Video DiT (Cosmos-2B 초기화)와 Action DiT (GR00T-N1 기반)를 cascaded coupling하되, **single forward pass의 intermediate feature를 추출**하여 video reconstruction을 bypass, LIBERO **98.6%** SOTA + RoboCasa 50.8% + 7x 빠른 수렴 달성.
 
 ---
 
 ## 1. 배경 및 동기
 
 ### 기존 연구의 구조적 한계
-- **World-Action Model (WAM)**: 비디오 생성과 action 예측을 결합하는 새로운 패러다임이나, joint modeling에서 **비디오와 action의 representation 간 간섭(entanglement)** 문제
-- Joint training 시 비디오 예측 품질이 action 예측 품질에 과도하게 의존 → 비디오가 부정확하면 action도 부정확
-- 기존 접근의 높은 추론 overhead: 비디오를 먼저 생성하고 action을 추출하는 2-stage pipeline
+- WAM(GR-1, Motus)에서 video와 action의 joint modeling이 **representation entanglement** 야기
+- Test-time video generation이 latency bottleneck (Fast-WAM이 지적)
+- Video reconstruction에 최적화된 feature가 action prediction에 최적이 아닐 수 있음
 
 ### 핵심 질문
-- **비디오와 action을 분리된 DiT로 모델링하되 cascaded coupling으로 정보를 공유하면, entanglement 문제를 해결할 수 있는가?**
+- **Video backbone의 intermediate feature를 single forward pass로 추출하면, 다중 denoising step의 video generation을 완전히 bypass할 수 있는가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Cascaded DiT Architecture
+### 2.1 Dual-DiT Framework
 
-```
-[Observation + Language]
-     ↓
-[Video DiT: future frame prediction]
-     ↓ (latent features)
-[Action DiT: action chunk prediction]
-     ↓
-[Action output]
-```
+**Video DiT**: Cosmos-Predict2.5-2B로 초기화, causal video VAE + flow-matching
+**Action DiT**: GR00T-N1 기반, AdaLN + cross-attention to video features
 
-두 개의 분리된 Diffusion Transformer가 cascaded 연결:
-- **Video DiT**: 미래 프레임을 latent space에서 예측
-- **Action DiT**: Video DiT의 latent features를 conditioning으로 받아 action 생성
+핵심: Video DiT의 **forward hook**으로 **layer 18**의 hidden activation을 intercept → Action DiT의 conditioning
 
-> ❓ **예상 질문**: Cascaded 구조가 joint training보다 왜 나은가?
-> **답변**: Joint training에서는 video loss와 action loss가 공유 파라미터를 통해 간섭. Cascaded에서는 각 DiT가 자신의 목적에 집중하되, information flow는 latent conditioning으로 유지. 이는 modular 설계의 이점.
+### 2.2 Tri-Timestep Training
 
-### 2.2 Video-Conditioned Action Diffusion
+세 개의 독립적 diffusion timestep:
+- **τ_v (video)**: Uniform [0,1] — 전체 denoising trajectory 노출
+- **τ_f (feature extraction)**: **Fixed** — 안정적 visual conditioning
+- **τ_a (action)**: Beta분포 — critical control phase에 편향
 
-Action DiT의 denoising:
+$$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{action}} + \lambda \cdot \mathcal{L}_{\text{video}}$$
 
-$$\hat{\mathbf{a}}_0 = D_\phi^{\text{act}}(\mathbf{a}_t, t, \mathbf{z}_{\text{video}}, \mathbf{c}_{\text{obs}})$$
+### 2.3 Single Forward Pass Feature Extraction
 
-여기서 $\mathbf{z}_{\text{video}}$는 Video DiT의 중간 latent features (생성된 비디오 자체가 아님).
-
-> ❓ **예상 질문**: Video DiT의 latent features와 최종 생성된 비디오 중 어느 것이 action에 더 유용한가?
-> **답변**: Latent features가 더 풍부한 정보를 담고 있음 (decoded image는 information bottleneck). 이 선택이 성능에 기여함을 ablation에서 보임.
-
-### 2.3 Training Strategy
-
-- End-to-end joint training: 두 DiT가 동시에 학습
-- Video DiT loss: reconstruction loss on future frames
-- Action DiT loss: diffusion denoising loss on actions
-- 두 loss의 weighted sum
-
-$$\mathcal{L} = \lambda_v \mathcal{L}_{\text{video}} + \lambda_a \mathcal{L}_{\text{action}}$$
+> **핵심 발견**: Multi-step denoising보다 **single forward pass**가 더 좋은 feature 제공
+> - 추가 denoising step → **pixel reconstruction에 과도하게 특화** → action feature 품질 하락
+> - Layer 18이 최적 (초기 layer: poor, terminal layer: "drastic collapse")
 
 ---
 
 ## 3. 실험 결과 심층 분석
 
-### LIBERO
+### LIBERO (Table 1)
 
-| 모델 | LIBERO Avg (%) | Sample Efficiency |
-|------|---------------|-------------------|
-| Diffusion Policy | 85.2 | 1x |
-| OpenVLA | 76.5 | 1x |
-| GR-1 (video WAM) | 91.3 | 3x |
-| **DiT4DiT** | **98.6** | **10x+** |
+| Suite | DiT4DiT | π₀.₅ | CogVLA (prev SOTA) |
+|-------|---------|-------|-------------------|
+| Spatial | 98.4 | 98.8 | - |
+| Object | **99.6** | 98.8 | - |
+| Goal | **98.6** | 98.0 | - |
+| Long | **97.6** | - | 95.4 |
+| **Average** | **98.6** | - | 97.4 |
 
-- **98.6%는 LIBERO near-saturation**
-- Sample efficiency 10x+: 동일 성능 달성에 필요한 데이터가 1/10
+### RoboCasa-GR1 Tabletop (Table 2, 24 tasks)
 
-### Convergence Speed
+| Model | Avg SR (%) |
+|-------|-----------|
+| Qwen3DiT baseline | 36.2 |
+| GR00T-N1.6 | 40.8 |
+| GR00T-N1.5 | 41.8 |
+| **DiT4DiT** | **50.8 (+9.0 vs GR00T-N1.5)** |
 
-| 모델 | 90% SR 도달 epoch |
-|------|-----------------|
-| Diffusion Policy | 500 |
-| GR-1 | 200 |
-| **DiT4DiT** | **~70 (7x faster)** |
+- 24 task 중 **16개에서 최고**
+- Precision-demanding: CanToDrawerClose **74% vs 56%** (+18%p)
+
+### Real-World Unitree G1 (Figure 5)
+
+| Task | DiT4DiT | GR00T-N1.5 | Qwen3DiT |
+|------|---------|-----------|----------|
+| Arrange Flower | **75%** | 25% | 0% |
+| Stack Cup | **60%** | 25% | <10% |
+| Move Spoon | **40%** | 15% | <10% |
+| Drawer | **90%** | - | 0% |
+| Box Packing | **50%** | - | 0% |
+
+- Qwen3DiT가 real deployment에서 **collapse** → DiT4DiT만 안정적 작동
+
+### Generalization
+
+| 설정 | DiT4DiT | Qwen3DiT |
+|------|---------|----------|
+| Unseen objects (sim) | 54.5% | 32.0% (+22.5%p) |
+| Zero-shot flower (real) | 70% | 10% |
+| Zero-shot cup quantity (real) | 50% | - |
 
 ---
 
 ## 4. Ablation 분석
 
-| 구성요소 | LIBERO (%) |
-|---------|-----------|
-| Full DiT4DiT | 98.6 |
-| Joint single DiT (no cascade) | 93.2 |
-| Action DiT only (no video) | 89.5 |
-| Video DiT → decoded image conditioning | 95.1 |
-| Video DiT → latent conditioning | 98.6 |
+### Feature Extraction Layer (Figure 8)
+- Layer 2-8: Poor
+- **Layer 18: Optimal**
+- Layer 24-28: "Drastic collapse" (pixel reconstruction에 특화)
+- All layers 평균: 단일 layer보다 열위
 
-- **Cascaded > joint**: 5.4%p 차이로 cascaded 구조의 우수성 입증
-- **Latent conditioning > decoded image**: 3.5%p 차이
+### Denoising Steps for Feature (Figure 8)
+- **Single forward pass: Optimal**
+- Step 증가 → 성능 단조 하락 → "pixel-level reconstruction에 over-commit"
 
----
-
-## 5. 관련 연구 비교
-
-| 모델 | Video Model | Action Model | Coupling | Inference |
-|------|-----------|-------------|---------|----------|
-| GR-1 | GPT-style AR | AR tokens | Joint decoder | Sequential |
-| UniPi | Diffusion | Inverse dynamics | 2-stage | Slow |
-| Motus | Latent world model | Flow matching | Joint | Medium |
-| **DiT4DiT** | **Diffusion Transformer** | **Diffusion Transformer** | **Cascaded** | **Medium** |
+### Joint vs Decoupled Training (Figure 8c)
+- t-SNE: Joint training → 더 선명한 temporal separation
+- Silhouette score: **0.09 → 0.17** (거의 2배)
 
 ---
 
-## 6. 한계 및 미해결 문제
+## 5. 효율성
 
-### 방법론적 미비점
-1. **추론 비용**: 두 개의 DiT를 순차 실행 → Video DiT denoising + Action DiT denoising = 총 latency 높음
-2. **Video DiT의 필요성**: 추론 시 실제로 비디오를 "생성"할 필요가 있는지 의문. Latent features만 필요하다면 full video generation이 불필요한 overhead
-3. **LIBERO saturation**: 98.6%에서 더 challenging한 벤치마크에서의 차별화가 필요
-4. **Real-robot 결과**: 시뮬레이션 위주. 실제 환경에서의 검증 부족
+| Metric | DiT4DiT | GR00T-N1.5 | Qwen3DiT |
+|--------|---------|-----------|----------|
+| Inference freq | **6 Hz** | 13 Hz | 9 Hz |
+| Convergence | **7x faster** | - | - |
+| Data efficiency | **10x** | - | - |
+| Params (trainable) | **2.2B** | - | - |
 
-### Attribution 문제
-- 98.6%의 기여가 **cascaded architecture** vs **DiT backbone** vs **video conditioning** 중 어디에서 오는지 완전히 분리되지 않음
-- Sample efficiency 개선이 video representation에서 오는 data augmentation 효과인지, architecture의 inductive bias인지 불명확
+- **6Hz는 가장 느림** → dual DiT의 computational overhead
+- 그러나 **7x 빠른 수렴 + 10x data efficiency**로 학습 비용 상쇄
 
 ---
 
-## 7. 총평
+## 6. 학습 설정
+
+- Sim pre-training: **241,450 episodes** (GR1 simulated)
+- Real fine-tuning: **200 demos/task** (Unitree G1)
+- Text encoder + visual VAE: **frozen**
+- 15% of GR00T-N1.5의 official training data 규모
+
+---
+
+## 7. 한계 및 미해결 문제
+
+1. **6Hz inference**: GR00T-N1.5 (13Hz), Qwen3DiT (9Hz) 대비 가장 느림. Real-time reactive control에 부적합
+2. **LIBERO saturation**: 98.6%에서 추가 차별화 어려움
+3. **Cosmos-2B 의존**: Video DiT 초기화에 대규모 pre-trained model 필요
+4. **Layer 18의 최적성**: 다른 아키텍처/데이터에서도 동일 layer가 optimal인지 불명확
+
+---
+
+## 8. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — DiT의 cascaded coupling이 참신 |
-| **Technical depth** | ★★★★☆ — 체계적 ablation |
-| **Experimental rigor** | ★★★☆☆ — LIBERO 집중, sim-only |
-| **Practical impact** | ★★★★☆ — Sample efficiency가 실용적 가치 |
-| **Writing quality** | ★★★★☆ — 명확 |
+| **Novelty** | ★★★★★ — Single-pass feature extraction의 발견이 매우 가치있음 |
+| **Technical depth** | ★★★★★ — Tri-timestep, layer ablation, joint vs decoupled 분석 |
+| **Experimental rigor** | ★★★★★ — LIBERO + RoboCasa + Real G1 + ablation 포괄적 |
+| **Practical impact** | ★★★★☆ — 6Hz가 deployment 제약 |
+| **Writing quality** | ★★★★☆ |
 
-**강점**: Video와 action을 분리하되 cascaded로 연결하는 설계가 우아하고 효과적. Sample efficiency 개선이 인상적. **약점**: LIBERO saturation, 추론 비용, real-world 검증 부재.
+**강점**: "Video reconstruction을 bypass하고 intermediate feature만 활용"이라는 핵심 통찰. 7x 수렴 + 10x data efficiency. **약점**: 6Hz latency, Cosmos-2B 의존.
 
 ---
 
-## 8. 🔥 예상 날카로운 질문 모음
+## 9. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | 추론 시 Video DiT를 skip하면? (Action DiT만 사용) | Ablation에서 89.5% (vs 98.6%). Video conditioning이 중요하나, 속도 trade-off |
-| 2 | Video DiT를 distill하여 1-step으로 만들면? | 유망한 방향. Consistency distillation 적용 가능하나 미탐구 |
-| 3 | LIBERO 말고 CALVIN이나 real-robot에서는? | 핵심 한계. LIBERO에서의 saturation이 다른 환경에서도 유지되는지 불명확 |
-| 4 | Sample efficiency 10x가 data size가 작을 때도 유지되는가? | 극소량(10 demo) 환경에서의 실험 부재 |
-| 5 | GigaWorld-Policy 같은 action-centered WAM과의 비교는? | 직접 비교 없음. DiT4DiT는 video-centered, GigaWorld는 action-centered WAM |
+| 1 | Fast-WAM과 어떻게 다른가? | Fast-WAM은 train-time only video, DiT4DiT는 single-pass feature extraction. 둘 다 test-time generation을 skip하나 메커니즘이 다름 |
+| 2 | 6Hz를 높이려면? | Video DiT를 distill하거나 feature extraction을 가속. 하지만 dual-DiT의 구조적 overhead |
+| 3 | Layer 18이 다른 모델에서도 최적인가? | Cosmos-2B specific일 수 있음. 다른 video backbone에서 재검증 필요 |
+| 4 | Joint training의 video loss가 실질적으로 필요한가? | λ=0이면 (action only) 어떻게 되는지 ablation이 더 명확했을 것 |
+
+<!-- VERIFIED: pdf -->

@@ -1,6 +1,6 @@
 # ECoT: Robotic Control via Embodied Chain-of-Thought Reasoning
 
-> **한 줄 요약**: VLA 모델에 embodied 특화 Chain-of-Thought (plans, subtasks, motions, visual features)를 도입하여, 추가 로봇 데이터 없이도 OpenVLA의 성공률을 28% 향상시키고 정책 실패의 해석가능성을 확보.
+> **한 줄 요약**: OpenVLA-7B에 6단계 embodied CoT (task rephrase→plan→subtask→move→gripper→objects)를 추가하여, Bridge V2에서 **Octo 대비 +45%p, OpenVLA 대비 +22%p** (ID 66%), Gemini 1.0으로 reasoning chain 자동 생성, 비동기 실행으로 +40% 추론 가속.
 
 ---
 
@@ -8,135 +8,144 @@
 
 ### 기존 연구의 구조적 한계
 - 기존 VLA는 "image→action" 직접 매핑 → 중간 추론 과정이 black-box
-- LLM의 CoT가 NLP에서 큰 성공을 거뒀으나, **로봇 제어에 적합한 CoT 구조**가 정의되지 않음
-- 로봇 실패 시 "왜 실패했는지" 진단 불가 → debugging이 극도로 어려움
+- 로봇 실패 시 "왜 실패했는지" 진단 불가
+- "Naive CoT" (단순 텍스트 reasoning)는 embodied context가 없어 효과 제한 (48% vs ECoT 66%)
 
 ### 핵심 질문
-- **로봇 제어에 특화된 CoT 구조란 무엇인가?**
-- **CoT가 action 품질을 실제로 향상시키는가, 아니면 단지 해석가능성만 제공하는가?**
+- **로봇 제어에 특화된 embodied reasoning 구조란 무엇인가?**
+- **CoT가 action 품질을 실제로 향상시키는가, 아니면 해석가능성만 제공하는가?**
 
 ---
 
 ## 2. 방법론 심층 분석
 
-### 2.1 Embodied CoT Structure
-
-4계층 structured reasoning:
+### 2.1 6-Step Embodied CoT Structure
 
 ```
-1. [Plan]: "나는 빨간 컵을 집어야 한다"
-2. [Subtask]: "먼저 빨간 컵 위로 이동"
-3. [Motion]: "오른쪽으로 5cm, 아래로 3cm 이동"
-4. [Grounding]: "빨간 컵은 이미지 좌측 상단에 위치"
+1. TASK: "나는 빨간 컵을 집어야 한다" (instruction rephrase)
+2. PLAN: "먼저 컵 위로 이동, 그 다음 집기" (high-level plan)
+3. SUBTASK: "현재: 컵 위로 이동 중" (current step)
+4. MOVE: "오른쪽으로 이동" (low-level primitive, 729 templates)
+5. GRIPPER: [x, y] (end-effector pixel position)
+6. OBJECTS: {"red cup": [bbox]} (visual grounding)
 ```
 
-이 reasoning tokens이 action prediction에 앞서 autoregressive하게 생성됨.
+### 2.2 Data Generation Pipeline
 
-> ❓ **예상 질문**: 이 4계층 구조를 왜 이렇게 설계했는가? 다른 granularity는?
-> **답변**: Plan→subtask→motion은 hierarchical task decomposition의 자연스러운 구조. Grounding은 VLM의 visual grounding 능력 활용. 3계층이나 5계층으로 변경한 ablation은 미수행 → 이 특정 구조의 최적성은 미검증.
+**7일간 Bridge V2 전체에 대해 자동 생성**:
+1. **Prismatic-7B VLM**: Scene description
+2. **Grounding DINO** (conf: box 0.3, text 0.2): Object detection
+3. **Proprioception 4-step lookahead**: 729 movement templates에서 매칭
+4. **OWLv2 + SAM + RANSAC**: Gripper pixel position
+5. **Gemini 1.0**: Synthetic reasoning chain 생성
 
-### 2.2 CoT Annotation 방식
-
-GPT-4V를 사용하여 기존 robot demonstration에 자동 CoT annotation 생성:
-
-$$\text{CoT}_t = \text{GPT-4V}(\mathbf{o}_t, \mathbf{l}, \text{template})$$
-
-- 수동 annotation 불필요하나 GPT-4V의 비용과 정확도에 의존
-- Template-guided 생성으로 일관성 확보
-
-> ❓ **예상 질문**: GPT-4V가 생성한 CoT의 정확도는? 잘못된 CoT가 action에 악영향을 미치지 않는가?
-> **답변**: 정확도에 대한 체계적 평가 미제공. 잘못된 CoT는 오히려 action을 방해할 수 있으며, 이는 "noisy label" 문제와 유사. 모델이 잘못된 CoT를 무시하는 법을 학습할 수도 있지만 보장 불가.
+> ❓ **예상 질문**: Gemini 1.0이 생성한 CoT의 정확도는?
+> **답변**: 체계적 정확도 평가 미제공. 잘못된 CoT는 "noisy label" 역할 → 모델이 잘못된 CoT를 무시하는 법을 학습할 수도 있으나 보장 불가. 다만 ECoT (66%) > Naive CoT (48%)이므로 embodied structure 자체의 가치가 입증.
 
 ### 2.3 Training
 
-OpenVLA backbone + CoT tokens을 추가 학습:
-- **추가 로봇 데이터 없이** 기존 데이터에 CoT annotation만 추가
-- Loss: CoT prediction + action prediction의 joint loss
+- **Base**: OpenVLA-7B (Prismatic + Llama 2)
+- **Dataset**: Bridge V2 (2.5M+ transitions, WidowX 6-DoF)
+- **Steps**: 80K (ECoT), 20K (fine-tuned OXE variant)
+- Reasoning + action tokens: 총 **~350 tokens** (action만은 7 tokens)
 
 ---
 
 ## 3. 실험 결과 심층 분석
 
-### SimplerEnv & Real Robot
+### Bridge V2 Real Robot (Table 1)
 
-| 모델 | SimplerEnv SR (%) | Real Robot SR (%) |
-|------|------------------|------------------|
-| OpenVLA | 48.7 | 32.0 |
-| **OpenVLA + ECoT** | **62.3 (+28%)** | **45.8** |
+| 모델 | ID View SR (%) | OOD View SR (%) |
+|------|---------------|----------------|
+| Octo | 21 | 16 |
+| OpenVLA (Bridge) | 44 | 30 |
+| RT-2-X (55B) | 47 | 48 |
+| Naive CoT | 48 | 48 |
+| **ECoT** | **66** | **64** |
 
-- **추가 데이터 없이 28% 향상**은 CoT의 효과를 강력히 입증
-- Real robot에서도 일관적 개선
+- **OpenVLA 대비 +22%p** (ID), **+34%p** (OOD)
+- **RT-2-X (55B) 대비 +19%p** (ID), +16%p (OOD) — 7B로 55B를 능가
+- **Naive CoT 대비 +18%p** → embodied structure의 가치
 
-### Interpretability
+### Inference Acceleration (Table 2)
 
-ECoT의 핵심 부가가치: 실패 시 어느 단계에서 추론이 잘못되었는지 진단 가능
-- Plan 오류: 잘못된 목표 설정
-- Subtask 오류: 순서 착오
-- Motion 오류: 방향/크기 착오
-- Grounding 오류: 물체 위치 오인식
+| 방법 | SR (%) | Speed 향상 |
+|------|--------|----------|
+| Full ECoT | 72% | baseline |
+| 5-Step Sync (매 5 step reasoning) | **72%** | **+24%** |
+| Asynchronous | 65% | **+40%** |
+
+- 5-step sync: 성능 유지하면서 24% 가속 → **매 step reasoning이 불필요**
+
+### Reasoning Variants (Table 3, OOD subset)
+
+| 변형 | SR (%) |
+|------|--------|
+| Base ECoT | 69 |
+| Frozen Bbox | 60 |
+| Co-trained (VLM data 3:1) | 56 |
+| Fine-tuned OXE | 54 |
+
+### Human Intervention (Section 5.4)
+
+ChatGPT로 reasoning chain 수정 → 가장 어려운 task에서 **32% → 80%** (single feedback)
 
 ---
 
 ## 4. Ablation 분석
 
-| CoT 구성 | SR 변화 |
-|---------|--------|
-| Full 4-layer CoT | +28% |
-| Plan only | +12% |
-| Plan + subtask | +18% |
-| Plan + subtask + motion | +24% |
-| Random CoT (noise) | -5% (성능 하락) |
+### Naive CoT vs Embodied CoT
+- Naive CoT (text only): **48%**
+- Embodied CoT (6-step): **66%** (+18%p)
+- → "Embodied reasoning steps are key to improving policy performance"
 
-- 각 layer가 점진적으로 기여
-- **Random CoT는 해로움** → CoT의 정보적 가치가 핵심
+### Frozen Bounding Boxes
+- Bbox를 freeze하고 high-level만 업데이트: **60%** (−6%p)
+- **30-50% inference speedup** 획득
 
----
-
-## 5. 관련 연구 비교
-
-| 모델 | CoT Type | Annotation | Interpretable | Data-Free |
-|------|----------|-----------|--------------|-----------|
-| Inner Monologue | Text plan | Manual | ✓ | ✗ |
-| SayCan | Affordance scoring | Manual | △ | ✗ |
-| CoT-VLA | Visual (images) | Auto (trajectory) | △ | ✓ |
-| **ECoT** | **4-layer text** | **Auto (GPT-4V)** | **✓✓** | **✓** |
+### Co-training with VLM Data
+- Robot:VLM = 3:1 비율로 co-training: **56%**
+- "No measurable performance improvement" — VLM 데이터가 오히려 방해
 
 ---
 
-## 6. 한계 및 미해결 문제
+## 5. 한계 및 미해결 문제
 
-### 방법론적 미비점
-1. **GPT-4V annotation 의존**: 비용이 높고, GPT-4V의 환각(hallucination)이 CoT 품질을 제한. 특히 복잡한 공간 관계에서 GPT-4V의 판단이 부정확할 수 있음
-2. **CoT 생성의 latency**: 매 timestep에서 수십 개 CoT 토큰을 생성 → action prediction 전 추가 지연
-3. **CoT 사용의 선택적 불가**: 모든 timestep에서 full CoT 생성 → 단순 동작에도 불필요한 reasoning overhead
-4. **자체 생성 CoT로의 전환 부재**: GPT-4V annotation에서 self-generated로의 distillation이 미탐구
+### 방법론적 미비점 (저자 명시 포함)
+1. **350 tokens의 latency**: Action 7 tokens → ECoT 350 tokens = **50x 더 많은 토큰 생성**. 5-step sync로 완화하나 근본적 overhead
+2. **Gemini 1.0 annotation 비용**: 7일간 전체 데이터셋 annotation → 비용 상당
+3. **Bridge V2 only**: 단일 로봇(WidowX)·환경에서만 검증. Cross-embodiment 미확인
+4. **VLM co-training 실패**: VLM 데이터 co-training이 오히려 해로움 → understanding과 action의 trade-off가 단순 mixing으로 해결 안 됨
+5. **Reasoning 정확도 미평가**: GT CoT가 없으므로 reasoning 자체의 accuracy 직접 측정 불가
 
 ### Attribution 문제
-- 28% 향상 중 "CoT 구조"의 기여 vs "GPT-4V의 추가 지식 주입" 효과 분리 어려움
-- GPT-4V가 scene에 대한 추가 정보(물체 이름, 색상 등)를 annotation에 포함 → 이 정보 자체가 action 향상에 기여할 수 있음
+- 66%의 향상이 "embodied CoT"의 구조적 이점인지, "Gemini 1.0의 추가 지식 주입" 효과인지 분리 어려움
+- Naive CoT (48%)와의 18%p 차이가 "structure"의 기여이나, Gemini가 다른 정보(물체 이름, 공간 관계)도 주입했을 수 있음
 
 ---
 
-## 7. 총평
+## 6. 총평
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — Embodied CoT 구조 정의 |
-| **Technical depth** | ★★★☆☆ — 간결하나 CoT 품질 분석 부족 |
-| **Experimental rigor** | ★★★★☆ — Real robot + ablation |
-| **Practical impact** | ★★★★★ — Interpretability + 성능 향상 동시 달성 |
-| **Writing quality** | ★★★★★ — 매우 명확 |
+| **Novelty** | ★★★★★ — Embodied CoT 구조 정의, 자동 데이터 생성 파이프라인 |
+| **Technical depth** | ★★★★☆ — 6-step structure, acceleration, human intervention |
+| **Experimental rigor** | ★★★★☆ — Real robot, ID/OOD, acceleration, ablation |
+| **Practical impact** | ★★★★★ — Interpretability + 성능 향상, 자동 annotation |
+| **Writing quality** | ★★★★★ |
 
-**강점**: 추가 데이터 없이 28% 향상은 놀라운 결과. 해석가능성이 실질적 debugging 도구로 기능. **약점**: GPT-4V 의존성, CoT 품질 보장 미비, latency overhead.
+**강점**: +22%p (OpenVLA 대비)를 추가 로봇 데이터 없이 달성. 해석가능성이 실질적 debugging 도구. Human intervention으로 32%→80% 복구 가능. **약점**: 350 tokens overhead, Bridge V2 단일 환경, annotation 비용.
 
 ---
 
-## 8. 🔥 예상 날카로운 질문 모음
+## 7. 🔥 예상 날카로운 질문 모음
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | GPT-4V 없이 CoT를 생성하는 방법은? | Self-training으로 모델이 스스로 CoT를 학습하는 방향 (Diffusion-VLA의 접근). 초기에는 외부 모델 의존이 불가피 |
-| 2 | CoT가 항상 필요한가? 단순 task에서 skip하면? | Dynamic CoT (필요할 때만 생성)가 바람직하나 미구현 |
-| 3 | CoT의 "정확성"을 어떻게 측정하는가? | Ground-truth CoT가 없으므로 직접 측정 불가. Action success를 proxy로 사용하나 간접적 |
-| 4 | Visual CoT (CoT-VLA)와 text CoT (ECoT) 중 어느 것이 더 유효한가? | Task-dependent. Spatial precision은 visual CoT, semantic reasoning은 text CoT. 결합이 최적일 수 있음 |
-| 5 | 28% 향상 중 "GPT-4V 지식 주입" 효과를 어떻게 분리하는가? | Random text(동일 길이)로 대체 시 -5%p. 구조화된 정보의 가치와 noise의 해로움 모두 확인 |
+| 1 | 350 tokens이면 latency가 50x 아닌가? | 맞음. 하지만 5-step sync로 성능 유지 + 24% 가속. 매 step reasoning이 불필요 |
+| 2 | Naive CoT (48%)와의 18%p 차이가 structure 때문인가, 정보 때문인가? | Structure (GRIPPER, OBJECTS)의 visual grounding이 핵심. 텍스트만으로는 spatial precision 부족 |
+| 3 | Cross-embodiment에서도 작동하는가? | Fine-tuned OXE variant가 "unseen robots에서도 reasoning을 생성"하나 성능은 54%로 base (69%) 대비 하락 |
+| 4 | CoT-VLA (visual)와 ECoT (text)를 결합하면? | 이론적으로 상보적 (spatial precision + semantic reasoning). 다만 latency 추가 증가 |
+| 5 | Human intervention의 scalability는? | 1회 feedback으로 32%→80%는 인상적이나, 매 failure마다 사람이 개입하는 것은 비실용적. 자동 correction이 필요 |
+
+<!-- VERIFIED: pdf -->
