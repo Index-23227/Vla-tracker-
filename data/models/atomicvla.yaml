@@ -1,32 +1,29 @@
-# Paper: AtomicVLA: Unlocking the Potential of Atomic Skill Learning in Robots
-# arXiv: 2603.07648
-
 name: AtomicVLA
-full_name: "AtomicVLA: Unlocking the Potential of Atomic Skill Learning in Robots"
-organization: "Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology"
-date: "2026-03-08"
+full_name: 'AtomicVLA: Unlocking the Potential of Atomic Skill Learning in Robots'
+organization: Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology
+date: '2026-03-08'
 paper_url: https://arxiv.org/abs/2603.07648
 code_url: https://github.com/zhanglk9/AtomicVLA
-venue: "CVPR2026"
+venue: CVPR2026
 open_source: true
-
 architecture:
-  backbone: "PaliGemma (SigLIP + Gemma 2B, via pi0)"
-  llm: "Gemma 2B"
-  action_head: "Skill-Guided MoE (SG-MoE)"
-  parameters: "4.17B"
+  backbone: PaliGemma (SigLIP + Gemma 2B, via pi0)
+  llm: Gemma 2B
+  action_head: Skill-Guided MoE (SG-MoE)
+  parameters: 4.17B
+  action_head_category: flow_matching
+key_innovation: 'Unified planning-and-execution framework with Skill-Guided Mixture-of-Experts (SG-MoE) for atomic skill learning.
+  A flexible routing encoder automatically assigns dedicated atomic experts to new skills, enabling continual skill acquisition.
 
-key_innovation: >
-  Unified planning-and-execution framework with Skill-Guided Mixture-of-Experts (SG-MoE)
-  for atomic skill learning. A flexible routing encoder automatically assigns dedicated
-  atomic experts to new skills, enabling continual skill acquisition.
-
+  '
 benchmarks:
   libero:
     libero_long: 95.2
     libero_avg: 96.6
-
 eval_conditions:
-  libero: "fine-tuned"
-
-tags: [libero, calvin, CVPR2026, open-source]
+  libero: fine-tuned
+tags:
+- libero
+- calvin
+- CVPR2026
+- open-source

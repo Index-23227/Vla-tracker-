@@ -1,23 +1,30 @@
 name: SuSIE
-version: "1.0"
-organization: "UC Berkeley"
+version: '1.0'
+organization: UC Berkeley
 paper_url: https://arxiv.org/abs/2310.10639
 code_url: https://github.com/rail-berkeley/susie
-date: "2023-10-01"
-venue: "ICRA 2024"
+date: '2023-10-01'
+venue: ICRA 2024
 architecture:
-  backbone: "InstructPix2Pix (fine-tuned)"
+  backbone: InstructPix2Pix (fine-tuned)
   llm: null
-  action_head: "low-level diffusion policy from subgoal image"
-  action_space: "continuous"
+  action_head: low-level diffusion policy from subgoal image
+  action_space: continuous
   parameters: null
-  key_innovation: "Hierarchical: high-level generates subgoal image via image editing diffusion, low-level policy reaches the subgoal"
+  key_innovation: 'Hierarchical: high-level generates subgoal image via image editing diffusion, low-level policy reaches
+    the subgoal'
+  action_head_category: diffusion
 training:
-  dataset: "Bridge V2"
-  method: "Fine-tune InstructPix2Pix for subgoal generation + train low-level policy"
+  dataset: Bridge V2
+  method: Fine-tune InstructPix2Pix for subgoal generation + train low-level policy
   compute: null
 benchmarks: {}
 open_source: true
-model_type: "video"
+model_type: video
 inference_hz: null
-tags: [subgoal-generation, image-editing, hierarchical, manipulation, open-source]
+tags:
+- subgoal-generation
+- image-editing
+- hierarchical
+- manipulation
+- open-source

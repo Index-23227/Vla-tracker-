@@ -10,10 +10,11 @@ tags:
 - adaptive-decoding
 - open-source
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B
   action_head: discrete diffusion over tokenized action chunks with adaptive decoding order
   parameters: 7B
+  action_head_category: discrete_diffusion
 benchmarks:
   libero:
     libero_avg: 96.3

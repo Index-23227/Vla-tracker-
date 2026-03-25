@@ -1,33 +1,39 @@
 name: HybridVLA
-version: "1.0"
-organization: "ByteDance"
+version: '1.0'
+organization: ByteDance
 paper_url: https://arxiv.org/abs/2503.10631
 code_url: null
-date: "2025-03-13"
+date: '2025-03-13'
 venue: null
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
-  action_head: "hybrid (diffusion + autoregressive)"
-  action_space: "continuous"
-  parameters: "7B"
-  key_innovation: "Dual action heads - autoregressive for coarse planning + diffusion for fine-grained actions"
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B
+  action_head: hybrid (diffusion + autoregressive)
+  action_space: continuous
+  parameters: 7B
+  key_innovation: Dual action heads - autoregressive for coarse planning + diffusion for fine-grained actions
+  action_head_category: hybrid
 training:
-  dataset: "Cross-embodiment robot data + language instructions"
-  compute: "32 A100 GPUs"
+  dataset: Cross-embodiment robot data + language instructions
+  compute: 32 A100 GPUs
 benchmarks:
   libero:
     libero_spatial: 91.4
     libero_object: 94.2
     libero_goal: 87.6
     libero_long: 69.8
-    source: "Table 1, HybridVLA paper"
-    date_reported: "2025-03-13"
-    eval_condition: "fine-tuned"
+    source: Table 1, HybridVLA paper
+    date_reported: '2025-03-13'
+    eval_condition: fine-tuned
   calvin:
     calvin_abc_d_avg_len: 3.6
-    source: "HybridVLA paper"
-    date_reported: "2025-03-13"
-    eval_condition: "fine-tuned"
+    source: HybridVLA paper
+    date_reported: '2025-03-13'
+    eval_condition: fine-tuned
 open_source: false
-tags: [7B, hybrid, diffusion, autoregressive, manipulation]
+tags:
+- 7B
+- hybrid
+- diffusion
+- autoregressive
+- manipulation

@@ -1,23 +1,29 @@
 name: UniPi
-version: "1.0"
-organization: "Google DeepMind"
+version: '1.0'
+organization: Google DeepMind
 paper_url: https://arxiv.org/abs/2302.00111
 code_url: null
-date: "2023-02-01"
-venue: "ICML 2023"
+date: '2023-02-01'
+venue: ICML 2023
 architecture:
-  backbone: "Video Diffusion Model"
+  backbone: Video Diffusion Model
   llm: null
-  action_head: "inverse dynamics from generated video"
-  action_space: "continuous"
+  action_head: inverse dynamics from generated video
+  action_space: continuous
   parameters: null
-  key_innovation: "Generates future video frames via text-conditioned diffusion, then extracts actions with inverse dynamics model"
+  key_innovation: Generates future video frames via text-conditioned diffusion, then extracts actions with inverse dynamics
+    model
+  action_head_category: inverse_dynamics
 training:
-  dataset: "Language Table, CLIPort"
-  method: "Video diffusion pre-training"
+  dataset: Language Table, CLIPort
+  method: Video diffusion pre-training
   compute: null
 benchmarks: {}
 open_source: false
-model_type: "video"
+model_type: video
 inference_hz: null
-tags: [video-diffusion, planning, language-conditioned, inverse-dynamics]
+tags:
+- video-diffusion
+- planning
+- language-conditioned
+- inverse-dynamics

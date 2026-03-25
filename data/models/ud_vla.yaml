@@ -1,34 +1,41 @@
 name: UD-VLA
-version: "1.0"
-organization: "Tsinghua University / Shanghai AI Lab"
+version: '1.0'
+organization: Tsinghua University / Shanghai AI Lab
 paper_url: https://arxiv.org/abs/2511.01718
 code_url: null
-date: "2025-11-03"
-venue: "ICLR 2026"
+date: '2025-11-03'
+venue: ICLR 2026
 architecture:
-  backbone: "Emu3 + MOVQ visual tokenizer"
-  llm: "Emu3"
-  action_head: "joint discrete denoising diffusion (JD3P)"
-  action_space: "discrete tokens (VQ + FAST)"
-  parameters: "3B"
-  key_innovation: "Unified diffusion over both vision and action tokens; synchronous denoising is 4x faster than autoregressive decoding"
+  backbone: Emu3 + MOVQ visual tokenizer
+  llm: Emu3
+  action_head: joint discrete denoising diffusion (JD3P)
+  action_space: discrete tokens (VQ + FAST)
+  parameters: 3B
+  key_innovation: Unified diffusion over both vision and action tokens; synchronous denoising is 4x faster than autoregressive
+    decoding
+  action_head_category: discrete_diffusion
 training:
-  dataset: "Open X-Embodiment + internet data"
-  method: "Joint denoising diffusion pre-training"
-  compute: "64 A100 GPUs"
+  dataset: Open X-Embodiment + internet data
+  method: Joint denoising diffusion pre-training
+  compute: 64 A100 GPUs
 benchmarks:
   libero:
     libero_spatial: 97.2
     libero_object: 97.8
     libero_goal: 93.6
     libero_long: 78.4
-    source: "UD-VLA paper"
-    date_reported: "2025-11-03"
-    eval_condition: "fine-tuned"
+    source: UD-VLA paper
+    date_reported: '2025-11-03'
+    eval_condition: fine-tuned
   calvin:
     calvin_abc_d_avg_len: 4.5
-    source: "UD-VLA paper"
-    date_reported: "2025-11-03"
-    eval_condition: "fine-tuned"
+    source: UD-VLA paper
+    date_reported: '2025-11-03'
+    eval_condition: fine-tuned
 open_source: false
-tags: [3B, diffusion, unified-denoising, fast-inference, manipulation]
+tags:
+- 3B
+- diffusion
+- unified-denoising
+- fast-inference
+- manipulation

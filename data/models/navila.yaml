@@ -7,7 +7,6 @@ venue: RSS 2025
 open_source: true
 model_type: navigation
 benchmarks: {}
-
 tags:
 - 8B
 - navigation
@@ -15,7 +14,8 @@ tags:
 - legged-robot
 - open-source
 architecture:
-  backbone: "SigLIP"
-  llm: "LLaMA 3 8B"
+  backbone: SigLIP
+  llm: LLaMA 3 8B
   action_head: 'hierarchical: NVILA-8B high-level VLA + low-level visual locomotion RL'
-  parameters: "8B"
+  parameters: 8B
+  action_head_category: other

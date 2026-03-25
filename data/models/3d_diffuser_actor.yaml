@@ -1,27 +1,28 @@
 name: 3D Diffuser Actor
-version: "1.0"
-organization: "ETH Zurich / NVIDIA"
+version: '1.0'
+organization: ETH Zurich / NVIDIA
 paper_url: https://arxiv.org/abs/2402.10885
 code_url: https://github.com/nickgkan/3d_diffuser_actor
-date: "2024-02-16"
-venue: "CoRL 2024"
+date: '2024-02-16'
+venue: CoRL 2024
 architecture:
-  backbone: "3D scene encoder (point cloud + features)"
-  llm: "CLIP (language conditioning)"
-  action_head: "diffusion (3D denoising)"
-  action_space: "continuous (SE(3) poses)"
-  parameters: "~50M"
-  key_innovation: "Diffusion over 3D action space; uses 3D scene representations for robust manipulation"
+  backbone: 3D scene encoder (point cloud + features)
+  llm: CLIP (language conditioning)
+  action_head: diffusion (3D denoising)
+  action_space: continuous (SE(3) poses)
+  parameters: ~50M
+  key_innovation: Diffusion over 3D action space; uses 3D scene representations for robust manipulation
+  action_head_category: diffusion
 training:
-  dataset: "RLBench / CALVIN demonstrations"
-  method: "3D-conditioned diffusion policy"
-  compute: "8 A100 GPUs"
+  dataset: RLBench / CALVIN demonstrations
+  method: 3D-conditioned diffusion policy
+  compute: 8 A100 GPUs
 benchmarks:
   rlbench:
     rlbench_18tasks: 68.2
-    source: "Table 1, 3D Diffuser Actor paper"
-    date_reported: "2024-02-16"
-    eval_condition: "fine-tuned"
+    source: Table 1, 3D Diffuser Actor paper
+    date_reported: '2024-02-16'
+    eval_condition: fine-tuned
   calvin:
     calvin_abc_d_avg_len: 3.2
     calvin_abc_d_1: 92.4
@@ -29,8 +30,15 @@ benchmarks:
     calvin_abc_d_3: 62.4
     calvin_abc_d_4: 46.8
     calvin_abc_d_5: 33.6
-    source: "Table 2, 3D Diffuser Actor paper"
-    date_reported: "2024-02-16"
-    eval_condition: "fine-tuned"
+    source: Table 2, 3D Diffuser Actor paper
+    date_reported: '2024-02-16'
+    eval_condition: fine-tuned
 open_source: true
-tags: [50M, diffusion, 3D, manipulation, open-source, rlbench, calvin]
+tags:
+- 50M
+- diffusion
+- 3D
+- manipulation
+- open-source
+- rlbench
+- calvin

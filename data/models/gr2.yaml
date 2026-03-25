@@ -1,22 +1,24 @@
 name: GR-2
-version: "1.0"
-organization: "ByteDance"
+version: '1.0'
+organization: ByteDance
 paper_url: https://arxiv.org/abs/2410.06158
 code_url: null
-date: "2024-10-08"
+date: '2024-10-08'
 venue: null
-venue_note: "Tech report (arXiv preprint); not published at a peer-reviewed venue"
+venue_note: Tech report (arXiv preprint); not published at a peer-reviewed venue
 architecture:
-  backbone: "Video GPT Transformer"
-  llm: "Custom GPT (1.5B)"
-  action_head: "autoregressive (video prediction + action)"
-  action_space: "continuous"
-  parameters: "1.5B"
-  key_innovation: "Scaled-up GR-1; pre-trained on 38M internet video clips, then fine-tuned on robot data; generates video predictions as world model"
+  backbone: Video GPT Transformer
+  llm: Custom GPT (1.5B)
+  action_head: autoregressive (video prediction + action)
+  action_space: continuous
+  parameters: 1.5B
+  key_innovation: Scaled-up GR-1; pre-trained on 38M internet video clips, then fine-tuned on robot data; generates video
+    predictions as world model
+  action_head_category: autoregressive
 training:
-  dataset: "38M video clips + 100K robot trajectories"
-  method: "Video pre-training → robot fine-tuning"
-  compute: "256 A100 GPUs"
+  dataset: 38M video clips + 100K robot trajectories
+  method: Video pre-training → robot fine-tuning
+  compute: 256 A100 GPUs
 benchmarks:
   calvin:
     calvin_abc_d_avg_len: 3.8
@@ -25,10 +27,15 @@ benchmarks:
     calvin_abc_d_3: 68.4
     calvin_abc_d_4: 54.8
     calvin_abc_d_5: 42.1
-    source: "Table 1, GR-2 paper"
-    date_reported: "2024-10-08"
-    eval_condition: "fine-tuned"
+    source: Table 1, GR-2 paper
+    date_reported: '2024-10-08'
+    eval_condition: fine-tuned
 open_source: false
-model_type: "vla"
+model_type: vla
 inference_hz: 3
-tags: [1.5B, autoregressive, video-prediction, manipulation, world-model]
+tags:
+- 1.5B
+- autoregressive
+- video-prediction
+- manipulation
+- world-model

@@ -9,10 +9,11 @@ tags:
 - trajectory-level
 - VLM-reward
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B
   action_head: trajectory-level RL on OpenVLA-7B with VLM process reward model
   parameters: 7B
+  action_head_category: autoregressive
 benchmarks:
   libero:
     libero_note: +4.5% over strongest baseline on 40 LIBERO tasks

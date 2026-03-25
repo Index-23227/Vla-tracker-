@@ -1,24 +1,31 @@
 name: NanoVLA
-version: "1.0"
-full_name: "NanoVLA: Routing Decoupled Vision-Language Understanding for Nano-sized Generalist Robotic Policies"
-organization: "Xiaomi EV"
+version: '1.0'
+full_name: 'NanoVLA: Routing Decoupled Vision-Language Understanding for Nano-sized Generalist Robotic Policies'
+organization: Xiaomi EV
 inference_hz: null
-date: "2025-10-29"
+date: '2025-10-29'
 paper_url: https://arxiv.org/abs/2510.25122
 code_url: null
 venue: null
 architecture:
-  backbone: "ResNet18"
-  llm: "BERT-base (NanoVLA-S) / Qwen2.5 0.5B (NanoVLA-L)"
-  action_head: "efficient action head"
-  action_space: "continuous"
-  parameters: "~50M"
-  key_innovation: "52x faster inference on edge devices; 98% fewer parameters vs prior SOTA VLAs via routing decoupled vision-language understanding"
+  backbone: ResNet18
+  llm: BERT-base (NanoVLA-S) / Qwen2.5 0.5B (NanoVLA-L)
+  action_head: efficient action head
+  action_space: continuous
+  parameters: ~50M
+  key_innovation: 52x faster inference on edge devices; 98% fewer parameters vs prior SOTA VLAs via routing decoupled vision-language
+    understanding
+  action_head_category: regression
 training:
-  dataset: "Cross-embodiment robot data"
-  method: "Decoupled routing training"
-  compute: "not specified"
+  dataset: Cross-embodiment robot data
+  method: Decoupled routing training
+  compute: not specified
 benchmarks: {}
 open_source: false
-model_type: "vla"
-tags: [nano, edge-device, efficient, 52x-faster, manipulation]
+model_type: vla
+tags:
+- nano
+- edge-device
+- efficient
+- 52x-faster
+- manipulation
