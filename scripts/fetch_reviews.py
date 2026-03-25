@@ -8,7 +8,7 @@ Supported venues:
   - NeurIPS 2025 (davidheineman/neurips-2025)   → accept list only
   - CoLM 2025 (davidheineman/colm-2025)         → accept list only
 
-Matching: model YAML paper_url → arXiv ID → fuzzy title match against venue data.
+Matching: model YAML full_name/name → normalized fuzzy title match against venue data.
 Output: data/paper_reviews.json
 """
 
@@ -247,14 +247,46 @@ ALL_PARSERS = [
 SIMILARITY_THRESHOLD = 0.80
 
 
+def _find_best_match(norm_model_title: str, venue_indices: list) -> tuple:
+    """Find the best matching paper across all venues.
+
+    Prioritizes: exact match > fuzzy match with reviews > fuzzy match without.
+    Returns (best_parser, best_row, best_score).
+    """
+    best_match_info = (None, None, 0.0)
+
+    for parser, idx in venue_indices:
+        # Exact normalized match — immediate return
+        if norm_model_title in idx:
+            row_i = idx[norm_model_title][0]
+            return (parser, parser.ds[row_i], 1.0)
+
+        # Fuzzy: only check titles that share at least one word (cheap pre-filter)
+        model_words = set(norm_model_title.split())
+        for norm_t, row_indices in idx.items():
+            # Skip titles with zero word overlap
+            if not model_words & set(norm_t.split()):
+                continue
+            sim = SequenceMatcher(None, norm_model_title, norm_t).ratio()
+            if sim <= best_match_info[2]:
+                continue
+            # Prefer venues with reviews at equal score
+            if sim == best_match_info[2] and best_match_info[0] and best_match_info[0].has_reviews:
+                continue
+            best_match_info = (parser, parser.ds[row_indices[0]], sim)
+
+    return best_match_info
+
+
 def match_models_to_venues(models: list[dict], parsers: list[VenueParser]) -> list[dict]:
     """Match model papers against venue datasets by title similarity."""
     results = []
     matched_count = 0
 
-    # Build title indices for all venues
+    # Build title indices for all venues (review-having venues first)
     venue_indices = []
-    for parser in parsers:
+    sorted_parsers = sorted(parsers, key=lambda p: (not p.has_reviews, p.name))
+    for parser in sorted_parsers:
         try:
             parser.load()
             idx = parser.build_index()
@@ -268,27 +300,7 @@ def match_models_to_venues(models: list[dict], parsers: list[VenueParser]) -> li
             continue
 
         norm_model_title = normalize_title(model_title)
-        best_match = None
-        best_score = 0.0
-
-        for parser, idx in venue_indices:
-            # Try exact normalized match first
-            if norm_model_title in idx:
-                row_i = idx[norm_model_title][0]
-                row = parser.ds[row_i]
-                best_match = parser.parse_paper(row)
-                best_match["match_score"] = 1.0
-                best_score = 1.0
-                break
-
-            # Fuzzy match
-            for norm_t, row_indices in idx.items():
-                sim = title_similarity(model_title, norm_t)  # compare against un-normalized for SequenceMatcher
-                if sim > best_score:
-                    best_score = sim
-                    row = parser.ds[row_indices[0]]
-                    best_match = parser.parse_paper(row)
-                    best_match["match_score"] = round(sim, 3)
+        parser, row, score = _find_best_match(norm_model_title, venue_indices)
 
         entry = {
             "model_name": model["name"],
@@ -296,10 +308,12 @@ def match_models_to_venues(models: list[dict], parsers: list[VenueParser]) -> li
             "arxiv_id": model["arxiv_id"],
         }
 
-        if best_match and best_score >= SIMILARITY_THRESHOLD:
-            entry.update(best_match)
+        if parser and row and score >= SIMILARITY_THRESHOLD:
+            match_data = parser.parse_paper(row)
+            match_data["match_score"] = round(score, 3)
+            entry.update(match_data)
             matched_count += 1
-            print(f"  ✓ {model['name']} → {best_match['venue']} (score={best_score:.2f}, decision={best_match.get('decision')})")
+            print(f"  ✓ {model['name']} → {match_data['venue']} (score={score:.2f}, decision={match_data.get('decision')})")
         else:
             entry.update({
                 "venue": None,
@@ -308,10 +322,10 @@ def match_models_to_venues(models: list[dict], parsers: list[VenueParser]) -> li
                 "review_avg": None,
                 "confidence_avg": None,
                 "reviews": [],
-                "match_score": round(best_score, 3) if best_score > 0 else 0,
+                "match_score": round(score, 3) if score > 0 else 0,
             })
-            if best_score > 0.5:
-                print(f"  ~ {model['name']} → near miss (score={best_score:.2f})")
+            if score > 0.5:
+                print(f"  ~ {model['name']} → near miss (score={score:.2f})")
 
         results.append(entry)
 
