@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "data" / "models"
 BENCHMARKS_DIR = ROOT / "data" / "benchmarks"
 REVIEWS_FILE = ROOT / "data" / "paper_reviews.json"
+AI_REVIEWS_DIR = ROOT / "data" / "ai_reviews"
 OUTPUT_FILE = ROOT / "data" / "leaderboard.json"
 DASHBOARD_COPY = ROOT / "dashboard" / "src" / "data" / "leaderboard.json"
 
@@ -42,6 +43,34 @@ def load_reviews() -> dict[str, dict]:
     with open(REVIEWS_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     return {p["model_name"]: p for p in data.get("papers", []) if p.get("venue")}
+
+
+def load_ai_reviews() -> dict[str, str]:
+    """Load AI-generated reviews indexed by model name."""
+    reviews = {}
+    if not AI_REVIEWS_DIR.exists():
+        return reviews
+
+    # Build name→file mapping for special cases
+    SPECIAL = {
+        "3D_Diffuser_Actor": "3D Diffuser Actor",
+        "Diffusion_Policy": "Diffusion Policy",
+        "Gemini_Robotics": "Gemini Robotics",
+        "Mobility_VLA": "Mobility VLA",
+        "pi_star_0.6": "pi*0.6",
+    }
+
+    for md_file in sorted(AI_REVIEWS_DIR.glob("*.md")):
+        stem = md_file.stem
+        model_name = SPECIAL.get(stem, stem)
+        with open(md_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        verified = "VERIFIED: pdf" in content
+        reviews[model_name] = {
+            "content": content,
+            "verified": verified,
+        }
+    return reviews
 
 
 def load_all_benchmarks() -> dict[str, dict]:
@@ -173,7 +202,8 @@ def compute_robocasa_avg(benchmarks: dict) -> float | None:
 
 
 def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
-                      reviews: dict[str, dict] | None = None) -> dict:
+                      reviews: dict[str, dict] | None = None,
+                      ai_reviews: dict[str, dict] | None = None) -> dict:
     leaderboard_entries = []
 
     for model in models:
@@ -256,6 +286,10 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
                 "openreview_url": rev.get("openreview_url"),
             }
 
+        # Merge AI review if available
+        if ai_reviews and model["name"] in ai_reviews:
+            entry["ai_review"] = ai_reviews[model["name"]]
+
         leaderboard_entries.append(entry)
 
     # Sort by LIBERO average (descending), models without LIBERO go to end
@@ -290,8 +324,12 @@ def main():
     reviews = load_reviews()
     print(f"  Found reviews for {len(reviews)} models")
 
+    print("Loading AI reviews...")
+    ai_reviews = load_ai_reviews()
+    print(f"  Found {len(ai_reviews)} AI reviews")
+
     print("Building leaderboard...")
-    leaderboard = build_leaderboard(models, benchmarks_meta, reviews)
+    leaderboard = build_leaderboard(models, benchmarks_meta, reviews, ai_reviews)
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
