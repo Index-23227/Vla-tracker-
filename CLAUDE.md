@@ -143,6 +143,29 @@ python scripts/scan_arxiv.py --days 7
 python scripts/generate_model_yaml.py --input data/scan_candidates.json --top 10
 ```
 
+### AI Paper Reviews
+
+AI-generated seminar-style reviews are stored in `data/ai_reviews/`. Each review follows a structured format (1-12 sections) suitable for academic seminars.
+
+```bash
+# Check review coverage (which models are missing reviews)
+python scripts/check_reviews.py
+
+# Reviews are markdown files in data/ai_reviews/
+# Referenced from data/paper_reviews.json (ai_review field)
+```
+
+**Review verification workflow:**
+1. Read the paper PDF (via arxiv)
+2. Verify/correct experimental numbers, ablation tables, architecture details
+3. Add `<!-- VERIFIED: pdf -->` tag at end of review file when verified
+4. Reviews without this tag are flagged by `check_reviews.py`
+
+**When adding a new model:**
+- After creating the YAML, also generate an AI review for the paper
+- Read the paper PDF for accurate numbers
+- Place review in `data/ai_reviews/{ModelName}.md`
+
 ### Full rebuild from scratch
 ```bash
 pip install -r requirements.txt

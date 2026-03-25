@@ -69,6 +69,10 @@ jobs:
         run: python scripts/validate_data.py
         continue-on-error: true
 
+      - name: Check AI review coverage
+        if: steps.generate.outputs.created != '0'
+        run: python scripts/check_reviews.py || true
+
       - name: Create summary
         if: steps.generate.outputs.created != '0'
         id: summary
