@@ -18,6 +18,42 @@ function ScoreBar({ value, max = 100 }) {
   )
 }
 
+function renderInline(text) {
+  if (!text) return text
+  // Split by **bold** and `code` patterns
+  const parts = []
+  let remaining = text
+  let key = 0
+  while (remaining) {
+    // Find the next ** or ` marker
+    const boldIdx = remaining.indexOf('**')
+    const codeIdx = remaining.indexOf('`')
+
+    if (boldIdx === -1 && codeIdx === -1) {
+      parts.push(remaining)
+      break
+    }
+
+    // Decide which comes first
+    const nextIsBold = boldIdx !== -1 && (codeIdx === -1 || boldIdx < codeIdx)
+
+    if (nextIsBold) {
+      const endIdx = remaining.indexOf('**', boldIdx + 2)
+      if (endIdx === -1) { parts.push(remaining); break }
+      if (boldIdx > 0) parts.push(remaining.slice(0, boldIdx))
+      parts.push(<strong key={key++} className="text-white font-semibold">{remaining.slice(boldIdx + 2, endIdx)}</strong>)
+      remaining = remaining.slice(endIdx + 2)
+    } else {
+      const endIdx = remaining.indexOf('`', codeIdx + 1)
+      if (endIdx === -1) { parts.push(remaining); break }
+      if (codeIdx > 0) parts.push(remaining.slice(0, codeIdx))
+      parts.push(<code key={key++} className="px-1 py-0.5 bg-zinc-800 rounded text-[11px] text-emerald-300 font-mono">{remaining.slice(codeIdx + 1, endIdx)}</code>)
+      remaining = remaining.slice(endIdx + 1)
+    }
+  }
+  return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : parts
+}
+
 function SimpleMarkdown({ text }) {
   if (!text) return null
   const lines = text.split('\n')
@@ -35,12 +71,12 @@ function SimpleMarkdown({ text }) {
       <div key={`t${elements.length}`} className="overflow-x-auto my-2">
         <table className="w-full text-xs border-collapse">
           <thead>
-            <tr>{headerCells.map((c, i) => <th key={i} className="text-left px-2 py-1 border-b border-zinc-700 text-zinc-400 font-medium">{c.trim()}</th>)}</tr>
+            <tr>{headerCells.map((c, i) => <th key={i} className="text-left px-2 py-1 border-b border-zinc-700 text-zinc-400 font-medium">{renderInline(c.trim())}</th>)}</tr>
           </thead>
           <tbody>
             {bodyRows.map((row, ri) => (
               <tr key={ri} className="border-b border-zinc-800/50">
-                {row.map((c, ci) => <td key={ci} className="px-2 py-1 text-zinc-300">{c.trim()}</td>)}
+                {row.map((c, ci) => <td key={ci} className="px-2 py-1 text-zinc-300">{renderInline(c.trim())}</td>)}
               </tr>
             ))}
           </tbody>
@@ -67,25 +103,21 @@ function SimpleMarkdown({ text }) {
       continue
     } else if (inTable) { inTable = false; flushTable() }
 
-    if (line.startsWith('# ')) { elements.push(<h1 key={i} className="text-lg font-bold text-white mt-4 mb-2">{line.slice(2)}</h1>); continue }
-    if (line.startsWith('## ')) { elements.push(<h2 key={i} className="text-sm font-bold text-white mt-4 mb-1.5 border-b border-zinc-800 pb-1">{line.slice(3)}</h2>); continue }
-    if (line.startsWith('### ')) { elements.push(<h3 key={i} className="text-xs font-bold text-zinc-300 mt-3 mb-1">{line.slice(4)}</h3>); continue }
+    if (line.startsWith('# ')) { elements.push(<h1 key={i} className="text-lg font-bold text-white mt-4 mb-2">{renderInline(line.slice(2))}</h1>); continue }
+    if (line.startsWith('## ')) { elements.push(<h2 key={i} className="text-sm font-bold text-white mt-4 mb-1.5 border-b border-zinc-800 pb-1">{renderInline(line.slice(3))}</h2>); continue }
+    if (line.startsWith('### ')) { elements.push(<h3 key={i} className="text-xs font-bold text-zinc-300 mt-3 mb-1">{renderInline(line.slice(4))}</h3>); continue }
     if (line.startsWith('> ')) {
       const isWarning = line.includes('⚠️') || line.includes('❓')
-      elements.push(<blockquote key={i} className={`border-l-2 pl-3 my-2 text-xs ${isWarning ? 'border-amber-500/50 text-amber-200/80' : 'border-purple-500/50 text-zinc-400 italic'}`}>{line.slice(2)}</blockquote>)
+      elements.push(<blockquote key={i} className={`border-l-2 pl-3 my-2 text-xs ${isWarning ? 'border-amber-500/50 text-amber-200/80' : 'border-purple-500/50 text-zinc-400 italic'}`}>{renderInline(line.slice(2))}</blockquote>)
       continue
     }
-    if (line.startsWith('- ') || line.startsWith('* ')) { elements.push(<li key={i} className="text-xs text-zinc-300 ml-4 list-disc mb-0.5">{line.slice(2)}</li>); continue }
+    if (line.startsWith('- ') || line.startsWith('* ')) { elements.push(<li key={i} className="text-xs text-zinc-300 ml-4 list-disc mb-0.5">{renderInline(line.slice(2))}</li>); continue }
     if (line.startsWith('---')) { elements.push(<hr key={i} className="border-zinc-800 my-3" />); continue }
-    if (line.match(/^\d+\. /)) { elements.push(<li key={i} className="text-xs text-zinc-300 ml-4 list-decimal mb-0.5">{line.replace(/^\d+\. /, '')}</li>); continue }
+    if (line.match(/^\d+\. /)) { elements.push(<li key={i} className="text-xs text-zinc-300 ml-4 list-decimal mb-0.5">{renderInline(line.replace(/^\d+\. /, ''))}</li>); continue }
     if (line.trim() === '') { elements.push(<div key={i} className="h-1" />); continue }
     if (line.startsWith('<!--')) continue
 
-    elements.push(<p key={i} className="text-xs text-zinc-300 mb-1">{line.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').split('<b>').map((part, pi) => {
-      if (pi === 0) return part
-      const [bold, rest] = part.split('</b>')
-      return <span key={pi}><strong className="text-white">{bold}</strong>{rest}</span>
-    })}</p>)
+    elements.push(<p key={i} className="text-xs text-zinc-300 mb-1">{renderInline(line)}</p>)
   }
   if (inTable) flushTable()
 
