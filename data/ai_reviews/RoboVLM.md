@@ -68,3 +68,5 @@
 |---|------|---------------|
 | 1 | 이 결론이 6개월 후에도 유효한가? | 핵심 원칙(backbone 중요성, spatial feature)은 유지될 가능성. 구체적 최적 조합은 변할 수 있음 |
 | 2 | Real-world에서도 동일한 설계 축 중요도인가? | Sim과 real에서 다를 수 있음. Real-world 대규모 분석은 미수행 |
+
+<!-- VERIFIED: abstract-only -->

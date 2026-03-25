@@ -66,3 +66,5 @@ $$\mathbf{a}_{\text{unified}} = [\Delta\mathbf{x}_L, \Delta\mathbf{q}_L, g_L, \D
 |---|------|---------------|
 | 1 | DexVLA와의 차이는? | DexVLA는 dexterous hand, RDT는 bimanual arm. 상보적 |
 | 2 | Joint-space action이 EE-space보다 나은 경우는? | 충돌 회피, 특이점 근처에서 joint-space가 유리하나 cross-robot 통일이 어려움 |
+
+<!-- VERIFIED: abstract-only -->

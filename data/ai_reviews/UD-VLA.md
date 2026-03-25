@@ -57,3 +57,5 @@ Reasoning tokens과 action tokens이 동일 noise schedule에서 jointly denoise
 | # | 질문 | 핵심 답변 |
 |---|------|----------|
 | 1 | Text diffusion의 품질이 AR 대비 열위면? | 현재 discrete diffusion LM의 text quality가 AR에 미치지 못할 수 있음. Reasoning 품질 검증 필요 |
+
+<!-- VERIFIED: abstract-only -->

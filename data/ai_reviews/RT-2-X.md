@@ -61,3 +61,5 @@ RT-2 (VLM-based)를 Open X-Embodiment로 확장.
 |---|------|---------------|
 | 1 | 데이터 품질이 양보다 중요하지 않은가? | DROID 등에서 보듯 high-quality curation이 중요. Open X-Embodiment의 품질 편차가 큼 |
 | 2 | 10x 더 큰 데이터셋을 만들면 성능이 10x 좋아지는가? | Diminishing returns 예상. Data curation과 diversity가 규모보다 중요할 수 있음 |
+
+<!-- VERIFIED: abstract-only -->

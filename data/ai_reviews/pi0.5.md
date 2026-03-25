@@ -72,3 +72,5 @@
 |---|------|---------------|
 | 1 | "Open-world"의 범위는? 10개 집? 100개 집? | 미공개. 소수의 새 환경일 가능성 |
 | 2 | Object detection을 사전 제공하는가 (oracle), 자체 수행하는가? | 자체 detection이면 인상적이나, oracle이면 unfair |
+
+<!-- VERIFIED: abstract-only -->

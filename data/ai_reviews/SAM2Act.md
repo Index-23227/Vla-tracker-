@@ -62,3 +62,5 @@ $$\mathbf{h}_t = \text{CrossAttn}(\mathbf{f}_t, \text{MemBank}(\mathbf{f}_{t-1},
 |---|------|---------------|
 | 1 | SAM2 대신 DINOv2를 쓰면? | DINOv2도 강력하나 SAM2의 segmentation-aware feature가 manipulation에 유리 |
 | 2 | Memory가 noise로 오염되면? | Attention으로 자연스럽게 irrelevant memory 무시. 그러나 adversarial noise에 대한 robustness 미검증 |
+
+<!-- VERIFIED: abstract-only -->

@@ -61,3 +61,5 @@ $$\mathbf{a}_t = \pi(\mathbf{o}_t, \hat{\mathbf{o}}_{t+k})$$
 |---|------|----------|
 | 1 | CoT-VLA와의 차이는? | CoT-VLA는 single model에서 visual CoT, SuSIE는 별도 diffusion model. SuSIE가 더 high-quality 이미지 생성 but 더 느림 |
 | 2 | Subgoal image를 latent space에서 생성하면? | FLARE의 접근과 유사. Latency 대폭 감소 가능 |
+
+<!-- VERIFIED: abstract-only -->

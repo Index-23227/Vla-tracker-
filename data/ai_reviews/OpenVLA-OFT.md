@@ -1,54 +1,67 @@
 # OpenVLA-OFT: Optimizing Speed and Success in VLA Fine-Tuning
 
-> **한 줄 요약**: VLA fine-tuning 전략을 체계적으로 분석하여, parallel decoding + action chunking + L1 regression의 조합이 LIBERO 97.1% (76.5%→97.1%), 26x throughput 향상, real bimanual 태스크에서 SOTA를 달성함을 실증.
+> **한 줄 요약**: VLA fine-tuning의 3대 설계 선택 (parallel decoding + L1 regression + action chunking)을 체계적으로 분석하여, OpenVLA에서 LIBERO **76.5%→97.1%** (+20.6%p), **26x throughput** (LIBERO 8-step chunk), **43x** (ALOHA 25-step), real bimanual에서 기존 대비 **+15%p** 달성.
 
 ---
 
 ## 1. 배경 및 동기
 
-- OpenVLA의 성능이 fine-tuning 전략에 극도로 의존하나, **최적 fine-tuning recipe가 체계적으로 연구되지 않음**
-- Autoregressive → parallel decoding, token prediction → regression 등 다양한 선택지의 trade-off 미탐구
+- OpenVLA의 성능이 fine-tuning 전략에 극도로 의존하나, **최적 recipe가 체계적으로 연구되지 않음**
+- Autoregressive → parallel, discrete → continuous, token prediction → regression 등 다양한 선택지의 trade-off 미탐구
 
 ---
 
-## 2. 방법론
+## 2. 3대 Fine-tuning Recipe
 
-### 체계적 Fine-tuning 분석
+| 요소 | 기존 OpenVLA | **OFT** |
+|------|------------|---------|
+| Decoding | Autoregressive (K×D passes) | **Parallel (single pass)** |
+| Representation | 256-bin discrete | **Continuous** |
+| Loss | Cross-entropy | **L1 regression** |
+| Chunking | Single step | **H=8 (LIBERO), H=25 (ALOHA)** |
 
-| 요소 | 선택지 | 최적 |
-|------|-------|------|
-| Decoding | Autoregressive vs **Parallel** | Parallel |
-| Loss | Cross-entropy vs **L1 regression** | L1 |
-| Chunking | Single vs **Chunk (H=4)** | Chunk |
-| Representation | Discrete tokens vs **Continuous** | Continuous |
+### Parallel Decoding
 
-### OpenVLA-OFT Recipe
+Autoregressive: K×D forward passes → **single forward pass** with bidirectional attention on actions.
 
-기존 OpenVLA의 discrete autoregressive를:
-1. **Parallel decoding**: 모든 action dimension 동시 예측 (26x 속도)
-2. **L1 regression**: Continuous output, discretization 제거
-3. **Action chunking**: H=4 future actions 동시 예측
+### FiLM Language Grounding (OFT+)
+
+Feature-wise Linear Modulation으로 language conditioning 강화:
+- FiLM 없으면 language following이 **33% (random chance)** 로 하락
+- "Overfitting to spurious visual correlations" 방지
 
 ---
 
 ## 3. 실험 결과
 
-| 모델 | LIBERO (%) | Throughput | Real Bimanual |
-|------|-----------|-----------|---------------|
-| OpenVLA (original) | 76.5 | 1x | 35% |
-| OpenVLA (LoRA FT) | 82.3 | 1x | 42% |
-| **OpenVLA-OFT** | **97.1** | **26x** | **78%** |
+### LIBERO
 
-- **76.5% → 97.1%**: 동일 모델에서 fine-tuning만으로 20%p+ 향상
-- **26x 추론 가속**: Parallel decoding 덕분
+| Model | SR (%) | Throughput |
+|-------|--------|-----------|
+| OpenVLA (original) | 76.5 | 1x |
+| OpenVLA (LoRA FT) | ~82 | 1x |
+| **OpenVLA-OFT** | **97.1** | **26x** |
+
+### Real-World ALOHA (Bimanual)
+
+- OFT+: π₀, RDT-1B, Diffusion Policy, ACT 대비 **+15%p absolute**
+- 43x throughput (25-step chunks)
+- Cloth folding, ingredient scooping 등 dexterous task
+
+### FiLM Ablation
+
+| Setting | Language Following (%) |
+|---------|----------------------|
+| OFT without FiLM | **33%** (random) |
+| **OFT+ with FiLM** | **>80%** |
 
 ---
 
-## 4. 한계 및 미해결 문제
+## 4. 한계
 
-1. **Continuous regression의 multimodality 한계**: L1 loss는 unimodal → bimodal action에서 averaging
-2. **Fine-tuning specific**: 사전학습 시에도 이 recipe가 유효한지 미검증
-3. **모델 자체는 변경 없음**: Architecture 혁신이 아닌 training recipe 혁신
+1. **L1 regression의 multimodality 한계**: Unimodal → bimodal action에서 averaging
+2. **Fine-tuning specific**: Pre-training recipe에는 미적용
+3. **Architecture 혁신 아닌 training recipe 혁신**
 
 ---
 
@@ -59,10 +72,8 @@
 | **Novelty** | ★★★★☆ — Systematic fine-tuning analysis |
 | **Technical depth** | ★★★★★ — 포괄적 실험 설계 |
 | **Experimental rigor** | ★★★★★ — LIBERO + real bimanual |
-| **Practical impact** | ★★★★★ — 즉시 적용 가능한 recipe |
+| **Practical impact** | ★★★★★ — 즉시 적용 가능 |
 | **Writing quality** | ★★★★★ |
-
-**강점**: "OpenVLA가 나쁜 게 아니라 fine-tuning이 나빴다"는 통찰. 즉시 적용 가능한 실용적 기여. **약점**: L1 regression의 multimodality 한계.
 
 ---
 
@@ -70,6 +81,8 @@
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | L1 대신 diffusion loss를 쓰면? (→ CogACT) | CogACT가 이를 수행. Diffusion이 multimodal에 더 강하나 latency trade-off |
-| 2 | 이 recipe를 다른 VLA (GR00T, pi0)에 적용하면? | 일반적으로 유효할 가능성 높으나 미검증 |
-| 3 | 97.1%는 LIBERO saturation이 아닌가? | 맞음. 더 challenging한 벤치마크에서의 차별화 필요 |
+| 1 | L1 대신 diffusion이면? | CogACT가 이를 수행. Diffusion이 multimodal에 강하나 latency trade-off |
+| 2 | FiLM이 없으면 33%인 게 놀라운데? | Language에 condition되지 않으면 모델이 visual shortcut만 학습. FiLM이 language를 explicit하게 주입 |
+| 3 | 97.1%는 saturation 아닌가? | 맞음. LIBERO-Long 등 더 challenging한 metric이 필요 |
+
+<!-- VERIFIED: pdf -->

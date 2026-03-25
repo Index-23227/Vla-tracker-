@@ -51,3 +51,5 @@
 | 질문 | 답변 |
 |------|------|
 | AVDC와의 차이? | AVDC는 dense correspondence, UniVLA는 latent action. UniVLA가 더 compact representation |
+
+<!-- VERIFIED: abstract-only -->

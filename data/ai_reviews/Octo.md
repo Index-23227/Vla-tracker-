@@ -1,55 +1,89 @@
 # Octo: An Open-Source Generalist Robot Policy
 
-> **한 줄 요약**: Open X-Embodiment의 80만 trajectory에서 학습한 transformer 기반 generalist policy로, language/goal image 지시와 새로운 sensor/action space에 수 시간 만에 fine-tuning 가능한 **오픈소스 범용 로봇 정책의 선구적 연구**.
+> **한 줄 요약**: 93M transformer를 OXE 800K trajectory (25 datasets)에서 학습한 오픈소스 generalist policy로, 9개 로봇 플랫폼에서 검증. Fine-tuning 시 baseline 대비 **+52%p**, 100 target demos + 5시간 A5000으로 새 로봇·센서·action space에 적응.
 
 ---
 
 ## 1. 배경 및 동기
 
-- 로봇 학습의 **데이터 파편화**: 각 연구그룹이 자체 데이터로 자체 모델 학습 → 지식 공유 불가
-- Open X-Embodiment 데이터셋의 등장으로 대규모 cross-embodiment 학습이 가능해짐
-- **오픈소스** generalist policy의 필요성: 누구나 접근·fine-tuning 가능
+- 로봇 학습의 데이터 파편화 해소 → Open X-Embodiment 기반 범용 정책
+- **오픈소스**: 누구나 접근·fine-tuning 가능한 generalist policy
 
 ---
 
-## 2. 방법론
+## 2. Architecture (93M)
 
-### Transformer Policy
+| Component | Spec |
+|-----------|------|
+| Transformer | **12 layers, 12 heads, hidden 768, MLP 3072** |
+| Total params | **93M** |
+| Language encoder | T5-base (111M, frozen) → 16 tokens |
+| Image encoder | Shallow CNN → 16×16 patches (256 tokens/view) |
+| Action head | **Diffusion** (3-layer MLP, hidden 256, 20 denoising steps, cosine schedule) |
 
-- Observation tokenizer: 다양한 카메라·proprioception을 토큰화
-- Task specification: Language command 또는 goal image
-- Action head: Diffusion-based
+Block-wise masked attention으로 flexible input/output adaptation.
 
-### Flexible Architecture
+### Training
 
-새로운 sensory input과 action space에 대한 빠른 adaptation:
-- New camera → observation tokenizer 추가
-- New robot → action head 교체/fine-tuning
-- **수 시간 내 adaptation** 가능
-
----
-
-## 3. 실험 결과
-
-| 설정 | SR (%) |
-|------|--------|
-| In-domain (WidowX) | ~72 |
-| Fine-tuned new robot (Franka) | ~65 |
-| Fine-tuned new robot (xArm) | ~58 |
-| Zero-shot new task | ~35 |
-
-### 9 Robotic Platforms 검증
-
-다양한 로봇에서의 fine-tuning 결과 보고.
+| 항목 | 값 |
+|------|-----|
+| Data | **800K trajectories** (25 OXE datasets) |
+| Hardware | **TPU v4-128** |
+| Duration | **14 hours** (300K steps) |
+| Batch | 2048 |
+| LR | 3e-4 (inverse sqrt decay) |
+| Fine-tuning | **~5 hours on A5000** (50K steps) |
 
 ---
 
-## 4. 한계 및 미해결 문제
+## 3. 실험 결과 심층 분석
 
-1. **Zero-shot 성능 한계**: Fine-tuning 없이는 새 환경에서 성능 부족
-2. **모델 크기 (93M)**: 최신 VLA (7B+) 대비 매우 작아 capacity 제한
-3. **Language 이해**: 전용 VLM 없이 text encoder만 사용 → 복잡한 지시 이해 약함
-4. **이후 OpenVLA에 의해 성능 추월**: VLM backbone 활용의 중요성을 역설적으로 보여줌
+### Zero-Shot (3 platforms)
+
+| Platform | Octo | RT-1-X | RT-2-X (55B) |
+|---------|------|--------|-------------|
+| WidowX (language) | **70%** | - | ~70% |
+| UR5 | **75%** | - | - |
+| RT-1 Robot | **50%** | - | ~50% |
+
+"Octo performed similarly to RT-2-X (55 billion parameters)"
+
+### Fine-Tuning (6 new domains, Table I)
+
+| Domain | Octo | Scratch | VC-1 |
+|--------|------|---------|------|
+| Berkeley Insertion (force-torque) | **70%** | 10% | 5% |
+| Stanford Coffee | **75%** | 45% | 0% |
+| CMU Baking | **50%** | 25% | 30% |
+| Berkeley Pick-Up (joint pos) | **60%** | 0% | 0% |
+| Berkeley Coke (new embodiment) | **100%** | 20% | 10% |
+| Berkeley Bimanual (ALOHA) | **80%** | 20% | 50% |
+| **Average** | **72%** | **20%** | **15%** |
+
+- **+52%p vs scratch**, +57%p vs VC-1
+- 100 target demos로 new sensor (force-torque), new action space (joint), new embodiment 적응
+
+### Model Ablation (WidowX)
+
+| Setting | SR (%) |
+|---------|--------|
+| Octo-Small (full) | 83% |
+| RT-X dataset mix | 60% |
+| Single robot (Bridge only) | 43% |
+| Discretized actions | 18% |
+| MSE continuous | 35% |
+
+- **Diffusion >> discrete (18%)**: Diffusion head의 결정적 중요성
+- **More datasets = better** (43% → 83%)
+
+---
+
+## 4. 한계 (저자 명시)
+
+1. **Wrist camera 처리 약함**: 27% 데이터만 wrist camera 포함
+2. **Language vs goal gap**: Language-conditioned가 goal-conditioned보다 일관적으로 우수 → goal conditioning 구조 개선 필요
+3. **93M capacity 제한**: 최신 VLA (7B+) 대비 capacity 부족 → 복잡한 reasoning 불가
+4. **이후 OpenVLA에 의해 추월**: VLM backbone의 중요성을 역설적으로 보여줌
 
 ---
 
@@ -57,13 +91,11 @@
 
 | 항목 | 평가 |
 |------|------|
-| **Novelty** | ★★★★☆ — 최초의 실용적 open-source generalist policy |
-| **Technical depth** | ★★★★☆ — 유연한 아키텍처 설계 |
-| **Experimental rigor** | ★★★★★ — 9 platforms |
-| **Practical impact** | ★★★★★ — 커뮤니티 기여 |
+| **Novelty** | ★★★★★ — 최초의 실용적 open-source generalist policy |
+| **Technical depth** | ★★★★☆ — 유연한 아키텍처, 9 platforms |
+| **Experimental rigor** | ★★★★★ — 9 platforms, fine-tuning 6 domains |
+| **Practical impact** | ★★★★★ — VLA 연구의 baseline |
 | **Writing quality** | ★★★★★ |
-
-**강점**: Open-source, 유연한 architecture, 9 platforms 검증. VLA 연구의 baseline으로 광범위하게 활용됨. **약점**: 모델 크기 제한, language 이해 부족.
 
 ---
 
@@ -71,6 +103,8 @@
 
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
-| 1 | VLM backbone을 추가하면? (→ OpenVLA) | 정확히 OpenVLA가 이를 수행. Language 이해 향상 + 성능 향상 확인 |
-| 2 | 93M이 충분한가? Scaling하면? | HPT 등에서 larger trunk이 더 나음을 보임. Octo는 efficiency 초점 |
-| 3 | Diffusion head의 step 수와 실시간 성능은? | ~50ms per step, 10 step → ~500ms. 2Hz 제어 |
+| 1 | VLM 추가하면? (→ OpenVLA) | OpenVLA가 정확히 이를 수행. Language understanding 향상 + 성능 향상 |
+| 2 | Diffusion head 대신 token prediction이면? | Ablation에서 18% (discrete) vs 83% (diffusion). Diffusion이 압도적 |
+| 3 | 93M이 충분한가? | No. HPT, CrossFormer 등이 더 큰 trunk으로 더 나은 결과. Scaling이 필요함을 시사 |
+
+<!-- VERIFIED: pdf -->

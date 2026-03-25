@@ -52,3 +52,5 @@
 | 질문 | 답변 |
 |------|------|
 | FLARE와의 차이? | FLARE는 latent prediction, UP-VLA는 pixel-level prediction. 더 explicit한 supervision |
+
+<!-- VERIFIED: abstract-only -->

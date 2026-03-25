@@ -66,3 +66,5 @@ $\alpha_l$: 학습 가능한 mixing coefficient.
 |---|------|----------|
 | 1 | VLM 능력 보존이 실질적으로 중요한가? | Zero-shot generalization과 novel instruction 이해에 필수 |
 | 2 | Specialist pathway를 smaller하게 만들면? | 성능 하락하나 메모리 절감. Sweet spot 탐색 포함 |
+
+<!-- VERIFIED: abstract-only -->

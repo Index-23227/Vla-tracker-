@@ -65,3 +65,5 @@ $$\mathbf{h} = g(\mathbf{f}_{\text{tac}}) \cdot \text{TacEncoder}(\mathbf{f}_{\t
 |---|------|----------|
 | 1 | 어떤 촉각 센서에서도 작동하는가? | Sensor-specific encoder 필요. Universal tactile tokenizer는 미탐구 |
 | 2 | Force/torque sensor로도 비슷한 효과인가? | F/T는 scalar로 fine-grained spatial 정보 부족. Vision-based tactile이 더 풍부 |
+
+<!-- VERIFIED: abstract-only -->

@@ -56,3 +56,5 @@ $$\text{Text instruction} \to \text{Video generation model} \to \text{Future fra
 | # | 질문 | 핵심 답변 |
 |---|------|----------|
 | 1 | Latent video (pixel 아닌)로 전환하면? | FLARE, Fast-WAM의 접근. Latency 대폭 감소 |
+
+<!-- VERIFIED: abstract-only -->

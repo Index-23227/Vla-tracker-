@@ -63,3 +63,5 @@ Action space를 task에 따라 적응적으로 discretization:
 |---|------|----------|
 | 1 | GST-VLA와의 차이는? | GST-VLA는 Gaussian primitives로 tokenization 자체를 3D화, SpatialVLA는 기존 token에 3D PE 추가. 더 경량 |
 | 2 | Ego3D PE 없이 depth를 추가 채널로 넣으면? | 이 비교가 핵심. PE가 더 효과적임을 ablation에서 보임 |
+
+<!-- VERIFIED: abstract-only -->

@@ -60,3 +60,5 @@ $$\mathbf{o}'_t = \text{Overlay}(\mathbf{o}_t, \text{trace}_{t-N:t})$$
 |---|------|----------|
 | 1 | Random trace를 그으면? | 성능 하락 → trace의 정보적 가치 확인 |
 | 2 | LLARVA와의 차이? | TraceVLA는 과거 궤적, LLARVA는 미래 예측 경로 |
+
+<!-- VERIFIED: abstract-only -->

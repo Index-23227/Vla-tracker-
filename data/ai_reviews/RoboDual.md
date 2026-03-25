@@ -71,3 +71,5 @@ VLA는 **frozen**, adapter + DiT만 학습:
 |---|------|---------------|
 | 1 | GR00T-N1의 System 1/2와 어떻게 다른가? | GR00T은 joint end-to-end 학습, RoboDual은 VLA frozen + adapter only |
 | 2 | N=1 (매 step VLA)과 N=10의 성능 차이는? | N=1이 성능 최고이나 속도 최저. Trade-off 분석 포함 |
+
+<!-- VERIFIED: abstract-only -->

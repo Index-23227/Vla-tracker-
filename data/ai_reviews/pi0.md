@@ -71,3 +71,5 @@ VLM (PaLI 계열 추정)의 hidden state를 flow matching expert의 conditioning
 |---|------|---------------|
 | 1 | Diffusion (CogACT) vs Flow (pi0): 어느 것이 승자인가? | 현재까지 실험적으로 비슷. Flow가 추론 속도에서 유리 |
 | 2 | 오픈소스 대안은? | FLOWER, OpenVLA-OFT 등이 유사 성능을 open으로 달성 |
+
+<!-- VERIFIED: abstract-only -->

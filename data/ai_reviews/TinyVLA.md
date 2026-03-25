@@ -60,3 +60,5 @@ TinyVLA: **직접 robot data로 from-scratch 또는 VLM initialization만**
 |---|------|----------|
 | 1 | Pre-training을 추가하면 얼마나 좋아지는가? | OpenVLA-OFT처럼 pre-training + 좋은 recipe = 97%+. Pre-training의 가치가 분명히 존재 |
 | 2 | 1K demo에서는? | 성능 크게 하락 예상. Few-shot regime에서는 pre-training이 필수적 |
+
+<!-- VERIFIED: abstract-only -->

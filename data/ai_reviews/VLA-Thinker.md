@@ -160,3 +160,5 @@ $$\mathcal{L}_{\text{RL}} = -\mathbb{E}[R(\text{success}) - \lambda \cdot \text{
 | 5 | 97.5%에서 남은 2.5% failure는 어떤 유형인가? | Thinking을 하고도 실패하는 경우 vs thinking을 하지 않아 실패하는 경우의 분리 분석이 insight를 줄 것 |
 | 6 | Text CoT와 visual CoT의 상보성의 메커니즘은? | Text가 high-level plan ("왼쪽으로 이동"), visual이 low-level target ("이 위치로"). 두 수준의 정보가 서로 다른 action dimension에 기여할 것으로 추정되나 정량적 분석 부재 |
 | 7 | Always-think (95.1%) vs dynamic (97.5%): dynamic이 왜 더 나은가? | Always-think에서 불필요한 reasoning이 noise로 작용하여 action을 방해. Selective thinking은 clean signal만 제공 |
+
+<!-- VERIFIED: abstract-only -->

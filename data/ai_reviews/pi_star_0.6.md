@@ -68,3 +68,5 @@ $$\pi(\mathbf{a} | \mathbf{o}, A) = \begin{cases} \text{high-advantage expert} &
 |---|------|---------------|
 | 1 | Intervention 없이 (자동 보상만으로) 자기개선이 가능한가? | 성능 하락 예상. Intervention의 정보가 매우 높은 가치 |
 | 2 | AcceRL과의 차이는? | AcceRL은 시뮬레이션 비동기 RL, RECAP은 실제 환경 경험 기반 |
+
+<!-- VERIFIED: abstract-only -->

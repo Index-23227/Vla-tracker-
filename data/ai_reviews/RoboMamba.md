@@ -63,3 +63,5 @@ Transformer 대신 **Mamba block**으로 vision-language-action 처리:
 |---|------|---------------|
 | 1 | Mamba-2나 Jamba (hybrid)를 적용하면? | Hybrid Transformer+Mamba가 양쪽 장점을 가질 가능성. 미탐구 |
 | 2 | Long observation history에서 Mamba의 이점이 더 커지는가? | 이론적으로 그렇다. History 길이에 따른 speed/performance 분석 필요 |
+
+<!-- VERIFIED: abstract-only -->

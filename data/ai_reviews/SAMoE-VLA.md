@@ -58,3 +58,5 @@ $$\text{expert\_idx} = \text{Router}(\text{BEV\_feature})$$
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
 | 1 | Manipulation VLA와 driving VLA를 통합할 수 있는가? | 이론적으로 가능하나 BEV vs ego-centric의 representation gap이 큼 |
+
+<!-- VERIFIED: abstract-only -->

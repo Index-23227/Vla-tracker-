@@ -58,3 +58,5 @@
 |------|------|
 | AcceRL과의 차이? | AcceRL은 분산 비동기+world model, VLA-RL은 direct online PPO. VLA-RL이 더 간단하나 AcceRL이 더 scalable |
 | PLD와 비교하면? | PLD는 indirect (residual→distill), VLA-RL은 direct RL. PLD가 더 안정적이나 VLA-RL이 더 general |
+
+<!-- VERIFIED: abstract-only -->

@@ -60,3 +60,5 @@
 | # | 질문 | 핵심 답변 |
 |---|------|----------|
 | 1 | FLOWER vs SmolVLA: 어느 것이 더 practical한가? | FLOWER가 성능 우수, SmolVLA가 배포 용이. Task 요구에 따라 선택 |
+
+<!-- VERIFIED: abstract-only -->

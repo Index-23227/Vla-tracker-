@@ -76,3 +76,5 @@ $$\mathbf{c} = \text{DCT}(\mathbf{a}_{1:H}), \quad \text{tokens} = \text{VQ}(\ma
 | 1 | FAST vs continuous diffusion: 어느 것이 더 나은 action representation인가? | Diffusion이 multimodal에 강하고, FAST는 efficiency에 강함. 상보적 |
 | 2 | FAST+ codebook이 새 embodiment에서 재학습 없이 작동하는 증거는? | Cross-embodiment 실험 포함. 90%+ 재사용 가능하나 10%의 out-of-distribution 동작에서 한계 |
 | 3 | K (주파수 계수 수)의 최적값은? | Task-dependent. Dexterous: K 높게, simple: K 낮게. Adaptive K 미탐구 |
+
+<!-- VERIFIED: abstract-only -->

@@ -69,3 +69,5 @@ $$\pi_{\text{VLA}}^{\text{new}} = \text{SFT}(\pi_{\text{VLA}}, \mathcal{D} \cup 
 |---|------|---------------|
 | 1 | PLD를 반복 적용하면 (iterative distillation) 계속 개선되는가? | 이론적으로 가능하나 diminishing returns. 99%에서 추가 개선 여지 미미 |
 | 2 | Residual actor 없이 직접 RL로 VLA를 fine-tune하면? | AcceRL/VLA-RL의 접근. PLD는 안정성 면에서 유리 |
+
+<!-- VERIFIED: abstract-only -->
