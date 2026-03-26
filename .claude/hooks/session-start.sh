@@ -19,7 +19,11 @@ python scripts/build_leaderboard.py > /dev/null 2>&1
 echo "Validating data..."
 python scripts/validate_data.py > /dev/null 2>&1
 
-# 5. Check AI review coverage
+# 5. Sync documentation counts
+echo "Syncing documentation counts..."
+python scripts/sync_counts.py > /dev/null 2>&1 || true
+
+# 6. Check AI review coverage
 echo "Checking AI review coverage..."
 python scripts/check_reviews.py 2>/dev/null || true
 

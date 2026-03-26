@@ -68,6 +68,8 @@ See `schemas/model.schema.json` for the complete specification with types, const
 | `check_reviews.py` | Check AI review coverage | (none) |
 | `generate_llms_full.py` | Generate llms-full.txt | (none) |
 | `push_to_hf.py` | Push dataset to HuggingFace | `--repo NAME`, `--dry-run` |
+| `sync_counts.py` | Auto-fix README/blueprint counts | `--dry-run` |
+| `apply_action_head_category.py` | Classify action heads | (none) |
 
 ## Critical Rules: Adding or Removing Models
 

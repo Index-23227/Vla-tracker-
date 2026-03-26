@@ -31,3 +31,6 @@ jobs:
 
       - name: Validate documentation counts
         run: python scripts/validate_counts.py
+
+      - name: Check AI review coverage
+        run: python scripts/check_reviews.py || true

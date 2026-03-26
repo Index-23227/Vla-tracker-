@@ -69,6 +69,10 @@ jobs:
         run: python scripts/validate_data.py
         continue-on-error: true
 
+      - name: Sync documentation counts
+        if: steps.generate.outputs.created != '0'
+        run: python scripts/sync_counts.py
+
       - name: Check AI review coverage
         if: steps.generate.outputs.created != '0'
         run: python scripts/check_reviews.py || true
@@ -118,7 +122,7 @@ jobs:
 
           # Create branch and commit
           git checkout -b "$BRANCH"
-          git add data/models/*.yaml data/scan_candidates.json data/leaderboard.json dashboard/src/data/leaderboard.json
+          git add data/models/*.yaml data/scan_candidates.json data/leaderboard.json dashboard/src/data/leaderboard.json README.md physical-ai-dashboard-blueprint.md
           git diff --staged --quiet && echo "No changes to commit" && exit 0
 
           git commit -m "feat: auto-detect new VLA papers from arXiv scan
