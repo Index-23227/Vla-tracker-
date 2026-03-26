@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-03-25T08:47:10.028533
+# Generated: 2026-03-26T06:37:43.767857
 # Models: 82
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -162,7 +162,7 @@ MODEL: X-VLA
   Venue: ICLR 2026
   Open Source: True
   Architecture:
-    Action Head: autoregressive with embodiment-specific soft prompts
+    Action Head: flow matching with embodiment-specific soft prompts (chunk_size=32)
     Backbone: Florence-Large
     LLM: None
     Parameters: 0.9B
@@ -609,7 +609,7 @@ MODEL: CoT-VLA
   Venue: CVPR 2025
   Open Source: False
   Architecture:
-    Action Head: diffusion policy
+    Action Head: autoregressive (256-bin discretized, 7 tokens × 10-step chunks via VILA-U)
     Backbone: SigLIP (via VILA-U)
     LLM: LLaMA-2 7B
     Parameters: 7B

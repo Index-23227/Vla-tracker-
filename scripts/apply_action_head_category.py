@@ -34,7 +34,7 @@ CLASSIFICATION = {
     "LLARVA":         "autoregressive",   # AR text-based action + visual trace
     "SimpleVLA-RL":   "autoregressive",   # AR base + GRPO RL (RL = training, not generation)
     "VLA-RL":         "autoregressive",   # AR base + online RL fine-tuning
-    "X-VLA":          "autoregressive",   # AR with soft prompts
+    "X-VLA":          "flow_matching",    # Flow matching with soft prompts (confirmed via paper + OpenReview)
     "LLaVA-VLA":      "autoregressive",   # Discrete tokenizer with chunking
     "RoboVLM":        "autoregressive",   # VQ-VAE tokenization + AR prediction
 
