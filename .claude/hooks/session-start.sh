@@ -27,7 +27,7 @@ python scripts/sync_counts.py > /dev/null 2>&1 || true
 echo "Checking AI review coverage..."
 python scripts/check_reviews.py 2>/dev/null || true
 
-# 6. Summary
+# 7. Summary
 YAML_COUNT=$(ls -1 data/models/*.yaml 2>/dev/null | wc -l)
 REVIEW_COUNT=$(ls -1 data/ai_reviews/*.md 2>/dev/null | wc -l)
 echo ""
