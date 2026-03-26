@@ -8,9 +8,9 @@ venue: ICLR 2026
 open_source: true
 architecture:
   backbone: Florence-Large
-  action_head: autoregressive with embodiment-specific soft prompts
+  action_head: flow matching with embodiment-specific soft prompts (chunk_size=32)
   parameters: 0.9B
-  action_head_category: autoregressive
+  action_head_category: flow_matching
 key_innovation: 'Introduces soft-prompting mechanism where embodiment-specific learnable embeddings guide a unified Transformer
   backbone for cross-embodiment policy learning. Won 1st Place (Champion) at AgiBot World Challenge (IROS 2025). Evaluated
   across 6 benchmarks spanning single-arm, bimanual, and autonomous driving.

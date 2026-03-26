@@ -11,30 +11,62 @@ VLA-Tracker is an open-source project that tracks 82 VLA models across 8 benchma
 - 70 AI-generated paper reviews (26 PDF-verified)
 - Auto-updated from arXiv weekly
 
-## API Access
+## API Access (for AI agents)
 
-All data is available as static JSON:
+Direct access (no JavaScript rendering required):
 
-- Leaderboard: https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json
-- Raw YAML per model: https://github.com/HyeongjinKim/Vla-tracker-/tree/main/data/models
+- Leaderboard JSON: https://raw.githubusercontent.com/Index-23227/Vla-tracker-/main/data/leaderboard.json
+- Full text data: https://raw.githubusercontent.com/Index-23227/Vla-tracker-/main/dashboard/public/llms-full.txt
+- Model YAML files: https://github.com/Index-23227/Vla-tracker-/tree/main/data/models
+- AI Reviews: https://github.com/Index-23227/Vla-tracker-/tree/main/data/ai_reviews
+- Action Head Taxonomy: https://raw.githubusercontent.com/Index-23227/Vla-tracker-/main/docs/action-head-taxonomy.md
+
+After GitHub Pages deployment:
+- Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
+- Static JSON: https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json
+- llms-full.txt: https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt
+
+## Action Head Categories
+
+Models are classified by core action generation mechanism:
+- autoregressive (17): Sequential token prediction (OpenVLA, RT-2-X)
+- diffusion (17): Gaussian denoising DDPM/DDIM (CogACT, Diffusion Policy)
+- flow_matching (16): ODE velocity field (pi0, FLOWER, X-VLA)
+- discrete_diffusion (4): Masked token denoising (DD-VLA, E0)
+- regression (8): Single-pass direct prediction (OpenVLA-OFT, HPT)
+- inverse_dynamics (3): Action from state transitions (UniPi, AVDC)
+- hybrid (6): Two+ mechanisms combined (HybridVLA, Diffusion-VLA)
+- other (11): Specialized/undisclosed
+
+See taxonomy: https://raw.githubusercontent.com/Index-23227/Vla-tracker-/main/docs/action-head-taxonomy.md
 
 ## Current Rankings (LIBERO Benchmark)
 
-1. PLD — 99.0% avg (NVIDIA, Oct 2025)
-2. SimpleVLA-RL — 98.8% (SJTU/PKU, Sep 2025)
-3. X-VLA — 97.8% (Tsinghua/Shanghai AI Lab, Oct 2025)
-4. Fast-WAM — 97.6% (Tsinghua/Galaxea, Mar 2026)
-5. VLA-Thinker — 97.5% (UCF/NVIDIA, Mar 2026)
+1. PLD — 99.0% avg (NVIDIA, Oct 2025) — other (RL framework)
+2. SimpleVLA-RL — 98.8% (SJTU/PKU, Sep 2025) — autoregressive
+3. X-VLA — 97.8% (Tsinghua/Shanghai AI Lab, Oct 2025) — flow_matching
+4. Fast-WAM — 97.6% (Tsinghua/Galaxea, Mar 2026) — flow_matching
+5. VLA-Thinker — 97.5% (UCF/NVIDIA, Mar 2026) — autoregressive
 
 ## Current Rankings (CALVIN Benchmark)
 
-1. LingBot-VLA — 4.50 avg len (Ant Group)
-2. UD-VLA — 4.50 avg len (Tsinghua)
-3. DreamVLA — 4.44 avg len (Shanghai AI Lab)
+1. LingBot-VLA — 4.50 avg len (Ant Group) — flow_matching
+2. UD-VLA — 4.50 avg len (Tsinghua) — discrete_diffusion
+3. DreamVLA — 4.44 avg len (Shanghai AI Lab) — inverse_dynamics
+
+## How to query this data
+
+```python
+import json, urllib.request
+url = "https://raw.githubusercontent.com/Index-23227/Vla-tracker-/main/data/leaderboard.json"
+data = json.loads(urllib.request.urlopen(url).read())
+for m in data["models"][:5]:
+    cat = m["architecture"]["action_head_category"]
+    print(f"{m['name']}: {m.get('libero_avg', 'N/A')} ({cat})")
+```
 
 ## Sections
 
-- [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/): Interactive leaderboard, compare, coverage heatmap
-- [Paper Reviews](https://hyeongjinkim.github.io/Vla-tracker-/#reviews): AI-generated seminar-style reviews for 70 papers
-- [Model Data](https://github.com/HyeongjinKim/Vla-tracker-/tree/main/data/models): YAML files with architecture, benchmarks, metadata
-- [Full Data (llms-full.txt)](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt): Complete model data for AI consumption
+- [Model Data](https://github.com/Index-23227/Vla-tracker-/tree/main/data/models): YAML files with architecture, benchmarks, metadata
+- [AI Reviews](https://github.com/Index-23227/Vla-tracker-/tree/main/data/ai_reviews): Seminar-style reviews for 70 papers
+- [Full Data](https://raw.githubusercontent.com/Index-23227/Vla-tracker-/main/dashboard/public/llms-full.txt): Complete model database for AI consumption
