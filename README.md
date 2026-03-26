@@ -45,7 +45,7 @@ VLA-Tracker solves this by:
 |------|-------|-----|------|-------|-------------|
 | 1 | **PLD** | **99.0** | Oct 2025 | ICLR 2026 | Residual RL |
 | 2 | **SimpleVLA-RL** | **98.8** | Sep 2025 | ICLR 2026 | AR + GRPO RL |
-| 3 | **X-VLA** | **97.8** | Oct 2025 | ICLR 2026 | AR + soft prompts |
+| 3 | **X-VLA** | **97.8** | Oct 2025 | ICLR 2026 | Flow matching + soft prompts |
 | 4 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
 | 5 | VLA-Thinker | 97.5 | Mar 2026 | — | AR + visual CoT + RL |
 | 6 | DreamVLA | 97.2 | Jul 2025 | — | Inverse dynamics |
