@@ -2,11 +2,11 @@
 
 > Benchmark tracking for Vision-Language-Action (VLA) robot models
 
-VLA-Tracker is an open-source project that tracks 82 VLA models across 8 benchmarks (LIBERO, CALVIN, SimplerEnv, RoboTwin, RLBench, RoboCasa, Meta-World, Real-World). It provides structured, machine-readable data on model architectures, benchmark scores, training details, and AI-generated paper reviews.
+VLA-Tracker is an open-source project that tracks 80 VLA models across 8 benchmarks (LIBERO, CALVIN, SimplerEnv, RoboTwin, RLBench, RoboCasa, Meta-World, Real-World). It provides structured, machine-readable data on model architectures, benchmark scores, training details, and AI-generated paper reviews.
 
 ## Key Data
 
-- 82 models tracked (2023–2026)
+- 80 models tracked (2023–2026)
 - 8 benchmarks with normalized scores
 - 70 AI-generated paper reviews (26 PDF-verified)
 - Auto-updated from arXiv weekly
@@ -29,14 +29,14 @@ After GitHub Pages deployment:
 ## Action Head Categories
 
 Models are classified by core action generation mechanism:
-- autoregressive (17): Sequential token prediction (OpenVLA, RT-2-X)
-- diffusion (17): Gaussian denoising DDPM/DDIM (CogACT, Diffusion Policy)
-- flow_matching (16): ODE velocity field (pi0, FLOWER, X-VLA)
+- autoregressive (16): Sequential token prediction (OpenVLA, RT-2-X)
+- diffusion (16): Gaussian denoising DDPM/DDIM (CogACT, Diffusion Policy)
+- flow_matching (17): ODE velocity field (pi0, FLOWER, X-VLA)
 - discrete_diffusion (4): Masked token denoising (DD-VLA, E0)
 - regression (8): Single-pass direct prediction (OpenVLA-OFT, HPT)
 - inverse_dynamics (3): Action from state transitions (UniPi, AVDC)
 - hybrid (6): Two+ mechanisms combined (HybridVLA, Diffusion-VLA)
-- other (11): Specialized/undisclosed
+- other (10): Specialized/undisclosed
 
 See taxonomy: https://raw.githubusercontent.com/Index-23227/Vla-tracker-/main/docs/action-head-taxonomy.md
 

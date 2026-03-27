@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-03-26T06:37:43.767857
-# Models: 82
+# Generated: 2026-03-27T05:47:54.922357
+# Models: 85
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -1044,6 +1044,22 @@ MODEL: DiT4DiT
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: DualCoT-VLA
+  Organization: TODO: check paper
+  Date: 2026-03-23
+  Paper: https://arxiv.org/abs/2603.22280
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, robocasa
+  Eval Conditions: {'libero': 'fine-tuned', 'robocasa': 'fine-tuned'}
+
+------------------------------------------------------------
 MODEL: E0
   Organization: Sun Yat-sen University
   Date: 2025-11-26
@@ -1229,36 +1245,6 @@ MODEL: GR00T-N1.6
   Eval Conditions: {'robocasa': 'fine-tuned'}
 
 ------------------------------------------------------------
-MODEL: GR00T-N1.7
-  Organization: NVIDIA
-  Date: 2026-03-18
-  Paper: None
-  Code: https://github.com/NVIDIA/Isaac-GR00T
-  Venue: GTC 2026
-  Open Source: True
-  Architecture:
-    Action Head: diffusion transformer
-    Backbone: Reasoning VLM
-    LLM: Reasoning VLM
-    Parameters: ~3B
-  Tags: 3B, diffusion-transformer, humanoid, reasoning-vla, commercial, NIM, open-model, open-source
-
-------------------------------------------------------------
-MODEL: GR00T-N2
-  Organization: NVIDIA
-  Date: 2026-03-18
-  Paper: None
-  Code: None
-  Venue: GTC 2026 (preview)
-  Open Source: False
-  Architecture:
-    Action Head: DreamZero-based
-    Backbone: World Action Model
-    LLM: None
-    Parameters: None
-  Tags: world-action-model, DreamZero, humanoid, preview
-
-------------------------------------------------------------
 MODEL: HiMoE-VLA
   Organization: Tsinghua University / Shanghai AI Lab
   Date: 2025-12-05
@@ -1439,6 +1425,22 @@ MODEL: NaVILA
   AI Review: Abstract-based
 
 ------------------------------------------------------------
+MODEL: TODO_MODEL_NAME
+  Organization: TODO: check paper
+  Date: 2026-03-23
+  Paper: https://arxiv.org/abs/2603.22078
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, robotwin
+  Eval Conditions: {'libero': 'fine-tuned', 'robotwin': 'fine-tuned'}
+
+------------------------------------------------------------
 MODEL: NORA
   Organization: Declare Lab
   Date: 2025-04-28
@@ -1454,6 +1456,38 @@ MODEL: NORA
   Tags: 3B, FAST+, compact, 970k-demos, open-source
   AI Review Summary: Qwen-2.5-VL-3B + FAST+ tokenizer(+2048 tokens)로, 970K OXE demonstration에서 **4000 H100 GPU-hours** 학습하여, WidowX real-world **56.7%** (OpenVLA 40%), LIBERO-Long **74.6%** (NORA-Long), inference **8.3GB** GPU memory.
   AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: ProbeFlow
+  Organization: TODO: check paper
+  Date: 2026-03-18
+  Paper: https://arxiv.org/abs/2603.17850
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: flow matching
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: flow-matching, libero, metaworld
+  Eval Conditions: {'libero': 'fine-tuned', 'metaworld': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: RoboAlign
+  Organization: TODO: check paper
+  Date: 2026-03-22
+  Paper: https://arxiv.org/abs/2603.21341
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: reasoning, libero, calvin
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: RoboDual
@@ -1712,6 +1746,22 @@ MODEL: Vlaser
     Venue: ICLR 2026, Decision: poster
     Review Avg: 5.0, Confidence: 3.25
 
+------------------------------------------------------------
+MODEL: VP-VLA
+  Organization: TODO: check paper
+  Date: 2026-03-23
+  Paper: https://arxiv.org/abs/2603.22003
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: simpler_env, robocasa
+  Eval Conditions: {'simpler_env': 'fine-tuned', 'robocasa': 'fine-tuned'}
+
 ================================================================================
 SECTION 3: BENCHMARK DEFINITIONS
 ================================================================================
@@ -1737,5 +1787,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 82 models, 36 with LIBERO scores
+Total: 85 models, 36 with LIBERO scores
 ================================================================================
