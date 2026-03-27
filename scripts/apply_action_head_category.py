@@ -49,7 +49,6 @@ CLASSIFICATION = {
     "GR00T-N1":         "diffusion",      # Dual-system, DiT action head (DDPM)
     "GR00T-N1.5":       "diffusion",      # DiT + FLARE objective
     "GR00T-N1.6":       "diffusion",      # Large DiT (32 layers)
-    "GR00T-N1.7":       "diffusion",      # DiT variant
     "MemoryVLA":        "diffusion",      # DiT conditioned on memory tokens
     "3D-VLA":           "diffusion",      # Embodied diffusion for goal generation
     "TinyVLA":          "diffusion",      # Compact diffusion-based head
@@ -117,7 +116,6 @@ CLASSIFICATION = {
     "PLD":             "other",           # Residual RL framework (system, not action head)
     "DepthCache":      "other",           # Token merging (efficiency, not action head)
     "SAMoE-VLA":       "other",           # Autonomous driving BEV-based (different domain)
-    "GR00T-N2":        "other",           # DreamZero-based (undisclosed)
     "UP-VLA":          "other",           # Understanding + prediction (auxiliary focused)
     "Mobility VLA":    "other",           # Hierarchical navigation (topo graph)
     "NaVILA":          "other",           # Hierarchical VLA + locomotion RL
