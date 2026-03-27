@@ -71,23 +71,32 @@ def infer_tags(candidate: dict) -> list[str]:
     return tags
 
 
-def infer_action_head(candidate: dict) -> str:
-    """Try to infer action head type from abstract."""
+def infer_action_head(candidate: dict) -> tuple[str, str]:
+    """Try to infer action head type and category from abstract.
+    Returns (action_head_description, action_head_category).
+    Categories: autoregressive, diffusion, flow_matching, discrete_diffusion,
+                regression, inverse_dynamics, hybrid, other
+    """
     abstract = candidate.get("abstract_snippet", "").lower()
+    raw = candidate.get("abstract_snippet", "")
 
-    if "flow matching" in abstract:
-        return "flow matching"
+    if "flow matching" in abstract or "flow-matching" in abstract:
+        return "flow matching", "flow_matching"
+    if "discrete diffusion" in abstract or "masked diffusion" in abstract:
+        return "discrete diffusion", "discrete_diffusion"
     if "diffusion transformer" in abstract:
-        return "diffusion transformer"
-    if "diffusion policy" in abstract:
-        return "diffusion policy"
-    if "diffusion" in abstract:
-        return "diffusion"
+        return "diffusion transformer", "diffusion"
+    if "diffusion policy" in abstract or "diffusion" in abstract:
+        return "diffusion", "diffusion"
+    if "inverse dynamics" in abstract:
+        return "inverse dynamics", "inverse_dynamics"
     if "autoregressive" in abstract:
-        return "autoregressive"
-    if "FAST" in candidate.get("abstract_snippet", ""):
-        return "FAST tokenizer + autoregressive"
-    return "TODO: check paper"
+        return "autoregressive", "autoregressive"
+    if "parallel decoding" in abstract or "regression" in abstract:
+        return "regression (parallel decoding)", "regression"
+    if "FAST" in raw:
+        return "FAST tokenizer + autoregressive", "autoregressive"
+    return "TODO: check paper", "other"
 
 
 def generate_yaml_content(candidate: dict) -> str:
@@ -106,7 +115,7 @@ def generate_yaml_content(candidate: dict) -> str:
 
     tags = infer_tags(candidate)
     tags_str = ", ".join(f"{t}" for t in tags)
-    action_head = infer_action_head(candidate)
+    action_head, action_head_category = infer_action_head(candidate)
     benchmarks_mentioned = candidate.get("benchmarks_mentioned", [])
 
     # Build benchmark section
@@ -165,6 +174,7 @@ open_source: false  # TODO: verify
 
 architecture:
   action_head: "{action_head}"
+  action_head_category: {action_head_category}
   parameters: "TODO"
   key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
 
