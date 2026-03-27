@@ -1,0 +1,31 @@
+name: SmoothVLA
+full_name: "SmoothVLA: Aligning Vision-Language-Action Models with Physical Constraints via Intrinsic Smoothness Optimization"
+organization: Chongqing University of Posts and Telecommunications / Chinese Academy of Sciences / USTC
+date: "2026-03-14"
+paper_url: https://arxiv.org/abs/2603.13925
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Prismatic-7B (OpenVLA base)"
+  llm: "Llama 2 7B"
+  action_head: "autoregressive with action chunking + GRPO RL fine-tuning for smoothness"
+  action_head_category: autoregressive
+  parameters: "~7B"
+  key_innovation: "Physics-informed hybrid reward: binary sparse task reward + continuous jerk-based smoothness penalty (λ=0.2). GRPO optimization without critic network."
+
+training:
+  dataset: "LIBERO (10 tasks × 50 demos per task)"
+  method: "SFT (LR 4e-5) → GRPO RL (LR 2e-5), batch 16"
+  compute: "TODO: check paper"
+
+benchmarks:
+  libero:
+    libero_avg: 80.5
+    libero_spatial_robustness_avg: 54.1
+
+eval_conditions:
+  libero: "rl"
+
+tags: [smoothness, GRPO, RL, OpenVLA-based, jerk-penalty, physics-informed, libero]

@@ -1,0 +1,26 @@
+name: UniDex
+full_name: "UniDex: A Robot Foundation Suite for Universal Dexterous Hand Control from Egocentric Human Videos"
+organization: Tsinghua University / Shanghai Qizhi Institute / Sun Yat-sen University / UNC Chapel Hill
+date: "2026-03-21"
+paper_url: https://arxiv.org/abs/2603.22264
+code_url: null
+venue: CVPR 2026
+open_source: false
+
+architecture:
+  backbone: "Uni3D pointcloud encoder (ViT, initialized from 2D pretrained ViT) + PaliGemma-style"
+  action_head: "flow matching (conditional flow-matching loss, Euler integration, step δ=0.1)"
+  action_head_category: flow_matching
+  parameters: "TODO"
+  key_innovation: "FAAS (Function-Actuator-Aligned Space): 82-dim unified action space enabling cross-hand transfer across 8 dexterous hands (6-24 DoF)"
+
+training:
+  dataset: "UniDex-Dataset: 9M frames, 50K+ trajectories, 8 hands (H2O, HOI4D, HOT3D, TACO)"
+  method: "Pretrain on UniDex-Dataset → post-train on 50 demos per task"
+  compute: "8× H800 pretrain (24h) + 2× H800 post-train (4h per task)"
+
+benchmarks: {}
+
+eval_conditions: {}
+
+tags: [dexterous-hand, flow-matching, cross-hand-transfer, egocentric-video, CVPR-2026, FAAS, pointcloud]

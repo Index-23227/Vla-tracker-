@@ -127,6 +127,17 @@ CLASSIFICATION = {
     # Classification depends on the underlying generation: AR with FAST tokens
     "pi0-FAST":       "autoregressive",   # FAST tokenization + AR generation
     "NORA":           "autoregressive",   # FAST+ tokenization + AR generation
+
+    # === New models (2026-03 scan) ===
+    "DualCoT-VLA":    "regression",       # Parallel forward (non-AR), paper confirms parallel CoT mechanism
+    "ProbeFlow":      "flow_matching",    # Flow matching optimization framework (paper confirmed)
+    "RoboAlign":      "diffusion",        # Diffusion-based action head on MLLM (paper confirmed)
+    "VP-VLA":         "other",            # Dual-system planner+controller, mechanism undisclosed
+    "StructVLA":      "other",            # Discrete token 2-stage, mechanism undisclosed (no HTML)
+    "UniDex":         "flow_matching",    # Conditional flow matching on FAAS action space (paper confirmed)
+    "KineVLA":        "autoregressive",   # AR with bi-level RVQ-VAE tokens (paper confirmed)
+    "SmoothVLA":      "autoregressive",   # OpenVLA base + GRPO RL (RL = training, not generation)
+    "VLA-IAP":        "other",            # Token pruning framework (not a model, like DepthCache)
 }
 
 

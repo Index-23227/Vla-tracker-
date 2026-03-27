@@ -1,0 +1,29 @@
+name: VLA-IAP
+full_name: "VLA-IAP: Training-Free Visual Token Pruning via Interaction Alignment for Vision-Language-Action Models"
+organization: HKUST / CUHK / South China Normal University / NUDT / USTB
+date: "2026-03-24"
+paper_url: https://arxiv.org/abs/2603.22991
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "training-free visual token pruning (applied to OpenVLA-OFT, pi0, pi0.5, DreamVLA)"
+  action_head_category: other
+  parameters: "N/A (framework, not a model)"
+  key_innovation: "Interaction-aligned pruning: geometric prior (Sobel edge), semantic prior (cross-modal attention), motion prior (temporal difference). Conservative/aggressive mode switching via IoU threshold."
+
+benchmarks:
+  libero:
+    libero_spatial: 97.6
+    libero_object: 99.6
+    libero_goal: 98.4
+    libero_long: 95.6
+    source: "VLA-IAP on OpenVLA-OFT at 70% token retention"
+
+eval_conditions:
+  libero: "fine-tuned (OpenVLA-OFT base)"
+
+inference_hz: null
+
+tags: [token-pruning, training-free, efficiency, speedup, multi-VLA, libero]
