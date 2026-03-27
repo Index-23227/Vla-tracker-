@@ -1,0 +1,26 @@
+name: StructVLA
+full_name: "Beyond Dense Futures: World Models as Structured Planners for Robotic Manipulation"
+organization: "TODO: check paper (Minghao Jin et al.)"
+date: "2026-03-13"
+paper_url: https://arxiv.org/abs/2603.12553
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "structured world model planner with unified discrete token vocabulary (2-stage)"
+  action_head_category: other
+  parameters: "TODO"
+  key_innovation: "Reformulates generative world models into structured planners predicting sparse, physically meaningful frames from kinematic cues (gripper transitions, turning points)"
+
+benchmarks:
+  libero:
+    libero_avg: 94.8
+  simpler_env:
+    simpler_widowx: 75.0
+
+eval_conditions:
+  libero: "fine-tuned"
+  simpler_env: "fine-tuned"
+
+tags: [world-model, structured-planner, libero, simpler_env, discrete-token]

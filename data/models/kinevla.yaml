@@ -1,0 +1,33 @@
+name: KineVLA
+full_name: "KineVLA: Towards Kinematics-Aware Vision-Language-Action Models with Bi-Level Action Decomposition"
+organization: "TODO: check paper (Gaoge Han et al.)"
+date: "2026-03-22"
+paper_url: https://arxiv.org/abs/2603.17524
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Prismatic-7B (OpenVLA base)"
+  llm: "Llama 2 7B"
+  action_head: "autoregressive with bi-level VQ action tokens (RVQ-VAE: goal codebook + kinematics codebook)"
+  action_head_category: autoregressive
+  parameters: "~7B"
+  key_innovation: "Bi-level action decomposition: goal-invariant (coarse) + kinematics-variant (fine) codebooks with mutual information regularization"
+
+training:
+  dataset: "LIBERO-Goal-Relabeled (63K frames) + Kine-LIBERO (266K frames) + Kine-Realman-75 (49K frames)"
+  method: "2-stage RVQ-VAE: Stage I goal codebook (Open X-Embodiment) → Stage II kinematics codebook"
+  compute: "1× A100 (RVQ-VAE) + 4× A100 (fine-tuning), 50K gradient steps"
+
+benchmarks:
+  libero:
+    libero_goal_relabeled_kinematics: 76.5
+    libero_kine_kinematics: 70.4
+
+eval_conditions:
+  libero: "fine-tuned"
+
+inference_hz: 10.4
+
+tags: [kinematics-aware, bi-level-VQ, RVQ-VAE, OpenVLA-based, LoRA, libero]
