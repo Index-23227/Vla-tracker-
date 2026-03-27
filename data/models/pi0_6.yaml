@@ -1,37 +1,41 @@
-name: "pi*0.6"
-full_name: "π*₀.₆: a VLA That Learns From Experience"
-organization: "Physical Intelligence"
-date: "2025-11-18"
+name: pi*0.6
+full_name: 'π*₀.₆: a VLA That Learns From Experience'
+organization: Physical Intelligence
+date: '2025-11-18'
 paper_url: https://arxiv.org/abs/2511.14759
 code_url: https://github.com/Physical-Intelligence/openpi
 venue: null
 open_source: true
-
 architecture:
-  backbone: "Gemma 3 4B VLM"
-  llm: "Gemma 3 4B"
-  action_head: "flow matching + RL (RECAP)"
-  action_space: "continuous"
-  parameters: "~5B (4B VLM + ~860M action expert)"
-  key_innovation: >
-    RECAP (RL with Experience and Corrections via Advantage-conditioned Policies):
-    trains VLA with heterogeneous data including demonstrations, on-policy rollouts,
-    and expert corrections. Doubles throughput and halves failure rate on hard
-    real-world tasks like laundry folding, box assembly, and espresso making.
+  backbone: Gemma 3 4B VLM
+  llm: Gemma 3 4B
+  action_head: flow matching + RL (RECAP)
+  action_space: continuous
+  parameters: ~5B (4B VLM + ~860M action expert)
+  key_innovation: 'RECAP (RL with Experience and Corrections via Advantage-conditioned Policies): trains VLA with heterogeneous
+    data including demonstrations, on-policy rollouts, and expert corrections. Doubles throughput and halves failure rate
+    on hard real-world tasks like laundry folding, box assembly, and espresso making.
 
+    '
+  action_head_category: flow_matching
 training:
-  dataset: "Proprietary cross-embodiment + on-robot RL data + expert corrections"
-  method: "RECAP: offline RL pre-training → on-robot RL fine-tuning"
-  compute: "proprietary"
-
+  dataset: Proprietary cross-embodiment + on-robot RL data + expert corrections
+  method: 'RECAP: offline RL pre-training → on-robot RL fine-tuning'
+  compute: proprietary
 benchmarks:
   libero:
     libero_spatial: 96.4
     libero_object: 97.2
     libero_goal: 95.6
     libero_long: 83.2
-
 eval_conditions:
-  libero: "fine-tuned"
-
-tags: [5B, flow-matching, RL, RECAP, real-world, manipulation, open-source, cross-embodiment]
+  libero: fine-tuned
+tags:
+- 5B
+- flow-matching
+- RL
+- RECAP
+- real-world
+- manipulation
+- open-source
+- cross-embodiment

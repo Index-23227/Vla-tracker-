@@ -17,6 +17,11 @@ BENCHMARKS_DIR = ROOT / "data" / "benchmarks"
 REQUIRED_MODEL_FIELDS = ["name", "organization", "date", "architecture", "benchmarks"]
 REQUIRED_BENCHMARK_FIELDS = ["name", "metric", "higher_is_better"]
 
+VALID_ACTION_HEAD_CATEGORIES = {
+    "autoregressive", "diffusion", "flow_matching", "discrete_diffusion",
+    "regression", "inverse_dynamics", "hybrid", "other",
+}
+
 errors = []
 warnings = []
 
@@ -42,6 +47,16 @@ def validate_model(path: Path, data: dict, known_benchmarks: set[str]):
     arch = data.get("architecture", {})
     if not arch.get("action_head"):
         warnings.append(f"[{name}] Missing architecture.action_head")
+
+    # action_head_category validation
+    cat = arch.get("action_head_category")
+    if not cat:
+        errors.append(f"[{name}] Missing architecture.action_head_category")
+    elif cat not in VALID_ACTION_HEAD_CATEGORIES:
+        errors.append(
+            f"[{name}] Invalid action_head_category '{cat}'. "
+            f"Must be one of: {', '.join(sorted(VALID_ACTION_HEAD_CATEGORIES))}"
+        )
 
     # Benchmark value checks
     benchmarks = data.get("benchmarks", {})

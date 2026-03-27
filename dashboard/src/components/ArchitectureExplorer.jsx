@@ -49,9 +49,14 @@ function normalizeLLM(raw) {
   return 'Other'
 }
 
-function normalizeActionHead(raw) {
-  if (!raw) return 'unknown'
-  const l = raw.toLowerCase()
+function normalizeActionHead(rawOrModel) {
+  // If passed a model object, use action_head_category directly
+  if (rawOrModel && typeof rawOrModel === 'object' && rawOrModel.architecture) {
+    return rawOrModel.architecture.action_head_category || 'other'
+  }
+  // Legacy: string-based fallback
+  if (!rawOrModel) return 'other'
+  const l = String(rawOrModel).toLowerCase()
   const key = Object.keys(ACTION_HEAD_COLORS).find(k => l.includes(k))
   return key || 'other'
 }
@@ -87,7 +92,7 @@ function FlowDiagram({ models, onSelectModels }) {
     models.forEach(m => {
       const bb = normalizeBackbone(m.architecture?.backbone)
       const llm = normalizeLLM(m.architecture?.llm)
-      const ah = normalizeActionHead(m.architecture?.action_head)
+      const ah = normalizeActionHead(m)
 
       backbones[bb] = (backbones[bb] || 0) + 1
       llms[llm] = (llms[llm] || 0) + 1
@@ -169,7 +174,7 @@ function FlowDiagram({ models, onSelectModels }) {
     const matching = models.filter(m => {
       if (col === 0) return normalizeBackbone(m.architecture?.backbone) === name
       if (col === 1) return normalizeLLM(m.architecture?.llm) === name
-      return normalizeActionHead(m.architecture?.action_head) === name
+      return normalizeActionHead(m) === name
     })
     if (onSelectModels) onSelectModels(matching)
   }
@@ -395,7 +400,7 @@ function CombinationMatrix({ models }) {
     let maxCount = 0
     models.forEach(m => {
       const bb = normalizeBackbone(m.architecture?.backbone)
-      const ah = normalizeActionHead(m.architecture?.action_head)
+      const ah = normalizeActionHead(m)
       const key = `${bb}|${ah}`
       if (!combos[key]) combos[key] = { backbone: bb, actionHead: ah, count: 0, models: [], bestScore: null }
       combos[key].count++
@@ -493,7 +498,7 @@ export default function ArchitectureExplorer({ models }) {
     const withAH = models.filter(m => m.architecture?.action_head).length
     const uniqueBB = new Set(models.map(m => normalizeBackbone(m.architecture?.backbone))).size
     const uniqueLLM = new Set(models.map(m => normalizeLLM(m.architecture?.llm))).size
-    const uniqueAH = new Set(models.map(m => normalizeActionHead(m.architecture?.action_head))).size
+    const uniqueAH = new Set(models.map(m => normalizeActionHead(m))).size
     return { withBB, withLLM, withAH, uniqueBB, uniqueLLM, uniqueAH }
   }, [models])
 

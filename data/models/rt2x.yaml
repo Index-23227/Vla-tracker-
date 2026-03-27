@@ -1,28 +1,34 @@
 name: RT-2-X
-version: "1.0"
-organization: "Google DeepMind"
+version: '1.0'
+organization: Google DeepMind
 paper_url: https://arxiv.org/abs/2310.08864
 code_url: null
-date: "2023-10-13"
-venue: "ICRA 2024"
+date: '2023-10-13'
+venue: ICRA 2024
 architecture:
-  backbone: "PaLI-X (ViT-22B)"
-  llm: "PaLM-E 12B / PaLI-X 55B (two variants)"
-  action_head: "autoregressive (tokenized)"
-  action_space: "discrete tokens → continuous"
-  parameters: "55B"
-  key_innovation: "First large-scale VLA showing cross-embodiment transfer via web-scale VLM"
+  backbone: PaLI-X (ViT-22B)
+  llm: PaLM-E 12B / PaLI-X 55B (two variants)
+  action_head: autoregressive (tokenized)
+  action_space: discrete tokens → continuous
+  parameters: 55B
+  key_innovation: First large-scale VLA showing cross-embodiment transfer via web-scale VLM
+  action_head_category: autoregressive
 training:
-  dataset: "Open X-Embodiment + web data co-training"
+  dataset: Open X-Embodiment + web data co-training
   num_trajectories: null
-  compute: "TPU v4 pods (Google internal)"
+  compute: TPU v4 pods (Google internal)
 benchmarks:
   simpler_env:
     google_robot_pick_coke_can: 72.5
     google_robot_move_near: 50.3
     google_robot_open_drawer: 38.6
-    source: "RT-2-X paper + SimplerEnv"
-    date_reported: "2023-10-13"
-    eval_condition: "fine-tuned"
+    source: RT-2-X paper + SimplerEnv
+    date_reported: '2023-10-13'
+    eval_condition: fine-tuned
 open_source: false
-tags: [55B, autoregressive, manipulation, cross-embodiment, web-pretrained]
+tags:
+- 55B
+- autoregressive
+- manipulation
+- cross-embodiment
+- web-pretrained

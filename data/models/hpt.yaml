@@ -1,34 +1,40 @@
 name: HPT
-version: "1.0"
-organization: "MIT / Meta FAIR"
+version: '1.0'
+organization: MIT / Meta FAIR
 paper_url: https://arxiv.org/abs/2409.20537
 code_url: https://github.com/liruiw/HPT
-date: "2024-09-30"
-venue: "NeurIPS 2024 (Spotlight)"
+date: '2024-09-30'
+venue: NeurIPS 2024 (Spotlight)
 architecture:
-  backbone: "Heterogeneous stem encoders (per embodiment)"
+  backbone: Heterogeneous stem encoders (per embodiment)
   llm: null
-  action_head: "shared transformer trunk + task-specific heads"
-  action_space: "continuous"
-  parameters: "300M"
-  key_innovation: "Heterogeneous pre-training across diverse robot embodiments; shared trunk learns universal representations"
+  action_head: shared transformer trunk + task-specific heads
+  action_space: continuous
+  parameters: 300M
+  key_innovation: Heterogeneous pre-training across diverse robot embodiments; shared trunk learns universal representations
+  action_head_category: regression
 training:
-  dataset: "52 datasets, multiple embodiments"
-  method: "Pre-training with heterogeneous stems → shared transformer"
-  compute: "64 A100 GPUs"
+  dataset: 52 datasets, multiple embodiments
+  method: Pre-training with heterogeneous stems → shared transformer
+  compute: 64 A100 GPUs
 benchmarks:
   libero:
     libero_spatial: 86.4
     libero_object: 89.2
     libero_goal: 78.6
     libero_long: 55.8
-    source: "Table 2, HPT paper"
-    date_reported: "2024-09-30"
-    eval_condition: "fine-tuned"
+    source: Table 2, HPT paper
+    date_reported: '2024-09-30'
+    eval_condition: fine-tuned
   simpler_env:
     google_robot_pick_coke_can: 62.4
-    source: "HPT paper"
-    date_reported: "2024-09-30"
-    eval_condition: "fine-tuned"
+    source: HPT paper
+    date_reported: '2024-09-30'
+    eval_condition: fine-tuned
 open_source: true
-tags: [300M, heterogeneous, cross-embodiment, manipulation, open-source]
+tags:
+- 300M
+- heterogeneous
+- cross-embodiment
+- manipulation
+- open-source

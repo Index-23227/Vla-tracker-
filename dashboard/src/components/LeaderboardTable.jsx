@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { BENCHMARKS, ACTION_HEAD_COLORS, VENUE_COLORS, EVAL_COLORS, classifyEvalCondition } from '../constants/benchmarks'
+import { BENCHMARKS, ACTION_HEAD_COLORS, ACTION_HEAD_LABELS, VENUE_COLORS, EVAL_COLORS, classifyEvalCondition } from '../constants/benchmarks'
 
 function getVenueColor(venue) {
   if (!venue) return null
@@ -9,12 +9,9 @@ function getVenueColor(venue) {
   return '#7F8C8D'
 }
 
-function getActionColor(actionHead) {
-  const lower = (actionHead || '').toLowerCase()
-  for (const [key, color] of Object.entries(ACTION_HEAD_COLORS)) {
-    if (lower.includes(key)) return color
-  }
-  return '#888'
+function getActionColor(model) {
+  const cat = model.architecture?.action_head_category || 'other'
+  return ACTION_HEAD_COLORS[cat] || '#888'
 }
 
 function formatDate(dateStr) {
@@ -190,11 +187,12 @@ export default function LeaderboardTable({ models, onModelClick }) {
                     <span
                       className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-md"
                       style={{
-                        backgroundColor: getActionColor(m.architecture?.action_head) + '18',
-                        color: getActionColor(m.architecture?.action_head),
+                        backgroundColor: getActionColor(m) + '18',
+                        color: getActionColor(m),
                       }}
+                      title={m.architecture?.action_head || 'unknown'}
                     >
-                      {m.architecture?.action_head || 'unknown'}
+                      {ACTION_HEAD_LABELS[m.architecture?.action_head_category] || m.architecture?.action_head_category || 'Other'}
                     </span>
                   </td>
                   <td className="px-3 py-3 hidden lg:table-cell">

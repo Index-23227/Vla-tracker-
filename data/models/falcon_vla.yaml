@@ -1,25 +1,31 @@
 name: FALCON
-version: "1.0"
-full_name: "From Spatial to Actions: Grounding Vision-Language-Action Model in Spatial Foundation Priors"
-organization: "ByteDance Seed"
+version: '1.0'
+full_name: 'From Spatial to Actions: Grounding Vision-Language-Action Model in Spatial Foundation Priors'
+organization: ByteDance Seed
 inference_hz: null
-date: "2025-10-20"
+date: '2025-10-20'
 paper_url: https://arxiv.org/abs/2510.17439
 code_url: null
 venue: null
 architecture:
-  backbone: "Kosmos-2 VLM + Embodied Spatial Model"
-  llm: "Kosmos-2 (1.6B)"
-  action_head: "spatial-grounded action head"
-  action_space: "continuous"
-  parameters: "2.9B"
-  key_innovation: "Grounding VLA in spatial foundation priors; separates spatial understanding (Embodied Spatial Model 1.0B) from language understanding (Kosmos-2 1.6B)"
+  backbone: Kosmos-2 VLM + Embodied Spatial Model
+  llm: Kosmos-2 (1.6B)
+  action_head: spatial-grounded action head
+  action_space: continuous
+  parameters: 2.9B
+  key_innovation: Grounding VLA in spatial foundation priors; separates spatial understanding (Embodied Spatial Model 1.0B)
+    from language understanding (Kosmos-2 1.6B)
+  action_head_category: regression
 training:
-  dataset: "Cross-embodiment robot data with spatial annotations"
-  method: "Spatial prior-grounded training"
-  compute: "not specified"
+  dataset: Cross-embodiment robot data with spatial annotations
+  method: Spatial prior-grounded training
+  compute: not specified
 benchmarks: {}
 open_source: false
-open_source_note: "Code and weights not publicly released"
-model_type: "vla"
-tags: [2.9B, spatial-grounding, Kosmos-2, manipulation]
+open_source_note: Code and weights not publicly released
+model_type: vla
+tags:
+- 2.9B
+- spatial-grounding
+- Kosmos-2
+- manipulation

@@ -12,10 +12,11 @@ tags:
 - autoregressive
 - open-source
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B
   action_head: autoregressive (OpenVLA base) + structured reasoning chain (TASK/PLAN/SUBTASK/MOVE)
   parameters: 7B
+  action_head_category: autoregressive
 benchmarks:
   libero:
     libero_avg: 90.8

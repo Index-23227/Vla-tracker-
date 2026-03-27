@@ -1,26 +1,22 @@
-# Paper: VLA-Thinker: Boosting Vision-Language-Action Models through Thinking-with-Image Reasoning
-# arXiv: 2603.14523
-
 name: VLA-Thinker
-full_name: "VLA-Thinker: Boosting Vision-Language-Action Models through Thinking-with-Image Reasoning"
-organization: "University of Central Florida / University of Wurzburg / USC / NVIDIA Research"
-date: "2026-03-15"
+full_name: 'VLA-Thinker: Boosting Vision-Language-Action Models through Thinking-with-Image Reasoning'
+organization: University of Central Florida / University of Wurzburg / USC / NVIDIA Research
+date: '2026-03-15'
 paper_url: https://arxiv.org/abs/2603.14523
 code_url: https://github.com/CYWang735/VLAThinker
 venue: null
 open_source: true
-
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
-  action_head: "autoregressive"
-  parameters: "7B"
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B
+  action_head: autoregressive
+  parameters: 7B
+  action_head_category: autoregressive
+key_innovation: 'Thinking-with-image reasoning framework that models perception as a dynamically invocable reasoning action.
+  Uses two-stage training: SFT cold-start with visual CoT data, then GRPO-based RL to align reasoning-action trajectories
+  with task-level success.
 
-key_innovation: >
-  Thinking-with-image reasoning framework that models perception as a dynamically invocable
-  reasoning action. Uses two-stage training: SFT cold-start with visual CoT data, then
-  GRPO-based RL to align reasoning-action trajectories with task-level success.
-
+  '
 benchmarks:
   libero:
     libero_spatial: 98.7
@@ -43,9 +39,12 @@ benchmarks:
     short_horizon_avg: 62.3
     medium_horizon_avg: 70.7
     long_horizon_avg: 64.6
-
 eval_conditions:
-  libero: "SFT + RL fine-tuned (GRPO)"
-  robotwin_v2: "SFT + RL fine-tuned (GRPO)"
-
-tags: [reasoning, libero, robotwin, robotwin_v2, open-source]
+  libero: SFT + RL fine-tuned (GRPO)
+  robotwin_v2: SFT + RL fine-tuned (GRPO)
+tags:
+- reasoning
+- libero
+- robotwin
+- robotwin_v2
+- open-source

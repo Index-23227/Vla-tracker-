@@ -1,197 +1,225 @@
+<div align="center">
+
 # VLA-Tracker
 
-### Real-time benchmark tracking for Vision-Language-Action models
+### The most comprehensive benchmark tracker for Vision-Language-Action models
 
-[![Models Tracked](https://img.shields.io/badge/models-82-blue)](data/models/)
-[![Benchmarks](https://img.shields.io/badge/benchmarks-8-green)](data/benchmarks/)
-[![Auto-Track](https://img.shields.io/badge/paper%20scan-arXiv%20%2B%20Semantic%20Scholar-orange)](.github/workflows/auto-track.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Visit-blue?style=for-the-badge)](https://hyeongjinkim.github.io/Vla-tracker-/)
+[![Models](https://img.shields.io/badge/Models-82-purple?style=flat-square)](data/models/)
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
+[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-70-orange?style=flat-square)](data/ai_reviews/)
+[![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
+
+**82 VLA models** · **8 benchmarks** · **70 AI paper reviews** · **Auto-updated from arXiv**
+
+[Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
+
+</div>
 
 ---
 
-## What is this?
+## Why VLA-Tracker?
 
-VLA-Tracker tracks **77 VLA models** (2023-2026) across **8 benchmarks** (LIBERO, CALVIN, SimplerEnv, RoboTwin v1/v2, Meta-World, RLBench, RoboCasa, Real-World). New papers are auto-detected from arXiv and Semantic Scholar via GitHub Actions.
+The VLA (Vision-Language-Action) field is moving fast — new models every week, each claiming SOTA on different benchmarks with different eval conditions. **No one can keep track.**
 
-**Unlike static awesome-lists**, this project:
-- **Tracks performance across multiple benchmarks** with normalized, comparable scores
-- **Auto-discovers new papers** via arXiv + Semantic Scholar scanning (twice weekly)
-- **Validates data integrity** on every PR with automated CI checks
-- **Interactive dashboard** to filter, compare, and explore models
+VLA-Tracker solves this by:
 
-## Leaderboard
+| Feature | Static Awesome-Lists | VLA-Tracker |
+|---------|---------------------|-------------|
+| Benchmark scores | Rarely included | **Normalized across 8 benchmarks** |
+| New paper discovery | Manual updates | **Auto-scanned from arXiv twice weekly** |
+| Data validation | None | **CI checks on every PR** |
+| Interactive exploration | None | **Full React dashboard with filters** |
+| Paper reviews | None | **70 AI-generated seminar-style reviews** |
+| Machine-readable | None | **JSON API + llms.txt for AI agents** |
 
-### LIBERO (Top 10)
+---
 
-| Rank | Model | Date | Venue | Action Head | Avg | Eval |
-|------|-------|------|-------|-------------|-----|------|
-| 1 | **PLD** | Oct 2025 | ICLR 2026 | residual RL (probe → learn → distill) | **99.0** | FT |
-| 2 | **SimpleVLA-RL** | Sep 2025 | ICLR 2026 | autoregressive + GRPO RL | **98.8** | FT |
-| 3 | **X-VLA** | Oct 2025 | ICLR 2026 | autoregressive w/ soft prompts | **97.8** | FT |
-| 4 | Fast-WAM | Mar 2026 | - | flow matching + video DiT | 97.6 | FT |
-| 5 | VLA-Thinker | Mar 2026 | - | autoregressive + visual CoT + GRPO RL | 97.5 | FT |
-| 6 | DreamVLA | Jul 2025 | - | inverse dynamics from world knowledge | 97.2 | FT |
-| 7 | AtomicVLA | Mar 2026 | CVPR 2026 | flow matching + SG-MoE | 96.6 | FT |
-| 8 | MemoryVLA | Aug 2025 | ICLR 2026 | diffusion transformer | 96.5 | FT |
-| 9 | dVLA | Sep 2025 | ICLR 2026 | discrete diffusion + multimodal CoT | 96.4 | FT |
-| 10 | GST-VLA | Mar 2026 | - | flow matching + Depth-Aware CoT | 96.3 | FT |
+## Current SOTA Rankings
 
-> **FT** = Fine-tuned | [Full leaderboard (JSON) ->](data/leaderboard.json)
+### LIBERO (Primary Benchmark)
+
+| Rank | Model | Avg | Date | Venue | Action Head |
+|------|-------|-----|------|-------|-------------|
+| 1 | **PLD** | **99.0** | Oct 2025 | ICLR 2026 | Residual RL |
+| 2 | **SimpleVLA-RL** | **98.8** | Sep 2025 | ICLR 2026 | AR + GRPO RL |
+| 3 | **X-VLA** | **97.8** | Oct 2025 | ICLR 2026 | Flow matching + soft prompts |
+| 4 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
+| 5 | VLA-Thinker | 97.5 | Mar 2026 | — | AR + visual CoT + RL |
+| 6 | DreamVLA | 97.2 | Jul 2025 | — | Inverse dynamics |
+| 7 | DeepThinkVLA | 97.1 | Nov 2025 | ICLR 2026 | Hybrid attention |
+| 8 | AtomicVLA | 96.6 | Mar 2026 | CVPR 2026 | Flow + SG-MoE |
+| 9 | MemoryVLA | 96.5 | Aug 2025 | ICLR 2026 | Diffusion transformer |
+| 10 | dVLA | 96.4 | Sep 2025 | ICLR 2026 | Discrete diffusion |
+
+> Full leaderboard with 36 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
-| **CALVIN** (avg len) | LingBot-VLA (4.5) | UD-VLA (4.5) | DreamVLA (4.44) |
-| **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.05) |
+| **CALVIN** (avg len) | LingBot-VLA (4.50) | UD-VLA (4.50) | DreamVLA (4.44) |
+| **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.1) |
 | **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
-| **RoboTwin v2** (avg) | Motus (87.84) | GigaWorld-Policy (86.0) | X-VLA (72.5) |
+| **RoboTwin v2** (avg) | Motus (87.8) | GigaWorld-Policy (86.0) | X-VLA (72.5) |
+| **RoboCasa** (avg) | FLARE (70.1) | DiT4DiT (50.8) | — |
 
-## All Tracked Models
+---
 
-<details>
-<summary>77 models (click to expand)</summary>
+## Paper Reviews
 
-3D Diffuser Actor, AtomicVLA, AVDC, CogACT, CoT-VLA, DexVLA, Diffusion Policy, dVLA, E0, FALCON, FAST-WAM, FLARE, FLOWER, GR-1, GR-2, GR00T-N1, GR00T-N1.5, GR00T-N1.6, GR00T-N1.7, GR00T-N2, GST-VLA, HPT, HybridVLA, InstructVLA, LingBot-VLA, MemoryVLA, NanoVLA, Octo, OpenVLA, OpenVLA-OFT, pi0, pi0.5, pi*0.6, pi0-FAST, RDT-1B, RoboVLM, RT-2-X, SimpleVLA-RL, SmolVLA, SpatialVLA, SuSIE, TraceVLA, UD-VLA, UniPI, UniVLA, VLA-Thinker, VLASER, X-VLA, *and more...*
+VLA-Tracker includes **70 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
 
-</details>
+1. One-line summary
+2. Background & motivation
+3. Methodology deep-dive (with equations and Q&A)
+4. Experimental results (exact numbers from papers)
+5. Ablation analysis
+6. Related work comparison tables
+7. Limitations & attribution issues
+8. Overall assessment with ratings
+9. Expected tough questions for seminars
 
-## Quick Start
+**26 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
 
-### Browse the Dashboard
+Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-tracker-/) · [Markdown files](data/ai_reviews/)
 
-```bash
-cd dashboard
-npm install
-npm run dev
+---
+
+## For AI Agents & Developers
+
+### Machine-Readable Data
+
+| Format | URL | Description |
+|--------|-----|-------------|
+| **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
+| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (1700+ lines) |
+| **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
+| **YAML** | [data/models/](data/models/) | Individual model files (82 files) |
+
+### Quick Start (Python)
+
+```python
+import json, urllib.request
+
+# Fetch latest leaderboard
+url = "https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json"
+data = json.loads(urllib.request.urlopen(url).read())
+
+# Top 5 LIBERO models
+for m in data["models"][:5]:
+    print(f"{m['name']}: {m.get('libero_avg', 'N/A')}")
 ```
 
-### Use the Data
+### Quick Start (YAML)
 
 ```python
 import yaml
 
-with open('data/models/pi0_5.yaml') as f:
+with open("data/models/pi0_5.yaml") as f:
     model = yaml.safe_load(f)
 
-print(model['benchmarks']['libero']['libero_long'])  # 72.8
+print(model["benchmarks"]["libero"]["libero_long"])  # 72.8
+print(model["architecture"]["action_head"])           # flow matching
 ```
 
-### Build the Leaderboard
+---
+
+## Dashboard
+
+The interactive dashboard provides:
+
+- **Leaderboard** — Sort by any benchmark, filter by action head / backbone / eval condition
+- **Compare** — Radar charts comparing models side-by-side
+- **Reviews** — AI-generated paper reviews with search & filter
+- **Lineage** — Model family tree visualization
+- **Efficiency** — Performance vs. parameters / inference speed
+- **Coverage** — Heatmap of which models report which benchmarks
+- **Architecture** — Breakdown by action head type, VLM backbone
 
 ```bash
-pip install pyyaml
-python scripts/build_leaderboard.py
+# Run locally
+cd dashboard && npm install && npm run dev
 ```
 
-### Scan for New Papers
+Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
-```bash
-# Auto mode: tries arXiv first, falls back to Semantic Scholar
-python scripts/scan_arxiv.py --days 14
-
-# Force Semantic Scholar only
-python scripts/scan_arxiv.py --source s2 --days 30
-
-# Generate draft YAMLs for top candidates
-python scripts/generate_model_yaml.py --top 5
-```
+---
 
 ## Tracked Benchmarks
 
-| Benchmark | Tasks | Models Tracked | Focus | Venue |
-|-----------|-------|----------------|-------|-------|
+| Benchmark | Tasks | Models | Focus | Venue |
+|-----------|-------|--------|-------|-------|
 | [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 36 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC->D | 18 | Long-horizon, language | RA-L 2022 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 18 | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 15 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50 tasks | 11 | Dual-arm, bimanual | CVPR 2025 Highlight |
-| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | - | Multi-task dexterity | CoRL 2020 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 11 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
 | [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 5 | Home robot tasks | RSS 2024 |
+| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity | CoRL 2020 |
 
-### LIBERO Leaderboard (36 models)
-
-| Rank | Model | Organization | LIBERO Avg |
-|------|-------|-------------|------------|
-| 1 | PLD | NVIDIA GEAR Lab | 99.0 |
-| 2 | SimpleVLA-RL | Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU | 98.83 |
-| 3 | X-VLA | Tsinghua University AIR / Shanghai AI Lab | 97.8 |
-| 4 | Fast-WAM | Tsinghua University (IIIS) / Galaxea AI | 97.6 |
-| 5 | VLA-Thinker | University of Central Florida / University of Wurzburg / USC / NVIDIA Research | 97.45 |
-| 6 | DreamVLA | Shanghai AI Lab / Fudan University / NUS | 97.2 |
-| 7 | DeepThinkVLA | Huazhong University / Tsinghua University / Renmin University | 97.05 |
-| 8 | AtomicVLA | Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology | 96.6 |
-| 9 | MemoryVLA | PKU / Tsinghua University / Shanghai AI Lab | 96.5 |
-| 10 | dVLA | Midea Group | 96.4 |
-| 11 | GST-VLA | Yeungnam University / KAIST | 96.33 |
-| 12 | DD-VLA | PKU / Shanghai AI Lab | 96.3 |
-| 13 | pi*0.6 | Physical Intelligence | 93.1 |
-| 14 | LingBot-VLA | Ant Group / Robbyant | 92.55 |
-| 15 | UD-VLA | Tsinghua University / Shanghai AI Lab | 91.75 |
-| 16 | ECoT | UC Berkeley / Stanford / University of Warsaw | 90.8 |
-| 17 | InstructVLA | Shanghai AI Lab (InternRobotics) | 90.6 |
-| 18 | UniVLA | HKU / OpenDriveLab / AgiBot | 90.1 |
-| 19 | FLARE | NVIDIA | 89.2 |
-| 20 | pi0.5 | Physical Intelligence | 88.88 |
-| 21 | SpatialVLA | Shanghai AI Lab / Tsinghua University | 88.05 |
-| 22 | DexVLA | ByteDance / Tsinghua University | 87.85 |
-| 23 | OpenVLA-OFT | Stanford / UC Berkeley / TRI | 87.35 |
-| 24 | CoT-VLA | UC Berkeley | 86.32 |
-| 25 | pi0-FAST | Physical Intelligence | 86.1 |
-| 26 | CogACT | Microsoft Research / Tsinghua University | 85.9 |
-| 27 | GR00T-N1 | NVIDIA | 85.75 |
-| 28 | HybridVLA | ByteDance | 85.75 |
-| 29 | pi0 | Physical Intelligence | 84.75 |
-| 30 | RoboVLM | Tsinghua University / ByteDance Research / CASIA / SJTU / NUS | 84.05 |
-| 31 | RDT-1B | Tsinghua University / Shanghai Qi Zhi Institute | 82.5 |
-| 32 | SmolVLA | Hugging Face | 79.5 |
-| 33 | HPT | MIT / Meta FAIR | 77.5 |
-| 34 | OpenVLA | Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT | 74.5 |
-| 35 | Octo | UC Berkeley / Stanford / CMU / Google DeepMind | 67.17 |
-| 36 | Diffusion Policy | Columbia University / MIT / TRI | 66.75 |
+---
 
 ## Automation
 
-Three GitHub Actions workflows keep the data up to date:
-
 | Workflow | Schedule | Description |
 |----------|----------|-------------|
-| [auto-track.yml](.github/workflows/auto-track.yml) | Wed & Sat 10:00 UTC | Scans arXiv + Semantic Scholar for new VLA papers, creates PRs with draft YAMLs |
-| [weekly-analysis.yml](.github/workflows/weekly-analysis.yml) | Mon 9:00 UTC | Validates data, builds leaderboard, deploys dashboard |
-| [validate-pr.yml](.github/workflows/validate-pr.yml) | On PR | Validates YAML integrity and rebuilds leaderboard as dry run |
+| [auto-track.yml](.github/workflows/auto-track.yml) | Wed & Sat 10:00 UTC | Scans arXiv + Semantic Scholar, creates PRs with draft YAMLs |
+| [weekly-analysis.yml](.github/workflows/weekly-analysis.yml) | Mon 9:00 UTC | Validates data, builds leaderboard, generates llms-full.txt, deploys dashboard |
+| [validate-pr.yml](.github/workflows/validate-pr.yml) | On PR | Validates YAML integrity and count consistency |
+
+---
 
 ## Project Structure
 
 ```
 ├── data/
-│   ├── benchmarks/          # Benchmark definitions (10 YAML files)
-│   ├── models/              # Model data with benchmark scores (82 YAML files)
+│   ├── models/              # 82 model YAML files (source of truth)
+│   ├── benchmarks/          # 8 benchmark definitions
+│   ├── ai_reviews/          # 70 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
-│   └── scan_candidates.json # Latest arXiv/S2 scan results
+│   └── paper_reviews.json   # Venue peer-review data (ICLR, NeurIPS, CoLM)
 ├── scripts/
 │   ├── scan_arxiv.py        # Paper scanner (arXiv + Semantic Scholar)
-│   ├── generate_model_yaml.py  # Draft YAML generator from scan results
-│   ├── build_leaderboard.py # YAML -> JSON leaderboard builder
+│   ├── build_leaderboard.py # YAML → JSON leaderboard builder
+│   ├── generate_llms_full.py # Generates llms-full.txt for AI agents
+│   ├── check_reviews.py     # AI review coverage tracker
 │   └── validate_data.py     # Data integrity checks
-├── dashboard/               # React + Recharts interactive dashboard
+├── dashboard/               # React + Tailwind + Recharts interactive dashboard
+│   └── public/
+│       ├── llms.txt         # AI agent discovery file
+│       └── llms-full.txt    # Complete model database for AI
 └── .github/workflows/       # CI/CD automation (3 workflows)
 ```
+
+---
 
 ## Contributing
 
 The easiest way to contribute is to **add a new model**:
 
-1. Create `data/models/your_model.yaml` (see existing files for format)
+1. Create `data/models/your_model.yaml` (see existing files or [schema](schemas/model.schema.json))
 2. Run `python scripts/validate_data.py` to verify
 3. Run `python scripts/build_leaderboard.py` to check rankings
 4. Submit a PR — CI will validate automatically
 
+We also welcome:
+- Benchmark score corrections (with paper citations)
+- New benchmark integrations
+- Dashboard improvements
+
+---
+
 ## Limitations
 
-- Benchmark numbers are manually verified from papers — errors possible
+- Benchmark numbers are from papers — evaluation conditions vary (fine-tuned vs. zero-shot)
 - Not all models report on all benchmarks (fair comparison is hard)
-- Real-world performance != benchmark performance
-- Evaluation conditions (fine-tuned vs zero-shot) vary across papers
+- AI reviews are generated by Claude and may contain inaccuracies (26/70 are PDF-verified)
+- Real-world performance ≠ benchmark performance
+
+---
 
 ## Citation
 
@@ -204,11 +232,12 @@ The easiest way to contribute is to **add a new model**:
 }
 ```
 
-## Acknowledgments
-
-Built with data from the VLA research community.
-Thanks to the authors of [LIBERO](https://arxiv.org/abs/2306.03310), [CALVIN](https://arxiv.org/abs/2112.03227), and all model papers tracked here.
-
 ---
 
-[Star this repo](https://github.com/HyeongjinKim/Vla-tracker-) to stay updated
+<div align="center">
+
+Built with data from the VLA research community.
+
+[Star this repo](https://github.com/HyeongjinKim/Vla-tracker-) to stay updated · [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
+
+</div>

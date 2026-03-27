@@ -1,29 +1,35 @@
 name: CoT-VLA
-version: "1.0"
-organization: "UC Berkeley"
+version: '1.0'
+organization: UC Berkeley
 paper_url: https://arxiv.org/abs/2503.22020
 code_url: null
-date: "2025-03-27"
-venue: "CVPR 2025"
+date: '2025-03-27'
+venue: CVPR 2025
 architecture:
-  backbone: "SigLIP (via VILA-U)"
-  llm: "LLaMA-2 7B"
-  action_head: "diffusion policy"
-  action_space: "continuous"
-  parameters: "7B"
-  key_innovation: "Chain-of-thought reasoning in VLM before action generation via diffusion head"
+  backbone: SigLIP (via VILA-U)
+  llm: LLaMA-2 7B
+  action_head: autoregressive (256-bin discretized, 7 tokens × 10-step chunks via VILA-U)
+  action_space: discrete (256 bins per dimension)
+  parameters: 7B
+  key_innovation: Visual chain-of-thought (future image prediction) before autoregressive action generation, with hybrid attention (causal for images, bidirectional for actions)
+  action_head_category: autoregressive
 training:
-  dataset: "LIBERO + cross-embodiment data"
-  method: "Two-stage: VLM fine-tuning → diffusion head training"
-  compute: "8 A100 GPUs"
+  dataset: LIBERO + cross-embodiment data
+  method: 'Two-stage: VLM fine-tuning → diffusion head training'
+  compute: 8 A100 GPUs
 benchmarks:
   libero:
     libero_spatial: 92.1
     libero_object: 93.8
     libero_goal: 88.2
     libero_long: 71.2
-    source: "Table 1, CoT-VLA paper"
-    date_reported: "2025-03-27"
-    eval_condition: "fine-tuned"
+    source: Table 1, CoT-VLA paper
+    date_reported: '2025-03-27'
+    eval_condition: fine-tuned
 open_source: false
-tags: [7B, chain-of-thought, diffusion, reasoning, manipulation]
+tags:
+- 7B
+- chain-of-thought
+- diffusion
+- reasoning
+- manipulation
