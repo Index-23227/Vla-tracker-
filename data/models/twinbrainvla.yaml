@@ -7,10 +7,9 @@ open_source: true
 benchmarks:
   robocasa:
     robocasa_avg: 54.6
-    source: "TwinBrainVLA paper (RoboCasa GR1 Tabletop 24 tasks, Qwen3VL variant)"
-    date_reported: "2026-01-30"
-    eval_condition: "fine-tuned"
-
+    source: TwinBrainVLA paper (RoboCasa GR1 Tabletop 24 tasks, Qwen3VL variant)
+    date_reported: '2026-01-30'
+    eval_condition: fine-tuned
 tags:
 - 3B-4B
 - asymmetric-MoT
@@ -18,7 +17,8 @@ tags:
 - dual-brain
 - open-source
 architecture:
-  backbone: "Qwen2.5-VL-3B / Qwen3-VL-4B"
-  llm: "Qwen2.5 3B / Qwen3 4B"
+  backbone: Qwen2.5-VL-3B / Qwen3-VL-4B
+  llm: Qwen2.5 3B / Qwen3 4B
   action_head: 'Asymmetric MoT: frozen Left Brain (generalist) + trainable Right Brain (specialist)'
-  parameters: "3B-4B"
+  parameters: 3B-4B
+  action_head_category: other

@@ -1,29 +1,35 @@
 name: dVLA
-version: "1.0"
-full_name: "dVLA: Diffusion Vision-Language-Action Model with Multimodal Chain-of-Thought"
-organization: "Midea Group"
+version: '1.0'
+full_name: 'dVLA: Diffusion Vision-Language-Action Model with Multimodal Chain-of-Thought'
+organization: Midea Group
 inference_hz: null
-date: "2025-09-30"
+date: '2025-09-30'
 paper_url: https://arxiv.org/abs/2509.25681
 code_url: null
-venue: "ICLR 2026 submission (rejected)"
+venue: ICLR 2026 submission (rejected)
 architecture:
-  backbone: "MMaDA (MAGViT-v2 vision tokenizer)"
-  llm: "LLaDA-8B-Instruct (discrete diffusion LM)"
-  action_head: "discrete diffusion with multimodal chain-of-thought"
-  action_space: "discrete tokens (FAST)"
-  parameters: "8B"
-  key_innovation: "Combines diffusion-based action generation with multimodal chain-of-thought reasoning for improved task planning and execution"
+  backbone: MMaDA (MAGViT-v2 vision tokenizer)
+  llm: LLaDA-8B-Instruct (discrete diffusion LM)
+  action_head: discrete diffusion with multimodal chain-of-thought
+  action_space: discrete tokens (FAST)
+  parameters: 8B
+  key_innovation: Combines diffusion-based action generation with multimodal chain-of-thought reasoning for improved task
+    planning and execution
+  action_head_category: discrete_diffusion
 training:
-  dataset: "Cross-embodiment robot data"
-  method: "Diffusion + multimodal CoT"
-  compute: "not specified"
+  dataset: Cross-embodiment robot data
+  method: Diffusion + multimodal CoT
+  compute: not specified
 benchmarks:
   libero:
     libero_avg: 96.4
-    source: "dVLA paper"
-    date_reported: "2025-09-30"
-    eval_condition: "fine-tuned"
+    source: dVLA paper
+    date_reported: '2025-09-30'
+    eval_condition: fine-tuned
 open_source: false
-model_type: "vla"
-tags: [diffusion, chain-of-thought, multimodal-CoT, manipulation]
+model_type: vla
+tags:
+- diffusion
+- chain-of-thought
+- multimodal-CoT
+- manipulation

@@ -1,28 +1,34 @@
 name: AVDC
-version: "1.0"
-organization: "CMU"
+version: '1.0'
+organization: CMU
 paper_url: https://arxiv.org/abs/2310.08576
 code_url: https://github.com/flow-diffusion/AVDC
-date: "2023-10-25"
-venue: "ICLR 2024"
+date: '2023-10-25'
+venue: ICLR 2024
 architecture:
-  backbone: "Video Diffusion (flow generation)"
+  backbone: Video Diffusion (flow generation)
   llm: null
-  action_head: "inverse dynamics from optical flow"
-  action_space: "continuous"
+  action_head: inverse dynamics from optical flow
+  action_space: continuous
   parameters: null
-  key_innovation: "Generates future video/flow conditioned on language, then extracts actions via flow-based inverse dynamics"
+  key_innovation: Generates future video/flow conditioned on language, then extracts actions via flow-based inverse dynamics
+  action_head_category: inverse_dynamics
 training:
-  dataset: "Something-Something V2 + RLBench + real robot"
-  method: "Pre-train video flow diffusion on human videos, fine-tune on robot data"
+  dataset: Something-Something V2 + RLBench + real robot
+  method: Pre-train video flow diffusion on human videos, fine-tune on robot data
   compute: null
 benchmarks:
   rlbench:
     rlbench_18tasks: 51.8
-    source: "Table 1, AVDC paper"
-    date_reported: "2023-10-25"
-    eval_condition: "fine-tuned"
+    source: Table 1, AVDC paper
+    date_reported: '2023-10-25'
+    eval_condition: fine-tuned
 open_source: true
-model_type: "video"
+model_type: video
 inference_hz: null
-tags: [video-diffusion, flow-prediction, inverse-dynamics, manipulation, open-source]
+tags:
+- video-diffusion
+- flow-prediction
+- inverse-dynamics
+- manipulation
+- open-source

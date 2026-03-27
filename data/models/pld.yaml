@@ -2,7 +2,7 @@ name: PLD
 organization: NVIDIA GEAR Lab
 date: '2025-10-30'
 paper_url: https://arxiv.org/abs/2511.00091
-venue: "ReALM-GEN Workshop @ ICLR 2026"
+venue: ReALM-GEN Workshop @ ICLR 2026
 open_source: false
 tags:
 - residual-RL
@@ -10,10 +10,11 @@ tags:
 - post-training
 - ICLR-2026-workshop
 architecture:
-  backbone: "varies (wraps existing VLAs)"
-  llm: "varies (wraps existing VLAs)"
+  backbone: varies (wraps existing VLAs)
+  llm: varies (wraps existing VLAs)
   action_head: plug-and-play residual RL framework (probe → learn → distill back to generalist)
   parameters: varies (applied on top of existing VLAs)
+  action_head_category: other
 benchmarks:
   libero:
     libero_avg: 99.0

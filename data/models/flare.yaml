@@ -1,33 +1,40 @@
 name: FLARE
-version: "1.0"
-organization: "NVIDIA"
+version: '1.0'
+organization: NVIDIA
 paper_url: https://arxiv.org/abs/2505.15659
 code_url: null
-date: "2025-05-21"
-venue: "CoRL 2025"
+date: '2025-05-21'
+venue: CoRL 2025
 architecture:
-  backbone: "SigLIP2-Large (siglip2-large-patch16-256)"
+  backbone: SigLIP2-Large (siglip2-large-patch16-256)
   llm: null
-  action_head: "Diffusion Transformer (DiT) + Q-former + future latent alignment"
-  action_space: "continuous"
-  parameters: "3B"
-  key_innovation: "Implicit world modeling via future latent observation alignment; aligns current representations with future states during training"
+  action_head: Diffusion Transformer (DiT) + Q-former + future latent alignment
+  action_space: continuous
+  parameters: 3B
+  key_innovation: Implicit world modeling via future latent observation alignment; aligns current representations with future
+    states during training
+  action_head_category: flow_matching
 training:
-  dataset: "Cross-embodiment robot data + latent alignment objectives"
-  compute: "NVIDIA DGX"
+  dataset: Cross-embodiment robot data + latent alignment objectives
+  compute: NVIDIA DGX
 benchmarks:
   libero:
     libero_spatial: 95.8
     libero_object: 96.4
     libero_goal: 91.4
     libero_long: 73.2
-    source: "FLARE paper"
-    date_reported: "2025-05-21"
-    eval_condition: "fine-tuned"
+    source: FLARE paper
+    date_reported: '2025-05-21'
+    eval_condition: fine-tuned
   calvin:
     calvin_abc_d_avg_len: 4.1
-    source: "FLARE paper"
-    date_reported: "2025-05-21"
-    eval_condition: "fine-tuned"
+    source: FLARE paper
+    date_reported: '2025-05-21'
+    eval_condition: fine-tuned
 open_source: false
-tags: [3B, diffusion-transformer, world-model, future-alignment, manipulation]
+tags:
+- 3B
+- diffusion-transformer
+- world-model
+- future-alignment
+- manipulation

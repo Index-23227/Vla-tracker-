@@ -43,6 +43,15 @@ jobs:
       - name: Build leaderboard
         run: python scripts/build_leaderboard.py
 
+      - name: Generate llms-full.txt
+        run: python scripts/generate_llms_full.py
+
+      - name: Sync documentation counts
+        run: python scripts/sync_counts.py
+
+      - name: Copy static data to dashboard public
+        run: cp data/leaderboard.json dashboard/public/leaderboard.json
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:

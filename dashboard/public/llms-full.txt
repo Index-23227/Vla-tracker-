@@ -1,0 +1,1741 @@
+# VLA-Tracker: Complete Model Database
+# Generated: 2026-03-26T06:37:43.767857
+# Models: 82
+# Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
+# Source: https://github.com/HyeongjinKim/Vla-tracker-
+# Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
+
+================================================================================
+SECTION 1: RANKINGS
+================================================================================
+
+## LIBERO Benchmark Rankings (sorted by average)
+
+   1. PLD                       avg= 99.0  spatial=—  object=—  goal=—  long=—  org=NVIDIA GEAR Lab  date=2025-10-30
+   2. SimpleVLA-RL              avg= 98.8  spatial=99.1  object=99.2  goal=98.5  long=98.5  org=Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU  date=2025-09-11
+   3. X-VLA                     avg= 97.8  spatial=98.4  object=98.8  goal=97.6  long=96.4  org=Tsinghua University AIR / Shanghai AI Lab  date=2025-10-11
+   4. Fast-WAM                  avg= 97.6  spatial=—  object=—  goal=—  long=—  org=Tsinghua University (IIIS) / Galaxea AI  date=2026-03-17
+   5. VLA-Thinker               avg= 97.5  spatial=98.7  object=99.0  goal=95.2  long=96.9  org=University of Central Florida / University of Wurzburg / USC / NVIDIA Research  date=2026-03-15
+   6. DreamVLA                  avg= 97.2  spatial=—  object=—  goal=—  long=—  org=Shanghai AI Lab / Fudan University / NUS  date=2025-07-06
+   7. DeepThinkVLA              avg= 97.0  spatial=96.6  object=99.0  goal=96.4  long=96.2  org=Huazhong University of Science and Technology / Tsinghua University / Renmin University of China  date=2025-11-24
+   8. AtomicVLA                 avg= 96.6  spatial=—  object=—  goal=—  long=95.2  org=Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology  date=2026-03-08
+   9. MemoryVLA                 avg= 96.5  spatial=—  object=—  goal=—  long=—  org=PKU / Tsinghua University / Shanghai AI Lab  date=2025-08-26
+  10. dVLA                      avg= 96.4  spatial=—  object=—  goal=—  long=—  org=Midea Group  date=2025-09-30
+  11. GST-VLA                   avg= 96.3  spatial=98.2  object=97.4  goal=97.1  long=92.6  org=Yeungnam University / KAIST  date=2026-03-10
+  12. DD-VLA                    avg= 96.3  spatial=—  object=—  goal=—  long=—  org=PKU / Shanghai AI Lab  date=2025-08-27
+  13. pi*0.6                    avg= 93.1  spatial=96.4  object=97.2  goal=95.6  long=83.2  org=Physical Intelligence  date=2025-11-18
+  14. LingBot-VLA               avg= 92.5  spatial=97.4  object=98.0  goal=94.2  long=80.6  org=Ant Group / Robbyant  date=2026-01-26
+  15. UD-VLA                    avg= 91.8  spatial=97.2  object=97.8  goal=93.6  long=78.4  org=Tsinghua University / Shanghai AI Lab  date=2025-11-03
+  16. ECoT                      avg= 90.8  spatial=—  object=—  goal=—  long=—  org=UC Berkeley / Stanford / University of Warsaw  date=2024-07-11
+  17. InstructVLA               avg= 90.6  spatial=96.2  object=97.0  goal=92.4  long=76.8  org=Shanghai AI Lab (InternRobotics)  date=2025-07-23
+  18. UniVLA                    avg= 90.1  spatial=96.8  object=97.4  goal=92.0  long=74.2  org=HKU / OpenDriveLab / AgiBot  date=2025-05-04
+  19. FLARE                     avg= 89.2  spatial=95.8  object=96.4  goal=91.4  long=73.2  org=NVIDIA  date=2025-05-21
+  20. pi0.5                     avg= 88.9  spatial=96.2  object=97.1  goal=89.4  long=72.8  org=Physical Intelligence  date=2025-04-22
+  21. SpatialVLA                avg= 88.0  spatial=95.6  object=96.0  goal=90.2  long=70.4  org=Shanghai AI Lab / Tsinghua University  date=2025-01-27
+  22. DexVLA                    avg= 87.8  spatial=94.2  object=95.8  goal=89.8  long=71.6  org=ByteDance / Tsinghua University  date=2025-02-03
+  23. OpenVLA-OFT               avg= 87.3  spatial=94.8  object=95.2  goal=91.0  long=68.4  org=Stanford / UC Berkeley / TRI  date=2025-02-27
+  24. CoT-VLA                   avg= 86.3  spatial=92.1  object=93.8  goal=88.2  long=71.2  org=UC Berkeley  date=2025-03-27
+  25. pi0-FAST                  avg= 86.1  spatial=93.8  object=95.4  goal=88.0  long=67.2  org=Physical Intelligence  date=2025-01-23
+  26. CogACT                    avg= 85.9  spatial=93.6  object=94.8  goal=88.4  long=66.8  org=Microsoft Research / Tsinghua University  date=2024-11-29
+  27. GR00T-N1                  avg= 85.8  spatial=93.2  object=94.8  goal=88.6  long=66.4  org=NVIDIA  date=2025-03-18
+  28. HybridVLA                 avg= 85.8  spatial=91.4  object=94.2  goal=87.6  long=69.8  org=ByteDance  date=2025-03-13
+  29. pi0                       avg= 84.8  spatial=92.4  object=94.6  goal=86.2  long=65.8  org=Physical Intelligence  date=2024-10-31
+  30. RoboVLM                   avg= 84.0  spatial=91.8  object=93.4  goal=86.8  long=64.2  org=Tsinghua University / ByteDance Research / CASIA / SJTU / NUS  date=2024-12-18
+  31. RDT-1B                    avg= 82.5  spatial=90.2  object=91.8  goal=85.6  long=62.4  org=Tsinghua University / Shanghai Qi Zhi Institute  date=2024-10-10
+  32. SmolVLA                   avg= 79.5  spatial=88.6  object=90.4  goal=82.8  long=56.2  org=Hugging Face  date=2025-06-02
+  33. HPT                       avg= 77.5  spatial=86.4  object=89.2  goal=78.6  long=55.8  org=MIT / Meta FAIR  date=2024-09-30
+  34. OpenVLA                   avg= 74.5  spatial=84.2  object=88.4  goal=72.0  long=53.4  org=Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT  date=2024-06-13
+  35. Octo                      avg= 67.2  spatial=78.9  object=82.3  goal=65.4  long=42.1  org=UC Berkeley / Stanford / CMU / Google DeepMind  date=2024-05-20
+  36. Diffusion Policy          avg= 66.8  spatial=78.4  object=80.6  goal=68.2  long=39.8  org=Columbia University / MIT / TRI  date=2023-03-07
+
+## CALVIN Benchmark Rankings (sorted by avg length)
+
+   1. LingBot-VLA               avg_len=4.50  org=Ant Group / Robbyant  date=2026-01-26
+   2. UD-VLA                    avg_len=4.50  org=Tsinghua University / Shanghai AI Lab  date=2025-11-03
+   3. DreamVLA                  avg_len=4.44  org=Shanghai AI Lab / Fudan University / NUS  date=2025-07-06
+   4. X-VLA                     avg_len=4.40  org=Tsinghua University AIR / Shanghai AI Lab  date=2025-10-11
+   5. InstructVLA               avg_len=4.40  org=Shanghai AI Lab (InternRobotics)  date=2025-07-23
+   6. pi0.5                     avg_len=4.20  org=Physical Intelligence  date=2025-04-22
+   7. UniVLA                    avg_len=4.10  org=HKU / OpenDriveLab / AgiBot  date=2025-05-04
+   8. FLARE                     avg_len=4.10  org=NVIDIA  date=2025-05-21
+   9. DexVLA                    avg_len=4.00  org=ByteDance / Tsinghua University  date=2025-02-03
+  10. pi0                       avg_len=3.80  org=Physical Intelligence  date=2024-10-31
+  11. GR-2                      avg_len=3.80  org=ByteDance  date=2024-10-08
+  12. LLaVA-VLA                 avg_len=3.68  org=HKUST (Guangzhou) / Huazhong University / Westlake University / Zhejiang University  date=2026-02-26
+  13. HybridVLA                 avg_len=3.60  org=ByteDance  date=2025-03-13
+  14. RoboVLM                   avg_len=3.50  org=Tsinghua University / ByteDance Research / CASIA / SJTU / NUS  date=2024-12-18
+  15. RDT-1B                    avg_len=3.40  org=Tsinghua University / Shanghai Qi Zhi Institute  date=2024-10-10
+  16. 3D Diffuser Actor         avg_len=3.20  org=ETH Zurich / NVIDIA  date=2024-02-16
+  17. GR-1                      avg_len=3.10  org=ByteDance  date=2023-12-20
+  18. Octo                      avg_len=2.40  org=UC Berkeley / Stanford / CMU / Google DeepMind  date=2024-05-20
+
+## SimplerEnv Rankings
+
+   1. InstructVLA               avg= 80.3  org=Shanghai AI Lab (InternRobotics)
+   2. SpatialVLA                avg= 78.2  org=Shanghai AI Lab / Tsinghua University
+   3. X-VLA                     avg= 78.0  org=Tsinghua University AIR / Shanghai AI Lab
+   4. OpenVLA-OFT               avg= 75.2  org=Stanford / UC Berkeley / TRI
+   5. Vlaser                    avg= 73.5  org=USTC / Shanghai AI Lab / SJTU / Zhejiang University / NJU / Fudan / Tsinghua / NUS
+   6. MemoryVLA                 avg= 72.3  org=PKU / Tsinghua University / Shanghai AI Lab
+   7. CogACT                    avg= 70.3  org=Microsoft Research / Tsinghua University
+   8. DreamVLA                  avg= 66.0  org=Shanghai AI Lab / Fudan University / NUS
+   9. SmolVLA                   avg= 64.8  org=Hugging Face
+  10. TraceVLA                  avg= 64.6  org=University of Michigan / NVIDIA
+  11. DD-VLA                    avg= 62.7  org=PKU / Shanghai AI Lab
+  12. HPT                       avg= 62.4  org=MIT / Meta FAIR
+  13. RT-2-X                    avg= 53.8  org=Google DeepMind
+  14. OpenVLA                   avg= 42.3  org=Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT
+  15. Octo                      avg= 31.4  org=UC Berkeley / Stanford / CMU / Google DeepMind
+
+## Robotwin V1 Rankings
+
+   1. Fast-WAM                  avg= 91.8
+   2. SimpleVLA-RL              avg= 70.4
+   3. LingBot-VLA               avg= 61.5
+   4. pi0                       avg= 46.5
+   5. RDT-1B                    avg= 28.5
+   6. Diffusion Policy          avg= 10.8
+
+## Robotwin V2 Rankings
+
+   1. Motus                     avg= 87.8
+   2. GigaWorld-Policy          avg= 86.0
+   3. X-VLA                     avg= 72.5
+   4. SimpleVLA-RL              avg= 68.8
+   5. VLA-Thinker               avg= 65.9
+   6. LLaVA-VLA                 avg= 28.6
+
+================================================================================
+SECTION 2: MODEL DETAILS
+================================================================================
+
+------------------------------------------------------------
+MODEL: PLD
+  Organization: NVIDIA GEAR Lab
+  Date: 2025-10-30
+  Paper: https://arxiv.org/abs/2511.00091
+  Code: None
+  Venue: ReALM-GEN Workshop @ ICLR 2026
+  Open Source: False
+  Architecture:
+    Action Head: plug-and-play residual RL framework (probe → learn → distill back to generalist)
+    Backbone: varies (wraps existing VLAs)
+    LLM: varies (wraps existing VLAs)
+    Parameters: varies (applied on top of existing VLAs)
+  Tags: residual-RL, probe-learn-distill, post-training, ICLR-2026-workshop
+  Benchmarks:
+    libero (avg=99.0): libero_avg=99.0
+  Eval Conditions: {'libero': 'RL post-trained', 'simpler_env': 'RL post-trained'}
+  AI Review Summary: Probe-Learn-Distill (PLD) 3단계 프레임워크로, residual RL로 VLA의 실패 영역을 탐색(probe)하고, hybrid rollout으로 데이터를 수집(learn)하며, 이를 다시 supervised FT로 정제(distill)하여 LIBERO 99% 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: SimpleVLA-RL
+  Organization: Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU
+  Date: 2025-09-11
+  Paper: https://arxiv.org/abs/2509.09674
+  Code: https://github.com/PRIME-RL/SimpleVLA-RL
+  Venue: ICLR 2026
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive + GRPO reinforcement learning
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Inference: 10 Hz
+  Tags: 7B, RL, GRPO, reinforcement-learning, ICLR-2026, open-source, SOTA, data-efficient
+  Benchmarks:
+    libero (avg=98.83): libero_spatial=99.1, libero_object=99.2, libero_goal=98.5, libero_long=98.5
+    robotwin_v1 (avg=70.4): hammer_beat=92.6, block_handover=89.6, blocks_stack=40.2, shoe_place=59.3, average=70.4
+    robotwin_v2 (avg=68.8): short_horizon=64.9, medium_horizon=72.5, long_horizon=69.0, average=68.8
+  Eval Conditions: {'libero': 'RL fine-tuned (on top of SFT)', 'robotwin_v1': 'RL fine-tuned', 'robotwin_v2': 'RL fine-tuned'}
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 7.5, Confidence: 4.25
+
+------------------------------------------------------------
+MODEL: X-VLA
+  Organization: Tsinghua University AIR / Shanghai AI Lab
+  Date: 2025-10-11
+  Paper: https://arxiv.org/abs/2510.10274
+  Code: https://github.com/2toinf/X-VLA
+  Venue: ICLR 2026
+  Open Source: True
+  Architecture:
+    Action Head: flow matching with embodiment-specific soft prompts (chunk_size=32)
+    Backbone: Florence-Large
+    LLM: None
+    Parameters: 0.9B
+  Inference: 25 Hz
+  Tags: 0.9B, soft-prompt, cross-embodiment, ICLR-2026, open-source, AgiBot-champion, efficient
+  Benchmarks:
+    libero (avg=97.8): libero_spatial=98.4, libero_object=98.8, libero_goal=97.6, libero_long=96.4
+    calvin (avg=4.4): calvin_abc_d_avg_len=4.4
+    simpler_env: simpler_widowx_vm=80.4, simpler_widowx_va=75.7
+    robotwin_v2 (avg=72.5): robotwin_v2_avg=72.5
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned (joint)', 'simpler_env': 'fine-tuned', 'robotwin_v2': 'fine-tuned'}
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 7.33, Confidence: 4.0
+
+------------------------------------------------------------
+MODEL: Fast-WAM
+  Organization: Tsinghua University (IIIS) / Galaxea AI
+  Date: 2026-03-17
+  Paper: https://arxiv.org/abs/2603.16666
+  Code: https://github.com/yuantianyuan01/FastWAM
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: flow matching (velocity field)
+    Backbone: Wan2.2 Video DiT (5B)
+    LLM: None
+    Parameters: 6B
+  Inference: 5 Hz
+  Tags: 6B, world-action-model, flow-matching, video-DiT, open-source
+  Benchmarks:
+    libero (avg=97.6): libero_avg=97.6
+    robotwin_v1 (avg=91.8): average=91.8
+  Eval Conditions: {'libero': 'fine-tuned', 'robotwin_v1': 'fine-tuned'}
+  AI Review Summary: Wan2.2-5B video DiT + 1B action expert (6B total)의 WAM에서, test-time video generation을 제거해도 성능이 **"highly comparable"** (RoboTwin 91.8%, LIBERO 97.6%)하면서 latency **190ms (vs IDM 810ms, 4.3x 가속)** 달성. 핵심: video co-training 제거 시 **-8%p** 하락.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: VLA-Thinker
+  Organization: University of Central Florida / University of Wurzburg / USC / NVIDIA Research
+  Date: 2026-03-15
+  Paper: https://arxiv.org/abs/2603.14523
+  Code: https://github.com/CYWang735/VLAThinker
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: reasoning, libero, robotwin, robotwin_v2, open-source
+  Benchmarks:
+    libero (avg=97.45): libero_spatial=98.7, libero_object=99.0, libero_goal=95.2, libero_long=96.9
+    robotwin_v2 (avg=65.88): lift_pot=64.8, beat_hammer_block=82.5, pick_dual_bottles=65.4, place_phone_stand=36.6, move_can_pot=61.0, place_a2b_left=39.1, place_empty_cup=92.7, handover_mic=89.9, handover_block=52.8, stack_bowls_two=71.1, blocks_rank_rgb=79.3, put_bottles_dustbin=55.4, short_horizon_avg=62.3, medium_horizon_avg=70.7, long_horizon_avg=64.6
+  Eval Conditions: {'libero': 'SFT + RL fine-tuned (GRPO)', 'robotwin_v2': 'SFT + RL fine-tuned (GRPO)'}
+  AI Review Summary: Perception을 "동적으로 호출 가능한 reasoning action"으로 모델링하여 multimodal embodied CoT를 구현하고, 2-stage training (SFT + RL alignment)으로 LIBERO 97.5% 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: DreamVLA
+  Organization: Shanghai AI Lab / Fudan University / NUS
+  Date: 2025-07-06
+  Paper: https://arxiv.org/abs/2507.04447
+  Code: https://github.com/DreamLM/Dream-VLX
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: inverse dynamics from world knowledge forecasts (depth, DINOv2, SAM)
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, world-knowledge-forecasting, inverse-dynamics, open-source
+  Benchmarks:
+    libero (avg=97.2): libero_avg=97.2
+    calvin (avg=4.44): calvin_abc_d_avg_len=4.44
+    simpler_env: simpler_bridge=71.4, simpler_fractal=60.5
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: Dynamic region reconstruction + depth prediction + semantic feature의 3종 world knowledge를 block-wise structured attention으로 분리 학습하고 DiT action decoder와 결합하여, CALVIN ABC-D **4.44 avg len** (SOTA) + LIBERO **92.6%** + real-world **76.7%** 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: DeepThinkVLA
+  Organization: Huazhong University of Science and Technology / Tsinghua University / Renmin University of China
+  Date: 2025-11-24
+  Paper: https://arxiv.org/abs/2511.15669
+  Code: https://github.com/wadeKeith/DeepThinkVLA
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: hybrid-attention decoder (causal CoT → bidirectional parallel action)
+    Backbone: pi0-FAST (PaliGemma 2)
+    LLM: Gemma-2 2B
+    Parameters: 2.9B
+  Tags: reasoning, chain-of-thought, RL, GRPO, open-source
+  Benchmarks:
+    libero (avg=97.05): libero_spatial=96.6, libero_object=99.0, libero_goal=96.4, libero_long=96.2
+  Eval Conditions: {'libero': 'SFT + RL fine-tuned (GRPO)'}
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 4.5, Confidence: 3.25
+
+------------------------------------------------------------
+MODEL: AtomicVLA
+  Organization: Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology
+  Date: 2026-03-08
+  Paper: https://arxiv.org/abs/2603.07648
+  Code: https://github.com/zhanglk9/AtomicVLA
+  Venue: CVPR2026
+  Open Source: True
+  Architecture:
+    Action Head: Skill-Guided MoE (SG-MoE)
+    Backbone: PaliGemma (SigLIP + Gemma 2B, via pi0)
+    LLM: Gemma 2B
+    Parameters: 4.17B
+  Tags: libero, calvin, CVPR2026, open-source
+  Benchmarks:
+    libero (avg=96.6): libero_long=95.2, libero_avg=96.6
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: π₀ foundation model 위에 Skill-Guided MoE (SG-MoE)를 구축하여, atomic skill 단위의 expert routing으로 long-horizon 태스크에서 π₀.₅ 대비 +18.3% real-world 향상, continual learning에서 catastrophic forgetting을 -1.3%로 최소화 (π₀.₅는 -15%).
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: MemoryVLA
+  Organization: PKU / Tsinghua University / Shanghai AI Lab
+  Date: 2025-08-26
+  Paper: https://arxiv.org/abs/2508.19236
+  Code: https://github.com/shihao1895/MemoryVLA
+  Venue: ICLR 2026
+  Open Source: True
+  Architecture:
+    Action Head: diffusion transformer conditioned on memory-augmented tokens
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, memory, temporal-context, long-horizon, ICLR-2026, open-source, diffusion-transformer
+  Benchmarks:
+    libero (avg=96.5): libero_5_suite_avg=96.5
+    simpler_env: simpler_bridge=71.9, simpler_fractal=72.7
+  Eval Conditions: {'simpler_env': 'fine-tuned', 'libero': 'fine-tuned'}
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 4.5, Confidence: 4.25
+
+------------------------------------------------------------
+MODEL: dVLA
+  Organization: Midea Group
+  Date: 2025-09-30
+  Paper: https://arxiv.org/abs/2509.25681
+  Code: None
+  Venue: ICLR 2026 submission (rejected)
+  Open Source: False
+  Architecture:
+    Action Head: discrete diffusion with multimodal chain-of-thought
+    Backbone: MMaDA (MAGViT-v2 vision tokenizer)
+    LLM: LLaDA-8B-Instruct (discrete diffusion LM)
+    Parameters: 8B
+  Tags: diffusion, chain-of-thought, multimodal-CoT, manipulation
+  Benchmarks:
+    libero (avg=96.4): libero_avg=96.4
+  Eval Conditions: {'libero': 'fine-tuned'}
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 4.0, Confidence: 3.75
+
+------------------------------------------------------------
+MODEL: GST-VLA
+  Organization: Yeungnam University / KAIST
+  Date: 2026-03-10
+  Paper: https://arxiv.org/abs/2603.09079
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: flow matching
+    Backbone: PrismaticVLM (SigLIP + DinoV2, via OpenVLA)
+    LLM: Llama-2 7B
+    Parameters: 300M action expert
+  Tags: libero, simpler_env
+  Benchmarks:
+    libero (avg=96.33): libero_spatial=98.2, libero_object=97.4, libero_goal=97.1, libero_long=92.6
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: 2D patch token 대신 3D anisotropic Gaussian primitives로 시각 정보를 인코딩하고, 3D Depth-Aware Chain-of-Thought를 결합하여 LIBERO 96.4% (+2.0%), SimplerEnv 80.2% (+5.4%) 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: DD-VLA
+  Organization: PKU / Shanghai AI Lab
+  Date: 2025-08-27
+  Paper: https://arxiv.org/abs/2508.20072
+  Code: https://github.com/Liang-ZX/DiscreteDiffusionVLA
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: discrete diffusion over tokenized action chunks with adaptive decoding order
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, discrete-diffusion, adaptive-decoding, open-source
+  Benchmarks:
+    libero (avg=96.3): libero_avg=96.3
+    simpler_env: simpler_fractal=71.2, simpler_bridge=54.2
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: OpenVLA의 Prismatic-7B backbone 내에서 **bidirectional discrete diffusion**을 구현하여, autoregressive 대비 2x 빠른 추론(68.8ms vs 136.2ms)과 LIBERO 96.3%, SimplerEnv-Fractal 64.1%를 달성하며, 적응적 디코딩 순서와 secondary re-masking으로 오류 교정 지원.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: pi*0.6
+  Organization: Physical Intelligence
+  Date: 2025-11-18
+  Paper: https://arxiv.org/abs/2511.14759
+  Code: https://github.com/Physical-Intelligence/openpi
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: flow matching + RL (RECAP)
+    Backbone: Gemma 3 4B VLM
+    LLM: Gemma 3 4B
+    Parameters: ~5B (4B VLM + ~860M action expert)
+  Tags: 5B, flow-matching, RL, RECAP, real-world, manipulation, open-source, cross-embodiment
+  Benchmarks:
+    libero (avg=93.1): libero_spatial=96.4, libero_object=97.2, libero_goal=95.6, libero_long=83.2
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: RECAP (RL with Experience and Corrections via Advantage-conditioned Policies)을 통해 VLA가 실제 배포 경험에서 자기개선하여, 태스크 throughput 2배 이상 증가 및 실패율 절반 감소 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: LingBot-VLA
+  Organization: Ant Group / Robbyant
+  Date: 2026-01-26
+  Paper: https://arxiv.org/abs/2601.18692
+  Code: None
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: Mixture of Transformers + flow matching
+    Backbone: Qwen2.5-VL-3B
+    LLM: Qwen2.5 3B
+    Parameters: ~4B (3B VLM + action expert)
+  Tags: 3B, MoT, flow-matching, large-scale-data, open-source, multi-embodiment
+  Benchmarks:
+    libero (avg=92.55): libero_spatial=97.4, libero_object=98.0, libero_goal=94.2, libero_long=80.6
+    calvin (avg=4.5): calvin_abc_d_avg_len=4.5
+    robotwin_v1 (avg=61.5): robotwin_easy=74.2, robotwin_hard=48.8
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'robotwin_v1': 'fine-tuned'}
+  AI Review Summary: 9개 인기 양팔 로봇 구성에서 약 20,000시간의 실제 데이터를 수집하여 학습한 실용적 VLA foundation model로, 효율적 학습과 폭넓은 일반화를 목표.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: UD-VLA
+  Organization: Tsinghua University / Shanghai AI Lab
+  Date: 2025-11-03
+  Paper: https://arxiv.org/abs/2511.01718
+  Code: None
+  Venue: ICLR 2026
+  Open Source: False
+  Architecture:
+    Action Head: joint discrete denoising diffusion (JD3P)
+    Backbone: Emu3 + MOVQ visual tokenizer
+    LLM: Emu3
+    Parameters: 3B
+  Tags: 3B, diffusion, unified-denoising, fast-inference, manipulation
+  Benchmarks:
+    libero (avg=91.75): libero_spatial=97.2, libero_object=97.8, libero_goal=93.6, libero_long=78.4
+    calvin (avg=4.5): calvin_abc_d_avg_len=4.5
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: 다중 modality(language reasoning + action)를 단일 이산 denoising diffusion trajectory에서 jointly 생성하는 통합 프레임워크로, CALVIN·LIBERO·SimplerEnv에서 SOTA 달성과 autoregressive 대비 4x 빠른 추론.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: ECoT
+  Organization: UC Berkeley / Stanford / University of Warsaw
+  Date: 2024-07-11
+  Paper: https://arxiv.org/abs/2407.08693
+  Code: https://github.com/MichalZawalski/embodied-CoT
+  Venue: CoRL 2024
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive (OpenVLA base) + structured reasoning chain (TASK/PLAN/SUBTASK/MOVE)
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, chain-of-thought, embodied-reasoning, autoregressive, open-source
+  Benchmarks:
+    libero (avg=90.8): libero_avg=90.8
+  Eval Conditions: {'libero': 'fine-tuned with CoT reasoning'}
+  AI Review Summary: OpenVLA-7B에 6단계 embodied CoT (task rephrase→plan→subtask→move→gripper→objects)를 추가하여, Bridge V2에서 **Octo 대비 +45%p, OpenVLA 대비 +22%p** (ID 66%), Gemini 1.0으로 reasoning chain 자동 생성, 비동기 실행으로 +40% 추론 가속.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: InstructVLA
+  Organization: Shanghai AI Lab (InternRobotics)
+  Date: 2025-07-23
+  Paper: https://arxiv.org/abs/2507.17520
+  Code: https://github.com/InternRobotics/InstructVLA
+  Venue: ICLR 2026
+  Open Source: True
+  Architecture:
+    Action Head: flow matching
+    Backbone: InternVL2-based VLM
+    LLM: InternLM2
+    Parameters: 4B
+  Tags: 4B, flow-matching, instruction-tuning, VLM-preservation, open-source
+  Benchmarks:
+    libero (avg=90.6): libero_spatial=96.2, libero_object=97.0, libero_goal=92.4, libero_long=76.8
+    calvin (avg=4.4): calvin_abc_d_avg_len=4.4
+    simpler_env: google_robot_pick_coke_can=86.4, google_robot_move_near=74.2
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: Multimodal instruction tuning에 MoE adaptation을 적용하여 embodied reasoning과 action generation을 jointly 최적화하는 VLA-IT (VLA Instruction Tuning) 패러다임 제안.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: UniVLA
+  Organization: HKU / OpenDriveLab / AgiBot
+  Date: 2025-05-04
+  Paper: https://arxiv.org/abs/2505.06111
+  Code: https://github.com/UniVLA/UniVLA
+  Venue: RSS 2025
+  Open Source: True
+  Architecture:
+    Action Head: flow matching (unified tokenization)
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, flow-matching, unified-tokenization, manipulation, open-source
+  Benchmarks:
+    libero (avg=90.1): libero_spatial=96.8, libero_object=97.4, libero_goal=92.0, libero_long=74.2
+    calvin (avg=4.1): calvin_abc_d_avg_len=4.1
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: 비디오에서 task-centric latent action을 학습하여 action annotation 없는 데이터로도 cross-embodiment VLA를 구축, OpenVLA 대비 우수 성능을 적은 compute로 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: FLARE
+  Organization: NVIDIA
+  Date: 2025-05-21
+  Paper: https://arxiv.org/abs/2505.15659
+  Code: None
+  Venue: CoRL 2025
+  Open Source: False
+  Architecture:
+    Action Head: Diffusion Transformer (DiT) + Q-former + future latent alignment
+    Backbone: SigLIP2-Large (siglip2-large-patch16-256)
+    LLM: None
+    Parameters: 3B
+  Tags: 3B, diffusion-transformer, world-model, future-alignment, manipulation
+  Benchmarks:
+    libero (avg=89.2): libero_spatial=95.8, libero_object=96.4, libero_goal=91.4, libero_long=73.2
+    calvin (avg=4.1): calvin_abc_d_avg_len=4.1
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: DiT에 M=32 learnable future token을 추가하고, SigLIP-2 기반 action-aware embedding의 cosine alignment loss로 latent world modeling을 수행하여, RoboCasa 24-task에서 **70.1%** (baseline 61.9%, +8.2%p), GR1 24-task에서 **55.0%** (+11%p), 추론 overhead **zero**.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: pi0.5
+  Organization: Physical Intelligence
+  Date: 2025-04-22
+  Paper: https://arxiv.org/abs/2504.16054
+  Code: None
+  Venue: CoRL 2025
+  Open Source: False
+  Architecture:
+    Action Head: flow matching
+    Backbone: PaliGemma-based VLM
+    LLM: Gemma-based
+    Parameters: 3B+
+  Inference: 45 Hz
+  Tags: flow-matching, manipulation, dexterous, cross-embodiment, SOTA
+  Benchmarks:
+    libero (avg=88.88): libero_spatial=96.2, libero_object=97.1, libero_goal=89.4, libero_long=72.8
+    calvin (avg=4.2): calvin_abc_d_avg_len=4.2
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: pi0를 확장하여 heterogeneous 태스크 co-training과 hybrid multi-modal 데이터(이미지, 언어, detection, subtask prediction)를 활용, 전혀 새로운 주거 환경에서 long-horizon dexterous manipulation을 zero-shot으로 수행.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: SpatialVLA
+  Organization: Shanghai AI Lab / Tsinghua University
+  Date: 2025-01-27
+  Paper: https://arxiv.org/abs/2501.15830
+  Code: https://github.com/SpatialVLA/SpatialVLA
+  Venue: RSS 2025
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive (tokenized)
+    Backbone: PaLiGemma2 (SigLIP + Gemma 2)
+    LLM: Gemma 2
+    Parameters: 4B
+  Tags: 4B, autoregressive, 3D-spatial, manipulation, open-source
+  Benchmarks:
+    libero (avg=88.05): libero_spatial=95.6, libero_object=96.0, libero_goal=90.2, libero_long=70.4
+    simpler_env: google_robot_pick_coke_can=84.3, google_robot_move_near=72.1
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: Ego3D Position Encoding과 Adaptive Action Grids로 VLA에 공간적 이해를 부여하여, 1.1M 로봇 에피소드에서 사전학습하고 뛰어난 in-distribution 일반화와 out-of-distribution 적응 능력 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: DexVLA
+  Organization: ByteDance / Tsinghua University
+  Date: 2025-02-03
+  Paper: https://arxiv.org/abs/2502.05855
+  Code: None
+  Venue: CoRL 2025
+  Open Source: False
+  Architecture:
+    Action Head: diffusion (hierarchical: coarse plan + fine action)
+    Backbone: Qwen2-VL-2B
+    LLM: Qwen2 ~1.5B (via Qwen2-VL-2B)
+    Parameters: ~3B (2B VLM + 1B diffusion expert)
+  Tags: 3B, diffusion, hierarchical, dexterous, manipulation
+  Benchmarks:
+    libero (avg=87.85): libero_spatial=94.2, libero_object=95.8, libero_goal=89.8, libero_long=71.6
+    calvin (avg=4.0): calvin_abc_d_avg_len=4.0
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: Qwen2-VL 2B에 **1B 파라미터 diffusion expert** (32-layer transformer)를 plug-in하고, 3-stage curriculum (cross-embodiment→embodiment-specific→task-specific)으로 학습하여, 셔츠 접기 0.92, LIBERO 97.3%, **60Hz inference on A6000** 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: OpenVLA-OFT
+  Organization: Stanford / UC Berkeley / TRI
+  Date: 2025-02-27
+  Paper: https://arxiv.org/abs/2502.19645
+  Code: https://github.com/moojink/openvla-oft
+  Venue: RSS 2025
+  Open Source: True
+  Architecture:
+    Action Head: parallel decoding + continuous actions
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, parallel-decoding, LoRA, manipulation, open-source
+  Benchmarks:
+    libero (avg=87.35): libero_spatial=94.8, libero_object=95.2, libero_goal=91.0, libero_long=68.4
+    simpler_env: google_robot_pick_coke_can=82.0, google_robot_move_near=68.5
+  Eval Conditions: {'libero': 'fine-tuned (LoRA)', 'simpler_env': 'fine-tuned (LoRA)'}
+  AI Review Summary: VLA fine-tuning의 3대 설계 선택 (parallel decoding + L1 regression + action chunking)을 체계적으로 분석하여, OpenVLA에서 LIBERO **76.5%→97.1%** (+20.6%p), **26x throughput** (LIBERO 8-step chunk), **43x** (ALOHA 25-step), real bimanual에서 기존 대비 **+15%p** 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: CoT-VLA
+  Organization: UC Berkeley
+  Date: 2025-03-27
+  Paper: https://arxiv.org/abs/2503.22020
+  Code: None
+  Venue: CVPR 2025
+  Open Source: False
+  Architecture:
+    Action Head: autoregressive (256-bin discretized, 7 tokens × 10-step chunks via VILA-U)
+    Backbone: SigLIP (via VILA-U)
+    LLM: LLaMA-2 7B
+    Parameters: 7B
+  Tags: 7B, chain-of-thought, diffusion, reasoning, manipulation
+  Benchmarks:
+    libero (avg=86.32): libero_spatial=92.1, libero_object=93.8, libero_goal=88.2, libero_long=71.2
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: VILA-U 기반 7B VLA에 시각적 CoT(미래 subgoal image 예측)를 autoregressive하게 통합하고, hybrid attention + action chunking으로 LIBERO 81.1%, real-world 17% 향상 달성. 단, 이미지 생성으로 **7배 추론 slowdown**.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: pi0-FAST
+  Organization: Physical Intelligence
+  Date: 2025-01-23
+  Paper: https://arxiv.org/abs/2501.09747
+  Code: https://github.com/physical-intelligence/fast
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: FAST tokenizer (discrete tokens from continuous actions)
+    Backbone: PaliGemma-based VLM
+    LLM: Gemma-based
+    Parameters: 3B
+  Inference: 230 Hz
+  Tags: 3B, autoregressive, FAST-tokenizer, manipulation, hybrid
+  Benchmarks:
+    libero (avg=86.1): libero_spatial=93.8, libero_object=95.4, libero_goal=88.0, libero_long=67.2
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: Discrete cosine transform 기반 주파수 공간 action tokenization (FAST)을 제안하여, 기존 binning 대비 고주파 dexterous 태스크에서의 정확도를 크게 향상시키고 학습 시간을 최대 5배 단축.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: CogACT
+  Organization: Microsoft Research / Tsinghua University
+  Date: 2024-11-29
+  Paper: https://arxiv.org/abs/2411.19650
+  Code: https://github.com/microsoft/CogACT
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: diffusion (continuous action generation)
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, diffusion, manipulation, open-source, VLM-backbone
+  Benchmarks:
+    libero (avg=85.9): libero_spatial=93.6, libero_object=94.8, libero_goal=88.4, libero_long=66.8
+    simpler_env: google_robot_pick_coke_can=78.4, google_robot_move_near=62.3
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: DINOv2+SigLIP vision encoder와 LLaMA-2 backbone으로 "cognition feature"를 추출하고, 별도의 Diffusion Transformer (DiT) action module로 action을 생성하는 componentized VLA로, OpenVLA 대비 +35%p (sim), +59%p (real) 향상을 7.6B로 달성하고 action head scaling law를 실증.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: GR00T-N1
+  Organization: NVIDIA
+  Date: 2025-03-18
+  Paper: https://arxiv.org/abs/2503.14734
+  Code: None
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: diffusion transformer (S1 system)
+    Backbone: Eagle-2 VLM (SigLIP-2 + SmolLM2)
+    LLM: SmolLM2 (within Eagle-2 VLM)
+    Parameters: 2.2B
+  Inference: 9 Hz
+  Tags: 2.2B, diffusion-transformer, dual-system, humanoid, open-model, open-source
+  Benchmarks:
+    libero (avg=85.75): libero_spatial=93.2, libero_object=94.8, libero_goal=88.6, libero_long=66.4
+    robocasa (avg=32.1): robocasa_avg=32.1
+  Eval Conditions: {'libero': 'fine-tuned', 'robocasa': 'fine-tuned'}
+  AI Review Summary: NVIDIA의 humanoid 로봇용 VLA foundation model로, dual-system 아키텍처(VLM System 2 + diffusion transformer System 1)를 채택하고 실제/합성/인간 비디오 데이터를 혼합 학습하여 다중 embodiment에서 SOTA 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: HybridVLA
+  Organization: ByteDance
+  Date: 2025-03-13
+  Paper: https://arxiv.org/abs/2503.10631
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: hybrid (diffusion + autoregressive)
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, hybrid, diffusion, autoregressive, manipulation
+  Benchmarks:
+    libero (avg=85.75): libero_spatial=91.4, libero_object=94.2, libero_goal=87.6, libero_long=69.8
+    calvin (avg=3.6): calvin_abc_d_avg_len=3.6
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: Diffusion-based action generation과 autoregressive reasoning을 **단일 LLM 내에서 통합**하여, continuous action의 정밀성과 language reasoning의 맥락 이해를 동시에 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: pi0
+  Organization: Physical Intelligence
+  Date: 2024-10-31
+  Paper: https://arxiv.org/abs/2410.24164
+  Code: None
+  Venue: RSS 2025
+  Open Source: False
+  Architecture:
+    Action Head: flow matching
+    Backbone: PaliGemma (SigLIP + Gemma)
+    LLM: Gemma 2B (pre-trained VLM)
+    Parameters: 3B
+  Inference: 50 Hz
+  Tags: 3B, flow-matching, manipulation, dexterous, cross-embodiment
+  Benchmarks:
+    libero (avg=84.75): libero_spatial=92.4, libero_object=94.6, libero_goal=86.2, libero_long=65.8
+    calvin (avg=3.8): calvin_abc_d_avg_len=3.8
+    robotwin_v1 (avg=46.5): robotwin_easy=58.2, robotwin_hard=34.8
+    robocasa (avg=41.8): robocasa_avg=41.8
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'robotwin_v1': 'fine-tuned', 'robocasa': 'fine-tuned'}
+  AI Review Summary: Flow matching 기반 action generation을 사전학습된 VLM 위에 구축하여, 단일 팔·양팔·모바일 매니퓰레이터를 포함하는 다중 플랫폼에서 언어 지시 기반 범용 로봇 제어를 실현한 **Physical Intelligence의 flagship 모델**.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: RoboVLM
+  Organization: Tsinghua University / ByteDance Research / CASIA / SJTU / NUS
+  Date: 2024-12-18
+  Paper: https://arxiv.org/abs/2412.14058
+  Code: https://github.com/Robot-VLM/RoboVLM
+  Venue: ICLR 2025
+  Open Source: True
+  Architecture:
+    Action Head: latent action tokenization (VQ-VAE) + autoregressive
+    Backbone: KosMos VLM (best config; framework supports 8 VLM backbones)
+    LLM: KosMos 2B (best config)
+    Parameters: 2B
+  Tags: 2B, VQ-VAE, autoregressive, manipulation, open-source, cross-embodiment
+  Benchmarks:
+    libero (avg=84.05): libero_spatial=91.8, libero_object=93.4, libero_goal=86.8, libero_long=64.2
+    calvin (avg=3.5): calvin_abc_d_avg_len=3.5
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: 8개 VLM backbone, 4개 policy architecture, 600+ 실험을 통해 VLA 설계의 핵심 요인을 체계적으로 분석하고, 이를 바탕으로 구축한 RoboVLMs가 manipulation 벤치마크에서 SOTA 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: RDT-1B
+  Organization: Tsinghua University / Shanghai Qi Zhi Institute
+  Date: 2024-10-10
+  Paper: https://arxiv.org/abs/2410.07864
+  Code: https://github.com/thu-ml/RoboticsDiffusionTransformer
+  Venue: ICLR 2025
+  Open Source: True
+  Architecture:
+    Action Head: diffusion (scalable transformer)
+    Backbone: SigLIP-So400m + T5-v1_1-XXL (language encoder)
+    LLM: None
+    Parameters: 1.2B
+  Tags: 1.2B, diffusion, manipulation, open-source, foundation-model, bimanual
+  Benchmarks:
+    libero (avg=82.5): libero_spatial=90.2, libero_object=91.8, libero_goal=85.6, libero_long=62.4
+    calvin (avg=3.4): calvin_abc_d_avg_len=3.4
+    robotwin_v1 (avg=28.5): robotwin_easy=42.6, robotwin_hard=14.4
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'robotwin_v1': 'fine-tuned'}
+  AI Review Summary: 1.2B 파라미터 diffusion transformer로 Physically Interpretable Unified Action Space를 정의하여 cross-robot bimanual manipulation을 수행하고, zero-shot 일반화와 few-shot 적응을 실현.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: SmolVLA
+  Organization: Hugging Face
+  Date: 2025-06-02
+  Paper: https://arxiv.org/abs/2506.01844
+  Code: https://github.com/huggingface/lerobot
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: flow matching
+    Backbone: SigLIP + SmolLM2
+    LLM: SmolLM2 (via SmolVLM2)
+    Parameters: 450M
+  Tags: 450M, flow-matching, efficient, lightweight, open-source, single-gpu
+  Benchmarks:
+    libero (avg=79.5): libero_spatial=88.6, libero_object=90.4, libero_goal=82.8, libero_long=56.2
+    simpler_env: google_robot_pick_coke_can=64.8
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: 기존 VLA 대비 10배 작은 compact 모델로 single-GPU 학습과 consumer hardware 배포를 목표로 설계, asynchronous inference로 높은 제어 주파수 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: HPT
+  Organization: MIT / Meta FAIR
+  Date: 2024-09-30
+  Paper: https://arxiv.org/abs/2409.20537
+  Code: https://github.com/liruiw/HPT
+  Venue: NeurIPS 2024 (Spotlight)
+  Open Source: True
+  Architecture:
+    Action Head: shared transformer trunk + task-specific heads
+    Backbone: Heterogeneous stem encoders (per embodiment)
+    LLM: None
+    Parameters: 300M
+  Tags: 300M, heterogeneous, cross-embodiment, manipulation, open-source
+  Benchmarks:
+    libero (avg=77.5): libero_spatial=86.4, libero_object=89.2, libero_goal=78.6, libero_long=55.8
+    simpler_env: google_robot_pick_coke_can=62.4
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: 52개 데이터셋의 heterogeneous 로봇 데이터에서 공유 가능한 policy trunk를 사전학습하여, embodiment-agnostic representation을 학습하고 unseen 태스크에서 20%+ fine-tuning 성능 향상 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: OpenVLA
+  Organization: Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT
+  Date: 2024-06-13
+  Paper: https://arxiv.org/abs/2406.09246
+  Code: https://github.com/openvla/openvla
+  Venue: CoRL 2024
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive (tokenized)
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, autoregressive, manipulation, open-source, generalist
+  Benchmarks:
+    libero (avg=74.5): libero_spatial=84.2, libero_object=88.4, libero_goal=72.0, libero_long=53.4
+    simpler_env: google_robot_pick_coke_can=56.2, google_robot_move_near=28.4
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  AI Review Summary: SigLIP+DINOv2 dual encoder (600M) + Llama 2 (7B)를 970K OXE demonstration에서 학습한 오픈소스 VLA로, BridgeV2 **76.2%**, Google Robot **79.4%**로 RT-2-X (55B)를 능가하며 LoRA로 **RTX 3090에서 fine-tuning** 가능. **64×A100, 14일 (21,500 A100-hrs)** 학습.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: Octo
+  Organization: UC Berkeley / Stanford / CMU / Google DeepMind
+  Date: 2024-05-20
+  Paper: https://arxiv.org/abs/2405.12213
+  Code: https://github.com/octo-models/octo
+  Venue: RSS 2024
+  Open Source: True
+  Architecture:
+    Action Head: diffusion policy
+    Backbone: Transformer (custom encoder-decoder)
+    LLM: None
+    Parameters: 93M
+  Tags: 93M, diffusion, manipulation, open-source, generalist, modular
+  Benchmarks:
+    libero (avg=67.17): libero_spatial=78.9, libero_object=82.3, libero_goal=65.4, libero_long=42.1
+    calvin (avg=2.4): calvin_abc_d_avg_len=2.4
+    simpler_env: google_robot_pick_coke_can=40.8, google_robot_move_near=22.1
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'simpler_env': 'zero-shot'}
+  AI Review Summary: 93M transformer를 OXE 800K trajectory (25 datasets)에서 학습한 오픈소스 generalist policy로, 9개 로봇 플랫폼에서 검증. Fine-tuning 시 baseline 대비 **+52%p**, 100 target demos + 5시간 A5000으로 새 로봇·센서·action space에 적응.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: Diffusion Policy
+  Organization: Columbia University / MIT / TRI
+  Date: 2023-03-07
+  Paper: https://arxiv.org/abs/2303.04137
+  Code: https://github.com/real-stanford/diffusion_policy
+  Venue: RSS 2023
+  Open Source: True
+  Architecture:
+    Action Head: diffusion (DDPM)
+    Backbone: ResNet-18 / Transformer
+    LLM: None
+    Parameters: ~25M
+  Tags: 25M, diffusion, manipulation, open-source, foundational, task-specific
+  Benchmarks:
+    libero (avg=66.75): libero_spatial=78.4, libero_object=80.6, libero_goal=68.2, libero_long=39.8
+    robotwin_v1 (avg=10.8): robotwin_easy=18.4, robotwin_hard=3.2
+  Eval Conditions: {'libero': 'fine-tuned', 'robotwin_v1': 'fine-tuned'}
+  AI Review Summary: 로봇 visuomotor policy를 조건부 denoising diffusion process로 정의하여, CNN(1D temporal) 및 Transformer(minGPT) 두 구현을 제공하고, 12개 태스크에서 position control로 기존 대비 평균 46.9% 성능 향상, real-world에서 Push-T 95%, 6DoF mug flip 90% 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: 3D-VLA
+  Organization: UMass Amherst / MIT / MIT-IBM Watson AI Lab
+  Date: 2024-03-14
+  Paper: https://arxiv.org/abs/2403.09631
+  Code: https://github.com/UMass-Embodied-AGI/3D-VLA
+  Venue: ICML 2024
+  Open Source: True
+  Architecture:
+    Action Head: embodied diffusion model aligned to 3D-LLM for goal generation + action prediction
+    Backbone: BLIP2 (Q-Former + 3D multi-view features)
+    LLM: FlanT5
+    Parameters: 3B–11B (FlanT5 backbone)
+  Tags: 3D, world-model, point-cloud, diffusion, open-source
+  AI Review Summary: BLIP2-FlanT5XL 기반 3D-LLM에 interaction token(물체·위치·행동)과 embodied diffusion model(RGB-D/point cloud 목표 생성)을 결합하여, 2M 3D-language-action 데이터 쌍으로 학습한 최초의 3D 기반 embodied generative world model.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: 3D Diffuser Actor
+  Organization: ETH Zurich / NVIDIA
+  Date: 2024-02-16
+  Paper: https://arxiv.org/abs/2402.10885
+  Code: https://github.com/nickgkan/3d_diffuser_actor
+  Venue: CoRL 2024
+  Open Source: True
+  Architecture:
+    Action Head: diffusion (3D denoising)
+    Backbone: 3D scene encoder (point cloud + features)
+    LLM: CLIP (language conditioning)
+    Parameters: ~50M
+  Tags: 50M, diffusion, 3D, manipulation, open-source, rlbench, calvin
+  Benchmarks:
+    calvin (avg=3.2): calvin_abc_d_avg_len=3.2, calvin_abc_d_1=92.4, calvin_abc_d_2=78.1, calvin_abc_d_3=62.4, calvin_abc_d_4=46.8, calvin_abc_d_5=33.6
+    rlbench (avg=68.2): rlbench_18tasks=68.2
+  Eval Conditions: {'calvin': 'fine-tuned', 'rlbench': 'fine-tuned'}
+  AI Review Summary: CLIP ResNet50로 추출한 2D feature를 depth로 3D로 lifting하고, 3D relative position attention을 가진 denoising transformer로 keypose를 생성하여, RLBench multi-view에서 81.3% (+18.1%p SOTA), single-view 78.4% (+13.1%p), CALVIN 3.27 avg len 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: AcceRL
+  Organization: TODO: check paper
+  Date: 2026-03-19
+  Paper: https://arxiv.org/abs/2603.18464
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: RL, libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: VLA 모델의 RL 학습을 위한 완전 비동기 분산 프레임워크로, macro/micro 2단계 비동기 설계와 plug-and-play diffusion world model을 결합하여 LIBERO에서 99-100% 성공률, 200배 sample efficiency 향상, super-linear throughput scaling 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: AVDC
+  Organization: CMU
+  Date: 2023-10-25
+  Paper: https://arxiv.org/abs/2310.08576
+  Code: https://github.com/flow-diffusion/AVDC
+  Venue: ICLR 2024
+  Open Source: True
+  Architecture:
+    Action Head: inverse dynamics from optical flow
+    Backbone: Video Diffusion (flow generation)
+    LLM: None
+    Parameters: None
+  Tags: video-diffusion, flow-prediction, inverse-dynamics, manipulation, open-source
+  Benchmarks:
+    rlbench (avg=51.8): rlbench_18tasks=51.8
+  Eval Conditions: {'rlbench': 'fine-tuned'}
+  AI Review Summary: Action annotation 없는 비디오에서 text-conditioned video diffusion model로 미래 프레임을 생성하고, optical flow 기반 dense correspondence + rigid body transformation으로 3D action을 역추론하여, 165개 비디오만으로 Meta-World 43.1% (BC 16.2% 대비 2.7배) 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: CrossFormer
+  Organization: UC Berkeley / Carnegie Mellon University
+  Date: 2024-08-21
+  Paper: https://arxiv.org/abs/2408.11812
+  Code: https://github.com/rail-berkeley/crossformer
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: embodiment-class-specific action heads (variable-dim)
+    Backbone: Decoder-only Transformer (Octo-based)
+    LLM: None
+    Parameters: not disclosed (Octo-based transformer)
+  Tags: cross-embodiment, decoder-only, manipulation, navigation, locomotion, open-source
+  AI Review Summary: 130M 파라미터의 경량 transformer로 20+ 이종 로봇의 900K trajectory를 학습하여, 단일 팔·양팔·바퀴 로봇·쿼드콥터·사족보행 모두를 하나의 정책으로 제어하고 **specialist와 동등(73% vs 67%)**, 쿼드콥터 zero-shot 82% 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: DeeR-VLA
+  Organization: Tsinghua University / Shanghai AI Lab
+  Date: 2024-11-04
+  Paper: https://arxiv.org/abs/2411.02359
+  Code: https://github.com/yueyang130/DeeR-VLA
+  Venue: NeurIPS 2024
+  Open Source: True
+  Architecture:
+    Action Head: multi-exit early-stopping with action consistency metric
+    Backbone: OpenFlamingo
+    LLM: MPT-1B
+    Parameters: 3B
+  Tags: 3B, dynamic-inference, early-exit, efficient, open-source
+  Eval Conditions: {'calvin': 'fine-tuned (dynamic inference)'}
+  AI Review Summary: OpenFlamingo (3B/9B) 기반 MLLM에 multi-exit 구조를 추가하여, action consistency 기반 early-exit으로 LLM GFLOPs를 **2.5-5.2x 절감** (Table 2: 31.2→10.0~12.5 GFLOPs, Table 5 best: 31.2→6.0), 실제 latency **68.1% 감소** (55→17.5ms)하면서 CALVIN 성능 유지(4.08 vs 4.07).
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: DepthCache
+  Organization: TODO: check paper
+  Date: 2026-03-11
+  Paper: https://arxiv.org/abs/2603.10469
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: Depth 기반 영역 분할 + progressive cross-frame token merging + dual protection mechanism으로, **3개 VLA (π0.5, OpenVLA, GR00T)에서 training-free로 1.07-1.33x speedup과 0.2-1.0%p 이내 성능 하락** 달성. Real-world에서 191ms→143ms (1.33x).
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: Diffusion-VLA
+  Organization: PKU / HKU
+  Date: 2024-12-04
+  Paper: https://arxiv.org/abs/2412.03293
+  Code: None
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive reasoning + diffusion action prediction with reasoning injection
+    Backbone: SigLIP
+    LLM: Qwen2
+    Parameters: 2B–72B (multi-scale)
+  Inference: 82 Hz
+  Tags: 2B-72B, diffusion-action, autoregressive-reasoning, fast-inference, open-source
+  AI Review Summary: Qwen2-VL (2B/7B/72B)에 FiLM 기반 reasoning injection으로 diffusion action policy를 가이드하여, 39K trajectory 사전학습만으로 970K 기반 OpenVLA를 압도 (multi-task 83.6% vs 39.4%), 102개 미지 물체 zero-shot 63.7%, **82Hz (2B)** 추론 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: DiT4DiT
+  Organization: TODO: check paper
+  Date: 2026-03-11
+  Paper: https://arxiv.org/abs/2603.10448
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: Video DiT (Cosmos-2B 초기화)와 Action DiT (GR00T-N1 기반)를 cascaded coupling하되, **single forward pass의 intermediate feature를 추출**하여 video reconstruction을 bypass, LIBERO **98.6%** SOTA + RoboCasa 50.8% + 7x 빠른 수렴 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: E0
+  Organization: Sun Yat-sen University
+  Date: 2025-11-26
+  Paper: https://arxiv.org/abs/2511.21542
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: continuized discrete diffusion
+    Backbone: PaliGemma (SigLIP + Gemma)
+    LLM: Gemma (via PaliGemma)
+    Parameters: None
+  Tags: discrete-diffusion, continuized, fine-grained-control, manipulation
+  AI Review Summary: Discrete action token에 Gaussian noise를 적용하는 "continuized discrete diffusion"으로, 2048 bins까지 확장 가능하며 14개 환경(LIBERO+VLABench+ManiSkill)에서 π₀/π₀.₅ 대비 **평균 +10.7%** 향상, real-world 45.6%, 단일 RTX PRO 6000에서 24시간 학습.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: FALCON
+  Organization: ByteDance Seed
+  Date: 2025-10-20
+  Paper: https://arxiv.org/abs/2510.17439
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: spatial-grounded action head
+    Backbone: Kosmos-2 VLM + Embodied Spatial Model
+    LLM: Kosmos-2 (1.6B)
+    Parameters: 2.9B
+  Tags: 2.9B, spatial-grounding, Kosmos-2, manipulation
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 6.5, Confidence: 4.0
+
+------------------------------------------------------------
+MODEL: FLOWER
+  Organization: Karlsruhe Institute of Technology (KIT)
+  Date: 2025-09-05
+  Paper: https://arxiv.org/abs/2509.04996
+  Code: https://github.com/intuitive-robots/flower_vla_calvin
+  Venue: CoRL 2025
+  Open Source: True
+  Architecture:
+    Action Head: flow matching
+    Backbone: Florence-2-Large (encoder only)
+    LLM: None
+    Parameters: 950M
+  Tags: 950M, flow-matching, efficient, manipulation, open-source
+  AI Review Summary: VLM의 30-50% layer를 pruning하여 intermediate fusion하고, 18-layer flow transformer(339M) + Global-AdaLN으로 action 생성하는 **947M VLA**로, CALVIN ABC **4.53 SOTA**, 10개 벤치마크에서 평균 25.1% 향상, **200 H100 GPU-hours** (48h on 4 H100s)로 학습.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: Gemini Robotics
+  Organization: Google DeepMind
+  Date: 2025-03-12
+  Paper: https://arxiv.org/abs/2503.20020
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: Gemini 2.0 foundation model: VLA (end-to-end) + ER (embodied reasoning) + On-Device variants
+    Backbone: Gemini 2.0 VLM
+    LLM: Gemini 2.0
+    Parameters: not disclosed (Gemini 2.0 scale)
+  Tags: Gemini-2.0, cross-embodiment, end-to-end, embodied-reasoning, proprietary
+  AI Review Summary: Google DeepMind의 Gemini 2.0 기반 대규모 VLA 모델 패밀리로, 범용 조작·open-vocabulary 지시 이해·few-shot 적응·cross-embodiment 일반화를 단일 모델에서 달성하며, embodied reasoning 특화 모델(Gemini Robotics-ER)을 함께 제안.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: GigaWorld-Policy
+  Organization: GigaAI
+  Date: 2026-03-18
+  Paper: https://arxiv.org/abs/2603.17240
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: flow matching action decoder
+    Backbone: Wan 2.2 Diffusion Transformer (5B)
+    LLM: None
+    Parameters: 5B
+  Inference: 2.8 Hz
+  Tags: world-action-model, flow-matching, video-DiT, efficient-inference
+  Benchmarks:
+    robotwin_v2 (avg=86.0): robotwin_v2_clean_avg=87.0, robotwin_v2_rand_avg=85.0
+  Eval Conditions: {'robotwin_v2': 'fine-tuned'}
+  AI Review Summary: 기존 video-centered WAM의 추론 병목을 해결하기 위해 action 예측을 중심으로 비디오 생성을 조건부로 재구성하는 action-centered WAM을 제안하여, 기존 대비 9배 빠른 추론과 7% 높은 성공률 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: GR-Dexter
+  Organization: ByteDance Seed
+  Date: 2025-12-30
+  Paper: https://arxiv.org/abs/2512.24210
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: VLM backbone + flow-matching action DiT for 56-DoF bimanual dexterous hands (ByteDexter V2)
+    Backbone: Qwen2.5-VL-3B-Instruct
+    LLM: Qwen2.5 3B
+    Parameters: not disclosed
+  Tags: bimanual, dexterous-hands, 56-DoF, cross-embodiment
+  AI Review Summary: 21-DoF 소형 로봇 핸드 설계부터 양팔 텔레오퍼레이션, cross-embodiment VLA 학습까지를 통합한 하드웨어-모델-데이터 프레임워크로, dexterous hand 기반 범용 조작의 실용적 구현.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: GR-1
+  Organization: ByteDance
+  Date: 2023-12-20
+  Paper: https://arxiv.org/abs/2312.13139
+  Code: https://github.com/bytedance/GR-1
+  Venue: ICLR 2024
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive (next-token prediction)
+    Backbone: GPT-style Transformer
+    LLM: Custom GPT (130M)
+    Parameters: 130M
+  Inference: 4 Hz
+  Tags: 130M, autoregressive, video-prediction, manipulation, language-conditioned, open-source
+  Benchmarks:
+    calvin (avg=3.1): calvin_abc_d_avg_len=3.1, calvin_abc_d_1=88.7, calvin_abc_d_2=72.4, calvin_abc_d_3=55.8, calvin_abc_d_4=40.2, calvin_abc_d_5=28.1
+  Eval Conditions: {'calvin': 'fine-tuned'}
+  AI Review Summary: 195M GPT-style transformer (46M trainable)를 Ego4D 800K 비디오 클립으로 video generation 사전학습한 후, CALVIN에서 **ABCD→D avg len 4.21** (HULC 3.06 대비 +37.6%), unseen scene zero-shot **85.4%** (기존 53.3% 대비 +60%) 달성.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: GR-2
+  Organization: ByteDance
+  Date: 2024-10-08
+  Paper: https://arxiv.org/abs/2410.06158
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: autoregressive (video prediction + action)
+    Backbone: Video GPT Transformer
+    LLM: Custom GPT (1.5B)
+    Parameters: 1.5B
+  Inference: 3 Hz
+  Tags: 1.5B, autoregressive, video-prediction, manipulation, world-model
+  Benchmarks:
+    calvin (avg=3.8): calvin_abc_d_avg_len=3.8, calvin_abc_d_1=93.2, calvin_abc_d_2=81.6, calvin_abc_d_3=68.4, calvin_abc_d_4=54.8, calvin_abc_d_5=42.1
+  Eval Conditions: {'calvin': 'fine-tuned'}
+  AI Review Summary: 3800만 비디오 클립·500억+ 토큰의 대규모 인터넷 비디오 사전학습을 통해 범용 로봇 agent를 구축, 100+ 태스크에서 97.7% 성공률과 미지 환경에 대한 뛰어난 일반화 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: GR00T-N1.5
+  Organization: NVIDIA
+  Date: 2025-06-11
+  Paper: None
+  Code: https://github.com/NVIDIA/Isaac-GR00T
+  Venue: Announced at Computex 2025 (industry release, no peer-reviewed paper)
+  Open Source: True
+  Architecture:
+    Action Head: diffusion transformer + FLARE objective
+    Backbone: Eagle 2.5 VLM
+    LLM: Eagle 2.5 VLM
+    Parameters: 3B
+  Tags: 3B, diffusion-transformer, dual-system, humanoid, FLARE, synthetic-data, open-model, open-source
+  Benchmarks:
+    robocasa (avg=64.1): robocasa_avg=64.1
+  Eval Conditions: {'robocasa': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: GR00T-N1.6
+  Organization: NVIDIA
+  Date: 2025-09-29
+  Paper: None
+  Code: https://github.com/NVIDIA/Isaac-GR00T
+  Venue: Announced at CoRL 2025 (keynote, no peer-reviewed paper)
+  Open Source: True
+  Architecture:
+    Action Head: large diffusion transformer (32 layers)
+    Backbone: Cosmos-Reason-2B VLM (flexible resolution, native aspect ratio)
+    LLM: Cosmos-Reason-2B
+    Parameters: 3B
+  Tags: 3B, diffusion-transformer, dual-system, humanoid, cosmos-reason, full-body-control, open-model, open-source
+  Benchmarks:
+    robocasa (avg=47.6): robocasa_avg=47.6
+  Eval Conditions: {'robocasa': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: GR00T-N1.7
+  Organization: NVIDIA
+  Date: 2026-03-18
+  Paper: None
+  Code: https://github.com/NVIDIA/Isaac-GR00T
+  Venue: GTC 2026
+  Open Source: True
+  Architecture:
+    Action Head: diffusion transformer
+    Backbone: Reasoning VLM
+    LLM: Reasoning VLM
+    Parameters: ~3B
+  Tags: 3B, diffusion-transformer, humanoid, reasoning-vla, commercial, NIM, open-model, open-source
+
+------------------------------------------------------------
+MODEL: GR00T-N2
+  Organization: NVIDIA
+  Date: 2026-03-18
+  Paper: None
+  Code: None
+  Venue: GTC 2026 (preview)
+  Open Source: False
+  Architecture:
+    Action Head: DreamZero-based
+    Backbone: World Action Model
+    LLM: None
+    Parameters: None
+  Tags: world-action-model, DreamZero, humanoid, preview
+
+------------------------------------------------------------
+MODEL: HiMoE-VLA
+  Organization: Tsinghua University / Shanghai AI Lab
+  Date: 2025-12-05
+  Paper: https://arxiv.org/abs/2512.05693
+  Code: https://github.com/ZhiyingDu/HiMoE-VLA
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: Hierarchical MoE action module with Action-Space MoE at boundary layers
+    Backbone: PaliGemma (SigLIP + Gemma)
+    LLM: Gemma 2B
+    Parameters: 3B+
+  Tags: 3B+, hierarchical-MoE, action-space-MoE, pi0-based, open-source
+  AI Review Summary: 로봇 데이터의 다층적 이질성(embodiment, action space, sensor, frequency)을 계층적 MoE로 계층별 적응적 처리하여, heterogeneous cross-embodiment 학습에서 일관적 성능 향상 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: Humanoid-VLA
+  Organization: Multiple Chinese institutions
+  Date: 2025-02-20
+  Paper: https://arxiv.org/abs/2502.14795
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: language-motion pre-alignment + egocentric video-conditioned fine-tuning
+    Backbone: CLIP ViT (egocentric video encoder)
+    LLM: LLM (language-motion alignment)
+    Parameters: not disclosed
+  Tags: humanoid, whole-body-control, language-motion-alignment, egocentric
+  AI Review Summary: Language understanding, egocentric perception, motion control을 통합하는 humanoid 전용 VLA로, language-motion 사전정렬과 self-supervised augmentation을 통해 범용 휴머노이드 제어 실현.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: InternVLA-A1
+  Organization: Shanghai AI Lab (InternRobotics)
+  Date: 2026-01-21
+  Paper: https://arxiv.org/abs/2601.02456
+  Code: https://github.com/InternRobotics/InternVLA-A1
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: Mixture-of-Transformers unifying understanding, generation, and action experts
+    Backbone: InternVL3 (2B) / Qwen3-VL (3B)
+    LLM: Qwen2.5 (2B variant) / Qwen3 (3B variant)
+    Parameters: 2B / 3B
+  Tags: 2B-3B, MoT, unified-UGA, open-source
+  AI Review Summary: Scene understanding, visual foresight generation, action execution을 위한 세 개의 전문가(expert)를 Mixture-of-Transformers 아키텍처로 통합하고 masked self-attention으로 조율하는 통합 VLA.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: InternVLA-M1
+  Organization: Shanghai AI Lab (InternRobotics)
+  Date: 2025-10-15
+  Paper: https://arxiv.org/abs/2510.13778
+  Code: https://github.com/InternRobotics/InternVLA-M1
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: dual-system: Qwen2.5-VL spatial planner + DiT action head
+    Backbone: Qwen2.5-VL
+    LLM: Qwen2.5
+    Parameters: based on Qwen2.5-VL
+  Tags: Qwen2.5-VL, spatial-grounding, dual-system, DiT-action, open-source
+  Eval Conditions: {'simpler_env': 'fine-tuned'}
+  AI Review Summary: Spatial grounding을 language instruction과 robot action을 연결하는 핵심 고리로 설정하고, 2-stage pipeline (spatial reasoning → action generation)으로 일반화된 instruction following 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: LLARVA
+  Organization: UC Berkeley
+  Date: 2024-06-17
+  Paper: https://arxiv.org/abs/2406.11815
+  Code: None
+  Venue: CoRL 2024
+  Open Source: True
+  Architecture:
+    Action Head: autoregressive text-based action + 2D visual trace prediction
+    Backbone: CLIP ViT-L (LLaVA)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, visual-trace, LLaVA, autoregressive, open-source
+  AI Review Summary: Structured prompt로 다양한 로봇 학습 태스크를 통합하고, 2D intermediate representation ("visual trace")을 예측하여 vision-action space를 정렬하는 instruction tuning 기반 VLA.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: LLaVA-VLA
+  Organization: HKUST (Guangzhou) / Huazhong University / Westlake University / Zhejiang University
+  Date: 2026-02-26
+  Paper: https://arxiv.org/abs/2602.22663
+  Code: https://github.com/OpenHelix-Team/LLaVA-VLA
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: discrete action tokenizer with action chunking (chunk size 5)
+    Backbone: LLaVA-OneVision-0.5B
+    LLM: Qwen-2 0.5B (within LLaVA-OneVision)
+    Parameters: 0.5B
+  Tags: lightweight, 0.5B, mobile-manipulation, consumer-GPU, open-source
+  Benchmarks:
+    calvin (avg=3.68): calvin_task_1=94.8, calvin_task_2=84.5, calvin_task_3=71.3, calvin_task_4=62.5, calvin_task_5=53.8, calvin_abc_d_avg_len=3.68
+    robotwin_v2 (avg=28.62): click_bell=72.0, click_alarmclock=65.0, lift_pot=21.0, move_can_pot=16.0, open_laptop=31.0, pick_dual_bottles=7.0, place_dual_shoes=5.0, rotate_qrcode=12.0
+  Eval Conditions: {'calvin': 'fine-tuned', 'robotwin_v2': 'fine-tuned (domain randomization setting)'}
+  AI Review Summary: VLA의 실용성(practicality)을 체계적으로 재평가하기 위한 CEBench 벤치마크를 제안하고, consumer-grade GPU에서 구동 가능한 경량 LLaVA-VLA 모델을 설계.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: Mobility VLA
+  Organization: Google DeepMind
+  Date: 2024-07-10
+  Paper: https://arxiv.org/abs/2407.07775
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: hierarchical: long-context VLM goal identification + topological graph navigation
+    Backbone: Gemini 1.5 Pro
+    LLM: Gemini 1.5 Pro
+    Parameters: not disclosed (Gemini-based)
+  Tags: navigation, long-context-VLM, topological-graph, multimodal-instruction
+  AI Review Summary: Long-context VLM과 topological graph 기반 제어를 결합한 계층적 navigation 시스템으로, 자연어+이미지 multimodal 지시를 이해하여 실제 환경에서 로봇 navigation 수행.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: Motus
+  Organization: Tsinghua University / Peking University / Horizon Robotics
+  Date: 2025-12-25
+  Paper: https://arxiv.org/abs/2512.13030
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: transformer action expert (30 layers, 641.5M)
+    Backbone: Mixture-of-Transformers (Wan 2.2 5B video + Qwen3-VL-2B)
+    LLM: Qwen3-VL-2B
+    Parameters: ~8B (VGM 5.0B + VLM 2.13B + Action 641.5M + Understanding 253.5M)
+  Tags: world-action-model, MoT, latent-action, optical-flow, cross-embodiment
+  Benchmarks:
+    libero: libero_long=97.6
+    robotwin_v2 (avg=87.84): robotwin_v2_easy_avg=88.66, robotwin_v2_hard_avg=87.02
+  Eval Conditions: {'libero': 'fine-tuned', 'robotwin_v2': 'fine-tuned'}
+  AI Review Summary: Latent action space에서의 통합 world model로, 기존 pretrained model과 motion information을 결합하는 Mixture-of-Transformer 아키텍처를 통해 video prediction, action prediction, planning을 유연하게 수행.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: NanoVLA
+  Organization: Xiaomi EV
+  Date: 2025-10-29
+  Paper: https://arxiv.org/abs/2510.25122
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: efficient action head
+    Backbone: ResNet18
+    LLM: BERT-base (NanoVLA-S) / Qwen2.5 0.5B (NanoVLA-L)
+    Parameters: ~50M
+  Tags: nano, edge-device, efficient, 52x-faster, manipulation
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 3.5, Confidence: 3.75
+
+------------------------------------------------------------
+MODEL: NaVILA
+  Organization: NVIDIA Research / UC San Diego / USC
+  Date: 2024-12-05
+  Paper: https://arxiv.org/abs/2412.04453
+  Code: https://github.com/AnjieCheng/NaVILA
+  Venue: RSS 2025
+  Open Source: True
+  Architecture:
+    Action Head: hierarchical: NVILA-8B high-level VLA + low-level visual locomotion RL
+    Backbone: SigLIP
+    LLM: LLaMA 3 8B
+    Parameters: 8B
+  Tags: 8B, navigation, hierarchical, legged-robot, open-source
+  AI Review Summary: VLA와 locomotion skill을 2-level 계층 구조로 통합하여, 다리 로봇에서의 vision-language navigation을 실현. Mid-level spatial language instruction을 생성하여 visual locomotion policy를 구동.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: NORA
+  Organization: Declare Lab
+  Date: 2025-04-28
+  Paper: https://arxiv.org/abs/2504.19854
+  Code: https://github.com/declare-lab/nora
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: FAST+ action tokenizer
+    Backbone: Qwen2.5-VL
+    LLM: Qwen2.5 3B
+    Parameters: 3B
+  Tags: 3B, FAST+, compact, 970k-demos, open-source
+  AI Review Summary: Qwen-2.5-VL-3B + FAST+ tokenizer(+2048 tokens)로, 970K OXE demonstration에서 **4000 H100 GPU-hours** 학습하여, WidowX real-world **56.7%** (OpenVLA 40%), LIBERO-Long **74.6%** (NORA-Long), inference **8.3GB** GPU memory.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: RoboDual
+  Organization: Shanghai AI Lab (OpenDriveLab)
+  Date: 2024-10-10
+  Paper: https://arxiv.org/abs/2410.08001
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: dual-system: OpenVLA 7B generalist + 20M Diffusion Transformer specialist via cross-attention
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B + 20M
+  Tags: 7B+20M, dual-system, diffusion-transformer, cross-attention
+  AI Review Summary: VLA-based generalist (System 2)와 diffusion-transformer specialist (System 1)를 20M 학습 가능 파라미터로 결합하여, real-world 26.7% 향상과 CALVIN 12% 향상을 3.8x 높은 제어 주파수에서 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: RoboMamba
+  Organization: Chinese Academy of Sciences (CAS) / UCAS
+  Date: 2024-06-06
+  Paper: https://arxiv.org/abs/2406.04339
+  Code: None
+  Venue: NeurIPS 2024
+  Open Source: False
+  Architecture:
+    Action Head: lightweight MLP policy head (3.7M) for SE(3) pose
+    Backbone: CLIP ViT-L/14
+    LLM: Mamba 2.7B (SSM, not transformer LLM)
+    Parameters: 3.2B (2.7B Mamba + CLIP)
+  Tags: 3.2B, Mamba-SSM, MLP-action-head, efficient
+  AI Review Summary: Mamba state space model을 VLA backbone으로 활용하여, Transformer 대비 3배 빠른 추론과 우수한 robotic reasoning을 최소한의 파라미터 fine-tuning으로 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: RT-2-X
+  Organization: Google DeepMind
+  Date: 2023-10-13
+  Paper: https://arxiv.org/abs/2310.08864
+  Code: None
+  Venue: ICRA 2024
+  Open Source: False
+  Architecture:
+    Action Head: autoregressive (tokenized)
+    Backbone: PaLI-X (ViT-22B)
+    LLM: PaLM-E 12B / PaLI-X 55B (two variants)
+    Parameters: 55B
+  Tags: 55B, autoregressive, manipulation, cross-embodiment, web-pretrained
+  Benchmarks:
+    simpler_env: google_robot_pick_coke_can=72.5, google_robot_move_near=50.3, google_robot_open_drawer=38.6
+  Eval Conditions: {'simpler_env': 'fine-tuned'}
+  AI Review Summary: 21개 기관 22종 로봇에서 527개 스킬을 포괄하는 대규모 cross-embodiment 데이터셋을 구축하고, RT-X 모델이 타 플랫폼의 경험을 활용하여 positive transfer를 달성함을 실증.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: SAM2Act
+  Organization: University of Washington / NVIDIA
+  Date: 2025-01-30
+  Paper: https://arxiv.org/abs/2501.18564
+  Code: https://github.com/sam2act/sam2act
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: RVT-2 multi-view transformer (coarse-to-fine heatmap) + SAM2 memory
+    Backbone: SAM2 (Segment Anything 2) encoder
+    LLM: None
+    Parameters: not disclosed (SAM2 encoder + RVT-2)
+  Tags: SAM2, multi-view, RLBench-SOTA, memory-bank, open-source
+  Benchmarks:
+    rlbench (avg=90.55): rlbench_18tasks=86.8, memorybench=94.3
+  Eval Conditions: {'rlbench': 'fine-tuned'}
+  AI Review Summary: SAM2의 visual foundation model 표현을 multi-resolution upsampling으로 활용하고, memory mechanism을 추가하여 RLBench 86.8% 및 memory-dependent 태스크에서 94.3% (MemoryBench) 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: SAMoE-VLA
+  Organization: TODO: check paper
+  Date: 2026-03-09
+  Paper: https://arxiv.org/abs/2603.08113
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: reasoning
+  Eval Conditions: {'TODO': 'check paper'}
+  AI Review Summary: 자율주행에 VLA를 적용하여, BEV feature 기반 scene-adaptive MoE routing과 Conditional Cross-Modal Causal Attention으로 nuScenes 및 LangAuto SOTA 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: SuSIE
+  Organization: UC Berkeley
+  Date: 2023-10-01
+  Paper: https://arxiv.org/abs/2310.10639
+  Code: https://github.com/rail-berkeley/susie
+  Venue: ICRA 2024
+  Open Source: True
+  Architecture:
+    Action Head: low-level diffusion policy from subgoal image
+    Backbone: InstructPix2Pix (fine-tuned)
+    LLM: None
+    Parameters: None
+  Tags: subgoal-generation, image-editing, hierarchical, manipulation, open-source
+  AI Review Summary: Image-editing diffusion model (InstructPix2Pix)을 high-level planner로 활용하여 현재 관측에서 중간 subgoal 이미지를 생성하고, low-level policy가 이를 달성하는 2-stage 구조로 CALVIN에서 기존 language-conditioned policy 대비 큰 일반화 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: TacVLA
+  Organization: TODO: check paper
+  Date: 2026-03-13
+  Paper: https://arxiv.org/abs/2603.12665
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Eval Conditions: {'TODO': 'check paper'}
+  AI Review Summary: 촉각(tactile) modality를 contact-aware gating mechanism으로 VLA에 통합하여, 접촉이 중요한 태스크(분해 20%↑, in-box picking 60%↑)와 시각 차단 상황(2.1x 향상)에서 큰 성능 향상 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: TinyVLA
+  Organization: Midea Group / East China Normal University
+  Date: 2024-09-19
+  Paper: https://arxiv.org/abs/2409.12514
+  Code: https://github.com/JayceWen/tinyvla
+  Venue: RA-L 2025
+  Open Source: True
+  Architecture:
+    Action Head: diffusion-based continuous action head
+    Backbone: SigLIP
+    LLM: Phi-2 (2.7B) or smaller
+    Parameters: 422M-1.3B
+  Tags: 422M-1.3B, diffusion, efficient, lightweight, open-source, LoRA
+  AI Review Summary: 사전학습 단계를 제거하고 빠른 추론과 데이터 효율성에 초점을 맞춘 compact VLA로, OpenVLA를 성능에서 match하면서 언어·물체·환경 변화에 대한 강건한 일반화 시현.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: TraceVLA
+  Organization: University of Michigan / NVIDIA
+  Date: 2024-12-13
+  Paper: https://arxiv.org/abs/2412.10345
+  Code: None
+  Venue: ICLR 2025
+  Open Source: False
+  Architecture:
+    Action Head: autoregressive + visual trace prompting
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, autoregressive, visual-trace, spatial-temporal, manipulation
+  Benchmarks:
+    simpler_env: google_robot_pick_coke_can=72.8, google_robot_move_near=56.4
+  Eval Conditions: {'simpler_env': 'fine-tuned'}
+  AI Review Summary: State-action trajectory를 이미지 위에 시각적 trace로 오버레이하여 VLA의 spatial-temporal awareness를 강화, SimplerEnv 10%↑ 및 real-robot 3.5x 향상 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: TwinBrainVLA
+  Organization: ZGC EmbodyAI
+  Date: 2026-01-20
+  Paper: https://arxiv.org/abs/2601.14133
+  Code: https://github.com/ZGC-EmbodyAI/TwinBrainVLA
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: Asymmetric MoT: frozen Left Brain (generalist) + trainable Right Brain (specialist)
+    Backbone: Qwen2.5-VL-3B / Qwen3-VL-4B
+    LLM: Qwen2.5 3B / Qwen3 4B
+    Parameters: 3B-4B
+  Tags: 3B-4B, asymmetric-MoT, anti-forgetting, dual-brain, open-source
+  Benchmarks:
+    robocasa (avg=54.6): robocasa_avg=54.6
+  Eval Conditions: {'robocasa': 'fine-tuned'}
+  AI Review Summary: Frozen generalist VLM pathway와 trainable specialist pathway를 비대칭 MoT로 조율하여, VLM의 기존 능력을 보존하면서 embodied task에서 대폭 향상 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: UniPi
+  Organization: Google DeepMind
+  Date: 2023-02-01
+  Paper: https://arxiv.org/abs/2302.00111
+  Code: None
+  Venue: ICML 2023
+  Open Source: False
+  Architecture:
+    Action Head: inverse dynamics from generated video
+    Backbone: Video Diffusion Model
+    LLM: None
+    Parameters: None
+  Tags: video-diffusion, planning, language-conditioned, inverse-dynamics
+  AI Review Summary: 순차적 의사결정을 text-conditioned video generation 문제로 재정의하여, 생성된 비디오에서 inverse dynamics로 action을 추출하는 **video-as-policy** 패러다임의 선구적 연구.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: UP-VLA
+  Organization: Tsinghua University
+  Date: 2025-01-31
+  Paper: https://arxiv.org/abs/2501.18867
+  Code: https://github.com/CladernyJorn/UP-VLA
+  Venue: ICML 2025
+  Open Source: True
+  Architecture:
+    Action Head: unified understanding + future image prediction for spatial awareness
+    Backbone: Show-o (CLIP ViT)
+    LLM: Phi-1.5
+    Parameters: 1.3B
+  Tags: 1.3B, future-prediction, unified-understanding, ICML-2025, open-source
+  Eval Conditions: {'calvin': 'fine-tuned'}
+  AI Review Summary: Multi-modal understanding과 future prediction 목적함수를 통합하여 VLM의 low-level spatial 정보 캡처 능력을 보강, CALVIN ABC-D에서 33% 향상과 real-world manipulation 개선.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: VLA-RL
+  Organization: ByteDance / Tsinghua University
+  Date: 2025-05-24
+  Paper: https://arxiv.org/abs/2505.18719
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: trajectory-level RL on OpenVLA-7B with VLM process reward model
+    Backbone: PrismaticVLM (SigLIP + DinoV2)
+    LLM: Llama-2 7B
+    Parameters: 7B
+  Tags: 7B, RL, trajectory-level, VLM-reward
+  Eval Conditions: {'libero': 'RL fine-tuned'}
+  AI Review Summary: Auto-regressive VLA에 online RL을 직접 적용하여, pretrained OpenVLA-7B가 fine-tuned baseline을 LIBERO 40개 태스크에서 4.5%p 능가하고, test-time compute 증가에 따른 성능 향상을 시현.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: Vlaser
+  Organization: USTC / Shanghai AI Lab / SJTU / Zhejiang University / NJU / Fudan / Tsinghua / NUS
+  Date: 2025-10-13
+  Paper: https://arxiv.org/abs/2510.11027
+  Code: https://github.com/OpenGVLab/Vlaser
+  Venue: ICLR 2026
+  Open Source: True
+  Architecture:
+    Action Head: flow matching action expert
+    Backbone: InternVL3
+    LLM: Qwen2.5-1.5B (2B variant) / Qwen2.5-7B (8B variant)
+    Parameters: 2B / 8B
+  Tags: 2B, 8B, reasoning, embodied-reasoning, InternVL, ICLR-2026, open-source, Vlaser-6M
+  Benchmarks:
+    simpler_env: simpler_bridge_widowx=78.6, simpler_google_robot=68.4
+  Eval Conditions: {'simpler_env': 'fine-tuned'}
+  Peer Review:
+    Venue: ICLR 2026, Decision: poster
+    Review Avg: 5.0, Confidence: 3.25
+
+================================================================================
+SECTION 3: BENCHMARK DEFINITIONS
+================================================================================
+
+LIBERO: 4 manipulation suites (Spatial, Object, Goal, Long-horizon)
+  Score range: 0-100% success rate. Higher is better.
+  Primary ranking metric for VLA-Tracker.
+
+CALVIN: Long-horizon language-conditioned manipulation (ABC→D setting)
+  Score: Average number of tasks completed in sequence (0-5). Higher is better.
+
+SimplerEnv: Sim-to-real transfer evaluation
+  Score range: 0-100% success rate. Higher is better.
+
+RoboTwin v1/v2: Bimanual dual-arm manipulation (50+ tasks)
+  Score range: 0-100% success rate. Higher is better.
+
+RLBench: Diverse manipulation tasks (18 tasks)
+  Score range: 0-100% success rate. Higher is better.
+
+RoboCasa: Home robot manipulation tasks
+  Score range: 0-100% success rate. Higher is better.
+
+================================================================================
+END OF FILE
+Total: 82 models, 36 with LIBERO scores
+================================================================================

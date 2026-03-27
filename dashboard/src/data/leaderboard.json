@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-25T08:40:43.957960",
+  "generated_at": "2026-03-27T04:53:40.888926",
   "num_models": 82,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -31,6 +31,7 @@
         "backbone": "varies (wraps existing VLAs)",
         "llm": "varies (wraps existing VLAs)",
         "action_head": "plug-and-play residual RL framework (probe → learn → distill back to generalist)",
+        "action_head_category": "other",
         "parameters": "varies (applied on top of existing VLAs)"
       },
       "model_type": null,
@@ -73,6 +74,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "autoregressive + GRPO reinforcement learning",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -136,7 +138,8 @@
       "architecture": {
         "backbone": "Florence-Large",
         "llm": null,
-        "action_head": "autoregressive with embodiment-specific soft prompts",
+        "action_head": "flow matching with embodiment-specific soft prompts (chunk_size=32)",
+        "action_head_category": "flow_matching",
         "parameters": "0.9B"
       },
       "model_type": null,
@@ -198,6 +201,7 @@
         "backbone": "Wan2.2 Video DiT (5B)",
         "llm": null,
         "action_head": "flow matching (velocity field)",
+        "action_head_category": "flow_matching",
         "parameters": "6B"
       },
       "model_type": null,
@@ -241,6 +245,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "autoregressive",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -300,6 +305,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "inverse dynamics from world knowledge forecasts (depth, DINOv2, SAM)",
+        "action_head_category": "inverse_dynamics",
         "parameters": "7B"
       },
       "model_type": null,
@@ -349,6 +355,7 @@
         "backbone": "pi0-FAST (PaliGemma 2)",
         "llm": "Gemma-2 2B",
         "action_head": "hybrid-attention decoder (causal CoT → bidirectional parallel action)",
+        "action_head_category": "hybrid",
         "parameters": "2.9B"
       },
       "model_type": null,
@@ -393,6 +400,7 @@
         "backbone": "PaliGemma (SigLIP + Gemma 2B, via pi0)",
         "llm": "Gemma 2B",
         "action_head": "Skill-Guided MoE (SG-MoE)",
+        "action_head_category": "flow_matching",
         "parameters": "4.17B"
       },
       "model_type": null,
@@ -434,6 +442,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "diffusion transformer conditioned on memory-augmented tokens",
+        "action_head_category": "diffusion",
         "parameters": "7B"
       },
       "model_type": null,
@@ -481,6 +490,7 @@
         "backbone": "MMaDA (MAGViT-v2 vision tokenizer)",
         "llm": "LLaDA-8B-Instruct (discrete diffusion LM)",
         "action_head": "discrete diffusion with multimodal chain-of-thought",
+        "action_head_category": "discrete_diffusion",
         "parameters": "8B"
       },
       "model_type": "vla",
@@ -520,6 +530,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2, via OpenVLA)",
         "llm": "Llama-2 7B",
         "action_head": "flow matching",
+        "action_head_category": "flow_matching",
         "parameters": "300M action expert"
       },
       "model_type": null,
@@ -560,6 +571,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "discrete diffusion over tokenized action chunks with adaptive decoding order",
+        "action_head_category": "discrete_diffusion",
         "parameters": "7B"
       },
       "model_type": null,
@@ -607,6 +619,7 @@
         "backbone": "Gemma 3 4B VLM",
         "llm": "Gemma 3 4B",
         "action_head": "flow matching + RL (RECAP)",
+        "action_head_category": "flow_matching",
         "parameters": "~5B (4B VLM + ~860M action expert)"
       },
       "model_type": null,
@@ -649,6 +662,7 @@
         "backbone": "Qwen2.5-VL-3B",
         "llm": "Qwen2.5 3B",
         "action_head": "Mixture of Transformers + flow matching",
+        "action_head_category": "flow_matching",
         "parameters": "~4B (3B VLM + action expert)"
       },
       "model_type": null,
@@ -701,6 +715,7 @@
         "backbone": "Emu3 + MOVQ visual tokenizer",
         "llm": "Emu3",
         "action_head": "joint discrete denoising diffusion (JD3P)",
+        "action_head_category": "discrete_diffusion",
         "parameters": "3B"
       },
       "model_type": null,
@@ -747,6 +762,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "autoregressive (OpenVLA base) + structured reasoning chain (TASK/PLAN/SUBTASK/MOVE)",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -785,6 +801,7 @@
         "backbone": "InternVL2-based VLM",
         "llm": "InternLM2",
         "action_head": "flow matching",
+        "action_head_category": "flow_matching",
         "parameters": "4B"
       },
       "model_type": null,
@@ -837,6 +854,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "flow matching (unified tokenization)",
+        "action_head_category": "flow_matching",
         "parameters": "7B"
       },
       "model_type": null,
@@ -883,6 +901,7 @@
         "backbone": "SigLIP2-Large (siglip2-large-patch16-256)",
         "llm": null,
         "action_head": "Diffusion Transformer (DiT) + Q-former + future latent alignment",
+        "action_head_category": "flow_matching",
         "parameters": "3B"
       },
       "model_type": null,
@@ -929,6 +948,7 @@
         "backbone": "PaliGemma-based VLM",
         "llm": "Gemma-based",
         "action_head": "flow matching",
+        "action_head_category": "flow_matching",
         "parameters": "3B+"
       },
       "model_type": null,
@@ -975,6 +995,7 @@
         "backbone": "PaLiGemma2 (SigLIP + Gemma 2)",
         "llm": "Gemma 2",
         "action_head": "autoregressive (tokenized)",
+        "action_head_category": "autoregressive",
         "parameters": "4B"
       },
       "model_type": null,
@@ -1022,6 +1043,7 @@
         "backbone": "Qwen2-VL-2B",
         "llm": "Qwen2 ~1.5B (via Qwen2-VL-2B)",
         "action_head": "diffusion (hierarchical: coarse plan + fine action)",
+        "action_head_category": "diffusion",
         "parameters": "~3B (2B VLM + 1B diffusion expert)"
       },
       "model_type": null,
@@ -1068,6 +1090,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "parallel decoding + continuous actions",
+        "action_head_category": "regression",
         "parameters": "7B"
       },
       "model_type": null,
@@ -1114,7 +1137,8 @@
       "architecture": {
         "backbone": "SigLIP (via VILA-U)",
         "llm": "LLaMA-2 7B",
-        "action_head": "diffusion policy",
+        "action_head": "autoregressive (256-bin discretized, 7 tokens × 10-step chunks via VILA-U)",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -1156,6 +1180,7 @@
         "backbone": "PaliGemma-based VLM",
         "llm": "Gemma-based",
         "action_head": "FAST tokenizer (discrete tokens from continuous actions)",
+        "action_head_category": "autoregressive",
         "parameters": "3B"
       },
       "model_type": null,
@@ -1197,6 +1222,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "diffusion (continuous action generation)",
+        "action_head_category": "diffusion",
         "parameters": "7B"
       },
       "model_type": null,
@@ -1245,6 +1271,7 @@
         "backbone": "Eagle-2 VLM (SigLIP-2 + SmolLM2)",
         "llm": "SmolLM2 (within Eagle-2 VLM)",
         "action_head": "diffusion transformer (S1 system)",
+        "action_head_category": "diffusion",
         "parameters": "2.2B"
       },
       "model_type": "vla",
@@ -1291,6 +1318,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "hybrid (diffusion + autoregressive)",
+        "action_head_category": "hybrid",
         "parameters": "7B"
       },
       "model_type": null,
@@ -1337,6 +1365,7 @@
         "backbone": "PaliGemma (SigLIP + Gemma)",
         "llm": "Gemma 2B (pre-trained VLM)",
         "action_head": "flow matching",
+        "action_head_category": "flow_matching",
         "parameters": "3B"
       },
       "model_type": null,
@@ -1395,6 +1424,7 @@
         "backbone": "KosMos VLM (best config; framework supports 8 VLM backbones)",
         "llm": "KosMos 2B (best config)",
         "action_head": "latent action tokenization (VQ-VAE) + autoregressive",
+        "action_head_category": "autoregressive",
         "parameters": "2B"
       },
       "model_type": null,
@@ -1442,6 +1472,7 @@
         "backbone": "SigLIP-So400m + T5-v1_1-XXL (language encoder)",
         "llm": null,
         "action_head": "diffusion (scalable transformer)",
+        "action_head_category": "diffusion",
         "parameters": "1.2B"
       },
       "model_type": null,
@@ -1495,6 +1526,7 @@
         "backbone": "SigLIP + SmolLM2",
         "llm": "SmolLM2 (via SmolVLM2)",
         "action_head": "flow matching",
+        "action_head_category": "flow_matching",
         "parameters": "450M"
       },
       "model_type": null,
@@ -1541,6 +1573,7 @@
         "backbone": "Heterogeneous stem encoders (per embodiment)",
         "llm": null,
         "action_head": "shared transformer trunk + task-specific heads",
+        "action_head_category": "regression",
         "parameters": "300M"
       },
       "model_type": null,
@@ -1587,6 +1620,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "autoregressive (tokenized)",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -1635,6 +1669,7 @@
         "backbone": "Transformer (custom encoder-decoder)",
         "llm": null,
         "action_head": "diffusion policy",
+        "action_head_category": "diffusion",
         "parameters": "93M"
       },
       "model_type": null,
@@ -1688,6 +1723,7 @@
         "backbone": "ResNet-18 / Transformer",
         "llm": null,
         "action_head": "diffusion (DDPM)",
+        "action_head_category": "diffusion",
         "parameters": "~25M"
       },
       "model_type": null,
@@ -1735,6 +1771,7 @@
         "backbone": "BLIP2 (Q-Former + 3D multi-view features)",
         "llm": "FlanT5",
         "action_head": "embodied diffusion model aligned to 3D-LLM for goal generation + action prediction",
+        "action_head_category": "diffusion",
         "parameters": "3B–11B (FlanT5 backbone)"
       },
       "model_type": null,
@@ -1768,6 +1805,7 @@
         "backbone": "3D scene encoder (point cloud + features)",
         "llm": "CLIP (language conditioning)",
         "action_head": "diffusion (3D denoising)",
+        "action_head_category": "diffusion",
         "parameters": "~50M"
       },
       "model_type": null,
@@ -1813,6 +1851,7 @@
         "backbone": null,
         "llm": null,
         "action_head": "TODO: check paper",
+        "action_head_category": "other",
         "parameters": "TODO"
       },
       "model_type": null,
@@ -1846,6 +1885,7 @@
         "backbone": "Video Diffusion (flow generation)",
         "llm": null,
         "action_head": "inverse dynamics from optical flow",
+        "action_head_category": "inverse_dynamics",
         "parameters": null
       },
       "model_type": "video",
@@ -1885,6 +1925,7 @@
         "backbone": "Decoder-only Transformer (Octo-based)",
         "llm": null,
         "action_head": "embodiment-class-specific action heads (variable-dim)",
+        "action_head_category": "regression",
         "parameters": "not disclosed (Octo-based transformer)"
       },
       "model_type": null,
@@ -1916,6 +1957,7 @@
         "backbone": "OpenFlamingo",
         "llm": "MPT-1B",
         "action_head": "multi-exit early-stopping with action consistency metric",
+        "action_head_category": "regression",
         "parameters": "3B"
       },
       "model_type": null,
@@ -1945,6 +1987,7 @@
         "backbone": null,
         "llm": null,
         "action_head": "TODO: check paper",
+        "action_head_category": "other",
         "parameters": "TODO"
       },
       "model_type": null,
@@ -1978,6 +2021,7 @@
         "backbone": "SigLIP",
         "llm": "Qwen2",
         "action_head": "autoregressive reasoning + diffusion action prediction with reasoning injection",
+        "action_head_category": "hybrid",
         "parameters": "2B–72B (multi-scale)"
       },
       "model_type": null,
@@ -2005,6 +2049,7 @@
         "backbone": null,
         "llm": null,
         "action_head": "TODO: check paper",
+        "action_head_category": "diffusion",
         "parameters": "TODO"
       },
       "model_type": null,
@@ -2037,6 +2082,7 @@
         "backbone": "PaliGemma (SigLIP + Gemma)",
         "llm": "Gemma (via PaliGemma)",
         "action_head": "continuized discrete diffusion",
+        "action_head_category": "discrete_diffusion",
         "parameters": null
       },
       "model_type": "vla",
@@ -2067,6 +2113,7 @@
         "backbone": "Kosmos-2 VLM + Embodied Spatial Model",
         "llm": "Kosmos-2 (1.6B)",
         "action_head": "spatial-grounded action head",
+        "action_head_category": "regression",
         "parameters": "2.9B"
       },
       "model_type": "vla",
@@ -2102,6 +2149,7 @@
         "backbone": "Florence-2-Large (encoder only)",
         "llm": null,
         "action_head": "flow matching",
+        "action_head_category": "flow_matching",
         "parameters": "950M"
       },
       "model_type": "vla",
@@ -2133,6 +2181,7 @@
         "backbone": "Gemini 2.0 VLM",
         "llm": "Gemini 2.0",
         "action_head": "Gemini 2.0 foundation model: VLA (end-to-end) + ER (embodied reasoning) + On-Device variants",
+        "action_head_category": "other",
         "parameters": "not disclosed (Gemini 2.0 scale)"
       },
       "model_type": null,
@@ -2163,6 +2212,7 @@
         "backbone": "Wan 2.2 Diffusion Transformer (5B)",
         "llm": null,
         "action_head": "flow matching action decoder",
+        "action_head_category": "flow_matching",
         "parameters": "5B"
       },
       "model_type": null,
@@ -2201,6 +2251,7 @@
         "backbone": "Qwen2.5-VL-3B-Instruct",
         "llm": "Qwen2.5 3B",
         "action_head": "VLM backbone + flow-matching action DiT for 56-DoF bimanual dexterous hands (ByteDexter V2)",
+        "action_head_category": "flow_matching",
         "parameters": "not disclosed"
       },
       "model_type": null,
@@ -2233,6 +2284,7 @@
         "backbone": "GPT-style Transformer",
         "llm": "Custom GPT (130M)",
         "action_head": "autoregressive (next-token prediction)",
+        "action_head_category": "autoregressive",
         "parameters": "130M"
       },
       "model_type": "vla",
@@ -2276,6 +2328,7 @@
         "backbone": "Video GPT Transformer",
         "llm": "Custom GPT (1.5B)",
         "action_head": "autoregressive (video prediction + action)",
+        "action_head_category": "autoregressive",
         "parameters": "1.5B"
       },
       "model_type": "vla",
@@ -2322,6 +2375,7 @@
         "backbone": "Eagle 2.5 VLM",
         "llm": "Eagle 2.5 VLM",
         "action_head": "diffusion transformer + FLARE objective",
+        "action_head_category": "diffusion",
         "parameters": "3B"
       },
       "model_type": "vla",
@@ -2359,6 +2413,7 @@
         "backbone": "Cosmos-Reason-2B VLM (flexible resolution, native aspect ratio)",
         "llm": "Cosmos-Reason-2B",
         "action_head": "large diffusion transformer (32 layers)",
+        "action_head_category": "diffusion",
         "parameters": "3B"
       },
       "model_type": "vla",
@@ -2396,6 +2451,7 @@
         "backbone": "Reasoning VLM",
         "llm": "Reasoning VLM",
         "action_head": "diffusion transformer",
+        "action_head_category": "diffusion",
         "parameters": "~3B"
       },
       "model_type": "vla",
@@ -2422,6 +2478,7 @@
         "backbone": "World Action Model",
         "llm": null,
         "action_head": "DreamZero-based",
+        "action_head_category": "other",
         "parameters": null
       },
       "model_type": "vla",
@@ -2449,6 +2506,7 @@
         "backbone": "PaliGemma (SigLIP + Gemma)",
         "llm": "Gemma 2B",
         "action_head": "Hierarchical MoE action module with Action-Space MoE at boundary layers",
+        "action_head_category": "regression",
         "parameters": "3B+"
       },
       "model_type": null,
@@ -2479,6 +2537,7 @@
         "backbone": "CLIP ViT (egocentric video encoder)",
         "llm": "LLM (language-motion alignment)",
         "action_head": "language-motion pre-alignment + egocentric video-conditioned fine-tuning",
+        "action_head_category": "other",
         "parameters": "not disclosed"
       },
       "model_type": "humanoid",
@@ -2509,6 +2568,7 @@
         "backbone": "InternVL3 (2B) / Qwen3-VL (3B)",
         "llm": "Qwen2.5 (2B variant) / Qwen3 (3B variant)",
         "action_head": "Mixture-of-Transformers unifying understanding, generation, and action experts",
+        "action_head_category": "hybrid",
         "parameters": "2B / 3B"
       },
       "model_type": null,
@@ -2540,6 +2600,7 @@
         "backbone": "Qwen2.5-VL",
         "llm": "Qwen2.5",
         "action_head": "dual-system: Qwen2.5-VL spatial planner + DiT action head",
+        "action_head_category": "hybrid",
         "parameters": "based on Qwen2.5-VL"
       },
       "model_type": null,
@@ -2573,6 +2634,7 @@
         "backbone": "CLIP ViT-L (LLaVA)",
         "llm": "Llama-2 7B",
         "action_head": "autoregressive text-based action + 2D visual trace prediction",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -2604,6 +2666,7 @@
         "backbone": "LLaVA-OneVision-0.5B",
         "llm": "Qwen-2 0.5B (within LLaVA-OneVision)",
         "action_head": "discrete action tokenizer with action chunking (chunk size 5)",
+        "action_head_category": "autoregressive",
         "parameters": "0.5B"
       },
       "model_type": null,
@@ -2658,6 +2721,7 @@
         "backbone": "Gemini 1.5 Pro",
         "llm": "Gemini 1.5 Pro",
         "action_head": "hierarchical: long-context VLM goal identification + topological graph navigation",
+        "action_head_category": "other",
         "parameters": "not disclosed (Gemini-based)"
       },
       "model_type": "navigation",
@@ -2689,6 +2753,7 @@
         "backbone": "Mixture-of-Transformers (Wan 2.2 5B video + Qwen3-VL-2B)",
         "llm": "Qwen3-VL-2B",
         "action_head": "transformer action expert (30 layers, 641.5M)",
+        "action_head_category": "flow_matching",
         "parameters": "~8B (VGM 5.0B + VLM 2.13B + Action 641.5M + Understanding 253.5M)"
       },
       "model_type": null,
@@ -2732,6 +2797,7 @@
         "backbone": "ResNet18",
         "llm": "BERT-base (NanoVLA-S) / Qwen2.5 0.5B (NanoVLA-L)",
         "action_head": "efficient action head",
+        "action_head_category": "regression",
         "parameters": "~50M"
       },
       "model_type": "vla",
@@ -2767,6 +2833,7 @@
         "backbone": "SigLIP",
         "llm": "LLaMA 3 8B",
         "action_head": "hierarchical: NVILA-8B high-level VLA + low-level visual locomotion RL",
+        "action_head_category": "other",
         "parameters": "8B"
       },
       "model_type": "navigation",
@@ -2798,6 +2865,7 @@
         "backbone": "Qwen2.5-VL",
         "llm": "Qwen2.5 3B",
         "action_head": "FAST+ action tokenizer",
+        "action_head_category": "autoregressive",
         "parameters": "3B"
       },
       "model_type": null,
@@ -2828,6 +2896,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "dual-system: OpenVLA 7B generalist + 20M Diffusion Transformer specialist via cross-attention",
+        "action_head_category": "hybrid",
         "parameters": "7B + 20M"
       },
       "model_type": null,
@@ -2858,6 +2927,7 @@
         "backbone": "CLIP ViT-L/14",
         "llm": "Mamba 2.7B (SSM, not transformer LLM)",
         "action_head": "lightweight MLP policy head (3.7M) for SE(3) pose",
+        "action_head_category": "regression",
         "parameters": "3.2B (2.7B Mamba + CLIP)"
       },
       "model_type": null,
@@ -2889,6 +2959,7 @@
         "backbone": "PaLI-X (ViT-22B)",
         "llm": "PaLM-E 12B / PaLI-X 55B (two variants)",
         "action_head": "autoregressive (tokenized)",
+        "action_head_category": "autoregressive",
         "parameters": "55B"
       },
       "model_type": null,
@@ -2929,6 +3000,7 @@
         "backbone": "SAM2 (Segment Anything 2) encoder",
         "llm": null,
         "action_head": "RVT-2 multi-view transformer (coarse-to-fine heatmap) + SAM2 memory",
+        "action_head_category": "diffusion",
         "parameters": "not disclosed (SAM2 encoder + RVT-2)"
       },
       "model_type": null,
@@ -2964,6 +3036,7 @@
         "backbone": null,
         "llm": null,
         "action_head": "TODO: check paper",
+        "action_head_category": "other",
         "parameters": "TODO"
       },
       "model_type": null,
@@ -2997,6 +3070,7 @@
         "backbone": "InstructPix2Pix (fine-tuned)",
         "llm": null,
         "action_head": "low-level diffusion policy from subgoal image",
+        "action_head_category": "diffusion",
         "parameters": null
       },
       "model_type": "video",
@@ -3022,6 +3096,7 @@
         "backbone": null,
         "llm": null,
         "action_head": "TODO: check paper",
+        "action_head_category": "diffusion",
         "parameters": "TODO"
       },
       "model_type": null,
@@ -3056,6 +3131,7 @@
         "backbone": "SigLIP",
         "llm": "Phi-2 (2.7B) or smaller",
         "action_head": "diffusion-based continuous action head",
+        "action_head_category": "diffusion",
         "parameters": "422M-1.3B"
       },
       "model_type": null,
@@ -3087,6 +3163,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "autoregressive + visual trace prompting",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -3126,6 +3203,7 @@
         "backbone": "Qwen2.5-VL-3B / Qwen3-VL-4B",
         "llm": "Qwen2.5 3B / Qwen3 4B",
         "action_head": "Asymmetric MoT: frozen Left Brain (generalist) + trainable Right Brain (specialist)",
+        "action_head_category": "other",
         "parameters": "3B-4B"
       },
       "model_type": null,
@@ -3163,6 +3241,7 @@
         "backbone": "Video Diffusion Model",
         "llm": null,
         "action_head": "inverse dynamics from generated video",
+        "action_head_category": "inverse_dynamics",
         "parameters": null
       },
       "model_type": "video",
@@ -3194,6 +3273,7 @@
         "backbone": "Show-o (CLIP ViT)",
         "llm": "Phi-1.5",
         "action_head": "unified understanding + future image prediction for spatial awareness",
+        "action_head_category": "other",
         "parameters": "1.3B"
       },
       "model_type": null,
@@ -3226,6 +3306,7 @@
         "backbone": "PrismaticVLM (SigLIP + DinoV2)",
         "llm": "Llama-2 7B",
         "action_head": "trajectory-level RL on OpenVLA-7B with VLM process reward model",
+        "action_head_category": "autoregressive",
         "parameters": "7B"
       },
       "model_type": null,
@@ -3262,6 +3343,7 @@
         "backbone": "InternVL3",
         "llm": "Qwen2.5-1.5B (2B variant) / Qwen2.5-7B (8B variant)",
         "action_head": "flow matching action expert",
+        "action_head_category": "flow_matching",
         "parameters": "2B / 8B"
       },
       "model_type": null,

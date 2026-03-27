@@ -6,7 +6,6 @@ code_url: https://github.com/UMass-Embodied-AGI/3D-VLA
 venue: ICML 2024
 open_source: true
 benchmarks: {}
-
 tags:
 - 3D
 - world-model
@@ -14,7 +13,8 @@ tags:
 - diffusion
 - open-source
 architecture:
-  backbone: "BLIP2 (Q-Former + 3D multi-view features)"
-  llm: "FlanT5"
+  backbone: BLIP2 (Q-Former + 3D multi-view features)
+  llm: FlanT5
   action_head: embodied diffusion model aligned to 3D-LLM for goal generation + action prediction
   parameters: 3B–11B (FlanT5 backbone)
+  action_head_category: diffusion

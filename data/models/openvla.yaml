@@ -1,34 +1,40 @@
 name: OpenVLA
-version: "1.0"
-organization: "Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT"
+version: '1.0'
+organization: Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT
 paper_url: https://arxiv.org/abs/2406.09246
 code_url: https://github.com/openvla/openvla
-date: "2024-06-13"
-venue: "CoRL 2024"
+date: '2024-06-13'
+venue: CoRL 2024
 architecture:
-  backbone: "PrismaticVLM (SigLIP + DinoV2)"
-  llm: "Llama-2 7B"
-  action_head: "autoregressive (tokenized)"
-  action_space: "continuous (7-DoF)"
-  parameters: "7B"
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B
+  action_head: autoregressive (tokenized)
+  action_space: continuous (7-DoF)
+  parameters: 7B
+  action_head_category: autoregressive
 training:
-  dataset: "Open X-Embodiment"
+  dataset: Open X-Embodiment
   num_trajectories: 970000
-  compute: "64 A100 GPUs, ~14 days"
+  compute: 64 A100 GPUs, ~14 days
 benchmarks:
   libero:
     libero_spatial: 84.2
     libero_object: 88.4
     libero_goal: 72.0
     libero_long: 53.4
-    source: "Table 1, original paper"
-    date_reported: "2024-06-13"
-    eval_condition: "fine-tuned"
+    source: Table 1, original paper
+    date_reported: '2024-06-13'
+    eval_condition: fine-tuned
   simpler_env:
     google_robot_pick_coke_can: 56.2
     google_robot_move_near: 28.4
-    source: "Table 2, original paper"
-    date_reported: "2024-06-13"
-    eval_condition: "fine-tuned"
+    source: Table 2, original paper
+    date_reported: '2024-06-13'
+    eval_condition: fine-tuned
 open_source: true
-tags: [7B, autoregressive, manipulation, open-source, generalist]
+tags:
+- 7B
+- autoregressive
+- manipulation
+- open-source
+- generalist

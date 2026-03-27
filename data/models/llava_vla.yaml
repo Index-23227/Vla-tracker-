@@ -1,26 +1,21 @@
-# Paper: Rethinking the Practicality of Vision-language-action Model
-# arXiv: 2602.22663
-
 name: LLaVA-VLA
-full_name: "LLaVA-VLA: Rethinking the Practicality of Vision-Language-Action Model"
-organization: "HKUST (Guangzhou) / Huazhong University / Westlake University / Zhejiang University"
-date: "2026-02-26"
+full_name: 'LLaVA-VLA: Rethinking the Practicality of Vision-Language-Action Model'
+organization: HKUST (Guangzhou) / Huazhong University / Westlake University / Zhejiang University
+date: '2026-02-26'
 paper_url: https://arxiv.org/abs/2602.22663
 code_url: https://github.com/OpenHelix-Team/LLaVA-VLA
 venue: null
 open_source: true
-
 architecture:
-  backbone: "LLaVA-OneVision-0.5B"
-  llm: "Qwen-2 0.5B (within LLaVA-OneVision)"
-  action_head: "discrete action tokenizer with action chunking (chunk size 5)"
-  parameters: "0.5B"
+  backbone: LLaVA-OneVision-0.5B
+  llm: Qwen-2 0.5B (within LLaVA-OneVision)
+  action_head: discrete action tokenizer with action chunking (chunk size 5)
+  parameters: 0.5B
+  action_head_category: autoregressive
+key_innovation: 'Lightweight VLA for consumer-grade GPU deployment. Achieves comparable performance to 10x larger models through
+  multi-view perception, proprioceptive tokenization, and action chunking with a two-stage training paradigm.
 
-key_innovation: >
-  Lightweight VLA for consumer-grade GPU deployment. Achieves comparable performance
-  to 10x larger models through multi-view perception, proprioceptive tokenization,
-  and action chunking with a two-stage training paradigm.
-
+  '
 benchmarks:
   calvin:
     calvin_task_1: 94.8
@@ -38,9 +33,12 @@ benchmarks:
     pick_dual_bottles: 7.0
     place_dual_shoes: 5.0
     rotate_qrcode: 12.0
-
 eval_conditions:
-  calvin: "fine-tuned"
-  robotwin_v2: "fine-tuned (domain randomization setting)"
-
-tags: [lightweight, 0.5B, mobile-manipulation, consumer-GPU, open-source]
+  calvin: fine-tuned
+  robotwin_v2: fine-tuned (domain randomization setting)
+tags:
+- lightweight
+- 0.5B
+- mobile-manipulation
+- consumer-GPU
+- open-source

@@ -4,7 +4,6 @@ date: '2024-12-04'
 paper_url: https://arxiv.org/abs/2412.03293
 open_source: true
 benchmarks: {}
-
 tags:
 - 2B-72B
 - diffusion-action
@@ -12,8 +11,9 @@ tags:
 - fast-inference
 - open-source
 architecture:
-  backbone: "SigLIP"
-  llm: "Qwen2"
+  backbone: SigLIP
+  llm: Qwen2
   action_head: autoregressive reasoning + diffusion action prediction with reasoning injection
   parameters: 2B–72B (multi-scale)
+  action_head_category: hybrid
 inference_hz: 82
