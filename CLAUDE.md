@@ -127,20 +127,40 @@ These values in the dashboard should stay consistent with the data:
 
 ## Common Workflows
 
-### Add a new model
+### Add a new model (FULL PIPELINE)
+
+When a new model is discovered (via auto-track or manually), the **complete pipeline** must run:
+
 ```bash
-# 1. Create YAML from template (or manually using schemas/model.schema.json as reference)
+# 1. Create YAML (auto-track does this, or manually)
 python scripts/generate_model_yaml.py --top 1
+# → action_head_category is auto-inferred from abstract
 
-# 2. Edit the generated YAML with actual scores
+# 2. Read the paper and fill in:
+#    - Exact benchmark scores (from paper tables)
+#    - Architecture details (backbone, LLM, parameters)
+#    - Organization, venue, open_source status
+#    - Verify action_head_category is correct
 
-# 3. Rebuild & validate
-python scripts/build_leaderboard.py
-python scripts/validate_data.py
-python scripts/validate_counts.py
+# 3. Generate AI review (read paper PDF first!)
+#    Place review in data/ai_reviews/{ModelName}.md
+#    Add <!-- VERIFIED: pdf --> tag if numbers are from paper
+#    Add <!-- VERIFIED: abstract-only --> if only abstract was read
 
-# 4. Update README counts + leaderboard table
+# 4. Rebuild everything
+python scripts/build_leaderboard.py    # YAML → JSON
+python scripts/validate_data.py        # Check integrity + action_head_category
+python scripts/sync_counts.py          # Auto-fix README/blueprint counts
+python scripts/generate_llms_full.py   # Regenerate llms-full.txt
+
+# 5. Validate
+python scripts/validate_counts.py      # Verify all counts match
+python scripts/check_reviews.py        # Check review coverage
 ```
+
+**What the session-start hook checks automatically:**
+- Builds leaderboard, validates data, syncs counts, checks review coverage
+- If new models lack reviews, it will alert you
 
 ### Scan for new papers
 ```bash

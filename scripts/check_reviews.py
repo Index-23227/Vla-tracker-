@@ -45,8 +45,8 @@ def get_models_from_yaml() -> list[dict]:
             "yaml_file": yf.name,
         })
         # Extract arxiv ID
-        url = data.get("paper_url", "")
-        if "arxiv.org/abs/" in url:
+        url = data.get("paper_url") or ""
+        if url and "arxiv.org/abs/" in url:
             models[-1]["arxiv_id"] = url.split("arxiv.org/abs/")[-1].split("v")[0]
     return models
 
