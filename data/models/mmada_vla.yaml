@@ -1,22 +1,16 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: MMaDA-VLA: Large Diffusion Vision-Language-Action Model with Unified Multi-Modal Instruction and Generation
-# arXiv: 2603.25406
-
 name: MMaDA-VLA
-full_name: "MMaDA-VLA: Large Diffusion Vision-Language-Action Model with Unified Multi-Modal Instruction and Generation"
-organization: "TODO: check paper"
-date: "2026-03-26"
+full_name: 'MMaDA-VLA: Large Diffusion Vision-Language-Action Model with Unified Multi-Modal Instruction and Generation'
+organization: 'TODO: check paper'
+date: '2026-03-26'
 paper_url: https://arxiv.org/abs/2603.25406
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
-
+open_source: false
 architecture:
-  action_head: "autoregressive"
-  action_head_category: autoregressive
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
-
+  action_head: discrete diffusion (masked token denoising, iterative order-free refinement)
+  action_head_category: discrete_diffusion
+  parameters: TODO
+  key_innovation: 'TODO: Read paper and summarize key contribution in 2-3 sentences.'
 benchmarks:
   libero:
     libero_spatial: TODO
@@ -25,9 +19,10 @@ benchmarks:
     libero_long: TODO
   calvin:
     calvin_abc_d_avg_len: TODO
-
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
-
-tags: [autoregressive, libero, calvin]
+  libero: fine-tuned
+  calvin: fine-tuned
+tags:
+- autoregressive
+- libero
+- calvin
