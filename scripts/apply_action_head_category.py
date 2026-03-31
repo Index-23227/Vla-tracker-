@@ -138,6 +138,11 @@ CLASSIFICATION = {
     "KineVLA":        "autoregressive",   # AR with bi-level RVQ-VAE tokens (paper confirmed)
     "SmoothVLA":      "autoregressive",   # OpenVLA base + GRPO RL (RL = training, not generation)
     "VLA-IAP":        "other",            # Token pruning framework (not a model, like DepthCache)
+
+    # === Auto-track 2026-03-28 scan ===
+    "SOMA":           "other",            # Adapter framework on frozen VLAs (pi0/pi0.5/SmolVLA)
+    "LaMP":           "other",            # Dual-expert (3D scene flow + action), novel architecture
+    "MMaDA-VLA":      "discrete_diffusion",  # Masked token denoising, iterative order-free refinement (paper confirmed)
 }
 
 
