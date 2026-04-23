@@ -63,4 +63,4 @@
 | 2 | "Kinematic drift"를 어떻게 측정하나? | Trajectory-level motion error(예: end-effector 경로 deviation)를 objective로 사용. 구체 metric은 PDF 확인. |
 | 3 | 다른 PTQ(예: GPTQ, AWQ) 대비 이득은? | 일반 LLM PTQ는 static per-token loss 기반이라 **순차 control drift에 맹목**. DA-PTQ는 trajectory 관점을 명시적으로 포함. |
 
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

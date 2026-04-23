@@ -1,6 +1,6 @@
 name: AnySlot
 full_name: "AnySlot: Goal-Conditioned Vision-Language-Action Policies for Zero-Shot Slot-Level Placement"
-organization: "TODO: check paper"
+organization: "Stony Brook University / Carnegie Mellon University / MBZUAI / Peking University"
 date: "2026-04-12"
 paper_url: https://arxiv.org/abs/2604.10432
 code_url: null
@@ -8,17 +8,17 @@ venue: null
 open_source: false
 
 architecture:
-  action_head: "goal-conditioned VLA policy with explicit visual goal (scene-marker) intermediate representation"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "AnySlot decouples compositional slot-level placement into two stages: a scene-marker generator that converts language into an explicit spatial visual goal, and a goal-conditioned VLA policy that executes this goal. This hierarchical design separates high-level slot selection from low-level execution and is evaluated on the newly introduced SlotBench simulation benchmark of nine slot-placement task categories."
+  backbone: "PaliGemma-3B (multi-view images)"
+  llm: "PaliGemma-3B (VL backbone); Nano-Banana 2 for scene-marker image generation"
+  action_head: "pi-0.5 flow-matching action expert, fine-tuned, conditioned on a generated scene-marker visual goal overlay"
+  action_head_category: flow_matching
+  parameters: "3B"
+  key_innovation: "AnySlot decouples compositional slot-level placement into (1) a scene-marker generator that renders the target slot as an explicit visual goal overlay and (2) a goal-conditioned pi-0.5 flow-matching VLA policy fine-tuned to execute that overlay. The paper introduces SlotBench (9 categories) to evaluate discrete slot-level placement; flat VLA baselines (Diffusion Policy, OpenVLA, pi-0, pi-0.5 direct) mostly score 0% SR outside the ordinal category."
+
+training:
+  dataset: "SAPIEN simulator box pick-and-place (synthetic with oracle visual goals) + 500 real slot-placement episodes"
+  method: "Fine-tune pi-0.5 for 20k steps, batch 64, on one H200"
 
 benchmarks: {}
 
-tags:
-  - slot-placement
-  - goal-conditioned
-  - zero-shot
-  - hierarchical
-  - manipulation
-  - abstract-only
+tags: [slot-placement, goal-conditioned, zero-shot, hierarchical, flow-matching, manipulation]

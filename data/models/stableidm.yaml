@@ -1,6 +1,6 @@
 name: StableIDM
 full_name: "StableIDM: Stabilizing Inverse Dynamics Model against Manipulator Truncation via Spatio-Temporal Refinement"
-organization: "TODO: check paper"
+organization: "GigaAI / Institute of Automation, Chinese Academy of Sciences / Beijing Institute of Technology"
 date: "2026-04-20"
 paper_url: https://arxiv.org/abs/2604.17887
 code_url: null
@@ -8,16 +8,17 @@ venue: null
 open_source: false
 
 architecture:
-  action_head: "inverse dynamics model with spatio-temporal feature refinement"
+  backbone: "DINOv2 (visual encoder) + Segment Anything (robot-centric masking)"
+  llm: null
+  action_head: "History-conditioned action decoder f_θ: base MLP regressor per-frame + TCN temporal correction over visual feature history (Directional Feature Aggregation + Temporal Dynamics Refinement)"
   action_head_category: inverse_dynamics
   parameters: "TODO"
-  key_innovation: "StableIDM stabilizes inverse dynamics prediction when the manipulator is truncated from view by combining three complementary modules: auxiliary robot-centric masking to suppress background clutter, Directional Feature Aggregation (DFA) that extracts anisotropic features along directions inferred from the visible arm, and Temporal Dynamics Refinement (TDR) that smooths and corrects predictions via motion continuity. The paper reports +12.1% strict action accuracy on the AgiBot benchmark under severe truncation, +9.7% task success in real-robot replay, +11.5% grasp success when decoding video-generated plans, and +17.6% downstream VLA real-robot success when used as an automatic annotator."
+  key_innovation: "StableIDM is a spatio-temporal refinement framework for inverse dynamics under manipulator truncation. It combines robot-centric masking via SAM to suppress background clutter, Directional Feature Aggregation for anisotropic features along inferred arm directions, and Temporal Dynamics Refinement that enforces motion continuity. Paper reports StableIDM 0.307/0.493 acc/dist on AgiBot heavy-truncation offline (vs ResNet 0.150/0.679), 47.4% real-robot replay success (vs 37.7% best baseline), 53.8% video-plan grasp success (vs 42.3% AnyPos), and lifts downstream VLA real-robot success from 35.3% (real-only) to 52.9% when used as an auto-annotator."
+
+training:
+  dataset: "AgiBot subset (100 episodes across ten everyday manipulation tasks: articulated-object, tabletop pick-and-place, cleaning)"
+  method: "Supervised inverse dynamics learning"
 
 benchmarks: {}
 
-tags:
-  - inverse-dynamics
-  - robustness
-  - spatio-temporal
-  - data-labeling
-  - abstract-only
+tags: [inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot]

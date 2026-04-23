@@ -1,18 +1,32 @@
 name: UniT
 full_name: "UniT: Toward a Unified Physical Language for Human-to-Humanoid Policy Learning and World Modeling"
-organization: "XPeng Robotics"
+organization: "XPeng Robotics / Tsinghua University / The University of Hong Kong"
 date: "2026-04-21"
 paper_url: https://arxiv.org/abs/2604.19734
-code_url: null
+code_url: "https://xpeng-robotics.github.io/unit/"
 venue: null
 open_source: false
 
 architecture:
-  action_head: "autoregressive token prediction over a shared discrete latent action space produced by a Unified Latent Action Tokenizer (tri-branch cross-reconstruction: action->vision anchoring, vision->action filtering, fusion branch)"
-  action_head_category: autoregressive
+  backbone: "frozen DINOv2"
+  llm: "Qwen2.5-VL (inside a GR00T n1.5-style framework)"
+  action_head: "Hybrid two-stage: (1) VLM predicts discrete UniT tokens via learnable queries appended to the VLM sequence (parallel classification, not next-token AR); (2) a lightweight flow-matching velocity head V_θ conditioned on VL features produces continuous embodiment-specific actions."
+  action_head_category: hybrid
   parameters: "TODO"
-  key_innovation: "UniT proposes a Unified Latent Action Tokenizer that establishes a shared physical language between egocentric human video and humanoid robot actions by anchoring heterogeneous kinematics to their common visual consequences. A tri-branch cross-reconstruction design (actions predict vision, vision reconstructs actions, plus a fusion branch) produces a shared discrete latent space of embodiment-agnostic physical intents; a downstream policy (VLA-UniT) and world model (WM-UniT) are learned by predicting these unified tokens, yielding strong data efficiency and zero-shot cross-embodiment transfer."
+  key_innovation: "UniT learns a Unified Latent Action Tokenizer that maps heterogeneous kinematics (human hands, humanoid end-effectors, robot joints) into a shared discrete visual-anchored latent space via tri-branch cross-reconstruction (action->vision anchoring, vision->action filtering, fusion). Downstream, VLA-UniT predicts these unified tokens in parallel via learnable VLM queries and a flow-matching velocity head converts them to continuous actions; a world model WM-UniT trains on the same tokens, enabling co-training on human egocentric video and humanoid robot data with strong data efficiency and zero-shot cross-embodiment transfer."
 
-benchmarks: {}
+training:
+  dataset: "EgoDex (27,419 pick-place trajectories) + RoboCasa GR1 (24,000) + DROID (95,599) + proprietary robot data (32k)"
+  method: "Pretrain tokenizer via tri-branch cross-reconstruction; fine-tune VLA-UniT and WM-UniT via token prediction + flow-matching"
 
-tags: [latent-action, cross-embodiment, humanoid, human-video, world-model, scaling, abstract-only]
+benchmarks:
+  robocasa:
+    robocasa_gr1_tabletop_overall: 66.7
+    robocasa_gr1_pick_place: 67.3
+    robocasa_gr1_articulated: 64.7
+    source: "Fig. 9"
+
+eval_conditions:
+  robocasa: "RoboCasa GR1 Tabletop, fine-tuned"
+
+tags: [latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching]

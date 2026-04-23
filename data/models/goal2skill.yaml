@@ -1,6 +1,6 @@
 name: Goal2Skill
 full_name: "Goal2Skill: Long-Horizon Manipulation with Adaptive Planning and Reflection"
-organization: "TODO: check paper"
+organization: "Beijing University of Posts and Telecommunications / InspireOmni AI / Tsinghua University"
 date: "2026-04-15"
 paper_url: https://arxiv.org/abs/2604.13942
 code_url: null
@@ -8,11 +8,17 @@ venue: null
 open_source: false
 
 architecture:
-  action_head: "dual-system: VLM-based high-level planner (structured task memory, goal decomposition, outcome verification, error-driven correction) + VLA-based low-level diffusion visuomotor executor conditioned on geometry-preserving filtered observations"
+  backbone: "not specified (zero-shot segmentation model used for geometry-preserving filtering)"
+  llm: "unnamed pre-trained VLM"
+  action_head: "Dual-system: VLM-based high-level planner (structured task memory, goal decomposition, outcome verification, error-driven correction) + VLA-based low-level diffusion visuomotor executor. Reverse diffusion (Eq. 19: A^{m-1} = μ_θ(A^m,m,Î,s,ℓ) + σ_m·ε) conditioned on geometry-preserving filtered observations."
   action_head_category: diffusion
   parameters: "TODO"
-  key_innovation: "Goal2Skill is a dual-system framework for long-horizon embodied manipulation that explicitly separates high-level semantic reasoning from low-level motor execution. A VLM-based agentic planner maintains structured task memory and performs goal decomposition, outcome verification, and error-driven correction, while a VLA-based diffusion visuomotor executor carries out each sub-task conditioned on geometry-preserving filtered observations. The authors report 32.4% average success rate on RMBench, versus 9.8% for the strongest baseline."
+  key_innovation: "Goal2Skill is a dual-system framework that explicitly decouples semantic long-horizon planning from motor execution: a VLM-based agentic planner maintains structured task memory, performs goal decomposition, verifies outcomes, and issues error-driven corrections, while a diffusion-based VLA executor conditions on geometry-preserving segmentation-filtered observations to execute each sub-goal. On RMBench the system reaches 32.4% average success versus 9.8% for the strongest baseline."
+
+training:
+  dataset: "RMBench (50 expert demonstrations per task)"
+  method: "30k optimization steps imitation learning"
 
 benchmarks: {}
 
-tags: [long-horizon, planning, reflection, dual-system, diffusion, abstract-only]
+tags: [long-horizon, planning, reflection, dual-system, diffusion, RMBench]

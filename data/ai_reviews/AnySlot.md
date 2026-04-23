@@ -62,4 +62,4 @@
 | 2 | Monolithic VLA에 data augmentation만으로는 해결되지 않나? | Compositional 언어 + sub-cm 정확도는 scale로는 느리게 개선됨 → explicit intermediate의 구조적 장점 주장. |
 | 3 | SlotBench가 실제 robotics 시나리오를 얼마나 대표하나? | 9개 category가 실제 packing/assembly를 얼마나 포괄하는지 별도 검증 필요. |
 
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

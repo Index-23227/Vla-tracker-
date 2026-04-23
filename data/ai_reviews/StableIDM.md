@@ -66,4 +66,4 @@
 | 2 | TDR이 진짜 motion continuity를 가정해도 되나? | 대부분 매니퓰레이션은 저가속도 연속 운동이라 합리적. 충격·접촉 순간에는 이 가정이 일시적으로 깨질 수 있음. |
 | 3 | 멀티뷰 카메라로 해결하면 되지 않나? | 실제 배포에서 멀티뷰 setup이 항상 가능한 건 아님. StableIDM은 single-view truncation robustness 자체를 목표로 함. |
 
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

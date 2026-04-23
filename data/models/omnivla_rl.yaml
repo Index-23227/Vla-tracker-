@@ -1,6 +1,6 @@
 name: OmniVLA-RL
 full_name: "OmniVLA-RL: A Vision-Language-Action Model with Spatial Understanding and Online RL"
-organization: "TODO: check paper"
+organization: "Country Garden Services / Omni AI / VBot / East China Normal University"
 date: "2026-04-20"
 paper_url: https://arxiv.org/abs/2604.17706
 code_url: null
@@ -8,11 +8,26 @@ venue: null
 open_source: false
 
 architecture:
-  action_head: "flow matching (Flow-GSPO, SDE-reformulated) with Mix-of-Transformers experts"
+  backbone: "SigLIP (semantic) + VGGT (Visual Geometry Grounded Transformer, spatial)"
+  llm: "PaLiGemma"
+  action_head: "Conditional Flow Matching with action chunking (Mix-of-Transformers: spatial / reasoning / action experts + Block-wise Causal Attention). RL-tuned with Flow-GSPO (SDE reformulation + Group Segmented PO)."
   action_head_category: flow_matching
   parameters: "TODO"
-  key_innovation: "OmniVLA-RL proposes a Mix-of-Transformers (MoT) architecture that integrates reasoning, spatial, and action experts to address imprecise spatial perception and suboptimal multimodal fusion. It introduces Flow-GSPO, which reformulates flow matching as a Stochastic Differential Equation process and combines it with Group Segmented Policy Optimization to improve action precision and RL training stability."
+  key_innovation: "OmniVLA-RL introduces a Mix-of-Transformers VLA that routes tokens through separate reasoning, spatial, and action experts over a PaLiGemma backbone fused with SigLIP and VGGT features, enabling precise spatial grounding. Its RL algorithm Flow-GSPO reformulates the flow-matching ODE as an SDE so Group Segmented Policy Optimization can be applied at action-block granularity, stabilizing online RL over continuous action chunks."
 
-benchmarks: {}
+training:
+  dataset: "Stage I large-scale 3D datasets; Stage II DROID; Stage III task-specific (LIBERO, LIBERO-Plus)"
+  method: "3-stage SFT pretraining then online RL with Flow-GSPO"
 
-tags: [RL, online-RL, flow-matching, spatial-understanding, reasoning, libero, abstract-only]
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 99.2
+    libero_goal: 98.5
+    libero_long: 93.5
+    source: "Table 1"
+
+eval_conditions:
+  libero: "SFT + online RL (Flow-GSPO) fine-tuned"
+
+tags: [RL, online-RL, flow-matching, mixture-of-experts, spatial-understanding, libero]

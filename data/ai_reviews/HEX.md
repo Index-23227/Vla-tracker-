@@ -65,4 +65,4 @@
 | 3 | 왜 flow matching을 선택했는가? | Continuous high-DoF action 분포 모델링에 강함, diffusion 대비 sampling 빠름 |
 | 4 | GR00T, Helix 등 다른 humanoid foundation과 차별점? | State-aligned 표현과 MoE routing이 핵심 차별화 |
 
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

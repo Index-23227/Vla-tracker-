@@ -66,4 +66,4 @@
 | 3 | RMBench만으로 충분한가? | LIBERO-Long, VIMA-Bench 등 추가 검증 권장 |
 | 4 | Executor의 diffusion은 왜 선택? | Geometry-preserving filtered observation과 결합 시 정밀 제어 유리 |
 
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

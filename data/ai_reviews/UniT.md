@@ -66,4 +66,4 @@
 | 3 | Vision이 action을 복원하는 분기의 필요성? | Action이 vision을 예측만 하면 spurious correlation 학습 → reverse branch가 regularizer 역할 |
 | 4 | Kinematic mismatch가 크면 visual anchor도 달라지지 않나? | 사용 도구·객체의 상태 변화 등 결과 수준에서는 공유됨 (핵심 가정) |
 
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

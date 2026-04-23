@@ -1,18 +1,24 @@
 name: HEX
 full_name: "HEX: Humanoid-Aligned Experts for Cross-Embodiment Whole-Body Manipulation"
-organization: "TODO: check paper"
+organization: "Beijing Innovation Center of Humanoid Robotics / Xi'an Jiaotong University / Nankai University / Peking University"
 date: "2026-04-09"
 paper_url: https://arxiv.org/abs/2604.07993
-code_url: null
+code_url: "https://hex-humanoid.github.io/"
 venue: null
 open_source: false
 
 architecture:
-  action_head: "Mixture-of-Experts with humanoid-aligned state representation, lightweight history tokens for temporal visual context, and residual-gated fusion with flow-matching action generation"
+  backbone: "Qwen3-VL-2B-Instruct (vision encoder inside the VLM)"
+  llm: "Qwen3-VL-2B-Instruct"
+  action_head: "16-layer DiT-B decoder (hidden size 1024) predicting 100-step action chunks, trained with flow-matching objective. Unified Proprioceptive Predictor with morphology-aware MoE + adaptive residual-gated fusion of future predicted states with VL features."
   action_head_category: flow_matching
-  parameters: "TODO"
-  key_innovation: "HEX is a state-centric VLA framework that tackles high-DoF humanoid whole-body manipulation by replacing independent per-part action prediction with a humanoid-aligned state representation and a Mixture-of-Experts architecture modeling coordinated whole-body motion. It combines lightweight history tokens for temporal visual context with a residual-gated fusion mechanism and flow-matching action generation, demonstrating strong performance on real-world humanoid manipulation tasks."
+  parameters: "2.4B"
+  key_innovation: "HEX replaces independent per-part humanoid action prediction with a state-centric Unified Proprioceptive Predictor using a morphology-aware Mixture-of-Experts that models coordinated whole-body dynamics. Lightweight history tokens carry short-horizon temporal visual context, and an adaptive residual-gated fusion mechanism blends predicted future proprioceptive states with vision-language features before a DiT-B flow-matching action head generates 100-step action chunks, enabling cross-embodiment transfer across seven humanoid bodies."
+
+training:
+  dataset: "12M frames across seven humanoid embodiments: HEX dataset (4M) + Humanoid Everyday (3.4M) + AgiBot World Colosseo (3.8M) + RoboCOIN Leju subset (2.3M)"
+  method: "Imitation learning with flow-matching objective"
 
 benchmarks: {}
 
-tags: [humanoid, whole-body, cross-embodiment, flow-matching, mixture-of-experts, abstract-only]
+tags: [humanoid, whole-body, cross-embodiment, flow-matching, mixture-of-experts, real-world]
