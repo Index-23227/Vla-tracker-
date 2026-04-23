@@ -9,11 +9,11 @@ open_source: false
 
 architecture:
   backbone: "SigLIP (semantic) + VGGT (Visual Geometry Grounded Transformer, spatial)"
-  llm: "PaLiGemma"
-  action_head: "Conditional Flow Matching with action chunking (Mix-of-Transformers: spatial / reasoning / action experts + Block-wise Causal Attention). RL-tuned with Flow-GSPO (SDE reformulation + Group Segmented PO)."
+  llm: "PaLiGemma (decoder-only Transformer; weights pretrained)"
+  action_head: "Conditional Flow Matching with action chunking (H=16, K=10 denoising steps). Mix-of-Transformers backbone shares Spatial / Reasoning / Action experts under Block-wise Causal Attention. RL-tuned with Flow-GSPO (SDE reformulation via Fokker-Planck + Group Segmented PO; G=8 group size, β=0.01 KL)."
   action_head_category: flow_matching
   parameters: "TODO"
-  key_innovation: "OmniVLA-RL introduces a Mix-of-Transformers VLA that routes tokens through separate reasoning, spatial, and action experts over a PaLiGemma backbone fused with SigLIP and VGGT features, enabling precise spatial grounding. Its RL algorithm Flow-GSPO reformulates the flow-matching ODE as an SDE so Group Segmented Policy Optimization can be applied at action-block granularity, stabilizing online RL over continuous action chunks."
+  key_innovation: "OmniVLA-RL introduces a Mix-of-Transformers VLA that routes tokens through separate Reasoning, Spatial, and Action experts over a PaLiGemma backbone fused with SigLIP and VGGT features. Block-wise Causal Attention decouples spatial-semantic prefix tokens from action suffix tokens. Flow-GSPO reformulates the flow-matching ODE as an SDE so that Group Segmented Policy Optimization can be applied at action-block granularity (Table 2 ablation: Flow-GSPO +39.1pp over SFT vs +24.5pp for GRPO and +37.5pp for PPO)."
 
 training:
   dataset: "Stage I large-scale 3D datasets; Stage II DROID; Stage III task-specific (LIBERO, LIBERO-Plus)"

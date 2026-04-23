@@ -8,17 +8,31 @@ venue: null
 open_source: false
 
 architecture:
-  backbone: "DINOv2 (visual encoder) + Segment Anything (robot-centric masking)"
+  backbone: "DINOv2 (Oquab et al. 2023) as visual encoder + Segment Anything (Kirillov et al. 2023) for robot-centric masking"
   llm: null
-  action_head: "History-conditioned action decoder f_θ: base MLP regressor per-frame + TCN temporal correction over visual feature history (Directional Feature Aggregation + Temporal Dynamics Refinement)"
+  action_head: "History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference."
   action_head_category: inverse_dynamics
   parameters: "TODO"
-  key_innovation: "StableIDM is a spatio-temporal refinement framework for inverse dynamics under manipulator truncation. It combines robot-centric masking via SAM to suppress background clutter, Directional Feature Aggregation for anisotropic features along inferred arm directions, and Temporal Dynamics Refinement that enforces motion continuity. Paper reports StableIDM 0.307/0.493 acc/dist on AgiBot heavy-truncation offline (vs ResNet 0.150/0.679), 47.4% real-robot replay success (vs 37.7% best baseline), 53.8% video-plan grasp success (vs 42.3% AnyPos), and lifts downstream VLA real-robot success from 35.3% (real-only) to 52.9% when used as an auto-annotator."
+  key_innovation: "StableIDM is a spatio-temporal refinement framework for inverse dynamics under manipulator truncation, combining robot-centric SAM masking, Directional Feature Aggregation (anisotropic features along inferred arm direction) and Temporal Dynamics Refinement (causal TCN smoothing kinematics). On AgiBot heavy-truncation it reaches strict acc 0.307 / per-dim acc 0.447 / L1 dist 0.493 vs Vidar 0.186/0.322/0.573 and ResNet 0.150/0.291/0.679. Real-world open-loop replay avg 47.4% (Pick&Place 53.8 / Microwave 42.3 / Sink 46.2) vs Vidar 37.7%. Video-plan grasp 53.8% vs AnyPos 42.3%. As auto-annotator for π0.5 VLA training: real-only 35.3% -> real+StableIDM-labeled 52.9% (+17.6pp)."
 
 training:
-  dataset: "AgiBot subset (100 episodes across ten everyday manipulation tasks: articulated-object, tabletop pick-and-place, cleaning)"
-  method: "Supervised inverse dynamics learning"
+  dataset: "AgiBot subset (100 episodes across ten everyday manipulation tasks: articulated-object, tabletop pick-and-place, cleaning). Episode list released as agibot_episodes.csv for reproducibility."
+  method: "Supervised inverse dynamics regression in normalized action space; end-to-end optimization of all components"
 
-benchmarks: {}
+benchmarks:
+  real_world:
+    agibot_offline_heavy_acc: 30.7
+    agibot_offline_heavy_acc_per_dim: 44.7
+    agibot_offline_light_acc: 28.6
+    agibot_offline_light_acc_per_dim: 47.6
+    realworld_replay_pick_place_sr: 53.8
+    realworld_replay_microwave_sr: 42.3
+    realworld_replay_sink_cleaning_sr: 46.2
+    realworld_replay_avg_sr: 47.4
+    video_plan_grasp_sr: 53.8
+    annotator_pi05_baseline: 35.3
+    annotator_pi05_with_stableidm: 52.9
+    source: "Tables 1, 3, 4, 5"
+    eval_condition: "AgiBot benchmark (100 episodes), real-robot dual-arm open-loop, monocular video-generation deployment"
 
-tags: [inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot]
+tags: [inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot, real-world]

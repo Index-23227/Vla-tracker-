@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-23T14:59:51.060866",
+  "generated_at": "2026-04-23T23:28:37.568981",
   "num_models": 120,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -287,8 +287,8 @@
       ],
       "architecture": {
         "backbone": "SigLIP (semantic) + VGGT (Visual Geometry Grounded Transformer, spatial)",
-        "llm": "PaLiGemma",
-        "action_head": "Conditional Flow Matching with action chunking (Mix-of-Transformers: spatial / reasoning / action experts + Block-wise Causal Attention). RL-tuned with Flow-GSPO (SDE reformulation + Group Segmented PO).",
+        "llm": "PaLiGemma (decoder-only Transformer; weights pretrained)",
+        "action_head": "Conditional Flow Matching with action chunking (H=16, K=10 denoising steps). Mix-of-Transformers backbone shares Spatial / Reasoning / Action experts under Block-wise Causal Attention. RL-tuned with Flow-GSPO (SDE reformulation via Fokker-Planck + Group Segmented PO; G=8 group size, β=0.01 KL).",
         "action_head_category": "flow_matching",
         "parameters": "TODO"
       },
@@ -2107,12 +2107,13 @@
         "zero-shot",
         "hierarchical",
         "flow-matching",
-        "manipulation"
+        "manipulation",
+        "SlotBench"
       ],
       "architecture": {
         "backbone": "PaliGemma-3B (multi-view images)",
-        "llm": "PaliGemma-3B (VL backbone); Nano-Banana 2 for scene-marker image generation",
-        "action_head": "pi-0.5 flow-matching action expert, fine-tuned, conditioned on a generated scene-marker visual goal overlay",
+        "llm": "PaliGemma-3B (VL backbone, π0.5 inheritance); Nano-Banana 2 as out-of-box high-level image-generator grounding module (11s latency on H200)",
+        "action_head": "π0.5 flow-matching action expert, fully fine-tuned (not PEFT — PEFT variant scored ~7% avg SR), conditioned on a scene-marker visual goal overlay Ĩ produced by Nano-Banana 2. Action chunking H≥1.",
         "action_head_category": "flow_matching",
         "parameters": "3B"
       },
@@ -2212,12 +2213,13 @@
         "efficiency",
         "deployment",
         "mixed-precision",
-        "drift-aware"
+        "drift-aware",
+        "CogACT"
       ],
       "architecture": {
         "backbone": "inherited from base VLA (CogACT in paper experiments)",
         "llm": "inherited from CogACT",
-        "action_head": "Post-training quantization applied over an existing diffusion VLA (CogACT). Outputs 7-D Cartesian deltas [dx, dy, dz, drx, dry, drz, dg] via the original diffusion denoiser.",
+        "action_head": "Post-training quantization applied over an existing diffusion VLA (CogACT). Targets the MLP blocks within the Diffusion Transformer (DiT) action head; final 2 DiT blocks (closest to continuous output) are preserved at high precision. Top 30% drift-sensitive DiT layers retained at BF16, remaining 70% quantized to W4. Outputs 7-DoF (3D translation + 3D rotation + gripper) continuous control via the original CogACT diffusion denoiser.",
         "action_head_category": "diffusion",
         "parameters": "TODO"
       },
@@ -2225,15 +2227,24 @@
       "inference_hz": null,
       "benchmarks": {
         "simpler_env": {
-          "widowx_visual_matching_avg": 51.3,
-          "google_robot_visual_matching_avg": 68.5,
-          "google_robot_variant_aggregation_avg": 51.7
+          "widowx_vm_put_spoon": 65.2,
+          "widowx_vm_put_carrot": 52.2,
+          "widowx_vm_stack_blocks": 17.4,
+          "widowx_vm_put_eggplant": 60.9,
+          "google_vm_pick_coke": 92.4,
+          "google_vm_move_near": 87.9,
+          "google_vm_open_close_drawer": 58.3,
+          "google_vm_drawer_apple": 35.2,
+          "google_va_pick_coke": 87.5,
+          "google_va_move_near": 74.5,
+          "google_va_open_close_drawer": 20.1,
+          "google_va_drawer_apple": 24.7
         }
       },
       "eval_conditions": {
-        "simpler_env": "W4A8 quantized CogACT (drift-aware PTQ), zero-shot"
+        "simpler_env": "W4A8 quantized CogACT (drift-aware PTQ), zero-shot; 42.5% memory reduction, 54.8% speedup vs CogACT FP. WidowX-VM avg=48.9, Google-VM avg=68.5, Google-VA avg=51.7"
       },
-      "simpler_avg": 57.17,
+      "simpler_avg": 56.36,
       "ai_review": {
         "content": "# DA-PTQ: Drift-Aware Post-Training Quantization for Efficient Vision-Language-Action Models\n\n> **한 줄 요약**: 순차 제어 환경에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ 문제를, **Cross-Space Representation Compensation + Motion-Driven Mixed-Precision** 두 축으로 해결하는 **drift-aware PTQ** 프레임워크.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA 배포는 memory/compute 제약 로봇에서 병목 → Post-Training Quantization(PTQ)이 자연스러운 선택지.\n- 그러나 VLA에 PTQ를 naive하게 적용하면 **순차 제어 도중 성능이 급격히 무너짐**.\n- 원인: vision-language → action 인터페이스에서의 양자화 오차가 시간에 따라 **kinematic drift** 로 누적.\n\n---\n\n## 2. 방법론\n\n### 2.1 Drift-aware 최적화 formulation\n- PTQ를 한 step의 오차 최소화가 아닌, **sequential decision process 위의 drift-aware optimization** 으로 재정의.\n- 시간 축 오차 누적을 목적함수에 직접 포함.\n\n### 2.2 Cross-Space Representation Compensation\n- Multimodal(비전/언어) representation과 action space 사이의 **구조적 왜곡(structured distortion)** 을 보정.\n- Action consistency를 개선하여 step-to-step error variance를 감소.\n\n### 2.3 Motion-Driven Mixed-Precision Allocation\n- Per-layer / per-component bit-width를 **trajectory-level motion error** 기준으로 할당.\n- 모션에 민감한 부위에 더 많은 비트를, 덜 민감한 부위엔 적은 비트를 배정 → 효율과 정확도의 trade-off 최적화.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- 저비트 설정에서 **full-precision과 비교 가능한 성능** 달성을 주장.\n- kinematic drift 유의미한 감소 보고.\n- 구체 bit-width, 벤치마크, 에너지/메모리 수치는 PDF 확인 필요.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **모델/백본 일반성**: 특정 VLA 아키텍처(discrete-token vs flow-matching 등)에 따라 drift 양상이 다름 → 일반화 검증 필요.\n2. **Calibration 데이터 의존**: PTQ는 calibration set 분포에 민감. Trajectory-level objective는 calibration의 covering 문제를 더 민감하게 만들 수 있음.\n3. **Hardware 매핑**: Mixed-precision이 실제 edge accelerator에서 지원되는 bit 조합과 정합해야 실질 속도 이득.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — VLA의 sequential 특성을 PTQ 목적함수에 직접 반영한 관점 전환은 신선. Mixed-precision을 motion error로 구동하는 것도 깔끔. |\n| **Practical impact** | ★★★★☆ — 저메모리 로봇 배포에 직격. 성능 유지 + 저비트가 사실이면 즉시 파급 큼. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 왜 QAT (Quantization-Aware Training)가 아니고 PTQ인가? | QAT은 재학습 비용이 크고 대형 VLA에서는 현실적이지 않음. PTQ는 calibration만으로 배포 가능 → DA-PTQ는 그 한계를 drift-aware로 극복. |\n| 2 | \"Kinematic drift\"를 어떻게 측정하나? | Trajectory-level motion error(예: end-effector 경로 deviation)를 objective로 사용. 구체 metric은 PDF 확인. |\n| 3 | 다른 PTQ(예: GPTQ, AWQ) 대비 이득은? | 일반 LLM PTQ는 static per-token loss 기반이라 **순차 control drift에 맹목**. DA-PTQ는 trajectory 관점을 명시적으로 포함. |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
@@ -2627,12 +2638,13 @@
         "reflection",
         "dual-system",
         "diffusion",
+        "multi-skill",
         "RMBench"
       ],
       "architecture": {
-        "backbone": "not specified (zero-shot segmentation model used for geometry-preserving filtering)",
-        "llm": "unnamed pre-trained VLM",
-        "action_head": "Dual-system: VLM-based high-level planner (structured task memory, goal decomposition, outcome verification, error-driven correction) + VLA-based low-level diffusion visuomotor executor. Reverse diffusion (Eq. 19: A^{m-1} = μ_θ(A^m,m,Î,s,ℓ) + σ_m·ε) conditioned on geometry-preserving filtered observations.",
+        "backbone": "zero-shot segmentation model S for distractor masking + temporal mask update K (specific identities not disclosed)",
+        "llm": "single pre-trained VLM reused as Φ_plan / Φ_verify / Φ_reflect / Φ_mem (model identity not disclosed in paper)",
+        "action_head": "Discrete library of diffusion-based visuomotor primitives π_1..π_J (one per reusable skill). Reverse diffusion (Eq. 19: A^{m-1}_t = μ_θ(A^m_t, m, Î_t, s_t, ℓ_k) + σ_m·ε) conditioned on geometry-filtered observation Î_t = I_t ⊙ (1−Q_t), 14-dim proprioceptive state s_t, and sub-task instruction ℓ_k. Receding-horizon execution with checkpoint-based VLM verification.",
         "action_head_category": "diffusion",
         "parameters": "TODO"
       },
@@ -2889,14 +2901,16 @@
       "architecture": {
         "backbone": "Qwen3-VL-2B-Instruct (vision encoder inside the VLM)",
         "llm": "Qwen3-VL-2B-Instruct",
-        "action_head": "16-layer DiT-B decoder (hidden size 1024) predicting 100-step action chunks, trained with flow-matching objective. Unified Proprioceptive Predictor with morphology-aware MoE + adaptive residual-gated fusion of future predicted states with VL features.",
+        "action_head": "16-layer DiT-B decoder (hidden size 1024) predicting 100-step action chunks, trained with flow-matching objective. Unified Proprioceptive Predictor (4-layer transformer, hidden 768, 50-step state horizon) with morphology-aware MoE (16 routed + 2 shared experts, top-1 routing) + adaptive residual-gated fusion of future predicted states with VL features.",
         "action_head_category": "flow_matching",
         "parameters": "2.4B"
       },
       "model_type": null,
-      "inference_hz": null,
+      "inference_hz": 13.6,
       "benchmarks": {},
-      "eval_conditions": {},
+      "eval_conditions": {
+        "real_world": "Tienkung 2.0/3.0 humanoids, 12-15 trials per task, 73.34ms latency on RTX 4090"
+      },
       "ai_review": {
         "content": "# HEX: Humanoid-Aligned Experts for Cross-Embodiment Whole-Body Manipulation\n\n> **한 줄 요약**: 부위별 독립 action prediction의 한계를 극복하기 위해, humanoid-aligned state 표현과 Mixture-of-Experts + flow-matching action generation을 결합한 **whole-body coordinated** VLA 프레임워크.\n\n---\n\n## 1. 배경 및 동기\n\n- 인간의 조작은 전신(Whole-body) 협조를 통해 이루어짐.\n- 기존 VLA는 팔/몸/다리 등 부위별 action을 largely independently 예측 → 고DoF humanoid에서 불안정.\n- **핵심 과제**: 고차원 humanoid action space를 통합적으로 모델링하되, cross-embodiment 전이도 가능해야 함.\n\n---\n\n## 2. 방법론\n\n### Humanoid-Aligned State Representation\n- Robot의 proprioceptive state를 humanoid 해부학적 구조에 맞춰 정렬된 형태로 인코딩.\n- 부위 간 상관관계를 보존한 state-centric 접근 (action-centric이 아님).\n\n### Mixture-of-Experts (MoE) for Whole-Body Coordination\n- 각 expert가 특정 body-part 또는 motion mode를 전담.\n- Routing을 통해 여러 expert의 출력을 coordinated whole-body action으로 통합.\n\n### Residual-Gated Fusion + Flow Matching\n- Lightweight history tokens으로 temporal visual context를 경량 주입.\n- Residual-gated fusion으로 modality·time 차원 정보를 결합 후, **flow matching** head가 연속 action 생성.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- 실제(real-world) humanoid 조작 태스크에서 강한 성능 보고.\n- Cross-embodiment (다양한 humanoid platform) 전이 실험 포함.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **MoE의 routing 안정성**: Expert balance collapse 가능성, 희귀 motion mode 누락.\n2. **State-centric 대 action-centric의 trade-off**: 표현 일관성은 얻지만, 플랫폼별 state schema alignment가 필요.\n3. **Flow matching latency**: 실시간 고주파 제어에서 inference speed 확보 난이도.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — State-centric + MoE + flow matching의 결합 방식이 참신 |\n| **Practical impact** | ★★★★☆ — Humanoid whole-body VLA는 업계 핵심 문제 |\n\n**강점**: Humanoid의 coordinated control이라는 실제 문제를 state representation 설계로 정면 공략. **약점**: MoE와 flow matching 모두 튜닝 난이도 높은 모듈이라 재현성 부담.\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Body-part 독립 예측 대비 실제 실패 모드의 차이? | 팔-몸통-하체 간 반력/균형 관계 위반 동작 대폭 감소 |\n| 2 | MoE가 진짜 부위별로 분화되는가? | Gating 분석 필요 (abstract에 세부 제시 없음) |\n| 3 | 왜 flow matching을 선택했는가? | Continuous high-DoF action 분포 모델링에 강함, diffusion 대비 sampling 빠름 |\n| 4 | GR00T, Helix 등 다른 humanoid foundation과 차별점? | State-aligned 표현과 MoE routing이 핵심 차별화 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
@@ -3980,12 +3994,13 @@
         "spatio-temporal",
         "robustness",
         "data-annotation",
-        "AgiBot"
+        "AgiBot",
+        "real-world"
       ],
       "architecture": {
-        "backbone": "DINOv2 (visual encoder) + Segment Anything (robot-centric masking)",
+        "backbone": "DINOv2 (Oquab et al. 2023) as visual encoder + Segment Anything (Kirillov et al. 2023) for robot-centric masking",
         "llm": null,
-        "action_head": "History-conditioned action decoder f_θ: base MLP regressor per-frame + TCN temporal correction over visual feature history (Directional Feature Aggregation + Temporal Dynamics Refinement)",
+        "action_head": "History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference.",
         "action_head_category": "inverse_dynamics",
         "parameters": "TODO"
       },
@@ -4359,12 +4374,13 @@
         "human-video",
         "world-model",
         "hybrid",
-        "flow-matching"
+        "flow-matching",
+        "autoregressive"
       ],
       "architecture": {
-        "backbone": "frozen DINOv2",
-        "llm": "Qwen2.5-VL (inside a GR00T n1.5-style framework)",
-        "action_head": "Hybrid two-stage: (1) VLM predicts discrete UniT tokens via learnable queries appended to the VLM sequence (parallel classification, not next-token AR); (2) a lightweight flow-matching velocity head V_θ conditioned on VL features produces continuous embodiment-specific actions.",
+        "backbone": "frozen DINOv2 (visual branch acts as inverse-dynamics model anchor)",
+        "llm": "Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)",
+        "action_head": "Hybrid two-stage. (1) UniT Token Prediction: learnable queries q_t appended to the VLM sequence; VLM predicts discrete UniT codes c_t = UniT(o_t, o_{t+k}, a_{t:t+k}, s_t) via parallel cross-entropy classification (not causal next-token AR). (2) Flow-Matching action head V_θ on action chunks A_t = [a_t,...,a_{t+H-1}], τ ∈ U[0,1], interpolated path A^τ_t = τA_t + (1−τ)ε; trained with L_fm = E[||V_θ(A^τ_t | x_t, Enc(o_t), τ) − (A_t − ε)||²]. Total: L_VLA = L_token + λ_fm·L_fm.",
         "action_head_category": "hybrid",
         "parameters": "TODO"
       },
@@ -4372,15 +4388,14 @@
       "inference_hz": null,
       "benchmarks": {
         "robocasa": {
-          "robocasa_gr1_tabletop_overall": 66.7,
           "robocasa_gr1_pick_place": 67.3,
           "robocasa_gr1_articulated": 64.7
         }
       },
       "eval_conditions": {
-        "robocasa": "RoboCasa GR1 Tabletop, fine-tuned"
+        "robocasa": "Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)"
       },
-      "robocasa_avg": 66.23,
+      "robocasa_avg": 66.0,
       "ai_review": {
         "content": "# UniT: Toward a Unified Physical Language for Human-to-Humanoid Policy Learning and World Modeling\n\n> **한 줄 요약**: Human egocentric video와 humanoid action을 \"visual consequence\"를 공통 anchor로 삼아 **embodiment-agnostic discrete latent space**로 통합하는, tri-branch cross-reconstruction 기반의 통합 physical language tokenizer.\n\n---\n\n## 1. 배경 및 동기\n\n- Humanoid foundation model의 scaling 병목 = robotic data 부족.\n- 대규모 egocentric human video는 scalable 대안이지만, 인간과 로봇의 **kinematic mismatch**(cross-embodiment chasm)로 직접 전이 불가.\n- **핵심 통찰**: 이질적 kinematics도 **물리적 결과(visual consequence)**는 보편적 → 시각을 anchor로 활용하자.\n\n---\n\n## 2. 방법론\n\n### UniT = Unified Latent Action Tokenizer via Visual Anchoring\n- 인간과 humanoid action 모두를 공유 discrete latent space의 token으로 맵핑.\n- Token은 \"embodiment-agnostic physical intent\"를 표현.\n\n### Tri-Branch Cross-Reconstruction\n1. **Action → Vision** 분기: action이 미래 vision을 예측하게 하여 kinematics를 물리적 결과에 anchoring.\n2. **Vision → Action** 분기: vision이 action을 reconstruct하게 하여 무관한 시각 confounder를 필터링.\n3. **Fusion** 분기: 정제된 두 modality를 결합해 shared discrete latent space를 형성.\n\n### Downstream: VLA-UniT (policy) / WM-UniT (world model)\n- 공유 discrete latent token을 **autoregressive token prediction** 방식으로 예측하여 policy/world-model을 학습 (diffusion 기반 아님 — abstract는 \"predicting these unified tokens\"로만 기술).\n- Token 예측 패러다임이라 LLM-style scaling과 자연스럽게 호환.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- XPeng Robotics 프로젝트 페이지 기반으로 humanoid scaling 목적.\n- Cross-embodiment token의 downstream humanoid policy 효과성을 주장 (구체 수치 paper 참조).\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Visual confounder의 완전 제거 난이도**: Vision→Action 분기가 조명·배경 등 irrelevant signal을 완벽히 걸러낸다는 보장 없음.\n2. **Discrete tokenization의 precision loss**: 미세한 humanoid motor 명령을 discrete token으로 양자화할 때 정밀도 손실 가능.\n3. **Human-egocentric 데이터 편향**: 일상 인간 활동이 humanoid 작업 분포와 다를 때 transfer 효과 제한.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Visual consequence를 cross-embodiment anchor로 삼은 tri-branch 설계가 독창적 |\n| **Practical impact** | ★★★★☆ — Humanoid data scaling 문제에 정면 대응 |\n\n**강점**: \"Kinematics는 다르나 visual outcome은 같다\"는 철학이 단순·강력하고, tri-branch 구조가 이를 엔지니어링적으로 구현. **약점**: Discrete latent의 해상도와 confounder filtering의 실제 품질 검증 필요.\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | LAPA와 차별점은? | Tri-branch 구조와 visual anchoring 철학, discrete token의 physical intent로서의 정의 |\n| 2 | 왜 discrete latent인가 (continuous 대비)? | World model과의 joint token prediction, LLM-style scaling 친화성 |\n| 3 | Vision이 action을 복원하는 분기의 필요성? | Action이 vision을 예측만 하면 spurious correlation 학습 → reverse branch가 regularizer 역할 |\n| 4 | Kinematic mismatch가 크면 visual anchor도 달라지지 않나? | 사용 도구·객체의 상태 변화 등 결과 수준에서는 공유됨 (핵심 가정) |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true

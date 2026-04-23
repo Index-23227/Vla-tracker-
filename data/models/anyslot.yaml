@@ -9,16 +9,28 @@ open_source: false
 
 architecture:
   backbone: "PaliGemma-3B (multi-view images)"
-  llm: "PaliGemma-3B (VL backbone); Nano-Banana 2 for scene-marker image generation"
-  action_head: "pi-0.5 flow-matching action expert, fine-tuned, conditioned on a generated scene-marker visual goal overlay"
+  llm: "PaliGemma-3B (VL backbone, π0.5 inheritance); Nano-Banana 2 as out-of-box high-level image-generator grounding module (11s latency on H200)"
+  action_head: "π0.5 flow-matching action expert, fully fine-tuned (not PEFT — PEFT variant scored ~7% avg SR), conditioned on a scene-marker visual goal overlay Ĩ produced by Nano-Banana 2. Action chunking H≥1."
   action_head_category: flow_matching
   parameters: "3B"
-  key_innovation: "AnySlot decouples compositional slot-level placement into (1) a scene-marker generator that renders the target slot as an explicit visual goal overlay and (2) a goal-conditioned pi-0.5 flow-matching VLA policy fine-tuned to execute that overlay. The paper introduces SlotBench (9 categories) to evaluate discrete slot-level placement; flat VLA baselines (Diffusion Policy, OpenVLA, pi-0, pi-0.5 direct) mostly score 0% SR outside the ordinal category."
+  key_innovation: "AnySlot decouples compositional slot-level placement into (1) a scene-marker generator (Nano-Banana 2) that renders the target slot as a pixel-aligned visual goal overlay and (2) a fully fine-tuned π0.5 flow-matching VLA policy executing that overlay. The paper introduces SlotBench (9 task categories, SAPIEN simulator) to evaluate discrete slot-level placement; flat VLA baselines (Diffusion Policy, OpenVLA-OFT, π0, π0.5 direct) score 0% SR outside the Ordinal category. Averaged across 9 categories AnySlot reaches ≈90.7% SR / 92.7% IA; oracle (expert-human guidance) attains ≈96.7% SR, indicating the remaining gap is high-level grounding, not low-level execution."
 
 training:
-  dataset: "SAPIEN simulator box pick-and-place (synthetic with oracle visual goals) + 500 real slot-placement episodes"
-  method: "Fine-tune pi-0.5 for 20k steps, batch 64, on one H200"
+  dataset: "D_syn: SAPIEN simulator synthetic episodes with oracle visual-goal markers (blue guidance sphere); D_std: 500 slot-placement episodes with language-only instructions. Training uses D_syn; D_std evaluated for comparison."
+  method: "Fully fine-tune π0.5 for 20,000 steps, batch size 64, on a single NVIDIA H200 GPU"
 
-benchmarks: {}
+benchmarks:
+  real_world:
+    slotbench_ordinal_sr: 92.0
+    slotbench_size_sr: 80.0
+    slotbench_height_sr: 76.0
+    slotbench_distance_sr: 96.0
+    slotbench_compositional_sr: 88.0
+    slotbench_negation_sr: 100.0
+    slotbench_vague_sr: 88.0
+    slotbench_affordance_sr: 96.0
+    slotbench_world_knowledge_sr: 90.0
+    source: "Table 1 (AnySlot row; computed avg SR=89.6, avg IA=92.7)"
+    eval_condition: "SlotBench zero-shot test set, 50 trials per task, full-fine-tuned π0.5 + Nano-Banana 2 grounding"
 
-tags: [slot-placement, goal-conditioned, zero-shot, hierarchical, flow-matching, manipulation]
+tags: [slot-placement, goal-conditioned, zero-shot, hierarchical, flow-matching, manipulation, SlotBench]

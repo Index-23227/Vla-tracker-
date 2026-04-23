@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-23T14:59:51.060866
+# Generated: 2026-04-23T23:28:37.568981
 # Models: 120
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -88,7 +88,7 @@ SECTION 1: RANKINGS
   11. TraceVLA                  avg= 64.6  org=University of Michigan / NVIDIA
   12. DD-VLA                    avg= 62.7  org=PKU / Shanghai AI Lab
   13. HPT                       avg= 62.4  org=MIT / Meta FAIR
-  14. DA-PTQ                    avg= 57.2  org=Tongji University / University of Technology Sydney
+  14. DA-PTQ                    avg= 56.4  org=Tongji University / University of Technology Sydney
   15. RT-2-X                    avg= 53.8  org=Google DeepMind
   16. OpenVLA                   avg= 42.3  org=Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT
   17. Octo                      avg= 31.4  org=UC Berkeley / Stanford / CMU / Google DeepMind
@@ -235,9 +235,9 @@ MODEL: OmniVLA-RL
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: Conditional Flow Matching with action chunking (Mix-of-Transformers: spatial / reasoning / action experts + Block-wise Causal Attention). RL-tuned with Flow-GSPO (SDE reformulation + Group Segmented PO).
+    Action Head: Conditional Flow Matching with action chunking (H=16, K=10 denoising steps). Mix-of-Transformers backbone shares Spatial / Reasoning / Action experts under Block-wise Causal Attention. RL-tuned with Flow-GSPO (SDE reformulation via Fokker-Planck + Group Segmented PO; G=8 group size, β=0.01 KL).
     Backbone: SigLIP (semantic) + VGGT (Visual Geometry Grounded Transformer, spatial)
-    LLM: PaLiGemma
+    LLM: PaLiGemma (decoder-only Transformer; weights pretrained)
     Parameters: TODO
   Tags: RL, online-RL, flow-matching, mixture-of-experts, spatial-understanding, libero
   Benchmarks:
@@ -1062,11 +1062,11 @@ MODEL: AnySlot
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: pi-0.5 flow-matching action expert, fine-tuned, conditioned on a generated scene-marker visual goal overlay
+    Action Head: π0.5 flow-matching action expert, fully fine-tuned (not PEFT — PEFT variant scored ~7% avg SR), conditioned on a scene-marker visual goal overlay Ĩ produced by Nano-Banana 2. Action chunking H≥1.
     Backbone: PaliGemma-3B (multi-view images)
-    LLM: PaliGemma-3B (VL backbone); Nano-Banana 2 for scene-marker image generation
+    LLM: PaliGemma-3B (VL backbone, π0.5 inheritance); Nano-Banana 2 as out-of-box high-level image-generator grounding module (11s latency on H200)
     Parameters: 3B
-  Tags: slot-placement, goal-conditioned, zero-shot, hierarchical, flow-matching, manipulation
+  Tags: slot-placement, goal-conditioned, zero-shot, hierarchical, flow-matching, manipulation, SlotBench
   AI Review Summary: 언어 지시를 **explicit visual goal (scene marker)** 로 먼저 변환한 뒤, goal-conditioned VLA policy로 실행하는 **hierarchical slot-level placement 프레임워크**. 새로운 SlotBench 9개 과제군에서 monolithic VLA 대비 zero-shot 성능 개선을 보고.
   AI Review: PDF-verified
 
@@ -1116,14 +1116,14 @@ MODEL: DA-PTQ
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: Post-training quantization applied over an existing diffusion VLA (CogACT). Outputs 7-D Cartesian deltas [dx, dy, dz, drx, dry, drz, dg] via the original diffusion denoiser.
+    Action Head: Post-training quantization applied over an existing diffusion VLA (CogACT). Targets the MLP blocks within the Diffusion Transformer (DiT) action head; final 2 DiT blocks (closest to continuous output) are preserved at high precision. Top 30% drift-sensitive DiT layers retained at BF16, remaining 70% quantized to W4. Outputs 7-DoF (3D translation + 3D rotation + gripper) continuous control via the original CogACT diffusion denoiser.
     Backbone: inherited from base VLA (CogACT in paper experiments)
     LLM: inherited from CogACT
     Parameters: TODO
-  Tags: quantization, post-training, efficiency, deployment, mixed-precision, drift-aware
+  Tags: quantization, post-training, efficiency, deployment, mixed-precision, drift-aware, CogACT
   Benchmarks:
-    simpler_env: widowx_visual_matching_avg=51.3, google_robot_visual_matching_avg=68.5, google_robot_variant_aggregation_avg=51.7
-  Eval Conditions: {'simpler_env': 'W4A8 quantized CogACT (drift-aware PTQ), zero-shot'}
+    simpler_env: widowx_vm_put_spoon=65.2, widowx_vm_put_carrot=52.2, widowx_vm_stack_blocks=17.4, widowx_vm_put_eggplant=60.9, google_vm_pick_coke=92.4, google_vm_move_near=87.9, google_vm_open_close_drawer=58.3, google_vm_drawer_apple=35.2, google_va_pick_coke=87.5, google_va_move_near=74.5, google_va_open_close_drawer=20.1, google_va_drawer_apple=24.7
+  Eval Conditions: {'simpler_env': 'W4A8 quantized CogACT (drift-aware PTQ), zero-shot; 42.5% memory reduction, 54.8% speedup vs CogACT FP. WidowX-VM avg=48.9, Google-VM avg=68.5, Google-VA avg=51.7'}
   AI Review Summary: 순차 제어 환경에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ 문제를, **Cross-Space Representation Compensation + Motion-Driven Mixed-Precision** 두 축으로 해결하는 **drift-aware PTQ** 프레임워크.
   AI Review: PDF-verified
 
@@ -1345,11 +1345,11 @@ MODEL: Goal2Skill
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: Dual-system: VLM-based high-level planner (structured task memory, goal decomposition, outcome verification, error-driven correction) + VLA-based low-level diffusion visuomotor executor. Reverse diffusion (Eq. 19: A^{m-1} = μ_θ(A^m,m,Î,s,ℓ) + σ_m·ε) conditioned on geometry-preserving filtered observations.
-    Backbone: not specified (zero-shot segmentation model used for geometry-preserving filtering)
-    LLM: unnamed pre-trained VLM
+    Action Head: Discrete library of diffusion-based visuomotor primitives π_1..π_J (one per reusable skill). Reverse diffusion (Eq. 19: A^{m-1}_t = μ_θ(A^m_t, m, Î_t, s_t, ℓ_k) + σ_m·ε) conditioned on geometry-filtered observation Î_t = I_t ⊙ (1−Q_t), 14-dim proprioceptive state s_t, and sub-task instruction ℓ_k. Receding-horizon execution with checkpoint-based VLM verification.
+    Backbone: zero-shot segmentation model S for distractor masking + temporal mask update K (specific identities not disclosed)
+    LLM: single pre-trained VLM reused as Φ_plan / Φ_verify / Φ_reflect / Φ_mem (model identity not disclosed in paper)
     Parameters: TODO
-  Tags: long-horizon, planning, reflection, dual-system, diffusion, RMBench
+  Tags: long-horizon, planning, reflection, dual-system, diffusion, multi-skill, RMBench
   AI Review Summary: VLM 기반 high-level planner(메모리·검증·반성)와 diffusion VLA low-level executor를 **closed-loop**로 결합해 long-horizon manipulation에서 baseline 대비 3배 이상의 성공률 향상을 보인 dual-system 프레임워크.
   AI Review: PDF-verified
 
@@ -1473,11 +1473,13 @@ MODEL: HEX
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: 16-layer DiT-B decoder (hidden size 1024) predicting 100-step action chunks, trained with flow-matching objective. Unified Proprioceptive Predictor with morphology-aware MoE + adaptive residual-gated fusion of future predicted states with VL features.
+    Action Head: 16-layer DiT-B decoder (hidden size 1024) predicting 100-step action chunks, trained with flow-matching objective. Unified Proprioceptive Predictor (4-layer transformer, hidden 768, 50-step state horizon) with morphology-aware MoE (16 routed + 2 shared experts, top-1 routing) + adaptive residual-gated fusion of future predicted states with VL features.
     Backbone: Qwen3-VL-2B-Instruct (vision encoder inside the VLM)
     LLM: Qwen3-VL-2B-Instruct
     Parameters: 2.4B
+  Inference: 13.6 Hz
   Tags: humanoid, whole-body, cross-embodiment, flow-matching, mixture-of-experts, real-world
+  Eval Conditions: {'real_world': 'Tienkung 2.0/3.0 humanoids, 12-15 trials per task, 73.34ms latency on RTX 4090'}
   AI Review Summary: 부위별 독립 action prediction의 한계를 극복하기 위해, humanoid-aligned state 표현과 Mixture-of-Experts + flow-matching action generation을 결합한 **whole-body coordinated** VLA 프레임워크.
   AI Review: PDF-verified
 
@@ -2070,11 +2072,11 @@ MODEL: StableIDM
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: History-conditioned action decoder f_θ: base MLP regressor per-frame + TCN temporal correction over visual feature history (Directional Feature Aggregation + Temporal Dynamics Refinement)
-    Backbone: DINOv2 (visual encoder) + Segment Anything (robot-centric masking)
+    Action Head: History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference.
+    Backbone: DINOv2 (Oquab et al. 2023) as visual encoder + Segment Anything (Kirillov et al. 2023) for robot-centric masking
     LLM: None
     Parameters: TODO
-  Tags: inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot
+  Tags: inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot, real-world
   AI Review Summary: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.
   AI Review: PDF-verified
 
@@ -2275,14 +2277,14 @@ MODEL: UniT
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: Hybrid two-stage: (1) VLM predicts discrete UniT tokens via learnable queries appended to the VLM sequence (parallel classification, not next-token AR); (2) a lightweight flow-matching velocity head V_θ conditioned on VL features produces continuous embodiment-specific actions.
-    Backbone: frozen DINOv2
-    LLM: Qwen2.5-VL (inside a GR00T n1.5-style framework)
+    Action Head: Hybrid two-stage. (1) UniT Token Prediction: learnable queries q_t appended to the VLM sequence; VLM predicts discrete UniT codes c_t = UniT(o_t, o_{t+k}, a_{t:t+k}, s_t) via parallel cross-entropy classification (not causal next-token AR). (2) Flow-Matching action head V_θ on action chunks A_t = [a_t,...,a_{t+H-1}], τ ∈ U[0,1], interpolated path A^τ_t = τA_t + (1−τ)ε; trained with L_fm = E[||V_θ(A^τ_t | x_t, Enc(o_t), τ) − (A_t − ε)||²]. Total: L_VLA = L_token + λ_fm·L_fm.
+    Backbone: frozen DINOv2 (visual branch acts as inverse-dynamics model anchor)
+    LLM: Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)
     Parameters: TODO
-  Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching
+  Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching, autoregressive
   Benchmarks:
-    robocasa (avg=66.23): robocasa_gr1_tabletop_overall=66.7, robocasa_gr1_pick_place=67.3, robocasa_gr1_articulated=64.7
-  Eval Conditions: {'robocasa': 'RoboCasa GR1 Tabletop, fine-tuned'}
+    robocasa (avg=66.0): robocasa_gr1_pick_place=67.3, robocasa_gr1_articulated=64.7
+  Eval Conditions: {'robocasa': 'Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)'}
   AI Review Summary: Human egocentric video와 humanoid action을 "visual consequence"를 공통 anchor로 삼아 **embodiment-agnostic discrete latent space**로 통합하는, tri-branch cross-reconstruction 기반의 통합 physical language tokenizer.
   AI Review: PDF-verified
 
