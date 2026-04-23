@@ -23,8 +23,9 @@
 2. **Vision → Action** 분기: vision이 action을 reconstruct하게 하여 무관한 시각 confounder를 필터링.
 3. **Fusion** 분기: 정제된 두 modality를 결합해 shared discrete latent space를 형성.
 
-### World Modeling 연계
-- 통합 token space는 policy learning뿐 아니라 world model 학습에도 직접 활용 가능.
+### Downstream: VLA-UniT (policy) / WM-UniT (world model)
+- 공유 discrete latent token을 **autoregressive token prediction** 방식으로 예측하여 policy/world-model을 학습 (diffusion 기반 아님 — abstract는 "predicting these unified tokens"로만 기술).
+- Token 예측 패러다임이라 LLM-style scaling과 자연스럽게 호환.
 
 ---
 

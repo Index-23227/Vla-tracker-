@@ -11,7 +11,7 @@ architecture:
   action_head: "dual-system: VLM-based high-level planner (structured task memory, goal decomposition, outcome verification, error-driven correction) + VLA-based low-level diffusion visuomotor executor conditioned on geometry-preserving filtered observations"
   action_head_category: diffusion
   parameters: "TODO"
-  key_innovation: "Goal2Skill is a dual-system framework for long-horizon embodied manipulation that explicitly separates high-level semantic reasoning from low-level motor execution. A VLM-based agentic planner maintains structured task memory and performs goal decomposition, outcome verification, and error-driven correction, while a VLA-based diffusion visuomotor executor carries out each sub-task conditioned on geometry-preserving filtered observations, forming a closed loop that enables memory-aware reasoning, adaptive replanning, and robust recovery."
+  key_innovation: "Goal2Skill is a dual-system framework for long-horizon embodied manipulation that explicitly separates high-level semantic reasoning from low-level motor execution. A VLM-based agentic planner maintains structured task memory and performs goal decomposition, outcome verification, and error-driven correction, while a VLA-based diffusion visuomotor executor carries out each sub-task conditioned on geometry-preserving filtered observations. The authors report 32.4% average success rate on RMBench, versus 9.8% for the strongest baseline."
 
 benchmarks: {}
 

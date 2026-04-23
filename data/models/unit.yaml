@@ -8,10 +8,10 @@ venue: null
 open_source: false
 
 architecture:
-  action_head: "Unified Latent Action Tokenizer via Visual Anchoring: tri-branch cross-reconstruction (action->vision anchoring, vision->action filtering, fusion branch) producing a shared discrete latent space of embodiment-agnostic physical intents"
-  action_head_category: discrete_diffusion
+  action_head: "autoregressive token prediction over a shared discrete latent action space produced by a Unified Latent Action Tokenizer (tri-branch cross-reconstruction: action->vision anchoring, vision->action filtering, fusion branch)"
+  action_head_category: autoregressive
   parameters: "TODO"
-  key_innovation: "UniT proposes a Unified Latent Action Tokenizer that establishes a shared physical language between egocentric human video and humanoid robot actions by anchoring heterogeneous kinematics to their common visual consequences. A tri-branch cross-reconstruction mechanism has actions predict vision (anchoring kinematics to physical outcomes) and vision reconstruct actions (filtering irrelevant visual confounders), while a fusion branch synergizes purified modalities into a shared discrete latent space of embodiment-agnostic physical intents."
+  key_innovation: "UniT proposes a Unified Latent Action Tokenizer that establishes a shared physical language between egocentric human video and humanoid robot actions by anchoring heterogeneous kinematics to their common visual consequences. A tri-branch cross-reconstruction design (actions predict vision, vision reconstructs actions, plus a fusion branch) produces a shared discrete latent space of embodiment-agnostic physical intents; a downstream policy (VLA-UniT) and world model (WM-UniT) are learned by predicting these unified tokens, yielding strong data efficiency and zero-shot cross-embodiment transfer."
 
 benchmarks: {}
 

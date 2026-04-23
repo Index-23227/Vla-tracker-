@@ -11,7 +11,7 @@ architecture:
   action_head: "inverse dynamics model with spatio-temporal feature refinement"
   action_head_category: inverse_dynamics
   parameters: "TODO"
-  key_innovation: "StableIDM stabilizes inverse dynamics prediction when the manipulator is truncated from view by combining three complementary modules: auxiliary robot-centric masking to suppress background clutter, Directional Feature Aggregation (DFA) that extracts anisotropic features along directions inferred from the visible arm, and Temporal Dynamics Refinement (TDR) that smooths and corrects predictions via motion continuity."
+  key_innovation: "StableIDM stabilizes inverse dynamics prediction when the manipulator is truncated from view by combining three complementary modules: auxiliary robot-centric masking to suppress background clutter, Directional Feature Aggregation (DFA) that extracts anisotropic features along directions inferred from the visible arm, and Temporal Dynamics Refinement (TDR) that smooths and corrects predictions via motion continuity. The paper reports +12.1% strict action accuracy on the AgiBot benchmark under severe truncation, +9.7% task success in real-robot replay, +11.5% grasp success when decoding video-generated plans, and +17.6% downstream VLA real-robot success when used as an automatic annotator."
 
 benchmarks: {}
 

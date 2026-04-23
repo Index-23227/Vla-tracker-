@@ -30,10 +30,14 @@
 
 ## 3. 실험 결과
 
-> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.
+> Abstract에서 직접 인용 (PDF 미검증).
 
-- Abstract는 "multiple benchmarks and real-robot experiments"에서 개선을 보고한다고 언급.
-- 구체 성능 수치(벤치마크, 오차 감소율 등)는 PDF 확인 필요.
+- **AgiBot benchmark (severe truncation)**: strict action accuracy **+12.1%** 향상
+- **Real-robot replay**: 평균 task success **+9.7%**
+- **Video-generated plan decoding**: end-to-end grasp success **+11.5%**
+- **Data annotator로 사용 시**: downstream VLA real-robot success **+17.6%**
+
+모든 수치는 baseline 대비 향상폭이며 절대치는 PDF 참조.
 
 ---
 

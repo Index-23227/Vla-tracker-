@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-23T12:06:16.545740
-# Models: 126
+# Generated: 2026-04-23T14:44:14.383961
+# Models: 121
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -1611,23 +1611,6 @@ MODEL: LaMP
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
 
 ------------------------------------------------------------
-MODEL: LARY
-  Organization: Meituan LongCat
-  Date: 2026-04-13
-  Paper: https://arxiv.org/abs/2604.11689
-  Code: https://github.com/meituan-longcat/LARYBench
-  Venue: None
-  Open Source: True
-  Architecture:
-    Action Head: latent action representation benchmark (evaluates latent-action encoders derived from large-scale human video on both semantic-action recognition and downstream robotic control tasks)
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: latent-action, human-video, scaling, benchmark, abstract-only
-  AI Review Summary: 대규모 human action video (1M+, 151 categories)로부터 학습된 **latent action** 표현의 품질을 체계적으로 평가하는 벤치마크로, 일반 비주얼 foundation model이 특화된 embodied model보다 latent-action encoder로 더 우수함을 보인 연구.
-  AI Review: Abstract-based
-
-------------------------------------------------------------
 MODEL: LIBERO-Para
   Organization: TODO: check paper
   Date: 2026-03-30
@@ -1916,23 +1899,6 @@ MODEL: ProgressVLA
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
 
 ------------------------------------------------------------
-MODEL: ReconVLA
-  Organization: TODO: check paper
-  Date: 2026-04-17
-  Paper: https://arxiv.org/abs/2604.16677
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: conformal prediction wrapper over pretrained VLA action tokens (training-free)
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: uncertainty, failure-aware, conformal-prediction, reasoning, abstract-only
-  AI Review Summary: Pretrained VLA를 재학습 없이 wrapping하여 conformal prediction으로 action token과 robot state에 calibrated uncertainty를 부여, failure를 사전 감지하는 경량 framework.
-  AI Review: Abstract-based
-
-------------------------------------------------------------
 MODEL: ReFineVLA
   Organization: TODO: check paper
   Date: 2026-04-20
@@ -1947,23 +1913,6 @@ MODEL: ReFineVLA
     Parameters: TODO
   Tags: reasoning, simpler_env
   Eval Conditions: {'simpler_env': 'fine-tuned'}
-
-------------------------------------------------------------
-MODEL: Rewind-IL
-  Organization: TODO: check paper
-  Date: 2026-04-17
-  Paper: https://arxiv.org/abs/2604.16683
-  Code: https://sjay05.github.io/rewind-il
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: training-free online safeguard (TIDE failure detector + state-respawning) around a frozen action-chunked generative imitation policy
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: imitation-learning, failure-aware, online-failure-detection, recovery, long-horizon, abstract-only
-  AI Review Summary: Action-chunked generative imitation policy 위에 붙는 training-free online safeguard — TIDE로 failure를 감지하고 VLM이 지정한 safe checkpoint로 "rewind"하여 실행을 재개.
-  AI Review: Abstract-based
 
 ------------------------------------------------------------
 MODEL: RoboAlign
@@ -2335,7 +2284,7 @@ MODEL: UniT
   Venue: None
   Open Source: False
   Architecture:
-    Action Head: Unified Latent Action Tokenizer via Visual Anchoring: tri-branch cross-reconstruction (action->vision anchoring, vision->action filtering, fusion branch) producing a shared discrete latent space of embodiment-agnostic physical intents
+    Action Head: autoregressive token prediction over a shared discrete latent action space produced by a Unified Latent Action Tokenizer (tri-branch cross-reconstruction: action->vision anchoring, vision->action filtering, fusion branch)
     Backbone: None
     LLM: None
     Parameters: TODO
@@ -2359,40 +2308,6 @@ MODEL: UP-VLA
   Tags: 1.3B, future-prediction, unified-understanding, ICML-2025, open-source
   Eval Conditions: {'calvin': 'fine-tuned'}
   AI Review Summary: Multi-modal understanding과 future prediction 목적함수를 통합하여 VLM의 low-level spatial 정보 캡처 능력을 보강, CALVIN ABC-D에서 33% 향상과 real-world manipulation 개선.
-  AI Review: Abstract-based
-
-------------------------------------------------------------
-MODEL: V-CAGE
-  Organization: TODO: check paper
-  Date: 2026-04-10
-  Paper: https://arxiv.org/abs/2604.09036
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: not applicable (data-generation framework used to train downstream VLAs)
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: scene-generation, agentic, data-synthesis, closed-loop, manipulation, abstract-only
-  AI Review Summary: **foundation-model 기반 agentic 데이터 합성 엔진**. Inpainting-guided scene 구축 + VLM visual critic closed-loop 검증 + 지각 기반 압축(>90%)으로 VLA 학습용 데이터를 **semantically coherent & kinematically reachable** 하게 대량 생산.
-  AI Review: Abstract-based
-
-------------------------------------------------------------
-MODEL: ViVa
-  Organization: TODO: check paper
-  Date: 2026-04-09
-  Paper: https://arxiv.org/abs/2604.08168
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: video-generative value model (repurposed pretrained video generator jointly predicting future proprioception and scalar value)
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: RL, value-function, video-generation, long-horizon, abstract-only
-  AI Review Summary: Pretrained video generator를 value function으로 재활용, 현재 관측과 proprioception으로부터 미래 proprioception과 scalar value를 공동 예측하여 long-horizon 로봇 RL의 value 추정을 개선.
   AI Review: Abstract-based
 
 ------------------------------------------------------------
@@ -2475,5 +2390,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 126 models, 39 with LIBERO scores
+Total: 121 models, 39 with LIBERO scores
 ================================================================================
