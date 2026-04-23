@@ -1,0 +1,43 @@
+name: HEX
+full_name: "HEX: Humanoid-Aligned Experts for Cross-Embodiment Whole-Body Manipulation"
+organization: "Beijing Innovation Center of Humanoid Robotics / Xi'an Jiaotong University / Nankai University / Peking University"
+date: "2026-04-09"
+paper_url: https://arxiv.org/abs/2604.07993
+code_url: "https://hex-humanoid.github.io/"
+venue: null
+open_source: false
+inference_hz: 13.6
+
+architecture:
+  backbone: "Qwen3-VL-2B-Instruct (vision encoder inside the VLM)"
+  llm: "Qwen3-VL-2B-Instruct"
+  action_head: "16-layer DiT-B decoder (hidden size 1024) predicting 100-step action chunks, trained with flow-matching objective. Unified Proprioceptive Predictor (4-layer transformer, hidden 768, 50-step state horizon) with morphology-aware MoE (16 routed + 2 shared experts, top-1 routing) + adaptive residual-gated fusion of future predicted states with VL features."
+  action_head_category: flow_matching
+  parameters: "2.4B"
+  key_innovation: "HEX replaces independent per-part humanoid action prediction with a state-centric Unified Proprioceptive Predictor using a morphology-aware Mixture-of-Experts (16+2) that models coordinated whole-body dynamics. Lightweight history tokens carry short-horizon temporal visual context, and an adaptive residual-gated fusion mechanism blends predicted future proprioceptive states with vision-language features before a DiT-B flow-matching action head generates 100-step action chunks. Achieves 79.8% Tienkung 3.0 / 100% Tienkung 2.0 mirror-pose, 53.3% box-convey final stage (vs 40% π0.5), and 61.8% generalization avg (vs π0.5 44.3%, GR00T N1.5 41.0%)."
+
+training:
+  dataset: "12M frames across seven humanoid embodiments: HEX dataset (4M) + Humanoid Everyday (3.4M) + AgiBot World Colosseo (3.8M) + RoboCOIN Leju subset (2.3M)"
+  method: "Imitation learning with flow-matching objective; 200k pretraining steps; 20k per-task fine-tuning"
+  compute: "~1K NVIDIA A100 GPU hours"
+
+benchmarks:
+  real_world:
+    kneel_and_manipulate_t3: 100.0
+    tidy_table_t3: 41.7
+    bring_box_pack_t3: 41.7
+    mirror_pose_t2: 100.0
+    pour_liquor_t2: 91.7
+    human_assist_t2: 83.3
+    walking_avoid_obstacles_t2: 100.0
+    box_convey_grasp: 100.0
+    box_convey_turn: 100.0
+    box_convey_walk: 73.3
+    box_convey_place: 53.3
+    generalization_pose_pouring_box_kneel_avg: 61.8
+    source: "Tables 1-2, Fig. 6 (HEX 2.4B; seen-scenario avg = 79.8 across the 7 tasks)"
+
+eval_conditions:
+  real_world: "Tienkung 2.0/3.0 humanoids, 12-15 trials per task, 73.34ms latency on RTX 4090"
+
+tags: [humanoid, whole-body, cross-embodiment, flow-matching, mixture-of-experts, real-world]

@@ -1,0 +1,24 @@
+name: Goal2Skill
+full_name: "Goal2Skill: Long-Horizon Manipulation with Adaptive Planning and Reflection"
+organization: "Beijing University of Posts and Telecommunications / InspireOmni AI / Tsinghua University"
+date: "2026-04-15"
+paper_url: https://arxiv.org/abs/2604.13942
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "zero-shot segmentation model S for distractor masking + temporal mask update K (specific identities not disclosed)"
+  llm: "single pre-trained VLM reused as Φ_plan / Φ_verify / Φ_reflect / Φ_mem (model identity not disclosed in paper)"
+  action_head: "Discrete library of diffusion-based visuomotor primitives π_1..π_J (one per reusable skill). Reverse diffusion (Eq. 19: A^{m-1}_t = μ_θ(A^m_t, m, Î_t, s_t, ℓ_k) + σ_m·ε) conditioned on geometry-filtered observation Î_t = I_t ⊙ (1−Q_t), 14-dim proprioceptive state s_t, and sub-task instruction ℓ_k. Receding-horizon execution with checkpoint-based VLM verification."
+  action_head_category: diffusion
+  parameters: "TODO"
+  key_innovation: "Goal2Skill is a dual-system long-horizon framework where a single VLM is reused as planner / verifier / reflector / memory keeper around episodic + working memory + error register, and a discrete library of diffusion-based skill primitives executes each sub-task on geometry-preserving filtered observations. On RMBench (5 tasks, 100 eval episodes/task) it reaches 32.4% total avg vs 9.8% for the strongest baseline (X-VLA), with the largest gain on memory-heavy M(n) tasks (38.7% vs 9.0%). Memory ablation: Base 6.7% -> +Ht 27.7% -> Full 35.3%. Recovery ablation: Base 8.0% -> +verify 17.5% -> +verify+reflect 24.0% -> Full 28.0%."
+
+training:
+  dataset: "RMBench (50 expert demonstrations per task, decomposed into preprocessed subtasks)"
+  method: "30k optimization steps imitation learning per skill primitive"
+
+benchmarks: {}
+
+tags: [long-horizon, planning, reflection, dual-system, diffusion, multi-skill, RMBench]

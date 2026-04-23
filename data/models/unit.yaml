@@ -1,0 +1,34 @@
+name: UniT
+full_name: "UniT: Toward a Unified Physical Language for Human-to-Humanoid Policy Learning and World Modeling"
+organization: "XPeng Robotics / Tsinghua University / The University of Hong Kong"
+date: "2026-04-21"
+paper_url: https://arxiv.org/abs/2604.19734
+code_url: "https://xpeng-robotics.github.io/unit/"
+venue: null
+open_source: false
+
+architecture:
+  backbone: "frozen DINOv2 (visual branch acts as inverse-dynamics model anchor)"
+  llm: "Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)"
+  action_head: "Hybrid two-stage. (1) UniT Token Prediction: learnable queries q_t appended to the VLM sequence; VLM predicts discrete UniT codes c_t = UniT(o_t, o_{t+k}, a_{t:t+k}, s_t) via parallel cross-entropy classification (not causal next-token AR). (2) Flow-Matching action head V_θ on action chunks A_t = [a_t,...,a_{t+H-1}], τ ∈ U[0,1], interpolated path A^τ_t = τA_t + (1−τ)ε; trained with L_fm = E[||V_θ(A^τ_t | x_t, Enc(o_t), τ) − (A_t − ε)||²]. Total: L_VLA = L_token + λ_fm·L_fm."
+  action_head_category: hybrid
+  parameters: "TODO"
+  key_innovation: "UniT learns a Unified Latent Action Tokenizer that maps heterogeneous kinematics (human hands, humanoid end-effectors, robot joints) into a shared discrete visual-anchored latent space via tri-branch cross-reconstruction (action->vision anchoring, vision->action filtering, fusion branch). VLA-UniT predicts these tokens in parallel via learnable VLM queries while a flow-matching head produces continuous embodiment-specific actions; WM-UniT (built on Cosmos Predict 2.5) re-uses the same tokens for action-conditioned video generation, enabling joint human-humanoid co-training. Achieves 66.7% RoboCasa GR1 overall (vs FLARE 55.0%, GR00T 47.8%) and 78%/75% real-world Pick&Place/Pouring on IRON-R01-1.11 (vs GR00T 30%/5%); with 10% training data UniT (45.5%) matches GR00T at full data (47.8%)."
+
+training:
+  dataset: "EgoDex (27,419 pick-place trajectories, 3,205 pour) + DROID (95,599 trajectories, 564 scenes) + RoboCasa GR1 (24 tabletop tasks, up to 1000 trajs/task) + 32k proprietary IRON-R01-1.11 robot trajectories + 30k EgoDex co-training"
+  method: "Stage 1: pretrain UniT tokenizer via tri-branch cross-reconstruction (cosine vision loss + action loss + RQ-VAE commitment). Stage 2: VLA-UniT and WM-UniT trained on UniT tokens via L_token (CE) + L_fm (flow matching) on robot + human data."
+
+benchmarks:
+  robocasa:
+    robocasa_gr1_pick_place: 67.3
+    robocasa_gr1_articulated: 64.7
+    source: "Fig. 9 (overall reported as 66.7%)"
+    eval_condition: "Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)"
+  real_world:
+    iron_pick_and_place: 78.0
+    iron_pouring: 75.0
+    source: "Fig. 11 (in-domain w/ EgoDex human co-training; OOD avg=38.5%, in-domain avg=50.0%)"
+    eval_condition: "IRON-R01-1.11 humanoid; few-shot robot data + EgoDex human co-training"
+
+tags: [latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching, autoregressive]
