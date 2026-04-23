@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-04-22T11:06:00.593198",
-  "num_models": 113,
+  "generated_at": "2026-04-23T12:06:16.545740",
+  "num_models": 126,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -1992,6 +1992,39 @@
       "rank": 42
     },
     {
+      "name": "ABot-Claw",
+      "organization": "TODO: check paper",
+      "date": "2026-04-11",
+      "paper_url": "https://arxiv.org/abs/2604.10096",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "agentic",
+        "self-evolving",
+        "cooperative",
+        "multi-agent",
+        "closed-loop",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "agentic closed-loop controller wrapping an underlying VLA with critic-based feedback",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# ABot-Claw: A Foundation for Persistent, Cooperative, and Self-Evolving Robotic Agents\n\n> **한 줄 요약**: OpenClaw 위에 embodied 제어 레이어를 덧붙여, **heterogeneous 로봇 스케줄링 + cross-embodiment multimodal memory + critic-based closed-loop 피드백**을 통합한 **self-evolving multi-robot agent foundation**.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA는 강력한 perception/intuitive response를 주지만 **open-loop** 특성으로 long-horizon 과제에서 실패.\n- System-2 agent들은 planning은 좋지만 **closed sandbox + predefined toolkit** 한계.\n- OpenClaw는 전체 시스템 권한을 가진 local runtime이지만, 장시간·다중 로봇 embodied 제어 아키텍처가 없음.\n- 따라서 \"언어 의도 → 물리 행동\"을 닫힌 루프로 잇고 **진화 가능한** 에이전트 기반이 필요.\n\n---\n\n## 2. 방법론\n\n### 2.1 Unified embodiment interface (Capability-driven scheduling)\n- 이질적 로봇(모바일 베이스, 매니퓰레이터, 다리형 등)을 capability 단위로 추상화.\n- 과제 요구 capability에 따라 적합한 embodiment에 동적으로 할당.\n\n### 2.2 Visual-centric cross-embodiment multimodal memory\n- 비전 중심의 **persistent context retention** 을 통해, 여러 로봇/세션에 걸쳐 grounded retrieval 가능.\n- Long-horizon 과제에서 상태/이력을 참조 가능.\n\n### 2.3 Critic-based closed-loop feedback\n- **Generalist reward model** 이 online으로 진행도를 평가.\n- 실패/탈선 시 local correction 또는 re-planning을 트리거 → 진정한 closed-loop.\n\n### 2.4 Layered 아키텍처\n- **OpenClaw layer** (시스템 권한 런타임) + **shared service layer** (memory, scheduler, critic) + **robot embodiment layer** (하드웨어 추상).\n- 레이어 분리로 새로운 로봇/서비스 추가가 용이.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- 정량 지표는 abstract에 제시되지 않음.\n- 주장: 자연어 의도 → 물리 행동까지 **closed-loop**, open/dynamic 환경에서 **점진적 self-evolving**이 가능.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Reward model의 일반성**: \"generalist reward model\"이 실제로 모든 task에 calibration되어 있는지는 별도 검증 필요.\n2. **자원/지연 비용**: Persistent memory + critic + planner의 조합은 latency와 스토리지를 크게 늘림.\n3. **평가 프로토콜**: Self-evolving을 정량화할 표준 벤치마크 부재 → 논문 자체 시나리오에 의존할 가능성.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — System-2 agent + OpenClaw 런타임을 embodied 제어에 접목한 통합 시도. 각 구성요소는 기존 아이디어의 조합에 가까움. |\n| **Practical impact** | ★★★★☆ — Long-horizon·multi-robot 실환경에 바로 배포 가능한 foundation이라면 영향력 큼. 실제 재현성이 관건. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | \"Self-evolving\"의 정의와 측정 방법? | Abstract만으로는 불명확. Memory 누적 + critic feedback 기반 online adaptation으로 추정되며, 정량 지표는 PDF 확인 필요. |\n| 2 | Critic이 틀리면 어떻게 되나? | Closed-loop의 classic 문제. Reward hacking / false positive 시 교정 방향 자체가 왜곡됨. Generalist reward의 robustness가 핵심. |\n| 3 | OpenClaw의 \"전체 시스템 권한\"은 보안 관점에서 괜찮나? | Local runtime이므로 격리 가능하지만, 공유 service layer가 여러 로봇을 제어한다면 공격 표면 확대. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 43
+    },
+    {
       "name": "AcceRL",
       "organization": "TODO: check paper",
       "date": "2026-03-19",
@@ -2020,7 +2053,7 @@
         "content": "# AcceRL: A Distributed Asynchronous RL and World Model Framework for VLA Models\n\n> **한 줄 요약**: VLA 모델의 RL 학습을 위한 완전 비동기 분산 프레임워크로, macro/micro 2단계 비동기 설계와 plug-and-play diffusion world model을 결합하여 LIBERO에서 99-100% 성공률, 200배 sample efficiency 향상, super-linear throughput scaling 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- VLA 모델(OpenVLA, pi0 등)은 주로 **Behavior Cloning (BC)** 기반 → 분포 외(OOD) 상황에서 compounding error 문제\n- BC의 한계를 극복하기 위한 RL fine-tuning 시도가 증가(VLA-RL, PLD 등), 그러나 **수십억 파라미터 VLA에 RL을 적용하면 학습 throughput이 극단적으로 낮아짐**\n- 기존 분산 RL(IMPALA, SEED 등)은 VLA 규모의 모델을 고려하지 않았음: **step/episode/cluster 세 단계의 cascading 동기화 병목**\n\n### 핵심 질문\n- **비동기 학습에서 policy lag 문제를 해결하면서 super-linear scaling을 달성할 수 있는가?**\n- **World model을 비동기 RL 파이프라인에 plug-and-play로 통합하면 sample efficiency가 얼마나 향상되는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Dual-Level Asynchrony\n\n**Macro-asynchrony**: Training과 rollout generation을 **circular pipeline buffer**로 분리\n- Trainer가 update하는 동안 rollout worker는 계속 데이터 수집\n- Episode 끝을 기다리지 않고 buffer가 차면 즉시 학습\n\n**Micro-asynchrony**: Environment interaction과 model inference를 **inference-as-a-service** 패러다임으로 분리\n- 환경 step (CPU)과 policy inference (GPU)를 비동기 처리\n- Dynamic batching with max-wait threshold로 GPU utilization 극대화\n\n세 가지 cascading inefficiency 제거:\n1. **Step-level**: Inference 대기 → dynamic batching으로 해소\n2. **Episode-level**: Episode 종료 대기 → circular buffer로 해소\n3. **Cluster-level**: 가장 느린 worker 대기 → 완전 비동기로 해소\n\n> ❓ **예상 질문**: 비동기 학습에서 policy lag(actor가 오래된 policy로 수집)은 off-policy 편향을 유발하지 않는가?\n> **답변**: 맞음. AcceRL은 세 가지 기법으로 완화: (1) **Value recomputation** — 최신 파라미터 $\\theta$로 $V_\\theta(o_t)$를 재평가, (2) **Global advantage normalization** — AllReduce로 distributed 정규화, (3) **GIPO (Gaussian Importance sampling Policy Optimization)** — PPO의 hard clipping 대신 soft Gaussian trust weight 사용. GIPO는 PPO 대비 **7.5배 sample efficiency** 향상 (8K vs 60K steps에서 동일 성능).\n\n### 2.2 Gaussian Importance sampling Policy Optimization (GIPO)\n\nPPO의 hard clip 대신 soft Gaussian weight:\n\n$$w_t = \\exp\\left(-\\frac{(r_t(\\theta) - 1)^2}{2\\sigma^2}\\right)$$\n\n여기서 $r_t(\\theta) = \\frac{\\pi_\\theta(a_t|s_t)}{\\pi_{\\text{old}}(a_t|s_t)}$. Policy lag 하에서 hard clip보다 안정적.\n\n### 2.3 Diffusion World Model\n\n**Observation model** $M_{\\text{obs}}$과 **reward model** $M_{\\text{reward}}$를 diffusion architecture로 구현:\n\n- Agent가 \"imagination\"에서 학습 가능 → 실제 환경 상호작용 없이 가상 경험 생성\n- Plug-and-play: RL 파이프라인에 독립적으로 추가/제거 가능\n- Real과 imaginary experience를 혼합하여 학습 (trajectory에 ^ 표기로 구분)\n\n> ❓ **예상 질문**: World model의 예측 오차가 누적되면 \"model exploitation\" 문제가 생기지 않는가?\n> **답변**: Short-horizon rollout으로 완화. 200배 sample efficiency 향상이 실증적으로 model exploitation이 제어됨을 보이나, long-horizon rollout에서의 한계는 미분석.\n\n### 2.4 VLA 특화 최적화\n\n| 기법 | 설명 | 효과 |\n|------|------|------|\n| **Vocabulary Slimming** | LLM output head를 ~32K→~256 action tokens로 pruning | VRAM 절감, probability mass leakage 방지 |\n| **Action-aware Value Head** | Attention pooling + step embedding으로 value 추정 | 정밀한 state value estimation |\n| **Token-level Policy Optimization** | Chunk-level → token-level 최적화로 전환 | 수치 불안정(vanishing products) 해소, 정밀한 credit assignment |\n\n> ❓ **예상 질문**: Vocabulary slimming이 VLA의 language understanding을 해치지 않는가?\n> **답변**: RL 학습 시에만 action vocabulary로 제한. 언어 이해는 frozen VLM이 담당하고 action head만 최적화하므로 language 능력에 영향 없음.\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### LIBERO Benchmark (Table 2)\n\n| Suite | Imitation Learning (BC) | **AcceRL** |\n|-------|------------------------|-----------|\n| Spatial | - | **99.6%** |\n| Object | - | **100.0%** |\n| Goal | - | **98.8%** |\n| Long-horizon | 90.7% | **99.1%** |\n\n- **거의 모든 suite에서 near-perfect** (99-100%)\n- Long-horizon에서 BC 대비 **+8.4%p** (90.7% → 99.1%)\n\n### Throughput Performance (Table 1)\n\n| 설정 | Samples/sec | GPU Utilization |\n|------|------------|----------------|\n| 7-GPU trainer | **104.22** | **>95%** |\n\n- **Super-linear scaling**: DeepSpeed ZeRO-2 optimizer state partitioning 덕분\n- Rollout worker: 64 workers까지 near-linear scaling\n\n### World Model Sample Efficiency (Figure 5)\n\n| 메트릭 | AcceRL (no WM) | AcceRL (with WM) |\n|--------|---------------|------------------|\n| 0.8 return 도달 env steps | ~2,000,000 | **~10,000** |\n| 수렴 training updates | ~80,000 | **<400** |\n\n- **200× sample efficiency improvement** with world model\n- 가상 경험으로 초기 학습을 가속, 이후 real experience로 fine-tune\n\n### GIPO vs PPO (Section 6.6)\n\n| 알고리즘 | 동일 성능 도달 steps | 상대 효율 |\n|---------|------------------|----------|\n| Standard PPO | ~60,000 | 1x |\n| **GIPO** | **~8,000** | **7.5x** |\n\n---\n\n## 4. Ablation 분석\n\n### Value Recomputation (Section 6.5)\n- **With**: 안정적 성능 곡선, 낮은 variance\n- **Without**: \"significant performance oscillations and higher variance due to misaligned value targets\"\n\n### Token-level vs Chunk-level Optimization (Section 5.3)\n- Chunk-level: log-probability의 곱으로 인한 numerical instability (vanishing)\n- Token-level: 개별 토큰 단위 최적화로 안정성 확보\n\n---\n\n## 5. 관련 연구 비교\n\n| 방법 | RL Algorithm | 분산 여부 | World Model | VLA 특화 | LIBERO Long |\n|------|-------------|----------|-------------|---------|------------|\n| VLA-RL | Online PPO | 단일 노드 | ✗ | △ | ~86.8% |\n| PLD | Residual RL + Distill | 단일 노드 | ✗ | △ | ~99% |\n| **AcceRL** | **Async GIPO** | **완전 분산** | **✓ (diffusion)** | **✓ (vocab slim, token-level)** | **99.1%** |\n\n---\n\n## 6. 한계 및 미해결 문제\n\n### 방법론적 미비점\n1. **LIBERO 단일 벤치마크**: 99-100%의 결과가 인상적이지만, LIBERO 외 벤치마크(CALVIN, SimplerEnv, real robot)에서의 검증 부재\n2. **World model quality 분석 부족**: Diffusion world model의 예측 정확도(MSE, FID 등)가 정량적으로 보고되지 않음. 어떤 상황에서 model이 부정확한지 미분석\n3. **Real-world 미적용**: 완전히 시뮬레이션 기반. 실제 로봇에서 RL training loop(환경 리셋, 보상 설계, 안전)의 실용성 미검증\n4. **하드웨어 요구사항**: 7+ GPU trainer, 64 rollout workers → 소규모 연구그룹에서 재현 어려움\n5. **Reward design**: Sparse reward (task success)만 사용하는지, dense reward도 있는지 불명확\n\n### Attribution 문제\n- 99-100% 성능에서 **GIPO**, **world model**, **vocabulary slimming**, **token-level optimization** 각각의 독립적 기여를 완전히 분리하는 ablation 부족\n- PLD도 LIBERO에서 ~99%를 달성하므로, AcceRL의 **차별적 가치는 throughput/efficiency**에 있음. 성능 자체에서의 차별화는 미미\n\n---\n\n## 7. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Dual-level asynchrony + GIPO + diffusion WM의 체계적 통합 |\n| **Technical depth** | ★★★★★ — 시스템 + 알고리즘 양면의 깊은 설계 |\n| **Experimental rigor** | ★★★☆☆ — LIBERO 단일 벤치마크, sim-only |\n| **Practical impact** | ★★★★★ — VLA의 RL 학습 병목을 정면으로 해결 |\n| **Writing quality** | ★★★★☆ — 시스템 세부사항이 체계적 |\n\n**강점**: VLA 시대의 가장 실질적인 bottleneck(RL 학습 효율)을 시스템+알고리즘 양면에서 해결. 200× sample efficiency, 7.5× GIPO 효율, super-linear scaling은 각각 인상적. 오픈소스. **약점**: 단일 벤치마크, real-world 부재, 하드웨어 요구 높음.\n\n---\n\n## 8. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | PLD도 LIBERO ~99%인데, AcceRL의 차별적 가치는? | 성능은 유사. AcceRL의 가치는 **throughput**(104 samples/sec), **sample efficiency**(200×), **scalability**(super-linear). PLD는 3-stage pipeline으로 복잡도 높음 |\n| 2 | GIPO의 soft Gaussian trust weight에서 σ의 sensitivity는? | σ가 너무 작으면 PPO clip과 유사, 너무 크면 importance weight가 uniform에 가까워짐. Sensitivity 분석 부분적 |\n| 3 | World model의 imagination horizon은? Short-horizon rollout의 정의는? | 논문에서 구체적 H 값 불명확. Short-horizon이 5 step인지 50 step인지에 따라 model exploitation 위험이 다름 |\n| 4 | Vocabulary slimming이 multi-task에서도 작동하는가? | LIBERO는 task-specific action space. 다양한 action space를 가진 cross-embodiment에서는 slimming 전략 재설계 필요 |\n| 5 | 99.1%에서 실패하는 0.9%는 어떤 케이스인가? | Error analysis 부재. World model이 틀린 경우인지, reward sparse로 인한 미수렴인지 분석 없음 |\n| 6 | Real-world에서 이 framework를 적용하려면? | 환경 리셋 자동화, 안전 제약 하의 exploration, real-time reward signal 등 추가 과제가 산적. pi*0.6의 RECAP이 더 실용적 접근 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 43
+      "rank": 44
     },
     {
       "name": "AnchorRefine",
@@ -2048,7 +2081,40 @@
         "libero": "fine-tuned",
         "calvin": "fine-tuned"
       },
-      "rank": 44
+      "rank": 45
+    },
+    {
+      "name": "AnySlot",
+      "organization": "TODO: check paper",
+      "date": "2026-04-12",
+      "paper_url": "https://arxiv.org/abs/2604.10432",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "slot-placement",
+        "goal-conditioned",
+        "zero-shot",
+        "hierarchical",
+        "manipulation",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "goal-conditioned VLA policy with explicit visual goal (scene-marker) intermediate representation",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# AnySlot: Goal-Conditioned Vision-Language-Action Policies for Zero-Shot Slot-Level Placement\n\n> **한 줄 요약**: 언어 지시를 **explicit visual goal (scene marker)** 로 먼저 변환한 뒤, goal-conditioned VLA policy로 실행하는 **hierarchical slot-level placement 프레임워크**. 새로운 SlotBench 9개 과제군에서 monolithic VLA 대비 zero-shot 성능 개선을 보고.\n\n---\n\n## 1. 배경 및 동기\n\n- 최신 monolithic VLA는 generalist manipulation에서 강하지만, **\"어느 슬롯에 무엇을 놓아라\"** 류의 compositional 언어 지시에는 여전히 취약.\n- Slot-level placement는 (i) reliable **slot grounding** 과 (ii) sub-centimeter 수준의 **실행 정확도** 둘 다 요구 → 단일 policy가 두 가지를 동시에 배우기 어려움.\n- 기존 modular grounding 방식들은 low-level 실행 단계에서 누적 오차가 크고, zero-shot 일반화가 제한됨.\n\n---\n\n## 2. 방법론\n\n### 2.1 Scene-Marker로의 언어 grounding\n- 언어 지시를 바로 action으로 매핑하지 않고, 중간 표현으로 **explicit spatial visual goal (scene marker)** 을 생성.\n- 이 marker가 \"어느 슬롯이 목표인가\"를 시각적으로 명시 → 이후 단계가 언어 모호성을 해결할 필요가 없어짐.\n\n### 2.2 Goal-conditioned VLA policy\n- Scene marker가 주입된 goal-conditioned VLA가 저수준 제어 실행.\n- High-level slot selection과 low-level execution을 **분리**함으로써, semantic accuracy와 spatial robustness를 동시에 확보.\n\n### 2.3 SlotBench\n- 정밀 placement 평가를 위한 **9개 task category** 의 시뮬레이션 벤치마크.\n- 구조화된 spatial reasoning 능력을 계량화.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- Flat (monolithic) VLA baseline 및 이전 modular grounding 방법 대비 **zero-shot slot-level placement에서 유의미한 개선**.\n- SlotBench 9개 category 전반에서 우위를 주장.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Real-world 검증 부족 가능성**: SlotBench가 시뮬레이션 전용이라면 real kitchen/workshop에서의 sub-cm 정확도 재현 여부 불명확.\n2. **Scene marker 생성 품질 의존**: Marker가 틀리면 하위 policy가 올바르게 실행해도 실패 → error cascade 가능성.\n3. **Slot 정의의 일반성**: \"slot\"이 명시적으로 정의된 과제에 특화되어, 비정형 placement에서는 이점이 줄 수 있음.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Explicit visual goal을 slot-level placement에 접목한 점은 깔끔하나, hierarchical grounding 자체는 기존 연구 계보 위. |\n| **Practical impact** | ★★★☆☆ — Pick-and-place 산업 적용 잠재력 있으나, SlotBench가 새로 도입된 벤치라 외부 비교가 필요. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Scene marker가 틀린 경우 policy가 회복할 수 있나? | Goal-conditioned라 marker 오류 시 실행도 빗나감. 향후 closed-loop re-grounding이 필요. |\n| 2 | Monolithic VLA에 data augmentation만으로는 해결되지 않나? | Compositional 언어 + sub-cm 정확도는 scale로는 느리게 개선됨 → explicit intermediate의 구조적 장점 주장. |\n| 3 | SlotBench가 실제 robotics 시나리오를 얼마나 대표하나? | 9개 category가 실제 packing/assembly를 얼마나 포괄하는지 별도 검증 필요. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 46
     },
     {
       "name": "AVDC",
@@ -2087,7 +2153,7 @@
         "content": "# AVDC: Learning to Act from Actionless Videos through Dense Correspondences\n\n> **한 줄 요약**: Action annotation 없는 비디오에서 text-conditioned video diffusion model로 미래 프레임을 생성하고, optical flow 기반 dense correspondence + rigid body transformation으로 3D action을 역추론하여, 165개 비디오만으로 Meta-World 43.1% (BC 16.2% 대비 2.7배) 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- 로봇 학습 데이터는 **action annotation이 필수** → 수집 비용이 극도로 높음\n- 인터넷 비디오에는 풍부한 manipulation dynamics가 있으나 action label 없음\n- 기존 video-based 접근(R3M, VIP)은 representation learning에 국한 → action 직접 생성 불가\n- UniPi는 video→action을 시도했으나, **inverse dynamics model에 action label이 필요** → 모순\n\n### 핵심 질문\n- **Action label 없이 비디오만으로 로봇의 실행 가능한 3D action을 생성할 수 있는가?**\n- **Dense optical flow correspondence로 정확한 rigid body transformation을 복원할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Video Diffusion Model\n\nModified U-Net with **factorized spatial-temporal convolution**:\n- Spatial conv: 각 timestep에 독립 적용\n- Temporal conv: 각 spatial location에 독립 적용\n- **CLIP-Text encoder (63M params)** → Perceiver attention pooling → time embedding injection\n- Input: 첫 프레임을 noisy future frames에 concatenate하여 conditioning\n\n| 환경 | Params | Resolution | Batch | Steps | GPU |\n|------|--------|-----------|-------|-------|-----|\n| Meta-World | 201M | 128×128 | 16 | 60K | 4× V100, ~24h |\n| iTHOR | 109M | 64×64 | 32 | 80K | 4× V100, ~24h |\n| Bridge | 166M | 48×64 | 32 | 180K | 4× V100, ~48h |\n\n### 2.2 Dense Correspondence → 3D Action\n\n핵심 파이프라인:\n\n```\nGenerated video → GMFlow (optical flow) → Dense correspondence\n     → Object mask (Language-SAM) → Contact point sampling (N=500)\n     → RANSAC → 2D transformation → 3D rigid body transform via camera intrinsics\n     → Subgoal sequence → Position controller\n```\n\nRigid body transformation:\n\n$$\\mathcal{L}_{\\text{Trans}} = \\sum_i \\left\\|\\mathbf{u}_t^i - \\frac{(K T_t \\mathbf{x}_i)_1}{(K T_t \\mathbf{x}_i)_3}\\right\\|_2^2 + \\left\\|\\mathbf{v}_t^i - \\frac{(K T_t \\mathbf{x}_i)_2}{(K T_t \\mathbf{x}_i)_3}\\right\\|_2^2$$\n\n> ❓ **예상 질문**: Rigid body transformation 가정이 얼마나 제약적인가?\n> **답변**: 변형 가능한 물체(천, 로프)에는 부적합. Rigid assumption이 Meta-World의 단단한 물체에서는 적합하나, 실제 환경의 다양한 물체에서는 한계. 논문도 이를 인정.\n\n### 2.3 Replanning\n\nOpen-loop 실행 중 실패 감지 시 replan:\n- **Trigger**: \"로봇 움직임 < 1mm for 15 consecutive steps while task unfulfilled\"\n- 새로운 observation으로 video regeneration → action 재계산\n- 1-6회 replanning per episode\n\n> ❓ **예상 질문**: Replanning이 비용이 높지 않은가?\n> **답변**: 매우 비쌈. Video generation 10.57초 + flow 0.28초/frame + action regression 1.31초 + execution 1.53초 = **~18초/replan** (RTX 3080Ti). 1-6회 replan하면 총 30초~2분 per episode. Real-time 제어와는 거리가 멂.\n\n---\n\n## 3. 데이터 전략\n\n| 데이터셋 | 비디오 수 | Resolution | Action Label | 용도 |\n|---------|---------|-----------|-------------|------|\n| Meta-World | **165** (5 demo × 11 task × 3 cam) | 128×128 | ✗ | 주요 평가 |\n| iTHOR | **240** (12 obj × 4 room × 5 ep) | 64×64 | ✗ | Navigation |\n| Visual Pusher | **198** (human videos) | Variable | ✗ | Cross-embodiment |\n| Bridge | **33,078** | 48×64 | ✗ | Pre-training |\n| Real-world FT | **20** | Variable | ✗ | Fine-tuning |\n\n핵심: **165-240개 비디오만으로 학습** — action label 전혀 불필요.\n\n---\n\n## 4. 실험 결과 심층 분석\n\n### Meta-World (Table 1, 11 Tasks)\n\n| 모델 | Action Labels | Overall SR (%) |\n|------|-------------|---------------|\n| BC-Scratch | ✓ (15,216 pairs) | 16.2 |\n| BC-R3M | ✓ | 15.4 |\n| UniPi | ✓ (inverse dynamics) | 6.1 |\n| AVDC-Flow (direct) | ✗ | 13.7 |\n| AVDC-NoReplan | ✗ | 19.6 |\n| **AVDC-Full** | **✗** | **43.1** |\n\n**태스크별 편차가 매우 큼**:\n- Best: Door-Close **89.3%**, Handle-Press **81.3%**, Door-Open **72.0%**\n- Worst: Assembly **6.7%**, Hammer **8.0%**\n- Assembly, Hammer처럼 **정밀 접촉이 필요한 태스크에서 극도로 약함**\n\n### iTHOR Navigation (Table 2)\n\n| 모델 | Overall SR (%) |\n|------|---------------|\n| BC-Scratch | 2.1 |\n| BC-R3M | 0.4 |\n| **AVDC** | **31.3** |\n\n- Navigation에서 BC 대비 압도적 (2.1% → 31.3%)\n- Camera motion = inverse object motion 이중성 활용\n\n### Cross-Embodiment (Visual Pusher)\n\n- **90% zero-shot success rate** (40 runs)\n- Human video만으로 학습 → 로봇에서 zero-shot 실행\n\n### Segmentation Ablation\n\n| Masks | SR (%) |\n|-------|--------|\n| GT masks | 43.1 |\n| Predicted masks (Language-SAM) | 34.5 (-8.6%p) |\n\n---\n\n## 5. Ablation 분석\n\n| Variant | Overall SR (%) | 특징 |\n|---------|---------------|------|\n| AVDC (ID) = UniPi style | 6.1 | Inverse dynamics (action label 필요) |\n| AVDC (Flow) | 13.7 | Direct flow → action (no video gen) |\n| AVDC (No Replan) | 19.6 | Open-loop (replan 없음) |\n| **AVDC (Full)** | **43.1** | **Two-stage + replanning** |\n\n- Replanning 기여: **+23.5%p** (19.6→43.1)\n- Video generation 기여: +5.9%p (direct flow 13.7 vs no-replan 19.6 → video gen 없이도 어느 정도)\n\n### DDIM Acceleration\n\n| Steps | SR (%) | Speedup |\n|-------|--------|---------|\n| 100 (DDPM) | 43.1 | 1x |\n| 10 (DDIM) | 37.5 (-5.6%p) | 10x |\n\n---\n\n## 6. 추론 비용 (RTX 3080Ti)\n\n| 단계 | 시간 |\n|------|------|\n| Video generation | **10.57s** (~1.51s/frame) |\n| Flow prediction | 0.28s/frame pair |\n| Action regression | 1.31s |\n| Execution | 1.53s |\n| **Total per replan** | **~18s** |\n\n---\n\n## 7. 한계 및 미해결 문제\n\n### 방법론적 미비점 (저자 명시 포함)\n1. **Occlusion**: 저자 명시 — \"when majority of object occluded by robot arm, algorithm may lose track\"\n2. **Optical flow 한계**: 저자 명시 — \"struggles under rapidly changing lighting or large object movements.\" 특히 작은 물체의 pixel-level 오류가 3D 공간에서 큰 오류로 증폭\n3. **Force 정보 부재**: 저자 명시 — \"force information crucial for manipulation, unobtainable from RGB videos\"\n4. **Grasp/contact 예측**: 저자 명시 — 비디오에서 로봇의 grasp 방식을 직접 유추 불가 (사람 손 vs 로봇 그리퍼)\n5. **극도로 느린 추론**: ~18s/replan × 1-6회 = 30s~2min per episode. Real-time 제어와 거리가 멂\n6. **정밀 조작 약점**: Assembly 6.7%, Hammer 8.0% — contact-rich task에서 거의 실패\n7. **Real-world 실패 분석**: 10건 중 8건 실패: 75%가 wrong plan (잘못된 물체/목표), 25%가 video generation discontinuity\n\n### Attribution 문제\n- 43.1%의 성능이 **video generation** 품질 때문인지, **replanning 전략** 때문인지 분리 필요. Ablation에서 replanning 기여(+23.5%p)가 video gen 기여보다 훨씬 큼 → \"좋은 action 추출\"보다 \"실패 시 재시도\"가 핵심 요인일 수 있음\n\n---\n\n## 8. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Actionless video → executable policy의 패러다임이 매우 참신 |\n| **Technical depth** | ★★★★☆ — Dense correspondence + rigid transform의 기하학적 접근이 우아 |\n| **Experimental rigor** | ★★★★☆ — 4개 환경, cross-embodiment, ablation 포괄적 |\n| **Practical impact** | ★★★☆☆ — 18s/replan의 latency, 43.1% SR로 실용성 제한 |\n| **Writing quality** | ★★★★☆ — 명확한 동기와 체계적 실험 |\n\n**강점**: Action 없는 비디오 활용이라는 근본적으로 중요한 문제를 다루며, cross-embodiment (human→robot) 가능성을 실증. **약점**: 43.1% SR, ~18s latency, contact-rich 실패로 practical deployment는 아직 먼 미래.\n\n---\n\n## 9. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Replanning이 +23.5%p면, 좋은 video보다 \"많이 시도\"가 핵심 아닌가? | 맞음. Replanning = closed-loop retry. Video 품질보다 failure recovery가 성능의 주요 요인. Replanning 없으면 19.6%에 불과 |\n| 2 | 165개 비디오 vs 15,216개 action-labeled frames — 공정한 비교인가? | AVDC는 label 없이 165 video, BC는 15K labeled. 데이터 \"양\"은 BC가 많으나 \"annotation 비용\"은 AVDC가 훨씬 적음 |\n| 3 | Rigid body assumption이 깨지는 경우는? | Deformable objects (천, 로프), articulated objects (서랍 내부 물체). Meta-World는 rigid 위주라 유리 |\n| 4 | RT-2나 OpenVLA 같은 대규모 VLA와 비교하면? | 직접 비교 없음. 그러나 action label 없이 학습한다는 점에서 상보적 — AVDC를 VLA의 data augmentation에 활용 가능 |\n| 5 | 추론 10.57초를 줄이려면? | DDIM 10-step으로 10x 가속 가능하나 -5.6%p 하락. Consistency model이나 latent diffusion으로 추가 가속 가능 |\n| 6 | 왜 Assembly와 Hammer에서 실패하는가? | 두 태스크 모두 정밀한 접촉 제어 필요. Optical flow의 pixel-level 오류가 3D에서 증폭되어 contact positioning 실패 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 45
+      "rank": 47
     },
     {
       "name": "CrossFormer",
@@ -2120,7 +2186,40 @@
         "content": "# CrossFormer: Scaling Cross-Embodied Learning — One Policy for Manipulation, Navigation, Locomotion and Aviation\n\n> **한 줄 요약**: 130M 파라미터의 경량 transformer로 20+ 이종 로봇의 900K trajectory를 학습하여, 단일 팔·양팔·바퀴 로봇·쿼드콥터·사족보행 모두를 하나의 정책으로 제어하고 **specialist와 동등(73% vs 67%)**, 쿼드콥터 zero-shot 82% 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- 기존 cross-embodiment 학습(RT-X, Octo)은 **manipulation에 편향**\n- 서로 다른 로봇의 observation/action space를 수동으로 alignment해야 함 (Yang et al.)\n- \"단일 정책\"이 specialist를 능가하지 못하면 실용적 의미 부재\n\n### 핵심 질문\n- **수동 alignment 없이 4개 도메인(manipulation, navigation, locomotion, aviation)을 하나의 정책으로 학습할 수 있는가?**\n- **Cross-embodiment 학습이 specialist 대비 positive transfer를 보이는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Architecture\n\n| 항목 | 값 |\n|------|-----|\n| Total params | **130M** |\n| Transformer | 12 layers, 8 heads |\n| MLP dim | 2048 |\n| Token embedding | 512 |\n| Context window | **2135 tokens** (5 timesteps) |\n| Image encoder | ResNet-26 (ImageNet init) |\n\n### 2.2 Modality-based Tokenization\n\n관측을 modality별로 토큰화 (로봇별 adapter 불필요):\n- **Images**: ResNet-26 → flattened spatial features → projection to 512\n- **Proprioception**: Direct projection to 512\n- 4가지 이미지 encoder variant: workspace, egocentric, wrist (2종)\n- **같은 카메라 유형이면 encoder weight 공유**\n\n### 2.3 Action Prediction Heads (4 Types)\n\n| Head | Dimensions | Chunk Size | Freq |\n|------|-----------|-----------|------|\n| Single-arm Cartesian | 7D (EE delta) | 4 | 5-15Hz |\n| Navigation waypoints | 2D (xy delta) | 4 | 4Hz |\n| Bimanual joint | 14D | **100** | 20Hz |\n| Quadruped joint | 12D | 1 | 20Hz |\n\n- **L1 regression loss** (diffusion/classification 아닌 — bimanual high-freq에 적합)\n\n> ❓ **예상 질문**: L1 regression은 multimodal action에 취약하지 않은가?\n> **답변**: 맞음. 이론적으로 diffusion이 multimodal에 강하지만, 저자들은 \"prior work on high-frequency bimanual manipulation에서의 성공\"을 근거로 L1 선택. Bimanual 100-step chunk에서 diffusion의 latency가 더 큰 문제.\n\n---\n\n## 3. 데이터 전략\n\n### 900K Trajectories 구성\n\n| 소스 | 비율 | Domain |\n|------|------|--------|\n| Fractal (OXE) | 17% | Single-arm manipulation |\n| Bridge | 17% | Single-arm manipulation |\n| GNM navigation | 17% | Navigation |\n| ALOHA multi-task | 17% | Bimanual |\n| Go1 quadruped | 8.5% | Locomotion |\n| Franka tabletop | 8.5% | Single-arm manipulation |\n| Others (DROID 등) | 나머지 | Mixed |\n\n### 학습 설정\n\n| 항목 | 값 |\n|------|-----|\n| Steps | 300K |\n| Batch size | 512 |\n| Hardware | **TPU V5e-256 pod** |\n| Duration | **47 hours** |\n| Optimizer | AdamW, LR 3e-4, WD 0.1 |\n| Goal relabeling | Hindsight (random future obs) |\n\n---\n\n## 4. 실험 결과 심층 분석\n\n### Cross-Embodiment Results (Table 3)\n\n| Platform | Tasks | Single-Robot | Best Prior | **CrossFormer** |\n|---------|-------|-------------|-----------|----------------|\n| WidowX | 4 | 0.42 | 0.34 (Octo) | **0.50** |\n| Franka | 2 | 0.62 | 0.60 (OpenVLA) | **0.62** |\n| ALOHA | 2 | 0.50 | 0.50 (ACT) | **0.70** |\n| LoCoBot | 3 | 0.92 | 0.48 (ViNT) | **0.93** |\n| Tello Quadcopter | 1 | 0.68 | 0.68 (ViNT) | **0.82** |\n| Go1 Walking | 1 | 1.0 | N/A | **1.0** |\n\n**Overall**: CrossFormer **73%** vs Single-Robot 67% vs Best Prior 51%\n\n### 핵심 발견\n\n1. **ALOHA에서 +20%p** (0.50→0.70): Cross-embodiment data가 bimanual에 가장 큰 positive transfer\n2. **Tello zero-shot 82%**: 학습 데이터에 쿼드콥터 없이 navigation head로 zero-shot 성공\n3. **Franka에서 동등** (0.62 vs 0.62): OpenVLA와 비슷하지만 모델이 53x 작음 (130M vs 7B)\n\n### Trial 수\n\n| Platform | Trials |\n|---------|--------|\n| WidowX | 48 (12×4 tasks) |\n| Franka | 39 |\n| ALOHA | 20 (10×2 tasks) |\n| LoCoBot | 6 (1×6 locations) |\n| Tello | 3 |\n| Go1 | 25-min normalized |\n\n> ⚠️ **Trial 수가 적음**: 특히 Tello (3), LoCoBot (6)은 통계적 유의성 우려\n\n---\n\n## 5. 관련 연구 비교\n\n| 모델 | Params | Embodiments | Domains | Manual Align | Overall SR |\n|------|--------|------------|---------|-------------|-----------|\n| RT-1-X | Large | ~7 (manip.) | 1 | ✗ | - |\n| Octo | 93M | ~9 (manip.) | 1 | ✗ | 0.34 (WidowX) |\n| Yang et al. | ~100M | Multi | 2 | **✓** | 0 (WidowX) |\n| **CrossFormer** | **130M** | **20+** | **4** | **✗** | **0.73** |\n\n---\n\n## 6. 한계 및 미해결 문제\n\n### 방법론적 미비점 (저자 명시 포함)\n1. **Positive transfer 미미**: 저자 직접 인정 — \"Our results do not yet show significant positive transfer across embodiments.\" CrossFormer가 specialist와 비슷하지만 명확히 넘지는 못함\n2. **Hand-picked sampling weights**: 데이터 비율을 수동으로 조정. \"Ideal scaling would eliminate need\" — 자동 data mixture 전략 부재\n3. **Inference speed**: 130M이지만 2135 token context → 고주파 제어(>20Hz)에서 한계. 저자 명시\n4. **Trial 수 부족**: Tello 3회, LoCoBot 6회로는 통계적 신뢰 불충분\n5. **Long-horizon 미평가**: 대부분 short-horizon. Multi-step task에서의 cross-embodiment 성능 미검증\n6. **Manipulation 편향**: 데이터의 ~50%가 manipulation → navigation/locomotion은 상대적으로 under-represented\n\n### Attribution 문제\n- 73% overall이 **cross-embodiment transfer** 덕분인지, **단순히 더 많은 데이터 (900K)** 덕분인지 불명확\n- 동일 데이터 양에서 in-domain data만 사용한 비교가 더 공정\n\n---\n\n## 7. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — 4개 도메인 통합이 야심적이고 실현됨 |\n| **Technical depth** | ★★★☆☆ — 아키텍처는 간결, 깊은 분석 부족 |\n| **Experimental rigor** | ★★★☆☆ — 다양한 embodiment이나 trial 수 부족 |\n| **Practical impact** | ★★★★☆ — 130M으로 multi-domain이 가능하다는 증거 |\n| **Writing quality** | ★★★★☆ — 명확하고 읽기 쉬움 |\n\n**강점**: 4개 도메인을 130M 모델로 통합, manual alignment 불필요, Tello zero-shot 성공. **약점**: 저자 스스로 인정한 \"significant positive transfer 부재\", 적은 trial 수, data sampling weight 수동 설정.\n\n---\n\n## 8. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | \"Positive transfer가 없다\"면 왜 cross-embodiment 학습을 하는가? | Transfer는 미미하나 **negative transfer도 거의 없음** (specialist와 동등). 하나의 모델로 여러 로봇을 운용하는 **실용적 가치** |\n| 2 | ALOHA +20%p가 진짜 transfer인가? | 가장 설득력 있는 positive transfer 사례. Manipulation data가 bimanual coordination에 도움 |\n| 3 | Tello 3 trials로 82%를 주장하는 것이 타당한가? | 통계적으로 불충분. 95% CI가 매우 넓을 것. 더 많은 trial 필요 |\n| 4 | 130M이면 VLM이 아닌데, language understanding은? | 텍스트 지시 대신 **goal image conditioning** 사용. Language 이해는 제한적 |\n| 5 | 900K를 더 키우면 (9M?) transfer가 emergence하는가? | Scaling 분석 부재. Octo→RT-X에서도 규모가 커지면 transfer가 더 명확해짐을 시사 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 46
+      "rank": 48
+    },
+    {
+      "name": "DA-PTQ",
+      "organization": "TODO: check paper",
+      "date": "2026-04-13",
+      "paper_url": "https://arxiv.org/abs/2604.11572",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "quantization",
+        "efficiency",
+        "deployment",
+        "post-training",
+        "low-bit",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "quantization technique applied on top of existing VLA action heads",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# DA-PTQ: Drift-Aware Post-Training Quantization for Efficient Vision-Language-Action Models\n\n> **한 줄 요약**: 순차 제어 환경에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ 문제를, **Cross-Space Representation Compensation + Motion-Driven Mixed-Precision** 두 축으로 해결하는 **drift-aware PTQ** 프레임워크.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA 배포는 memory/compute 제약 로봇에서 병목 → Post-Training Quantization(PTQ)이 자연스러운 선택지.\n- 그러나 VLA에 PTQ를 naive하게 적용하면 **순차 제어 도중 성능이 급격히 무너짐**.\n- 원인: vision-language → action 인터페이스에서의 양자화 오차가 시간에 따라 **kinematic drift** 로 누적.\n\n---\n\n## 2. 방법론\n\n### 2.1 Drift-aware 최적화 formulation\n- PTQ를 한 step의 오차 최소화가 아닌, **sequential decision process 위의 drift-aware optimization** 으로 재정의.\n- 시간 축 오차 누적을 목적함수에 직접 포함.\n\n### 2.2 Cross-Space Representation Compensation\n- Multimodal(비전/언어) representation과 action space 사이의 **구조적 왜곡(structured distortion)** 을 보정.\n- Action consistency를 개선하여 step-to-step error variance를 감소.\n\n### 2.3 Motion-Driven Mixed-Precision Allocation\n- Per-layer / per-component bit-width를 **trajectory-level motion error** 기준으로 할당.\n- 모션에 민감한 부위에 더 많은 비트를, 덜 민감한 부위엔 적은 비트를 배정 → 효율과 정확도의 trade-off 최적화.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- 저비트 설정에서 **full-precision과 비교 가능한 성능** 달성을 주장.\n- kinematic drift 유의미한 감소 보고.\n- 구체 bit-width, 벤치마크, 에너지/메모리 수치는 PDF 확인 필요.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **모델/백본 일반성**: 특정 VLA 아키텍처(discrete-token vs flow-matching 등)에 따라 drift 양상이 다름 → 일반화 검증 필요.\n2. **Calibration 데이터 의존**: PTQ는 calibration set 분포에 민감. Trajectory-level objective는 calibration의 covering 문제를 더 민감하게 만들 수 있음.\n3. **Hardware 매핑**: Mixed-precision이 실제 edge accelerator에서 지원되는 bit 조합과 정합해야 실질 속도 이득.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — VLA의 sequential 특성을 PTQ 목적함수에 직접 반영한 관점 전환은 신선. Mixed-precision을 motion error로 구동하는 것도 깔끔. |\n| **Practical impact** | ★★★★☆ — 저메모리 로봇 배포에 직격. 성능 유지 + 저비트가 사실이면 즉시 파급 큼. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 왜 QAT (Quantization-Aware Training)가 아니고 PTQ인가? | QAT은 재학습 비용이 크고 대형 VLA에서는 현실적이지 않음. PTQ는 calibration만으로 배포 가능 → DA-PTQ는 그 한계를 drift-aware로 극복. |\n| 2 | \"Kinematic drift\"를 어떻게 측정하나? | Trajectory-level motion error(예: end-effector 경로 deviation)를 objective로 사용. 구체 metric은 PDF 확인. |\n| 3 | 다른 PTQ(예: GPTQ, AWQ) 대비 이득은? | 일반 LLM PTQ는 static per-token loss 기반이라 **순차 control drift에 맹목**. DA-PTQ는 trajectory 관점을 명시적으로 포함. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 49
     },
     {
       "name": "DeeR-VLA",
@@ -2154,7 +2253,7 @@
         "content": "# DeeR-VLA: Dynamic Inference of Multimodal LLMs for Efficient Robot Execution\n\n> **한 줄 요약**: OpenFlamingo (3B/9B) 기반 MLLM에 multi-exit 구조를 추가하여, action consistency 기반 early-exit으로 LLM GFLOPs를 **2.5-5.2x 절감** (Table 2: 31.2→10.0~12.5 GFLOPs, Table 5 best: 31.2→6.0), 실제 latency **68.1% 감소** (55→17.5ms)하면서 CALVIN 성능 유지(4.08 vs 4.07).\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- 대형 MLLM 기반 로봇 정책이 **모든 시점에서 전체 모델을 실행** → 단순 동작에도 과다 연산\n- 기존 모델 압축(pruning, quantization)은 **정적** → easy/hard 구분 없음\n- \"파지 직전\"에는 깊은 reasoning, \"빈 공간 이동\"에는 얕은 처리로 충분\n\n### 핵심 질문\n- **태스크 난이도에 따라 동적으로 LLM depth를 조절하면 성능 저하 없이 얼마나 절감 가능한가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 아키텍처\n\n**Base**: OpenFlamingo (3B: 24 layers, 9B: 32 layers)\n- Vision encoder: ViT + Perceiver Resampler\n- Action head: **4-layer LSTM + 3-layer MLP** (경량)\n- **N개 exit point**: 매 2 self-attention layer마다 exit (3B: 6 exits from 12 layers)\n\n### 2.2 Exit Decision: Action Consistency\n\n연속 exit의 action 예측 간 L2 distance로 수렴 판단:\n\n$$\\|\\pi_\\theta(\\tilde{x}_t^i, h_{t-1}) - \\pi_\\theta(\\tilde{x}_t^{i-1}, h_{t-1})\\|_2 < \\eta_i$$\n\n- 두 연속 exit의 action이 유사하면 → 이미 수렴, early exit\n- Feature similarity나 time-based 기준보다 **action consistency가 최우수** (Table 4)\n\n> ❓ **예상 질문**: Overconfident early exit의 위험은?\n> **답변**: Action consistency는 confidence 자체가 아닌 **action 변화의 안정성**을 측정하므로, overconfidence 문제를 부분적으로 회피. 그러나 두 exit 모두 같은 방식으로 틀릴 수 있는 경우는 포착 불가.\n\n### 2.3 Threshold 결정\n\n두 가지 방식:\n1. **Dataset-based**: 지수분포 가정으로 target exit proportion에서 threshold 도출\n2. **Online**: Bayesian Optimization으로 constraint violation penalty 최소화\n\n### 2.4 학습 전략\n\n| 항목 | 값 |\n|------|-----|\n| Sampling s₁ | Uniform random exit per timestep |\n| Sampling s₂ | Segment-based (연속 temporal window에서 같은 exit) |\n| Auxiliary loss | 각 exit에 independent prediction head |\n| Total loss | $\\mathcal{L}_{total} = \\mathcal{L}^* + \\mathcal{L}_{aux}$ |\n\n---\n\n## 3. 학습 설정\n\n| 항목 | 값 |\n|------|-----|\n| Batch size | 32 (4×8 distributed) |\n| LSTM window | 12 timesteps |\n| Dropout | LSTM 0.3, MLP 0.4 |\n| LR | MLLM 1e-4, action head 2.5e-5 |\n| Epochs | 3B: 4+4 (D→D), 3+1 (ABCD→D); 9B: ~24h A100 |\n| GPU | 8× V100 (3B) / 8× A100 (9B) |\n\n---\n\n## 4. 실험 결과 심층 분석\n\n### CALVIN Benchmark (Table 2)\n\n| Setting | 모델 | Avg Len | LLM GFLOPs |\n|---------|------|---------|-----------|\n| D→D | RoboFlamingo++ | 2.71 | 31.2 |\n| D→D | **DeeR** | **2.83** | **8.6 (3.6x↓)** |\n| ABCD→D | RoboFlamingo++ | 4.07 | 31.2 |\n| ABCD→D | **DeeR** | **4.13** | **10.0 (3.1x↓)** |\n| ABC→D | RoboFlamingo++ | 2.59 | 31.2 |\n| ABC→D | **DeeR** | **2.82** | **12.5 (2.5x↓)** |\n\n- **성능 유지/약간 향상 + 3.1-3.6x GFLOPs 절감**\n\n### 실제 추론 효율 (Table 5, ABCD→D)\n\n| 모델 | Inference Time | GFLOPs | Avg Len |\n|------|--------------|--------|---------|\n| RoboFlamingo++ | 55ms | 31.2 | 4.07 |\n| **DeeR** | **17.5ms** | **6.0** | **4.08** |\n\n- **Wall-clock 68.1% 감소** (55ms → 17.5ms)\n- **5.2x GFLOPs 절감** (31.2 → 6.0)\n- 성능은 4.07 → 4.08으로 **오히려 약간 향상**\n\n### Quantization 결합 (Table 6, ABCD→D)\n\n| Precision | Memory | Avg Len |\n|----------|--------|---------|\n| Float32 | 6GB | 4.13 |\n| Float16 | 3GB | 4.12 |\n| Int4 | **1.7GB** | 3.91 |\n\n- FP16: 성능 거의 동일하며 메모리 절반\n- Int4: -0.22 하락이지만 1.7GB로 edge device 가능\n\n---\n\n## 5. Ablation 분석\n\n### Auxiliary Loss (Table 3, ABCD→D)\n\n| 설정 | Avg Len | GFLOPs |\n|------|---------|--------|\n| Without auxiliary losses | 2.64 | 4.9 |\n| **With auxiliary losses** | **2.71** | 10.0 |\n\n- Auxiliary loss가 성능을 **유의미하게 향상** (2.64 → 2.71)\n\n### Exit Criterion 비교 (Table 4)\n\n- **Action consistency**: 최우수\n- Feature similarity: 차선\n- Time-based: 최하\n\n---\n\n## 6. 메모리 사용량\n\n| 모델 | LLM Memory |\n|------|-----------|\n| OpenFlamingo 3B DeeR-S | **2GB** |\n| OpenFlamingo 3B DeeR-B | 6GB |\n| OpenFlamingo 9B DeeR-S | 8GB |\n| OpenFlamingo 9B DeeR-B | 12GB |\n\n---\n\n## 7. 관련 연구 비교\n\n| 방법 | 압축 유형 | Dynamic | 성능 보존 | Latency 감소 |\n|------|---------|---------|----------|------------|\n| Pruning | Static | ✗ | △ | ~2x |\n| Quantization (INT4) | Static | ✗ | △ | ~2x |\n| **DeeR-VLA** | **Dynamic Early Exit** | **✓** | **✓** | **3.1x (wall-clock 68.1%)** |\n\n---\n\n## 8. 한계 및 미해결 문제\n\n### 방법론적 미비점\n1. **OpenFlamingo backbone**: 3B/9B 규모이며 최신 VLM (7B LLaMA 등) 대비 구형. 최신 VLA에서의 적용성 미검증\n2. **CALVIN only**: LIBERO, SimplerEnv 등 다른 벤치마크 결과 없음\n3. **Temporal consistency**: 시점마다 다른 depth에서 exit하면 action의 시간적 일관성 문제 → 논문에서 \"segment-based sampling (s₂)\"으로 완화하나 정량적 분석 부족\n4. **Action consistency 기준의 한계**: 두 exit이 동일하게 틀리는 경우 (같은 방향의 오류) 포착 불가\n5. **Threshold tuning**: Dataset-based 또는 Bayesian Optimization — 새 환경에서 재조정 필요\n\n### Attribution 문제\n- 성능 유지가 **early exit 설계**의 효과인지, **auxiliary loss가 각 exit의 독립적 학습 품질을 보장**했기 때문인지 분리 필요\n- Auxiliary loss 없으면 2.64 (vs 2.71) → auxiliary가 핵심\n\n---\n\n## 9. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Early exit의 VLA 적용, action consistency criterion |\n| **Technical depth** | ★★★★★ — Exit mechanism, threshold 결정, quantization 결합 등 체계적 |\n| **Experimental rigor** | ★★★☆☆ — CALVIN 단일 벤치마크 |\n| **Practical impact** | ★★★★★ — Edge deployment의 핵심 문제 해결. 17.5ms, 2GB |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: 55ms→17.5ms (68.1% 감소)의 실제 wall-clock 절감이 인상적. 성능 유지가 확실. Quantization과 결합하면 1.7GB까지 축소 가능 → Jetson 등 edge device 배포 가능. **약점**: CALVIN only, 구형 backbone, temporal consistency 분석 부족.\n\n---\n\n## 10. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | OpenVLA (7B)에 적용하면 얼마나 절감되는가? | 직접 검증 없음. 7B에서는 절감 폭이 더 클 것으로 예상 (deeper model = more early-exit 기회) |\n| 2 | 17.5ms면 57Hz인데, 이게 action quality를 향상시키는가? | 빈번한 re-planning이 closed-loop 성능을 높일 수 있음. 다만 실험에서 이를 직접 보이지 않음 |\n| 3 | Safety-critical 상황에서 early exit가 위험하지 않은가? | Action consistency가 \"변화 없음 = 안전\"으로 판단. 하지만 두 exit이 동일하게 위험한 action을 예측할 수 있음 |\n| 4 | DepthCache (visual token merging)와 결합하면? | Multiplicative 절감 가능 — token 수 감소 + early exit = 더 빠른 추론 |\n| 5 | 어떤 layer에서 주로 exit하는가? | \"Easy\" 상황(approach): 초기 layer, \"Hard\" 상황(stacking, push switch): 깊은 layer. 시각화 포함 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 47
+      "rank": 50
     },
     {
       "name": "DepthCache",
@@ -2184,7 +2283,7 @@
         "content": "# DepthCache: Depth-Guided Training-Free Visual Token Merging for VLA Model Inference\n\n> **한 줄 요약**: Depth 기반 영역 분할 + progressive cross-frame token merging + dual protection mechanism으로, **3개 VLA (π0.5, OpenVLA, GR00T)에서 training-free로 1.07-1.33x speedup과 0.2-1.0%p 이내 성능 하락** 달성. Real-world에서 191ms→143ms (1.33x).\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- VLA 모델의 visual token 수가 추론 latency의 주요 bottleneck\n- 기존 token pruning/merging (FastV, ToMe)은 **2D 공간에서 균일하게 적용** → 로봇 조작에 중요한 근거리 물체와 배경을 동등하게 취급\n- 기존 방법들이 VLA에 적용 시 **심각한 성능 하락** (FastV: π0.5에서 -20.3%p)\n\n### 핵심 질문\n- **Depth 기반 구조적 사전지식으로 token merging을 가이드하면, 성능 보존과 속도 향상을 동시에 달성할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Core Components\n\n1. **Depth-guided Region Partitioning**: K=3 depth clusters로 영역 분할, 근거리=낮은 merge, 원거리=높은 merge\n2. **Progressive Cross-frame Merging**: W=5 frame window에서 점진적으로 merge ratio 증가 (step ratio η=0.2 → ~5 frame에서 수렴)\n3. **Dual Protection**: Attention-based semantic protection (τ_att = μ+σ) + depth gradient 기반 geometric edge protection\n4. **Change-triggered Re-initialization**: 장면 변화 감지 시 cache 초기화\n\n### 2.2 Auxiliary View Pipeline\n\nWrist camera 전용 2-state machine:\n- End-effector 정지 시: aggressive compression\n- 움직임 시: 덜 aggressive compression\n\n### 2.3 Key Hyperparameters\n\n| Parameter | Default | 역할 |\n|-----------|---------|------|\n| Warmup frames (N) | 5 | 초기 cache 구축 |\n| Depth clusters (K) | 3 | 영역 분할 수 |\n| Progressive window (W) | 5 | Merge 수렴 window |\n| Max merge ratio (r_max) | 0.7 | 최대 token 제거 비율 |\n| Step ratio (η) | 0.2 | Progressive step size |\n\n**Training-free**: 사전학습된 체크포인트에 **수정 없이** 적용. NVIDIA RTX 4090 (24GB)에서 실행.\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### LIBERO Simulation — π0.5 (3.3B)\n\n| Method | Spatial | Object | Goal | Long | **Avg SR** | **Speedup** | Token Ratio |\n|--------|---------|--------|------|------|-----------|-----------|-------------|\n| Baseline | 99.0 | 97.0 | 99.0 | 96.5 | **97.9** | 1.00x | 100% |\n| + FastV | 73.4 | 89.4 | 79.1 | 68.5 | 77.6 | 1.30x | 68.0% |\n| + ToSA | 79.3 | 82.0 | 71.6 | 62.4 | 73.8 | 0.94x | 57.8% |\n| **+ DepthCache** | **98.9** | **97.1** | **98.3** | **96.1** | **97.6 (−0.3)** | **1.28x** | 68.2% |\n\n- FastV: **-20.3%p** 하락 vs DepthCache: **-0.3%p** → 핵심 차별화\n\n### LIBERO Simulation — OpenVLA (7B)\n\n| Method | Avg SR | Speedup |\n|--------|--------|---------|\n| Baseline | 76.7 | 1.00x |\n| + FastV | 64.0 (-12.7) | 1.39x |\n| + SP-VLA | 71.9 (-4.8) | 1.50x |\n| **+ DepthCache** | **75.7 (−1.0)** | **1.21x** |\n\n### LIBERO Simulation — GR00T (2.2B)\n\n| Method | Avg SR | Speedup |\n|--------|--------|---------|\n| Baseline | 93.1 | 1.00x |\n| **+ DepthCache** | **92.9 (−0.2)** | **1.07x** |\n\n### ⭐ Real-World (π0.5, 20 trials/task)\n\n| Task | Baseline | DepthCache |\n|------|---------|-----------|\n| Pick & Place | 20/20 | 20/20 |\n| Stack Blocks | 18/20 | 17/20 |\n| Drawer & Place | 17/20 | 15/20 |\n| **Aggregate** | **55/60 (91.7%)** | **52/60 (86.7%)** |\n\n| Metric | Baseline | DepthCache |\n|--------|---------|-----------|\n| Inference latency | **191ms** | **143ms (1.33x)** |\n\n### Extended Real-World\n\n| Scenario | Baseline | DepthCache | Time Reduction |\n|---------|---------|-----------|---------------|\n| Multi-Object Sorting | 15/15 | 13/15 | **28.6s→22.1s (-22.7%)** |\n| Perturbation Recovery | 11/15 | 12/15 | **17.4s→13.7s (-21.3%)** |\n\n---\n\n## 4. Ablation 분석 (π0.5, LIBERO)\n\n| Configuration | Avg SR | Δ | Speedup |\n|--------------|--------|------|---------|\n| **Full DepthCache** | **97.6** | — | 1.28x |\n| w/o Depth Partitioning | 79.4 | **−18.2** | 1.34x |\n| w/o Progressive Merge | 81.0 | **−16.6** | 1.32x |\n| w/o Dual Protection | 90.3 | **−7.3** | 1.48x |\n| w/o Re-initialization | 92.8 | −4.8 | 1.25x |\n| w/o Auxiliary View | 97.8 | +0.2 | 1.06x |\n\n**Component impact ranking**: Depth Partitioning (−18.2) > Progressive Merge (−16.6) > Dual Protection (−7.3)\n\n### Parameter Sensitivity\n\n- **r_max ∈ [0.3, 0.7]**: Broad safe plateau with near-invariant SR\n- **r_max > 0.7**: 성능 하락 시작\n- **η = 1.0 (one-shot merge)**: 81.0% → progressive가 필수\n\n---\n\n## 5. 한계 및 미해결 문제\n\n### 방법론적 미비점\n1. **Modest speedup**: 1.07-1.33x는 DeeR-VLA (3.1-5.2x)나 quantization (2-4x)에 비해 modest. Token merging만으로는 dramatic 가속 어려움\n2. **Real-world 성능 하락**: 55/60 → 52/60 (−5%) — simulation보다 real에서 하락이 더 큼\n3. **Depth estimation overhead 미보고**: DepthCache는 depth map이 필요하나, depth 계산 비용이 speedup에 포함되는지 불명확 (GT depth vs estimated)\n4. **GR00T에서 1.07x**: 거의 무의미한 speedup. 모델 아키텍처에 따라 효과 편차가 큼\n\n### Attribution 문제\n- Speedup은 동일(1.28-1.34x)한데 depth partitioning 없으면 성능이 18.2%p 하락 → depth의 기여는 speedup이 아닌 **성능 보존**에 있음\n\n---\n\n## 6. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Depth-guided token merging의 체계적 설계 |\n| **Technical depth** | ★★★★★ — 5개 구성요소의 포괄적 ablation, 3개 VLA 검증 |\n| **Experimental rigor** | ★★★★★ — 3 VLA × LIBERO + real-world + ablation + sensitivity |\n| **Practical impact** | ★★★★☆ — Training-free plug-in. 다만 speedup modest |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: 3개 VLA에서 일관적으로 성능 보존 (−0.2~−1.0%p). Training-free. 기존 방법(FastV −20.3%p) 대비 압도적. **약점**: Speedup이 modest (1.07-1.33x), real-world에서 sim보다 큰 하락.\n\n---\n\n## 7. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | DeeR-VLA (early exit)와 결합하면? | Token merging + early exit = multiplicative 가속 가능. 미검증 |\n| 2 | Depth를 어디서 얻는가? Real-world에서 GT depth인가? | π0.5 등은 depth camera 사용. Monocular estimation 시 추가 latency 발생하여 순수 speedup 감소 가능 |\n| 3 | GR00T에서 1.07x면 의미 없지 않은가? | GR00T의 vision token이 이미 적어서(compact encoder) merging 여지가 적음. 큰 vision encoder를 가진 VLA에서 효과 극대화 |\n| 4 | r_max=0.7이면 70% 토큰 제거인데, 원거리에서 중요 정보 손실은? | Dual protection이 semantic/geometric edge를 보호. Ablation에서 protection 제거 시 -7.3%p |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 48
+      "rank": 51
     },
     {
       "name": "DIAL",
@@ -2210,7 +2309,7 @@
       "eval_conditions": {
         "robocasa": "fine-tuned"
       },
-      "rank": 49
+      "rank": 52
     },
     {
       "name": "Diffusion-VLA",
@@ -2242,7 +2341,7 @@
         "content": "# Diffusion-VLA (DiVLA): Generalizable and Interpretable Robot Foundation Model via Self-Generated Reasoning\n\n> **한 줄 요약**: Qwen2-VL (2B/7B/72B)에 FiLM 기반 reasoning injection으로 diffusion action policy를 가이드하여, 39K trajectory 사전학습만으로 970K 기반 OpenVLA를 압도 (multi-task 83.6% vs 39.4%), 102개 미지 물체 zero-shot 63.7%, **82Hz (2B)** 추론 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- 기존 VLA의 reasoning(ECoT 등)은 **사후 추가된 보조 과제** → action에의 직접적 기여 불명확\n- Reasoning을 매 step의 입력-출력 cycle로 수행하면 **computational overhead** 큼\n- 사람이 만든 CoT annotation은 비용이 높고 scalability 한계\n\n### 핵심 질문\n- **Reasoning을 FiLM으로 policy에 직접 embedding하면, iterative reasoning 없이도 action이 향상되는가?**\n- **소량 데이터 (39K)로도 대량 (970K) 기반 모델을 능가할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Architecture\n\n**VLM**: Qwen2-VL (2B / 7B / 72B) + SigLIP visual encoder\n**Action module**: Diffusion policy, VLM→projection (2 MLP + LayerNorm)→diffusion model\n**Reasoning injection**: **FiLM (Feature-wise Linear Modulation)** — VLM의 reasoning tokens이 projection layer를 scale/shift\n\n$$\\mathcal{L} = \\mathcal{L}_{\\text{diff}} + \\alpha \\mathcal{L}_{\\text{ntp}}, \\quad \\alpha = 10$$\n\n> ❓ **예상 질문**: α=10이면 NTP loss가 diffusion보다 10배 가중되는데, action 품질에 해가 없는가?\n> **답변**: NTP loss가 reasoning quality를 보장하고, 이 reasoning이 FiLM으로 action에 간접 기여. α가 높으면 reasoning이 더 정확 → action도 개선. Sensitivity 분석은 미제공.\n\n### 2.2 Self-Generated Reasoning\n\n- **GPT-4o**로 합성 reasoning annotation 생성 (학습 데이터)\n- 모델이 reasoning을 autoregressive하게 생성 → FiLM으로 action conditioning\n- 예: 대상 물체 변경 시 \"grabbing toy blue car\" → \"grabbing hex key\"로 **동적 자기 수정**\n\n### 2.3 Inference Speed\n\n| Model | Control Frequency |\n|-------|------------------|\n| **DiVLA-2B** | **82 Hz** |\n| **DiVLA-7B** | **42 Hz** |\n| OpenVLA-7B | 5 Hz |\n\n- 82Hz는 **action chunk**으로 달성: chunk당 VLM 1회 + diffusion 1회 → 여러 step 동시 출력\n- VLM reasoning은 매 chunk마다가 아닌 주기적으로만 실행될 가능성 있음\n\n---\n\n## 3. 데이터 전략\n\n| 모델 | Pre-training Data |\n|------|------------------|\n| DiVLA-2B/7B | **DROID dataset** |\n| DiVLA-72B | DROID + OXE |\n| Fine-tuning | 400-580 trajectories/task |\n\n- **39K trajectories**만으로 pre-train (vs OpenVLA 970K) — 24x 적은 데이터\n\n### Fine-tuning\n\n| 항목 | 값 |\n|------|-----|\n| LR | 2e-5 (fixed) |\n| Epochs | 20 |\n| VLM | LoRA applied |\n| Visual encoder | Frozen |\n| GPU | A6000 |\n\n---\n\n## 4. 실험 결과 심층 분석\n\n### Multi-Task (Table 1, 5 tasks)\n\n| Model | Pre-train Data | In-Dist Avg | **Visual Gen Avg** |\n|-------|---------------|-------------|-------------------|\n| Diffusion Policy | - | 27.9% | 8.9% |\n| TinyVLA | - | 45.5% | 28.9% |\n| Octo | 970K | 24.3% | 17.8% |\n| OpenVLA-7B | 970K | 39.4% | 26.7% |\n| **DiVLA-2B** | **39K** | **83.6%** | **57.8%** |\n\n- **39K로 970K 기반 OpenVLA를 2배 이상 능가** (83.6% vs 39.4%)\n\n### Zero-Shot Bin Picking (102 Unseen Objects)\n\n| Model | SR (%) |\n|-------|--------|\n| Diffusion Policy | 8.9 |\n| Octo | 19.6 |\n| TinyVLA | 23.5 |\n| OpenVLA | 28.4 |\n| **DiVLA-2B** | **63.7** |\n\n### Bimanual Table Bussing (Table 2)\n\n| Model | Seen Objects | Mixed Objects |\n|-------|-------------|---------------|\n| Diffusion Policy | 45.8% | 31.2% |\n| OpenVLA | 0% | 0% |\n| **DiVLA-2B** | **72.9%** | **70.8%** |\n\n### View Shifting Generalization (Table 6)\n\n| Model | SR (%) |\n|-------|--------|\n| Diffusion Policy | 0% |\n| OpenVLA | 0% |\n| **DiVLA-2B** | **60%** |\n\n### Model Scaling (Table 10)\n\n| Model | Factory Sorting | Zero-Shot Bin Picking |\n|-------|-----------------|---------------------|\n| DiVLA-2B | 66.2% | 63.7% |\n| DiVLA-7B | 74.9% | 66.7% |\n| **DiVLA-72B** | **82.4%** | **75.9%** |\n\n---\n\n## 5. Ablation — Reasoning Injection Module (Table 8)\n\n| Task | With FiLM | Without FiLM |\n|------|----------|-------------|\n| Task 1 | 100% | 66.7% |\n| Task 2 | 100% | 66.7% |\n| Task 3 | 63.6% | 45.5% |\n| Task 4 | 63.6% | 45.5% |\n| Task 5 | 90.9% | 27.3% |\n| **Average** | **83.6%** | **50.3% (−33.3%p)** |\n\n- FiLM 제거 시 **-33.3%p** → reasoning injection이 핵심 기여\n\n---\n\n## 6. 한계 및 미해결 문제\n\n### 방법론적 미비점\n1. **Custom 벤치마크 위주**: LIBERO, CALVIN 등 표준 벤치마크 결과 없음 → 직접 비교 어려움\n2. **GPT-4o annotation 의존**: Reasoning annotation 생성에 GPT-4o 비용. Self-generated가 이를 완화하나 초기 annotation 필요\n3. **82Hz의 실체**: Action chunk 기반이므로 **effective control frequency**와 다를 수 있음. VLM reasoning 주기 미보고\n4. **α=10의 sensitivity**: NTP vs diffusion loss 비율의 sensitivity 분석 부재\n5. **DROID 39K의 특수성**: DROID가 다양한 환경을 포함하여 \"적은 양이지만 높은 diversity\"일 수 있음. 다른 39K dataset에서도 재현되는지 불명확\n\n### Attribution 문제\n- 83.6%가 **FiLM reasoning** 때문인지, **Qwen2-VL backbone** 때문인지, **diffusion action** 때문인지 → FiLM ablation (−33.3%p)이 가장 큰 기여를 보이나, backbone 변경 ablation은 부재\n\n---\n\n## 7. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — FiLM reasoning injection이 간결하고 효과적 |\n| **Technical depth** | ★★★★☆ — Scaling (2B→72B), ablation 포괄적 |\n| **Experimental rigor** | ★★★☆☆ — Custom 벤치마크, 표준 비교 부족 |\n| **Practical impact** | ★★★★★ — 82Hz, 39K만으로 competitive, 미지 물체 63.7% |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: 소량 데이터(39K)로 대량(970K) 모델을 압도하는 data efficiency. FiLM reasoning의 결정적 기여(+33.3%p). 72B까지의 scaling 분석. **약점**: 표준 벤치마크 부재, 82Hz의 실체 불명확, custom 평가의 재현성 우려.\n\n---\n\n## 8. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | LIBERO에서 얼마인가? | 미보고. 표준 벤치마크 결과 없어 직접 비교 불가 |\n| 2 | 82Hz에서 VLM은 매 step 실행되는가? | 아니오. Action chunk 단위로 VLM 실행. Effective reasoning frequency는 훨씬 낮을 것 |\n| 3 | DROID 39K가 특별한 것 아닌가? (diversity가 높아서) | 가능. 동일 양의 단일 환경 데이터에서 재현되는지 검증 필요 |\n| 4 | ECoT와의 차이는? | ECoT는 GPT-4V로 structured CoT annotation, DiVLA는 FiLM으로 implicit injection. DiVLA가 더 효율적 (iterative cycle 없음) |\n| 5 | Reasoning을 freeze하고 action만 학습하면? | FiLM ablation(−33.3%p)이 이를 간접적으로 보임. Reasoning이 action에 필수적 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 50
+      "rank": 53
     },
     {
       "name": "DiT4DiT",
@@ -2272,7 +2371,7 @@
         "content": "# DiT4DiT: Jointly Modeling Video Dynamics and Actions for Generalizable Robot Control\n\n> **한 줄 요약**: Video DiT (Cosmos-2B 초기화)와 Action DiT (GR00T-N1 기반)를 cascaded coupling하되, **single forward pass의 intermediate feature를 추출**하여 video reconstruction을 bypass, LIBERO **98.6%** SOTA + RoboCasa 50.8% + 7x 빠른 수렴 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- WAM(GR-1, Motus)에서 video와 action의 joint modeling이 **representation entanglement** 야기\n- Test-time video generation이 latency bottleneck (Fast-WAM이 지적)\n- Video reconstruction에 최적화된 feature가 action prediction에 최적이 아닐 수 있음\n\n### 핵심 질문\n- **Video backbone의 intermediate feature를 single forward pass로 추출하면, 다중 denoising step의 video generation을 완전히 bypass할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Dual-DiT Framework\n\n**Video DiT**: Cosmos-Predict2.5-2B로 초기화, causal video VAE + flow-matching\n**Action DiT**: GR00T-N1 기반, AdaLN + cross-attention to video features\n\n핵심: Video DiT의 **forward hook**으로 **layer 18**의 hidden activation을 intercept → Action DiT의 conditioning\n\n### 2.2 Tri-Timestep Training\n\n세 개의 독립적 diffusion timestep:\n- **τ_v (video)**: Uniform [0,1] — 전체 denoising trajectory 노출\n- **τ_f (feature extraction)**: **Fixed** — 안정적 visual conditioning\n- **τ_a (action)**: Beta분포 — critical control phase에 편향\n\n$$\\mathcal{L}_{\\text{total}} = \\mathcal{L}_{\\text{action}} + \\lambda \\cdot \\mathcal{L}_{\\text{video}}$$\n\n### 2.3 Single Forward Pass Feature Extraction\n\n> **핵심 발견**: Multi-step denoising보다 **single forward pass**가 더 좋은 feature 제공\n> - 추가 denoising step → **pixel reconstruction에 과도하게 특화** → action feature 품질 하락\n> - Layer 18이 최적 (초기 layer: poor, terminal layer: \"drastic collapse\")\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### LIBERO (Table 1)\n\n| Suite | DiT4DiT | π₀.₅ | CogVLA (prev SOTA) |\n|-------|---------|-------|-------------------|\n| Spatial | 98.4 | 98.8 | - |\n| Object | **99.6** | 98.8 | - |\n| Goal | **98.6** | 98.0 | - |\n| Long | **97.6** | - | 95.4 |\n| **Average** | **98.6** | - | 97.4 |\n\n### RoboCasa-GR1 Tabletop (Table 2, 24 tasks)\n\n| Model | Avg SR (%) |\n|-------|-----------|\n| Qwen3DiT baseline | 36.2 |\n| GR00T-N1.6 | 40.8 |\n| GR00T-N1.5 | 41.8 |\n| **DiT4DiT** | **50.8 (+9.0 vs GR00T-N1.5)** |\n\n- 24 task 중 **16개에서 최고**\n- Precision-demanding: CanToDrawerClose **74% vs 56%** (+18%p)\n\n### Real-World Unitree G1 (Figure 5)\n\n| Task | DiT4DiT | GR00T-N1.5 | Qwen3DiT |\n|------|---------|-----------|----------|\n| Arrange Flower | **75%** | 25% | 0% |\n| Stack Cup | **60%** | 25% | <10% |\n| Move Spoon | **40%** | 15% | <10% |\n| Drawer | **90%** | - | 0% |\n| Box Packing | **50%** | - | 0% |\n\n- Qwen3DiT가 real deployment에서 **collapse** → DiT4DiT만 안정적 작동\n\n### Generalization\n\n| 설정 | DiT4DiT | Qwen3DiT |\n|------|---------|----------|\n| Unseen objects (sim) | 54.5% | 32.0% (+22.5%p) |\n| Zero-shot flower (real) | 70% | 10% |\n| Zero-shot cup quantity (real) | 50% | - |\n\n---\n\n## 4. Ablation 분석\n\n### Feature Extraction Layer (Figure 8)\n- Layer 2-8: Poor\n- **Layer 18: Optimal**\n- Layer 24-28: \"Drastic collapse\" (pixel reconstruction에 특화)\n- All layers 평균: 단일 layer보다 열위\n\n### Denoising Steps for Feature (Figure 8)\n- **Single forward pass: Optimal**\n- Step 증가 → 성능 단조 하락 → \"pixel-level reconstruction에 over-commit\"\n\n### Joint vs Decoupled Training (Figure 8c)\n- t-SNE: Joint training → 더 선명한 temporal separation\n- Silhouette score: **0.09 → 0.17** (거의 2배)\n\n---\n\n## 5. 효율성\n\n| Metric | DiT4DiT | GR00T-N1.5 | Qwen3DiT |\n|--------|---------|-----------|----------|\n| Inference freq | **6 Hz** | 13 Hz | 9 Hz |\n| Convergence | **7x faster** | - | - |\n| Data efficiency | **10x** | - | - |\n| Params (trainable) | **2.2B** | - | - |\n\n- **6Hz는 가장 느림** → dual DiT의 computational overhead\n- 그러나 **7x 빠른 수렴 + 10x data efficiency**로 학습 비용 상쇄\n\n---\n\n## 6. 학습 설정\n\n- Sim pre-training: **241,450 episodes** (GR1 simulated)\n- Real fine-tuning: **200 demos/task** (Unitree G1)\n- Text encoder + visual VAE: **frozen**\n- 15% of GR00T-N1.5의 official training data 규모\n\n---\n\n## 7. 한계 및 미해결 문제\n\n1. **6Hz inference**: GR00T-N1.5 (13Hz), Qwen3DiT (9Hz) 대비 가장 느림. Real-time reactive control에 부적합\n2. **LIBERO saturation**: 98.6%에서 추가 차별화 어려움\n3. **Cosmos-2B 의존**: Video DiT 초기화에 대규모 pre-trained model 필요\n4. **Layer 18의 최적성**: 다른 아키텍처/데이터에서도 동일 layer가 optimal인지 불명확\n\n---\n\n## 8. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Single-pass feature extraction의 발견이 매우 가치있음 |\n| **Technical depth** | ★★★★★ — Tri-timestep, layer ablation, joint vs decoupled 분석 |\n| **Experimental rigor** | ★★★★★ — LIBERO + RoboCasa + Real G1 + ablation 포괄적 |\n| **Practical impact** | ★★★★☆ — 6Hz가 deployment 제약 |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: \"Video reconstruction을 bypass하고 intermediate feature만 활용\"이라는 핵심 통찰. 7x 수렴 + 10x data efficiency. **약점**: 6Hz latency, Cosmos-2B 의존.\n\n---\n\n## 9. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Fast-WAM과 어떻게 다른가? | Fast-WAM은 train-time only video, DiT4DiT는 single-pass feature extraction. 둘 다 test-time generation을 skip하나 메커니즘이 다름 |\n| 2 | 6Hz를 높이려면? | Video DiT를 distill하거나 feature extraction을 가속. 하지만 dual-DiT의 구조적 overhead |\n| 3 | Layer 18이 다른 모델에서도 최적인가? | Cosmos-2B specific일 수 있음. 다른 video backbone에서 재검증 필요 |\n| 4 | Joint training의 video loss가 실질적으로 필요한가? | λ=0이면 (action only) 어떻게 되는지 ablation이 더 명확했을 것 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 51
+      "rank": 54
     },
     {
       "name": "DualCoT-VLA",
@@ -2300,7 +2399,7 @@
         "libero": "fine-tuned",
         "robocasa": "fine-tuned"
       },
-      "rank": 52
+      "rank": 55
     },
     {
       "name": "E0",
@@ -2331,7 +2430,7 @@
         "content": "# E₀: Enhancing Generalization and Fine-Grained Control in VLA Models via Continuized Discrete Diffusion\n\n> **한 줄 요약**: Discrete action token에 Gaussian noise를 적용하는 \"continuized discrete diffusion\"으로, 2048 bins까지 확장 가능하며 14개 환경(LIBERO+VLABench+ManiSkill)에서 π₀/π₀.₅ 대비 **평균 +10.7%** 향상, real-world 45.6%, 단일 RTX PRO 6000에서 24시간 학습.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- **Autoregressive VLA** (OpenVLA): 256-bin 한계, fine-grained control 부족\n- **Continuous diffusion**: VLM의 discrete token 공간과 mismatch → \"off-support prediction\" (discrete action set 밖의 값)\n- **Discrete diffusion** (DD-VLA): Binary mask만 가능, noise granularity 제한\n\n### 핵심 질문\n- **Discrete token에 continuous Gaussian noise를 적용하면, 256-bin 한계를 넘어 2048+ bin까지 확장 가능한가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Continuized Discrete Diffusion\n\nOne-hot action token에 smoothing (α=0.1)을 적용한 후 Gaussian noise:\n\n$$\\tilde{A}_t^\\tau = \\tau \\tilde{A}_t + (1-\\tau)\\epsilon, \\quad \\epsilon \\sim \\mathcal{N}(0, I)$$\n\n- τ: Beta분포에서 샘플 (higher noise에 편향)\n- 학습 목적함수: **Cross-entropy loss** (VLM과 동일)\n\n### 2.2 Architecture\n\n- **VLM**: PaliGemma (Gemma, width=2048, depth=18, heads=8)\n- **Action expert**: **300M parameters** (width=1024, depth=18)\n- **Action discretization**: **최대 2048 bins** (1st-Nth percentile quantile)\n- **Action chunking**: H=50 timesteps\n- **Action dim**: D_a=7 (EE) or D_a=8 (joint)\n\n### 2.3 이론적 주장\n\n**Lemma 1**: Discrete actions → VC dimension O(K log K). Continuous → unbounded pseudo-dimension. → \"Tighter sample-complexity guarantees\"\n\n**Lemma 2**: Continuous diffusion → off-support averaging (discrete set 밖 값 생성). Discrete diffusion → \"preserves action support with probability 1\"\n\n> ❓ **예상 질문**: Off-support prediction이 실제로 문제가 되는가?\n> **답변**: 이론적으로는 문제. 실험적으로는 continuous diffusion도 잘 작동 (CogACT, pi0). Off-support 값이 nearest valid action에 round되면 실질적 차이가 작을 수 있음. E₀의 이론적 주장은 실험적 관찰보다 강함.\n\n---\n\n## 3. 학습 설정\n\n| 항목 | 값 |\n|------|-----|\n| GPU | **Single NVIDIA RTX PRO 6000** |\n| Duration | **24 hours** |\n| Steps | 30,000 |\n| Batch size | 32 |\n| LR | 5e-5 (cosine decay) |\n| Warmup | 10,000 steps |\n| EMA decay | 0.999 |\n| Optimizer | AdamW (grad clip 1.0) |\n\n---\n\n## 4. 실험 결과 심층 분석\n\n### 14 Environments Average\n\n| 모델 | Average (%) |\n|------|-----------|\n| π₀ FAST | 52.2 |\n| π₀.₅ | 50.1 |\n| π₀ | 51.4 |\n| **E₀** | **60.8 (+10.7%)** |\n\n### LIBERO (4 suites)\n\n| Suite | E₀ | π₀ | π₀.₅ | π₀ FAST |\n|-------|-----|-----|-------|---------|\n| Spatial | **97.2** | 96.8 | 95.4 | 96.4 |\n| Object | **99.4** | 98.8 | 98.4 | 96.8 |\n| Goal | 95.0 | **95.8** | **97.2** | 88.6 |\n| Long | **92.2** | 85.2 | 89.6 | 60.2 |\n\n- LIBERO-Long에서 +7%p (π₀ 대비) — fine-grained control 이점\n\n### ManiSkill (5 tasks)\n\n| Task | E₀ | π₀ | π₀.₅ |\n|------|-----|-----|-------|\n| Peg Insert | **24.0** | 4.0 | 8.0 |\n| Pick Cube | 76.0 | 60.0 | 56.0 |\n| Stack Cube | **72.0** | 48.0 | 56.0 |\n| Plug Charger | **4.0** | 0.0 | 4.0 |\n| Push Cube | **100.0** | 100.0 | 92.0 |\n\n- **Peg Insert +20%p**: 정밀 삽입에서 continuized discretization의 이점 극대화\n\n### VLABench (5 tasks)\n\n| Task | E₀ | π₀ | π₀.₅ |\n|------|-----|-----|-------|\n| Poker Select | **72.0** | 6.0 | 20.0 |\n| Mahjong Select | **18.8** | 7.0 | 6.5 |\n\n- VLABench에서 **π₀ 대비 극적 향상** (Poker: 72% vs 6%)\n\n### Real-World (Franka, 8 tasks)\n\n| 모델 | Average (%) |\n|------|-----------|\n| π₀ FAST | 10.0 |\n| π₀ | 43.1 |\n| **E₀** | **45.6** |\n\n---\n\n## 5. Ablation 분석\n\n### Discretization Bins\n\n| Bins | LIBERO Avg (%) |\n|------|---------------|\n| 128 | 0.0 (failure) |\n| 256 | 75.55 |\n| 512 | 79.95 |\n| 1024 | 81.65 |\n| **2048** | **84.30 (optimal)** |\n| 4096 | 83.55 |\n| 8192 | 82.00 |\n\n- **2048이 sweet spot**. 128은 완전 실패, 256 대비 +9%p\n\n### One-Hot Smoothing (α)\n\n| α | Avg (%) |\n|---|---------|\n| **0.1** | **84.30** |\n| 0.5 | 83.95 |\n| 1.0 (no smoothing) | 82.90 |\n\n### Action Chunking (H)\n\n| H | Avg (%) |\n|---|---------|\n| 1 | 51.10 |\n| 10 | 75.80 |\n| **20** | **76.25 (optimal)** |\n| 50 | 49.65 |\n| 100 | 37.55 |\n\n### Spherical View Augmentation\n\n| 모델 | Without | With | Δ |\n|------|---------|------|---|\n| π₀ | 19.7% | 50.8% | +31.1 |\n| **E₀** | **66.5%** | **83.9%** | +22.6 |\n\n---\n\n## 6. 한계 및 미해결 문제\n\n1. **Real-world 개선 modest**: 45.6% vs π₀ 43.1% = +2.5%p. Sim과 달리 real에서 차이 작음\n2. **이론 vs 실험 괴리**: Off-support 문제의 이론적 중요성에 비해 실험적 차이가 modest한 경우 있음 (LIBERO-Goal: π₀.₅가 E₀ 능가)\n3. **128-bin failure**: 왜 128에서 완전 실패하는지 분석 부족\n4. **Action chunking H=50에서의 하락**: 49.65%로 급락 — long horizon prediction의 한계\n\n---\n\n## 7. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Continuized discrete diffusion, 2048-bin 확장 |\n| **Technical depth** | ★★★★★ — 이론적 정당화 + 포괄적 ablation |\n| **Experimental rigor** | ★★★★★ — **14 환경**, real-world, view augmentation |\n| **Practical impact** | ★★★★☆ — Single GPU 24h, 다만 real-world 개선 modest |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: 14개 환경에서의 포괄적 검증. 2048-bin이 256 대비 +9%p라는 실질적 이점. Peg insert (+20%p), Poker (+66%p) 등 fine-grained task에서 결정적. **약점**: Real-world +2.5%p, 일부 task에서 π₀.₅에 밀림.\n\n---\n\n## 8. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 2048 bins이면 quantization error가 충분히 작은가? | ±1m range에서 ~0.5mm resolution. 대부분 manipulation에 충분. Sub-mm precision에는 4096+ 필요할 수 있음 |\n| 2 | LIBERO-Goal에서 π₀.₅에 밀리는 이유는? | Goal suite가 high-level planning 중심이라 fine-grained discretization의 이점이 덜 드러남 |\n| 3 | Off-support 문제가 실제로 얼마나 영향 있는가? | CogACT, pi0 등 continuous diffusion도 잘 작동 → off-support의 실제 impact은 이론만큼 크지 않을 수 있음 |\n| 4 | Single GPU 24h면 누구나 재현 가능한가? | RTX PRO 6000 ($5K+)이 필요. Consumer GPU (RTX 4090)에서는 약간 더 걸릴 수 있으나 feasible |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 53
+      "rank": 56
     },
     {
       "name": "E-VLA",
@@ -2355,7 +2454,7 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
-      "rank": 54
+      "rank": 57
     },
     {
       "name": "FALCON",
@@ -2390,7 +2489,7 @@
         "num_reviews": 4,
         "openreview_url": "https://openreview.net/forum?id=fzmittHfq3"
       },
-      "rank": 55
+      "rank": 58
     },
     {
       "name": "FLOWER",
@@ -2422,7 +2521,7 @@
         "content": "# FLOWER: Democratizing Generalist Robot Policies with Efficient VLA Flow Policies\n\n> **한 줄 요약**: VLM의 30-50% layer를 pruning하여 intermediate fusion하고, 18-layer flow transformer(339M) + Global-AdaLN으로 action 생성하는 **947M VLA**로, CALVIN ABC **4.53 SOTA**, 10개 벤치마크에서 평균 25.1% 향상, **200 H100 GPU-hours** (48h on 4 H100s)로 학습.\n\n---\n\n## 1. 배경 및 동기\n\n- 대형 VLA (7B+)의 학습 비용이 연구 접근성 제약\n- VLM의 모든 layer가 action에 필요한 것은 아님 → **compute 낭비**\n- Diffusion/flow action head에 capacity가 충분하지 않음\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 VLM Pruning\n\n| VLM Type | 전략 |\n|---------|------|\n| Encoder-Decoder (Florence-2-L) | **Decoder 전체 제거** (~50%) |\n| Decoder-Only (SmolFlow2-Video) | **후반 30% layer 제거** |\n\n\"Intermediate fusion\": 중간 layer의 hidden state를 flow transformer에 cross-attention으로 주입.\n\n### 2.2 Architecture 세부\n\n| Component | Params | 역할 |\n|-----------|--------|------|\n| ViT | 360M | Visual encoding |\n| VLM (pruned) | 205M | Language + vision reasoning |\n| Flow Transformer | 339M | Action generation |\n| Others | 43M | Projections, etc. |\n| **Total** | **947M** | |\n\n**Flow Transformer**: 18 layers, 1024 latent dim, 16 heads, SwiGLU MLP, RMSNorm\n\n### 2.3 Global-AdaLN-Zero\n\n모든 layer에서 **단일 공유 modulation weight** + action-type별 unique signal:\n- Standard per-layer AdaLN 대비 **20% parameter 절감**\n- 성능: 4.43 (standard) vs **4.53** (global) — 오히려 약간 향상\n\n### 2.4 Inference\n\n| Metric | Value |\n|--------|-------|\n| Throughput | **311 Hz** |\n| Latency | **0.052s (52ms)** |\n| VRAM | **1.85 GB** |\n\n---\n\n## 3. 학습 설정\n\n| 항목 | 값 |\n|------|-----|\n| Data | 250K trajectories (8 open datasets) |\n| Mix | DROID 23.5%, BridgeV2 28.6%, Fractal 24.7% |\n| Batch | 256 × 4 grad accum |\n| Steps | 360K (saturates ~350K) |\n| **Total compute** | **200 H100 GPU-hours** (48h on 4 H100s) |\n\n---\n\n## 4. 실험 결과 심층 분석\n\n### CALVIN ABC→D (Table 10)\n\n| Setting | Task 1 | Task 5 | **Avg Len** |\n|---------|--------|--------|-------------|\n| D→D | 97.4% | - | 4.35 |\n| **ABC→D** | **99.4%** | **84.9%** | **4.53 ± 0.04 (SOTA)** |\n| ABCD→D | 99.2% | 92.3% | 4.67 |\n\nBaselines: VPP 4.29, Seer 4.28, MoDE 4.01, RoboDual 3.66\n\n### 10 Benchmarks 종합\n\n| Benchmark | FLOWER | Best Baseline | Δ |\n|-----------|--------|--------------|---|\n| CALVIN ABC | **90.6%** | 85.8% (OpenVLA) | +4.8 |\n| LIBERO Long | **94.9%** | 85.8% (π₀) | **+9.1** |\n| LIBERO 90 | 94.7% | 96.0% (MoDE) | -1.3 |\n| SIMPLER Bridge | **40.0%** | 30.0% (Octo) | +10.0 |\n| SIMPLER Google | 32.2% | 42.4% (RT-1X) | **-10.2** |\n| Real Kitchen | **61.0%** | 30.0% (OpenVLA) | **+31.0** |\n| Real Generalization | **51.0%** | 23.4% (OpenVLA) | **+27.6** |\n| Aloha Insertion | 54.0% | 54.0% (ACT) | 0.0 |\n| LIBERO Spatial | 97.5% | 98.0% (π₀.₅) | -0.5 |\n| LIBERO Object | 99.1% | 99.1% | 0.0 |\n\n- **Real Kitchen +31%p, Real Generalization +27.6%p** → real-world에서 강력\n- **SIMPLER Google -10.2%p** → 이 벤치마크에서 약점\n\n### OpenVLA 대비\n\n| Metric | OpenVLA | FLOWER | 비율 |\n|--------|---------|--------|------|\n| Params | 7.7B | **947M** | **8.1x 작음** |\n| Training | ~10K GPU-hrs | **200 GPU-hrs** | **50x 적음** |\n| Real Kitchen | 31% | **61%** | **+97%** |\n| Throughput | ~5 Hz | **311 Hz** | **62x 빠름** |\n\n---\n\n## 5. Ablation 분석\n\n### Fusion Strategy (Table 1)\n\n| 방법 | LIBERO-Long | CALVIN ABC |\n|------|-----------|-----------|\n| **Intermediate** | **93.4%** | **89.5%** |\n| Late | 61.8% | 71.2% |\n| Early | 33.4% | 57.1% |\n\n### Pruning Ratio (Table 2)\n\n| Retained Layers | CALVIN ABC | LIBERO-Long |\n|----------------|-----------|-----------|\n| **0.3 (70% pruned)** | **72.1%** | **70.7%** |\n| 0.5 (50% pruned) | 66.4% | 62.5% |\n| Full (no pruning) | 66.3% | 69.2% |\n\n> ⚠️ **핵심 발견**: **Full VLM보다 70% pruned가 더 좋음!** (CALVIN: 72.1% vs 66.3%)\n\n### Critical Components (Table 3, CALVIN avg len)\n\n| Removed Component | Avg Len | Δ |\n|------------------|---------|---|\n| Full FLOWER | **4.53** | — |\n| Frozen VLM | 2.65 | **−40%** |\n| No Flow head | 3.33 | −25% |\n| Small backbone | 4.26 | −4% |\n| Discrete tokens | 1.12 | **−75%** |\n| No Global-AdaLN | 3.33 | −25% |\n\n- **Discrete tokenization이 가장 치명적** (4.53→1.12)\n\n---\n\n## 6. 한계 및 미해결 문제\n\n1. **SIMPLER Google -10.2%p**: 이 벤치마크에서 약점. RT-1X는 Google Robot에 특화되어 있어 불공정할 수 있으나 결과는 결과\n2. **Manipulation only**: Navigation, locomotion 미지원\n3. **8/10 벤치마크가 simulation**: Real-world 결과(2개)는 인상적이나 규모 제한\n4. **Iterative sampling**: Rectified flow 4-8 steps이 deterministic policy보다 느림 (그래도 311Hz)\n\n---\n\n## 7. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — \"Less VLM, more action head\"의 역발상, pruning이 오히려 성능 향상 |\n| **Technical depth** | ★★★★★ — 10 benchmarks, 풍부한 ablation |\n| **Experimental rigor** | ★★★★★ — 가장 많은 벤치마크에서 평가 |\n| **Practical impact** | ★★★★★ — 200 GPU-hrs, 947M, 311Hz, open-source |\n| **Writing quality** | ★★★★★ |\n\n**강점**: 947M/200 GPU-hrs로 7.7B/10K GPU-hrs를 능가하는 효율성 혁명. Pruning이 오히려 성능 향상이라는 반직관적 결과. **약점**: SIMPLER Google 약점, sim 위주.\n\n---\n\n## 8. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 왜 pruning이 성능을 올리는가? | 후반 layer가 language generation에 특화 → action에 불필요한 representation 생성. 제거하면 action-relevant intermediate features가 직접 활용됨 |\n| 2 | SIMPLER Google에서 왜 약한가? | RT-1X가 Google Robot에 대규모 데이터로 특화. FLOWER는 cross-embodiment이라 특정 로봇에서 불리 |\n| 3 | 200 GPU-hrs를 더 늘리면? | 350K step에서 saturation. 더 긴 학습보다 **더 많은/다양한 데이터**가 효과적일 것 |\n| 4 | Discrete tokens이 1.12면 치명적인데, 왜 다른 VLA는 discrete로 잘 하는가? | FLOWER의 flow transformer가 continuous action에 최적화. Discrete tokenization은 flow의 이점을 파괴 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 56
+      "rank": 59
     },
     {
       "name": "Gemini Robotics",
@@ -2454,7 +2553,7 @@
         "content": "# Gemini Robotics: Bringing AI into the Physical World\n\n> **한 줄 요약**: Google DeepMind의 Gemini 2.0 기반 대규모 VLA 모델 패밀리로, 범용 조작·open-vocabulary 지시 이해·few-shot 적응·cross-embodiment 일반화를 단일 모델에서 달성하며, embodied reasoning 특화 모델(Gemini Robotics-ER)을 함께 제안.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- 기존 VLA(OpenVLA, RT-2)는 **제한된 규모**의 VLM backbone → open-world 일반화에 한계\n- **Foundation model의 강력한 reasoning**과 **로봇 제어의 low-level precision** 사이의 갭 미해결\n- 안전성(safety) 고려가 대부분의 로봇 FM 연구에서 부재\n\n### 핵심 질문\n- **세계 최대급 multimodal foundation model(Gemini 2.0)을 로봇 제어에 직접 활용하면 어떤 수준의 일반화가 가능한가?**\n- **Embodied reasoning(3D 이해, grasp prediction, 궤적 예측)을 별도 모듈로 분리하면 어떤 이점이 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Two-Model Family\n\n| 모델 | 역할 | 출력 |\n|------|------|------|\n| **Gemini Robotics-ER** | Embodied Reasoning | Detection, pointing, trajectory/grasp prediction, 3D bbox, multi-view correspondence |\n| **Gemini Robotics** | VLA (direct control) | 7-DoF robot actions |\n\nER은 perception/reasoning 전문, Robotics는 end-to-end 제어.\n\n> ❓ **예상 질문**: 두 모델을 분리한 이유는? 하나의 통합 모델이 더 효율적이지 않은가?\n> **답변**: 분리를 통해 (1) ER은 다양한 downstream 응용에 재사용 가능, (2) Robotics는 ER의 출력을 conditioning으로 활용 가능, (3) 각각 독립적으로 scaling/개선 가능. 통합 모델은 training recipe가 더 복잡해지는 trade-off.\n\n### 2.2 Gemini Robotics (VLA)\n\nGemini 2.0의 multimodal 능력을 활용하여:\n- **Open vocabulary instruction following**: \"그 파란색 머그를 책 옆에 놓아줘\" 같은 자유형 지시\n- **Few-shot adaptation**: 100개 demonstration만으로 새로운 태스크 학습\n- **Cross-embodiment**: Fine-tuning으로 새로운 로봇 형태에 적응\n\n> ❓ **예상 질문**: Gemini 2.0의 규모(파라미터 수)는? 로봇에서 on-device 실행이 가능한가?\n> **답변**: 파라미터 수 미공개이나 수십~수백 B 규모로 추정. On-device 실행은 불가능하며 클라우드 추론 필수. 이는 latency와 connectivity 의존성이라는 실용적 제약.\n\n### 2.3 Safety Framework\n\n로봇 FM 최초로 **안전성 프레임워크** 포함:\n- Physical safety constraints (인간 접근 시 감속/정지)\n- Instruction refusal (위험한 지시 거부)\n- Uncertainty-aware action (불확실 시 보수적 행동)\n\n> ❓ **예상 질문**: Safety framework의 구체적 구현은? Rule-based인가 학습된 것인가?\n> **답변**: 상세 구현은 비공개. Rule-based와 learned safety classifier의 조합으로 추정. 완전히 학습 기반이면 adversarial attack에 취약할 수 있으며, rule-based면 유연성 부족.\n\n---\n\n## 3. 데이터 전략\n\n- **규모**: 미공개이나 Gemini 2.0의 인터넷 규모 사전학습 + 대규모 로봇 데이터 fine-tuning\n- **Multi-embodiment**: 단일 팔, 양팔, 모바일 매니퓰레이터 등 다양한 로봇\n- **데이터 비공개**: 재현성의 근본적 제약\n\n---\n\n## 4. 실험 결과 심층 분석\n\n### Real-world Manipulation\n\n| 능력 | 성능 |\n|------|------|\n| Long-horizon 태스크 | \"주방 정리\" 등 10+ step 완수 |\n| Dexterous manipulation | Fine-tuning 후 고난도 작업 수행 |\n| Few-shot (100 demos) | 새로운 short-horizon 태스크 학습 |\n| Open vocabulary | 학습에 없던 지시어에 대응 |\n| Cross-embodiment | Fine-tuning으로 새 로봇 적응 |\n\n### 정량적 비교 (보고된 범위)\n\n| 설정 | Gemini Robotics | 기존 SOTA |\n|------|---------------|----------|\n| Multi-task manipulation | \"상당히 개선됨\" | - |\n| Few-shot new tasks | 100 demo로 >80% | 1000+ demo 필요 |\n| Unseen environments | \"강건한 일반화\" | - |\n\n- **구체적 수치가 많이 생략됨** — 산업 연구의 전형적 한계\n\n---\n\n## 5. 관련 연구 비교\n\n| 모델 | FM Scale | Open Vocab | Safety | Open Source |\n|------|---------|-----------|--------|-----------|\n| RT-2 | PaLI-X (55B) | ✓ | ✗ | ✗ |\n| OpenVLA | 7B | △ | ✗ | ✓ |\n| pi0 | ~3B | △ | ✗ | △ |\n| **Gemini Robotics** | **>>10B** | **✓✓** | **✓** | **✗** |\n\n---\n\n## 6. 한계 및 미해결 문제\n\n### 방법론적 미비점\n1. **재현 불가**: 모델, 데이터, 학습 세부사항이 모두 비공개. 학술적 검증 불가능\n2. **정량적 결과 부족**: \"상당한 개선\", \"강건한 일반화\" 등 정성적 표현이 많고 구체적 수치가 부족\n3. **Cloud 의존성**: On-device 실행 불가 → 네트워크 latency, 연결 끊김 시 로봇 정지, 프라이버시 우려\n4. **Compute 비용**: 추론 시 대형 모델 실행 비용이 로봇 1대당 매우 높음 → 대규모 배포의 경제성 의문\n5. **Safety의 검증**: Safety framework이 있다고 주장하나 adversarial testing, red-teaming 결과가 불충분\n\n### Attribution 문제\n- 성능이 **Gemini 2.0의 규모** 때문인지 **로봇 학습 레시피** 때문인지 분리 불가\n- 동일 데이터로 더 작은 모델을 학습하면 성능이 어떻게 변하는지 비교 불가능\n\n---\n\n## 7. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — 최대 규모 FM의 로봇 적용, ER 모델 개념 |\n| **Technical depth** | ★★☆☆☆ — 비공개 사항이 많아 기술 평가 어려움 |\n| **Experimental rigor** | ★★☆☆☆ — 정량적 비교 부족 |\n| **Practical impact** | ★★★★★ — 산업적 milestone |\n| **Writing quality** | ★★★★☆ — 잘 작성된 technical report |\n\n**강점**: Foundation model 규모와 로봇 제어의 결합이 보여주는 가능성이 인상적. Safety 논의를 포함한 점은 책임 있는 연구. **약점**: 비공개 모델/데이터로 학술적 검증 불가능. 정량적 비교 부재. Cloud 의존성이 실용성을 제한.\n\n---\n\n## 8. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 모델 크기가 핵심인가, 아니면 데이터가 핵심인가? | 분리 불가. 하지만 FLOWER (950M)가 CALVIN SOTA를 달성한 것을 볼 때, 규모만이 답은 아님 |\n| 2 | Cloud inference의 latency는 real-time 제어에 충분한가? | 보고 미흡. 네트워크 RTT + 모델 추론 = 200ms+ 예상. 안정적 연결 필수 |\n| 3 | 이 모델을 distill하여 edge에 배포할 수 있는가? | 이론적으로 가능하나 distillation의 성능 하락 정도 미제시 |\n| 4 | Open-source VLA (OpenVLA, FLOWER)와 공정하게 비교하면? | 표준 벤치마크(LIBERO, CALVIN)에서의 직접 비교가 없어 판단 불가 |\n| 5 | Safety framework이 adversarial 공격에 대해 얼마나 강건한가? | Red-teaming 결과 미공개. Jailbreak 가능성에 대한 체계적 분석 필요 |\n| 6 | 100 demo few-shot이 진정한 few-shot인가? | 100개도 특정 도메인에서는 많은 양. 1-5 shot에서의 성능 미보고 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 57
+      "rank": 60
     },
     {
       "name": "GigaWorld-Policy",
@@ -2493,7 +2592,40 @@
         "content": "# GigaWorld-Policy: An Efficient Action-Centered World-Action Model\n\n> **한 줄 요약**: 기존 video-centered WAM의 추론 병목을 해결하기 위해 action 예측을 중심으로 비디오 생성을 조건부로 재구성하는 action-centered WAM을 제안하여, 기존 대비 9배 빠른 추론과 7% 높은 성공률 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- WAM (Motus, GR-1)은 **비디오와 action을 joint modeling** → 추론 시 비디오 생성이 필수적이어서 latency가 높음\n- Joint modeling에서 **visual token이 action token에 영향** → 비디오 예측 품질이 action 정확도를 좌우\n- Fast-WAM이 test-time video를 제거했으나, 학습 시에도 **action-centric 관점**에서 설계된 것은 아님\n\n### 핵심 질문\n- **Action 예측을 primary task로, 비디오 생성을 auxiliary task로 역할을 뒤집으면?**\n- **비디오 생성을 추론 시 optional로 만들면서도 학습 시의 이점을 유지할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Action-Centered Causal Design\n\n핵심 설계: future video token이 action token에 **영향을 줄 수 없도록** causal mask 설계:\n\n```\nToken sequence: [obs_tokens] → [action_tokens] → [future_video_tokens]\nCausal mask: action은 obs만 참조, future_video는 obs+action 참조\n```\n\n$$P(\\mathbf{a}, \\hat{\\mathbf{v}} | \\mathbf{o}) = P(\\mathbf{a} | \\mathbf{o}) \\cdot P(\\hat{\\mathbf{v}} | \\mathbf{o}, \\mathbf{a})$$\n\n> ❓ **예상 질문**: Action이 video를 참조하지 못하면 video generation의 학습 signal이 action에 어떻게 전달되는가?\n> **답변**: **공유 encoder**를 통해 간접 전달. Video generation loss가 encoder를 업데이트 → encoder representation이 dynamics-aware가 됨 → action prediction이 이 representation을 활용. Fast-WAM과 유사한 메커니즘이나, causal 구조로 명시적으로 분리.\n\n### 2.2 Optional Video Generation at Inference\n\n추론 시:\n- **Fast mode**: Action tokens만 생성 → 9x speedup\n- **Full mode**: Action + future video 생성 → 시각화, 안전 검증 등에 활용 가능\n\n### 2.3 Large-scale Pre-training\n\nAction-centered video generation model을 대규모 로봇 데이터로 사전학습한 후, policy learning backbone으로 활용.\n\n---\n\n## 3. 실험 결과 심층 분석\n\n| 모델 | SR (%) | Inference (ms) | 대비 |\n|------|--------|---------------|------|\n| Motus (WAM baseline) | 78.5 | ~900 | baseline |\n| pi-0.5 | 45.2 | ~200 | - |\n| **GigaWorld-Policy (fast)** | **85.5 (+7%)** | **~100 (9x)** | +7% SR, 9x faster |\n\n### RoboTwin 2.0\n\n| 모델 | SR (%) |\n|------|--------|\n| pi-0.5 | 41.3 |\n| **GigaWorld-Policy** | **80.5 (+95%)** |\n\n- pi-0.5 대비 거의 **2배** 성능 → 주목할 만한 결과\n\n---\n\n## 4. 한계 및 미해결 문제\n\n### 방법론적 미비점\n1. **Causal 분리의 trade-off**: Action이 future video를 참조하지 못하므로, 미래 상태 예측에 기반한 plan이 불가능. Long-horizon task에서 이 제약이 성능을 제한할 수 있음\n2. **사전학습 데이터 비공개**: 대규모 로봇 데이터의 구성과 규모가 불명확\n3. **Motus 외 WAM과의 비교 부족**: GR-1, DiT4DiT 등과의 직접 비교 미제공\n4. **Standard benchmark 부족**: RoboTwin 위주, LIBERO/CALVIN에서의 결과 부재\n\n### Attribution 문제\n- 성능 향상이 **action-centered 설계** 때문인지, **대규모 사전학습 데이터** 때문인지 분리 어려움\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Video-centered → action-centered 패러다임 전환 |\n| **Technical depth** | ★★★★☆ — Causal design이 잘 설계됨 |\n| **Experimental rigor** | ★★★☆☆ — 한정된 벤치마크 |\n| **Practical impact** | ★★★★★ — 9x speedup의 실용적 가치 |\n| **Writing quality** | ★★★★☆ — 명확 |\n\n**강점**: \"Action이 video에 의존하면 안 된다\"는 통찰이 설계에 잘 반영됨. 9x 속도와 7% 성능 동시 향상. **약점**: 데이터 비공개, 한정된 벤치마크, long-horizon에서의 검증 부재.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Fast-WAM과 어떻게 다른가? | Fast-WAM은 test-time video를 단순 제거, GigaWorld는 학습 구조 자체를 action-centered로 재설계 |\n| 2 | Action이 future video를 참조하면 plan 능력이 생기지 않나? | 맞음, 이것이 trade-off. Plan이 필요한 long-horizon task에서는 이 제약이 문제될 수 있음 |\n| 3 | pi-0.5 대비 95% 향상의 공정성은? (학습 데이터 차이?) | 데이터 차이가 있을 수 있으며, 동일 데이터에서의 비교가 더 공정 |\n| 4 | Optional video generation의 실용적 활용 사례는? | Safety check (예측 비디오가 위험하면 action 거부), human supervision, debugging |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 58
+      "rank": 61
+    },
+    {
+      "name": "Goal2Skill",
+      "organization": "TODO: check paper",
+      "date": "2026-04-15",
+      "paper_url": "https://arxiv.org/abs/2604.13942",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "long-horizon",
+        "planning",
+        "reflection",
+        "dual-system",
+        "diffusion",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "dual-system: VLM-based high-level planner (structured task memory, goal decomposition, outcome verification, error-driven correction) + VLA-based low-level diffusion visuomotor executor conditioned on geometry-preserving filtered observations",
+        "action_head_category": "diffusion",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# Goal2Skill: Long-Horizon Manipulation with Adaptive Planning and Reflection\n\n> **한 줄 요약**: VLM 기반 high-level planner(메모리·검증·반성)와 diffusion VLA low-level executor를 **closed-loop**로 결합해 long-horizon manipulation에서 baseline 대비 3배 이상의 성공률 향상을 보인 dual-system 프레임워크.\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA: 제한된 observation window + end-to-end action prediction → long-horizon, memory-dependent task에 취약.\n- Partial observability, occlusion, multi-stage dependency가 있는 태스크는 **지속적 memory**, **adaptive decomposition**, **실패 복구**가 필수.\n- 단일 네트워크로 reasoning과 motor control을 모두 처리하면 둘 다 어중간 → 분리하자.\n\n---\n\n## 2. 방법론\n\n### High-Level Planner (VLM-based agent)\n- Structured task memory 유지.\n- Goal decomposition, outcome verification, error-driven correction을 담당.\n- Sub-task를 low-level executor에 순차 또는 적응적으로 하달.\n\n### Low-Level Executor (VLA + diffusion)\n- Geometry-preserving filtered observation을 입력으로 받는 diffusion-based action generator.\n- 각 sub-task를 visuomotor control로 실행.\n\n### Closed Loop\n- Executor 결과 → Planner가 verify → 실패 시 reflection & replan → 재실행.\n- 구조화된 memory가 단순 history가 아닌, planning-relevant state로 축적.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- **RMBench**의 대표 long-horizon 태스크에서 **평균 성공률 32.4%** 기록, 가장 강한 baseline(9.8%) 대비 3배 이상 향상.\n- Ablation: structured memory와 closed-loop recovery 모두 필수 요소로 확인.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **VLM 호출 비용·latency**: High-level planner가 매 step마다 호출되면 실시간성 저해.\n2. **Verification의 신뢰성**: Outcome verification을 VLM이 담당 → 잘못된 verify면 무한 루프 또는 premature 종료.\n3. **RMBench 특화 가능성**: 32.4%라는 절대 수치는 여전히 낮아, 일반 long-horizon 환경으로 확장성 검증 필요.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Dual-system + reflection 자체는 최근 흐름, 조합·검증이 기여 |\n| **Practical impact** | ★★★★☆ — Baseline 대비 3배 이상 개선은 실질적 |\n\n**강점**: Structured memory와 closed-loop recovery의 ablation 기여가 명확. **약점**: 여전히 32.4% 성공률 → long-horizon의 본질적 난제는 남아있음.\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 단일 VLA에 CoT 붙이는 것과 뭐가 다른가? | Memory의 구조화와 verify→recover loop이 핵심 차별점 |\n| 2 | Planner-Executor 호출 빈도는? | 일반적으로 sub-task 단위 (abstract에 구체 수치 없음) |\n| 3 | RMBench만으로 충분한가? | LIBERO-Long, VIMA-Bench 등 추가 검증 권장 |\n| 4 | Executor의 diffusion은 왜 선택? | Geometry-preserving filtered observation과 결합 시 정밀 제어 유리 |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 62
     },
     {
       "name": "GR-Dexter",
@@ -2524,7 +2656,7 @@
         "content": "# GR-Dexter: VLA-based Generalist Manipulation on Bimanual Dexterous-Hand Robots\n\n> **한 줄 요약**: 21-DoF 소형 로봇 핸드 설계부터 양팔 텔레오퍼레이션, cross-embodiment VLA 학습까지를 통합한 하드웨어-모델-데이터 프레임워크로, dexterous hand 기반 범용 조작의 실용적 구현.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- 대부분의 VLA 연구는 **그리퍼(2-finger)**에 국한 → dexterous hand(5-finger)로 확장 어려움\n- Dexterous hand의 높은 DoF (20+) → action space 폭발, VLA로의 직접 적용 난제\n- 실제 dexterous 데이터 수집의 어려움: 텔레오퍼레이션 시스템 복잡, occlusion 빈번\n\n### 핵심 질문\n- **Dexterous hand 로봇에서 VLA가 그리퍼 수준의 일반화를 달성할 수 있는가?**\n- **하드웨어·데이터·모델의 공동 설계가 성능에 얼마나 기여하는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Hardware: 21-DoF Compact Hand\n\n- 기존 dexterous hand (30+ DoF) 대비 21-DoF로 **action space 축소**하면서 manipulation 능력 유지\n- 소형화로 hand-object occlusion 감소 → visual observation 품질 향상\n\n> ❓ **예상 질문**: 21 DoF면 일부 manipulation이 불가능하지 않은가?\n> **답변**: 21 DoF는 palm + 5 fingers × 3-4 joints. 대부분의 일상 manipulation에 충분하나, 극도로 정밀한 in-hand manipulation (pen spinning 등)은 제한적.\n\n### 2.2 Teleoperation System\n\n양팔 직관적 텔레오퍼레이션:\n- VR controller + glove 기반\n- Hand retargeting으로 인간 손 동작 → 로봇 핸드 매핑\n- 1시간 교육으로 비전문가도 데이터 수집 가능\n\n### 2.3 VLA Training Recipe\n\nGR-2 backbone 기반:\n1. Vision-language pre-training (인터넷 비디오)\n2. Cross-embodiment fine-tuning (그리퍼 + dexterous 데이터 혼합)\n3. Target embodiment fine-tuning (GR-Dexter 특화)\n\n---\n\n## 3. 실험 결과 심층 분석\n\n| 태스크 유형 | SR (%) | 비고 |\n|-----------|--------|------|\n| Long-horizon (4+ steps) | ~70% | 주방 정리 등 |\n| Generalizable pick-and-place | ~85% | 미지 물체 포함 |\n| Unseen objects | ~65% | zero-shot |\n| Unseen instructions | ~60% | novel language |\n\n---\n\n## 4. 한계 및 미해결 문제\n\n### 방법론적 미비점\n1. **재현 불가**: 커스텀 하드웨어 + 비공개 데이터 → 외부 검증 사실상 불가\n2. **Gripper VLA 대비 공정 비교 부재**: 동일 태스크에서 gripper VLA vs dexterous VLA 비교가 없어, dexterous hand의 부가가치 불명확\n3. **Sim-to-real 미탐구**: 시뮬레이션 없이 실제 데이터만 사용 → 데이터 수집 비용 높음\n4. **Contact dynamics**: Dexterous manipulation의 핵심인 접촉 역학에 대한 명시적 모델링 부재\n\n### Attribution 문제\n- 성능이 **하드웨어 설계**, **데이터 수집 방법**, **VLA 학습 레시피** 중 어디서 주로 오는지 분리 불가\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — 하드웨어-모델-데이터 통합 접근 |\n| **Technical depth** | ★★★★☆ — 전체 시스템 설계 |\n| **Experimental rigor** | ★★★☆☆ — 비공개, 재현 불가 |\n| **Practical impact** | ★★★★☆ — Dexterous VLA의 첫 번째 실용적 시스템 |\n| **Writing quality** | ★★★★☆ — Technical report 형식 |\n\n**강점**: Dexterous hand에서의 VLA 적용을 처음으로 실용적 수준으로 구현. **약점**: 비공개 시스템, 재현 불가, 비교 baseline 부족.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 21 DoF가 30 DoF 대비 manipulation capability에서 얼마나 손실되는가? | 정량적 비교 부재. 대부분 task에서 충분하다고 주장하나 체계적 분석 없음 |\n| 2 | 그리퍼로 동일 태스크를 수행하면 성능 차이는? | 핵심 비교이나 미수행. Dexterous hand의 부가가치 정량화 필요 |\n| 3 | Teleoperation의 retargeting 오류가 데이터 품질에 미치는 영향은? | 인간 손 → 로봇 핸드 매핑의 불완전성이 action label noise로 작용 가능 |\n| 4 | 이 시스템을 다른 dexterous hand (LEAP, Allegro)에 적용할 수 있는가? | VLA 부분은 cross-embodiment로 확장 가능하나, hardware-specific teleoperation 재설계 필요 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 59
+      "rank": 63
     },
     {
       "name": "GR-1",
@@ -2569,7 +2701,7 @@
         "content": "# GR-1: Unleashing Large-Scale Video Generative Pre-training for Visual Robot Manipulation\n\n> **한 줄 요약**: 195M GPT-style transformer (46M trainable)를 Ego4D 800K 비디오 클립으로 video generation 사전학습한 후, CALVIN에서 **ABCD→D avg len 4.21** (HULC 3.06 대비 +37.6%), unseen scene zero-shot **85.4%** (기존 53.3% 대비 +60%) 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- 로봇 데이터만으로는 diversity와 규모 부족 → 일반화 한계\n- 인터넷 비디오에 풍부한 physical dynamics knowledge가 있으나 action label 없음\n- **Video generative pre-training**이 manipulation의 일반화에 직접 기여하는가?\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Architecture\n\n| Component | Spec |\n|-----------|------|\n| Transformer | **12 layers, 12 heads, hidden 384** |\n| Total params | **195M** (46M trainable) |\n| Language | CLIP text encoder (frozen) |\n| Vision | MAE pre-trained ViT + Perceiver Resampler (frozen) |\n| Robot state | Linear layers (6D EE pose + gripper) |\n\n### 2.2 Token Sequencing\n\n```\n(l, s_{t-h}, o_{t-h}, [OBS], [ACT], l, s_{t-h+1}, ..., l, s_t, o_t, [OBS], [ACT])\n```\n\nCausal attention, [ACT]과 [OBS]은 미래 position에 attend하지 않음.\n\n### 2.3 Output\n\n- **Video decoder**: Transformer + mask tokens → image patch reconstruction (MSE loss)\n- **Action decoder**: Linear layers → arm (Smooth-L1) + gripper (BCE)\n\n### 2.4 Training\n\n| Stage | Data | Batch | LR | Epochs |\n|-------|------|-------|-----|--------|\n| Pre-training | **Ego4D** (800K clips, 8M frames, 3500 hours) | 1024 | 3.6e-4 | 50 |\n| Fine-tuning | CALVIN (22,966 trajectories) | 512 | 1e-3 | 20 |\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### CALVIN ABCD→D\n\n| Model | Avg Len | 5-task SR (%) |\n|-------|---------|-------------|\n| HULC | 3.06 | 38.3 |\n| MT-R3M | - | - |\n| **GR-1** | **4.21** | **73.1** |\n\n### CALVIN ABC→D (Unseen Scene Zero-shot)\n\n| Model | 1-task SR (%) |\n|-------|-------------|\n| MT-R3M | 53.3 |\n| **GR-1** | **85.4 (+60%)** |\n\n### Data Efficiency\n\n| Data | Avg Len |\n|------|---------|\n| 10% of CALVIN | GR-1: **2.00** vs HULC: 1.11 |\n| Full | GR-1: **4.21** vs HULC: 3.06 |\n\n### Unseen Language\n\n| Model | Avg Len |\n|-------|---------|\n| HULC | 1.82 |\n| **GR-1** | **2.17** |\n\n### Real Robot\n\n| Setting | SR (%) |\n|---------|--------|\n| Seen objects | 79 |\n| Unseen instances | 73 |\n| Unseen categories | 30 |\n| Drawer manipulation | 75 (vs RT-1: 35) |\n\n---\n\n## 4. Ablation 분석\n\n### Video Pre-training 기여 (ABCD→D)\n\n| Setting | Avg Len |\n|---------|---------|\n| No video pred + No pre-train | 3.33 |\n| Video prediction only | 3.82 |\n| **Full (pre-train + video pred)** | **4.21** |\n\n### Future Prediction Step (Δt)\n\n| Δt | Avg Len |\n|----|---------|\n| 1 | 3.61 |\n| **3** | **3.82 (optimal)** |\n| 5 | 3.67 |\n\n---\n\n## 5. 한계 및 미해결 문제\n\n1. **LIBERO 결과 없음**: CALVIN only. LIBERO에서의 성능 미검증\n2. **Image generation overhead**: 추론 시 future image token 생성 → latency 증가 (수치 미보고)\n3. **195M은 소형**: 이후 GR-2 (수십B)로 scaling. 195M의 capacity 한계\n4. **Unseen categories 30%**: 완전히 새로운 물체에서 약함\n5. **Pre-training 비용**: Ego4D 800K clips, 50 epochs → 상당한 compute\n\n---\n\n## 6. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Video generative pre-training for robots의 선구적 연구 |\n| **Technical depth** | ★★★★☆ — Δt ablation, data efficiency 분석 |\n| **Experimental rigor** | ★★★★☆ — CALVIN + real robot. LIBERO 부재 |\n| **Practical impact** | ★★★★★ — WAM 패러다임의 기초 확립 |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: Unseen scene 53.3%→85.4%는 video pre-training의 결정적 기여. 195M의 효율적 설계. **약점**: CALVIN only, latency 미보고, unseen category 30%.\n\n---\n\n## 7. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Fast-WAM처럼 test-time video를 skip하면? | 이 ablation 미수행. 이후 Fast-WAM이 이를 검증 |\n| 2 | Ego4D 대신 다른 video dataset이면? | Domain match가 중요. Kitchen video → kitchen task에 유리 |\n| 3 | 195M을 1B+로 scaling하면? | GR-2가 이를 수행. 97.7% on 100+ tasks |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 60
+      "rank": 64
     },
     {
       "name": "GR-2",
@@ -2613,7 +2745,7 @@
         "content": "# GR-2: A Generative Video-Language-Action Model with Web-Scale Knowledge for Robot Manipulation\n\n> **한 줄 요약**: 3800만 비디오 클립·500억+ 토큰의 대규모 인터넷 비디오 사전학습을 통해 범용 로봇 agent를 구축, 100+ 태스크에서 97.7% 성공률과 미지 환경에 대한 뛰어난 일반화 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- GR-1의 후속작으로 **규모를 극적으로 확대**: 비디오 데이터 38M clips, 50B+ tokens\n- 핵심: **web-scale video pre-training이 로봇 조작의 일반화에 결정적**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Web-Scale Pre-training → Robot Fine-tuning Pipeline\n\n```\n[38M web videos, 50B+ tokens] → Video generation pre-training\n                                        ↓\n[Robot trajectories] → Video + action generation fine-tuning\n```\n\n### 2.2 Model Scaling\n\n| 모델 크기 | 100-task SR (%) |\n|----------|---------------|\n| Small | 89.2 |\n| Medium | 94.5 |\n| **Large** | **97.7** |\n\n- **Scaling law**: 모델 크기에 따라 성능이 일관적으로 향상\n\n> ❓ **예상 질문**: Scaling이 어디까지 유효한가? Saturate되는 지점은?\n> **답변**: 97.7%에서 near-saturation이나, 더 어려운 태스크에서의 ceiling 미검증.\n\n---\n\n## 3. 실험 결과 심층 분석\n\n| 설정 | SR (%) |\n|------|--------|\n| 100+ 학습 태스크 (in-domain) | 97.7 |\n| 새로운 배경 | ~90% |\n| 새로운 환경 | ~85% |\n| 새로운 물체 | ~82% |\n| 새로운 태스크 | ~75% |\n\n- 각 일반화 축에서 점진적 하락하나 여전히 높은 수준\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **비공개**: 모델·데이터 비공개, 재현 불가\n2. **100+ 태스크**: 대부분 tabletop manipulation. Diversity의 실체 불명확\n3. **Cloud 의존**: 대형 모델의 on-device 실행 불가\n4. **비디오 생성의 추론 시 역할**: 추론 시에도 비디오 생성하는지 불명확\n\n### Attribution 문제\n- **데이터 규모** vs **모델 아키텍처** vs **학습 레시피**의 독립적 기여 분리 불가\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — GR-1의 규모 확장 |\n| **Technical depth** | ★★★☆☆ — Scaling 위주, 아키텍처 혁신 제한적 |\n| **Experimental rigor** | ★★★★☆ — 다양한 일반화 축 평가 |\n| **Practical impact** | ★★★★☆ — Web-scale pre-training 유효성 입증 |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: 97.7%의 강력한 결과, scaling law의 로봇 분야 검증. **약점**: 비공개, 재현 불가, 아키텍처적 혁신보다는 규모의 힘.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 38M videos의 curation은 어떻게 했는가? | 미공개. 데이터 품질이 핵심이나 세부사항 없음 |\n| 2 | 동일 아키텍처에서 데이터를 1/10로 줄이면? | Scaling 분석에서 데이터 규모의 영향 부분적 보고하나 상세하지 않음 |\n| 3 | OpenVLA와 동일 벤치마크에서의 직접 비교는? | LIBERO/CALVIN 등 표준 벤치마크 결과 미제공 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 61
+      "rank": 65
     },
     {
       "name": "GR00T-N1.5",
@@ -2651,7 +2783,7 @@
         "robocasa": "fine-tuned"
       },
       "robocasa_avg": 64.1,
-      "rank": 62
+      "rank": 66
     },
     {
       "name": "GR00T-N1.6",
@@ -2689,7 +2821,7 @@
         "robocasa": "fine-tuned"
       },
       "robocasa_avg": 47.6,
-      "rank": 63
+      "rank": 67
     },
     {
       "name": "HELM",
@@ -2717,7 +2849,40 @@
         "libero": "fine-tuned",
         "calvin": "fine-tuned"
       },
-      "rank": 64
+      "rank": 68
+    },
+    {
+      "name": "HEX",
+      "organization": "TODO: check paper",
+      "date": "2026-04-09",
+      "paper_url": "https://arxiv.org/abs/2604.07993",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "humanoid",
+        "whole-body",
+        "cross-embodiment",
+        "flow-matching",
+        "mixture-of-experts",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "Mixture-of-Experts with humanoid-aligned state representation, lightweight history tokens for temporal visual context, and residual-gated fusion with flow-matching action generation",
+        "action_head_category": "flow_matching",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# HEX: Humanoid-Aligned Experts for Cross-Embodiment Whole-Body Manipulation\n\n> **한 줄 요약**: 부위별 독립 action prediction의 한계를 극복하기 위해, humanoid-aligned state 표현과 Mixture-of-Experts + flow-matching action generation을 결합한 **whole-body coordinated** VLA 프레임워크.\n\n---\n\n## 1. 배경 및 동기\n\n- 인간의 조작은 전신(Whole-body) 협조를 통해 이루어짐.\n- 기존 VLA는 팔/몸/다리 등 부위별 action을 largely independently 예측 → 고DoF humanoid에서 불안정.\n- **핵심 과제**: 고차원 humanoid action space를 통합적으로 모델링하되, cross-embodiment 전이도 가능해야 함.\n\n---\n\n## 2. 방법론\n\n### Humanoid-Aligned State Representation\n- Robot의 proprioceptive state를 humanoid 해부학적 구조에 맞춰 정렬된 형태로 인코딩.\n- 부위 간 상관관계를 보존한 state-centric 접근 (action-centric이 아님).\n\n### Mixture-of-Experts (MoE) for Whole-Body Coordination\n- 각 expert가 특정 body-part 또는 motion mode를 전담.\n- Routing을 통해 여러 expert의 출력을 coordinated whole-body action으로 통합.\n\n### Residual-Gated Fusion + Flow Matching\n- Lightweight history tokens으로 temporal visual context를 경량 주입.\n- Residual-gated fusion으로 modality·time 차원 정보를 결합 후, **flow matching** head가 연속 action 생성.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- 실제(real-world) humanoid 조작 태스크에서 강한 성능 보고.\n- Cross-embodiment (다양한 humanoid platform) 전이 실험 포함.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **MoE의 routing 안정성**: Expert balance collapse 가능성, 희귀 motion mode 누락.\n2. **State-centric 대 action-centric의 trade-off**: 표현 일관성은 얻지만, 플랫폼별 state schema alignment가 필요.\n3. **Flow matching latency**: 실시간 고주파 제어에서 inference speed 확보 난이도.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — State-centric + MoE + flow matching의 결합 방식이 참신 |\n| **Practical impact** | ★★★★☆ — Humanoid whole-body VLA는 업계 핵심 문제 |\n\n**강점**: Humanoid의 coordinated control이라는 실제 문제를 state representation 설계로 정면 공략. **약점**: MoE와 flow matching 모두 튜닝 난이도 높은 모듈이라 재현성 부담.\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Body-part 독립 예측 대비 실제 실패 모드의 차이? | 팔-몸통-하체 간 반력/균형 관계 위반 동작 대폭 감소 |\n| 2 | MoE가 진짜 부위별로 분화되는가? | Gating 분석 필요 (abstract에 세부 제시 없음) |\n| 3 | 왜 flow matching을 선택했는가? | Continuous high-DoF action 분포 모델링에 강함, diffusion 대비 sampling 빠름 |\n| 4 | GR00T, Helix 등 다른 humanoid foundation과 차별점? | State-aligned 표현과 MoE routing이 핵심 차별화 |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 69
     },
     {
       "name": "HiMoE-VLA",
@@ -2749,7 +2914,7 @@
         "content": "# HiMoE-VLA: Hierarchical Mixture-of-Experts for Generalist VLA Policies\n\n> **한 줄 요약**: 로봇 데이터의 다층적 이질성(embodiment, action space, sensor, frequency)을 계층적 MoE로 계층별 적응적 처리하여, heterogeneous cross-embodiment 학습에서 일관적 성능 향상 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- Cross-embodiment VLA (Octo, CrossFormer)는 **이질적 데이터를 단일 네트워크로 처리** → 서로 다른 embodiment 간 interference\n- 이질성이 **다층적**: embodiment 차이, action space 차이, sensor 차이, control frequency 차이\n- 기존 MoE는 단일 수준의 routing만 수행 → 다층적 이질성 미처리\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Hierarchical MoE\n\n각 transformer layer에서 **다중 수준의 routing**:\n\n```\nLayer l:\n  Router 1: Embodiment-level routing → expert subset 선택\n  Router 2: Task-level routing → expert subset 내에서 세부 선택\n  Shared experts: 모든 입력에 공통 적용\n```\n\n$$h_l = \\sum_{i \\in \\text{shared}} E_i^s(x) + \\sum_{j \\in \\text{selected}} g_j(x) \\cdot E_j^{h}(x)$$\n\n> ❓ **예상 질문**: Hierarchical routing의 overhead는? 일반 MoE 대비 얼마나 추가 연산인가?\n> **답변**: Routing 자체는 경량 linear projection이므로 overhead 미미. 다만 expert 수 증가에 따른 메모리 사용량이 단일 MoE 대비 높을 수 있음.\n\n### 2.2 Gradual Abstraction\n\n하위 layer: embodiment-specific features 처리 (sensor alignment, action space normalization)\n상위 layer: task-agnostic shared knowledge (물체 인식, 공간 추론)\n\n> ❓ **예상 질문**: 이 abstraction 패턴이 자연스럽게 emerge하는가, 아니면 강제하는가?\n> **답변**: Routing이 학습을 통해 자동으로 결정되므로 emerge하는 것으로 주장. 그러나 이 패턴의 발현을 정량적으로 검증하는 분석(예: router decision 시각화)은 부분적.\n\n---\n\n## 3. 실험 결과 심층 분석\n\n| 모델 | Cross-embodiment 평균 SR (%) |\n|------|---------------------------|\n| Octo | 55.3 |\n| CrossFormer | 61.7 |\n| OpenVLA (single) | 68.5 |\n| **HiMoE-VLA** | **73.2** |\n\n- Cross-embodiment에서 일관적 향상\n- 특히 **이질성이 큰 조합** (manipulator + mobile)에서 개선폭이 큼\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Expert 수의 scalability**: Embodiment가 수십 개로 늘어나면 expert 수 폭발\n2. **새로운 embodiment 추가**: 기존 routing을 재학습해야 하는지, 새 expert만 추가하면 되는지 불명확\n3. **Routing의 해석가능성**: 어떤 expert가 어떤 embodiment에 특화되는지의 분석 부족\n4. **Standard benchmark 결과**: LIBERO/CALVIN 등 단일 embodiment 벤치마크에서의 경쟁력 미제시\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Hierarchical MoE for heterogeneous robotics |\n| **Technical depth** | ★★★★☆ — 다층 routing 설계 |\n| **Experimental rigor** | ★★★★☆ — Cross-embodiment 포괄적 평가 |\n| **Practical impact** | ★★★★☆ — Multi-robot deployment에 직접적 가치 |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: 로봇 데이터의 다층적 이질성을 구조적으로 다루는 최초의 체계적 접근. **약점**: Scalability 우려, 새 embodiment 추가의 용이성 미검증.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Embodiment 수가 100개면 expert 몇 개 필요한가? | Linear scaling이면 비실용적. Expert sharing/clustering이 필요하나 미탐구 |\n| 2 | 단일 MoE (hierarchical 아닌)와의 차이는 얼마인가? | Ablation 포함. Hierarchical이 flat MoE 대비 ~3%p 향상 |\n| 3 | Load balancing은 어떻게 하는가? | Auxiliary loss로 balanced routing 유도하나, 특정 embodiment에 expert가 편중될 수 있음 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 65
+      "rank": 70
     },
     {
       "name": "HiVLA",
@@ -2775,7 +2940,7 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
-      "rank": 66
+      "rank": 71
     },
     {
       "name": "Humanoid-VLA",
@@ -2806,7 +2971,7 @@
         "content": "# Humanoid-VLA: Towards Universal Humanoid Control with Visual Integration\n\n> **한 줄 요약**: Language understanding, egocentric perception, motion control을 통합하는 humanoid 전용 VLA로, language-motion 사전정렬과 self-supervised augmentation을 통해 범용 휴머노이드 제어 실현.\n\n---\n\n## 1. 배경 및 동기\n\n- Humanoid 로봇은 **전신 제어 (수십 DoF)** 필요 → 기존 manipulator VLA 직접 적용 불가\n- 언어 지시 → 전신 동작의 **semantic gap**이 매우 큼 (\"문 열어\" → 걸어가서, 손을 뻗어, 핸들 잡고, 돌려서, 당기기)\n- Egocentric vision (1인칭 시점)이 주요 입력이나, 기존 VLA는 third-person view에 최적화\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Language-Motion Pre-alignment\n\n언어 지시와 motion primitive를 사전 정렬:\n- CLIP-like contrastive learning으로 language embedding과 motion embedding을 같은 공간에 매핑\n- 이를 통해 \"walk forward\" ↔ locomotion trajectory, \"reach up\" ↔ arm motion 등의 대응 학습\n\n### 2.2 Self-supervised Data Augmentation\n\n제한된 humanoid 데이터를 확장:\n- Random perturbation으로 diverse trajectory 생성\n- Goal relabeling으로 데이터 재활용\n\n> ❓ **예상 질문**: Self-supervised augmentation이 물리적으로 유효한 trajectory를 생성하는가?\n> **답변**: Random perturbation이 물리 법칙을 위반할 수 있음. 시뮬레이터에서 물리 검증을 거칠 수 있으나, 이 과정이 포함되는지 불명확.\n\n---\n\n## 3. 실험 결과 심층 분석\n\n| 태스크 | 기존 방법 | Humanoid-VLA |\n|-------|---------|-------------|\n| Object manipulation | ~45% | ~65% |\n| Navigation + manipulation | ~30% | ~55% |\n| Language following | ~40% | ~60% |\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Simulation 위주**: 실제 humanoid 실험 제한적\n2. **Locomotion + manipulation의 완전 통합**: 보행 중 조작의 안정성 분석 부족\n3. **Data augmentation 품질**: 물리적 타당성 보장 미비\n4. **Egocentric vision의 한계**: 시야 제한으로 task-relevant 정보가 보이지 않을 수 있음\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Humanoid 특화 VLA |\n| **Technical depth** | ★★★☆☆ — 각 기법의 깊이가 다소 부족 |\n| **Experimental rigor** | ★★★☆☆ — Sim 위주 |\n| **Practical impact** | ★★★★☆ — Humanoid 연구 커뮤니티에 가치 |\n| **Writing quality** | ★★★☆☆ |\n\n**강점**: Humanoid-specific 문제를 정면으로 다룸. **약점**: 실험 깊이 부족, augmentation 품질 불확실.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | GR00T-N1과의 차이는? | GR00T은 더 큰 규모·데이터, Humanoid-VLA는 language-motion alignment에 특화 |\n| 2 | 넘어짐(falling) recovery는 가능한가? | 미다뤄짐. Safety-critical한 failure mode |\n| 3 | Egocentric 대신 third-person을 추가하면? | 성능 향상 예상되나 deployment 제약. Head-mounted camera가 현실적 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 67
+      "rank": 72
     },
     {
       "name": "HY-Embodied-0.5",
@@ -2830,7 +2995,7 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
-      "rank": 68
+      "rank": 73
     },
     {
       "name": "InternVLA-A1",
@@ -2861,7 +3026,7 @@
         "content": "# InternVLA-A1: Unifying Understanding, Generation and Action for Robotic Manipulation\n\n> **한 줄 요약**: Scene understanding, visual foresight generation, action execution을 위한 세 개의 전문가(expert)를 Mixture-of-Transformers 아키텍처로 통합하고 masked self-attention으로 조율하는 통합 VLA.\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA가 understanding/generation/action 중 하나에 특화 → 통합 모델의 필요성\n- 세 능력을 동시에 학습하면 **representation interference** 발생 → MoT로 해결\n\n---\n\n## 2. 방법론 심층 분석\n\n### Mixture-of-Transformers (MoT)\n\n세 개의 transformer expert:\n1. **Understanding Expert**: Scene comprehension, object detection\n2. **Generation Expert**: Future image/video generation (visual foresight)\n3. **Action Expert**: Robot action prediction\n\nMasked self-attention으로 expert 간 정보 흐름 제어:\n- Understanding → Generation: 허용 (scene 이해가 prediction에 도움)\n- Understanding → Action: 허용\n- Generation → Action: 조건부 (visual foresight가 action을 guide)\n- Action → Generation: 차단 (action이 imagination을 오염시키지 않도록)\n\n> ❓ **예상 질문**: GigaWorld-Policy의 causal design과 어떻게 다른가?\n> **답변**: 유사한 철학이나 구현이 다름. GigaWorld는 token 순서와 causal mask, InternVLA-A1은 expert-level MoT와 attention mask. MoT가 더 유연한 정보 흐름 제어 가능.\n\n---\n\n## 3. 실험 결과 심층 분석\n\n| 능력 | InternVLA-A1 | 단일 목적 baseline |\n|------|-------------|------------------|\n| Understanding | ~90% (VQA) | ~92% |\n| Generation (FID) | ~15 | ~12 |\n| Action (LIBERO) | ~93% | ~90% |\n\n- 세 능력 모두에서 competitive하면서 **action에서 오히려 단일 목적보다 우수** → multi-task synergy\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **세 expert의 학습 비용**: MoT 구조로 인해 단일 모델 대비 3배 가까운 파라미터\n2. **Attention mask 설계의 최적성**: 수동 설계된 mask가 optimal인지 검증 부재\n3. **Real-world 검증 제한적**\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Understanding+Generation+Action 통합 |\n| **Technical depth** | ★★★★☆ — MoT 설계 |\n| **Experimental rigor** | ★★★★☆ |\n| **Practical impact** | ★★★★☆ |\n| **Writing quality** | ★★★★☆ |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Expert 수를 2개로 줄이면? | Understanding+Action만으로도 대부분 태스크 해결 가능. Generation expert의 marginal 기여 정량화 필요 |\n| 2 | MoT vs MoE: 어떤 차이인가? | MoT는 전체 transformer block이 expert, MoE는 FFN만 expert. MoT가 더 유연하나 더 비쌈 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 69
+      "rank": 74
     },
     {
       "name": "InternVLA-M1",
@@ -2895,7 +3060,7 @@
         "content": "# InternVLA-M1: A Spatially Guided VLA Framework for Generalist Robot Policy\n\n> **한 줄 요약**: Spatial grounding을 language instruction과 robot action을 연결하는 핵심 고리로 설정하고, 2-stage pipeline (spatial reasoning → action generation)으로 일반화된 instruction following 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- Language instruction \"빨간 컵을 집어\"에서 action으로의 직접 매핑은 **spatial grounding** (빨간 컵의 위치)이 implicit → 오류 진단 어려움\n- Spatial grounding을 explicit 중간 표현으로 활용하면 해석가능성 + 정확도 향상\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2-Stage Pipeline\n\n**Stage 1: Spatial Reasoning**\n$$\\text{VLM}(\\text{image}, \\text{instruction}) \\to \\text{spatial grounding} (\\text{bbox}, \\text{keypoint}, \\text{direction})$$\n\n**Stage 2: Spatially-Conditioned Action**\n$$\\text{Action Head}(\\text{image}, \\text{spatial grounding}) \\to \\text{action}$$\n\n> ❓ **예상 질문**: 2-stage의 error cascading은?\n> **답변**: Stage 1의 grounding 오류가 Stage 2에 직접 전파. 이를 완화하기 위해 end-to-end fine-tuning을 수행하나, cascading risk은 구조적으로 존재.\n\n---\n\n## 3. 실험 결과\n\n| 설정 | Direct VLA | InternVLA-M1 |\n|------|-----------|-------------|\n| Seen objects | 82.3% | 88.7% |\n| Unseen objects | 51.2% | 68.5% |\n| Novel instructions | 45.8% | 62.3% |\n\n- **Unseen objects와 novel instructions에서 큰 향상** → spatial grounding이 일반화에 기여\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **2-stage latency**: Spatial reasoning + action generation의 순차 실행\n2. **Grounding 오류**: VLM의 spatial grounding 정확도에 전체 성능이 의존\n3. **Contact-level precision**: Bbox/keypoint 수준 grounding이 mm 단위 정밀도에 부족\n4. **Standard benchmark 비교 부족**\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Spatial grounding as bridge |\n| **Technical depth** | ★★★★☆ |\n| **Experimental rigor** | ★★★☆☆ |\n| **Practical impact** | ★★★★☆ — Interpretable VLA |\n| **Writing quality** | ★★★★☆ |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Grounding 없이 직접 action을 예측하면 얼마나 차이나는가? | Ablation에서 ~10-15%p 하락. Grounding의 가치 입증 |\n| 2 | 3D grounding (depth 포함)으로 확장하면? | GST-VLA와의 접점. 3D grounding이 더 유효할 가능성 |\n| 3 | Stage 1과 Stage 2를 parallel로 실행할 수 있는가? | 구조적으로 불가. Stage 2가 Stage 1 출력에 의존 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 70
+      "rank": 75
     },
     {
       "name": "KineVLA",
@@ -2935,7 +3100,7 @@
         "content": "# KineVLA: Towards Kinematics-Aware VLA Models with Bi-Level Action Decomposition\n\n> **한 줄 요약**: OpenVLA 위에 bi-level RVQ-VAE (goal codebook + kinematics codebook)를 구축하여, goal-invariant 행동과 kinematics-variant 행동을 분리하고, kinematics-sensitive task에서 **76.5%** kinematics SR (baseline 35%) + 96ms inference 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- 기존 VLA는 **goal completion만 평가** → \"어떻게\" 수행하는지 (kinematics: 방향, 궤적, 회전)는 무시\n- 동일 goal을 달성하는 여러 kinematics 경로 중 **특정 경로를 지정**할 수 없음\n- Action tokenization이 goal과 kinematics를 entangle → fine-grained control 불가\n\n### 핵심 질문\n- **Goal-invariant한 coarse action과 kinematics-variant한 fine action을 분리하면, 지정된 동작 방식으로 task를 수행할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Bi-Level RVQ-VAE\n\n두 개의 codebook으로 action을 계층적으로 표현:\n\n**Goal codebook ($E_l$)**: Stage I에서 Open X-Embodiment + ManiSkill 데이터로 학습. Task의 semantic goal을 인코딩.\n\n**Kinematics codebook ($E_h$)**: Stage II에서 kinematics-annotated 데이터로 학습 (goal codebook freeze). 방향, 궤적, 회전 등 세밀한 kinematic parameter를 인코딩.\n\n### 2.2 Bi-Level Reasoning\n\nChain-of-thought 스타일로 coarse + fine reasoning text와 discrete action token을 생성:\n- Coarse reasoning: \"pick up the cup\" (goal)\n- Fine reasoning: \"approach from the left, rotate 90°\" (kinematics)\n- 동일 vocabulary space에서 text + action token을 unified하게 생성\n\n### 2.3 Mutual Information Regularization\n\n$$\\mathcal{L}_{MI} = -\\frac{1}{2N}\\sum\\left[\\log\\frac{e^{s_{ii}}}{\\sum e^{s_{ij}}} + \\log\\frac{e^{s_{ii}}}{\\sum e^{s_{ji}}}\\right]$$\n\nInfoNCE objective로 reasoning과 action의 일관성을 강제.\n\n### 2.4 Architecture\n\n- **Base**: OpenVLA (Prismatic-7B)\n- **Fine-tuning**: LoRA rank=32, all linear layers\n- **Action chunk**: H=5 timesteps\n- **Inference**: 96ms\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### LIBERO-Goal-Relabeled\n\n| Model | Goal SR (%) | Kinematics SR (%) |\n|-------|-----------|------------------|\n| OpenVLA | ~70 | ~35 |\n| π₀.₅ | ~69 | ~38 |\n| VQ-VLA | ~71 | ~40 |\n| **KineVLA** | **~70** | **76.5** |\n\n- Goal SR은 유사하나 **kinematics SR에서 36%p+ 향상**\n\n### Ablation (LIBERO-Goal-Relabeled)\n\n| Component | Kinematics SR (%) |\n|-----------|------------------|\n| Baseline (OpenVLA) | ~35 |\n| + Bi-Rep (bi-level representation) | ~57 (+22) |\n| + Bi-Rea (bi-level reasoning) | ~65 (+8) |\n| **+ MI (mutual information)** | **76.5 (+11.5)** |\n\n### Real Robot (Kine-Realman-75)\n\n| Model | Kinematics SR (%) |\n|-------|------------------|\n| OpenVLA | ~25 |\n| **KineVLA** | **65.0** |\n\n### Inference Speed\n\n| Model | Latency (ms) |\n|-------|-------------|\n| OpenVLA | 237 |\n| π₀.₅ | 86 |\n| VQ-VLA | 84 |\n| **KineVLA** | **96** |\n\n---\n\n## 4. Training\n\n- RVQ-VAE: 1× A100, batch 1024\n- Fine-tuning: 4× A100, batch 64, 50K steps\n- Datasets: LIBERO-Goal-Relabeled (63K), Kine-LIBERO (266K), Kine-Realman-75 (49K)\n\n---\n\n## 5. 한계 및 미해결 문제\n\n1. **Goal SR이 향상되지 않음**: Kinematics에 집중하면서 goal 성능은 baseline과 동일. Trade-off 존재\n2. **Kinematics annotation 비용**: 사람이 방향, 궤적 등을 명시적으로 annotation해야 함\n3. **표준 LIBERO 4-suite 결과 없음**: Custom relabeled 데이터셋에서만 평가\n\n---\n\n## 6. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — \"어떻게 수행하는가\"를 VLA에 도입 |\n| **Technical depth** | ★★★★★ — RVQ-VAE, MI regularization, 체계적 ablation |\n| **Experimental rigor** | ★★★★☆ — 3 datasets + real robot. 표준 벤치마크 부재 |\n| **Practical impact** | ★★★★☆ — Kinematics-aware control의 새로운 방향 |\n\n---\n\n## 7. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Goal SR이 안 오르는데, kinematics를 신경쓸 필요가 있는가? | 산업 현장에서 \"어떻게\"가 중요 (안전, 효율). 같은 goal이라도 경로에 따라 충돌 가능 |\n| 2 | Codebook 크기가 성능에 미치는 영향은? | 미보고. 작으면 expressiveness 부족, 크면 학습 어려움 |\n| 3 | FAST tokenizer와의 결합은? | FAST는 frequency-space, KineVLA는 semantic-space 분해. 상보적 가능성 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 71
+      "rank": 76
     },
     {
       "name": "LaMP",
@@ -2963,7 +3128,39 @@
         "libero": "fine-tuned",
         "simpler_env": "fine-tuned"
       },
-      "rank": 72
+      "rank": 77
+    },
+    {
+      "name": "LARY",
+      "organization": "Meituan LongCat",
+      "date": "2026-04-13",
+      "paper_url": "https://arxiv.org/abs/2604.11689",
+      "code_url": "https://github.com/meituan-longcat/LARYBench",
+      "venue": null,
+      "open_source": true,
+      "tags": [
+        "latent-action",
+        "human-video",
+        "scaling",
+        "benchmark",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "latent action representation benchmark (evaluates latent-action encoders derived from large-scale human video on both semantic-action recognition and downstream robotic control tasks)",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# LARY: A Latent Action Representation Yielding Benchmark for Generalizable Vision-to-Action Alignment\n\n> **한 줄 요약**: 대규모 human action video (1M+, 151 categories)로부터 학습된 **latent action** 표현의 품질을 체계적으로 평가하는 벤치마크로, 일반 비주얼 foundation model이 특화된 embodied model보다 latent-action encoder로 더 우수함을 보인 연구.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA 모델은 명시적 action label 데이터가 부족 → human action video가 scalable alternative.\n- 그러나 human video는 ontology-independent한 표현(= latent action)으로 변환해야 로봇에 전이 가능.\n- **핵심 질문**: 어떤 visual encoder가 좋은 latent action 표현을 산출하는가? → 이를 측정할 표준 벤치마크가 없었음.\n\n---\n\n## 2. 방법론\n\n### Latent Action Representation Yielding (LARY) 벤치마크\n- 1M+ human action videos, 151 action categories를 커버하는 대규모 평가 프로토콜.\n- 두 축으로 평가: (a) **semantic action understanding** (e.g., action classification), (b) **generalizable vision-to-action alignment** (downstream 로봇 제어).\n\n### Latent vs Pixel Space\n- Pixel-based video prediction보다 latent-based visual space가 physical action space와 구조적으로 더 잘 정렬됨을 실증.\n- 일반 visual foundation model (DINO/CLIP-류) vs specialized embodied encoder를 비교.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- 1M+ human action videos, 151 categories 규모의 평가.\n- 일반 visual foundation model이 specialized embodied model을 **상회**하여 더 좋은 latent action encoder로 기능.\n- Latent-based space가 pixel-based space 대비 action space와 더 잘 aligned.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Human→Robot embodiment gap**: Latent action이 ontology-independent하다 해도 최종 robot motor command로의 decoding에서 오차가 발생 가능.\n2. **Semantic action category의 대표성**: 151 category가 실제 로봇 작업의 long-tail을 얼마나 커버하는가?\n3. **Benchmark로서의 지속성**: 일반 visual FM이 빠르게 진화 → 평가 기준이 빠르게 구식화될 리스크.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Latent action 평가를 체계화한 benchmark contribution |\n| **Practical impact** | ★★★★☆ — VLA pretraining encoder 선택에 직접적 가이드 제공 |\n\n**강점**: Latent action이라는 다소 모호했던 개념을 측정 가능한 axis로 내림. **약점**: 자체 새로운 모델이 아닌 evaluation framework이므로 다운스트림 검증 깊이에 의존.\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 왜 general visual FM이 embodied model보다 좋았는가? | 데이터 규모·다양성 우위, embodied pretraining이 과적합되는 경향 |\n| 2 | Latent action은 어떻게 정의되는가? | Ontology-independent, embodiment-agnostic한 action의 분포적 표현 |\n| 3 | 이 결과가 LAPA, UniPi 같은 latent-action VLA에 어떤 시사? | Encoder 백본을 embodied 전용이 아닌 general FM으로 대체해볼 가치 |\n| 4 | Pixel-based video prediction(GR-1, UniPi)은 낡은 접근인가? | Latent space의 alignment 우위를 보였으므로, latent-diffusion 계열이 더 유망할 수 있다 |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 78
     },
     {
       "name": "LIBERO-Para",
@@ -2989,7 +3186,7 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
-      "rank": 73
+      "rank": 79
     },
     {
       "name": "LLARVA",
@@ -3021,7 +3218,7 @@
         "content": "# LLARVA: Vision-Action Instruction Tuning Enhances Robot Learning\n\n> **한 줄 요약**: Structured prompt로 다양한 로봇 학습 태스크를 통합하고, 2D intermediate representation (\"visual trace\")을 예측하여 vision-action space를 정렬하는 instruction tuning 기반 VLA.\n\n---\n\n## 1. 배경 및 동기\n\n- Vision space와 action space 사이의 **semantic gap**: 이미지의 어떤 부분이 action에 관련되는지 불명확\n- Instruction tuning (LLaVA 스타일)의 로봇 적용\n\n---\n\n## 2. 방법론\n\n### Visual Trace\n\n2D image 위에 **visual trace** (예측 경로, 접촉점 등)를 intermediate representation으로 예측:\n- 이미지 위에 그려지는 화살표/점/경로\n- Action보다 직관적이고, 이미지보다 compact\n\n### Structured Prompts\n\n다양한 task를 통일된 prompt 형식으로 표현:\n- \"이 물체를 [위치]로 옮겨라\" → visual trace + action\n- \"이 장면을 설명하라\" → text description\n\n---\n\n## 3. 실험 결과\n\n| 모델 | Multi-task SR (%) |\n|------|-----------------|\n| BC baseline | 52.3 |\n| OpenVLA | 68.5 |\n| **LLARVA** | **74.2** |\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Visual trace의 정밀도**: 2D trace가 3D action으로 변환 시 depth 정보 손실\n2. **Trace annotation**: 학습 데이터에 trace annotation 필요\n3. **복잡한 manipulation**: 단순 pick-and-place 외의 complex task에서 trace 표현력 한계\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Visual trace as intermediate representation |\n| **Practical impact** | ★★★☆☆ — Trace annotation 비용이 실용성 제한 |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | TraceVLA와의 차이는? | TraceVLA는 state-action trajectory를 시각적으로 인코딩, LLARVA는 predicted trace를 intermediate로 활용 |\n| 2 | 3D visual trace (point cloud 경로)로 확장하면? | Depth 문제 해결 가능하나 구현 복잡성 증가 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 74
+      "rank": 80
     },
     {
       "name": "LLaVA-VLA",
@@ -3077,7 +3274,7 @@
         "content": "# LLaVA-VLA: Rethinking the Practicality of VLA — A Comprehensive Benchmark and Improved Baseline\n\n> **한 줄 요약**: VLA의 실용성(practicality)을 체계적으로 재평가하기 위한 CEBench 벤치마크를 제안하고, consumer-grade GPU에서 구동 가능한 경량 LLaVA-VLA 모델을 설계.\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA 평가가 **실용성을 간과**: 추론 속도, GPU 메모리, fine-tuning 비용 등\n- 대부분의 VLA가 A100/H100 필수 → consumer GPU (RTX 3090/4090)에서 실행 불가\n- Navigation과 manipulation을 동시에 다루는 VLA 부재\n\n---\n\n## 2. 방법론\n\n### CEBench (Comprehensive Evaluation Benchmark)\n\n| 평가 축 | 메트릭 |\n|--------|--------|\n| Task performance | Success rate |\n| Efficiency | Inference FPS, GPU memory |\n| Practicality | Fine-tuning cost, deployment ease |\n\n### LLaVA-VLA\n\n- LLaVA backbone (경량)\n- Navigation + manipulation 동시 지원\n- **Consumer GPU (RTX 4090)에서 실행 가능**\n\n---\n\n## 3. 실험 결과\n\n| 모델 | SR (%) | FPS | GPU Memory |\n|------|--------|-----|-----------|\n| OpenVLA (7B) | 76.5 | 5.2 | 28GB |\n| **LLaVA-VLA (3B)** | **72.8** | **12.5** | **12GB** |\n\n- 3.7%p 성능 하락이지만 **2.4x 빠르고 절반의 메모리** 사용\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **성능 격차**: 대형 모델 대비 여전히 성능 하락\n2. **CEBench의 포괄성**: 포함된 task diversity가 실제 deployment 시나리오를 충분히 반영하는지 불명확\n3. **Navigation 성능**: Manipulation 대비 navigation 평가가 불충분\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Practicality-focused 평가 프레임워크 |\n| **Practical impact** | ★★★★★ — Consumer GPU deployment |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Quantization (INT4)을 적용하면 7B도 RTX 4090에서 되지 않는가? | 가능하나 quantization 성능 하락과 LLaVA-VLA의 native 경량이 더 나을 수 있음 |\n| 2 | FLOWER (950M)와 비교하면? | FLOWER가 더 작으면서 성능 우수. LLaVA-VLA는 navigation까지 포함하는 점이 차별화 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 75
+      "rank": 81
     },
     {
       "name": "ManipArena",
@@ -3103,7 +3300,7 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
-      "rank": 76
+      "rank": 82
     },
     {
       "name": "MMaDA-VLA",
@@ -3132,7 +3329,7 @@
         "libero": "fine-tuned",
         "calvin": "fine-tuned"
       },
-      "rank": 77
+      "rank": 83
     },
     {
       "name": "Mobility VLA",
@@ -3163,7 +3360,7 @@
         "content": "# Mobility VLA: Multimodal Instruction Navigation with Long-Context VLMs and Topological Graphs\n\n> **한 줄 요약**: Long-context VLM과 topological graph 기반 제어를 결합한 계층적 navigation 시스템으로, 자연어+이미지 multimodal 지시를 이해하여 실제 환경에서 로봇 navigation 수행.\n\n---\n\n## 1. 배경 및 동기\n\n- Robot navigation에서 multimodal instruction (텍스트 + 참조 이미지) 처리 필요\n- 기존 VLN (Vision-Language Navigation)은 discrete graph 기반 → 실제 로봇 제어에 부적합\n- Long-context VLM의 등장으로 긴 시퀀스의 관측 이력 처리 가능\n\n---\n\n## 2. 방법론\n\n### Hierarchical System\n\n**High-level**: Long-context VLM이 multimodal instruction을 해석하고 topological graph 위에서 경로 계획\n**Low-level**: Local navigation policy로 waypoint 간 이동\n\n> ❓ **예상 질문**: End-to-end VLA 대비 hierarchical의 이점은?\n> **답변**: Navigation의 long-range planning은 end-to-end로 학습하기 어려움. Topological graph가 global structure를 제공하고 VLM이 semantic reasoning을 수행하여 각각의 강점을 활용.\n\n---\n\n## 3. 실험 결과\n\n| 설정 | 기존 VLN | Mobility VLA |\n|------|---------|-------------|\n| Seen env | 68% | 78% |\n| Unseen env | 42% | 58% |\n| Multimodal instruction | N/A | 65% |\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Manipulation 미포함**: Navigation only → 범용 VLA가 아님\n2. **Topological graph 의존**: 사전 구축된 map 필요\n3. **Dynamic environments**: 정적 환경 가정\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Long-context VLM + topological nav |\n| **Practical impact** | ★★★☆☆ — Map 의존이 실용성 제한 |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Map 없이 작동할 수 있는가? | 현 구조에서 불가. Online mapping과의 결합 필요 |\n| 2 | NaVILA와의 차이는? | NaVILA는 legged robot locomotion 포함, Mobility VLA는 wheeled robot navigation 특화 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 78
+      "rank": 84
     },
     {
       "name": "Motus",
@@ -3207,7 +3404,7 @@
         "content": "# Motus: A Unified Latent Action World Model\n\n> **한 줄 요약**: Latent action space에서의 통합 world model로, 기존 pretrained model과 motion information을 결합하는 Mixture-of-Transformer 아키텍처를 통해 video prediction, action prediction, planning을 유연하게 수행.\n\n---\n\n## 1. 배경 및 동기\n\n- World model과 action model의 **분리된 학습**이 비효율적\n- Latent action space에서 통합하면 action-labeled data 없이도 world dynamics 학습 가능\n- 기존 pretrained model (video generation, VLM)의 지식을 활용하면서 motion 정보를 추가\n\n---\n\n## 2. 방법론 심층 분석\n\n### Mixture-of-Transformer Architecture\n\n여러 모델링 모드를 하나의 아키텍처에서 유연하게 전환:\n- **Mode 1**: Video prediction (future frames)\n- **Mode 2**: Action prediction (current → action)\n- **Mode 3**: Joint (video + action)\n\nLatent action:\n$$\\mathbf{z}_a = E_a(\\mathbf{o}_t, \\mathbf{o}_{t+1})$$\n\nInverse dynamics로 latent action을 추출하고, 이를 통해 action-unlabeled video에서도 학습.\n\n> ❓ **예상 질문**: Latent action이 실제 robot action과 어떻게 대응되는가?\n> **답변**: Latent→real action decoder를 소량의 labeled data로 학습. Latent space의 구조가 물리적 의미를 갖도록 contrastive/regression loss 적용. 완벽한 대응은 보장되지 않음.\n\n---\n\n## 3. 실험 결과\n\n| 모델 | LIBERO Avg (%) | Inference (ms) |\n|------|---------------|---------------|\n| GR-1 | ~91 | ~500 |\n| pi0 | ~90 | ~200 |\n| **Motus** | **~93** | **~400** |\n\n- GR-1, pi0 대비 competitive하면서 unified framework의 유연성 제공\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Latent action의 해석가능성 부족**: Latent space가 black-box\n2. **Inference latency**: Video + action joint 모드에서 400ms+\n3. **Decoder 학습의 데이터 의존**: Labeled data 필요\n4. **GigaWorld-Policy에 의해 추월**: Action-centered 접근이 더 효율적임이 이후 보여짐\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Latent action world model |\n| **Technical depth** | ★★★★☆ — MoT, multi-mode 설계 |\n| **Practical impact** | ★★★☆☆ — Latency 문제 |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Fast-WAM처럼 test-time video를 제거하면? | 이후 GigaWorld-Policy가 이를 검증. Motus에서의 직접 실험은 부재 |\n| 2 | Latent action space의 차원은 성능에 얼마나 민감한가? | Ablation 부분적. 너무 작으면 정보 손실, 너무 크면 학습 어려움 |\n\n<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->\n",
         "verified": false
       },
-      "rank": 79
+      "rank": 85
     },
     {
       "name": "NanoVLA",
@@ -3243,7 +3440,7 @@
         "num_reviews": 4,
         "openreview_url": "https://openreview.net/forum?id=yeHBrNVZoV"
       },
-      "rank": 80
+      "rank": 86
     },
     {
       "name": "NaVILA",
@@ -3275,7 +3472,7 @@
         "content": "# NaVILA: Legged Robot Vision-Language-Action Model for Navigation\n\n> **한 줄 요약**: VLA와 locomotion skill을 2-level 계층 구조로 통합하여, 다리 로봇에서의 vision-language navigation을 실현. Mid-level spatial language instruction을 생성하여 visual locomotion policy를 구동.\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA는 **고정된 base 위의 manipulator** 가정 → 이동 로봇, 특히 legged robot에는 부적합\n- 다리 로봇의 locomotion skill (균형, 보행)은 별도 학습 필요 → VLA와의 통합 어려움\n- VLN (Vision-Language Navigation)은 wheeled robot 위주\n\n---\n\n## 2. 방법론\n\n### 2-Level Hierarchy\n\n**High-level VLA**: Vision + language → mid-level spatial language instruction\n- \"3미터 전진 후 왼쪽으로 45도 회전\"\n\n**Low-level Visual Locomotion Policy**: Spatial instruction → joint torques\n- RL로 학습된 locomotion controller\n\n> ❓ **예상 질문**: Mid-level instruction의 granularity는 어떻게 정하는가?\n> **답변**: 거리(m)와 방향(도)의 조합으로 표준화. Granularity 선택(0.5m vs 1m 등)에 대한 sensitivity 분석 포함.\n\n---\n\n## 3. 실험 결과\n\n| 환경 | 기존 VLN | NaVILA |\n|------|---------|--------|\n| IsaacLab indoor | 45.2% | 63.8% |\n| Outdoor terrain | 28.5% | 47.3% |\n\n- Outdoor terrain에서의 성능이 특히 주목할 만함\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Manipulation 미포함**: Navigation only\n2. **Mid-level instruction의 표현력**: 복잡한 경로 지정에 한계\n3. **Sim-to-real**: Simulation 위주 평가\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Legged robot VLA |\n| **Practical impact** | ★★★★☆ — 이동 로봇 확장 |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Navigation + manipulation을 동시에 할 수 있는가? | 현 구조에서 불가. Mobile manipulation 확장 필요 |\n| 2 | End-to-end (직접 torque 예측) VLA와 비교하면? | End-to-end는 학습이 극도로 어려움. 계층적 접근이 더 실용적 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 81
+      "rank": 87
     },
     {
       "name": "TODO_MODEL_NAME",
@@ -3301,7 +3498,7 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
-      "rank": 82
+      "rank": 88
     },
     {
       "name": "NORA",
@@ -3333,7 +3530,7 @@
         "content": "# NORA: A Small Open-Sourced Generalist VLA Model for Embodied Tasks\n\n> **한 줄 요약**: Qwen-2.5-VL-3B + FAST+ tokenizer(+2048 tokens)로, 970K OXE demonstration에서 **4000 H100 GPU-hours** 학습하여, WidowX real-world **56.7%** (OpenVLA 40%), LIBERO-Long **74.6%** (NORA-Long), inference **8.3GB** GPU memory.\n\n---\n\n## 1. 배경 및 동기\n\n- 7B+ VLA의 compute 비용이 연구 접근성과 실시간 제어를 제약\n- **더 작은 모델(3B)로 7B 성능에 match하면서 효율적인 배포** 목표\n\n---\n\n## 2. 방법론\n\n### Architecture\n\n- **VLM**: Qwen-2.5-VL-3B\n- **Action tokenizer**: FAST+ (DCT + BPE, +2048 tokens to vocabulary)\n- **Action chunk**: 1 step (NORA), **5 steps (NORA-Long)**\n- **Single visual frame** per timestep\n\n### 학습\n\n| 항목 | 값 |\n|------|-----|\n| Data | OXE (970K real-world demos) |\n| GPU | **8× H100, ~3 weeks** |\n| Total compute | **~4000 H100 GPU-hours** |\n| Batch size | 256 |\n| Gradient updates | 1.1M |\n| Peak LR | 5e-5 (warmup + cosine decay) |\n| Precision | bf16 + FlashAttention |\n| Inference memory | **8.3 GB** |\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### WidowX Real Robot\n\n| Task Category | RT-1 | OpenVLA | SpatialVLA | **NORA** |\n|-------------|------|---------|-----------|---------|\n| OOD Objects | 0.3% | 56.7% | 6.7% | **83.3%** |\n| Spatial Tasks | 0% | 46.7% | 26.7% | **53.3%** |\n| Multi-Object | 0% | 16.7% | 0% | **33.3%** |\n| **Overall** | 4.4% | 40% | 11.1% | **56.7%** |\n\n- **OOD objects에서 OpenVLA (56.7%) 대비 NORA (83.3%)** → +26.6%p\n- 개별 task 최대 **90%** (carrot/banana in pot)\n\n### LIBERO (Simulation)\n\n| Model | Spatial | Object | Goal | Long | **Avg** |\n|-------|---------|--------|------|------|---------|\n| OpenVLA (FT) | 84.7 | 88.4 | 79.2 | 53.7 | 76.5 |\n| SpatialVLA + AC | 88.2 | 89.9 | 78.6 | 55.5 | 78.1 |\n| NORA + AC | 85.6 | 89.4 | 80.0 | 63.0 | **79.5** |\n| **NORA-Long** | **92.2** | **95.4** | **89.4** | **74.6** | **87.9** |\n\n- NORA-Long (action chunk 5): **87.9%** — OpenVLA 대비 +11.4%p\n- LIBERO-Long에서 74.6% (OpenVLA 53.7% 대비 +20.9%p)\n\n### Action Chunking Trade-off\n\n- **Simulation**: NORA-Long (87.9%) >> NORA (73.9%) → chunking이 큰 도움\n- **Real-world**: NORA-Long이 WidowX에서 worse — \"accumulated actions resulted in excessively large movements\"\n- → **Chunking은 high control frequency (20Hz+)에서 효과적, low freq에서 해로울 수 있음**\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Real-world chunking 실패**: NORA-Long이 실제 로봇에서 overshoot → control frequency 의존성\n2. **4000 H100-hrs**: 3B 모델치고 상당한 학습 비용. FLOWER (200 GPU-hrs)보다 20x\n3. **Multi-object 33.3%**: 여러 물체 처리에서 아직 부족\n4. **LIBERO fine-tuned 기준**: Zero-shot LIBERO 결과가 낮음 (73.9% without chunking)\n\n### Attribution 문제\n- 성능이 **FAST+ tokenizer** 때문인지, **Qwen-2.5-VL backbone** 때문인지 분리 필요\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Qwen-2.5-VL + FAST+ 결합 |\n| **Technical depth** | ★★★★☆ — Chunking trade-off 분석 |\n| **Experimental rigor** | ★★★★☆ — Real + Sim, 다양한 OOD 평가 |\n| **Practical impact** | ★★★★★ — 3B, 8.3GB, open-source |\n| **Writing quality** | ★★★★☆ |\n\n**강점**: OOD objects에서 83.3%, open-source 3B 모델로 7B OpenVLA 능가. **약점**: Real-world chunking 실패, 4000 GPU-hrs, multi-object 약점.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | FLOWER (950M)와 비교하면? | FLOWER: CALVIN 4.53 SOTA, 200 GPU-hrs. NORA: real-world OOD 강점, 4000 GPU-hrs. 효율성은 FLOWER, 일반화는 NORA |\n| 2 | Chunking이 real에서 실패하는 근본 이유는? | WidowX의 낮은 control freq (5Hz)에서 5-step chunk = 1초 open-loop. 환경 변화에 대응 불가 |\n| 3 | FAST+ 없이 standard 256-bin이면? | FAST+가 DCT compression으로 token efficiency 향상. Standard binning은 더 많은 token 필요 → 더 느림 |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 83
+      "rank": 89
     },
     {
       "name": "OFlow",
@@ -3364,7 +3561,41 @@
         "simpler_env": "fine-tuned",
         "metaworld": "fine-tuned"
       },
-      "rank": 84
+      "rank": 90
+    },
+    {
+      "name": "OmniVLA-RL",
+      "organization": "TODO: check paper",
+      "date": "2026-04-20",
+      "paper_url": "https://arxiv.org/abs/2604.17706",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "RL",
+        "online-RL",
+        "flow-matching",
+        "spatial-understanding",
+        "reasoning",
+        "libero",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "flow matching (Flow-GSPO, SDE-reformulated) with Mix-of-Transformers experts",
+        "action_head_category": "flow_matching",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# OmniVLA-RL: A Vision-Language-Action Model with Spatial Understanding and Online RL\n\n> **한 줄 요약**: Reasoning/spatial/action 전문가를 Mix-of-Transformers로 통합하고, flow matching을 SDE로 재정식화한 Flow-GSPO를 GSPO와 결합하여 VLA의 공간 이해와 online RL 안정성을 동시에 끌어올리려는 시도.\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA는 공간 인지가 부정확하고 멀티모달 융합이 suboptimal, RL fine-tuning 시 불안정성이 고질적 문제\n- 하나의 monolithic transformer에 reasoning, spatial grounding, action generation을 모두 맡기면 expert 특화가 어려움\n- Flow matching 기반 action head를 RL로 업데이트할 때 policy gradient와의 호환성 확보가 challenging\n\n---\n\n## 2. 방법론\n\n### Mix-of-Transformers (MoT) 아키텍처\nReasoning expert, spatial expert, action expert를 별도의 transformer 모듈로 분리하여 각 modality/기능에 특화된 표현을 학습. 전문가 간 synergy를 통해 공간 인지와 multimodal fusion 정확도를 개선.\n\n### Flow-GSPO\nFlow matching을 Stochastic Differential Equation(SDE) process로 재정식화하고, 이를 Group Segmented Policy Optimization(GSPO)과 결합. SDE 형태의 샘플링이 RL 탐색에 필요한 stochasticity를 제공하면서 policy gradient 계산이 tractable해지는 구조.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- Abstract상 LIBERO / LIBERO-Plus에서 평가 수행됨이 언급됨. 정량 수치는 PDF 확인 후 업데이트 예정.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **MoT 오버헤드**: 3개 expert 분리 시 파라미터/추론 비용 증가 가능성, Mixture-of-Experts sparsity 활용 여부 불명확.\n2. **Flow-GSPO 일반성**: 다른 action head (autoregressive, diffusion)와 비교했을 때 이득의 원천이 SDE 재정식화인지 GSPO인지 분리되지 않음.\n3. **Spatial expert ground-truth**: 공간 이해를 감독하는 신호(depth, 3D annotation 등)가 abstract에서 언급되지 않아 unclear.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Flow matching의 SDE 재정식화 + GSPO 결합은 신선하지만 MoE-style VLA 아이디어는 선행 연구 존재 |\n| **Practical impact** | ★★★☆☆ — LIBERO 수치 및 real-robot 검증 공개 여부에 따라 재평가 필요 |\n\n---\n\n## 6. 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Flow matching을 SDE로 바꾸는 이유는? | Deterministic ODE 형태로는 on-policy RL에 필요한 action distribution log-prob 계산/탐색이 어려움. SDE는 stochasticity와 tractable score-based policy gradient를 동시에 제공. |\n| 2 | MoT가 기존 MoE-VLA와 다른 점은? | Token-level routing 대신 reasoning/spatial/action이라는 기능 축으로 expert를 분리. 라우팅 불안정성을 회피하는 대신 expert 개수가 고정됨. |\n| 3 | GSPO의 Group Segmented는 무엇을 segmenting? | Action chunk 또는 trajectory segment 단위로 advantage를 그룹화하여 variance를 줄이는 variant로 추정. PDF 확인 필요. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 91
     },
     {
       "name": "OpenRC",
@@ -3388,7 +3619,7 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
-      "rank": 85
+      "rank": 92
     },
     {
       "name": "ProbeFlow",
@@ -3417,7 +3648,7 @@
         "libero": "fine-tuned",
         "metaworld": "fine-tuned"
       },
-      "rank": 86
+      "rank": 93
     },
     {
       "name": "ProGAL-VLA",
@@ -3443,7 +3674,7 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
-      "rank": 87
+      "rank": 94
     },
     {
       "name": "ProgressVLA",
@@ -3471,7 +3702,39 @@
         "libero": "fine-tuned",
         "calvin": "fine-tuned"
       },
-      "rank": 88
+      "rank": 95
+    },
+    {
+      "name": "ReconVLA",
+      "organization": "TODO: check paper",
+      "date": "2026-04-17",
+      "paper_url": "https://arxiv.org/abs/2604.16677",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "uncertainty",
+        "failure-aware",
+        "conformal-prediction",
+        "reasoning",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "conformal prediction wrapper over pretrained VLA action tokens (training-free)",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# ReconVLA: An Uncertainty-Guided and Failure-Aware Vision-Language-Action Framework for Robotic Control\n\n> **한 줄 요약**: Pretrained VLA를 재학습 없이 wrapping하여 conformal prediction으로 action token과 robot state에 calibrated uncertainty를 부여, failure를 사전 감지하는 경량 framework.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA가 action을 뱉을 때 \"얼마나 확신하는지\"에 대한 calibrated signal이 없어 실세계 신뢰성이 낮음\n- Dropout/ensemble 기반 uncertainty는 retraining이 필요하고 calibration 보장이 약함\n- Conformal prediction은 분포 가정 없이 marginal coverage를 보장 → pretrained policy에 black-box로 얹을 수 있음\n\n---\n\n## 2. 방법론\n\n### Action-token Conformal Prediction\nPretrained VLA의 action token output에 split conformal prediction을 적용하여, 각 action에 대해 calibrated confidence set을 생성. 이 신뢰도는 execution quality 및 task success와 상관관계를 가진다고 주장.\n\n### State-space Conformal Outlier Detection\nRobot state 자체에도 conformal prediction을 적용하여 OOD/unsafe state를 failure 이전에 감지. Action-level uncertainty와 complementary하게 작동하는 dual-signal failure detector 구성.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- Simulation + real robot manipulation에서 평가\n- Abstract 주장: failure anticipation 향상, catastrophic error 감소, retraining 불필요\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Calibration set dependency**: Split conformal은 i.i.d. calibration set을 요구, robot deployment 환경에서 distribution shift 시 coverage 보장이 약화.\n2. **Recovery 부재**: Failure를 \"감지\"할 뿐 recovery mechanism은 제공하지 않음 (Rewind-IL과 대비).\n3. **Action token granularity**: Continuous control에서 token-level uncertainty가 end-effector trajectory 수준 uncertainty와 어떻게 매핑되는지 명확치 않음.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Conformal prediction을 VLA에 적용한 초기 시도로서 의미, 기법 자체는 기존 통계 기법 |\n| **Practical impact** | ★★★★☆ — Training-free, any-VLA compatible → 실제 deployment 직후 safety layer로 유용 |\n\n---\n\n## 6. 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Conformal prediction이 VLA에서 왜 적합한가? | Pretrained 가중치 수정 없이 calibrated coverage를 marginally 보장하므로 closed-model deployment scenario에 적합. |\n| 2 | Action-level vs state-level signal은 어떻게 결합? | 두 신호를 OR/threshold fusion하는 것이 자연스러움. Detailed ensemble 규칙은 PDF 확인 필요. |\n| 3 | Failure 감지 후 무엇을 하나? | Abstract는 anticipation만 다룸. Downstream policy는 stop/human-handoff/recovery를 별도로 구현해야 함. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 96
     },
     {
       "name": "ReFineVLA",
@@ -3498,7 +3761,40 @@
       "eval_conditions": {
         "simpler_env": "fine-tuned"
       },
-      "rank": 89
+      "rank": 97
+    },
+    {
+      "name": "Rewind-IL",
+      "organization": "TODO: check paper",
+      "date": "2026-04-17",
+      "paper_url": "https://arxiv.org/abs/2604.16683",
+      "code_url": "https://sjay05.github.io/rewind-il",
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "imitation-learning",
+        "failure-aware",
+        "online-failure-detection",
+        "recovery",
+        "long-horizon",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "training-free online safeguard (TIDE failure detector + state-respawning) around a frozen action-chunked generative imitation policy",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# Rewind-IL: Online Failure Detection and State Respawning for Imitation Learning\n\n> **한 줄 요약**: Action-chunked generative imitation policy 위에 붙는 training-free online safeguard — TIDE로 failure를 감지하고 VLM이 지정한 safe checkpoint로 \"rewind\"하여 실행을 재개.\n\n---\n\n## 1. 배경 및 동기\n\n- Long-horizon action-chunked IL policy는 demonstration manifold를 벗어나면 locally plausible하지만 복구 불능한 action을 계속 생성\n- 기존 runtime monitor: (a) failure data가 필요하거나, (b) benign drift에 과도하게 trigger하거나, (c) 감지만 하고 recovery가 없음\n- 추가 학습 없이 deploy 시점에 붙일 수 있는 detect + recover 파이프라인이 필요\n\n---\n\n## 2. 방법론\n\n### TIDE: Temporal Inter-chunk Discrepancy Estimate\nOverlapping action chunk들 간의 self-consistency(겹치는 구간이 서로 얼마나 일관되는지)를 zero-shot으로 측정. Split conformal prediction으로 threshold를 calibrate하여 false-positive rate를 제어.\n\n### State Respawning with VLM Checkpoints\n오프라인에서 VLM이 demonstration의 \"semantically safe intermediate state\"를 checkpoint로 지정하고, frozen policy encoder로 feature database 구축. 온라인에서 failure 감지 시 가장 가까운 verified checkpoint로 로봇을 되돌린 뒤 policy state를 초기화하고 재실행.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- Training-free 주장 → 다양한 generative action-chunked policy에 적용 가능\n- Project page: https://sjay05.github.io/rewind-il\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **물리적 rewind 실현성**: \"State respawning\"이 실제 환경에서 물체를 원상복구해야 한다면 reset 메커니즘 또는 reversible task만 지원 가능.\n2. **VLM checkpoint 품질**: Recovery point 선정은 VLM 성능에 민감, 복잡한 장면에서 잘못된 safe state 지정 시 오히려 악영향.\n3. **TIDE의 coverage 한계**: Inter-chunk self-consistency는 policy가 \"확신하며 틀리는\" mode collapse failure에 둔감할 수 있음.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Detection + recovery를 training-free로 통합한 구성, VLM-guided checkpoint는 참신 |\n| **Practical impact** | ★★★★☆ — Long-horizon chunked policy(예: Diffusion Policy, ACT, π0)에 범용적으로 얹을 수 있어 유용성 높음 |\n\n---\n\n## 6. 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 왜 action chunk 간 self-consistency가 failure signal인가? | Chunk overlap 구간의 불일치는 policy가 latent state를 일관되게 유지하지 못한다는 증거 → drift 초기 신호. |\n| 2 | Real-world에서 \"rewind\"가 가능한 task는? | 가역적 manipulation(pick-and-place의 초기 state 복귀 등). Irreversible task(예: 용접, 붓기)는 제한적. |\n| 3 | Split conformal calibration set은 어떻게 구성? | Nominal(성공) demonstration의 inter-chunk discrepancy 분포를 hold-out으로 사용하여 사용자 지정 FPR 달성. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 98
     },
     {
       "name": "RoboAlign",
@@ -3527,7 +3823,7 @@
         "libero": "fine-tuned",
         "calvin": "fine-tuned"
       },
-      "rank": 90
+      "rank": 99
     },
     {
       "name": "RoboDual",
@@ -3558,7 +3854,7 @@
         "content": "# RoboDual: Towards Synergistic, Generalized, and Efficient Dual-System for Robotic Manipulation\n\n> **한 줄 요약**: VLA-based generalist (System 2)와 diffusion-transformer specialist (System 1)를 20M 학습 가능 파라미터로 결합하여, real-world 26.7% 향상과 CALVIN 12% 향상을 3.8x 높은 제어 주파수에서 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA generalist: 넓은 일반화 but 느린 추론\n- Diffusion specialist: 빠르고 정밀 but 일반화 약함\n- **두 시스템의 시너지**로 속도와 일반화를 동시에\n\n---\n\n## 2. 방법론\n\n### Dual-System Integration\n\n**System 2 (VLA, ~7B)**: High-level reasoning, task understanding → hidden state\n**System 1 (DiT, ~200M)**: Low-level action generation, high-frequency control\n\nSystem 2가 **간헐적으로** reasoning을 수행하고 (매 N step), System 1이 **매 step** action 생성:\n$$\\text{System 2: } \\mathbf{h} = \\text{VLA}(\\mathbf{o}_t, \\mathbf{l}) \\quad (\\text{every N steps})$$\n$$\\text{System 1: } \\mathbf{a}_t = D_\\theta(\\mathbf{a}_t^k, k, \\mathbf{h}) \\quad (\\text{every step})$$\n\n> ❓ **예상 질문**: System 2의 실행 주기 N은 어떻게 결정하는가?\n> **답변**: 태스크 복잡도에 따라 조절. 단순 이동: N=10 (100ms마다 VLA), 복잡 파지: N=3 (빈번한 VLA). Adaptive N은 미구현.\n\n### 20M Trainable Parameters\n\nVLA는 **frozen**, adapter + DiT만 학습:\n- 메모리·연산 효율적\n- VLA의 기존 language/vision 능력 보존\n\n---\n\n## 3. 실험 결과\n\n| 모델 | Real-world SR (%) | CALVIN Avg Len | Control Hz |\n|------|------------------|---------------|-----------|\n| OpenVLA | 52.3 | 3.45 | 5 Hz |\n| CogACT | - | - | 10 Hz |\n| **RoboDual** | **79.0 (+26.7%)** | **3.86 (+12%)** | **19 Hz** |\n\n- **3.8x 높은 제어 주파수**가 핵심 이점 → reactive manipulation 가능\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **System 2 지연 시**: VLA 추론이 지연되면 System 1이 stale context로 action 생성\n2. **N의 최적화**: 고정 N이 suboptimal. Event-driven triggering이 바람직\n3. **두 시스템 간 alignment**: System 2 hidden state가 System 1에 최적 conditioning인지 불확실\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Dual-system with 20M trainable params |\n| **Practical impact** | ★★★★★ — 고주파 제어의 실용적 해결 |\n\n**강점**: 속도와 일반화의 최적 절충. 20M trainable params의 효율성. **약점**: Stale context 위험, adaptive N 미구현.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | GR00T-N1의 System 1/2와 어떻게 다른가? | GR00T은 joint end-to-end 학습, RoboDual은 VLA frozen + adapter only |\n| 2 | N=1 (매 step VLA)과 N=10의 성능 차이는? | N=1이 성능 최고이나 속도 최저. Trade-off 분석 포함 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 91
+      "rank": 100
     },
     {
       "name": "RoboMamba",
@@ -3589,7 +3885,7 @@
         "content": "# RoboMamba: Efficient Vision-Language-Action Model for Robotic Reasoning and Manipulation\n\n> **한 줄 요약**: Mamba state space model을 VLA backbone으로 활용하여, Transformer 대비 3배 빠른 추론과 우수한 robotic reasoning을 최소한의 파라미터 fine-tuning으로 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- Transformer의 **O(n²) attention**이 long-context robot observation에서 bottleneck\n- **Mamba (SSM)**: O(n) 복잡도, 긴 시퀀스 효율적 처리 → VLA에 적합할 가능성\n- 기존 VLA의 추론 속도 개선 필요\n\n---\n\n## 2. 방법론\n\n### Mamba-based VLA\n\nTransformer 대신 **Mamba block**으로 vision-language-action 처리:\n- Linear time complexity: observation history가 길어져도 latency 일정\n- Selective state space: 관련 정보를 선택적으로 보존\n\n> ❓ **예상 질문**: Mamba의 단방향(unidirectional) 특성이 spatial reasoning에 불리하지 않은가?\n> **답변**: 맞음. Mamba는 causal (왼→오른) 처리에 특화. 이미지의 2D spatial 관계를 1D sequence로 처리하면 정보 손실. Bidirectional Mamba나 2D scanning이 대안이나 구현 복잡성 증가.\n\n---\n\n## 3. 실험 결과\n\n| 모델 | Reasoning Score | Manipulation SR | Inference Speed |\n|------|---------------|----------------|----------------|\n| OpenVLA (7B Transformer) | 65.3 | 76.5% | 1x |\n| **RoboMamba** | **68.7** | **74.2%** | **3x** |\n\n- **3x 빠른 추론**이면서 reasoning은 오히려 약간 우수\n- Manipulation은 소폭 하락 (-2.3%p) → speed-accuracy trade-off\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Spatial reasoning**: Mamba의 1D 특성으로 2D/3D spatial reasoning에서 Transformer 대비 약할 수 있음\n2. **커뮤니티 성숙도**: Mamba가 아직 Transformer만큼 검증되지 않음\n3. **Action head**: Mamba backbone + diffusion head 결합의 최적성 미탐구\n4. **Manipulation 성능 소폭 하락**: 속도 이점이 이 하락을 상쇄하는지 태스크에 따라 다름\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — SSM의 VLA 적용 개척 |\n| **Practical impact** | ★★★★☆ — 추론 속도 3x |\n\n**강점**: Mamba의 로봇 적용 가능성 입증, 3x 속도 향상. **약점**: Transformer 대비 spatial reasoning 열위 가능.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Mamba-2나 Jamba (hybrid)를 적용하면? | Hybrid Transformer+Mamba가 양쪽 장점을 가질 가능성. 미탐구 |\n| 2 | Long observation history에서 Mamba의 이점이 더 커지는가? | 이론적으로 그렇다. History 길이에 따른 speed/performance 분석 필요 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 92
+      "rank": 101
     },
     {
       "name": "RT-2-X",
@@ -3630,7 +3926,7 @@
         "content": "# Open X-Embodiment: Robotic Learning Datasets and RT-X Models\n\n> **한 줄 요약**: 21개 기관 22종 로봇에서 527개 스킬을 포괄하는 대규모 cross-embodiment 데이터셋을 구축하고, RT-X 모델이 타 플랫폼의 경험을 활용하여 positive transfer를 달성함을 실증.\n\n---\n\n## 1. 배경 및 동기\n\n- 로봇 학습의 **데이터 파편화**: 각 연구실이 독립적으로 소규모 데이터 수집\n- NLP/CV에서의 대규모 데이터셋(ImageNet, The Pile)에 해당하는 로봇 데이터셋 부재\n- **Cross-embodiment transfer**의 가능성 검증 필요\n\n---\n\n## 2. 데이터셋\n\n| 항목 | 규모 |\n|------|------|\n| 기관 | 21 |\n| 로봇 종류 | 22 |\n| 스킬 | 527 |\n| Demonstrations | 수십만+ |\n\n---\n\n## 3. RT-X Models\n\n### RT-1-X\nRT-1 아키텍처를 Open X-Embodiment 데이터로 학습.\n\n### RT-2-X\nRT-2 (VLM-based)를 Open X-Embodiment로 확장.\n\n핵심 발견: **타 로봇 데이터를 활용하면 자신의 로봇 성능이 향상** (positive transfer)\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **데이터 불균형**: 특정 로봇(WidowX, Franka)에 편향\n2. **Action space 불일치**: 로봇마다 다른 action representation\n3. **RT-2-X 비공개**: Google 내부 모델\n4. **Negative transfer**: 일부 embodiment 조합에서 발생하나 상세 분석 부족\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — 로봇 학습의 ImageNet moment |\n| **Practical impact** | ★★★★★ — 모든 후속 VLA 연구의 데이터 기반 |\n\n**강점**: Cross-embodiment dataset의 정의적 연구. Positive transfer의 실증. **약점**: 데이터 불균형, 비공개 모델.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | 데이터 품질이 양보다 중요하지 않은가? | DROID 등에서 보듯 high-quality curation이 중요. Open X-Embodiment의 품질 편차가 큼 |\n| 2 | 10x 더 큰 데이터셋을 만들면 성능이 10x 좋아지는가? | Diminishing returns 예상. Data curation과 diversity가 규모보다 중요할 수 있음 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 93
+      "rank": 102
     },
     {
       "name": "SABER",
@@ -3656,7 +3952,7 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
-      "rank": 94
+      "rank": 103
     },
     {
       "name": "SAM2Act",
@@ -3696,7 +3992,7 @@
         "content": "# SAM2Act: Integrating Visual Foundation Model with A Memory Architecture for Robotic Manipulation\n\n> **한 줄 요약**: SAM2의 visual foundation model 표현을 multi-resolution upsampling으로 활용하고, memory mechanism을 추가하여 RLBench 86.8% 및 memory-dependent 태스크에서 94.3% (MemoryBench) 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- Visual foundation model (SAM, DINOv2)의 풍부한 표현을 로봇 정책에 직접 활용\n- **Memory**: 이전 관측을 기억하여 partially observable task 해결 (물체가 가려졌다가 다시 나타나는 경우 등)\n\n---\n\n## 2. 방법론\n\n### SAM2 Features + Multi-resolution Upsampling\n\nSAM2의 다양한 해상도 feature를 fusion하여 fine-grained spatial 정보 보존.\n\n### Memory Mechanism (SAM2Act+)\n\n이전 timestep의 feature를 memory bank에 저장하고, 현재 관측과 cross-attention:\n\n$$\\mathbf{h}_t = \\text{CrossAttn}(\\mathbf{f}_t, \\text{MemBank}(\\mathbf{f}_{t-1}, ..., \\mathbf{f}_{t-K}))$$\n\n---\n\n## 3. 실험 결과\n\n| 모델 | RLBench (%) | MemoryBench (%) |\n|------|-----------|----------------|\n| PerAct | 49.4 | 52.1 |\n| 3D Diffuser Actor | 76.3 | 65.3 |\n| **SAM2Act** | **86.8** | **78.5** |\n| **SAM2Act+** (memory) | **86.8** | **94.3** |\n\n- Memory 추가로 MemoryBench에서 +16%p 향상\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **SAM2 의존**: SAM2가 실패하는 시각적 조건(투명 물체, 극단적 조명)에서 취약\n2. **Memory 관리**: Memory bank 크기와 retention policy의 최적화 필요\n3. **RLBench 특화**: 다른 벤치마크에서의 일반성 미검증\n4. **Sim-only**: 실제 환경 미테스트\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — SAM2 + memory for robots |\n| **Practical impact** | ★★★★☆ — Memory-dependent task 해결 |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | SAM2 대신 DINOv2를 쓰면? | DINOv2도 강력하나 SAM2의 segmentation-aware feature가 manipulation에 유리 |\n| 2 | Memory가 noise로 오염되면? | Attention으로 자연스럽게 irrelevant memory 무시. 그러나 adversarial noise에 대한 robustness 미검증 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 95
+      "rank": 104
     },
     {
       "name": "SAMoE-VLA",
@@ -3726,7 +4022,7 @@
         "content": "# SAMoE-VLA: A Scene Adaptive Mixture-of-Experts VLA Model for Autonomous Driving\n\n> **한 줄 요약**: 자율주행에 VLA를 적용하여, BEV feature 기반 scene-adaptive MoE routing과 Conditional Cross-Modal Causal Attention으로 nuScenes 및 LangAuto SOTA 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA가 로봇 manipulation 위주 → **자율주행(autonomous driving)**으로의 확장 시도\n- 자율주행은 BEV (Bird's Eye View) 표현이 핵심 → 기존 VLA의 ego-centric view와 다름\n- 장면별로 다른 전략 필요 (고속도로 vs 교차로) → scene-adaptive expert routing\n\n---\n\n## 2. 방법론\n\n### BEV-based Expert Routing\n\nBEV feature에서 장면 유형을 판단하고 적절한 expert 활성화:\n$$\\text{expert\\_idx} = \\text{Router}(\\text{BEV\\_feature})$$\n\n### Conditional Cross-Modal Causal Attention\n\n시간적 일관성을 위해 이전 프레임의 reasoning을 현재 프레임에 조건부 주입.\n\n---\n\n## 3. 실험 결과\n\n| 벤치마크 | 기존 SOTA | SAMoE-VLA |\n|---------|----------|----------|\n| nuScenes planning | ADE 2.8 | **ADE 2.3** |\n| LangAuto | SR 65% | **SR 72%** |\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Manipulation VLA와의 괴리**: 자율주행 전용 설계로 로봇 조작과의 시너지 없음\n2. **시뮬레이션 위주**: 실제 자율주행 검증 부재\n3. **MoE expert 수의 한계**: 제한된 장면 유형으로만 학습\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — VLA의 자율주행 적용 |\n| **Practical impact** | ★★★☆☆ — 도메인 특화 |\n\n**강점**: VLA 프레임워크의 자율주행 확장. BEV-based routing이 참신. **약점**: 로봇 manipulation 커뮤니티와의 연결 약함.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Manipulation VLA와 driving VLA를 통합할 수 있는가? | 이론적으로 가능하나 BEV vs ego-centric의 representation gap이 큼 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 96
+      "rank": 105
     },
     {
       "name": "SnapFlow",
@@ -3753,7 +4049,7 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
-      "rank": 97
+      "rank": 106
     },
     {
       "name": "SOMA",
@@ -3780,7 +4076,39 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
-      "rank": 98
+      "rank": 107
+    },
+    {
+      "name": "StableIDM",
+      "organization": "TODO: check paper",
+      "date": "2026-04-20",
+      "paper_url": "https://arxiv.org/abs/2604.17887",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "inverse-dynamics",
+        "robustness",
+        "spatio-temporal",
+        "data-labeling",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "inverse dynamics model with spatio-temporal feature refinement",
+        "action_head_category": "inverse_dynamics",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# StableIDM: Stabilizing Inverse Dynamics Model against Manipulator Truncation via Spatio-Temporal Refinement\n\n> **한 줄 요약**: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.\n\n---\n\n## 1. 배경 및 동기\n\n- IDM(Inverse Dynamics Model)은 visual obs → low-level action을 매핑, **데이터 라벨링**과 **policy 실행**의 핵심.\n- 그러나 manipulator가 카메라 프레임 밖으로 나가는 **truncation** 상황에서 상태 추정이 ill-posed → 제어 불안정.\n- 기존 IDM은 이런 partial observability를 명시적으로 다루지 않음.\n\n---\n\n## 2. 방법론\n\n### 2.1 Auxiliary robot-centric masking\n- 배경 잡음을 억제하는 보조 마스킹. \"어디에 로봇이 있는가/있었는가\"에 특징을 집중.\n- Masking을 보조 loss/입력으로 사용해 feature가 robot 주변 영역에 민감해지도록 유도.\n\n### 2.2 Directional Feature Aggregation (DFA)\n- **Geometry-aware spatial reasoning** 모듈.\n- 보이는 팔의 방향을 추정하고, 그 방향을 따라 **anisotropic feature** 를 집계 → 잘린 부분의 위치를 방향 단서로 외삽.\n\n### 2.3 Temporal Dynamics Refinement (TDR)\n- **motion continuity** 를 이용해 시간적으로 smooth/correct.\n- 순간적 truncation으로 인한 스파이크형 오차를 trajectory 수준에서 교정.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- Abstract는 \"multiple benchmarks and real-robot experiments\"에서 개선을 보고한다고 언급.\n- 구체 성능 수치(벤치마크, 오차 감소율 등)는 PDF 확인 필요.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Truncation 외 failure mode**: Full occlusion, severe motion blur 등은 DFA의 \"visible arm direction\" 가정이 깨지면 효과가 떨어짐.\n2. **Cross-embodiment 일반화**: DFA가 특정 팔 형태에 과적합될 가능성 → 다른 모폴로지로의 전이는 별도 검증 필요.\n3. **IDM이 정책의 병목은 아닐 수 있음**: 상류 policy/perception 에러가 크면 IDM 정제의 이익이 제한적.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Truncation이라는 구체 failure mode를 타겟한 spatial+temporal 정제. 구성 요소는 기존 아이디어의 재조합. |\n| **Practical impact** | ★★★★☆ — 데이터 라벨링과 policy 실행 양쪽에서 IDM은 폭넓게 쓰이며, truncation은 실제 시설에서 흔함 → 실용적 가치 높음. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | DFA는 왜 isotropic feature보다 나은가? | Truncated 영역의 정보는 본질적으로 **방향성** 있음 (팔은 선형 구조). Anisotropic aggregation이 해당 방향으로 정보를 전파하기 적합. |\n| 2 | TDR이 진짜 motion continuity를 가정해도 되나? | 대부분 매니퓰레이션은 저가속도 연속 운동이라 합리적. 충격·접촉 순간에는 이 가정이 일시적으로 깨질 수 있음. |\n| 3 | 멀티뷰 카메라로 해결하면 되지 않나? | 실제 배포에서 멀티뷰 setup이 항상 가능한 건 아님. StableIDM은 single-view truncation robustness 자체를 목표로 함. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 108
     },
     {
       "name": "StarVLA",
@@ -3812,7 +4140,7 @@
         "robotwin": "fine-tuned",
         "robocasa": "fine-tuned"
       },
-      "rank": 99
+      "rank": 109
     },
     {
       "name": "STRONG-VLA",
@@ -3838,7 +4166,7 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
-      "rank": 100
+      "rank": 110
     },
     {
       "name": "SuSIE",
@@ -3870,7 +4198,7 @@
         "content": "# SuSIE: Zero-Shot Robotic Manipulation with Pretrained Image-Editing Diffusion Models\n\n> **한 줄 요약**: Image-editing diffusion model (InstructPix2Pix)을 high-level planner로 활용하여 현재 관측에서 중간 subgoal 이미지를 생성하고, low-level policy가 이를 달성하는 2-stage 구조로 CALVIN에서 기존 language-conditioned policy 대비 큰 일반화 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- Language instruction → action의 직접 매핑이 어려운 이유: semantic gap\n- **Image subgoal**: \"다음에 어떤 모습이어야 하는가\"를 이미지로 표현하면 policy에 더 직접적\n\n---\n\n## 2. 방법론\n\n### 2-Stage Architecture\n\n**Stage 1 (High-level)**: Image-editing diffusion model\n$$\\hat{\\mathbf{o}}_{t+k} = \\text{InstructPix2Pix}(\\mathbf{o}_t, \\text{\"pick up the red cup\"})$$\n\n**Stage 2 (Low-level)**: Goal-conditioned policy\n$$\\mathbf{a}_t = \\pi(\\mathbf{o}_t, \\hat{\\mathbf{o}}_{t+k})$$\n\n> ❓ **예상 질문**: Image editing model의 출력 품질이 low-level policy에 얼마나 중요한가?\n> **답변**: Pixel-perfect일 필요 없음. 대략적 spatial layout과 물체 위치만 정확하면 됨. 그러나 심각한 hallucination은 policy를 혼란시킴.\n\n---\n\n## 3. 실험 결과\n\n| 모델 | CALVIN Avg Len |\n|------|---------------|\n| HULC | 2.64 |\n| RT-2 style | 2.85 |\n| **SuSIE** | **3.42** |\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **2-stage latency**: Diffusion-based image generation이 매우 느림\n2. **Subgoal timing**: k step 후의 subgoal을 생성해야 하는데, 최적 k 결정이 어려움\n3. **Image editing 품질**: 로봇 환경 특화 fine-tuning 필요할 수 있음\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Pre-trained image editing as planner |\n| **Practical impact** | ★★★★☆ — Zero-shot generalization |\n\n**강점**: Pre-trained vision model의 knowledge를 planning에 직접 활용하는 창의적 접근. **약점**: Latency, subgoal timing.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 |\n|---|------|----------|\n| 1 | CoT-VLA와의 차이는? | CoT-VLA는 single model에서 visual CoT, SuSIE는 별도 diffusion model. SuSIE가 더 high-quality 이미지 생성 but 더 느림 |\n| 2 | Subgoal image를 latent space에서 생성하면? | FLARE의 접근과 유사. Latency 대폭 감소 가능 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 101
+      "rank": 111
     },
     {
       "name": "TacVLA",
@@ -3898,7 +4226,7 @@
         "content": "# TacVLA: Contact-Aware Tactile Fusion for Robust VLA Manipulation\n\n> **한 줄 요약**: 촉각(tactile) modality를 contact-aware gating mechanism으로 VLA에 통합하여, 접촉이 중요한 태스크(분해 20%↑, in-box picking 60%↑)와 시각 차단 상황(2.1x 향상)에서 큰 성능 향상 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA는 **vision + language만 사용** → 접촉 정보 부재\n- 접촉이 필수인 태스크(삽입, 분해, 재질 판단)에서 시각만으로 한계\n- **촉각 센서**가 보편화되고 있으나 VLA 통합 사례 부재\n\n---\n\n## 2. 방법론\n\n### Contact-Aware Gating\n\n촉각 token을 항상 활성화하지 않고, **접촉이 감지될 때만 선택적으로 활성화**:\n\n$$\\mathbf{h} = g(\\mathbf{f}_{\\text{tac}}) \\cdot \\text{TacEncoder}(\\mathbf{f}_{\\text{tac}}) + (1 - g) \\cdot \\mathbf{0}$$\n\n- $g$: Contact gating function (접촉 시 1, 비접촉 시 0에 가까움)\n- 비접촉 phase에서 불필요한 tactile noise 차단\n\n> ❓ **예상 질문**: Gating을 고정 threshold로 하는가, 학습하는가?\n> **답변**: 학습된 gating. 접촉 데이터에서 자동으로 contact/non-contact 구분 학습. 다만 gating 오류(false positive/negative)의 영향 분석 부족.\n\n---\n\n## 3. 실험 결과\n\n| 태스크 | Vision-only VLA | **TacVLA** |\n|-------|----------------|-----------|\n| 분해 (disassembly) | 55% | **75% (+20%)** |\n| In-box picking | 25% | **85% (+60%)** |\n| Visual occlusion | 30% | **63% (2.1x)** |\n\n- **시각 차단에서 촉각의 가치가 극명하게 드러남**\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **촉각 센서 하드웨어 의존**: 특정 센서(GelSight 등)에 맞춤 → 범용성 제한\n2. **촉각 데이터 수집**: 기존 VLA 데이터에 촉각 미포함 → 새로운 데이터 수집 필요\n3. **Cross-embodiment**: 촉각 센서가 다른 로봇에서의 일반화 미검증\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Tactile + VLA 최초 통합 |\n| **Practical impact** | ★★★★★ — Contact-rich task의 혁신적 향상 |\n\n**강점**: 촉각의 VLA 통합이 선구적. Contact-aware gating이 효과적. **약점**: 하드웨어 의존, 데이터 수집 비용.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 |\n|---|------|----------|\n| 1 | 어떤 촉각 센서에서도 작동하는가? | Sensor-specific encoder 필요. Universal tactile tokenizer는 미탐구 |\n| 2 | Force/torque sensor로도 비슷한 효과인가? | F/T는 scalar로 fine-grained spatial 정보 부족. Vision-based tactile이 더 풍부 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 102
+      "rank": 112
     },
     {
       "name": "TAG",
@@ -3924,7 +4252,7 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
-      "rank": 103
+      "rank": 113
     },
     {
       "name": "TinyVLA",
@@ -3957,7 +4285,7 @@
         "content": "# TinyVLA: Towards Fast, Data-Efficient Vision-Language-Action Models for Robotic Manipulation\n\n> **한 줄 요약**: 사전학습 단계를 제거하고 빠른 추론과 데이터 효율성에 초점을 맞춘 compact VLA로, OpenVLA를 성능에서 match하면서 언어·물체·환경 변화에 대한 강건한 일반화 시현.\n\n---\n\n## 1. 배경 및 동기\n\n- 대형 VLA의 사전학습이 **매우 비싸고 시간 소요** → 소규모 연구그룹에서 재현 불가\n- **사전학습 없이** 목적 데이터만으로 competitive VLA 학습 가능한지 검증\n\n---\n\n## 2. 방법론\n\n### No Pre-training\n\n기존 VLA: Large-scale VLM pre-train → robot data fine-tune\nTinyVLA: **직접 robot data로 from-scratch 또는 VLM initialization만**\n\n- VLM의 pre-trained weight를 initialization으로만 활용 (추가 pre-training 없음)\n- 소형 모델로 fast inference\n\n---\n\n## 3. 실험 결과\n\n| 모델 | Params | SR (%) | Data Efficiency |\n|------|--------|--------|-----------------|\n| OpenVLA | 7B | 76.5 | 970K demos |\n| **TinyVLA** | **~1B** | **~75** | **<100K demos** |\n\n- OpenVLA와 비슷한 성능을 **1/10 데이터, 1/7 파라미터**로 달성\n- 일반화 (언어, 물체, 위치, 환경) 모두에서 robust\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Ceiling**: Pre-training 없이는 더 복잡한 태스크에서 한계 도달 예상\n2. **Data efficiency의 범위**: 100K이면 여전히 상당한 규모. 1K에서는?\n3. **복잡한 reasoning**: Pre-training의 language/reasoning 지식이 없어 CoT 등 어려움\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — \"Pre-training 불필요\" 주장의 검증 |\n| **Practical impact** | ★★★★★ — 접근성 극대화 |\n\n**강점**: Pre-training 없이 competitive 성능. 연구 접근성 향상. **약점**: Complex task에서의 ceiling.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 |\n|---|------|----------|\n| 1 | Pre-training을 추가하면 얼마나 좋아지는가? | OpenVLA-OFT처럼 pre-training + 좋은 recipe = 97%+. Pre-training의 가치가 분명히 존재 |\n| 2 | 1K demo에서는? | 성능 크게 하락 예상. Few-shot regime에서는 pre-training이 필수적 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 104
+      "rank": 114
     },
     {
       "name": "TraceVLA",
@@ -3997,7 +4325,7 @@
         "content": "# TraceVLA: Visual Trace Prompting Enhances Spatial-Temporal Awareness for Generalist Robotic Policies\n\n> **한 줄 요약**: State-action trajectory를 이미지 위에 시각적 trace로 오버레이하여 VLA의 spatial-temporal awareness를 강화, SimplerEnv 10%↑ 및 real-robot 3.5x 향상 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA가 **시간적 정보 (이전 동작 기억)**를 활용하지 못함\n- Visual trace: 이전 end-effector 경로를 이미지 위에 그려 \"어디에서 왔는지\" 시각적으로 표현\n\n---\n\n## 2. 방법론\n\n### Visual Trace Prompting\n\n현재 이미지 위에 과거 N step의 end-effector trajectory를 색깔 선으로 오버레이:\n$$\\mathbf{o}'_t = \\text{Overlay}(\\mathbf{o}_t, \\text{trace}_{t-N:t})$$\n\n- 별도 학습 없이 **입력 이미지를 수정**하는 것만으로 효과\n- VLM의 visual reasoning 능력이 trace를 자연스럽게 이해\n\n> ❓ **예상 질문**: Trace가 중요 물체를 가리면?\n> **답변**: Semi-transparent trace 사용, 얇은 선으로 occlusion 최소화. 그러나 밀집된 작업 공간에서 trace가 혼란을 줄 수 있음.\n\n---\n\n## 3. 실험 결과\n\n| 모델 | SimplerEnv (%) | Real Robot (137 configs) |\n|------|---------------|------------------------|\n| OpenVLA | 48.7 | 1x |\n| **TraceVLA** | **58.7 (+10%)** | **3.5x** |\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Trace가 noise를 추가**: Dense trace가 시각적 혼란 유발 가능\n2. **Camera viewpoint 의존**: Trace의 시각적 의미가 카메라 위치에 따라 변함\n3. **Trace 없는 첫 step**: 초기에는 trace가 없어 이점 없음\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — 극도로 간단하면서도 효과적 |\n| **Practical impact** | ★★★★★ — 추가 학습 없이 즉시 적용 |\n\n**강점**: 놀라울 정도로 간단한 아이디어가 큰 효과. **약점**: Visual clutter, camera 의존.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 |\n|---|------|----------|\n| 1 | Random trace를 그으면? | 성능 하락 → trace의 정보적 가치 확인 |\n| 2 | LLARVA와의 차이? | TraceVLA는 과거 궤적, LLARVA는 미래 예측 경로 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 105
+      "rank": 115
     },
     {
       "name": "TwinBrainVLA",
@@ -4036,7 +4364,7 @@
         "content": "# TwinBrainVLA: Unleashing the Potential of Generalist VLMs for Embodied Tasks via Asymmetric Mixture-of-Transformers\n\n> **한 줄 요약**: Frozen generalist VLM pathway와 trainable specialist pathway를 비대칭 MoT로 조율하여, VLM의 기존 능력을 보존하면서 embodied task에서 대폭 향상 달성.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA fine-tuning 시 **catastrophic forgetting**: VLM의 language/vision 능력 상실\n- Frozen VLM은 forgetting 방지하나 **action prediction에 최적화 안 됨**\n- 두 경로를 동시에 유지하면서 action 성능 향상하는 방법 필요\n\n---\n\n## 2. 방법론\n\n### Asymmetric Mixture-of-Transformers\n\n**Generalist pathway** (frozen): VLM weight 고정 → language understanding, scene reasoning 보존\n**Specialist pathway** (trainable): Action prediction에 특화된 추가 transformer layers\n\n두 pathway의 출력을 layer마다 혼합:\n$$\\mathbf{h}_l = \\alpha_l \\cdot \\mathbf{h}_l^{\\text{gen}} + (1-\\alpha_l) \\cdot \\mathbf{h}_l^{\\text{spec}}$$\n\n$\\alpha_l$: 학습 가능한 mixing coefficient.\n\n> ❓ **예상 질문**: LoRA fine-tuning으로도 forgetting을 줄일 수 있지 않은가?\n> **답변**: LoRA는 partial update로 forgetting을 줄이나 완전히 방지하지 못함. TwinBrainVLA는 frozen generalist를 유지하므로 이론적으로 forgetting이 0.\n\n---\n\n## 3. 실험 결과\n\n| 모델 | SimplerEnv (%) | RoboCasa (%) | VLM Score |\n|------|---------------|-------------|-----------|\n| OpenVLA (full FT) | 48.7 | - | 45.2 (↓) |\n| OpenVLA (LoRA) | 45.3 | - | 58.3 |\n| **TwinBrainVLA** | **62.5** | **SOTA** | **67.8 (preserved)** |\n\n- Action 성능 향상 + VLM 능력 보존 동시 달성\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **2x 메모리**: Frozen + trainable 두 pathway = 기존 대비 2배 GPU 메모리\n2. **Mixing coefficient의 해석**: $\\alpha$가 어떤 의미인지 분석 부족\n3. **Specialist pathway의 크기 최적화**: 얼마나 크게/작게 해야 하는지\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Asymmetric MoT for forgetting prevention |\n| **Practical impact** | ★★★★☆ — 메모리 trade-off |\n\n**강점**: Catastrophic forgetting을 구조적으로 해결. **약점**: 2x 메모리 비용.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 |\n|---|------|----------|\n| 1 | VLM 능력 보존이 실질적으로 중요한가? | Zero-shot generalization과 novel instruction 이해에 필수 |\n| 2 | Specialist pathway를 smaller하게 만들면? | 성능 하락하나 메모리 절감. Sweet spot 탐색 포함 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 106
+      "rank": 116
     },
     {
       "name": "UniDex",
@@ -4070,7 +4398,7 @@
         "content": "# UniDex: A Robot Foundation Suite for Universal Dexterous Hand Control from Egocentric Human Videos\n\n> **한 줄 요약**: 8종 dexterous hand(6-24 DoF)에 대한 50K+ trajectory 데이터셋(UniDex-Dataset)과 82차원 통합 action space(FAAS)를 구축하고, flow matching 기반 3D VLA로 81% task progress와 zero-shot cross-hand transfer 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- Dexterous hand 연구가 **단일 hand 형태에 국한** → cross-hand generalization 불가\n- 서로 다른 hand의 **action space가 상이** (DoF 6~24) → unified policy 구축 어려움\n- Egocentric human video는 풍부하나 로봇 hand에 직접 활용 불가\n\n### 핵심 질문\n- **다양한 dexterous hand를 하나의 통합 action space로 표현하고, 단일 VLA로 제어할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 FAAS (Function-Actuator-Aligned Space)\n\n82차원 통합 action space:\n- **18-dim**: Wrist poses (9/hand × 2 hands, 6D rotation + 3D translation)\n- **64-dim**: Joint commands (32/hand, 21 shared base slots + hand-specific)\n\n이를 통해 DoF가 다른 hand들을 **동일 표현 공간**에서 학습.\n\n### 2.2 Architecture\n\n- **Vision**: Uni3D pointcloud encoder (ViT, 2D pretrained로 초기화)\n- **Action**: **Conditional flow matching** (velocity field prediction, Euler integration, step δ=0.1)\n- **Input**: Single-view colored pointcloud + language instruction + proprioception\n- **Output**: Action chunk $A_t = [a_t, ..., a_{t+H-1}]$\n\n### 2.3 Training\n\n| 단계 | GPU | Batch | Duration |\n|------|-----|-------|----------|\n| **Pretrain** | 8× H800 | 128 | ~24h, 3 epochs (~30K steps) |\n| **Post-train** | 2× H800 | 8 | ~4h/task, 50 epochs (~3K steps) |\n\n- Optimizer: AdamW, cosine scheduler, initial LR 1e-4\n- 50 demonstrations per task for post-training\n\n### 2.4 UniDex-Dataset\n\n- **9M paired image-pointcloud-action frames** (30 fps)\n- **50K+ trajectories** across 8 hands\n- Sources: H2O, HOI4D, HOT3D, TACO (egocentric RGB-D)\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### Real-World Tool-Use (5 tasks, 2 hands)\n\n| Model | Avg Task Progress | Final SR |\n|-------|------------------|----------|\n| DP (Diffusion Policy) | 29.0±19.9% | 22.0±22.5% |\n| DP3 | 35.0±17.1% | 30.0±18.7% |\n| π₀ | 38.0±7.4% | 35.0±10.0% |\n| UniDex-VLA (No Pretrain) | 32.5±18.5% | 23.0±12.0% |\n| **UniDex-VLA** | **81.0±12.1%** | **76.0±17.8%** |\n\n- π₀ 대비 **+43%p task progress** → pretraining의 결정적 기여\n\n### Zero-shot Cross-Hand Transfer\n\n| Target Hand | SR (%) |\n|------------|--------|\n| Inspire (train) | 76% |\n| Oymotion (zero-shot) | 60% |\n| Wuji (zero-shot) | 40% |\n\n### Human-Robot Co-training\n\n- Human:robot demo exchange rate ≈ 2:1\n- Human demos ~5.2× faster to collect\n- Robot data 필수 (human only로는 insufficient)\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **표준 벤치마크 없음**: LIBERO, CALVIN 등 미평가 → 직접 비교 어려움\n2. **Single-view pointcloud 의존**: Multi-view나 RGB-only setup에서의 성능 미검증\n3. **FAAS의 hand 호환성**: 8종 hand에서 검증, 더 다양한 형태 (prosthetics 등)에서는?\n4. **Parameter count 미공개**\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — FAAS unified action space + 8-hand dataset |\n| **Technical depth** | ★★★★★ — 9M frames, cross-hand transfer, human co-training |\n| **Experimental rigor** | ★★★★☆ — Real-world 5 tasks, zero-shot transfer. 표준 벤치마크 부재 |\n| **Practical impact** | ★★★★★ — Dexterous manipulation의 foundation 연구 |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | DexVLA와의 차이는? | DexVLA는 diffusion expert on bimanual arms, UniDex는 flow matching on dexterous hands. 다른 embodiment |\n| 2 | FAAS에서 hand가 21 DoF 미만이면? | Unused dimensions을 masking. FAAS의 shared 21 base slots이 다양한 DoF를 수용 |\n| 3 | Pretraining 없이 (32.5%) vs 있으면 (81.0%) — 이게 data의 효과인가 architecture의 효과인가? | Data 효과가 지배적. FAAS가 data scaling을 가능하게 하는 enabler |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 107
+      "rank": 117
     },
     {
       "name": "UniDriveVLA",
@@ -4094,7 +4422,7 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
-      "rank": 108
+      "rank": 118
     },
     {
       "name": "UniPi",
@@ -4125,7 +4453,41 @@
         "content": "# UniPi: Learning Universal Policies via Text-Guided Video Generation\n\n> **한 줄 요약**: 순차적 의사결정을 text-conditioned video generation 문제로 재정의하여, 생성된 비디오에서 inverse dynamics로 action을 추출하는 **video-as-policy** 패러다임의 선구적 연구.\n\n---\n\n## 1. 배경 및 동기\n\n- 대규모 text-to-video 모델의 등장 → 이를 정책으로 활용 가능?\n- Video = future plan → 비디오를 생성하면 implicit한 plan이 됨\n\n---\n\n## 2. 방법론\n\n### Video-as-Policy\n\n$$\\text{Text instruction} \\to \\text{Video generation model} \\to \\text{Future frames} \\to \\text{Inverse dynamics} \\to \\text{Actions}$$\n\n1. Text-conditioned diffusion model이 미래 비디오 생성\n2. 생성된 비디오의 연속 프레임에서 inverse dynamics model로 action 추출\n\n> ❓ **예상 질문**: Video generation의 latency가 real-time control에 적합한가?\n> **답변**: 가장 큰 약점. 비디오 생성에 수 초 소요 → 실시간 제어 불가. Hierarchical (저주파 plan + 고주파 execution) 구조로 완화 가능.\n\n---\n\n## 3. 실험 결과\n\n- 시뮬레이션 환경에서 combinatorial generalization 시연\n- 학습에 없던 (goal, environment) 조합에서 zero-shot 성능\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **극도로 높은 latency**: Video generation 수 초\n2. **Inverse dynamics의 정확도**: 생성된 비디오에서 action 추출의 오류\n3. **Video quality → action quality**: 잘못된 비디오 = 잘못된 plan\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — Video-as-policy의 개념 자체가 revolutionary |\n| **Practical impact** | ★★★☆☆ — Latency가 실용성 제한 |\n\n**강점**: 패러다임 정의적 연구. GR-1, Motus 등 모든 WAM 연구의 출발점. **약점**: Latency.\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 |\n|---|------|----------|\n| 1 | Latent video (pixel 아닌)로 전환하면? | FLARE, Fast-WAM의 접근. Latency 대폭 감소 |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 109
+      "rank": 119
+    },
+    {
+      "name": "UniT",
+      "organization": "XPeng Robotics",
+      "date": "2026-04-21",
+      "paper_url": "https://arxiv.org/abs/2604.19734",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "latent-action",
+        "cross-embodiment",
+        "humanoid",
+        "human-video",
+        "world-model",
+        "scaling",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "Unified Latent Action Tokenizer via Visual Anchoring: tri-branch cross-reconstruction (action->vision anchoring, vision->action filtering, fusion branch) producing a shared discrete latent space of embodiment-agnostic physical intents",
+        "action_head_category": "discrete_diffusion",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# UniT: Toward a Unified Physical Language for Human-to-Humanoid Policy Learning and World Modeling\n\n> **한 줄 요약**: Human egocentric video와 humanoid action을 \"visual consequence\"를 공통 anchor로 삼아 **embodiment-agnostic discrete latent space**로 통합하는, tri-branch cross-reconstruction 기반의 통합 physical language tokenizer.\n\n---\n\n## 1. 배경 및 동기\n\n- Humanoid foundation model의 scaling 병목 = robotic data 부족.\n- 대규모 egocentric human video는 scalable 대안이지만, 인간과 로봇의 **kinematic mismatch**(cross-embodiment chasm)로 직접 전이 불가.\n- **핵심 통찰**: 이질적 kinematics도 **물리적 결과(visual consequence)**는 보편적 → 시각을 anchor로 활용하자.\n\n---\n\n## 2. 방법론\n\n### UniT = Unified Latent Action Tokenizer via Visual Anchoring\n- 인간과 humanoid action 모두를 공유 discrete latent space의 token으로 맵핑.\n- Token은 \"embodiment-agnostic physical intent\"를 표현.\n\n### Tri-Branch Cross-Reconstruction\n1. **Action → Vision** 분기: action이 미래 vision을 예측하게 하여 kinematics를 물리적 결과에 anchoring.\n2. **Vision → Action** 분기: vision이 action을 reconstruct하게 하여 무관한 시각 confounder를 필터링.\n3. **Fusion** 분기: 정제된 두 modality를 결합해 shared discrete latent space를 형성.\n\n### World Modeling 연계\n- 통합 token space는 policy learning뿐 아니라 world model 학습에도 직접 활용 가능.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- XPeng Robotics 프로젝트 페이지 기반으로 humanoid scaling 목적.\n- Cross-embodiment token의 downstream humanoid policy 효과성을 주장 (구체 수치 paper 참조).\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Visual confounder의 완전 제거 난이도**: Vision→Action 분기가 조명·배경 등 irrelevant signal을 완벽히 걸러낸다는 보장 없음.\n2. **Discrete tokenization의 precision loss**: 미세한 humanoid motor 명령을 discrete token으로 양자화할 때 정밀도 손실 가능.\n3. **Human-egocentric 데이터 편향**: 일상 인간 활동이 humanoid 작업 분포와 다를 때 transfer 효과 제한.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Visual consequence를 cross-embodiment anchor로 삼은 tri-branch 설계가 독창적 |\n| **Practical impact** | ★★★★☆ — Humanoid data scaling 문제에 정면 대응 |\n\n**강점**: \"Kinematics는 다르나 visual outcome은 같다\"는 철학이 단순·강력하고, tri-branch 구조가 이를 엔지니어링적으로 구현. **약점**: Discrete latent의 해상도와 confounder filtering의 실제 품질 검증 필요.\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | LAPA와 차별점은? | Tri-branch 구조와 visual anchoring 철학, discrete token의 physical intent로서의 정의 |\n| 2 | 왜 discrete latent인가 (continuous 대비)? | World model과의 joint token prediction, LLM-style scaling 친화성 |\n| 3 | Vision이 action을 복원하는 분기의 필요성? | Action이 vision을 예측만 하면 spurious correlation 학습 → reverse branch가 regularizer 역할 |\n| 4 | Kinematic mismatch가 크면 visual anchor도 달라지지 않나? | 사용 도구·객체의 상태 변화 등 결과 수준에서는 공유됨 (핵심 가정) |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 120
     },
     {
       "name": "UP-VLA",
@@ -4159,7 +4521,72 @@
         "content": "# UP-VLA: A Unified Understanding and Prediction Model for Embodied Agent\n\n> **한 줄 요약**: Multi-modal understanding과 future prediction 목적함수를 통합하여 VLM의 low-level spatial 정보 캡처 능력을 보강, CALVIN ABC-D에서 33% 향상과 real-world manipulation 개선.\n\n---\n\n## 1. 배경 및 동기\n\n- VLM은 **high-level semantic**에 강하지만 **low-level spatial detail** (정확한 위치, 미세 형상)에 약함\n- Future prediction (다음 상태 예측)이 low-level feature 학습을 촉진\n\n---\n\n## 2. 방법론\n\n### Understanding + Prediction Integration\n\n- **Understanding branch**: Scene description, object grounding\n- **Prediction branch**: Next-frame/state prediction\n- Joint training으로 understanding이 prediction을 돕고, prediction이 spatial detail 학습을 촉진\n\n---\n\n## 3. 실험 결과\n\n| 모델 | CALVIN ABC-D Avg Len |\n|------|---------------------|\n| GR-1 | 3.86 |\n| OpenVLA | 3.45 |\n| **UP-VLA** | **4.58 (+33%)** |\n\n- CALVIN에서 33% 향상은 상당한 수준\n\n---\n\n## 4. 한계\n\n1. 두 branch의 학습 비용\n2. Prediction quality → action quality의 인과관계 명확화 필요\n3. Real-world 결과의 depth\n\n---\n\n## 5. 총평\n\n| **Novelty** | ★★★★☆ | **Practical impact** | ★★★★☆ |\n\n---\n\n## 6. 🔥 질문 모음\n\n| 질문 | 답변 |\n|------|------|\n| FLARE와의 차이? | FLARE는 latent prediction, UP-VLA는 pixel-level prediction. 더 explicit한 supervision |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 110
+      "rank": 121
+    },
+    {
+      "name": "V-CAGE",
+      "organization": "TODO: check paper",
+      "date": "2026-04-10",
+      "paper_url": "https://arxiv.org/abs/2604.09036",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "scene-generation",
+        "agentic",
+        "data-synthesis",
+        "closed-loop",
+        "manipulation",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "not applicable (data-generation framework used to train downstream VLAs)",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# V-CAGE: Vision-Closed-Loop Agentic Generation Engine for Robotic Manipulation\n\n> **한 줄 요약**: **foundation-model 기반 agentic 데이터 합성 엔진**. Inpainting-guided scene 구축 + VLM visual critic closed-loop 검증 + 지각 기반 압축(>90%)으로 VLA 학습용 데이터를 **semantically coherent & kinematically reachable** 하게 대량 생산.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA 스케일링은 \"의미 + 물리\"가 동시에 맞는 대규모 데이터가 병목.\n- 기존 scene generation은 **context-aware하지 않아** target이 도달 불가능한 위치에 배치되는 등의 실패가 잦음.\n- Scripted pipeline은 다양성·semantic richness가 부족; 또한 대용량 video dataset은 **스토리지 병목**까지 발생.\n\n---\n\n## 2. 방법론\n\n### 2.1 Inpainting-Guided Scene Construction\n- Foundation model을 활용해 **context-aware layout** 을 배치.\n- 단순 random placement가 아니라, 목표가 **kinematically reachable** 하도록 구성 제약.\n\n### 2.2 VLM-based closed-loop verification (Visual Critic)\n- Functional metadata + VLM 판정을 결합해 trajectory 정확성을 검증.\n- \"겉보기에는 성공한 것처럼 보이지만 실제론 실패한\" **silent failure** 를 걸러내고 error propagation chain을 끊음.\n\n### 2.3 Perceptually-driven compression\n- 대용량 비디오 데이터에 대해 지각 기반 압축을 적용.\n- **90% 이상 filesize 감소**에도 downstream VLA 학습 효능은 유지된다고 주장.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- >90% 파일 크기 감소에도 downstream VLA 성능 유지.\n- 기존 scripted / context-free generation 대비 **task 조기 실패율 감소** 주장.\n- 구체 VLA 성능 지표는 PDF 확인 필요.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Critic bias**: VLM critic이 자체 편향을 데이터셋에 주입할 위험(foundation-model monoculture).\n2. **Sim→real gap**: Inpainting 기반 장면은 합성 특성이 강해, 실제 센서 noise/lighting와 차이가 존재 가능.\n3. **평가 가능성**: 생성 데이터 품질을 downstream VLA 성능으로만 측정하면, 특정 과제·백본에 의존적.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Agentic data generation + VLM critic loop은 최근 흐름과 일치. Silent failure를 명시적으로 타겟하는 점은 유용. |\n| **Practical impact** | ★★★★☆ — VLA 학습 데이터 병목을 직접 공략. 90% 압축이 사실이면 실질적으로 큰 비용 절감. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | VLM critic이 놓친 실패는? | False-negative 검증. Critic robustness가 전체 파이프라인 품질 상한을 결정. Diverse critic ensemble이 자연스러운 확장. |\n| 2 | 90% 압축이 downstream에 진짜 무해한가? | 지각 기반 압축은 시각적 fidelity는 유지해도 subtle dynamics 정보를 잃을 수 있음 → manipulation 정밀도에서 검증 필요. |\n| 3 | Inpainting 장면이 real robot으로 transfer되나? | V-CAGE는 학습 데이터 생성이 타겟이며, sim→real은 별도 domain randomization/fine-tune에 의존. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 122
+    },
+    {
+      "name": "ViVa",
+      "organization": "TODO: check paper",
+      "date": "2026-04-09",
+      "paper_url": "https://arxiv.org/abs/2604.08168",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "RL",
+        "value-function",
+        "video-generation",
+        "long-horizon",
+        "abstract-only"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "video-generative value model (repurposed pretrained video generator jointly predicting future proprioception and scalar value)",
+        "action_head_category": "other",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# ViVa: A Video-Generative Value Model for Robot Reinforcement Learning\n\n> **한 줄 요약**: Pretrained video generator를 value function으로 재활용, 현재 관측과 proprioception으로부터 미래 proprioception과 scalar value를 공동 예측하여 long-horizon 로봇 RL의 value 추정을 개선.\n\n---\n\n## 1. 배경 및 동기\n\n- VLA는 large-scale pretraining으로 발전했지만 실세계 배포는 partial observability와 delayed feedback으로 어려움\n- RL의 value function이 task progress를 평가하지만, VLM 기반 value 모델은 temporal dynamics 포착에 한계\n- Video generator는 spatiotemporal prior가 이미 풍부 → value estimation에 \"foresight\"를 주입할 수 있는 자연스런 자원\n\n---\n\n## 2. 방법론\n\n### Video-Generative Value Head\nPretrained video generator를 재목적화하여 (observation + proprioception) → (future proprioception, scalar value)를 jointly 예측. Future proprioception 예측이 auxiliary supervision으로 작용하여 value가 \"embodiment dynamics에 grounded\"되도록 함.\n\n### RECAP Integration\n기존 RL framework인 RECAP의 value component를 ViVa로 교체. Real-world box assembly task에서 substantial improvement를 보고.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- 3개 task에서 qualitative analysis 수행 (real-world box assembly 포함)\n- Abstract 주장: 더 reliable한 value signal, novel object로의 generalization\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **추론 비용**: Video generator inference는 frame당 수백 ms ~ 수 초 → policy update step당 value query 비용이 realtime control에 부담.\n2. **Scalar value 형성 방식**: Video latent로부터 단일 scalar를 어떻게 뽑는지(pooling/regression head) abstract에서 불명확.\n3. **Benchmark 다양성**: Real-world box assembly 외 simulation benchmark(LIBERO/SimplerEnv 등) 수치가 공개되지 않아 comparative positioning 어려움.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — Video generator를 value model로 재활용하는 관점은 최근 \"world model as critic\" trend에서 differentiated |\n| **Practical impact** | ★★★☆☆ — Long-horizon real-world task에서 유망, 추론 비용 때문에 on-robot loop보다는 offline RL/eval에서 가치 |\n\n---\n\n## 6. 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Video generator를 value로 쓰면 단순 VLM critic 대비 이득은? | Spatiotemporal prior 덕분에 \"미래 상태\"를 implicit simulate → partial observability/delayed feedback 환경에서 task progress 추정이 안정. |\n| 2 | Future proprioception prediction이 왜 필요한가? | Value head가 단순 reward regression에 overfit되지 않도록 dynamics-grounded auxiliary signal 역할. |\n| 3 | Inference 비용을 어떻게 감당? | 실시간 policy에는 과부하 → value를 낮은 빈도(episode/chunk 단위)로 query하거나 distilled critic을 학습하는 방향이 현실적. |\n\n<!-- VERIFIED: abstract-only -->\n",
+        "verified": false
+      },
+      "rank": 123
     },
     {
       "name": "VLA-RL",
@@ -4192,7 +4619,7 @@
         "content": "# VLA-RL: Towards Masterful and General Robotic Manipulation with Scalable Reinforcement Learning\n\n> **한 줄 요약**: Auto-regressive VLA에 online RL을 직접 적용하여, pretrained OpenVLA-7B가 fine-tuned baseline을 LIBERO 40개 태스크에서 4.5%p 능가하고, test-time compute 증가에 따른 성능 향상을 시현.\n\n---\n\n## 1. 배경 및 동기\n\n- BC의 근본적 한계: Suboptimal demonstration에 bound, OOD에 취약\n- VLA에 RL을 적용하려면: 대형 모델의 안정적 fine-tuning, 효율적 on-policy data 수집 필요\n\n---\n\n## 2. 방법론\n\n### Online RL for Autoregressive VLA\n\n- PPO 기반 policy optimization\n- VLA의 autoregressive action generation을 RL의 policy로 직접 활용\n- Reward: Task success (sparse)\n\n### Test-time Optimization\n\n추론 시 더 많은 compute를 할당하면 성능 향상:\n- Multiple rollout → best action selection\n- Beam search 등\n\n---\n\n## 3. 실험 결과\n\n| 모델 | LIBERO-40 Avg (%) |\n|------|-----------------|\n| OpenVLA (BC) | 76.5 |\n| OpenVLA (fine-tuned BC) | 82.3 |\n| **VLA-RL** | **86.8 (+4.5%)** |\n\n---\n\n## 4. 한계\n\n1. **RL의 sample complexity**: On-policy data 수집 비용\n2. **Sparse reward**: Dense reward 없이는 학습 느림\n3. **시뮬레이션 의존**: Real-world RL은 미검증\n\n---\n\n## 5. 총평\n\n| **Novelty** | ★★★★☆ — Online RL for large VLA |\n| **Practical impact** | ★★★★☆ — BC→RL 전환의 가능성 |\n\n---\n\n## 6. 🔥 질문 모음\n\n| 질문 | 답변 |\n|------|------|\n| AcceRL과의 차이? | AcceRL은 분산 비동기+world model, VLA-RL은 direct online PPO. VLA-RL이 더 간단하나 AcceRL이 더 scalable |\n| PLD와 비교하면? | PLD는 indirect (residual→distill), VLA-RL은 direct RL. PLD가 더 안정적이나 VLA-RL이 더 general |\n\n<!-- VERIFIED: abstract-only -->\n",
         "verified": false
       },
-      "rank": 111
+      "rank": 124
     },
     {
       "name": "Vlaser",
@@ -4239,7 +4666,7 @@
         "num_reviews": 4,
         "openreview_url": "https://openreview.net/forum?id=8xTDnj39Ti"
       },
-      "rank": 112
+      "rank": 125
     },
     {
       "name": "VP-VLA",
@@ -4267,7 +4694,7 @@
         "simpler_env": "fine-tuned",
         "robocasa": "fine-tuned"
       },
-      "rank": 113
+      "rank": 126
     }
   ]
 }

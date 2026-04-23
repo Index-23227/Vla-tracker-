@@ -1,0 +1,18 @@
+name: ViVa
+full_name: "ViVa: A Video-Generative Value Model for Robot Reinforcement Learning"
+organization: "TODO: check paper"
+date: "2026-04-09"
+paper_url: https://arxiv.org/abs/2604.08168
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "video-generative value model (repurposed pretrained video generator jointly predicting future proprioception and scalar value)"
+  action_head_category: other
+  parameters: "TODO"
+  key_innovation: "ViVa repurposes a pretrained video generator as a value model for robot RL, taking the current observation and proprioception and jointly predicting future proprioception plus a scalar value for the current state. By leveraging spatiotemporal priors from video corpora, value estimation is grounded in anticipated embodiment dynamics rather than static snapshots, and when integrated into RECAP it delivers substantial improvements on real-world box assembly."
+
+benchmarks: {}
+
+tags: [RL, value-function, video-generation, long-horizon, abstract-only]

@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-03-27T09:16:38.080265
-# Models: 89
+# Generated: 2026-04-23T12:06:16.545740
+# Models: 126
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -982,6 +982,39 @@ MODEL: 3D Diffuser Actor
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: A1
+  Organization: TODO: check paper
+  Date: 2026-04-07
+  Paper: https://arxiv.org/abs/2604.05672
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: diffusion
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: diffusion, libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: ABot-Claw
+  Organization: TODO: check paper
+  Date: 2026-04-11
+  Paper: https://arxiv.org/abs/2604.10096
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: agentic closed-loop controller wrapping an underlying VLA with critic-based feedback
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: agentic, self-evolving, cooperative, multi-agent, closed-loop, abstract-only
+  AI Review Summary: OpenClaw 위에 embodied 제어 레이어를 덧붙여, **heterogeneous 로봇 스케줄링 + cross-embodiment multimodal memory + critic-based closed-loop 피드백**을 통합한 **self-evolving multi-robot agent foundation**.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
 MODEL: AcceRL
   Organization: TODO: check paper
   Date: 2026-03-19
@@ -998,6 +1031,39 @@ MODEL: AcceRL
   Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: VLA 모델의 RL 학습을 위한 완전 비동기 분산 프레임워크로, macro/micro 2단계 비동기 설계와 plug-and-play diffusion world model을 결합하여 LIBERO에서 99-100% 성공률, 200배 sample efficiency 향상, super-linear throughput scaling 달성.
   AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: AnchorRefine
+  Organization: TODO: check paper
+  Date: 2026-04-20
+  Paper: https://arxiv.org/abs/2604.17787
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, calvin
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: AnySlot
+  Organization: TODO: check paper
+  Date: 2026-04-12
+  Paper: https://arxiv.org/abs/2604.10432
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: goal-conditioned VLA policy with explicit visual goal (scene-marker) intermediate representation
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: slot-placement, goal-conditioned, zero-shot, hierarchical, manipulation, abstract-only
+  AI Review Summary: 언어 지시를 **explicit visual goal (scene marker)** 로 먼저 변환한 뒤, goal-conditioned VLA policy로 실행하는 **hierarchical slot-level placement 프레임워크**. 새로운 SlotBench 9개 과제군에서 monolithic VLA 대비 zero-shot 성능 개선을 보고.
+  AI Review: Abstract-based
 
 ------------------------------------------------------------
 MODEL: AVDC
@@ -1037,6 +1103,23 @@ MODEL: CrossFormer
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: DA-PTQ
+  Organization: TODO: check paper
+  Date: 2026-04-13
+  Paper: https://arxiv.org/abs/2604.11572
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: quantization technique applied on top of existing VLA action heads
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: quantization, efficiency, deployment, post-training, low-bit, abstract-only
+  AI Review Summary: 순차 제어 환경에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ 문제를, **Cross-Space Representation Compensation + Motion-Driven Mixed-Precision** 두 축으로 해결하는 **drift-aware PTQ** 프레임워크.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
 MODEL: DeeR-VLA
   Organization: Tsinghua University / Shanghai AI Lab
   Date: 2024-11-04
@@ -1071,6 +1154,22 @@ MODEL: DepthCache
   Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: Depth 기반 영역 분할 + progressive cross-frame token merging + dual protection mechanism으로, **3개 VLA (π0.5, OpenVLA, GR00T)에서 training-free로 1.07-1.33x speedup과 0.2-1.0%p 이내 성능 하락** 달성. Real-world에서 191ms→143ms (1.33x).
   AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: DIAL
+  Organization: TODO: check paper
+  Date: 2026-03-31
+  Paper: https://arxiv.org/abs/2603.29844
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: robocasa
+  Eval Conditions: {'robocasa': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: Diffusion-VLA
@@ -1140,6 +1239,21 @@ MODEL: E0
   Tags: discrete-diffusion, continuized, fine-grained-control, manipulation
   AI Review Summary: Discrete action token에 Gaussian noise를 적용하는 "continuized discrete diffusion"으로, 2048 bins까지 확장 가능하며 14개 환경(LIBERO+VLABench+ManiSkill)에서 π₀/π₀.₅ 대비 **평균 +10.7%** 향상, real-world 45.6%, 단일 RTX PRO 6000에서 24시간 학습.
   AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: E-VLA
+  Organization: TODO: check paper
+  Date: 2026-04-06
+  Paper: https://arxiv.org/abs/2604.04834
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Eval Conditions: {'TODO': 'check paper'}
 
 ------------------------------------------------------------
 MODEL: FALCON
@@ -1212,6 +1326,23 @@ MODEL: GigaWorld-Policy
     robotwin_v2 (avg=86.0): robotwin_v2_clean_avg=87.0, robotwin_v2_rand_avg=85.0
   Eval Conditions: {'robotwin_v2': 'fine-tuned'}
   AI Review Summary: 기존 video-centered WAM의 추론 병목을 해결하기 위해 action 예측을 중심으로 비디오 생성을 조건부로 재구성하는 action-centered WAM을 제안하여, 기존 대비 9배 빠른 추론과 7% 높은 성공률 달성.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: Goal2Skill
+  Organization: TODO: check paper
+  Date: 2026-04-15
+  Paper: https://arxiv.org/abs/2604.13942
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: dual-system: VLM-based high-level planner (structured task memory, goal decomposition, outcome verification, error-driven correction) + VLA-based low-level diffusion visuomotor executor conditioned on geometry-preserving filtered observations
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: long-horizon, planning, reflection, dual-system, diffusion, abstract-only
+  AI Review Summary: VLM 기반 high-level planner(메모리·검증·반성)와 diffusion VLA low-level executor를 **closed-loop**로 결합해 long-horizon manipulation에서 baseline 대비 3배 이상의 성공률 향상을 보인 dual-system 프레임워크.
   AI Review: Abstract-based
 
 ------------------------------------------------------------
@@ -1310,6 +1441,39 @@ MODEL: GR00T-N1.6
   Eval Conditions: {'robocasa': 'fine-tuned'}
 
 ------------------------------------------------------------
+MODEL: HELM
+  Organization: TODO: check paper
+  Date: 2026-04-20
+  Paper: https://arxiv.org/abs/2604.18791
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, calvin
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: HEX
+  Organization: TODO: check paper
+  Date: 2026-04-09
+  Paper: https://arxiv.org/abs/2604.07993
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: Mixture-of-Experts with humanoid-aligned state representation, lightweight history tokens for temporal visual context, and residual-gated fusion with flow-matching action generation
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: humanoid, whole-body, cross-embodiment, flow-matching, mixture-of-experts, abstract-only
+  AI Review Summary: 부위별 독립 action prediction의 한계를 극복하기 위해, humanoid-aligned state 표현과 Mixture-of-Experts + flow-matching action generation을 결합한 **whole-body coordinated** VLA 프레임워크.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
 MODEL: HiMoE-VLA
   Organization: Tsinghua University / Shanghai AI Lab
   Date: 2025-12-05
@@ -1327,6 +1491,22 @@ MODEL: HiMoE-VLA
   AI Review: Abstract-based
 
 ------------------------------------------------------------
+MODEL: HiVLA
+  Organization: TODO: check paper
+  Date: 2026-04-15
+  Paper: https://arxiv.org/abs/2604.14125
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: reasoning
+  Eval Conditions: {'TODO': 'check paper'}
+
+------------------------------------------------------------
 MODEL: Humanoid-VLA
   Organization: Multiple Chinese institutions
   Date: 2025-02-20
@@ -1342,6 +1522,21 @@ MODEL: Humanoid-VLA
   Tags: humanoid, whole-body-control, language-motion-alignment, egocentric
   AI Review Summary: Language understanding, egocentric perception, motion control을 통합하는 humanoid 전용 VLA로, language-motion 사전정렬과 self-supervised augmentation을 통해 범용 휴머노이드 제어 실현.
   AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: HY-Embodied-0.5
+  Organization: TODO: check paper
+  Date: 2026-04-08
+  Paper: https://arxiv.org/abs/2604.07430
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Eval Conditions: {'TODO': 'check paper'}
 
 ------------------------------------------------------------
 MODEL: InternVLA-A1
@@ -1400,6 +1595,55 @@ MODEL: KineVLA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: LaMP
+  Organization: TODO: check paper
+  Date: 2026-03-26
+  Paper: https://arxiv.org/abs/2603.25399
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, simpler_env
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: LARY
+  Organization: Meituan LongCat
+  Date: 2026-04-13
+  Paper: https://arxiv.org/abs/2604.11689
+  Code: https://github.com/meituan-longcat/LARYBench
+  Venue: None
+  Open Source: True
+  Architecture:
+    Action Head: latent action representation benchmark (evaluates latent-action encoders derived from large-scale human video on both semantic-action recognition and downstream robotic control tasks)
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: latent-action, human-video, scaling, benchmark, abstract-only
+  AI Review Summary: 대규모 human action video (1M+, 151 categories)로부터 학습된 **latent action** 표현의 품질을 체계적으로 평가하는 벤치마크로, 일반 비주얼 foundation model이 특화된 embodied model보다 latent-action encoder로 더 우수함을 보인 연구.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: LIBERO-Para
+  Organization: TODO: check paper
+  Date: 2026-03-30
+  Paper: https://arxiv.org/abs/2603.28301
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+
+------------------------------------------------------------
 MODEL: LLARVA
   Organization: UC Berkeley
   Date: 2024-06-17
@@ -1436,6 +1680,38 @@ MODEL: LLaVA-VLA
   Eval Conditions: {'calvin': 'fine-tuned', 'robotwin_v2': 'fine-tuned (domain randomization setting)'}
   AI Review Summary: VLA의 실용성(practicality)을 체계적으로 재평가하기 위한 CEBench 벤치마크를 제안하고, consumer-grade GPU에서 구동 가능한 경량 LLaVA-VLA 모델을 설계.
   AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: ManipArena
+  Organization: TODO: check paper
+  Date: 2026-03-30
+  Paper: https://arxiv.org/abs/2603.28545
+  Code: None
+  Venue: CVPR 2026
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: CVPR-2026
+  Eval Conditions: {'TODO': 'check paper'}
+
+------------------------------------------------------------
+MODEL: MMaDA-VLA
+  Organization: TODO: check paper
+  Date: 2026-03-26
+  Paper: https://arxiv.org/abs/2603.25406
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: discrete diffusion (masked token denoising, iterative order-free refinement)
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: autoregressive, libero, calvin
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: Mobility VLA
@@ -1511,6 +1787,22 @@ MODEL: NaVILA
   AI Review: Abstract-based
 
 ------------------------------------------------------------
+MODEL: TODO_MODEL_NAME
+  Organization: TODO: check paper
+  Date: 2026-03-26
+  Paper: https://arxiv.org/abs/2603.25740
+  Code: None
+  Venue: CVPR 2026
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: CVPR-2026
+  Eval Conditions: {'TODO': 'check paper'}
+
+------------------------------------------------------------
 MODEL: NORA
   Organization: Declare Lab
   Date: 2025-04-28
@@ -1528,6 +1820,54 @@ MODEL: NORA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: OFlow
+  Organization: TODO: check paper
+  Date: 2026-04-20
+  Paper: https://arxiv.org/abs/2604.17876
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: reasoning, libero, simpler_env, metaworld
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'metaworld': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: OmniVLA-RL
+  Organization: TODO: check paper
+  Date: 2026-04-20
+  Paper: https://arxiv.org/abs/2604.17706
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: flow matching (Flow-GSPO, SDE-reformulated) with Mix-of-Transformers experts
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: RL, online-RL, flow-matching, spatial-understanding, reasoning, libero, abstract-only
+  AI Review Summary: Reasoning/spatial/action 전문가를 Mix-of-Transformers로 통합하고, flow matching을 SDE로 재정식화한 Flow-GSPO를 GSPO와 결합하여 VLA의 공간 이해와 online RL 안정성을 동시에 끌어올리려는 시도.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: OpenRC
+  Organization: TODO: check paper
+  Date: 2026-04-04
+  Paper: https://arxiv.org/abs/2604.03781
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Eval Conditions: {'TODO': 'check paper'}
+
+------------------------------------------------------------
 MODEL: ProbeFlow
   Organization: TODO: check paper
   Date: 2026-03-18
@@ -1542,6 +1882,88 @@ MODEL: ProbeFlow
     Parameters: TODO
   Tags: flow-matching, libero, metaworld
   Eval Conditions: {'libero': 'fine-tuned', 'metaworld': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: ProGAL-VLA
+  Organization: TODO: check paper
+  Date: 2026-04-10
+  Paper: https://arxiv.org/abs/2604.09824
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: ProgressVLA
+  Organization: TODO: check paper
+  Date: 2026-03-29
+  Paper: https://arxiv.org/abs/2603.27670
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, calvin
+  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: ReconVLA
+  Organization: TODO: check paper
+  Date: 2026-04-17
+  Paper: https://arxiv.org/abs/2604.16677
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: conformal prediction wrapper over pretrained VLA action tokens (training-free)
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: uncertainty, failure-aware, conformal-prediction, reasoning, abstract-only
+  AI Review Summary: Pretrained VLA를 재학습 없이 wrapping하여 conformal prediction으로 action token과 robot state에 calibrated uncertainty를 부여, failure를 사전 감지하는 경량 framework.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: ReFineVLA
+  Organization: TODO: check paper
+  Date: 2026-04-20
+  Paper: https://arxiv.org/abs/2604.17800
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: reasoning, simpler_env
+  Eval Conditions: {'simpler_env': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: Rewind-IL
+  Organization: TODO: check paper
+  Date: 2026-04-17
+  Paper: https://arxiv.org/abs/2604.16683
+  Code: https://sjay05.github.io/rewind-il
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: training-free online safeguard (TIDE failure detector + state-respawning) around a frozen action-chunked generative imitation policy
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: imitation-learning, failure-aware, online-failure-detection, recovery, long-horizon, abstract-only
+  AI Review Summary: Action-chunked generative imitation policy 위에 붙는 training-free online safeguard — TIDE로 failure를 감지하고 VLM이 지정한 safe checkpoint로 "rewind"하여 실행을 재개.
+  AI Review: Abstract-based
 
 ------------------------------------------------------------
 MODEL: RoboAlign
@@ -1614,6 +2036,22 @@ MODEL: RT-2-X
   AI Review: Abstract-based
 
 ------------------------------------------------------------
+MODEL: SABER
+  Organization: TODO: check paper
+  Date: 2026-03-26
+  Paper: https://arxiv.org/abs/2603.24935
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+
+------------------------------------------------------------
 MODEL: SAM2Act
   Organization: University of Washington / NVIDIA
   Date: 2025-01-30
@@ -1652,6 +2090,87 @@ MODEL: SAMoE-VLA
   AI Review: Abstract-based
 
 ------------------------------------------------------------
+MODEL: SnapFlow
+  Organization: TODO: check paper
+  Date: 2026-04-07
+  Paper: https://arxiv.org/abs/2604.05656
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: flow matching
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: flow-matching, libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: SOMA
+  Organization: TODO: check paper
+  Date: 2026-03-25
+  Paper: https://arxiv.org/abs/2603.24060
+  Code: None
+  Venue: IROS 2026
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, IROS-2026
+  Eval Conditions: {'libero': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: StableIDM
+  Organization: TODO: check paper
+  Date: 2026-04-20
+  Paper: https://arxiv.org/abs/2604.17887
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: inverse dynamics model with spatio-temporal feature refinement
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: inverse-dynamics, robustness, spatio-temporal, data-labeling, abstract-only
+  AI Review Summary: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: StarVLA
+  Organization: TODO: check paper
+  Date: 2026-04-06
+  Paper: https://arxiv.org/abs/2604.05014
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero, simpler_env, robotwin, robocasa
+  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'robotwin': 'fine-tuned', 'robocasa': 'fine-tuned'}
+
+------------------------------------------------------------
+MODEL: STRONG-VLA
+  Organization: TODO: check paper
+  Date: 2026-04-11
+  Paper: https://arxiv.org/abs/2604.10055
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero
+  Eval Conditions: {'libero': 'fine-tuned'}
+
+------------------------------------------------------------
 MODEL: SuSIE
   Organization: UC Berkeley
   Date: 2023-10-01
@@ -1684,6 +2203,22 @@ MODEL: TacVLA
   Eval Conditions: {'TODO': 'check paper'}
   AI Review Summary: 촉각(tactile) modality를 contact-aware gating mechanism으로 VLA에 통합하여, 접촉이 중요한 태스크(분해 20%↑, in-box picking 60%↑)와 시각 차단 상황(2.1x 향상)에서 큰 성능 향상 달성.
   AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: TAG
+  Organization: TODO: check paper
+  Date: 2026-03-25
+  Paper: https://arxiv.org/abs/2603.24584
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: libero
+  Eval Conditions: {'libero': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: TinyVLA
@@ -1760,6 +2295,21 @@ MODEL: UniDex
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: UniDriveVLA
+  Organization: TODO: check paper
+  Date: 2026-04-02
+  Paper: https://arxiv.org/abs/2604.02190
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: TODO: check paper
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Eval Conditions: {'TODO': 'check paper'}
+
+------------------------------------------------------------
 MODEL: UniPi
   Organization: Google DeepMind
   Date: 2023-02-01
@@ -1774,6 +2324,23 @@ MODEL: UniPi
     Parameters: None
   Tags: video-diffusion, planning, language-conditioned, inverse-dynamics
   AI Review Summary: 순차적 의사결정을 text-conditioned video generation 문제로 재정의하여, 생성된 비디오에서 inverse dynamics로 action을 추출하는 **video-as-policy** 패러다임의 선구적 연구.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: UniT
+  Organization: XPeng Robotics
+  Date: 2026-04-21
+  Paper: https://arxiv.org/abs/2604.19734
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: Unified Latent Action Tokenizer via Visual Anchoring: tri-branch cross-reconstruction (action->vision anchoring, vision->action filtering, fusion branch) producing a shared discrete latent space of embodiment-agnostic physical intents
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, scaling, abstract-only
+  AI Review Summary: Human egocentric video와 humanoid action을 "visual consequence"를 공통 anchor로 삼아 **embodiment-agnostic discrete latent space**로 통합하는, tri-branch cross-reconstruction 기반의 통합 physical language tokenizer.
   AI Review: Abstract-based
 
 ------------------------------------------------------------
@@ -1792,6 +2359,40 @@ MODEL: UP-VLA
   Tags: 1.3B, future-prediction, unified-understanding, ICML-2025, open-source
   Eval Conditions: {'calvin': 'fine-tuned'}
   AI Review Summary: Multi-modal understanding과 future prediction 목적함수를 통합하여 VLM의 low-level spatial 정보 캡처 능력을 보강, CALVIN ABC-D에서 33% 향상과 real-world manipulation 개선.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: V-CAGE
+  Organization: TODO: check paper
+  Date: 2026-04-10
+  Paper: https://arxiv.org/abs/2604.09036
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: not applicable (data-generation framework used to train downstream VLAs)
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: scene-generation, agentic, data-synthesis, closed-loop, manipulation, abstract-only
+  AI Review Summary: **foundation-model 기반 agentic 데이터 합성 엔진**. Inpainting-guided scene 구축 + VLM visual critic closed-loop 검증 + 지각 기반 압축(>90%)으로 VLA 학습용 데이터를 **semantically coherent & kinematically reachable** 하게 대량 생산.
+  AI Review: Abstract-based
+
+------------------------------------------------------------
+MODEL: ViVa
+  Organization: TODO: check paper
+  Date: 2026-04-09
+  Paper: https://arxiv.org/abs/2604.08168
+  Code: None
+  Venue: None
+  Open Source: False
+  Architecture:
+    Action Head: video-generative value model (repurposed pretrained video generator jointly predicting future proprioception and scalar value)
+    Backbone: None
+    LLM: None
+    Parameters: TODO
+  Tags: RL, value-function, video-generation, long-horizon, abstract-only
+  AI Review Summary: Pretrained video generator를 value function으로 재활용, 현재 관측과 proprioception으로부터 미래 proprioception과 scalar value를 공동 예측하여 long-horizon 로봇 RL의 value 추정을 개선.
   AI Review: Abstract-based
 
 ------------------------------------------------------------
@@ -1874,5 +2475,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 89 models, 39 with LIBERO scores
+Total: 126 models, 39 with LIBERO scores
 ================================================================================

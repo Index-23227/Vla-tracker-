@@ -1,0 +1,18 @@
+name: ReconVLA
+full_name: "ReconVLA: An Uncertainty-Guided and Failure-Aware Vision-Language-Action Framework for Robotic Control"
+organization: "TODO: check paper"
+date: "2026-04-17"
+paper_url: https://arxiv.org/abs/2604.16677
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "conformal prediction wrapper over pretrained VLA action tokens (training-free)"
+  action_head_category: other
+  parameters: "TODO"
+  key_innovation: "ReconVLA applies conformal prediction directly to the action token outputs of pretrained VLA policies, producing calibrated uncertainty estimates correlated with execution quality without retraining. It further extends conformal prediction to the robot state space to flag outliers or unsafe states before failures occur, providing complementary action-level and state-level failure detection."
+
+benchmarks: {}
+
+tags: [uncertainty, failure-aware, conformal-prediction, reasoning, abstract-only]
