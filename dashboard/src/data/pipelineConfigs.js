@@ -1887,4 +1887,165 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'GRPO with task + jerk hybrid reward', notes: ['LIBERO 80.5% avg', '+13.8% smoothness over standard RL', 'Outperforms SFT generalization', 'Intrinsic reward (no extrinsic env feedback)'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #85  DMW (Drive My Way) — UC Riverside / U Michigan  (autonomous driving VLA)
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DMW': {
+    inputs: [
+      { label: 'Front-view RGB', color: 'b' },
+      { label: 'Natural language instr.', sub: 'short-term style guidance', color: 'b' },
+      { label: 'User embedding', sub: 'long-term preference', color: 'k' },
+    ],
+    stages: [
+      { group: 'SimLingo VLA backbone', sub: 'built on InternVL2-1B', color: 'p', children: [
+        { label: 'InternVL2 vision encoder', color: 'k' },
+        { label: 'InternVL2-1B LLM', sub: '1B', color: 'i' },
+      ]},
+      { group: 'Preference-alignment fine-tuning', sub: 'per-driver policy adaptation', color: 'o', children: [
+        { label: 'LLM-generated reward weights', sub: 'per-style safety/efficiency/comfort', color: 'y' },
+        { label: 'Policy FT with reward shaping', sub: 'AdamW lr=1e-4, wd=1e-3', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous driving control', sub: 'throttle / brake / steer, personalized', color: 'e' },
+    meta: { loss: 'RL-style reward shaping with LLM-generated weights', notes: ['1B params', 'Bench2Drive closed-loop', '25 drivers for preference alignment', 'CVPR 2026, open-source at dmw-cvpr.github.io'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #86  KineVLA — Gaoge Han et al.
+  // ═══════════════════════════════════════════════════════════════════════════
+  'KineVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'Prismatic-7B VLM (OpenVLA base)', sub: '7B', color: 'p', children: [
+        { label: 'SigLIP + DinoV2', sub: 'vision encoders', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language model', color: 'i' },
+      ]},
+      { group: 'Bi-level action tokenization (RVQ-VAE)', sub: 'goal vs kinematics decomposition', color: 'o', children: [
+        { label: 'Goal codebook', sub: 'coarse, goal-invariant intent', color: 'a' },
+        { label: 'Kinematics codebook', sub: 'fine, kinematics-variant execution', color: 't' },
+        { label: 'Mutual-information regularizer', sub: 'disentangle the two levels', color: 'y' },
+      ]},
+      { label: 'Autoregressive action-token decoder', sub: 'bi-level tokens', color: 'r' },
+    ],
+    output: { label: 'Discrete action tokens', sub: 'two-level structure', color: 'e' },
+    meta: { loss: 'CE on bi-level tokens + MI regularizer', notes: ['~7B params', 'Decouples task intent from motor execution', 'OpenVLA-style base'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #87  LLaVA-VLA — HKUST (GZ) / HUST / Westlake
+  // ═══════════════════════════════════════════════════════════════════════════
+  'LLaVA-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'LLaVA-OneVision-0.5B', sub: 'compact VLM', color: 'p', children: [
+        { label: 'LLaVA-OneVision vision tower', color: 'k' },
+        { label: 'Qwen-2 0.5B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Discrete action tokenizer', sub: 'chunk size 5', color: 'o' },
+      { label: 'Autoregressive decoder', sub: 'action tokens', color: 'r' },
+    ],
+    output: { label: 'Action chunks', sub: '5-step discrete tokens', color: 'e' },
+    meta: { loss: 'CE on action tokens', notes: ['0.5B params (ultra-compact)', 'CALVIN 3.68 avg length', 'Action chunking on small VLM'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #88  Motus — Tsinghua / PKU / Horizon Robotics
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Motus': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Mixture-of-Transformers backbone', sub: '~8B total', color: 'p', children: [
+        { label: 'Wan 2.2 VGM', sub: 'video generative model (5.0B)', color: 'y' },
+        { label: 'Qwen3-VL-2B', sub: 'VLM (2.13B)', color: 'i' },
+        { label: 'Understanding module', sub: '253.5M', color: 'c' },
+      ]},
+      { group: 'Action expert', sub: '30-layer transformer, 641.5M', color: 'o', children: [
+        { label: 'Flow-matching objective', sub: 'velocity prediction', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'video-grounded', color: 'e' },
+    meta: { loss: 'Flow matching + video generation', notes: ['~8B total params', 'RoboTwin v2 top-1 (87.8)', 'MoT combines video generation with VLA'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #89  GigaWorld-Policy — GigaAI
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GigaWorld-Policy': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Wan 2.2 Diffusion Transformer', sub: '5B (video-generative backbone)', color: 'p', children: [
+        { label: 'Multi-modal encoder', color: 'k' },
+        { label: 'DiT backbone', sub: 'video generation', color: 'y' },
+      ]},
+      { label: 'Flow-matching action decoder', sub: 'velocity field head', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'world-model-grounded', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['5B params', 'RoboTwin v2 #2 (86.0)', 'Shared video-generation prior'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #90  MMaDA-VLA — (organization TBD from paper)
+  // ═══════════════════════════════════════════════════════════════════════════
+  'MMaDA-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Masked action tokens', color: 'o' },
+    ],
+    stages: [
+      { label: 'Multi-modal encoder', sub: 'unified VL tokens', color: 'p' },
+      { group: 'Discrete-diffusion action decoder', sub: 'masked token denoising', color: 'o', children: [
+        { label: 'Iterative order-free refinement', sub: 'multi-step unmask', color: 'a' },
+        { label: 'Parallel token recovery', sub: 'non-causal', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Discrete action tokens', sub: 'iteratively denoised', color: 'e' },
+    meta: { loss: 'Masked denoising CE over action codebook', notes: ['Discrete diffusion over action tokens', 'Order-free iterative refinement'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #91  UniDex — Tsinghua / Shanghai Qizhi / SYSU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'UniDex': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Point cloud', sub: '3D geometry', color: 'c' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', sub: 'dexterous hand 6-24 DoF', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Multimodal encoding', sub: 'vision + 3D + language', color: 'p', children: [
+        { label: 'Uni3D (ViT)', sub: 'point-cloud encoder (2D ViT init)', color: 'k' },
+        { label: 'PaliGemma-style vision-language', sub: 'RGB + text', color: 'i' },
+      ]},
+      { label: 'FAAS (Function-Actuator-Aligned Space)', sub: '82-dim unified action space across 8 hands', color: 'c' },
+      { group: 'Flow-matching action head', sub: 'conditional flow matching', color: 'o', children: [
+        { label: 'Velocity field prediction', sub: 'Euler integration', color: 'r' },
+        { label: 'Step δ=0.1', sub: '10-step denoising', color: 'a' },
+      ]},
+    ],
+    output: { label: 'Dexterous hand actions', sub: '82-dim FAAS → embodiment-specific', color: 'e' },
+    meta: { loss: 'Conditional flow matching', notes: ['8 dexterous hands supported', '6-24 DoF range', 'FAAS enables cross-hand transfer'] },
+  },
+
 }
