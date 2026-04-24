@@ -112,6 +112,8 @@ Keep the table sorted by LIBERO Avg descending.
 | RLBench     | `rlbench_avg`       | `benchmarks.rlbench` |
 | RoboCasa    | `robocasa_avg`      | `benchmarks.robocasa` |
 
+> **Note on naming**: Model YAMLs use split keys `benchmarks.robotwin_v1` and `benchmarks.robotwin_v2`, while the benchmark definition file lives at `data/benchmarks/robotwin.yaml` (single file covers both versions). This means `leaderboard.benchmarks_available` lists `robotwin` (from the YAML filename), but model score lookups must use the versioned keys. If you add a new RoboTwin-variant score, put it under `robotwin_v1` or `robotwin_v2`, NOT `robotwin`.
+
 ### Average Computation Rules
 - **LIBERO**: `libero_5_suite_avg` → mean of 4 suites → `libero_avg` fallback
 - **CALVIN**: `calvin_abc_d_avg_len` → `calvin_avg` fallback
