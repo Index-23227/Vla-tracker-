@@ -1693,10 +1693,10 @@ export const PIPELINE_CONFIGS = {
       { label: 'Noise ε', color: 'o' },
     ],
     stages: [
-      { group: 'UniT tokenizer (pretrain)', sub: 'tri-branch cross-reconstruction', color: 'c', children: [
+      { group: 'UniT tokenizer (pretrain)', sub: 'tri-branch cross-reconstruction + shared RQ-VAE codebook', color: 'c', children: [
         { label: 'Visual branch E_v', sub: 'frozen DINOv2 → IDM', color: 'k' },
-        { label: 'Action branch E_a', sub: 'kinematics → visual outcome', color: 'g' },
-        { label: 'Fusion branch', sub: 'shared RQ-VAE latent space', color: 't' },
+        { label: 'Action branch E_a', sub: 'state + action chunk', color: 'g' },
+        { label: 'Fusion branch E_m', sub: 'synergizes E_v + E_a features', color: 't' },
       ]},
       { group: 'VLA-UniT (policy)', sub: 'GR00T n1.5 framework + Qwen2.5-VL', color: 'p', children: [
         { label: 'Qwen2.5-VL', sub: 'VL backbone', color: 'i' },
@@ -1745,16 +1745,17 @@ export const PIPELINE_CONFIGS = {
       { label: 'Robot mask M_t', sub: 'from SAM', color: 'g' },
     ],
     stages: [
-      { group: 'Visual encoding', sub: 'fixed-length sliding window', color: 'k', children: [
-        { label: 'DINOv2', sub: 'frozen visual encoder', color: 'k' },
-        { label: 'SAM', sub: 'auxiliary robot-centric masking', color: 'c' },
+      { group: 'Preprocessing + visual encoding', sub: 'fixed-length sliding window', color: 'k', children: [
+        { label: 'SAM', sub: 'robot-centric masking (suppresses bg)', color: 'c' },
+        { label: 'DINOv2', sub: 'frozen encoder → Embeddings + CLS tokens', color: 'k' },
       ]},
-      { label: 'Base regressor h(z_t)', sub: 'per-frame MLP', color: 'p' },
-      { group: 'Spatio-Temporal Refinement', sub: 'anisotropic + motion continuity', color: 'o', children: [
-        { label: 'Directional Feature Aggregation (DFA)', sub: 'anisotropic along arm direction', color: 'a' },
-        { label: 'Temporal Dynamics Refinement (TDR)', sub: 'causal TCN, dilations {1,2,4,8}', color: 't' },
+      { label: 'TDR step 1: Temporal Fusion (pre-DFA)', sub: 'repairs current visual features using adjacent frames', color: 't' },
+      { group: 'Directional Feature Aggregation (DFA)', sub: 'anisotropic spatial aggregation', color: 'o', children: [
+        { label: 'Directional weights from CLS tokens', sub: 'MLP over CLS → axis-aware coefficients', color: 'i' },
+        { label: 'Weighted global average pooling', sub: 'produces direction-aware feature', color: 'a' },
       ]},
-      { label: 'Residual correction + normalization', sub: 'µ_train, σ_train per-dim', color: 'x' },
+      { label: 'TDR step 2: Temporal Regressor (post-DFA)', sub: 'MLP + causal TCN, dilations {1,2,4,8}', color: 't' },
+      { label: 'Residual action prediction', sub: 'denormalize via μ_train, σ_train per-dim', color: 'x' },
     ],
     output: { label: 'Current action a_t', sub: 'dual-arm joint angles + gripper', color: 'e' },
     meta: { loss: 'Supervised IDM regression', loop: 'Single-step; fixed-length causal window', notes: ['AgiBot heavy trunc: acc 0.307, L1 0.493 (best)', 'Real-robot replay avg 47.4%', 'As π0.5 annotator: 35.3% → 52.9%'] },
@@ -1774,7 +1775,7 @@ export const PIPELINE_CONFIGS = {
         { label: 'Smoothing + shrinkage', sub: 'λ_smooth=0.15, shrink=0.55', color: 't' },
         { label: 'Fold compensation into weights', sub: 'zero inference overhead', color: 'x' },
       ]},
-      { group: 'Motion-Driven Mixed-Precision Allocation (DA-MPA)', sub: 'trajectory-level drift optimization', color: 'o', children: [
+      { group: 'Drift-Aware Mixed-Precision Allocation (DA-MPA)', sub: 'trajectory-level drift optimization', color: 'o', children: [
         { label: 'Structural Jacobian profiling', sub: 'Tikhonov damping λ=3e-4', color: 'a' },
         { label: 'Per-dim motion-error scoring', sub: 'w_trans=1.8, w_rot=0.15', color: 'y' },
         { label: 'Top-30% layers → BF16', sub: 'rest 70% → W4', color: 'r' },
