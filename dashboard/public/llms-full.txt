@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-24T08:19:07.850191
+# Generated: 2026-04-24T14:11:19.406618
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -219,6 +219,8 @@ MODEL: DualCoT-VLA
     libero (avg=98.8): libero_spatial=99.4, libero_object=99.8, libero_goal=97.8, libero_long=98.2, libero_avg=98.8
     robocasa (avg=55.1): robocasa_gr1_avg=55.1
   Eval Conditions: {'libero': 'fine-tuned', 'robocasa': 'fine-tuned'}
+  AI Review Summary: 16개의 visual CoT + 4개의 linguistic CoT learnable query token을 VLM 입력에 삽입하고 각각을 Depth Anything 3(기하)와 Qwen3-0.6B(언어)로 distill하여, autoregressive CoT 없이 단일 forward pass로 dual-modal 추론을 수행. LIBERO 98.8%, RoboCasa GR1 55.1%, VLM latency 3156ms → 58.1ms.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: SnapFlow
@@ -237,6 +239,8 @@ MODEL: SnapFlow
   Benchmarks:
     libero (avg=98.75): libero_spatial=99.0, libero_object=100.0, libero_goal=99.0, libero_long=97.0, libero_avg=98.75
   Eval Conditions: {'libero': 'fine-tuned (pi0.5 backbone + SnapFlow self-distillation, 1-NFE inference)'}
+  AI Review Summary: pi0.5(3B)와 SmolVLA(500M) 같은 flow-matching VLA의 10-step Euler denoising을 "FM sample + two-step Euler shortcut consistency sample" progressive mixing과 zero-initialized target-time embedding으로 **1-NFE forward pass**에 압축하는 plug-and-play self-distillation. pi0.5 LIBERO 평균 98.75%(10-step teacher 97.75% 대비
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: DiT4DiT
@@ -277,6 +281,7 @@ MODEL: LaMP
     libero (avg=98.33): libero_spatial=99.4, libero_object=99.8, libero_goal=97.4, libero_long=96.7, libero_avg=98.3
     simpler_env: simpler_widowx_stack=75.0, simpler_widowx_carrot=66.7, simpler_widowx_spoon=79.1, simpler_widowx_eggplant=95.8, simpler_avg=79.2
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'zero-shot'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: MMaDA-VLA
@@ -314,6 +319,8 @@ MODEL: TAG
   Benchmarks:
     libero (avg=97.85): libero_spatial=97.8, libero_object=99.2, libero_goal=97.4, libero_long=97.0, libero_avg=97.9
   Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: Pi0/Pi0.5 위에 "foreground-erased counterfactual observation"을 unconditional branch로 두고 **classifier-free guidance 스타일로 predicted velocity field를 residual extrapolation**하는 inference-time guidance. 학습은 counterfactual calibration(p_cf=0.1) 30K step만 필요하며 LIBERO Avg 97.9%(π0.5 baseline 95.2 대비 **+2.7%p*
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: VLA-IAP
@@ -461,6 +468,8 @@ MODEL: AnchorRefine
     libero (avg=97.4): libero_long=97.4, libero_avg=97.4
     calvin (avg=4.4): calvin_abc_d_avg_len=4.4
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review Summary: 사람의 coarse-to-fine reaching에서 착안해 VLA action 생성을 "trajectory anchor + residual refinement"로 분해하고, gripper를 decision-aware MSE로 별도 보정하여 LIBERO-Long 97.4%, CALVIN ABC→D Avg.Len 4.40을 달성한 backbone-agnostic framework.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: DreamVLA
@@ -523,6 +532,7 @@ MODEL: OFlow
     libero (avg=96.62): libero_spatial=98.0, libero_object=99.0, libero_goal=95.0, libero_long=94.5, libero_avg=96.6
     simpler_env: simpler_widowx_spoon=76.8, simpler_widowx_carrot=62.7, simpler_widowx_eggplant=56.6, simpler_widowx_stack=72.4, simpler_avg=67.1
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'metaworld': 'fine-tuned', 'libero_plus': 'zero-shot'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: AtomicVLA
@@ -561,6 +571,8 @@ MODEL: A1
   Benchmarks:
     libero (avg=96.55): libero_spatial=97.4, libero_object=99.8, libero_goal=97.6, libero_long=91.4, libero_avg=96.6
   Eval Conditions: {'libero': 'fine-tuned'}
+  AI Review Summary: VLM 백본과 flow-matching action head를 "layer별 warm-start denoising + action-consistency 조기 종료"로 동시에 가속화하여, LIBERO 96.6%와 RoboChallenge 29.0%를 유지하면서 에피소드당 latency를 37.8s → 10.5s로 줄인 완전 오픈소스 VLA.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: MemoryVLA
@@ -854,6 +866,7 @@ MODEL: ProbeFlow
     libero (avg=88.7): libero_avg=88.7
     metaworld: metaworld_mt50_avg=83.2
   Eval Conditions: {'libero': 'fine-tuned', 'metaworld': 'fine-tuned'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: SpatialVLA
@@ -936,6 +949,8 @@ MODEL: RoboAlign
     libero (avg=86.75): libero_spatial=93.8, libero_object=96.0, libero_goal=87.2, libero_long=70.0, libero_avg=86.8
     calvin (avg=2.57): calvin_abc_d_1=87.6, calvin_abc_d_2=67.2, calvin_abc_d_3=47.1, calvin_abc_d_4=32.8, calvin_abc_d_5=22.2, calvin_abc_d_avg_len=2.57
   Eval Conditions: {'libero': 'fine-tuned (frozen MLLM backbone, diffusion head trained per benchmark)', 'calvin': 'fine-tuned ABC->D (frozen MLLM backbone, diffusion head trained per benchmark)'}
+  AI Review Summary: Qwen2.5-VL-7B-Instruct를 SFT로 FAST action token 생성 능력에 노출시킨 뒤 GRPO로 reasoning을 action-accuracy reward에 직접 맞추는 2-stage MLLM 학습으로, 이후 frozen MLLM 위에 diffusion head를 붙여 LIBERO Avg 86.8%, CALVIN ABC→D Avg.Len 2.57, real-world +106.6% 상대 이득을 달성한 KAIST/RLWRLD/Yonsei/UC Berkeley의 language-action alignment f
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: CoT-VLA
@@ -1084,6 +1099,7 @@ MODEL: ProgressVLA
     libero (avg=84.5): libero_spatial=88.2, libero_object=96.4, libero_goal=87.2, libero_long=66.2, libero_avg=84.5
     calvin (avg=3.73): calvin_abc_d_1=95.2, calvin_abc_d_2=84.8, calvin_abc_d_3=73.6, calvin_abc_d_4=67.2, calvin_abc_d_5=52.0, calvin_abc_d_avg_len=3.73
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned (ABC->D, single S-RGB input)'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: RoboVLM
@@ -1401,6 +1417,8 @@ MODEL: DIAL
   Benchmarks:
     robocasa (avg=70.2): robocasa_gr1_avg=70.2
   Eval Conditions: {'robocasa': 'fine-tuned'}
+  AI Review Summary: VLM(System-2)이 **자신의 ViT feature space 안에서** H-step 뒤의 visual foresight를 예측하고, flow-matching policy(System-1)가 latent inverse dynamics로 이를 풀어 action을 생성하는 differentiable bottleneck 구조. RoboCasa GR1 Tabletop 24-task 평균 **70.2%** (full data)로 FLARE 55.0%, GR00T-N1.6 47.6% 대비 큰 격차로 SOTA; few-shot(10%) 
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: Diffusion-VLA
@@ -1471,6 +1489,8 @@ MODEL: E-VLA
     Parameters: ~0.5B
   Tags: event-camera, smolvla, low-light, motion-blur, real-world, sensor-fusion
   Eval Conditions: {'real_world': 'fine-tuned'}
+  AI Review Summary: DAVIS346 event camera stream을 SmolVLA 기반 VLA에 파라미터 프리 overlay 또는 13M hierarchical event adapter로 주입하여, 20 lux 저조도에서 Pick-Place 성공률 0% → 90%, 1000ms motion blur에서 0% → 25%까지 robustness를 회복한 event-augmented VLA.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: FALCON
@@ -1675,6 +1695,7 @@ MODEL: HELM
     libero: libero_long=81.5
     calvin (avg=3.58): calvin_abc_d_avg_len=3.58
   Eval Conditions: {'libero': 'wrapper-on-frozen-vla', 'calvin': 'wrapper-on-frozen-vla'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: HEX
@@ -1729,6 +1750,7 @@ MODEL: HiVLA
   Benchmarks:
     robotwin_v2 (avg=83.3): robotwin_v2_avg=83.3
   Eval Conditions: {'robotwin_v2': 'fine-tuned'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: Humanoid-VLA
@@ -1762,6 +1784,7 @@ MODEL: HY-Embodied-0.5
     Parameters: 2B / 32B
   Tags: tencent, mixture-of-transformers, foundation-model, flow-matching, real-world, open-source
   Eval Conditions: {'real_world': 'fine-tuned'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: InternVLA-A1
@@ -1962,6 +1985,7 @@ MODEL: ProGAL-VLA
     Parameters: ~7B (per-step controller; planner adds 7B but is invoked once per episode)
   Tags: grounding, hierarchical, dual-system, contrastive, ambiguity-detection, openvla, libero_plus
   Eval Conditions: {'libero_plus': 'fine-tuned'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: ReFineVLA
