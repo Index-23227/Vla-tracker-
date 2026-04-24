@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-24T02:09:45.363659
+# Generated: 2026-04-24T02:18:55.940231
 # Models: 120
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -1216,6 +1216,22 @@ MODEL: DiT4DiT
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: DMW
+  Organization: University of California, Riverside / University of Michigan
+  Date: 2026-03-26
+  Paper: https://arxiv.org/abs/2603.25740
+  Code: https://dmw-cvpr.github.io/
+  Venue: CVPR 2026
+  Open Source: True
+  Architecture:
+    Action Head: Preference-aligned policy fine-tuning with RL-style reward shaping. Personalized user embedding conditions the policy; natural-language instructions provide short-term style guidance. Outputs continuous control (throttle / brake / steer) for autonomous driving.
+    Backbone: SimLingo VLA backbone (built on InternVL2-1B)
+    LLM: InternVL2-1B
+    Parameters: 1B
+  Tags: autonomous-driving, personalization, preference-alignment, natural-language-instruction, RL, CVPR-2026, Bench2Drive
+  Eval Conditions: {'real_world': "Bench2Drive closed-loop (not in VLA-Tracker's standard benchmark set)"}
+
+------------------------------------------------------------
 MODEL: DualCoT-VLA
   Organization: TODO: check paper
   Date: 2026-03-23
@@ -1778,22 +1794,6 @@ MODEL: NaVILA
   Tags: 8B, navigation, hierarchical, legged-robot, open-source
   AI Review Summary: VLA와 locomotion skill을 2-level 계층 구조로 통합하여, 다리 로봇에서의 vision-language navigation을 실현. Mid-level spatial language instruction을 생성하여 visual locomotion policy를 구동.
   AI Review: Abstract-based
-
-------------------------------------------------------------
-MODEL: TODO_MODEL_NAME
-  Organization: TODO: check paper
-  Date: 2026-03-26
-  Paper: https://arxiv.org/abs/2603.25740
-  Code: None
-  Venue: CVPR 2026
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: CVPR-2026
-  Eval Conditions: {'TODO': 'check paper'}
 
 ------------------------------------------------------------
 MODEL: NORA

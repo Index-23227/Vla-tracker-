@@ -1,0 +1,27 @@
+name: DMW
+full_name: "Drive My Way: Preference Alignment of Vision-Language-Action Model for Personalized Driving"
+organization: "University of California, Riverside / University of Michigan"
+date: "2026-03-26"
+paper_url: https://arxiv.org/abs/2603.25740
+code_url: "https://dmw-cvpr.github.io/"
+venue: "CVPR 2026"
+open_source: true
+
+architecture:
+  backbone: "SimLingo VLA backbone (built on InternVL2-1B)"
+  llm: "InternVL2-1B"
+  action_head: "Preference-aligned policy fine-tuning with RL-style reward shaping. Personalized user embedding conditions the policy; natural-language instructions provide short-term style guidance. Outputs continuous control (throttle / brake / steer) for autonomous driving."
+  action_head_category: other
+  parameters: "1B"
+  key_innovation: "DMW is a personalized autonomous-driving VLA that aligns behavior with long-term user habits while allowing short-term natural-language instructions to modulate style. A user embedding is learned from a multi-driver dataset and conditions the policy, while style-aware reward weights (LLM-generated) fine-tune SimLingo for each preference regime. On Bench2Drive closed-loop (Table 1), DMW improves on SimLingo baseline for both aggressive and conservative instructions while maintaining safety."
+
+training:
+  dataset: "Authors' personalized driving dataset across multiple real drivers + Bench2Drive closed-loop scenarios; 25 drivers for preference alignment"
+  method: "Pretrained SimLingo backbone + preference-aware policy fine-tuning with LLM-generated reward weights; AdamW lr=1e-4, weight decay 1e-3"
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "Bench2Drive closed-loop (not in VLA-Tracker's standard benchmark set)"
+
+tags: [autonomous-driving, personalization, preference-alignment, natural-language-instruction, RL, CVPR-2026, Bench2Drive]

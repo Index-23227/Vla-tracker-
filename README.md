@@ -45,16 +45,18 @@ VLA-Tracker solves this by:
 |------|-------|-----|------|-------|-------------|
 | 1 | **PLD** | **99.0** | Oct 2025 | ICLR 2026 | Residual RL |
 | 2 | **SimpleVLA-RL** | **98.8** | Sep 2025 | ICLR 2026 | AR + GRPO RL |
-| 3 | **X-VLA** | **97.8** | Oct 2025 | ICLR 2026 | Flow matching + soft prompts |
-| 4 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
-| 5 | VLA-Thinker | 97.5 | Mar 2026 | — | AR + visual CoT + RL |
-| 6 | DreamVLA | 97.2 | Jul 2025 | — | Inverse dynamics |
-| 7 | DeepThinkVLA | 97.1 | Nov 2025 | ICLR 2026 | Hybrid attention |
-| 8 | AtomicVLA | 96.6 | Mar 2026 | CVPR 2026 | Flow + SG-MoE |
-| 9 | MemoryVLA | 96.5 | Aug 2025 | ICLR 2026 | Diffusion transformer |
-| 10 | dVLA | 96.4 | Sep 2025 | ICLR 2026 | Discrete diffusion |
+| 3 | **VLA-IAP** | **97.8** | Mar 2026 | — | Flow matching + IAP |
+| 4 | **X-VLA** | **97.8** | Oct 2025 | ICLR 2026 | Flow matching + soft prompts |
+| 5 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
+| 6 | OmniVLA-RL | 97.6 | Apr 2026 | — | Flow matching + Flow-GSPO RL |
+| 7 | VLA-Thinker | 97.5 | Mar 2026 | — | AR + visual CoT + RL |
+| 8 | DreamVLA | 97.2 | Jul 2025 | — | Inverse dynamics |
+| 9 | DeepThinkVLA | 97.1 | Nov 2025 | ICLR 2026 | Hybrid attention |
+| 10 | AtomicVLA | 96.6 | Mar 2026 | CVPR 2026 | Flow + SG-MoE |
+| 11 | MemoryVLA | 96.5 | Aug 2025 | ICLR 2026 | Diffusion transformer |
+| 12 | dVLA | 96.4 | Sep 2025 | ICLR 2026 | Discrete diffusion |
 
-> Full leaderboard with 36 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 40 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
