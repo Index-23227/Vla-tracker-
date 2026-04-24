@@ -1587,4 +1587,202 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'Flow matching + reasoning', notes: ['2B–8B params', 'Vlaser-6M dataset'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #74  OmniVLA-RL — Country Garden / Omni AI / VBot / ECNU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'OmniVLA-RL': {
+    inputs: [
+      { label: 'Multi-view RGB', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Encoders', sub: 'tri-modal', color: 'k', children: [
+        { label: 'SigLIP', sub: 'semantic vision', color: 'k' },
+        { label: 'VGGT', sub: '3D spatial encoder', color: 'c' },
+        { label: 'Text encoder', sub: 'instructions', color: 'b' },
+      ]},
+      { group: 'Mix-of-Transformers (MoT) backbone', sub: 'PaLiGemma VLM init, 3 experts share layers', color: 'p', children: [
+        { label: 'Reasoning expert', sub: 'semantics + language', color: 'i' },
+        { label: 'Spatial expert', sub: '3D geometry', color: 'c' },
+        { label: 'Action expert', sub: 'flow matching head', color: 'r' },
+      ]},
+      { label: 'Block-wise Causal Attention', sub: 'omni-visible prefix + causal action suffix', color: 'x' },
+      { group: 'Flow-GSPO online RL', sub: 'SDE reformulation + Group Segmented PO', color: 'a', children: [
+        { label: 'Conditional Flow Matching', sub: 'H=16, K=10 denoising', color: 'r' },
+        { label: 'SDE sampling', sub: 'Fokker–Planck', color: 'y' },
+        { label: 'GSPO update', sub: 'G=8, ε=0.2, β=0.01', color: 'a' },
+      ]},
+    ],
+    output: { label: 'Continuous action chunks', sub: 'spatially grounded, RL-refined', color: 'e' },
+    meta: { loss: 'CFM + Flow-GSPO', loop: '10 denoising / 200 RL steps', notes: ['LIBERO avg 97.6%', 'LIBERO-Plus 80.3% (+39.1pp over SFT)', 'No real-world eval'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #75  HEX — BICHR / XJTU / Nankai / PKU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'HEX': {
+    inputs: [
+      { label: 'Multi-view RGB', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Humanoid proprio', sub: 'upper+lower body, IMU, tactile', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Qwen3-VL-2B-Instruct', sub: 'VLM backbone, 2B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Qwen3-VL', color: 'k' },
+        { label: 'Qwen3 LLM', sub: '2B language', color: 'i' },
+        { label: 'History query tokens', sub: 'lightweight temporal cache', color: 'c' },
+      ]},
+      { group: 'Unified Proprioceptive Predictor (UPP)', sub: '4-layer, hidden 768, morphology-aware MoE', color: 'o', children: [
+        { label: 'Humanoid-aligned state repr.', sub: 'body-part encoders', color: 'g' },
+        { label: 'MoE: 16 routed + 2 shared', sub: 'top-1 softmax, LB=0.01', color: 'a' },
+        { label: 'Future state predictor', sub: '50-step proprio horizon', color: 't' },
+      ]},
+      { label: 'Residual-gated fusion', sub: 'blends VL features + predicted future states', color: 'x' },
+      { group: 'DiT-B flow-matching action head', sub: '16-layer, hidden 1024, 100-step chunks', color: 'r', children: [
+        { label: 'Flow-matching objective', sub: 'velocity field V_θ', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Whole-body action chunks', sub: '100-step, cross-embodiment', color: 'e' },
+    meta: { loss: 'L_action + α·L_state (flow + proprio pred)', loop: 'Real-time @ 73.34ms on RTX 4090 (≈13.6 Hz)', notes: ['2.4B params', 'Seen-scenario avg 79.8%', 'Generalization avg 61.8%', '~1K A100 GPU hrs'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #76  Goal2Skill — BUPT / InspireOmni AI / Tsinghua
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Goal2Skill': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Long-horizon goal G', color: 'b' },
+      { label: 'Proprio s_t', sub: '14-dim', color: 'g' },
+    ],
+    stages: [
+      { group: 'High-level VLM planner', sub: 'agentic (VLM identity not disclosed)', color: 'p', children: [
+        { label: 'Φ_plan', sub: 'goal decomposition', color: 'i' },
+        { label: 'Φ_verify', sub: 'VLM outcome check', color: 'c' },
+        { label: 'Φ_reflect', sub: 'failure diagnosis + replan', color: 'y' },
+        { label: 'Φ_mem', sub: 'memory updater', color: 'a' },
+      ]},
+      { group: 'Structured task memory M_t', sub: 'natural-language', color: 't', children: [
+        { label: 'Episodic H_t', sub: 'sliding-window summaries', color: 't' },
+        { label: 'Working W_t', sub: 'current state summary', color: 't' },
+        { label: 'Error register E_t', sub: 'diagnosed failures', color: 'r' },
+      ]},
+      { label: 'Geometry-preserving filter', sub: 'Î_t = I_t ⊙ (1−Q_t), zero-shot mask + temporal update', color: 'x' },
+      { group: 'Low-level skill library', sub: 'discrete diffusion primitives {π_1..π_J}', color: 'r', children: [
+        { label: 'Skill selector j_k', sub: 'chosen by planner', color: 'a' },
+        { label: 'Reverse diffusion (Eq.19)', sub: 'µ_θ + σ_m·ε, conditioned on Î, s, ℓ', color: 'r' },
+        { label: 'Receding-horizon chunks', sub: 'with VLM checkpoint verify', color: 'x' },
+      ]},
+    ],
+    output: { label: 'Continuous action chunks', sub: 'sub-task level, memory-aware', color: 'e' },
+    meta: { loss: 'Per-skill diffusion (50 demos/task, 30k steps)', loop: 'Closed-loop plan → exec → verify → (retry | replan)', notes: ['RMBench total 32.4% (vs 9.8% best baseline)', 'M(n) avg 38.7% vs 9.0%', 'VLM / executor identities NOT disclosed'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #77  UniT — XPeng / Tsinghua / HKU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'UniT': {
+    inputs: [
+      { label: 'Egocentric human video', color: 'b' },
+      { label: 'Humanoid robot RGB', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'State + action (human/robot)', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'UniT tokenizer (pretrain)', sub: 'tri-branch cross-reconstruction', color: 'c', children: [
+        { label: 'Visual branch E_v', sub: 'frozen DINOv2 → IDM', color: 'k' },
+        { label: 'Action branch E_a', sub: 'kinematics → visual outcome', color: 'g' },
+        { label: 'Fusion branch', sub: 'shared RQ-VAE latent space', color: 't' },
+      ]},
+      { group: 'VLA-UniT (policy)', sub: 'GR00T n1.5 framework + Qwen2.5-VL', color: 'p', children: [
+        { label: 'Qwen2.5-VL', sub: 'VL backbone', color: 'i' },
+        { label: 'Learnable UniT queries', sub: 'parallel CE classification (Eq.4)', color: 'a' },
+        { label: 'Flow-matching velocity head V_θ', sub: 'continuous actions (Eq.5)', color: 'r' },
+      ]},
+      { group: 'WM-UniT (world model, optional)', sub: 'Cosmos Predict 2.5', color: 'y', children: [
+        { label: 'UniT action features z_a', sub: 'control interface', color: 'g' },
+        { label: 'Video generation head', sub: 'flow matching on latent frames', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Continuous actions + future frames', sub: 'embodiment-agnostic', color: 'e' },
+    meta: { loss: 'L_VLA = L_token (CE) + λ_fm·L_fm (flow)', loop: 'WM-UniT autoregressive rollout', notes: ['RoboCasa GR1 overall 66.7% (vs FLARE 55.0)', 'IRON real-world 78% / 75% (vs GR00T 30% / 5%)', '10% data UniT ≈ full-data GR00T baseline'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #78  AnySlot — Stony Brook / CMU / MBZUAI / PKU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'AnySlot': {
+    inputs: [
+      { label: 'Multi-view RGB I^{1:m}', color: 'b' },
+      { label: 'Compositional language instr.', color: 'b' },
+      { label: 'Robot state q_t', color: 'g' },
+    ],
+    stages: [
+      { group: 'High-level: Scene-marker grounding', sub: 'Nano-Banana 2 (11s latency on H200)', color: 'y', children: [
+        { label: 'Guidance image Ĩ', sub: 'blue sphere overlay at target slot', color: 'a' },
+        { label: 'Marker center (u,v)', sub: 'pixel-aligned goal', color: 'y' },
+      ]},
+      { group: 'Low-level: π0.5 VLA (fully fine-tuned)', sub: 'PaliGemma-3B + flow-matching action expert', color: 'p', children: [
+        { label: 'PaliGemma-3B', sub: 'VL backbone', color: 'i' },
+        { label: 'Goal-conditioned prefix', sub: 'Ĩ injected into context', color: 'c' },
+        { label: 'Flow-matching action expert', sub: 'continuous denoising', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Precise slot placement actions', sub: 'sub-centimeter accuracy', color: 'e' },
+    meta: { loss: 'Flow matching fine-tune (D_syn, 20k steps, H200 bs=64)', notes: ['3B params', 'SlotBench avg SR 89.6% / IA 92.7%', 'Flat π0.5 scores 18% on Ord only, 0% elsewhere', 'Oracle ~96.7% → bottleneck is high-level grounding'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #79  StableIDM — GigaAI / CASIA / BIT
+  // ═══════════════════════════════════════════════════════════════════════════
+  'StableIDM': {
+    inputs: [
+      { label: 'RGB frames I_{t-K:t}', sub: 'causal history window', color: 'b' },
+      { label: 'Robot mask M_t', sub: 'from SAM', color: 'g' },
+    ],
+    stages: [
+      { group: 'Visual encoding', sub: 'fixed-length sliding window', color: 'k', children: [
+        { label: 'DINOv2', sub: 'frozen visual encoder', color: 'k' },
+        { label: 'SAM', sub: 'auxiliary robot-centric masking', color: 'c' },
+      ]},
+      { label: 'Base regressor h(z_t)', sub: 'per-frame MLP', color: 'p' },
+      { group: 'Spatio-Temporal Refinement', sub: 'anisotropic + motion continuity', color: 'o', children: [
+        { label: 'Directional Feature Aggregation (DFA)', sub: 'anisotropic along arm direction', color: 'a' },
+        { label: 'Temporal Dynamics Refinement (TDR)', sub: 'causal TCN, dilations {1,2,4,8}', color: 't' },
+      ]},
+      { label: 'Residual correction + normalization', sub: 'µ_train, σ_train per-dim', color: 'x' },
+    ],
+    output: { label: 'Current action a_t', sub: 'dual-arm joint angles + gripper', color: 'e' },
+    meta: { loss: 'Supervised IDM regression', loop: 'Single-step; fixed-length causal window', notes: ['AgiBot heavy trunc: acc 0.307, L1 0.493 (best)', 'Real-robot replay avg 47.4%', 'As π0.5 annotator: 35.3% → 52.9%'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #80  DA-PTQ — Tongji / UTS
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DA-PTQ': {
+    inputs: [
+      { label: 'Pretrained CogACT (FP)', sub: 'base VLA', color: 'p' },
+      { label: 'Calibration: 512 trajs', sub: 'BridgeData V2, 6 spatial bins', color: 'b' },
+    ],
+    stages: [
+      { group: 'Cross-Space Representation Compensation (CSRC)', sub: 'orthogonalize VL↔action interface', color: 'c', children: [
+        { label: 'Block-wise SVD rotation', sub: 'block size 16×16', color: 'c' },
+        { label: 'Smoothing + shrinkage', sub: 'λ_smooth=0.15, shrink=0.55', color: 't' },
+        { label: 'Fold compensation into weights', sub: 'zero inference overhead', color: 'x' },
+      ]},
+      { group: 'Motion-Driven Mixed-Precision Allocation (DA-MPA)', sub: 'trajectory-level drift optimization', color: 'o', children: [
+        { label: 'Structural Jacobian profiling', sub: 'Tikhonov damping λ=3e-4', color: 'a' },
+        { label: 'Per-dim motion-error scoring', sub: 'w_trans=1.8, w_rot=0.15', color: 'y' },
+        { label: 'Top-30% layers → BF16', sub: 'rest 70% → W4', color: 'r' },
+      ]},
+      { label: 'Final 2 DiT blocks preserved', sub: 'proximity to continuous output', color: 'x' },
+    ],
+    output: { label: 'Quantized CogACT (W4A8)', sub: '7-DoF diffusion actions, drift-stabilized', color: 'e' },
+    meta: { loss: 'Training-free PTQ (calibration only)', notes: ['42.5% memory reduction', '54.8% inference speedup', 'WidowX VM 48.9 (vs FP 51.3)', 'Google VM 68.5 (vs FP 74.8)', 'Google VA 51.7 (vs FP 61.3)'] },
+  },
+
 }
