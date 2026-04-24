@@ -66,7 +66,7 @@ VLA-Tracker solves this by:
 | **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.1) |
 | **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
 | **RoboTwin v2** (avg) | Motus (87.8) | GigaWorld-Policy (86.0) | X-VLA (72.5) |
-| **RoboCasa** (avg) | FLARE (70.1) | DiT4DiT (50.8) | — |
+| **RoboCasa** (avg) | UniT (66.0) | GR00T-N1.5 (64.1) | TwinBrainVLA (54.6) |
 
 ---
 
