@@ -81,6 +81,19 @@ def main():
                 lines.append(f"  {i:2d}. {m['name']:25s} avg={m[key]:5.1f}")
             lines.append("")
 
+    # RoboCasa / RLBench rankings (previously missing)
+    for bench in ["robocasa", "rlbench"]:
+        key = f"{bench}_avg"
+        ranked = sorted([m for m in models if m.get(key)],
+                        key=lambda x: x[key], reverse=True)
+        if ranked:
+            lines.append(f"## {bench.replace('_',' ').title()} Rankings")
+            lines.append("")
+            for i, m in enumerate(ranked, 1):
+                lines.append(f"  {i:2d}. {m['name']:25s} avg={m[key]:5.1f}  "
+                              f"org={m.get('organization', '?')}")
+            lines.append("")
+
     lines.append("=" * 80)
     lines.append("SECTION 2: MODEL DETAILS")
     lines.append("=" * 80)
