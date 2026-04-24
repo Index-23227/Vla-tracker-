@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-24T01:57:32.881894
+# Generated: 2026-04-24T02:09:45.363659
 # Models: 120
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -2281,7 +2281,7 @@ MODEL: UniT
     Backbone: frozen DINOv2 (visual branch acts as inverse-dynamics model anchor)
     LLM: Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)
     Parameters: TODO
-  Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching, autoregressive
+  Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching
   Benchmarks:
     robocasa (avg=66.0): robocasa_gr1_pick_place=67.3, robocasa_gr1_articulated=64.7
   Eval Conditions: {'robocasa': 'Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)'}
