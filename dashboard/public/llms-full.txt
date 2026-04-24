@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-24T01:42:29.178082
+# Generated: 2026-04-24T01:57:32.881894
 # Models: 120
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -1124,7 +1124,7 @@ MODEL: DA-PTQ
   Benchmarks:
     simpler_env: widowx_vm_put_spoon=65.2, widowx_vm_put_carrot=52.2, widowx_vm_stack_blocks=17.4, widowx_vm_put_eggplant=60.9, google_vm_pick_coke=92.4, google_vm_move_near=87.9, google_vm_open_close_drawer=58.3, google_vm_drawer_apple=35.2, google_va_pick_coke=87.5, google_va_move_near=74.5, google_va_open_close_drawer=20.1, google_va_drawer_apple=24.7
   Eval Conditions: {'simpler_env': 'W4A8 quantized CogACT (drift-aware PTQ), zero-shot; 42.5% memory reduction, 54.8% speedup vs CogACT FP. WidowX-VM avg=48.9, Google-VM avg=68.5, Google-VA avg=51.7'}
-  AI Review Summary: 순차 제어 환경에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ 문제를, **Cross-Space Representation Compensation + Motion-Driven Mixed-Precision** 두 축으로 해결하는 **drift-aware PTQ** 프레임워크.
+  AI Review Summary: 순차 제어에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ를, **Cross-Space Representation Compensation (CSRC) + Drift-Aware Mixed-Precision Allocation (DA-MPA)** 두 축으로 해결. CogACT W4A8에서 42.5% 메모리 감소 + 54.8% 속도 향상을 달성하면서 FP 대비 성능 손실을 최소화.
   AI Review: PDF-verified
 
 ------------------------------------------------------------

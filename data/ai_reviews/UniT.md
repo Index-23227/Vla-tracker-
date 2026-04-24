@@ -23,18 +23,68 @@
 2. **Vision → Action** 분기: vision이 action을 reconstruct하게 하여 무관한 시각 confounder를 필터링.
 3. **Fusion** 분기: 정제된 두 modality를 결합해 shared discrete latent space를 형성.
 
-### Downstream: VLA-UniT (policy) / WM-UniT (world model)
-- 공유 discrete latent token을 **autoregressive token prediction** 방식으로 예측하여 policy/world-model을 학습 (diffusion 기반 아님 — abstract는 "predicting these unified tokens"로만 기술).
-- Token 예측 패러다임이라 LLM-style scaling과 자연스럽게 호환.
+### Downstream: VLA-UniT (policy) / WM-UniT (world model) — **Hybrid action head**
+
+PDF Sec 3.3 확인: Policy는 **2단계 hybrid** 구조.
+
+1. **UniT Token Prediction (Eq. 4, parallel CE)**: VLM 시퀀스에 learnable queries q_t 추가, VLM이 unified discrete UniT 토큰을 **병렬 분류** (causal AR 아님).
+   ```
+   p̂_t = f_VLM(o_t, ℓ, q_t),   L_token = CE(p̂_t, c_t)
+   ```
+2. **Flow-Matching Action Generation (Eq. 5)**: 연속 embodiment-specific action을 flow matching velocity head V_θ로 생성.
+   ```
+   L_fm = E[ ||V_θ(A^τ_t | x_t, Enc(o_t), τ) − (A_t − ε)||² ]
+   ```
+
+총 loss: `L_VLA = L_token + λ_fm · L_fm`
+
+WM-UniT: Cosmos Predict 2.5 기반, UniT action-branch features z_a를 control interface로 사용.
+
+### Backbone 구성
+
+- Visual: **frozen DINOv2** (E_v branch, IDM 역할)
+- VLM: **Qwen2.5-VL** (GR00T n1.5 framework 내)
+- Tokenizer: RQ-VAE shared codebook across 3 branches (E_v / E_a / E_m)
 
 ---
 
 ## 3. 실험 결과
 
-> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.
+### RoboCasa GR1 Tabletop 시뮬 (Fig. 9, full-data 24×1000 trajs)
 
-- XPeng Robotics 프로젝트 페이지 기반으로 humanoid scaling 목적.
-- Cross-embodiment token의 downstream humanoid policy 효과성을 주장 (구체 수치 paper 참조).
+| 방법 | Pick & Place | Articulated | **Overall** |
+|------|-------------:|------------:|------------:|
+| Diffusion Policy | 40.4 | 35.0 | 40.9 |
+| GR00T N1.6 | 47.0 | 42.3 | 47.6 |
+| GR00T (Qwen3-VL) | 50.4 | 50.1 | 47.8 |
+| FAST (Qwen3-VL) | 51.3 | 50.3 | 48.8 |
+| OFT (Qwen3-VL) | 44.4 | 43.7 | 43.9 |
+| FLARE | 58.2 / 55.4 | 38.4 | 55.0 |
+| **VLA-UniT (Qwen2.5-VL)** | **67.3** | **64.7** | **66.7** |
+
+- 이전 최강 FLARE 대비 +11.7pp, GR00T baseline 대비 +18.9pp.
+
+### 데이터 효율성 (Fig. 10 Left)
+
+| 설정 | GR00T-Qwen2.5 | **VLA-UniT** |
+|------|--------------:|-------------:|
+| 24×100 trajs (10% 데이터) | 21.3% | **45.5%** |
+| 24×1000 trajs (full) | 47.8% | **66.7%** |
+
+**⟹ UniT는 10% 데이터로 GR00T full-data (47.8%)와 유사** → **~10배 sample efficiency**.
+
+### IRON-R01-1.11 실물 휴머노이드 (Fig. 11)
+
+| Task | GR00T | UniT w/o human | **UniT w/ human** |
+|------|------:|---------------:|------------------:|
+| Pick & Place | 30 | 70 | **78** |
+| Pouring | 5 | 35 | **75** |
+
+- Pouring: human 데이터 co-train 추가 시 **75%** (baseline 5% → +70pp).
+
+### OOD 일반화 (Fig. 11 Right, IRON)
+
+5개 카테고리 (Background / Target / Distractor / Geometric / Combinatorial) 모두에서 human co-train 효과 확인.
 
 ---
 
@@ -62,7 +112,7 @@
 | # | 질문 | 핵심 답변 요점 |
 |---|------|---------------|
 | 1 | LAPA와 차별점은? | Tri-branch 구조와 visual anchoring 철학, discrete token의 physical intent로서의 정의 |
-| 2 | 왜 discrete latent인가 (continuous 대비)? | World model과의 joint token prediction, LLM-style scaling 친화성 |
+| 2 | 왜 discrete latent인가 (continuous 대비)? | Shared RQ-VAE codebook이 human/humanoid/LLM token prediction 모두와 자연스럽게 호환; VLM의 CE loss 목적함수와 일치. |
 | 3 | Vision이 action을 복원하는 분기의 필요성? | Action이 vision을 예측만 하면 spurious correlation 학습 → reverse branch가 regularizer 역할 |
 | 4 | Kinematic mismatch가 크면 visual anchor도 달라지지 않나? | 사용 도구·객체의 상태 변화 등 결과 수준에서는 공유됨 (핵심 가정) |
 

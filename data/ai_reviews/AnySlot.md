@@ -30,10 +30,46 @@
 
 ## 3. 실험 결과
 
-> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.
+### 구현 세부
 
-- Flat (monolithic) VLA baseline 및 이전 modular grounding 방법 대비 **zero-shot slot-level placement에서 유의미한 개선**.
-- SlotBench 9개 category 전반에서 우위를 주장.
+- High-level: **Nano-Banana 2** image generator가 guidance image Ĩ (blue sphere overlay) 생성, 11s 지연.
+- Low-level: **π0.5** VLA (PaliGemma-3B + flow-matching action expert), **fully fine-tuned**.
+  - PEFT 변형은 평균 SR ~7%로 무너짐 → full fine-tuning이 필수.
+- Training: D_syn (SAPIEN synthetic, oracle markers) + 500 real episodes 보조
+- 20,000 steps, batch 64, **single H200 GPU**
+- 평가: zero-shot SlotBench, 50 trials/task
+
+### SlotBench Table 1 — SR/IA (%) 전체
+
+| 방법 | Ord | Size | Hgt | Dist | Comp | Neg | Vague | Aff | World |
+|------|----:|-----:|----:|-----:|-----:|----:|------:|----:|------:|
+| Diffusion Policy (flat) | 16/– | 0/– | 0/– | 0/– | 0/– | 0/– | 0/– | 0/– | 0/– |
+| OpenVLA-OFT | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| π0 (flat) | 12 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| π0.5 (flat) | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| AnyPlace (modular) | 12/12 | 42/42 | 0 | 38/38 | 0 | 0 | 16/16 | 0 | 0 |
+| **AnySlot (Ours)** | **92/96** | **80/82** | **76/84** | **96/98** | **88/90** | **100/100** | **88/94** | **96/96** | **90/94** |
+| AnySlot (Oracle human) | 98/100 | 96/100 | 82/100 | 100/100 | 98/100 | 100/100 | 100/100 | 100/100 | 98/100 |
+
+- **평균 SR 89.6%, IA 92.7%**
+- Flat VLA는 Ordinal을 제외하면 모두 0% → monolithic policy는 compositional 언어 지시에 **완전 실패**
+- AnyPlace(modular) 대비에서도 전 카테고리 대폭 개선
+- **Oracle ~96.7% SR** → 남은 gap (~7pp)은 low-level 실행이 아니라 **high-level grounding**의 한계
+
+### Grounding 모듈 ablation (Table 2, latency 포함)
+
+VLM 기반 coordinate grounding (GPT-5.2, Gemini-3.1 등)은 spatial fidelity가 부족하고 latency 25-133s. Image generator 기반 (Nano-Banana 2)이 11s로 가장 빠르고 정확.
+
+### Low-level ablation (Table 3, oracle guidance)
+
+| Method | 평균 SR |
+|--------|--------:|
+| AnySlot-Diffusion Policy | partial (viewpoint-sensitive) |
+| AnySlot-OpenVLA-OFT | 0 |
+| AnySlot-π0.5 (PEFT) | ~7 |
+| **AnySlot-π0.5 (Full FT)** | **~97** |
+
+→ **Full fine-tuning of π0.5** 이 반드시 필요; PEFT/OFT로는 sub-cm 정밀도 불가능.
 
 ---
 

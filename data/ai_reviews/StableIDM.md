@@ -14,30 +14,68 @@
 
 ## 2. 방법론
 
-### 2.1 Auxiliary robot-centric masking
-- 배경 잡음을 억제하는 보조 마스킹. "어디에 로봇이 있는가/있었는가"에 특징을 집중.
-- Masking을 보조 loss/입력으로 사용해 feature가 robot 주변 영역에 민감해지도록 유도.
+### 2.1 Robot-centric masking (SAM preprocessing)
+- **Segment Anything**이 로봇 영역을 분할 → 배경 잡음을 마스킹으로 억제, encoder가 robot-centric 영역에 집중하도록.
+- 마스킹은 보조 입력 + loss 형태로 전달.
 
-### 2.2 Directional Feature Aggregation (DFA)
-- **Geometry-aware spatial reasoning** 모듈.
-- 보이는 팔의 방향을 추정하고, 그 방향을 따라 **anisotropic feature** 를 집계 → 잘린 부분의 위치를 방향 단서로 외삽.
+### 2.2 DFA — Directional Feature Aggregation
+- **DINOv2**가 Embeddings + CLS tokens 산출.
+- **CLS tokens → MLP**로 *axis-dependent directional weights* 유도.
+- 이 방향 가중치를 feature embeddings에 적용 후 **weighted global average pooling** → direction-aware feature descriptor.
+- 핵심: truncation된 팔의 정보는 본질적으로 *방향성*을 가지므로, anisotropic aggregation이 누락 영역의 구조적 정보를 추론 가능.
 
-### 2.3 Temporal Dynamics Refinement (TDR)
-- **motion continuity** 를 이용해 시간적으로 smooth/correct.
-- 순간적 truncation으로 인한 스파이크형 오차를 trajectory 수준에서 교정.
+### 2.3 TDR — **Two-step** Temporal Dynamics Refinement (매우 중요)
+
+논문(Sec 3)은 TDR이 DFA의 **앞뒤**를 감싸는 two-step stack임을 명시:
+
+1. **Temporal Fusion (DFA 이전)**: 인접 프레임들을 사용해 현재 프레임의 시각 feature를 복원.
+2. **Temporal Regressor (DFA 이후)**: MLP + **causal TCN** (dilation factors 1, 2, 4, 8)로 최종 action을 안정화, spike 제거.
+
+따라서 파이프라인은 `SAM mask → DINOv2 → TDR step 1 → DFA → TDR step 2 → action` 순서.
 
 ---
 
 ## 3. 실험 결과
 
-> Abstract에서 직접 인용 (PDF 미검증).
+### Table 1 — AgiBot offline (truncation split @ 15%)
 
-- **AgiBot benchmark (severe truncation)**: strict action accuracy **+12.1%** 향상
-- **Real-robot replay**: 평균 task success **+9.7%**
-- **Video-generated plan decoding**: end-to-end grasp success **+11.5%**
-- **Data annotator로 사용 시**: downstream VLA real-robot success **+17.6%**
+| 방법 | Light acc↑ | Light L1↓ | **Heavy acc↑** | **Heavy L1↓** |
+|------|-----------:|----------:|--------------:|-------------:|
+| ResNet | 0.179 | 0.189 | 0.150 | 0.679 |
+| AnyPos | 0.148 | 0.172 | 0.159 | 0.538 |
+| Vidar | 0.194 | 0.163 | 0.186 | 0.573 |
+| **StableIDM** | **0.286** | **0.142** | **0.307** | **0.493** |
 
-모든 수치는 baseline 대비 향상폭이며 절대치는 PDF 참조.
+### Ablation (같은 Table 1)
+
+- Full - DFA: Heavy acc 0.158 (-14.9pp)
+- Full - TDR: Heavy acc 0.265 (거의 유지되지만 L1 0.662 → 스파이크 증가로 제어 불안정)
+- Full - mask: Heavy acc 0.288, L1 0.475 (**흥미롭게도 L1은 더 낮음**)
+  - 저자 해석: 마스크 없으면 정적 배경 cues에 overfit하는 "spurious shortcut" → 일시적으로 L1은 좋아 보이나 일반성 상실.
+
+### Table 3 — Real-robot open-loop replay SR (%)
+
+| 방법 | Pick&Place | Microwave | Sink Cleaning | Avg |
+|------|-----------:|----------:|--------------:|----:|
+| ResNet | 23.1 | 27.4 | 19.7 | 23.4 |
+| AnyPos | 34.6 | 39.2 | 34.5 | 36.1 |
+| Vidar | 46.2 | 37.9 | 29.1 | 37.7 |
+| **StableIDM** | **53.8** | **42.3** | **46.2** | **47.4** |
+
+### Table 4 — Video-plan grasp SR (%)
+
+ResNet 11.5 / Vidar 26.9 / AnyPos 42.3 / **StableIDM 53.8**
+
+### Table 5 — π0.5 downstream VLA에 annotator로 활용
+
+- Real data only: 35.3%
+- Real + StableIDM-labeled video: **52.9%** (+17.6pp)
+
+### 실험 설정
+
+- 데이터: **AgiBot 100 episodes**, 10 tasks (articulated, pick-place, cleaning)
+- 액션: dual-arm joint angles + gripper opening (continuous)
+- `agibot_episodes.csv` 공개 (재현성)
 
 ---
 
