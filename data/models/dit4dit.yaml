@@ -1,19 +1,40 @@
 name: DiT4DiT
-full_name: 'DiT4DiT: Jointly Modeling Video Dynamics and Actions for Generalizable Robot Control'
-organization: 'TODO: check paper'
-date: '2026-03-11'
+full_name: "DiT4DiT: Jointly Modeling Video Dynamics and Actions for Generalizable Robot Control"
+organization: "Mondo Robotics; HKUST(GZ); HKUST"
+date: "2026-03-11"
 paper_url: https://arxiv.org/abs/2603.10448
-code_url: null
+code_url: https://dit4dit.github.io/
 venue: null
-open_source: false
+open_source: true
+
 architecture:
-  action_head: 'TODO: check paper'
-  parameters: TODO
-  action_head_category: diffusion
-key_innovation: 'TODO: Read paper and summarize key contribution in 2-3 sentences.
+  backbone: "Cosmos-Predict2.5-2B video Diffusion Transformer (with causal video VAE), conditioned on Cosmos-Reason1 language embeddings"
+  llm: "Cosmos-Reason1 (text encoder for video DiT)"
+  action_head: "Action Diffusion Transformer adapted from GR00T-N1, using AdaLN to inject diffusion timestep and cross-attention to consume intermediate hidden features extracted from the video DiT at a fixed feature-extraction timestep; trained with flow matching"
+  action_head_category: flow_matching
+  parameters: "2.2B trainable"
+  key_innovation: "DiT4DiT couples a video Diffusion Transformer with an action Diffusion Transformer end-to-end via a unified dual flow-matching objective. Rather than relying on reconstructed future frames, it extracts intermediate denoising hidden states from the video DiT at a fixed feature-extraction timestep and uses them as temporally grounded conditioning for the action DiT. An asymmetric tri-timestep scheme (uniform sampling for video, deterministic timestep for feature extraction, Beta-distribution sampling for action) lets the two modules be trained jointly without one disrupting the other, demonstrating that video generation can serve as an effective scaling proxy for robot policy learning (>10x sample efficiency, up to 7x faster convergence)."
 
-  '
-benchmarks: {}
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 99.6
+    libero_goal: 98.6
+    libero_long: 97.6
+    libero_avg: 98.6
+    source: "Table 1"
+    eval_condition: "trained from scratch on LIBERO (no external action data)"
+  robocasa:
+    robocasa_gr1_avg: 50.8
+    source: "Table 2 (RoboCasa-GR1 24-task average)"
+    eval_condition: "trained from scratch on RoboCasa-GR1 Tabletop (no external action data)"
 
-tags:
-- libero
+training:
+  datasets: ["LIBERO (from scratch)", "RoboCasa-GR1 Tabletop (1,000 trajectories per task x 24 tasks)", "Subset of GR1 simulation pretraining data (241,450 episodes)", "Real-world Unitree G1 teleoperation (200 episodes per task x 7 tasks)"]
+  method: "Joint training of Video DiT and Action DiT under a dual flow-matching loss with an asymmetric tri-timestep scheme (uniform tau_v for video, deterministic tau_f for feature extraction, Beta-sampled tau_a for action). Text encoder and visual VAE are frozen; only the two DiT modules are updated."
+
+eval_conditions:
+  libero: "trained from scratch (no external action pretraining data)"
+  robocasa: "trained from scratch"
+
+tags: [flow_matching, video_generation, diffusion_transformer, libero, robocasa, world_model, dual_dit]

@@ -1,26 +1,45 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: HELM: Harness-Enhanced Long-horizon Memory for Vision-Language-Action Manipulation
-# arXiv: 2604.18791
-
 name: HELM
 full_name: "HELM: Harness-Enhanced Long-horizon Memory for Vision-Language-Action Manipulation"
-organization: "TODO: check paper"
+organization: Tsinghua University / Alibaba Group / Bengbu University
 date: "2026-04-20"
 paper_url: https://arxiv.org/abs/2604.18791
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: model-agnostic wrapper (evaluated with OpenVLA and Octo backbones, both kept frozen)
+  llm: inherited from underlying VLA backbone (OpenVLA / Octo)
+  action_head: "Wraps a frozen VLA backbone with three components: an Episodic Memory Module (CLIP ViT-B/32 keyframe store with top-k cosine retrieval), a learned State Verifier (3-layer MLP 1024->512->256->1 predicting pre-execution failure probability from memory-augmented observation, action, and subgoal), and a Harness Controller that triggers rollback or replanning when failure is predicted."
   action_head_category: other
   parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  key_innovation: "Model-agnostic execution-loop framework that addresses three structural failure modes of long-horizon VLA manipulation: the memory gap (EMM with CLIP-indexed keyframe retrieval), the verification gap (a learned MLP State Verifier that predicts pre-execution failure conditioned on retrieved memory), and the recovery gap (a Harness Controller implementing memory-conditioned rollback or forward replanning). The State Verifier is the core learning contribution and depends critically on memory-augmented context."
 
-benchmarks: {}
+training:
+  dataset: 50K (observation, action, subgoal) failure-labeled triples from VLA rollouts on LIBERO training tasks; CALVIN ABC->D for additional evaluation
+  method: Binary cross-entropy with positive weight 4.0 to train the State Verifier (Adam, lr 1e-4, batch 256, ~2 h on one A100); the underlying VLA backbone is frozen
+
+benchmarks:
+  libero:
+    libero_long: 81.5
+    source: Table 2 (LIBERO-LONG, OpenVLA backbone), original paper
+    date_reported: "2026-04-20"
+    eval_condition: wrapper-on-frozen-OpenVLA
+    notes: "Also reports SCR=89.3% and RSR=54.2% on LIBERO-LONG; HELM(Octo) reaches 72.8% TSR on LIBERO-LONG."
+  calvin:
+    calvin_abc_d_avg_len: 3.58
+    source: Table 2 (CALVIN ABC->D, OpenVLA backbone), original paper
+    date_reported: "2026-04-20"
+    eval_condition: wrapper-on-frozen-OpenVLA
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero: wrapper-on-frozen-vla
+  calvin: wrapper-on-frozen-vla
 
-tags: [libero, calvin]
+tags:
+  - wrapper
+  - long-horizon
+  - episodic-memory
+  - failure-recovery
+  - libero
+  - calvin

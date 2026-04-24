@@ -1,19 +1,35 @@
 name: DepthCache
-full_name: 'DepthCache: Depth-Guided Training-Free Visual Token Merging for Vision-Language-Action Model Inference'
-organization: 'TODO: check paper'
-date: '2026-03-11'
+full_name: "DepthCache: Depth-Guided Training-Free Visual Token Merging for Vision-Language-Action Model Inference"
+organization: "Huazhong University of Science and Technology"
+date: "2026-03-11"
 paper_url: https://arxiv.org/abs/2603.10469
 code_url: null
-venue: null
+venue: "Submitted to IEEE (per author note)"
 open_source: false
+
 architecture:
-  action_head: 'TODO: check paper'
-  parameters: TODO
+  backbone: "N/A (training-free wrapper; inherits backbone of host VLA, e.g., SigLIP for pi0.5, SigLIP+DINOv2 for OpenVLA, Eagle for GR00T)"
+  llm: "N/A (inherits LLM of host VLA, e.g., Gemma for pi0.5, Llama 2 for OpenVLA)"
+  action_head: "Training-free inference-time visual token merging wrapper; does not modify the underlying VLA action head (e.g., flow-matching for pi0.5, autoregressive for OpenVLA, Diffusion Transformer for GR00T)"
   action_head_category: other
-key_innovation: 'TODO: Read paper and summarize key contribution in 2-3 sentences.
+  parameters: "TODO"
+  key_innovation: "DepthCache is a training-free, model-agnostic visual-token compression wrapper for VLA inference that repurposes depth as an external structural prior rather than a perceptual input. It partitions unprotected visual tokens into K depth-based regions via K-Means and assigns spatially differentiated merge ratios that scale with mean depth (preserving near-field workspace, compressing distant background). Token merging is distributed progressively across consecutive frames rather than within a single forward pass, with attention- and depth-edge-based dual protection of task-critical tokens, plus a motion-adaptive state machine for wrist cameras. Wraps base VLAs (pi0.5, OpenVLA, GR00T) for 1.07x-1.28x speedup with <1% LIBERO success-rate degradation."
 
-  '
-benchmarks: {}
+benchmarks:
+  libero:
+    libero_spatial: 98.9
+    libero_object: 97.1
+    libero_goal: 98.3
+    libero_long: 96.1
+    libero_avg: 97.6
+    source: "Table I (pi0.5 + DepthCache)"
+    eval_condition: "fine-tuned; pi0.5 + DepthCache wrapper; training-free inference-time compression"
 
-tags:
-- libero
+training:
+  datasets: ["N/A - training-free method"]
+  method: "Training-free; no model modification or fine-tuning. Hyperparameters: 5 warmup frames, K=3 depth clusters, progressive merge window W=5 steps."
+
+eval_conditions:
+  libero: "fine-tuned (host pi0.5 fine-tuned on LIBERO; DepthCache applied at inference only)"
+
+tags: [training_free, token_merging, inference_acceleration, depth_guided, libero, wrapper]

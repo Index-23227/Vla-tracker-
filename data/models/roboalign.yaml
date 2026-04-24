@@ -1,26 +1,47 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: RoboAlign: Learning Test-Time Reasoning for Language-Action Alignment in Vision-Language-Action Models
-# arXiv: 2603.21341
-
 name: RoboAlign
 full_name: "RoboAlign: Learning Test-Time Reasoning for Language-Action Alignment in Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "KAIST / RLWRLD / Yonsei University / UC Berkeley"
 date: "2026-03-22"
 paper_url: https://arxiv.org/abs/2603.21341
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: "Qwen2.5-VL-7B-Instruct MLLM backbone (also evaluated with Qwen3-VL-8B-Instruct); newly-initialized diffusion-based action expert reads hidden states from the 18th layer of the frozen MLLM"
+  llm: "Qwen2.5-VL-7B-Instruct"
+  action_head: "Diffusion-based action expert (newly initialized) attached to a frozen MLLM backbone; trained on top of an MLLM that has been aligned with low-level FAST action tokens via SFT followed by GRPO reinforcement learning that rewards format and FAST token accuracy"
   action_head_category: diffusion
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "7B (MLLM) + diffusion action head"
+  key_innovation: "Two-stage MLLM training framework that aligns embodied reasoning with low-level actions: Stage 1 SFT teaches the MLLM to generate FAST action tokens via zero-shot chain-of-thought reasoning; Stage 2 GRPO refines the reasoning by maximizing a token-level FAST action-accuracy reward. The resulting MLLM is then frozen and a diffusion action head is trained on top, achieving 17.5% / 18.9% / 106.6% relative gains over SFT baselines on LIBERO / CALVIN / real-world."
 
-benchmarks: {}
+training:
+  dataset: "1.88M MLLM training samples for SFT + 400K BridgeV2 FAST token prediction (2.28M total); 12.8K BridgeV2 FAST subset for RL/GRPO"
+  method: "Stage 1: Robotics-aware SFT on RoboAlign VQA + chain-of-thought reasoning + low-level FAST action token generation (Qwen2.5-VL training repo, 1 epoch, lr 2e-5, cosine, vision encoder frozen). Stage 2: GRPO via EasyR1, rollout batch 512, update batch 128, 5 samples/prompt, lr 1e-6, 1 epoch. VLA training: 60K steps for LIBERO, 100K for CALVIN, 30K for real robot."
+
+benchmarks:
+  libero:
+    libero_spatial: 93.8
+    libero_object: 96.0
+    libero_goal: 87.2
+    libero_long: 70.0
+    libero_avg: 86.8
+    source: "Table 2, RoboAlign paper (w/ ROBOALIGN, Qwen2.5-VL-7B-Ins backbone)"
+    date_reported: "2026-03-22"
+    eval_condition: fine-tuned
+  calvin:
+    calvin_abc_d_1: 87.6
+    calvin_abc_d_2: 67.2
+    calvin_abc_d_3: 47.1
+    calvin_abc_d_4: 32.8
+    calvin_abc_d_5: 22.2
+    calvin_abc_d_avg_len: 2.57
+    source: "Table 3, RoboAlign paper (w/ ROBOALIGN, Qwen2.5-VL-7B-Ins backbone)"
+    date_reported: "2026-03-22"
+    eval_condition: fine-tuned
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero: "fine-tuned (frozen MLLM backbone, diffusion head trained per benchmark)"
+  calvin: "fine-tuned ABC->D (frozen MLLM backbone, diffusion head trained per benchmark)"
 
-tags: [reasoning, libero, calvin]
+tags: [reasoning, GRPO, reinforcement-learning, FAST-tokens, diffusion-head, libero, calvin, qwen2.5-vl]

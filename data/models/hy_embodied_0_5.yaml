@@ -1,27 +1,33 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: HY-Embodied-0.5: Embodied Foundation Models for Real-World Agents
-# arXiv: 2604.07430
-
 name: HY-Embodied-0.5
 full_name: "HY-Embodied-0.5: Embodied Foundation Models for Real-World Agents"
-organization: "TODO: check paper"
+organization: Tencent Robotics X / Tencent HY Vision Team
 date: "2026-04-08"
 paper_url: https://arxiv.org/abs/2604.07430
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/Tencent-Hunyuan/HY-Embodied
 venue: null
-open_source: false  # TODO: verify
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: HY-ViT 2.0 (400M, native-resolution Vision Transformer)
+  llm: HY-Embodied-0.5 MoT (2B activated / 4B total Mixture-of-Transformers; also a 32B activated / 407B total MoE-A32B variant)
+  action_head: "Action Expert module following the structural design of pi0/pi0.5, attached to the HY-Embodied-0.5 MoT-2B base model and pre-trained on 5K hours of UMI data before per-task SFT."
+  action_head_category: flow_matching
+  parameters: "2B / 32B"
+  key_innovation: "Embodied foundation VLM family combining a native-resolution HY-ViT 2.0 encoder with a Mixture-of-Transformers backbone (modality-specific QKV/FFN parameters and bidirectional visual attention) and learnable visual latent tokens that bridge vision and language. An iterative, self-evolving post-training paradigm and large-to-small on-policy distillation transfer the 32B MoE model's reasoning into the 2B MoT edge variant. The MoT-2B base model is then extended with a pi0/pi0.5-style Action Expert to form a VLA."
 
-benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+training:
+  dataset: 100M+ multimodal pre-training samples (visual perception, embodied-centric, spatial-centric, general understanding); VLA fine-tuned on 5K hours of UMI data, then SFT on 300-700 real-robot episodes per task
+  method: Pre-training + SFT + RL with iterative self-evolving deep-thinking and large-to-small on-policy distillation (from MoE-A32B to MoT-2B); VLA SFT uses per-GPU batch size 32 across 32 GPUs for 200K iterations on UMI data prior to per-task fine-tuning
+
+benchmarks: {}
 
 eval_conditions:
-  TODO: "check paper"
+  real_world: fine-tuned
 
-tags: []
+tags:
+  - tencent
+  - mixture-of-transformers
+  - foundation-model
+  - flow-matching
+  - real-world
+  - open-source

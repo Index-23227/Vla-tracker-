@@ -1,19 +1,54 @@
 name: MMaDA-VLA
-full_name: 'MMaDA-VLA: Large Diffusion Vision-Language-Action Model with Unified Multi-Modal Instruction and Generation'
-organization: 'TODO: check paper'
-date: '2026-03-26'
+full_name: "MMaDA-VLA: Large Diffusion Vision-Language-Action Model with Unified Multi-Modal Instruction and Generation"
+organization: "Westlake University, Zhejiang University, East China University of Science and Technology, Huawei Celia Team, HKUST(GZ), OpenHelix Robotics"
+date: "2026-03-26"
 paper_url: https://arxiv.org/abs/2603.25406
 code_url: null
 venue: null
-open_source: false
+open_source: true
+
 architecture:
-  action_head: discrete diffusion (masked token denoising, iterative order-free refinement)
+  backbone: MMaDA-8B-Base (unified multi-modal large diffusion language model)
+  llm: MMaDA-8B-Base
+  action_head: native discrete diffusion (masked token denoising over unified discrete token space; iterative parallel refinement with hybrid attention)
   action_head_category: discrete_diffusion
-  parameters: TODO
-  key_innovation: 'TODO: Read paper and summarize key contribution in 2-3 sentences.'
-benchmarks: {}
+  parameters: "8B"
+  key_innovation: "Fully native pre-trained large diffusion VLA that unifies language, images, and continuous robot controls in a single discrete token space and trains a single backbone with masked-token denoising to jointly generate a future goal observation and action chunk in parallel. Hybrid attention (intra-modal full + inter-modal causal) enables order-free refinement; goal-image generation provides world-model-like dynamics without auxiliary modules."
+
+training:
+  dataset: ~61M steps cross-embodiment data (DROID 49.94%, BC-Z 9.95%, Language Table 9.88%, Furniture Bench 7.35%, Fractal 6.44%, Bridge V2 3.15%, Kuka 3.03%, FMB 2.06%, CALVIN 1.87%, LIBERO 1.55%, plus smaller datasets); fine-tuned on benchmark-specific data
+  hardware: 8 nodes of 8x NVIDIA H800 80GB
+  pretrain_time: ~30 hours
+  image_tokenizer: MAGVIT-v2
+  action_tokenizer: 256-bin discretization per dimension
+  optimizer: AdamW, LR 1e-4, cosine decay
+  action_chunk_size: 5 (LIBERO), 10 (CALVIN)
+
+benchmarks:
+  libero:
+    libero_spatial: 98.8
+    libero_object: 99.8
+    libero_goal: 98.0
+    libero_long: 95.2
+    libero_avg: 98.0
+    source: MMaDA-VLA paper Table 1
+    date_reported: '2026-03-26'
+    eval_condition: fine-tuned
+  calvin:
+    calvin_abc_d_1_5: 99.8
+    calvin_abc_d_2_5: 98.6
+    calvin_abc_d_3_5: 96.3
+    calvin_abc_d_4_5: 93.5
+    calvin_abc_d_5_5: 89.7
+    calvin_abc_d_avg_len: 4.78
+    source: MMaDA-VLA paper Table 1 (ABC->D)
+    date_reported: '2026-03-26'
+    eval_condition: fine-tuned
 
 tags:
-- autoregressive
+- 8B
+- discrete-diffusion
+- unified-multimodal
+- world-model
 - libero
 - calvin
