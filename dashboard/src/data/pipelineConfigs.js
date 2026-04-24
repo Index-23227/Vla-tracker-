@@ -1786,4 +1786,105 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'Training-free PTQ (calibration only)', notes: ['42.5% memory reduction', '54.8% inference speedup', 'WidowX VM 48.9 (vs FP 51.3)', 'Google VM 68.5 (vs FP 74.8)', 'Google VA 51.7 (vs FP 61.3)'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #81  VLA-IAP — HKUST / CUHK / SCNU / NUDT / USTB
+  // ═══════════════════════════════════════════════════════════════════════════
+  'VLA-IAP': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Pretrained VLA (any)', sub: 'OpenVLA-OFT / π0 / π0.5 / DreamVLA', color: 'p' },
+    ],
+    stages: [
+      { group: 'Interaction-First signal extraction (training-free)', sub: 'per-frame geometric + motion priors', color: 'c', children: [
+        { label: 'Sobel edge map', sub: 'structural geometric anchors', color: 'c' },
+        { label: 'Motion denoise', sub: 'history smoothing, IoU tracking', color: 't' },
+        { label: 'Semantic-motion alignment', sub: 'low-IoU → pruned, high-IoU → preserved', color: 'a' },
+      ]},
+      { group: 'Dynamic pruning schedule', sub: 'conservative → aggressive', color: 'o', children: [
+        { label: 'Early phase', sub: 'minimal pruning (stability)', color: 'g' },
+        { label: 'Interaction phase', sub: 'aggressive pruning (speedup)', color: 'r' },
+      ]},
+      { label: 'Inject pruned tokens into backbone', sub: 'unchanged action head', color: 'x' },
+    ],
+    output: { label: 'Accelerated actions', sub: 'unchanged quality, 1.25–1.54× speedup', color: 'e' },
+    meta: { loss: 'None (training-free)', notes: ['LIBERO 97.8% with 1.25× speedup', 'Up to 1.54× speedup with comparable performance', 'Works across OpenVLA-OFT, π0, π0.5, DreamVLA', 'Validated on real robot + 3 sim envs'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #82  DeepThinkVLA — HUST / Tsinghua / RUC
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DeepThinkVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'PaliGemma 2 backbone (π0-FAST base)', sub: '2.9B params', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'PaliGemma 2 ViT', color: 'k' },
+        { label: 'Gemma-2 2B', sub: 'language model', color: 'i' },
+      ]},
+      { group: 'Hybrid-Attention Decoder', sub: 'condition 1 of CoT effectiveness', color: 'o', children: [
+        { label: 'Causal attention for language CoT', sub: 'sequential reasoning tokens', color: 'a' },
+        { label: 'Bidirectional attention for actions', sub: 'parallel action decoding', color: 'y' },
+      ]},
+      { group: 'SFT-then-RL pipeline', sub: 'condition 2: outcome-aligned causal CoT', color: 'r', children: [
+        { label: 'Stage 1: SFT with CoT annotations', sub: 'reasoning-action chain', color: 't' },
+        { label: 'Stage 2: outcome-based RL', sub: 'sparse task-success reward', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Action tokens (FAST-style)', sub: 'reasoning-grounded', color: 'e' },
+    meta: { loss: 'CE on FAST action tokens + RL task reward', notes: ['LIBERO 97.0%', 'LIBERO-Plus 79.0% (vs π0-FAST 61.6%)', 'RoboTwin 2.0 59.3% (+21.7pp over best)', '2.9B params'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #83  StructVLA — USTC / MBZUAI
+  // ═══════════════════════════════════════════════════════════════════════════
+  'StructVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'Structured World-Model Planner', sub: 'sparse physically-meaningful future frames', color: 'c', children: [
+        { label: 'Kinematic milestone detector', sub: 'gripper transitions + turning points', color: 'k' },
+        { label: 'Structured frame predictor', sub: 'unified discrete token vocabulary', color: 't' },
+      ]},
+      { label: 'Unified discrete token vocabulary', sub: 'shared across visual + action tokens', color: 'p' },
+      { group: 'Two-stage training', sub: 'decoupled plan vs execute', color: 'o', children: [
+        { label: 'Stage 1: WM predicts structured frames', sub: 'sparse milestones (not dense rollout)', color: 'a' },
+        { label: 'Stage 2: map structured foresight → actions', sub: 'low-level motor tokens', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Actions', sub: 'milestone-aligned', color: 'e' },
+    meta: { loss: 'Token prediction on unified vocab', notes: ['LIBERO 94.8%', 'SimplerEnv-WidowX 75.0%', 'Sparse structured frames avoid dense-rollout error accumulation', 'Real-world deployments validated'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #84  SmoothVLA — CQUPT / CIGIT CAS / USTC
+  // ═══════════════════════════════════════════════════════════════════════════
+  'SmoothVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'Prismatic-7B (OpenVLA base)', sub: 'autoregressive VLA', color: 'p', children: [
+        { label: 'SigLIP + DinoV2', sub: 'vision encoders', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language model', color: 'i' },
+        { label: 'AR action head + chunking', sub: 'autoregressive tokens', color: 'a' },
+      ]},
+      { group: 'GRPO RL fine-tuning', sub: 'intrinsic smoothness optimization', color: 'o', children: [
+        { label: 'Binary sparse task reward', sub: 'success/fail signal', color: 'r' },
+        { label: 'Continuous jerk penalty', sub: 'trajectory jerk from policy rollouts', color: 't' },
+        { label: 'Hybrid reward combination', sub: 'task + physics-informed smoothness', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Smooth continuous actions', sub: 'physically feasible trajectories', color: 'e' },
+    meta: { loss: 'GRPO with task + jerk hybrid reward', notes: ['LIBERO 80.5% avg', '+13.8% smoothness over standard RL', 'Outperforms SFT generalization', 'Intrinsic reward (no extrinsic env feedback)'] },
+  },
+
 }
