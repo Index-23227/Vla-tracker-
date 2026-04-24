@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-24T06:17:03.632345
-# Models: 120
+# Generated: 2026-04-24T06:58:47.446994
+# Models: 114
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -1035,23 +1035,6 @@ MODEL: A1
   Eval Conditions: {'libero': 'fine-tuned'}
 
 ------------------------------------------------------------
-MODEL: AcceRL
-  Organization: TODO: check paper
-  Date: 2026-03-19
-  Paper: https://arxiv.org/abs/2603.18464
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: RL, libero
-  AI Review Summary: VLA 모델의 RL 학습을 위한 완전 비동기 분산 프레임워크로, macro/micro 2단계 비동기 설계와 plug-and-play diffusion world model을 결합하여 LIBERO에서 99-100% 성공률, 200배 sample efficiency 향상, super-linear throughput scaling 달성.
-  AI Review: PDF-verified
-
-------------------------------------------------------------
 MODEL: AnchorRefine
   Organization: TODO: check paper
   Date: 2026-04-20
@@ -1652,22 +1635,6 @@ MODEL: LaMP
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
 
 ------------------------------------------------------------
-MODEL: LIBERO-Para
-  Organization: TODO: check paper
-  Date: 2026-03-30
-  Paper: https://arxiv.org/abs/2603.28301
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero
-  Eval Conditions: {'libero': 'fine-tuned'}
-
-------------------------------------------------------------
 MODEL: LLARVA
   Organization: UC Berkeley
   Date: 2024-06-17
@@ -1704,25 +1671,6 @@ MODEL: LLaVA-VLA
   Eval Conditions: {'calvin': 'fine-tuned', 'robotwin_v2': 'fine-tuned (domain randomization setting)'}
   AI Review Summary: VLA의 실용성(practicality)을 체계적으로 재평가하기 위한 CEBench 벤치마크를 제안하고, consumer-grade GPU에서 구동 가능한 경량 LLaVA-VLA 모델을 설계.
   AI Review: Abstract-based
-
-------------------------------------------------------------
-MODEL: ManipArena
-  Organization: TODO: check paper
-  Date: 2026-03-30
-  Paper: https://arxiv.org/abs/2603.28545
-  Code: None
-  Venue: CVPR 2026
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: CVPR-2026
-  Eval Conditions: {'TODO': 'check paper'}
-  Peer Review:
-    Venue: CVPR 2026, Decision: None
-    Review Avg: None, Confidence: None
 
 ------------------------------------------------------------
 MODEL: MMaDA-VLA
@@ -1844,21 +1792,6 @@ MODEL: OFlow
     Parameters: TODO
   Tags: reasoning, libero, simpler_env, metaworld
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'metaworld': 'fine-tuned'}
-
-------------------------------------------------------------
-MODEL: OpenRC
-  Organization: TODO: check paper
-  Date: 2026-04-04
-  Paper: https://arxiv.org/abs/2604.03781
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Eval Conditions: {'TODO': 'check paper'}
 
 ------------------------------------------------------------
 MODEL: ProbeFlow
@@ -1995,22 +1928,6 @@ MODEL: RT-2-X
   AI Review: Abstract-based
 
 ------------------------------------------------------------
-MODEL: SABER
-  Organization: TODO: check paper
-  Date: 2026-03-26
-  Paper: https://arxiv.org/abs/2603.24935
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero
-  Eval Conditions: {'libero': 'fine-tuned'}
-
-------------------------------------------------------------
 MODEL: SAM2Act
   Organization: University of Washington / NVIDIA
   Date: 2025-01-30
@@ -2099,22 +2016,6 @@ MODEL: StableIDM
   Tags: inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot, real-world
   AI Review Summary: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.
   AI Review: PDF-verified
-
-------------------------------------------------------------
-MODEL: StarVLA
-  Organization: TODO: check paper
-  Date: 2026-04-06
-  Paper: https://arxiv.org/abs/2604.05014
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero, simpler_env, robotwin, robocasa
-  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'robotwin': 'fine-tuned', 'robocasa': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: STRONG-VLA
@@ -2409,5 +2310,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 120 models, 40 with LIBERO scores
+Total: 114 models, 40 with LIBERO scores
 ================================================================================
