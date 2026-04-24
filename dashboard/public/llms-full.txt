@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-24T14:11:19.406618
+# Generated: 2026-04-24T14:13:33.277073
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -301,6 +301,7 @@ MODEL: MMaDA-VLA
     libero (avg=97.95): libero_spatial=98.8, libero_object=99.8, libero_goal=98.0, libero_long=95.2, libero_avg=98.0
     calvin (avg=4.78): calvin_abc_d_1_5=99.8, calvin_abc_d_2_5=98.6, calvin_abc_d_3_5=96.3, calvin_abc_d_4_5=93.5, calvin_abc_d_5_5=89.7, calvin_abc_d_avg_len=4.78
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: TAG
@@ -2004,6 +2005,7 @@ MODEL: ReFineVLA
   Benchmarks:
     simpler_env: widowx_put_spoon_on_towel_grasp=42.9, widowx_put_spoon_on_towel_success=38.1, widowx_put_carrot_on_plate_grasp=33.3, widowx_put_carrot_on_plate_success=33.3, widowx_stack_green_on_yellow_grasp=71.4, widowx_stack_green_on_yellow_success=23.8, widowx_put_eggplant_in_basket_grasp=100.0, widowx_put_eggplant_in_basket_success=95.2, widowx_average=47.7, google_robot_visual_matching_pick_coke_can=83.0, google_robot_visual_matching_move_near=95.3, google_robot_visual_matching_open_close_drawer=51.4, google_robot_visual_matching_average=76.6, google_robot_variant_aggregation_pick_coke_can=83.8, google_robot_variant_aggregation_move_near=88.1, google_robot_variant_aggregation_open_close_drawer=34.4, google_robot_variant_aggregation_average=68.8
   Eval Conditions: {'simpler_env': 'fine-tuned (WidowX on BridgeData-v2; Google Robot on Fractal)'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: RoboDual
@@ -2241,6 +2243,8 @@ MODEL: UniDriveVLA
     Parameters: 2B (Base) / 8B (Large) VLM backbone; additional Perception Expert and Action Expert
   Tags: autonomous-driving, mixture-of-transformers, sparse-perception, flow-matching, qwen3-vl, nuscenes, bench2drive
   Eval Conditions: {'nuscenes': 'fine-tuned', 'bench2drive': 'fine-tuned'}
+  AI Review Summary: Xiaomi EV + HUST + UMacau의 autonomous-driving VLA. Qwen3-VL(2B Base / 8B Large) 위에 **Mixture-of-Transformers(MoT) 3-expert 아키텍처(Understanding / Perception / Action)**를 masked joint attention으로 결합하여 representation interference를 해소하고, sparse perception(detection, map, occupancy, motion, ego anchor) + 
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: UniPi
@@ -2354,6 +2358,8 @@ MODEL: VP-VLA
     simpler_env: simpler_widowx_spoon=66.7, simpler_widowx_carrot=50.0, simpler_widowx_stack=20.8, simpler_widowx_eggplant=95.8, simpler_avg=58.3
     robocasa (avg=53.8): robocasa_pnp_close_avg=54.3, robocasa_pnp_novel_cuttingboard_avg=60.8, robocasa_pnp_novel_placemat_avg=54.5, robocasa_pnp_novel_tray_avg=46.0, robocasa_pnp_novel_plate_avg=53.5, robocasa_avg=53.8
   Eval Conditions: {'simpler_env': 'fine-tuned', 'robocasa': 'fine-tuned'}
+  AI Review Summary: HKUST/CUHK/SmartMore의 dual-system VLA. **System 2 Planner**(Qwen3-VL-4B-Instruct + SAM3)가 instruction을 subtask로 decompose하고 target object 중심에 crosshair, placement region에 bounding box를 **overhead camera에 직접 그린** visual prompt를 생성, **System 1 Controller**(QwenOFT = OpenVLA-OFT의 Prismatic VLM을 Qwen3-V
+  AI Review: PDF-verified
 
 ================================================================================
 SECTION 3: BENCHMARK DEFINITIONS
