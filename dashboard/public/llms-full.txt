@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-24T02:18:55.940231
+# Generated: 2026-04-24T02:21:25.655527
 # Models: 120
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -1033,7 +1033,6 @@ MODEL: AcceRL
     LLM: None
     Parameters: TODO
   Tags: RL, libero
-  Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: VLA 모델의 RL 학습을 위한 완전 비동기 분산 프레임워크로, macro/micro 2단계 비동기 설계와 plug-and-play diffusion world model을 결합하여 LIBERO에서 99-100% 성공률, 200배 sample efficiency 향상, super-linear throughput scaling 달성.
   AI Review: PDF-verified
 
@@ -1159,7 +1158,6 @@ MODEL: DepthCache
     LLM: None
     Parameters: TODO
   Tags: libero
-  Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: Depth 기반 영역 분할 + progressive cross-frame token merging + dual protection mechanism으로, **3개 VLA (π0.5, OpenVLA, GR00T)에서 training-free로 1.07-1.33x speedup과 0.2-1.0%p 이내 성능 하락** 달성. Real-world에서 191ms→143ms (1.33x).
   AI Review: PDF-verified
 
@@ -1211,7 +1209,6 @@ MODEL: DiT4DiT
     LLM: None
     Parameters: TODO
   Tags: libero
-  Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: Video DiT (Cosmos-2B 초기화)와 Action DiT (GR00T-N1 기반)를 cascaded coupling하되, **single forward pass의 intermediate feature를 추출**하여 video reconstruction을 bypass, LIBERO **98.6%** SOTA + RoboCasa 50.8% + 7x 빠른 수렴 달성.
   AI Review: PDF-verified
 
@@ -1720,7 +1717,6 @@ MODEL: MMaDA-VLA
     LLM: None
     Parameters: TODO
   Tags: autoregressive, libero, calvin
-  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: Mobility VLA
