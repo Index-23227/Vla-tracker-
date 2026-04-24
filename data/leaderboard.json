@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-24T02:21:25.655527",
+  "generated_at": "2026-04-24T06:04:28.025497",
   "num_models": 120,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -2427,6 +2427,14 @@
       "eval_conditions": {
         "real_world": "Bench2Drive closed-loop (not in VLA-Tracker's standard benchmark set)"
       },
+      "peer_review": {
+        "venue": "CVPR 2026",
+        "decision": null,
+        "review_avg": null,
+        "confidence_avg": null,
+        "num_reviews": 0,
+        "openreview_url": null
+      },
       "rank": 55
     },
     {
@@ -3327,6 +3335,14 @@
       "eval_conditions": {
         "TODO": "check paper"
       },
+      "peer_review": {
+        "venue": "CVPR 2026",
+        "decision": null,
+        "review_avg": null,
+        "confidence_avg": null,
+        "num_reviews": 0,
+        "openreview_url": null
+      },
       "rank": 82
     },
     {
@@ -3975,6 +3991,14 @@
       "eval_conditions": {
         "libero": "fine-tuned"
       },
+      "peer_review": {
+        "venue": "IROS 2026",
+        "decision": null,
+        "review_avg": null,
+        "confidence_avg": null,
+        "num_reviews": 0,
+        "openreview_url": null
+      },
       "rank": 103
     },
     {
@@ -4295,6 +4319,14 @@
       "inference_hz": null,
       "benchmarks": {},
       "eval_conditions": {},
+      "peer_review": {
+        "venue": "CVPR 2026",
+        "decision": null,
+        "review_avg": null,
+        "confidence_avg": null,
+        "num_reviews": 0,
+        "openreview_url": null
+      },
       "ai_review": {
         "content": "# UniDex: A Robot Foundation Suite for Universal Dexterous Hand Control from Egocentric Human Videos\n\n> **한 줄 요약**: 8종 dexterous hand(6-24 DoF)에 대한 50K+ trajectory 데이터셋(UniDex-Dataset)과 82차원 통합 action space(FAAS)를 구축하고, flow matching 기반 3D VLA로 81% task progress와 zero-shot cross-hand transfer 달성.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 연구의 구조적 한계\n- Dexterous hand 연구가 **단일 hand 형태에 국한** → cross-hand generalization 불가\n- 서로 다른 hand의 **action space가 상이** (DoF 6~24) → unified policy 구축 어려움\n- Egocentric human video는 풍부하나 로봇 hand에 직접 활용 불가\n\n### 핵심 질문\n- **다양한 dexterous hand를 하나의 통합 action space로 표현하고, 단일 VLA로 제어할 수 있는가?**\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 FAAS (Function-Actuator-Aligned Space)\n\n82차원 통합 action space:\n- **18-dim**: Wrist poses (9/hand × 2 hands, 6D rotation + 3D translation)\n- **64-dim**: Joint commands (32/hand, 21 shared base slots + hand-specific)\n\n이를 통해 DoF가 다른 hand들을 **동일 표현 공간**에서 학습.\n\n### 2.2 Architecture\n\n- **Vision**: Uni3D pointcloud encoder (ViT, 2D pretrained로 초기화)\n- **Action**: **Conditional flow matching** (velocity field prediction, Euler integration, step δ=0.1)\n- **Input**: Single-view colored pointcloud + language instruction + proprioception\n- **Output**: Action chunk $A_t = [a_t, ..., a_{t+H-1}]$\n\n### 2.3 Training\n\n| 단계 | GPU | Batch | Duration |\n|------|-----|-------|----------|\n| **Pretrain** | 8× H800 | 128 | ~24h, 3 epochs (~30K steps) |\n| **Post-train** | 2× H800 | 8 | ~4h/task, 50 epochs (~3K steps) |\n\n- Optimizer: AdamW, cosine scheduler, initial LR 1e-4\n- 50 demonstrations per task for post-training\n\n### 2.4 UniDex-Dataset\n\n- **9M paired image-pointcloud-action frames** (30 fps)\n- **50K+ trajectories** across 8 hands\n- Sources: H2O, HOI4D, HOT3D, TACO (egocentric RGB-D)\n\n---\n\n## 3. 실험 결과 심층 분석\n\n### Real-World Tool-Use (5 tasks, 2 hands)\n\n| Model | Avg Task Progress | Final SR |\n|-------|------------------|----------|\n| DP (Diffusion Policy) | 29.0±19.9% | 22.0±22.5% |\n| DP3 | 35.0±17.1% | 30.0±18.7% |\n| π₀ | 38.0±7.4% | 35.0±10.0% |\n| UniDex-VLA (No Pretrain) | 32.5±18.5% | 23.0±12.0% |\n| **UniDex-VLA** | **81.0±12.1%** | **76.0±17.8%** |\n\n- π₀ 대비 **+43%p task progress** → pretraining의 결정적 기여\n\n### Zero-shot Cross-Hand Transfer\n\n| Target Hand | SR (%) |\n|------------|--------|\n| Inspire (train) | 76% |\n| Oymotion (zero-shot) | 60% |\n| Wuji (zero-shot) | 40% |\n\n### Human-Robot Co-training\n\n- Human:robot demo exchange rate ≈ 2:1\n- Human demos ~5.2× faster to collect\n- Robot data 필수 (human only로는 insufficient)\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **표준 벤치마크 없음**: LIBERO, CALVIN 등 미평가 → 직접 비교 어려움\n2. **Single-view pointcloud 의존**: Multi-view나 RGB-only setup에서의 성능 미검증\n3. **FAAS의 hand 호환성**: 8종 hand에서 검증, 더 다양한 형태 (prosthetics 등)에서는?\n4. **Parameter count 미공개**\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★★ — FAAS unified action space + 8-hand dataset |\n| **Technical depth** | ★★★★★ — 9M frames, cross-hand transfer, human co-training |\n| **Experimental rigor** | ★★★★☆ — Real-world 5 tasks, zero-shot transfer. 표준 벤치마크 부재 |\n| **Practical impact** | ★★★★★ — Dexterous manipulation의 foundation 연구 |\n\n---\n\n## 6. 🔥 예상 날카로운 질문 모음\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | DexVLA와의 차이는? | DexVLA는 diffusion expert on bimanual arms, UniDex는 flow matching on dexterous hands. 다른 embodiment |\n| 2 | FAAS에서 hand가 21 DoF 미만이면? | Unused dimensions을 masking. FAAS의 shared 21 base slots이 다양한 DoF를 수용 |\n| 3 | Pretraining 없이 (32.5%) vs 있으면 (81.0%) — 이게 data의 효과인가 architecture의 효과인가? | Data 효과가 지배적. FAAS가 data scaling을 가능하게 하는 enabler |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true

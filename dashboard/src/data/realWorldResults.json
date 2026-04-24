@@ -3,9 +3,24 @@
     "name": "pi*0.6",
     "source": "arXiv:2511.14759",
     "tasks": [
-      { "task": "Laundry Folding", "metric": "throughput", "value": "2x baseline", "setting": "Real homes" },
-      { "task": "Box Assembly", "metric": "failure_rate", "value": "~50% reduction", "setting": "Real deployment" },
-      { "task": "Espresso Making", "metric": "failure_rate", "value": "~50% reduction", "setting": "Professional machine" }
+      {
+        "task": "Laundry Folding",
+        "metric": "throughput",
+        "value": "2x baseline",
+        "setting": "Real homes"
+      },
+      {
+        "task": "Box Assembly",
+        "metric": "failure_rate",
+        "value": "~50% reduction",
+        "setting": "Real deployment"
+      },
+      {
+        "task": "Espresso Making",
+        "metric": "failure_rate",
+        "value": "~50% reduction",
+        "setting": "Professional machine"
+      }
     ],
     "method": "RECAP (RL with corrections)",
     "robot": "Custom",
@@ -13,11 +28,126 @@
     "verified": true
   },
   {
+    "name": "HEX",
+    "source": "arXiv:2604.07993",
+    "tasks": [
+      {
+        "task": "Mirror human pose",
+        "metric": "success_rate",
+        "value": "100%",
+        "setting": "Tienkung 2.0, 12 trials"
+      },
+      {
+        "task": "Pour liquor (follow human order)",
+        "metric": "success_rate",
+        "value": "91.7%",
+        "setting": "Tienkung 2.0, 12 trials"
+      },
+      {
+        "task": "Walking while avoiding obstacles",
+        "metric": "success_rate",
+        "value": "100%",
+        "setting": "Tienkung 2.0, 12 trials"
+      },
+      {
+        "task": "Long-horizon box conveyance (4 stages)",
+        "metric": "success_rate",
+        "value": "100/100/73.3/53.3%",
+        "setting": "Tienkung 2.0, 15 trials/stage"
+      },
+      {
+        "task": "Generalization avg (8 OOD variants)",
+        "metric": "success_rate",
+        "value": "61.8%",
+        "setting": "Tienkung 2.0/3.0"
+      }
+    ],
+    "method": "Flow-matching DiT-B with MoE UPP (2.4B)",
+    "robot": "Tienkung 2.0/3.0 bipedal humanoid",
+    "highlight": true,
+    "verified": true,
+    "date": "2026-04"
+  },
+  {
+    "name": "UniT",
+    "source": "arXiv:2604.19734",
+    "tasks": [
+      {
+        "task": "Pick & Place (in-domain, human co-train)",
+        "metric": "success_rate",
+        "value": "78%",
+        "setting": "IRON-R01-1.11, vs GR00T 30%"
+      },
+      {
+        "task": "Pouring (bimanual, human co-train)",
+        "metric": "success_rate",
+        "value": "75%",
+        "setting": "IRON-R01-1.11, vs GR00T 5%"
+      },
+      {
+        "task": "OOD avg (5 categories)",
+        "metric": "success_rate",
+        "value": "38.5%",
+        "setting": "IRON-R01-1.11 humanoid"
+      }
+    ],
+    "method": "VLA-UniT hybrid head (CE tokens + flow-matching) on GR00T n1.5 + Qwen2.5-VL",
+    "robot": "IRON-R01-1.11 humanoid (XPeng)",
+    "highlight": true,
+    "verified": true,
+    "date": "2026-04"
+  },
+  {
+    "name": "StableIDM",
+    "source": "arXiv:2604.17887",
+    "tasks": [
+      {
+        "task": "Pick & Place (open-loop replay)",
+        "metric": "success_rate",
+        "value": "53.8%",
+        "setting": "Real robot, vs Vidar 46.2%"
+      },
+      {
+        "task": "Microwave",
+        "metric": "success_rate",
+        "value": "42.3%",
+        "setting": "Real robot, vs AnyPos 39.2%"
+      },
+      {
+        "task": "Sink Cleaning",
+        "metric": "success_rate",
+        "value": "46.2%",
+        "setting": "Real robot, vs Vidar 29.1%"
+      },
+      {
+        "task": "Downstream π0.5 VLA (annotator boost)",
+        "metric": "success_rate",
+        "value": "35.3% → 52.9%",
+        "setting": "Real+StableIDM-labeled"
+      }
+    ],
+    "method": "DINOv2 + SAM + DFA (anisotropic) + TDR (causal TCN dilations 1,2,4,8)",
+    "robot": "Dual-arm (AgiBot protocol)",
+    "highlight": false,
+    "verified": true,
+    "date": "2026-04"
+  },
+  {
     "name": "pi0",
     "source": "arXiv:2410.24164",
     "tasks": [
-      { "task": "Laundry Folding", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab" },
-      { "task": "Table Bussing", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab" }
+      {
+        "task": "Laundry Folding",
+        "metric": "success_rate",
+        "value": "Demonstrated",
+        "setting": "Lab"
+      },
+      {
+        "task": "Table Bussing",
+        "metric": "success_rate",
+        "value": "Demonstrated",
+        "setting": "Lab"
+      }
     ],
     "method": "Flow matching VLA",
     "robot": "Multiple embodiments",
@@ -27,8 +157,18 @@
     "name": "RT-2-X",
     "source": "arXiv:2310.08864",
     "tasks": [
-      { "task": "Emergent Skills (Drawer)", "metric": "success_rate", "value": "76%", "setting": "Lab (Google Robot)" },
-      { "task": "Emergent Skills (Cabinet)", "metric": "success_rate", "value": "59%", "setting": "Lab (Google Robot)" }
+      {
+        "task": "Emergent Skills (Drawer)",
+        "metric": "success_rate",
+        "value": "76%",
+        "setting": "Lab (Google Robot)"
+      },
+      {
+        "task": "Emergent Skills (Cabinet)",
+        "metric": "success_rate",
+        "value": "59%",
+        "setting": "Lab (Google Robot)"
+      }
     ],
     "method": "VLM → action tokens",
     "robot": "Google Robot",
@@ -38,7 +178,12 @@
     "name": "OpenVLA",
     "source": "arXiv:2406.09246",
     "tasks": [
-      { "task": "WidowX Tasks (7 tasks avg)", "metric": "success_rate", "value": "~84.7%", "setting": "Lab (WidowX)" }
+      {
+        "task": "WidowX Tasks (7 tasks avg)",
+        "metric": "success_rate",
+        "value": "~84.7%",
+        "setting": "Lab (WidowX)"
+      }
     ],
     "method": "Fine-tuned VLM",
     "robot": "WidowX",
@@ -48,7 +193,12 @@
     "name": "GR00T-N1",
     "source": "arXiv:2503.14734",
     "tasks": [
-      { "task": "Manipulation (multiple tasks)", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab (SO-100 / GR-1)" }
+      {
+        "task": "Manipulation (multiple tasks)",
+        "metric": "success_rate",
+        "value": "Demonstrated",
+        "setting": "Lab (SO-100 / GR-1)"
+      }
     ],
     "method": "Dual-system VLA",
     "robot": "SO-100 / GR-1",
@@ -58,7 +208,12 @@
     "name": "Octo",
     "source": "arXiv:2405.12213",
     "tasks": [
-      { "task": "WidowX Pick & Place", "metric": "success_rate", "value": "Demonstrated", "setting": "Lab (WidowX / Franka)" }
+      {
+        "task": "WidowX Pick & Place",
+        "metric": "success_rate",
+        "value": "Demonstrated",
+        "setting": "Lab (WidowX / Franka)"
+      }
     ],
     "method": "Generalist policy",
     "robot": "WidowX / Franka",
