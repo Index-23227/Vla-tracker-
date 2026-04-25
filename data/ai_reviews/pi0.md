@@ -1,75 +1,97 @@
-# π₀: A Vision-Language-Action Flow Model for General Robot Control
+# π0: A Vision-Language-Action Flow Model for General Robot Control
 
-> **한 줄 요약**: Flow matching 기반 action generation을 사전학습된 VLM 위에 구축하여, 단일 팔·양팔·모바일 매니퓰레이터를 포함하는 다중 플랫폼에서 언어 지시 기반 범용 로봇 제어를 실현한 **Physical Intelligence의 flagship 모델**.
-
----
-
-## 1. 배경 및 동기
-
-- Diffusion 기반 action generation의 iterative denoising latency 문제
-- **Flow matching**: Diffusion 대비 더 직선적인 sampling path → 적은 step으로 고품질 생성
-- 다중 로봇 플랫폼에서의 일관된 범용 정책의 필요성
+> **한 줄 요약**: Physical Intelligence가 제안한 π0는 PaliGemma 3B VLM 위에 300M action expert를 추가하여 conditional flow matching으로 50Hz 연속 action chunk를 생성하는 generalist robot policy. 7종 robot platform·68 task·약 10,000시간의 데이터로 pre-train되었으며, laundry folding과 같은 수십 분 길이의 dexterous task에서 OpenVLA·Octo를 압도.
 
 ---
 
-## 2. 방법론 심층 분석
+## 1. 배경 및 동기 (Section I, II)
 
-### Flow Matching Action Generation
-
-Diffusion의 곡선 경로 대신 **직선 경로(optimal transport)**로 noise→action 변환:
-
-$$d\mathbf{a}_t = v_\theta(\mathbf{a}_t, t, \mathbf{c}) dt$$
-
-ODE solver로 단 5-10 step에서 고품질 action 생성. Diffusion 대비 2-5x 빠른 추론.
-
-### Pre-trained VLM + Flow Expert
-
-VLM (PaLI 계열 추정)의 hidden state를 flow matching expert의 conditioning으로 활용.
-
-> ❓ **예상 질문**: Flow matching vs Diffusion: 어떤 것이 더 나은가?
-> **답변**: Flow matching이 이론적으로 더 효율적 (fewer ODE steps). 실험적으로도 동일 품질에서 2-5x 빠름. 다만 diffusion이 더 mature하고 distillation 기법이 풍부.
+- 기존 VLA (RT-2, OpenVLA)는 autoregressive discretization을 사용해 high-frequency dexterous control이 어려움 (Section II, p.2): "their autoregressive discretization architecture does not support action chunks".
+- Robotics에서는 LLM/VLM처럼 "diverse pre-training + curated post-training"의 분리된 recipe가 필요 (Section II): low-quality pre-training data는 회복(recovery) 행동을 가르치고, high-quality post-training data는 효율과 robustness를 부여.
+- π0는 이를 위해 (1) PaliGemma backbone, (2) flow matching action expert, (3) cross-embodiment + OXE 결합 dataset을 통합.
 
 ---
 
-## 3. 실험 결과
+## 2. 방법론 (Section IV)
 
-| 플랫폼 | 능력 |
-|--------|------|
-| Single-arm (Franka) | Multi-task manipulation |
-| Dual-arm | Bimanual coordination |
-| Mobile manipulator | Navigation + manipulation |
+### 아키텍처 (Figure 3, Section IV)
+- **Backbone**: PaliGemma 3B (SigLIP + Gemma 2B). Late fusion VLM.
+- **Action expert**: 300M 파라미터, scratch 초기화 → 총 3.3B (Section IV, p.4).
+- **Mixture of experts** 구조: image/text 토큰은 VLM weights 사용, action/state 토큰은 별도 action expert weights 사용 — Transfusion (Zhou et al.) 기반의 design.
+- Action chunk H=50, 즉 50Hz로 50-step (1초) chunk 예측.
 
-- Zero-shot capability, language following
-- 빨래 접기, 상자 조립 등 **complex dexterous task** 수행 가능
+### Flow Matching Loss (Section IV, p.5)
+$$\mathcal{L}^\tau(\theta) = \mathbb{E}_{p(A_t|o_t), q(A_t^\tau|A_t)}\|v_\theta(A_t^\tau, o_t) - u(A_t^\tau|A_t)\|^2$$
+- Linear-Gaussian path: q(A_t^τ|A_t) = N(τA_t, (1−τ)I).
+- τ는 lower (noisier) timestep을 강조하는 beta distribution에서 sampling.
+- Inference: τ=0 → τ=1 forward Euler, **10 integration step** (δ=0.1).
 
----
-
-## 4. 한계 및 미해결 문제
-
-1. **비공개 모델**: 아키텍처·데이터·가중치 모두 비공개
-2. **정량적 비교 부족**: 표준 벤치마크에서의 수치 제한적
-3. **Compute 요구**: 대형 VLM + flow expert의 추론 비용
-4. **Safety**: Complex task에서의 안전성 보장 미논의
+### Action Expert (Section IV)
+- Bidirectional attention mask로 모든 action token이 서로 attend.
+- Inference 효율: prefix o_t의 attention KV는 캐시, action token suffix만 매 step 재계산.
 
 ---
 
-## 5. 총평
+## 3. 데이터 및 학습 (Section V)
 
-| 항목 | 평가 |
-|------|------|
-| **Novelty** | ★★★★★ — Flow matching의 VLA 적용 선구 |
-| **Technical depth** | ★★★★☆ — 비공개 제한 |
-| **Practical impact** | ★★★★★ — Industry milestone |
-
-**강점**: Flow matching이 VLA에서의 표준 action head로 자리잡는 데 기여. Complex task 시연이 인상적. **약점**: 비공개.
+- **Pre-training mixture (Figure 4)**: 9.1% open-source (OXE Magic Soup, Bridge v2, DROID) + 90.9% π dataset (903M timestep, 7 robot configurations, 68 task).
+- **Weighting**: task-robot 조합 n에 대해 n^0.43 가중치로 imbalance 완화.
+- **Action vector zero-pad**: 18-dim까지 pad (largest robot 기준, dual-arm 2×7 + gripper 2 + base + torso).
+- **Post-training**: task별로 5h ~ 100h+의 curated data로 SFT.
 
 ---
 
-## 6. 🔥 예상 날카로운 질문 모음
+## 4. 실험 결과
 
-| # | 질문 | 핵심 답변 요점 |
-|---|------|---------------|
-| 1 | Diffusion (CogACT) vs Flow (pi0): 어느 것이 승자인가? | 현재까지 실험적으로 비슷. Flow가 추론 속도에서 유리 |
-| 2 | 오픈소스 대안은? | FLOWER, OpenVLA-OFT 등이 유사 성능을 open으로 달성 |
+### Out-of-box Direct Prompting (Section VI-A, Figure 7)
+5 task (Shirt Folding, Bussing Easy/Hard, Grocery Bagging, Toast)에서 normalized score (10 episode 평균):
+- π0 (700k step): 모든 task에서 baseline 대비 압도적 1위
+- π0 (parity, 160k step): OpenVLA·Octo·OpenVLA-UR5e·π0-small 모두 능가
+- OpenVLA: action chunk 미지원으로 dexterous task에서 거의 실패
+- Octo: action chunking은 가능하나 representational capacity 부족
 
-<!-- VERIFIED: abstract-only -->
+### Language Following (Section VI-B, Figure 9)
+- π0-flat / π0-human / π0-HL 비교 (3 task: Bussing, Table setting, Grocery bagging).
+- π0-HL (high-level VLM이 subtask 출력)은 π0-human (oracle subtask)에 근접한 성능 — autonomous하면서 expert guidance에 가까운 성능.
+- π0-small보다 π0가 일관되게 우월 → VLM pre-training이 instruction following에 결정적.
+
+### Fine-tuning to New Tasks (Section VI-C, Figure 10)
+다양한 difficulty의 downstream task 평가:
+- 가장 유사한 (stack bowls, towel folding) — pre-training과 가까움
+- 새 element 도입 (microwave) — semantic 일반화 필요
+- 완전 신규 (laundry folding 등) — fine-tuning 필요
+
+### Multi-Stage / Long Tasks
+Laundry folding은 dryer → hamper → folding table → 옷 종류별 folding의 5~20분 시퀀스 (Figure 2). 저자 표현으로 "longest dexterous tasks in the end-to-end robot learning literature".
+
+---
+
+## 5. 한계
+
+- **Inference cost**: 10-step Euler integration이 필요. action expert가 작아 latency를 줄였으나 50Hz에 맞추기 위한 KV 캐싱 등 engineering 필요 (Section IV).
+- **High-level policy 의존**: 복잡한 long-horizon은 외부 VLM (SayCan-style)이 subtask를 끊어줘야 best 성능 (Figure 9, π0-HL).
+- **Open-source 제한**: 모델 weight 비공개, 재현 어려움.
+- **Compute 비교의 어려움**: π0-small과의 비교에서 "smaller model + no VLM init" 두 변수가 얽혀 있음 (Section VI-B).
+
+---
+
+## 6. 총평
+
+π0는 robot foundation model의 "GPT-3 moment"에 가장 근접한 시도. 핵심 기여는 (1) **flow matching을 VLA에 본격 도입**, (2) **mixture-of-experts 식 action expert weights 분리**, (3) **10,000시간 cross-embodiment 데이터 scaling**이다. Figure 7의 baseline 대비 격차는 robot 데이터 scale과 architecture choice의 시너지를 입증하며, OpenVLA의 autoregressive 한계가 명확히 드러난 점이 후속 연구 (FAST, π0.5)의 동기를 제공했다. 한편 Transfusion (Zhou et al.) 아이디어를 robot domain에 가져온 것은 자연스러운 선택이지만, "왜 flow matching인가 vs diffusion"에 대한 ablation은 부족하다.
+
+---
+
+## 7. 예상 질문
+
+- **Q1**: 왜 flow matching인가? Diffusion 대비 우월성?
+  - A: Section IV에서 "diffusion variant"라고만 표현. Flow matching은 단순 linear path와 적은 inference step (10 vs 50)이 장점. 직접 비교 ablation은 없음.
+- **Q2**: action expert가 왜 별도 weights여야 하나?
+  - A: Transfusion (Section IV)을 따라가되 "robotics-specific tokens에 별도 weight를 쓰는 것이 성능 향상"이라 보고. MoE 관점.
+- **Q3**: π0-small 대비 향상이 정말 VLM pre-training 효과인가, 단지 큰 모델 효과인가?
+  - A: 저자 스스로 confounder를 인정 (Section VI-B). pre-training 없이 큰 모델을 안정적으로 학습하기 어렵다는 점이 confound.
+- **Q4**: OpenVLA가 그렇게 약한 이유?
+  - A: action chunk 미지원 + 7B인데도 cross-embodiment에서 unstable (Section VI-A의 Figure 7). UR5e-only fine-tune이 더 나음.
+- **Q5**: 50 Hz inference는 실제로 가능한가?
+  - A: action expert가 300M으로 작고, prefix KV cache 사용. Section IV / Appendix D에서 inference timing 명시.
+
+<!-- VERIFIED: pdf -->

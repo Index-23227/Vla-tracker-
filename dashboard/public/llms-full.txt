@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-25T08:29:01.678125
+# Generated: 2026-04-25T08:43:51.239103
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -174,8 +174,8 @@ MODEL: PLD
   Benchmarks:
     libero (avg=99.0): libero_avg=99.0
   Eval Conditions: {'libero': 'RL post-trained', 'simpler_env': 'RL post-trained'}
-  AI Review Summary: Probe-Learn-Distill (PLD) 3단계 프레임워크로, residual RL로 VLA의 실패 영역을 탐색(probe)하고, hybrid rollout으로 데이터를 수집(learn)하며, 이를 다시 supervised FT로 정제(distill)하여 LIBERO 99% 달성.
-  AI Review: Abstract-based
+  AI Review Summary: NVIDIA GEAR/CMU의 PLD는 Probe(잔차 RL specialist 학습) → Learn(VLA prior로 base policy probing 후 specialist takeover) → Distill(SFT)의 3단계 post-training pipeline으로, π0/OpenVLA 모두에서 LIBERO 평균 99% 이상을 달성하고 SimplerEnv에서 +24.9%의 절대 개선을 기록한 self-improving 데이터 flywheel.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: SimpleVLA-RL
@@ -452,8 +452,7 @@ MODEL: VLA-Thinker
     libero (avg=97.45): libero_spatial=98.7, libero_object=99.0, libero_goal=95.2, libero_long=96.9
     robotwin_v2 (avg=65.88): lift_pot=64.8, beat_hammer_block=82.5, pick_dual_bottles=65.4, place_phone_stand=36.6, move_can_pot=61.0, place_a2b_left=39.1, place_empty_cup=92.7, handover_mic=89.9, handover_block=52.8, stack_bowls_two=71.1, blocks_rank_rgb=79.3, put_bottles_dustbin=55.4, short_horizon_avg=62.3, medium_horizon_avg=70.7, long_horizon_avg=64.6
   Eval Conditions: {'libero': 'SFT + RL fine-tuned (GRPO)', 'robotwin_v2': 'SFT + RL fine-tuned (GRPO)'}
-  AI Review Summary: Perception을 "동적으로 호출 가능한 reasoning action"으로 모델링하여 multimodal embodied CoT를 구현하고, 2-stage training (SFT + RL alignment)으로 LIBERO 97.5% 달성.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: AnchorRefine
@@ -750,8 +749,7 @@ MODEL: UD-VLA
     libero (avg=91.75): libero_spatial=97.2, libero_object=97.8, libero_goal=93.6, libero_long=78.4
     calvin (avg=4.5): calvin_abc_d_avg_len=4.5
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-  AI Review Summary: 다중 modality(language reasoning + action)를 단일 이산 denoising diffusion trajectory에서 jointly 생성하는 통합 프레임워크로, CALVIN·LIBERO·SimplerEnv에서 SOTA 달성과 autoregressive 대비 4x 빠른 추론.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: ECoT
@@ -813,8 +811,7 @@ MODEL: UniVLA
     libero (avg=90.1): libero_spatial=96.8, libero_object=97.4, libero_goal=92.0, libero_long=74.2
     calvin (avg=4.1): calvin_abc_d_avg_len=4.1
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-  AI Review Summary: 비디오에서 task-centric latent action을 학습하여 action annotation 없는 데이터로도 cross-embodiment VLA를 구축, OpenVLA 대비 우수 성능을 적은 compute로 달성.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: FLARE
@@ -856,8 +853,8 @@ MODEL: pi0.5
     libero (avg=88.88): libero_spatial=96.2, libero_object=97.1, libero_goal=89.4, libero_long=72.8
     calvin (avg=4.2): calvin_abc_d_avg_len=4.2
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-  AI Review Summary: pi0를 확장하여 heterogeneous 태스크 co-training과 hybrid multi-modal 데이터(이미지, 언어, detection, subtask prediction)를 활용, 전혀 새로운 주거 환경에서 long-horizon dexterous manipulation을 zero-shot으로 수행.
-  AI Review: Abstract-based
+  AI Review Summary: π0를 확장한 π0.5는 mobile manipulator 데이터 (~400h)와 다양한 non-mobile robot, web data, high-level subtask, verbal instruction 등 heterogeneous source의 co-training으로 **훈련에 본 적 없는 실제 가정의 침실·주방을 청소**할 수 있는 첫 end-to-end VLA. Discrete FAST 토큰으로 pre-train한 뒤 flow-matching action expert로 post-train하는 hybrid recipe가 
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: ProbeFlow
@@ -897,8 +894,8 @@ MODEL: SpatialVLA
     libero (avg=88.05): libero_spatial=95.6, libero_object=96.0, libero_goal=90.2, libero_long=70.4
     simpler_env: google_robot_pick_coke_can=84.3, google_robot_move_near=72.1
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
-  AI Review Summary: Ego3D Position Encoding과 Adaptive Action Grids로 VLA에 공간적 이해를 부여하여, 1.1M 로봇 에피소드에서 사전학습하고 뛰어난 in-distribution 일반화와 out-of-distribution 적응 능력 달성.
-  AI Review: Abstract-based
+  AI Review Summary: Shanghai AI Lab + Tsinghua의 SpatialVLA는 PaliGemma2 위에 (1) **Ego3D Position Encoding** (ZoeDepth로 추정한 depth로 egocentric 3D 좌표를 SigLIP feature에 더함)과 (2) **Adaptive Action Grids** (Gaussian-fitted 분포로 polar coordinate를 비균등 grid로 양자화, action당 7 token → 3 token)을 추가하여, 1.1M episode pre-training으로 Simpler
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: DexVLA
@@ -1001,8 +998,8 @@ MODEL: pi0-FAST
   Benchmarks:
     libero (avg=86.1): libero_spatial=93.8, libero_object=95.4, libero_goal=88.0, libero_long=67.2
   Eval Conditions: {'libero': 'fine-tuned'}
-  AI Review Summary: Discrete cosine transform 기반 주파수 공간 action tokenization (FAST)을 제안하여, 기존 binning 대비 고주파 dexterous 태스크에서의 정확도를 크게 향상시키고 학습 시간을 최대 5배 단축.
-  AI Review: Abstract-based
+  AI Review Summary: Discrete Cosine Transform(DCT) + Byte-Pair Encoding(BPE)으로 robot action chunk를 압축하는 FAST tokenizer를 도입, autoregressive VLA가 50Hz 고주파 dexterous task에서도 기존 binning 방식이 완전히 실패하는 영역을 학습 가능하게 만들고, π0 diffusion VLA 성능을 매칭하면서 **5배 빠른 학습**을 달성. 1M action sequence로 훈련된 universal tokenizer FAST+를 함께 공개.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: CogACT
@@ -1065,8 +1062,8 @@ MODEL: HybridVLA
     libero (avg=85.75): libero_spatial=91.4, libero_object=94.2, libero_goal=87.6, libero_long=69.8
     calvin (avg=3.6): calvin_abc_d_avg_len=3.6
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-  AI Review Summary: Diffusion-based action generation과 autoregressive reasoning을 **단일 LLM 내에서 통합**하여, continuous action의 정밀성과 language reasoning의 맥락 이해를 동시에 달성.
-  AI Review: Abstract-based
+  AI Review Summary: Diffusion 기반 연속 action 생성과 next-token prediction 기반 autoregressive action 생성을 **단일 LLM(Llama-2 7B)** 안에서 collaborative training으로 통합하고, autoregressive token confidence로 두 action을 적응적 ensemble하여 RLBench 10 task SR 74%(OpenVLA 대비 +33%p, CogACT 대비 +14%p)를 달성한 PKU/BAAI/CUHK 논문(arXiv 2503.10631, 2025).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: pi0
@@ -1089,8 +1086,8 @@ MODEL: pi0
     robotwin_v1 (avg=46.5): robotwin_easy=58.2, robotwin_hard=34.8
     robocasa (avg=41.8): robocasa_avg=41.8
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'robotwin_v1': 'fine-tuned', 'robocasa': 'fine-tuned'}
-  AI Review Summary: Flow matching 기반 action generation을 사전학습된 VLM 위에 구축하여, 단일 팔·양팔·모바일 매니퓰레이터를 포함하는 다중 플랫폼에서 언어 지시 기반 범용 로봇 제어를 실현한 **Physical Intelligence의 flagship 모델**.
-  AI Review: Abstract-based
+  AI Review Summary: Physical Intelligence가 제안한 π0는 PaliGemma 3B VLM 위에 300M action expert를 추가하여 conditional flow matching으로 50Hz 연속 action chunk를 생성하는 generalist robot policy. 7종 robot platform·68 task·약 10,000시간의 데이터로 pre-train되었으며, laundry folding과 같은 수십 분 길이의 dexterous task에서 OpenVLA·Octo를 압도.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: ProgressVLA
@@ -1152,8 +1149,8 @@ MODEL: RDT-1B
     calvin (avg=3.4): calvin_abc_d_avg_len=3.4
     robotwin_v1 (avg=28.5): robotwin_easy=42.6, robotwin_hard=14.4
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'robotwin_v1': 'fine-tuned'}
-  AI Review Summary: 1.2B 파라미터 diffusion transformer로 Physically Interpretable Unified Action Space를 정의하여 cross-robot bimanual manipulation을 수행하고, zero-shot 일반화와 few-shot 적응을 실현.
-  AI Review: Abstract-based
+  AI Review Summary: 1.2B 파라미터 Diffusion Transformer를 1M+ 멀티로봇 trajectory에 사전학습하고, Physically Interpretable Unified Action Space를 도입해 ALOHA 양팔 로봇에서 zero-shot 일반화·few-shot 학습·dexterous 제어를 동시에 달성한 ICLR 2025 논문.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: SmoothVLA
@@ -1193,8 +1190,8 @@ MODEL: SmolVLA
     libero (avg=79.5): libero_spatial=88.6, libero_object=90.4, libero_goal=82.8, libero_long=56.2
     simpler_env: google_robot_pick_coke_can=64.8
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
-  AI Review Summary: 기존 VLA 대비 10배 작은 compact 모델로 single-GPU 학습과 consumer hardware 배포를 목표로 설계, asynchronous inference로 높은 제어 주파수 달성.
-  AI Review: Abstract-based
+  AI Review Summary: SmolVLM-2 backbone(상위 layer skipping)과 cross/self-attention을 interleave한 Flow Matching action expert(0.45B 총 파라미터)를 481개 community dataset 22.9K episode로 사전학습하고, async inference로 30% 빠른 실세계 제어를 달성한 Hugging Face의 open-source VLA(arXiv 2506.01844, 2025).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: HPT
@@ -1971,8 +1968,8 @@ MODEL: NaVILA
     LLM: LLaMA 3 8B
     Parameters: 8B
   Tags: 8B, navigation, hierarchical, legged-robot, open-source
-  AI Review Summary: VLA와 locomotion skill을 2-level 계층 구조로 통합하여, 다리 로봇에서의 vision-language navigation을 실현. Mid-level spatial language instruction을 생성하여 visual locomotion policy를 구동.
-  AI Review: Abstract-based
+  AI Review Summary: VILA 기반 VLA가 자연어 형태의 mid-level action(예: "turn right 30 degrees")을 생성하고, 단일 단계(single-stage) RL로 학습된 LiDAR 기반 visual locomotion policy가 이를 실행하는 2-level 계층 구조로, R2R-CE Val-Unseen에서 SR 54%, RxR-CE에서 SR 49.3%, 실세계 25 instructions에서 88% 성공률을 달성한 RSS 2025 논문.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: NORA
@@ -2041,8 +2038,7 @@ MODEL: RoboDual
     LLM: Llama-2 7B
     Parameters: 7B + 20M
   Tags: 7B+20M, dual-system, diffusion-transformer, cross-attention
-  AI Review Summary: VLA-based generalist (System 2)와 diffusion-transformer specialist (System 1)를 20M 학습 가능 파라미터로 결합하여, real-world 26.7% 향상과 CALVIN 12% 향상을 3.8x 높은 제어 주파수에서 달성.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: RoboMamba
@@ -2098,8 +2094,7 @@ MODEL: SAM2Act
   Benchmarks:
     rlbench (avg=90.55): rlbench_18tasks=86.8, memorybench=94.3
   Eval Conditions: {'rlbench': 'fine-tuned'}
-  AI Review Summary: SAM2의 visual foundation model 표현을 multi-resolution upsampling으로 활용하고, memory mechanism을 추가하여 RLBench 86.8% 및 memory-dependent 태스크에서 94.3% (MemoryBench) 달성.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: SAMoE-VLA
@@ -2185,8 +2180,8 @@ MODEL: TinyVLA
     LLM: Phi-2 (2.7B) or smaller
     Parameters: 422M-1.3B
   Tags: 422M-1.3B, diffusion, efficient, lightweight, open-source, LoRA
-  AI Review Summary: 사전학습 단계를 제거하고 빠른 추론과 데이터 효율성에 초점을 맞춘 compact VLA로, OpenVLA를 성능에서 match하면서 언어·물체·환경 변화에 대한 강건한 일반화 시현.
-  AI Review: Abstract-based
+  AI Review Summary: 1B 미만 VLM(LLaVA-Phi 계열, Pythia 백본)에 LoRA fine-tuning + Diffusion Policy head를 결합하여, **OpenX 사전학습 없이도** 단일팔 5 task 평균 SR 94.0%를 달성하고 OpenVLA(7B, 970K demos pretrain) 대비 +25.7%p 우위와 **20배 빠른 추론**(14 ms vs 292 ms)을 보인 RA-L 2025 논문.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: TraceVLA
