@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-25T08:50:14.019668
+# Generated: 2026-04-25T08:53:20.240920
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -790,8 +790,8 @@ MODEL: InstructVLA
     calvin (avg=4.4): calvin_abc_d_avg_len=4.4
     simpler_env: google_robot_pick_coke_can=86.4, google_robot_move_near=74.2
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'simpler_env': 'fine-tuned'}
-  AI Review Summary: Multimodal instruction tuning에 MoE adaptation을 적용하여 embodied reasoning과 action generation을 jointly 최적화하는 VLA-IT (VLA Instruction Tuning) 패러다임 제안.
-  AI Review: Abstract-based
+  AI Review Summary: Eagle2-2B VLM을 backbone으로 사용해 latent action queries + MoE LoRA + flow matching action expert를 결합, 650K VLA-IT corpus와 multimodal data로 공동 학습하여 SimplerEnv에서 SpatialVLA 대비 +33% (61.2 vs 45.9 평균), SimplerEnv-Instruct에서 OpenVLA(FT&GPT) 대비 +29% (46.9 vs 35.6)를 달성한 ICLR 2026 spotlight 후보.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: UniVLA
@@ -1041,8 +1041,8 @@ MODEL: GR00T-N1
     libero (avg=85.75): libero_spatial=93.2, libero_object=94.8, libero_goal=88.6, libero_long=66.4
     robocasa (avg=32.1): robocasa_avg=32.1
   Eval Conditions: {'libero': 'fine-tuned', 'robocasa': 'fine-tuned'}
-  AI Review Summary: NVIDIA의 humanoid 로봇용 VLA foundation model로, dual-system 아키텍처(VLM System 2 + diffusion transformer System 1)를 채택하고 실제/합성/인간 비디오 데이터를 혼합 학습하여 다중 embodiment에서 SOTA 달성.
-  AI Review: Abstract-based
+  AI Review Summary: NVIDIA GEAR이 공개한 humanoid 전용 2.2B VLA로, Eagle-2 VLM(SigLIP-2 vision + SmolLM2 LLM, 1.34B)을 System 2(10Hz)로, flow-matching diffusion transformer를 System 1(120Hz)로 결합한 dual-system 구조이며, 88h 실제 GR-1 + 827h neural trajectory + 6,500h sim의 heterogeneous data로 학습해 RoboCasa(32.1%)·DexMimicGen(66.5%)·GR-1 t
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: HybridVLA
@@ -1211,8 +1211,8 @@ MODEL: HPT
     libero (avg=77.5): libero_spatial=86.4, libero_object=89.2, libero_goal=78.6, libero_long=55.8
     simpler_env: google_robot_pick_coke_can=62.4
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
-  AI Review Summary: 52개 데이터셋의 heterogeneous 로봇 데이터에서 공유 가능한 policy trunk를 사전학습하여, embodiment-agnostic representation을 학습하고 unseen 태스크에서 20%+ fine-tuning 성능 향상 달성.
-  AI Review: Abstract-based
+  AI Review Summary: MIT/Meta FAIR(Lirui Wang, Xinlei Chen, Jialiang Zhao, Kaiming He)가 제안한 stem-trunk-head 모듈러 아키텍처로, 52개 이질적 robot dataset(real teleop + simulation + deployed robots + human videos, 200K trajectory)에서 sharable transformer trunk를 사전학습하고 새 embodiment로 transfer 시 fine-tuned 성능을 20%+ 향상시킨 NeurIPS 2024 Spot
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: OpenVLA
@@ -1832,8 +1832,7 @@ MODEL: InternVLA-M1
     Parameters: based on Qwen2.5-VL
   Tags: Qwen2.5-VL, spatial-grounding, dual-system, DiT-action, open-source
   Eval Conditions: {'simpler_env': 'fine-tuned'}
-  AI Review Summary: Spatial grounding을 language instruction과 robot action을 연결하는 핵심 고리로 설정하고, 2-stage pipeline (spatial reasoning → action generation)으로 일반화된 instruction following 달성.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: KineVLA
@@ -1929,8 +1928,7 @@ MODEL: Motus
     libero: libero_long=97.6
     robotwin_v2 (avg=87.84): robotwin_v2_easy_avg=88.66, robotwin_v2_hard_avg=87.02
   Eval Conditions: {'libero': 'fine-tuned', 'robotwin_v2': 'fine-tuned'}
-  AI Review Summary: Latent action space에서의 통합 world model로, 기존 pretrained model과 motion information을 결합하는 Mixture-of-Transformer 아키텍처를 통해 video prediction, action prediction, planning을 유연하게 수행.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: NanoVLA
@@ -2052,8 +2050,8 @@ MODEL: RoboMamba
     LLM: Mamba 2.7B (SSM, not transformer LLM)
     Parameters: 3.2B (2.7B Mamba + CLIP)
   Tags: 3.2B, Mamba-SSM, MLP-action-head, efficient
-  AI Review Summary: Mamba state space model을 VLA backbone으로 활용하여, Transformer 대비 3배 빠른 추론과 우수한 robotic reasoning을 최소한의 파라미터 fine-tuning으로 달성.
-  AI Review: Abstract-based
+  AI Review Summary: Peking University/AI2 Robotics가 제안한 NeurIPS 2024 efficient VLA로, CLIP ViT-L + Mamba-2.7B (selective SSM, linear complexity)에 7MB(~3.7M, 모델 파라미터의 0.1%) 단순 MLP policy head만 fine-tune하여 SAPIEN 시뮬에서 ManipLLM 대비 seen +7.0%p / unseen +2.0%p, A100에서 9.0Hz inference(OpenVLA 3.4Hz, ManipLLM 1.1Hz 대비 3~7×)를 달
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: RT-2-X
@@ -2144,8 +2142,8 @@ MODEL: SuSIE
     LLM: None
     Parameters: None
   Tags: subgoal-generation, image-editing, hierarchical, manipulation, open-source
-  AI Review Summary: Image-editing diffusion model (InstructPix2Pix)을 high-level planner로 활용하여 현재 관측에서 중간 subgoal 이미지를 생성하고, low-level policy가 이를 달성하는 2-stage 구조로 CALVIN에서 기존 language-conditioned policy 대비 큰 일반화 달성.
-  AI Review: Abstract-based
+  AI Review Summary: InstructPix2Pix를 finetune한 image-editing diffusion이 텍스트 명령에 대응하는 **subgoal 이미지**를 생성하고, goal-conditioned diffusion policy가 그 subgoal을 추종하는 2-단계 hierarchical 구조. CALVIN ABC→D zero-shot에서 5-task 평균 0.26으로 SOTA를 달성하고, 실제 WidowX에서 RT-2-X(55B)를 능가 (Black & Nakamoto 등, UC Berkeley/Stanford/Google DeepMind
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: TacVLA
@@ -2199,8 +2197,8 @@ MODEL: TraceVLA
   Benchmarks:
     simpler_env: google_robot_pick_coke_can=72.8, google_robot_move_near=56.4
   Eval Conditions: {'simpler_env': 'fine-tuned'}
-  AI Review Summary: State-action trajectory를 이미지 위에 시각적 trace로 오버레이하여 VLA의 spatial-temporal awareness를 강화, SimplerEnv 10%↑ 및 real-robot 3.5x 향상 달성.
-  AI Review: Abstract-based
+  AI Review Summary: Co-Tracker로 추출한 active point trajectory를 원본 이미지 위에 시각적으로 overlay하는 **visual trace prompting**으로 OpenVLA-7B를 finetune. SimplerEnv Google Robot 3-task 평균에서 OpenVLA 대비 +7.5%p, real-world WidowX-250 8 task에서 OpenVLA 대비 약 3.5× success를 달성한 ICLR 2025 논문 (UMD/MSR).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: TwinBrainVLA
@@ -2312,8 +2310,7 @@ MODEL: UP-VLA
     Parameters: 1.3B
   Tags: 1.3B, future-prediction, unified-understanding, ICML-2025, open-source
   Eval Conditions: {'calvin': 'fine-tuned'}
-  AI Review Summary: Multi-modal understanding과 future prediction 목적함수를 통합하여 VLM의 low-level spatial 정보 캡처 능력을 보강, CALVIN ABC-D에서 33% 향상과 real-world manipulation 개선.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: VLA-RL
