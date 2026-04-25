@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-25T08:43:51.239103
+# Generated: 2026-04-25T08:50:14.019668
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -728,8 +728,8 @@ MODEL: LingBot-VLA
     calvin (avg=4.5): calvin_abc_d_avg_len=4.5
     robotwin_v1 (avg=61.5): robotwin_easy=74.2, robotwin_hard=48.8
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned', 'robotwin_v1': 'fine-tuned'}
-  AI Review Summary: 9개 인기 양팔 로봇 구성에서 약 20,000시간의 실제 데이터를 수집하여 학습한 실용적 VLA foundation model로, 효율적 학습과 폭넓은 일반화를 목표.
-  AI Review: Abstract-based
+  AI Review Summary: Ant Group/Robbyant이 9종 dual-arm 로봇 플랫폼에서 수집한 약 20,000시간 실제 데이터로 사전학습한 Qwen2.5-VL-3B 기반 MoT(Mixture-of-Transformers) + flow matching VLA로, GM-100 100태스크/3플랫폼 22,500 trial 평가에서 π0.5/GR00T-N1.6/WALL-OSS를 모두 능가하는 SOTA를 기록했다.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: UD-VLA
@@ -1127,8 +1127,8 @@ MODEL: RoboVLM
     libero (avg=84.05): libero_spatial=91.8, libero_object=93.4, libero_goal=86.8, libero_long=64.2
     calvin (avg=3.5): calvin_abc_d_avg_len=3.5
   Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-  AI Review Summary: 8개 VLM backbone, 4개 policy architecture, 600+ 실험을 통해 VLA 설계의 핵심 요인을 체계적으로 분석하고, 이를 바탕으로 구축한 RoboVLMs가 manipulation 벤치마크에서 SOTA 달성.
-  AI Review: Abstract-based
+  AI Review Summary: 8 VLM backbone × 4 policy architecture × 600+ 실험을 통해 VLA 설계 4대 질문(Why/Which/How/When)을 체계적으로 검증하고, KosMos+Policy-Head 구성이 CALVIN/SimplerEnv에서 SOTA를 달성함을 보임 (ICLR 2025).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: RDT-1B
@@ -1782,8 +1782,7 @@ MODEL: Humanoid-VLA
     LLM: LLM (language-motion alignment)
     Parameters: not disclosed
   Tags: humanoid, whole-body-control, language-motion-alignment, egocentric
-  AI Review Summary: Language understanding, egocentric perception, motion control을 통합하는 humanoid 전용 VLA로, language-motion 사전정렬과 self-supervised augmentation을 통해 범용 휴머노이드 제어 실현.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: HY-Embodied-0.5
@@ -1816,8 +1815,7 @@ MODEL: InternVLA-A1
     LLM: Qwen2.5 (2B variant) / Qwen3 (3B variant)
     Parameters: 2B / 3B
   Tags: 2B-3B, MoT, unified-UGA, open-source
-  AI Review Summary: Scene understanding, visual foresight generation, action execution을 위한 세 개의 전문가(expert)를 Mixture-of-Transformers 아키텍처로 통합하고 masked self-attention으로 조율하는 통합 VLA.
-  AI Review: Abstract-based
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: InternVLA-M1
@@ -2074,8 +2072,8 @@ MODEL: RT-2-X
   Benchmarks:
     simpler_env: google_robot_pick_coke_can=72.5, google_robot_move_near=50.3, google_robot_open_drawer=38.6
   Eval Conditions: {'simpler_env': 'fine-tuned'}
-  AI Review Summary: 21개 기관 22종 로봇에서 527개 스킬을 포괄하는 대규모 cross-embodiment 데이터셋을 구축하고, RT-X 모델이 타 플랫폼의 경험을 활용하여 positive transfer를 달성함을 실증.
-  AI Review: Abstract-based
+  AI Review Summary: 21개 기관 22 로봇 embodiment에서 527 skill / 160,266 task를 모은 Open X-Embodiment(OXE) dataset을 공개하고, 동일 robotics-mixture로 학습한 RT-1-X(35M)·RT-2-X(55B)가 multi-domain positive transfer를 달성함을 6 robot · 3,600 trial 평가로 실증 (ICRA 2024).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: SAM2Act
@@ -2094,6 +2092,7 @@ MODEL: SAM2Act
   Benchmarks:
     rlbench (avg=90.55): rlbench_18tasks=86.8, memorybench=94.3
   Eval Conditions: {'rlbench': 'fine-tuned'}
+  AI Review Summary: 작성 시점에서 venue 정보가 명확히 확인되지 않아 venue 표기는 생략. 본 리뷰는 arXiv:2501.18564v4 기준.
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -2275,8 +2274,8 @@ MODEL: UniPi
     LLM: None
     Parameters: None
   Tags: video-diffusion, planning, language-conditioned, inverse-dynamics
-  AI Review Summary: 순차적 의사결정을 text-conditioned video generation 문제로 재정의하여, 생성된 비디오에서 inverse dynamics로 action을 추출하는 **video-as-policy** 패러다임의 선구적 연구.
-  AI Review: Abstract-based
+  AI Review Summary: 순차적 의사결정 문제를 text-conditioned video generation으로 재정의(UPDP, Unified Predictive Decision Process)하고, 생성된 frame sequence에서 inverse dynamics로 action을 추출하는 **video-as-policy** 패러다임의 선구적 연구. CLIPort/조합 생성 task에서 baseline 대비 큰 폭의 향상을 보고 (NeurIPS 2023, Du et al.).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: UniT

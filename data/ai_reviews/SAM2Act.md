@@ -2,6 +2,8 @@
 
 **Fang, Grotz, Pumacay, Wang, Fox, Krishna, Duan, 2025 (arXiv:2501.18564v4, U. Washington / NVIDIA / AI2 / UC San Pablo)**
 
+> 작성 시점에서 venue 정보가 명확히 확인되지 않아 venue 표기는 생략. 본 리뷰는 arXiv:2501.18564v4 기준.
+
 ## 한 줄 요약
 RVT-2의 multi-view coarse-to-fine transformer 위에 SAM2 image encoder + multi-resolution upsampling을 결합하여 RLBench 18 task 평균 86.8%를 달성하고, SAM2의 memory bank/encoder/attention을 차용한 SAM2Act+로 spatial memory 의존 태스크(MemoryBench) 평균 94.3%를 기록한 keyframe-based 3D manipulation policy.
 
@@ -31,13 +33,15 @@ RVT-2의 multi-view coarse-to-fine transformer 위에 SAM2 image encoder + multi
 
 ## 한계
 - **연속 제어 미지원**: Keyframe-based pose 예측 정책으로 dexterous continuous control(예: 손가락 제어)로의 확장이 제한됨 (§6).
-- Memory window 길이가 task별로 고정되어 가변 길이 시퀀스에 약함 (§6).
-- 저자들이 직접 실험한 결과 메모리에 spatial 정보는 잘 저장되지만 색상 등 semantic 정보 보존은 어려웠다고 명시 (§6).
-- 32× H100/A100 GPU 사용으로 학습 비용이 크고 SAM2 encoder param이 정확히 공개되지 않음(YAML "not disclosed").
-- LIBERO·CALVIN 평가가 없어 다른 VLA 계열과의 직접 비교가 제한적이다.
+- **고정 메모리 윈도우**: Memory window 길이가 task별로 고정되어 가변 길이 시퀀스에 약함 (§6).
+- **Semantic 메모리 부재**: 저자들이 직접 실험한 결과 메모리에 spatial 정보는 잘 저장되지만 색상 등 semantic 정보 보존은 어려웠다고 명시 (§6).
+- **계산 비용**: 32× H100/A100 GPU 사용으로 학습 비용이 크고 SAM2 encoder param이 정확히 공개되지 않음(YAML "not disclosed").
+- **벤치마크 커버리지 협소**: LIBERO·CALVIN 평가가 없어 다른 VLA 계열과의 직접 비교가 제한적. RLBench·Colosseum·MemoryBench 모두 RVT-2 후속작 생태계 위주.
 
 ## 총평
 RVT-2가 정의한 multi-view 2.5D 키프레임 회귀 패러다임에 (i) SAM2의 풍부한 멀티해상도 시각 표현, (ii) 메모리 모듈을 결합해 RLBench·Colosseum·MemoryBench 3축에서 SOTA를 달성한 단단한 후속작이다. 특히 Insert Peg에서 2× 가까운 개선과 Colosseum 환경 perturbation에서 -4.3%로 거의 robust한 점은 vision foundation model의 표현이 manipulation policy의 일반화에 직접 기여함을 보여주는 강한 증거다. MemoryBench라는 새 벤치마크 제안 자체도 비-Markov 의존 작업의 평가 방법론으로 가치가 크다.
+
+설계상 RVT-2 위에 plug-in 형태로 SAM2 encoder + cascade upsampler + memory 모듈을 얹은 구조라 다른 multi-view 3D policy(예: 3D Diffuser Actor, Act3D)에도 이식 가능성이 높다. 이는 향후 SAM3, DINOv3 같은 더 강력한 vision foundation model로의 자연스러운 업그레이드 경로를 열어둔다는 점에서 미래지향적 설계라 평가할 수 있다.
 
 ## 예상 질문
 1. **왜 SAM2 → SAM으로 바꾸면 성능이 크게 떨어지는가?**

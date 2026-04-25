@@ -5,6 +5,11 @@
 ## 한 줄 요약
 이미지 토큰(VQ visual tokenizer)과 action 토큰(FAST tokenizer)을 단일 시퀀스에 놓고, hybrid attention(intra-modal bidirectional + inter-modal causal)과 동기적 이산 확산 과정 JD3P로 future image와 action을 함께 denoise함으로써, CALVIN ABCD→D avg.len 4.64, LIBERO 92.7%, SimplerEnv-WidowX 62.5%를 autoregressive 대비 4.3× 빠른 속도로 달성한 통합 VLA.
 
+## 핵심 기여
+- **JD3P (Joint Discrete Denoising Diffusion Process)**: future image와 action을 동일 trajectory에서 동기적 denoise — 매 step cross-modal attention으로 image guidance가 action에 지속 주입.
+- **Hybrid attention**: intra-modal bidirectional + inter-modal causal로 modality 간 정보 누설 차단 + image/action 내부의 풍부한 상호작용 보존.
+- **Inference acceleration**: KV-cache + special token prefilling + vocabulary remapping + confidence-based decoding으로 AR 대비 4.3× 가속하면서 정확도 동시 개선.
+
 ## 배경
 "Unified VLA"는 이미지 생성과 action 예측을 함께 다루어 시각적 chain-of-thought를 활용하는 흐름이지만, 기존 방법은 두 패러다임 모두 단점이 있다 (Table 1):
 1) **Extrinsic experts** (GR-1, SEER, DreamVLA, F1, UP-VLA): 외부 vision encoder/decoder를 두어 modality 정렬에서 misalignment, 복잡성, weak coupling이 발생.
@@ -27,18 +32,30 @@
 - **Decoding mechanism (Table 7)**: AR 4.18@50tok/s, Jacobi 4.16@102, Independent diffusion 4.35@144, **JD3P 4.64@219**. 정확도와 속도 동시 개선이 핵심 기여.
 
 ## 한계
-- 사전학습 비용이 명시적으로 공개되지 않았고, 학습 코드/체크포인트가 공개되지 않은 상태(YAML `code_url: null`, `open_source: false`).
-- VQ visual tokenizer(MoVQ)와 FAST action tokenizer 두 외부 도구에 의존 — 이들의 reconstruction loss가 상한이 됨.
-- 실세계 평가는 Fig. 3 등 정성 위주로 보고되어 있으며, 다양한 embodiment에서의 정량 robustness 측정은 제한적.
-- Long-horizon temporal CoT(여러 sub-goal image 시퀀스 예측)나 sparse-reward RL과의 결합은 future work.
+- **공개성 부족**: 사전학습 비용이 명시적으로 공개되지 않았고, 학습 코드/체크포인트가 공개되지 않은 상태(YAML `code_url: null`, `open_source: false`). 8× H100, ~24h 학습 명시는 LIBERO 한정.
+- **외부 tokenizer 의존**: VQ visual tokenizer(MoVQ)와 FAST action tokenizer 두 외부 도구에 의존 — 이들의 reconstruction loss가 상한이 됨. 새로운 embodiment의 action 분포에는 FAST 재학습이 필요.
+- **실세계 평가 제한**: Fig. 3 등 정성 위주로 보고되어 있으며, 다양한 embodiment에서의 정량 robustness 측정은 제한적.
+- **Long-horizon CoT 미지원**: 여러 sub-goal image 시퀀스를 예측하는 multi-step visual CoT나 sparse-reward RL과의 결합은 future work.
 - **YAML 점수 불일치**: 본 리포 `data/models/ud_vla.yaml`은 CALVIN 4.5, LIBERO 평균 91.75 (97.2/97.8/93.6/78.4)로 표기되어 있으나, 논문 Table 2/3의 실제 값은 4.64, 92.7% (94.1/95.7/91.2/89.6). 특히 Long suite 78.4 vs 89.6은 큰 차이라 데이터 갱신 필요.
 
 ## 총평
 "image와 action을 같은 vocabulary와 같은 denoising step 안에 묶어 매 iteration마다 cross-modal interaction을 강제"한다는 단순하지만 강력한 통일 원리를 제시한 ICLR 2026 논문. CoT-VLA(autoregressive image + diffusion action)와 비교했을 때, 동일한 unified token space를 공유하면서도 디코딩 단계까지 합쳐 4× 가속 + 정확도 개선을 동시에 달성한 점이 핵심 기여. Hybrid attention의 modality-별 분리 설계와 future image generation을 visual CoT로 활용한다는 ablation 결과는 후속 unified VLA 연구에 강한 베이스라인을 제공한다.
 
+특히 Table 1의 paradigm 비교에서 명확히 보이듯, UD-VLA는 "extrinsic experts 없음 + 단일 decoding process + diffusion-based"라는 셋의 교집합을 처음으로 깨끗하게 채운 모델이다. 이는 LLM의 next-token prediction이 텍스트에서 차지한 위치를 robotics의 multimodal 통합 학습에서 차지할 가능성을 시사한다.
+
 ## 예상 질문
-1. Future image 예측이 정말 action에 도움이 되는가, 아니면 단순 정규화 효과인가? — Table 6에서 Null vs Current vs Future가 4.21 → 4.39 → 4.64로 monotonic 증가, "단지 fine-grained perception" 가설(Current)을 넘어서는 추가 이득 0.25 → temporal anticipation의 직접 기여 (§4.3).
-2. CoT-VLA와 무엇이 본질적으로 다른가? — CoT-VLA는 이미지를 AR로 먼저 다 그리고 그 후 action을 diffusion으로 디코드(AR-Diff). UD-VLA는 두 modality를 동일 trajectory에서 동시 denoise(JD3P). 매 step cross-modal attention이 가능하다는 점이 결정적 (Table 1, §1).
-3. 4× 속도 개선의 출처는? — KV-cache + prefilled special token + remapping + confidence-based parallel unmasking. AR의 token-by-token 50 tok/s → JD3P 219 tok/s (Table 7).
+1. **Future image 예측이 정말 action에 도움이 되는가, 아니면 단순 정규화 효과인가?**
+   - Table 6에서 Null vs Current vs Future가 4.21 → 4.39 → 4.64로 monotonic 증가.
+   - "단지 fine-grained perception" 가설(Current 재구성)이 4.39, Future는 +0.25 추가 이득 → temporal anticipation의 직접 기여 (§4.3).
+2. **CoT-VLA와 무엇이 본질적으로 다른가?**
+   - CoT-VLA는 이미지를 AR로 먼저 다 그리고 그 후 action을 diffusion으로 디코드(AR-Diff).
+   - UD-VLA는 두 modality를 동일 trajectory에서 동시 denoise(JD3P). 매 step cross-modal attention이 가능 (Table 1, §1).
+   - 결과적으로 LIBERO 92.7 vs CoT-VLA 81.1, +11.6%pp 격차 (Table 3).
+3. **4× 속도 개선의 출처는?**
+   - KV-cache + prefilled special token + remapping(vocabulary 후보 축소) + confidence-based parallel unmasking.
+   - AR의 token-by-token 50.2 tok/s → JD3P 219.3 tok/s (Table 7). Jacobi(101.6)나 Independent diffusion(144.4)보다도 1.5~2× 빠름.
+4. **DreamVLA와 거의 비슷한 LIBERO 평균인데 어떤 부분이 강점인가?**
+   - DreamVLA는 외부 expert encoder/decoder를 두는 paradigm — extra modality 정렬 부담이 있음.
+   - UD-VLA는 외부 expert 없이 unified token space에서 단일 모델로 동작, Long suite 89.6 vs DreamVLA 89.5로 동급, Spatial 94.1 vs 97.5로는 약간 양보하지만 inference 속도와 단순성에서 우위 (Table 1, Table 3).
 
 <!-- VERIFIED: pdf -->

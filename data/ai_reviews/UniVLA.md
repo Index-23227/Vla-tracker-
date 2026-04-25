@@ -5,6 +5,11 @@
 ## 한 줄 요약
 DINOv2 feature space 위에서 language-conditioned VQ-VAE inverse/forward dynamics model로 task-centric latent action을 비지도 학습하고, Prismatic-7B VLM에 |C|=16개 ACT 토큰을 추가해 cross-embodiment generalist policy를 학습 — LIBERO 95.2%, CALVIN ABC→D avg.len 3.80, R2R navigation 47.1% oracle 성공률을 OpenVLA 대비 1/20 GPU-hour로 달성.
 
+## 핵심 기여
+- 비지도 latent action을 비디오만으로 학습하는 framework — action label 없는 web-scale data 활용 가능.
+- DINOv2 feature 공간 + 언어 conditioning으로 task-relevant/irrelevant dynamics 명시적 분리 (이중 codebook).
+- 동일 model로 manipulation(LIBERO/CALVIN/SimplerEnv) + navigation(R2R) + 실세계 4 task 모두에서 SOTA, OpenVLA 대비 1/20 사전학습 compute, 1/10 downstream data.
+
 ## 배경
 OpenVLA·RT-2 등 기존 VLA는 action label 보유 데이터에만 의존해 internet-scale 비디오를 활용하지 못했고, embodiment 간 action space 이질성이 transfer를 막았다 (§1). LAPA[87], IGOR[16], Genie[12]는 raw pixel 재구성 기반 latent action을 도입했으나, 카메라 흔들림·외부 agent 움직임 등 task-irrelevant dynamics까지 포착해 policy 학습에 노이즈로 작용한다는 한계가 있다 (§II.C). UniVLA의 핵심 통찰은 "DINOv2 patch feature 공간에서 inverse dynamics를 학습하고, 언어 instruction을 conditioning으로 줘서 task-irrelevant 변화를 별도 codebook으로 분리(decouple)"하는 것이다 (§III.A, Fig. 2).
 
@@ -16,12 +21,22 @@ OpenVLA·RT-2 등 기존 VLA는 action label 보유 데이터에만 의존해 in
 - **History-as-CoT**: 직전 latent action 토큰들을 prompt에 포함시켜 CoT 식 sequential context 제공 — multi-frame visual history 없이도 +16.5% R2R, +3.9% LIBERO-Long.
 
 ## 실험 결과
+### Manipulation
 - **LIBERO (Table I)**: Full pretraining 모델이 Spatial 96.5 / Object 96.8 / Goal 95.6 / Long 92.0, 평균 95.2%로 OpenVLA(76.5%)·LAPA(65.7%)·MaIL(83.5%)·MDT(76.1%)를 모두 능가. Bridge-only 사전학습만으로도 평균 92.5%, Human(Ego4D) 단독은 88.7%로, 데이터 scaling이 monotonic하게 도움.
 - **CALVIN ABC→D (Table A-II)**: avg.len 3.80, 1→5 task 95.5/85.8/75.4/66.9/56.5. RoboDual(3.66), CLOVER(3.53), GR-1(3.06), OpenVLA(3.27) 대비 SOTA. UniVLA는 단일 third-view RGB만 사용한다는 제약 하의 결과.
-- **VLN-CE R2R (Fig. 6)**: Oracle success 47.1%, OpenVLA(17.5%) 대비 +29.6%. NaVid(49.1%) 수준에 단일 RGB만으로 도달. Seq2Seq 8.1, CMA 14.0 대비 압도적.
-- **SimplerEnv-WidowX (Table A-III)**: Full fine-tune 47.9%, Decoder-only 35.4%. OpenVLA 1.0%, Octo-Small 30.0%, RoboVLM 31.3% 대비 SOTA. Bridge가 사전학습에 포함된 점을 고려해 decoder-only 평가도 함께 보고하는 점이 인상적.
-- **Real-world (Fig. 5)**: Store screwdriver, Clean cutting board, Fold towel twice, Stack tower of Hanoi 4 task에서 평균 81.7% 성공률, OpenVLA 45.0%, LAPA 38.3%, Diffusion Policy 33.3% 대비 +36.7%. 변형 객체(towel) 시나리오 86.7%.
-- **Ablation (Table III, IV, Fig. 10)**: Task-irrelevant latent만 사용 시 LIBERO-Long ≈0%, task-centric 사용 시 92.0%로 decoupling 효과 입증. 10% LIBERO-Goal 데이터로 86.3% (OpenVLA 100% 학습본의 79.2% 능가). Action decoder의 cross-attention 설계가 autoregressive decoder 대비 LIBERO-Long +42.1%pp 이득.
+- **SimplerEnv-WidowX (Table A-III)**: Full fine-tune 47.9%, Decoder-only 35.4%. OpenVLA 1.0%, Octo-Small 30.0%, RoboVLM 31.3% 대비 SOTA. Bridge가 사전학습에 포함된 점을 고려해 decoder-only 평가도 함께 보고하는 점이 인상적. Put Eggplant in Yellow Basket 80.6%(decoder-only)~93.0%(full).
+
+### Navigation
+- **VLN-CE R2R (Fig. 6)**: Oracle success 47.1%, OpenVLA(17.5%) 대비 +29.6%. NaVid(49.1%, 전체 history 입력) 수준에 단일 RGB만으로 도달. Seq2Seq 8.1, CMA 14.0, LLaVA-Nav 10.8 대비 압도적.
+
+### 실세계
+- **Real-world (Fig. 5)**: Store screwdriver, Clean cutting board, Fold towel twice, Stack tower of Hanoi 4 task에서 평균 81.7% 성공률, OpenVLA 45.0%, LAPA 38.3%, Diffusion Policy 33.3% 대비 +36.7%. 변형 객체(towel) 시나리오 86.7%, 정밀(stack hanoi) 93.3%.
+
+### Ablation
+- **Latent action design (Table III)**: Task-irrelevant latent만 사용 시 LIBERO-Long ≈0%, task-centric 사용 시 92.0%로 decoupling 효과 입증. Genie 식 raw-pixel latent 대비 일관된 우위.
+- **Decoder design (Table IV)**: cross-attention decoder 대비 autoregressive decoder는 LIBERO-Long에서 -42.1%pp 손실. Visual feature를 query에 활용하는 설계가 핵심.
+- **Data efficiency (Fig. 10)**: 10% LIBERO-Goal 데이터로 86.3% — OpenVLA 100% 학습본의 79.2% 능가. 50% Long 데이터로 SOTA.
+- **History-as-CoT**: 직전 latent action 토큰을 prompt prefix로 주입 시 R2R +16.5%, LIBERO-Long +3.9%.
 
 ## 한계
 - 모든 사전학습이 BridgeData·OXE·GNM·Ego4D에 한정 — 비-egocentric 산업 영상이나 다양한 카메라 위치로의 일반화 검증 부족.
@@ -34,8 +49,18 @@ OpenVLA·RT-2 등 기존 VLA는 action label 보유 데이터에만 의존해 in
 "action label 없이 비디오에서 학습한 task-centric latent space + 768→16 vocab compaction + Prismatic-7B 위 next-token prediction"이라는 아이디어를 일관성 있게 밀어붙여, OpenVLA 대비 1/20 compute·1/10 downstream data로 다중 벤치마크에서 SOTA를 달성한 모범적 generalist VLA 레시피다. DINOv2 + 언어 conditioning으로 task-relevant dynamics를 분리하는 설계는 이후 IGOR-2, LAPA 후속 연구에 직접 영향을 끼쳤고, navigation·manipulation·real-world 모두에서 통하는 unified action space의 가능성을 확실히 보였다. RSS 2025 채택.
 
 ## 예상 질문
-1. Latent action |C|=16이 너무 작지 않나? — Table III에서 task-centric vs task-irrelevant 분리만으로도 충분히 표현력 확보, 압축 자체가 학습 수렴을 4× 가속한다고 §III.B에서 주장. Action chunk N=4와 결합되면 16^4=65k 공간이라 충분하다는 입장.
-2. OpenVLA보다 적은 compute로 어떻게 SOTA를 달성하나? — Action vocabulary 압축 + DINOv2 feature 공간의 prediction(픽셀 vs DINO)이 핵심. Bridge-only로 사전학습해도 OpenVLA OXE-full보다 LIBERO 평균 92.5% > 76.5% (Table I).
-3. "History-as-CoT"는 정확히 무엇인가? — 직전 latent action 토큰들을 prompt prefix로 주입하는 방식. R2R에서 +16.5%, LIBERO-Long에서 +3.9% 이득 (§III.B 후반 + Sec. C ablation).
+1. **Latent action |C|=16이 너무 작지 않나?**
+   - Table III에서 task-centric vs task-irrelevant 분리만으로도 충분히 표현력 확보, 압축 자체가 학습 수렴을 4× 가속한다고 §III.B에서 주장.
+   - Action chunk N=4와 결합되면 16^4=65k 공간이라 충분하다는 입장. OpenVLA의 256^7 vs UniVLA 16^4 — 약 10^14 → 6.5×10^4로 10^9× 압축.
+2. **OpenVLA보다 적은 compute로 어떻게 SOTA를 달성하나?**
+   - Action vocabulary 압축으로 next-token entropy 감소 → 빠른 수렴.
+   - DINOv2 feature 공간의 prediction(픽셀 대신)이 task-irrelevant noise 제거 → 데이터 효율 향상.
+   - Bridge-only로 사전학습해도 OpenVLA OXE-full보다 LIBERO 평균 92.5% > 76.5% (Table I).
+   - 960 A100-hour vs OpenVLA 21,500 A100-hour (§III.B).
+3. **"History-as-CoT"는 정확히 무엇인가?**
+   - 직전 latent action 토큰들을 prompt prefix로 주입하는 방식. visual frame을 여러 장 입력하지 않고도 시퀀스 정보 활용.
+   - R2R에서 +16.5%, LIBERO-Long에서 +3.9% 이득 (§III.B 후반 + Sec. C ablation). Inference latency 증가 최소화.
+4. **YAML 점수와 논문 점수 차이의 원인은?**
+   - YAML(libero_avg ≈ 90.1, calvin 4.1)은 v1 스냅샷의 conservative 값으로 보이며, 논문 v3(arXiv:2505.06111v3, 2025-11-03)은 Full pretraining 기준 95.2 / 3.80을 보고. 검토·갱신 권장.
 
 <!-- VERIFIED: pdf -->
