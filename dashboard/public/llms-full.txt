@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-25T09:01:03.251120
+# Generated: 2026-04-25T14:41:40.920598
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -1574,8 +1574,8 @@ MODEL: GigaWorld-Policy
   Benchmarks:
     robotwin_v2 (avg=86.0): robotwin_v2_clean_avg=87.0, robotwin_v2_rand_avg=85.0
   Eval Conditions: {'robotwin_v2': 'fine-tuned'}
-  AI Review Summary: 기존 video-centered WAM의 추론 병목을 해결하기 위해 action 예측을 중심으로 비디오 생성을 조건부로 재구성하는 action-centered WAM을 제안하여, 기존 대비 9배 빠른 추론과 7% 높은 성공률 달성.
-  AI Review: Abstract-based
+  AI Review Summary: Wan 2.2 5B DiT를 backbone으로 action token과 future-video token을 causal mask로 결합한 action-centered World–Action Model. Inference 시 video branch는 optional이라 action-only 360 ms (Motus 대비 9× 가속), RoboTwin 2.0 86%·실세계 0.83 SR 달성.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: Goal2Skill
@@ -1650,8 +1650,8 @@ MODEL: GR-2
   Benchmarks:
     calvin (avg=3.8): calvin_abc_d_avg_len=3.8, calvin_abc_d_1=93.2, calvin_abc_d_2=81.6, calvin_abc_d_3=68.4, calvin_abc_d_4=54.8, calvin_abc_d_5=42.1
   Eval Conditions: {'calvin': 'fine-tuned'}
-  AI Review Summary: 3800만 비디오 클립·500억+ 토큰의 대규모 인터넷 비디오 사전학습을 통해 범용 로봇 agent를 구축, 100+ 태스크에서 97.7% 성공률과 미지 환경에 대한 뛰어난 일반화 달성.
-  AI Review: Abstract-based
+  AI Review Summary: GR-1의 후속작으로, **38M 인터넷 비디오·~50B 토큰**으로 video generative pre-training 후 약 4만 robot trajectory로 fine-tune하여 **105개 multi-task에서 평균 97.7% SR**, end-to-end bin-picking에서 평균 79.0%, CALVIN ABCD-D에서 avg-len 4.64로 SOTA를 달성한 GPT-style VLA.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: GR00T-N1.5
@@ -1746,8 +1746,8 @@ MODEL: HiMoE-VLA
     LLM: Gemma 2B
     Parameters: 3B+
   Tags: 3B+, hierarchical-MoE, action-space-MoE, pi0-based, open-source
-  AI Review Summary: 로봇 데이터의 다층적 이질성(embodiment, action space, sensor, frequency)을 계층적 MoE로 계층별 적응적 처리하여, heterogeneous cross-embodiment 학습에서 일관적 성능 향상 달성.
-  AI Review: Abstract-based
+  AI Review Summary: 로봇 데이터의 이질성(action space, embodiment, sensor)을 처리하기 위해 boundary 층의 Action-Space MoE(AS-MoE)와 인접 층의 Heterogeneity-Balancing MoE(HB-MoE)를 dense Transformer block과 interleave한 계층 MoE 구조. PaliGemma backbone에 flow-matching action expert를 결합하여 LIBERO 평균 97.8 / CALVIN ABC→D avg-len 3.967 달성.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: HiVLA
@@ -2160,8 +2160,8 @@ MODEL: TacVLA
     Parameters: None
   Tags: tactile, contact-rich, multimodal-fusion, pi0.5-base, flow-matching, real-world, manipulation
   Eval Conditions: {'real_world': 'fine-tuned'}
-  AI Review Summary: 촉각(tactile) modality를 contact-aware gating mechanism으로 VLA에 통합하여, 접촉이 중요한 태스크(분해 20%↑, in-box picking 60%↑)와 시각 차단 상황(2.1x 향상)에서 큰 성능 향상 달성.
-  AI Review: Abstract-based
+  AI Review Summary: Pi0.5 backbone에 **15×8 taxel array → MLP-인코딩된 36개 tactile token**을 추가하고, 임계 압력 기반 binary contact flag로 tactile token을 **상태 의존적으로 attention에서 끄고 켜는** Contact-aware Gating을 도입. Constraint-locked disassembly 4종 평균 **83.75%** (Tab. II), 가려진 in-box picking **70%** (vs Pi0.5 10%, Tab. II), 전면 카메라 차단 시 평균 
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: TinyVLA
