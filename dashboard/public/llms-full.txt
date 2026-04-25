@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-25T08:16:26.721563
+# Generated: 2026-04-25T08:27:20.771492
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -200,6 +200,8 @@ MODEL: SimpleVLA-RL
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 7.5, Confidence: 4.25
+  AI Review Summary: DeepSeek-R1 스타일의 단순한 결과 기반(outcome-based) GRPO 강화학습을 OpenVLA-OFT에 적용하여 LIBERO 평균 99.1%(SoTA)를 달성하고, 데이터 부족과 일반화 한계를 동시에 해결한 효율적 VLA 온라인 RL 프레임워크.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: DualCoT-VLA
@@ -367,6 +369,8 @@ MODEL: X-VLA
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 7.33, Confidence: 4.0
+  AI Review Summary: 임바디먼트별 soft prompt(학습 가능한 임베딩)와 flow matching 디코더를 결합하여 0.9B 파라미터로 LIBERO 98.1 / Simpler-WidowX 95.8 등 6개 시뮬레이션 + 3개 실제 로봇 플랫폼에서 SOTA를 달성한 cross-embodiment VLA. ICLR 2026.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: DepthCache
@@ -514,6 +518,8 @@ MODEL: DeepThinkVLA
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 4.5, Confidence: 3.25
+  AI Review Summary: CoT 추론이 VLA에서 효과를 내려면 (1) Decoding Alignment(언어는 causal AR, 액션은 bidirectional 병렬)와 (2) Causal Alignment(outcome-based RL로 추론과 행동을 인과 연결)이 동시에 충족되어야 함을 실증하고, hybrid-attention decoder + SFT→GRPO 파이프라인으로 LIBERO 97.0%, RoboTwin 2.0 59.3%를 달성한 2.9B 모델.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: OFlow
@@ -596,6 +602,8 @@ MODEL: MemoryVLA
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 4.5, Confidence: 4.25
+  AI Review Summary: 인지과학의 working memory + episodic memory 이중 시스템에 영감을 받아 Perceptual-Cognitive Memory Bank(PCMB)를 도입한 7B Cognition-Memory-Action 프레임워크. 메모리 조건부 diffusion transformer 액션 expert로 SimplerEnv-Bridge 71.9, Fractal 72.7, LIBERO 96.5, 실세계 long-horizon 83% (+26 vs CogACT) 달성. ICLR 2026.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: dVLA
@@ -617,6 +625,8 @@ MODEL: dVLA
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 4.0, Confidence: 3.75
+  AI Review Summary: MMaDA(discrete diffusion language model) + FAST 액션 토크나이저를 결합하여 시각·언어·액션을 단일 discrete diffusion 목적함수로 학습하는 8B 모델. Subgoal 이미지 + 텍스트 reasoning + 액션을 동시에 생성하는 multimodal CoT로 LIBERO 96.4% 달성, 실세계 bin-picking 등 4개 task에서 65% 평균. ICLR 2026 submission (Midea Group).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: GST-VLA
@@ -1457,6 +1467,8 @@ MODEL: DMW
   Peer Review:
     Venue: CVPR 2026, Decision: None
     Review Avg: None, Confidence: None
+  AI Review Summary: SimLingo(InternVL2-1B) backbone에 사용자 임베딩과 GRPO 기반 강화 미세조정을 결합한 개인화 자율주행 VLA. 30명 운전자의 PDD 데이터셋으로 학습하고 LLM이 생성한 style-aware reward 가중치로 보정하여, Bench2Drive closed-loop에서 SimLingo 대비 일관된 스타일 적응을 달성한 CVPR 2026 논문.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: E0
@@ -1510,6 +1522,8 @@ MODEL: FALCON
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 6.5, Confidence: 4.0
+  AI Review Summary: VGGT 기반 Embodied Spatial Model(ESM, 1.0B)이 RGB(또는 옵션의 depth/pose)에서 풍부한 3D 토큰을 추출하고, 이를 VLM(Kosmos-2 1.6B) 출력의 action token에 element-wise add로 주입하는 Spatial-Enhanced Action Head를 통해 vision-language 정렬을 보존하면서 3D 공간 추론을 강화한 ByteDance Seed의 2.9B VLA. CALVIN ABCD→D 4.53, ABC→D 4.40, SimplerEnv WidowX 56.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: FLOWER
@@ -1659,6 +1673,8 @@ MODEL: GR00T-N1.5
   Benchmarks:
     robocasa (avg=64.1): robocasa_avg=64.1
   Eval Conditions: {'robocasa': 'fine-tuned'}
+  AI Review Summary: NVIDIA GEAR Lab이 Computex 2025에서 발표한 GR00T-N1의 dual-system 후속작. Eagle 2.5 VLM(System 2) + diffusion transformer action head(System 1)에 **FLARE(Future LAtent Representation Alignment) objective**를 추가하여 인간 비디오로부터 학습 가능. GR00T-Dreams 합성 데이터 파이프라인으로 1K H100 GPU·250K step·batch 16384, 36시간 학습. HuggingFac
+  AI Review: Abstract-based
 
 ------------------------------------------------------------
 MODEL: GR00T-N1.6
@@ -1677,6 +1693,8 @@ MODEL: GR00T-N1.6
   Benchmarks:
     robocasa (avg=47.6): robocasa_avg=47.6
   Eval Conditions: {'robocasa': 'fine-tuned'}
+  AI Review Summary: NVIDIA GEAR Lab이 CoRL 2025 키노트(2025-09-29)에서 공개한 GR00T-N1.5의 후속작. Cosmos-Reason-2B VLM(flexible resolution + native aspect ratio) + 32-layer 대형 diffusion transformer(N1.5의 16-layer 대비 2배) + state-relative action chunk 예측을 도입한 full-body humanoid control 모델. 300K step, batch 16384 학습. HF에 weights 공개(n
+  AI Review: Abstract-based
 
 ------------------------------------------------------------
 MODEL: HELM
@@ -1936,6 +1954,8 @@ MODEL: NanoVLA
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 3.5, Confidence: 3.75
+  AI Review Summary: Xiaomi EV의 edge-device 지향 경량 VLA 패밀리. (1) vision-language 입력을 late stage에서만 융합하는 decoupled fusion으로 instruction caching, (2) 길게 학습 짧게 실행(LSAC) chunking, (3) Beta-Binomial 기반 dynamic router로 small/large backbone 전환. ResNet18 + BERT-base(NanoVLA-S, 161M) / Qwen2.5-0.5B(NanoVLA-L, 520M) 구성으로 Jetson Ori
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: NaVILA
@@ -2339,6 +2359,8 @@ MODEL: Vlaser
   Peer Review:
     Venue: ICLR 2026, Decision: poster
     Review Avg: 5.0, Confidence: 3.25
+  AI Review Summary: USTC + Shanghai AI Lab 연합의 ICLR 2026 논문. InternVL3(2B/8B) backbone + flow-matching action expert 구조에 6M 규모 Vlaser-6M(grounding 1.8M + QA 1.2M + spatial 0.6M + planning 0.4M + in-domain sim 2M) 데이터로 SFT. 12개 embodied reasoning 벤치마크에서 8B 모델이 +10% margin 우위, SimplerEnv WidowX 65.1 / Google Robot VM 76.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: VP-VLA

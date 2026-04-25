@@ -193,7 +193,12 @@
           "weaknesses": "In terms of the attention decoding, I don't think the proposed Hybrid-Attention is meaningfully different from the CoT-VLA-7B Zhao et al 2025b cited work, which generates subgoals as a CoT using causal autorgressive attention, then a full parallel attention for actions like this work. The only difference seems to be using text based subgoals compared to image based subgoals.\n\nThe paper spends little time acknowledging that the results for DeepThinkVLA use an additional wrist-mounted camera, whic"
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/DeepThinkVLA.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "DeeR-VLA",
@@ -361,7 +366,12 @@
           "weaknesses": "1.  **Unclear Explanation of Acceleration Method:** The description of the \"Prefix Attention Mask\" in Section 3.4 is confusing and difficult to follow. The text describes a \"blockwise causal attention mask with two blocks\"  and \"full bidirectional attention within each block\" , but then states \"tokens in one block restricted from attending to tokens in subsequent blocks\". This description is ambiguous. For the KV caching of the prefix (Block 1) to be useful, the generated tokens (Block 2) must b"
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/dVLA.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "E0",
@@ -439,7 +449,12 @@
           "weaknesses": "My main concern is that the evaluation benchmarks chosen, especially the simulation ones are weak and do not necessarily benefit from 3D understanding and information. \n\nFor instance, the paper makes this statement: “FALCON surpasses previous methods that rely on ground-truth point clouds (e.g., 3DDP (Ze et al., 2024) and 3D Diffuser Actor (Ke et al., 2024)), improving the Avg.\nLen. by 4.13 and 1.05, respectively. This provides clear evidence of the effectiveness of our implicit\nspatial informat"
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/FALCON.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "Fast-WAM",
@@ -613,7 +628,12 @@
       "review_avg": null,
       "confidence_avg": null,
       "reviews": [],
-      "match_score": 0.333
+      "match_score": 0.333,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/GR00T-N1.5.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "GR00T-N1.6",
@@ -625,7 +645,12 @@
       "review_avg": null,
       "confidence_avg": null,
       "reviews": [],
-      "match_score": 0.333
+      "match_score": 0.333,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/GR00T-N1.6.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "GST-VLA",
@@ -865,7 +890,12 @@
           "weaknesses": "* The ambiguity of optimal memory length: from the ablation study in Table 5, it suggests that a memory length of $L=16$ is optimal (71.9% success), while the performance worsens at $L=64$ (67.7%). However, in the Appendix, the authors state that a memory length of $L=256$ was used for real-world long-horizon tasks. There lacks of in-depth analysis of how memory length is associated with the actual performance.\n* The mechanism of using single cognitive token: for complex tasks require multiple l"
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/MemoryVLA.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "Mobility VLA",
@@ -943,7 +973,12 @@
           "weaknesses": "**LSAC**: While LSAC is effective, the idea of predicting longer sequences and executing shorter sub-segments with periodic replans has been used in Diffusion Policy and Pi0; the paper could better articulate what is novel.\n\n**Routing signal is text-only.** The router is trained as a text-conditioned comparator over models. This assumes that instruction phrasing correlates tightly with task difficulty. However, “pick up the banana” may range from trivial on a clear table to hard in a fruit pile "
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/NanoVLA.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "NaVILA",
@@ -1291,7 +1326,12 @@
           "weaknesses": "1. The experiments section doesn’t mention details about the training datasets and benchmarks. From the current description it is a bit unclear to me on what task, episodes, and bechmarks was the RL finetuning for the VLA policies done? My understanding is OpenVLA-OFT was first trained on real world robotics datasets and then for benchmarking on libero it was finetuned with small amounts of simulation only trajectories. I would like to understand for experiments presented in tables 1, 2 and 3 di"
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/SimpleVLA-RL.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "SmolVLA",
@@ -1567,7 +1607,12 @@
           "weaknesses": "1. The paper compares only two model scales within a single architecture and concludes that smaller models are better at point-based grounding while larger models excel at multi-step planning and closed-loop simulation; however, this scale–performance relationship may not generalize to other model families, and the work provides little deeper analysis or mechanistic explanation to substantiate it.\n\n2. The policy relies on single-frame observations and fixed-length action sequences, with the acti"
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/Vlaser.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "X-VLA",
@@ -1602,7 +1647,12 @@
           "weaknesses": "Prompts are queried by dataset/hardware ID; this assumes reliable domain labels during training and may risk overfitting to source IDs unless carefully regularized. There are no experimental evidence of zero-shot generalization to unseen tasks with known robots and unseen robots.\n\nWhile the experiment results has a wide coverage, the current focus is on tabletop tasks with focus on the end-effector movements, and do not require much reasoning of the differences in the embodiment. It is unclear i"
         }
       ],
-      "match_score": 1.0
+      "match_score": 1.0,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/X-VLA.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "A1",
@@ -1701,7 +1751,12 @@
       "review_avg": null,
       "confidence_avg": null,
       "reviews": [],
-      "match_score": null
+      "match_score": null,
+      "ai_review": {
+        "source": "ai_generated",
+        "review_path": "data/ai_reviews/DMW.md",
+        "generated_by": "claude-opus-4-6"
+      }
     },
     {
       "model_name": "DualCoT-VLA",
@@ -2197,6 +2252,6 @@
       }
     }
   ],
-  "num_ai_reviewed": 101,
+  "num_ai_reviewed": 112,
   "ai_review_note": "AI-generated reviews for papers without venue reviews. Format: seminar-style with sections 1-12 including methodology analysis, limitations, and expected questions."
 }
