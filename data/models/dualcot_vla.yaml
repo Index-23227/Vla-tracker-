@@ -1,33 +1,49 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models
-# arXiv: 2603.22280
-
 name: DualCoT-VLA
 full_name: "DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: HKUST (Guangzhou) / Huawei Foundation Model Department
 date: "2026-03-23"
 paper_url: https://arxiv.org/abs/2603.22280
-code_url: null  # TODO: check for GitHub repo
+code_url: https://livfour.github.io/DualCoT-VLA/
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: regression
+  backbone: Qwen3-VL-4B (with Depth Anything 3 as frozen visual teacher during training)
+  llm: Qwen3-VL-4B (Qwen3-0.6B as frozen auxiliary linguistic teacher during training)
+  action_head: "Diffusion Transformer (DiT) action expert trained with Flow Matching, conditioned on VLM hidden states (including 16 visual CoT and 4 linguistic CoT learnable query tokens) via cross-attention."
+  action_head_category: flow_matching
   parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  key_innovation: "Parallel implicit visual-linguistic Chain-of-Thought via two sets of learnable query tokens (16 visual + 4 linguistic) inserted into the VLM input. Visual CoT tokens are aligned with frozen Depth Anything 3 features (geometric distillation) and linguistic CoT tokens condition a frozen Qwen3-0.6B decoder to reproduce explicit CoT text, forcing the VLM to internalize spatial perception and logical planning in a single forward pass instead of sequential autoregressive reasoning."
+
+training:
+  dataset: LIBERO + RoboCasa GR1 + AgileX Cobot real-world demonstrations (linguistic CoT annotations from Yin et al. 2025 for LIBERO; Qwen3-VL-32B-generated for RoboCasa GR1)
+  method: end-to-end joint training with weighted losses (visual MSE distillation + linguistic CE + flow-matching action MSE), trained on NVIDIA H100 GPUs
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.4
+    libero_object: 99.8
+    libero_goal: 97.8
+    libero_long: 98.2
+    libero_avg: 98.8
+    source: Table 1, original paper
+    date_reported: "2026-03-23"
+    eval_condition: fine-tuned
   robocasa:
-    robocasa_avg: TODO
+    robocasa_gr1_avg: 55.1
+    source: Table 2 (24-task average), original paper
+    date_reported: "2026-03-23"
+    eval_condition: fine-tuned
 
 eval_conditions:
-  libero: "fine-tuned"
-  robocasa: "fine-tuned"
+  libero: fine-tuned
+  robocasa: fine-tuned
 
-tags: [libero, robocasa]
+tags:
+  - flow-matching
+  - chain-of-thought
+  - dual-cot
+  - libero
+  - robocasa
+  - parallel-reasoning
+  - latent-reasoning

@@ -1,27 +1,30 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: UniDriveVLA: Unifying Understanding, Perception, and Action Planning for Autonomous Driving
-# arXiv: 2604.02190
-
 name: UniDriveVLA
 full_name: "UniDriveVLA: Unifying Understanding, Perception, and Action Planning for Autonomous Driving"
-organization: "TODO: check paper"
+organization: "Huazhong University of Science and Technology; Xiaomi EV; SKL-IOTSC, University of Macau"
 date: "2026-04-02"
 paper_url: https://arxiv.org/abs/2604.02190
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/xiaomi-research/unidrivevla
 venue: null
-open_source: false  # TODO: verify
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-VL (SigLIP-2 vision encoder + MLP merger + Qwen3 LM); inputs resized to 960x544"
+  llm: "Qwen3-VL-2B (Base) / Qwen3-VL-8B (Large)"
+  action_head: "Action Expert with flow-matching trajectory generation (interpolation between Gaussian noise and target velocity sequence)"
+  action_head_category: flow_matching
+  parameters: "2B (Base) / 8B (Large) VLM backbone; additional Perception Expert and Action Expert"
+  key_innovation: "Mixture-of-Transformers (MoT) architecture with three specialized experts (Understanding, Perception, Action) coordinated via masked joint attention, decoupling spatial perception from semantic reasoning to mitigate representation interference. Combines a sparse perception paradigm (detection / map / occupancy / motion / ego anchors) with a three-stage progressive training strategy (pretrain VLM on driving+general data, joint optimization with LoRA on VLM and 0.5x LR multiplier, freeze VLM and fine-tune Perception+Action experts with motion forecasting)."
 
-benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+training:
+  stage1: "Full fine-tune base VLM for 3 epochs, LR 4e-5, 3:7 driving:general data ratio (general from FineVision)"
+  stage2: "30 epochs joint optimization (AdamW), base LR 2e-4, VLM 0.5x multiplier (effective 1e-4), LoRA on language model, EMA"
+  stage3: "Freeze VLM, fine-tune Perception+Action experts for 15 epochs, LR 1e-4, motion forecasting objective, EMA"
+  datasets: "nuScenes (open-loop), Bench2Drive (closed-loop, CARLA), DriveBench, plus general VQA (MMStar, MMMU, RealWorldQA, AI2D, MME, VLMsAreBlind, ChartQA)"
+
+benchmarks: {}
 
 eval_conditions:
-  TODO: "check paper"
+  nuscenes: "fine-tuned"
+  bench2drive: "fine-tuned"
 
-tags: []
+tags: [autonomous-driving, mixture-of-transformers, sparse-perception, flow-matching, qwen3-vl, nuscenes, bench2drive]

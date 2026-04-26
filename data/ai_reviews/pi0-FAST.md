@@ -1,80 +1,106 @@
-# FAST: Efficient Action Tokenization for Vision-Language-Action Models
+# π0-FAST: Efficient Action Tokenization for Vision-Language-Action Models
 
-> **한 줄 요약**: Discrete cosine transform 기반 주파수 공간 action tokenization (FAST)을 제안하여, 기존 binning 대비 고주파 dexterous 태스크에서의 정확도를 크게 향상시키고 학습 시간을 최대 5배 단축.
-
----
-
-## 1. 배경 및 동기
-
-- 기존 action tokenization (uniform binning): 각 action dimension을 독립 bin으로 양자화 → **dimension 간 correlation 무시**
-- 고주파 dexterous 동작 (빠른 손가락 움직임)을 제대로 표현 못함
-- Token 수가 action dimension × chunk length만큼 필요 → 고차원에서 비효율
+> **한 줄 요약**: Discrete Cosine Transform(DCT) + Byte-Pair Encoding(BPE)으로 robot action chunk를 압축하는 FAST tokenizer를 도입, autoregressive VLA가 50Hz 고주파 dexterous task에서도 기존 binning 방식이 완전히 실패하는 영역을 학습 가능하게 만들고, π0 diffusion VLA 성능을 매칭하면서 **5배 빠른 학습**을 달성. 1M action sequence로 훈련된 universal tokenizer FAST+를 함께 공개.
 
 ---
 
-## 2. 방법론 심층 분석
+## 1. 배경 및 동기 (Section I, IV)
 
-### Frequency-Space Tokenization
+- 기존 autoregressive VLA (RT-2, OpenVLA)의 action tokenization은 per-dimension·per-timestep binning (256 bins, Section III). 1초 H=50 chunk에 대해 D=14면 700 token 필요.
+- **문제 (Section IV, Figure 3 case study)**: 합성 cubic spline 보간 task에서 sampling rate 25 → 800 timestep으로 늘리면 binning tokenizer의 MSE는 급격히 상승. Qualitative 시각화: 모델이 "단순히 첫 action을 복사" — 인접 token간 marginal information이 0에 수렴하기 때문.
+- 핵심 통찰: "robot action signals need to be compressed before training, to reduce correlation between consecutive tokens" (Section I) — language의 BPE처럼 compression-based tokenization이 필요. 단, action은 연속이므로 frequency-domain 압축 (DCT)이 자연스러운 선택.
 
-Action chunk를 DCT로 변환 후 quantize:
+---
 
-$$\mathbf{c} = \text{DCT}(\mathbf{a}_{1:H}), \quad \text{tokens} = \text{VQ}(\mathbf{c}[:K])$$
+## 2. 방법론 (Section V, Algorithm 1, Figure 4)
 
-- DCT: smooth trajectory는 저주파 계수 몇 개로 충분히 표현
-- High-frequency는 필요 시 더 많은 계수로 보존
-- **Token 수 감소**: H×D bins → K coefficients (K << H×D)
+### FAST Tokenization Pipeline (Section V-B, Figure 4)
+1. **Normalize**: 각 dim별 1%/99% quantile로 [−1, 1] 정규화 (outlier robust).
+2. **DCT**: 각 action dim별로 discrete cosine transform. Low-frequency가 전체 형태를, high-frequency가 sharp jump를 표현 (JPEG와 동일 원리).
+3. **Quantize**: round(γ·C). γ는 lossiness vs compression rate trade-off (default γ=10).
+4. **Flatten**: |A|×H DCT matrix를 column-first로 flatten (low-frequency components first across dims) — autoregressive sample이 전체 형태부터 예측하도록.
+5. **BPE**: 1024 vocabulary로 byte-pair encoding. 0이 많은 sparse signal을 dense token sequence로.
 
-> ❓ **예상 질문**: DCT가 최선인가? Wavelet이나 PCA는?
-> **답변**: DCT가 에너지 compaction에서 PCA와 유사하면서도 data-independent (학습 불필요). Wavelet은 localized frequency에 유리하나 token 수 증가.
+### Universal Tokenizer FAST+ (Section V-C)
+- 1M action chunk (single-arm·bimanual·mobile·humanoid 등) 위에서 BPE 학습.
+- HuggingFace `AutoProcessor.from_pretrained("physical-intelligence/fast")`로 3줄 코드에 적용 가능.
 
-### FAST+ (Universal Tokenizer)
-
-1M robot action trajectories에서 사전학습된 universal codebook:
-- 새로운 로봇/태스크에서 codebook 재학습 불필요
-- Plug-and-play 활용 가능
+### π0-FAST 통합 (Section VI-A)
+- π0 backbone (PaliGemma 3B) 그대로, action expert 대신 FAST 토큰을 standard autoregressive next-token prediction으로 학습.
+- 동일 vocabulary slot에 action token을 overwrite (RT-2/OpenVLA 방식).
 
 ---
 
 ## 3. 실험 결과
 
-| Tokenizer | LIBERO (%) | Dexterous Task (%) | Training Time |
-|-----------|-----------|-------------------|---------------|
-| 256-bin | 76.5 | 45.2 | 1x |
-| 1024-bin | 78.3 | 52.8 | 1.5x |
-| **FAST** | **84.2** | **68.3** | **0.2x** |
+### Compression Ratio (Table I)
+| Dataset | Frequency | Naive tokens | FAST tokens | Compression |
+|---------|-----------|--------------|-------------|-------------|
+| BridgeV2 | 5 Hz | 35 | 20 | 1.75× |
+| DROID | 15 Hz | 105 | 29 | 3.6× |
+| Bussing | 20 Hz | 140 | 28 | 5.0× |
+| Shirt Fold | 50 Hz | 700 | 53 | **13.2×** |
 
-- **Dexterous task에서 23%p+ 향상** → 고주파 동작 표현의 결정적 이점
-- **학습 시간 5x 단축** → token 수 감소로 autoregressive 학습 효율화
+특히 고주파 task에서 압축률이 급격히 증가하며, FAST는 frequency와 무관하게 **chunk당 약 30 token으로 수렴** — 신호 복잡도에 따라 적응적으로 token 수를 결정.
+
+### Tokenizer 비교 (Section VI-B, Figure 6)
+LIBERO / DROID / Table Bussing / T-Shirt Folding 4개 task에서 success rate / task progress:
+- **Naive binning**: 20Hz/50Hz task에서 거의 0% — task progress 불가.
+- **FSQ (Vector Quantization)**: 어느 정도 학습되나 dexterous task에서 FAST 대비 약함.
+- **FAST**: 모든 task에서 강함, 특히 고주파에서 격차 큼.
+- **FAST+** (universal): per-dataset FAST tokenizer와 거의 동등 → universal default로 사용 가능.
+
+### OpenVLA + FAST (Section VI-D)
+- T-Shirt Folding (50Hz)에서 OpenVLA + naive ≈ 0% → OpenVLA + FAST+ 큰 폭 향상. tokenizer가 model backbone과 독립적임을 입증.
+
+### π0-FAST vs π0 Diffusion (Section VI-E, Figure 9)
+- **소규모 dataset** (LIBERO, T-Shirt Folding <50h): 두 모델 동등.
+- **대규모 dataset** (Table Bussing): π0-FAST가 **3배 적은 step**으로 동일 성능 도달.
+- **DROID zero-shot**: π0-FAST가 language instruction을 더 잘 따름 (diffusion π0는 종종 language 무시).
+- **Inference latency 단점**: π0 diffusion 100ms vs π0-FAST 750ms/chunk (Section VI-E) — 30~60 action token을 autoregressive decode + 2B language backbone 사용 (vs 300M action expert).
+
+### Generalist Scaling (Section VI-F, Figure 11)
+- 903M timestep + 9.1% open-source (BRIDGE/DROID/OXE)로 cross-embodied 학습.
+- π0-FAST는 π0 diffusion의 zero-shot 성능을 매칭하면서 **5× fewer GPU hours** (Section VI-F).
+- Laundry folding (Figure 10) 같은 가장 어려운 long-horizon dexterous task도 성공.
+
+### DROID Zero-shot (Section VI-A, Figure 7)
+- 3개 university campus (Berkeley/Stanford/U.Washington)의 unseen 환경에서 zero-shot table-top manipulation. 단순 picking, 캐비닛 열기, 수도꼭지 조작 등.
+- 처음으로 DROID에서 **co-training/fine-tuning 없이 language prompt만으로 zero-shot evaluation** 성공.
+
+### BPE Ablation (Section VI-D)
+- BPE 제거 시 성능 하락 (T-Shirt Folding, Table Bussing). DCT만으로도 naive보다 좋지만, 0이 많은 sparse signal에서 BPE가 학습 신호를 살리고 inference 속도를 단축.
 
 ---
 
-## 4. 한계 및 미해결 문제
+## 4. 한계
 
-1. **DCT의 한계**: Abrupt trajectory change (충돌 시 급정지)를 잘 표현하지 못함 (Gibbs 현상)
-2. **Universal codebook의 한계**: 극도로 다른 action space (드론 vs 팔)에서 하나의 codebook이 충분한지 불확실
-3. **Diffusion/flow action head와의 비교**: FAST는 autoregressive에 특화. Diffusion 대비 우위는 context-dependent
+- **Inference speed**: π0 diffusion 대비 7.5× 느림. dynamic task에는 부적합. speculative decoding·quantization 등 LLM optimization 적용 필요 (Section VII).
+- **Static manipulator만 검증**: humanoid·mobile robot은 offline tokenizer test만 했고 policy 평가 미실시.
+- **DCT 가정**: action signal이 충분히 smooth해야 함. 매우 discontinuous한 control (예: contact-rich의 sudden grip)에서는 high-frequency component 손실 가능.
+- **BPE vocab 의존**: BPE 1024 size가 default지만 더 큰 vocab의 효과 미검증.
 
 ---
 
 ## 5. 총평
 
-| 항목 | 평가 |
-|------|------|
-| **Novelty** | ★★★★★ — Action tokenization의 근본적 재설계 |
-| **Technical depth** | ★★★★★ — DCT의 적용이 수학적으로 잘 정당화됨 |
-| **Practical impact** | ★★★★★ — NORA, OpenVLA-v2 등 즉시 채택 |
-| **Writing quality** | ★★★★★ |
-
-**강점**: Simple, effective, theoretically motivated. **약점**: Abrupt dynamics에서의 한계.
+FAST의 가장 큰 기여는 **autoregressive VLA가 diffusion VLA와 경쟁 가능하다**는 것을 입증한 것이다. Section VI-F의 5× compute 절감은 단순 효율 개선이 아니라 패러다임 선택 문제 — autoregressive는 LLM 인프라(speculative decoding, 양자화, KV cache, batch inference) 를 그대로 활용 가능. JPEG의 DCT라는 고전적 기법을 robotics에 응용한 점이 인상적이며, "BPE는 language tokenization의 핵심인데 왜 robot은 안 쓰지?"라는 단순한 질문에서 출발했다는 게 주목할 만하다. Figure 3의 case study (sampling rate ↑ → naive 실패)는 직관적이고 설득력 있다. 한편 inference latency 문제는 FAST의 **유일한 약점**이며, 후속작 π0.5는 "discrete pre-train + flow post-train"으로 이를 우회하는 전략을 채택했다.
 
 ---
 
-## 6. 🔥 예상 날카로운 질문 모음
+## 6. 예상 질문
 
-| # | 질문 | 핵심 답변 요점 |
-|---|------|---------------|
-| 1 | FAST vs continuous diffusion: 어느 것이 더 나은 action representation인가? | Diffusion이 multimodal에 강하고, FAST는 efficiency에 강함. 상보적 |
-| 2 | FAST+ codebook이 새 embodiment에서 재학습 없이 작동하는 증거는? | Cross-embodiment 실험 포함. 90%+ 재사용 가능하나 10%의 out-of-distribution 동작에서 한계 |
-| 3 | K (주파수 계수 수)의 최적값은? | Task-dependent. Dexterous: K 높게, simple: K 낮게. Adaptive K 미탐구 |
+- **Q1**: 왜 DCT인가? FFT·Wavelet은?
+  - A: Section V-A — DCT는 분석적·매우 단순·JPEG 등에서 검증된 압축률. Wavelet도 가능하지만 DCT의 단순성이 BPE와의 결합에 적합.
+- **Q2**: BPE가 정말 필요한가?
+  - A: Section VI-D ablation — BPE 없으면 0 token이 많아 학습 신호 dilute + 수백 token autoregressive decode로 inference 속도도 저하.
+- **Q3**: FAST+ universal tokenizer는 dataset-specific tokenizer 대비 성능 손실 없나?
+  - A: Figure 6 — 거의 동일. 1M chunk의 다양성으로 충분히 일반적인 BPE vocab을 학습.
+- **Q4**: Diffusion vs Autoregressive — 결론은?
+  - A: Section VII — "the jury is still out". FAST는 학습 효율·language following에서 우월, diffusion은 inference latency에서 우월. trade-off.
+- **Q5**: 750ms/chunk inference로 50Hz control이 가능한가?
+  - A: H=50의 1초 chunk를 750ms마다 생성하므로 receding-horizon control 가능 (action의 0~750ms 부분 실행 후 다음 chunk). 그러나 dynamic task에는 부족.
+- **Q6**: BridgeV2 1.75× 압축은 작아 보이는데?
+  - A: 5Hz는 이미 redundancy가 적어 압축 여지가 작음. FAST의 진가는 50Hz (13.2×).
 
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

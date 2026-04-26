@@ -1,22 +1,29 @@
 name: SAMoE-VLA
-full_name: 'SAMoE-VLA: A Scene Adaptive Mixture-of-Experts Vision-Language-Action Model for Autonomous Driving'
-organization: 'TODO: check paper'
-date: '2026-03-09'
+full_name: "SAMoE-VLA: A Scene Adaptive Mixture-of-Experts Vision-Language-Action Model for Autonomous Driving"
+organization: "Tsinghua University (AIR) / Southeast University / HUST / USTC / USTB"
+date: "2026-03-09"
 paper_url: https://arxiv.org/abs/2603.08113
 code_url: null
 venue: null
 open_source: false
-architecture:
-  action_head: 'TODO: check paper'
-  parameters: TODO
-  action_head_category: other
-key_innovation: 'TODO: Read paper and summarize key contribution in 2-3 sentences.
 
-  '
-benchmarks:
-  libero:
-    TODO: check paper for benchmark scores
+architecture:
+  backbone: "OpenCLIP-ConvNext image encoder + CPFPN multi-scale features + BEVFormer BEV encoder (256-dim, 200x200 spatial); World-Language Expert built on a pretrained large world-VLM"
+  llm: "InternVL2-2B (planning expert initialization)"
+  action_head: "Flow matching-based planning expert structured as Mixture-of-Experts (SA-MoE) layers replacing FFN at every fourth Transformer layer; routed by a Deformable Scene Encoder using BEV features; unified with World-Language Expert via Conditional Cross-Modal Causal Attention (CMCA); 10 ODE steps at inference"
+  action_head_category: flow_matching
+  parameters: "3.6B (total)"
+  key_innovation: "Scene-adaptive Mixture-of-Experts VLA for end-to-end autonomous driving in which expert routing is conditioned on structured BEV scene features (via a Deformable Scene Encoder) instead of token embeddings, combined with a Conditional Cross-Modal Causal Attention mechanism that unifies world, language, and planning representations under a temporally aligned causal mask."
+
+training:
+  dataset: "nuScenes (1,000 driving scenes, ~280K annotated frames) for open-loop planning; LMDrive / LangAuto (~64K instruction-sensor-control clips on CARLA, 8 towns) for closed-loop"
+  method: "LoRA staged training followed by full-parameter fine-tuning at lr 1e-4; flow-matching training with ε ~ N(0, I) and τ ~ Beta(1.5, 1.0) clamped to [0.001, 0.999]"
+  compute: "8 NVIDIA A800 GPUs"
+
+benchmarks: {}
+
 eval_conditions:
-  TODO: check paper
-tags:
-- reasoning
+  nuscenes: "open-loop planning (not in VLA-Tracker's standard benchmark set)"
+  langauto: "closed-loop CARLA (not in VLA-Tracker's standard benchmark set)"
+
+tags: [autonomous-driving, mixture-of-experts, flow-matching, BEV, nuscenes, langauto, internvl2]

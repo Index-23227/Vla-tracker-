@@ -1,104 +1,68 @@
 # GST-VLA: Structured Gaussian Spatial Tokens for 3D Depth-Aware VLA Models
 
-> **한 줄 요약**: 2D patch token 대신 3D anisotropic Gaussian primitives로 시각 정보를 인코딩하고, 3D Depth-Aware Chain-of-Thought를 결합하여 LIBERO 96.4% (+2.0%), SimplerEnv 80.2% (+5.4%) 달성.
+> **한 줄 요약**: 2D patch token 대신 3D anisotropic Gaussian primitive($\mu, \sigma, \alpha$)로 장면을 토큰화하고 Depth-Aware Chain-of-Thought($c_1$–$c_4$)를 결합하여 LIBERO 96.4%, SimplerEnv 80.2%, Data-Efficient 83.1% 달성.
 
 ---
 
 ## 1. 배경 및 동기
 
-- VLA의 visual token은 **2D patch 기반** → 3D geometry (표면 방향, depth 불확실성) 미표현
-- Depth를 추가 채널로 넣는 것은 **scalar** 수준 → surface orientation, confidence 등 부재
-- Spatial reasoning에 특화된 CoT가 없음
+VLA 모델은 시각 입력을 2D patch token($N_p$=256)으로 인코딩하는데, 이 토큰들은 (i) pixel-uniform 하게 token budget을 분배하고, (ii) surface normal/곡률 정보를 담지 못하며, (iii) depth 신뢰도(geometric confidence)를 표현할 방식이 없다. DepthVLA는 별도 depth expert stream을 추가했지만 여전히 픽셀당 scalar depth로, edge와 평면이 동일 깊이일 때 동일한 표현을 만든다 (논문 Sec. I). GST-VLA는 (a) 3D anisotropic Gaussian primitive로 surface orientation·confidence를 명시적으로 인코딩하고, (b) DA-CoT으로 3D 추론을 supervised intermediate generation으로 강제한다.
 
----
-
-## 2. 방법론 심층 분석
+## 2. 방법론
 
 ### 2.1 Gaussian Spatial Tokenizer (GST)
+- Frozen depth estimator + frozen SigLIP semantic encoder → patch별 metric anchor $p_k$를 back-projection (Eq. 1)
+- 4-layer MLP($f_\theta$)이 $[\mu_k \in \mathbb{R}^3, \sigma_k \in \mathbb{R}^3, \hat\alpha_k]$를 예측 (Eq. 2). 공분산은 axis-aligned $\Sigma_k = \mathrm{diag}(\exp(2\sigma_k))$
+- Multi-scale image pyramid 기반 opacity MLP (Eq. 3): 3×1152 → 1차원, 표면 confidence를 텍스처 gradient에 연동
+- 3D Fourier PE $L=6$ octave (Eq. 4) — ablation에서 2D learned PE 대체 시 −2.8 pp로 GST 내 가장 큰 단일 효과 (Table IV)
+- Spatial attention pooling으로 $N_p$=256 raw token → $N_g$=128 pooled token (Eq. 5). Average pooling 대체 시 −2.1 pp
+- Differentiable depth rendering (Eq. 6) + scale-invariant log loss(Eq. 13)로 geometric regularization
 
-128개의 3D anisotropic Gaussian primitives로 장면 표현:
-
-$$G_i = (\mu_i \in \mathbb{R}^3, \log\sigma_i \in \mathbb{R}^3, \alpha_i \in (0,1))$$
-
-- $\mu$: 3D 위치 (metric residual mean)
-- $\sigma$: 비등방 공분산 → **local surface orientation** 인코딩
-- $\alpha$: opacity → **geometric confidence** (depth 불확실 영역에서 자동 낮아짐)
-
-> ❓ **예상 질문**: 왜 128개? 복잡한 장면에서 충분한가?
-> **답변**: Spatial attention pooling으로 기하학적으로 중요한 영역에 토큰을 집중. Uniform distribution 대비 효율적이나, 매우 복잡한 장면(수십 개 물체)에서 128이 부족할 수 있음.
-
-### 2.2 3D Depth-Aware CoT (DA-CoT)
-
-4가지 structured spatial thought:
-1. **3D object grounding**: 물체의 3D 위치
-2. **Grasp affordance geometry**: 파지 접점의 기하학
-3. **Pairwise metric distance**: 물체 간 3D 거리
-4. **Coarse SE(3) waypoint**: 대략적 목표 pose
-
-> ❓ **예상 질문**: 이 4가지 thought가 왜 필요하고 충분한가?
-> **답변**: 로봇 manipulation의 핵심 정보를 커버하도록 설계. 그러나 이 선택의 최적성에 대한 이론적 근거는 약함. 다른 spatial thought (충돌 예측, 역학 등)의 추가 효과 미검증.
+### 2.2 Depth-Aware Chain-of-Thought
+- VLM 모든 transformer block에 cross-attention sublayer 추가 (Eq. 8) — pooled가 아닌 raw 256-primitive에 직접 access
+- 4단계 thought를 autoregressive 생성: $c_1$ 3D centroid → $c_2$ grasp contact + 표면 normal → $c_3$ metric pairwise distance → $c_4$ SE(3) waypoint
+- Annotation 자동화: 3D centroid는 open-vocab detection + depth point cloud, grasp point는 pretrained planner, waypoint는 demonstration end-effector 속도 zero-crossing
 
 ### 2.3 Flow-Matching Action Expert
+300M 파라미터, 6 layers × $d_e$=512, dual cross-attention(VLM hidden / DA-CoT action token), MoE FFN(8 expert/layer, top-2 routing, expert hidden 2048). $L_{\text{act}}$=10 chunks, ODE 10 Euler steps (Eq. 10).
 
-300M 파라미터 flow-matching expert with MoE feedforward:
+### 2.4 3-Stage Training
+- **S1** (80K steps): GST + action expert만 학습 (encoders/VLM frozen). $L_{\text{depth}}$ on ScanNet/Hypersim/ARKitScenes
+- **S2** (40K steps): LoRA(r=16,α=32) on Ψ projector + VLM self-attn, $L_{\text{flow}}+L_{\text{CoT}}+L_{\text{depth}}$
+- **S3** (20K steps): full fine-tune at LR 3e-5
+- Composite loss(Eq. 11): $\lambda_{\text{CoT}}=0.5, \lambda_{\text{depth}}=0.1$
 
-$$\mathbf{a} = \text{ODE-solve}(f_\theta(\mathbf{z}, t, \mathbf{c}_{\text{VLM}}, \mathbf{c}_{\text{DA-CoT}}))$$
+## 3. 실험 결과
 
----
+| Benchmark | GST-VLA | Δ vs SOTA |
+|---|---|---|
+| LIBERO Spatial / Object / Goal / Long (Table II) | 98.2 / 97.4 / 97.1 / 92.6 → 96.4 avg | +2.0 vs SpatialVLA 94.4 |
+| SimplerEnv Pick-Can / Move-Near / Drawer-Open / Drawer-Close (Table III) | 83.1 / 77.5 / 75.6 / 84.7 → 80.2 avg | +5.4 vs SpatialVLA 74.8 |
+| Data-Efficient (Table I) Avg | 83.1 | +6.3 vs SpatialVLA 76.8 |
 
-## 3. 실험 결과 심층 분석
+LIBERO-Long에서 +3.1 pp의 가장 큰 향상 — $c_4$ SE(3) waypoint supervision 덕분의 trajectory level coherence(Sec. IV.B). SimplerEnv Close-Drawer에서 +5.9 pp는 grasp contact $c_2$ 효과.
 
-| 벤치마크 | 기존 SOTA | GST-VLA | 향상 |
-|---------|----------|---------|------|
-| LIBERO | 94.4% | **96.4%** | +2.0% |
-| SimplerEnv | 74.8% | **80.2%** | +5.4% |
+## 4. 핵심 Ablation (논문 Tables IV–VII)
 
-SimplerEnv에서의 5.4% 향상이 더 주목할 만함 → **3D spatial understanding이 sim-to-real transfer에 특히 유효**
+- 3D Fourier PE → 2D learned: **−2.8 pp** (GST 내 최대)
+- $S_1$ pretraining 제거: **−6.2 pp** (전체 ablation 중 최대; geometric calibration 선결 필요)
+- $L_{\text{action}}$ conditioning 제거: −3.1 pp (DA-CoT가 $H_{\text{vlm}}$과 redundant 아님)
+- DA-CoT 전체 제거: −3.9 pp; $c_4$만 제거: −2.3 pp; $c_1$만 제거: −1.9 pp
+- Dense scalar depth(DepthVLA-style) 대비 full Gaussian: +4.5 pp (Table VII)
+- $N_g$=64는 −3.3 pp, $N_g$=256은 +0.4 pp만 — 128이 saturation point
 
----
+## 5. 분석 및 의의
 
-## 4. Ablation 분석
+- DA-CoT 출력 중 $c_1$ centroid 오차 5 cm 초과 시 task success 30% 미만 — 런타임 monitoring 신호로 사용 가능 (Sec. IV.D.1)
+- Median 3D centroid 오차 2.3 cm, grasp contact 1.8 cm, SE(3) waypoint 3.1 cm. CoT 정확도 vs success Pearson 0.71
+- Inference 6.2 Hz on A100-80GB: encode 18ms + GST 12ms + DA-CoT 38ms + ODE 22ms (DepthVLA 8.1 Hz, OpenVLA 9.4 Hz)
+- 60–70% of pooling query를 object surface/edge에 할당; specular/textureless 표면에서 $\alpha<0.05$로 자동 suppression
 
-| 구성요소 | LIBERO (%) | SimplerEnv (%) |
-|---------|-----------|---------------|
-| Full GST-VLA | 96.4 | 80.2 |
-| − Gaussian (→ 2D patch) | 93.5 | 73.8 |
-| − DA-CoT | 94.8 | 76.5 |
-| − Opacity | 95.1 | 77.3 |
-| − Anisotropic (→ isotropic) | 95.5 | 78.1 |
+## 6. 한계 및 발전 방향
 
----
+- Frozen depth estimator의 정확도가 bottleneck — reflective/투명 물체에서 $c_1$ 오차 누적되어 task success 급락
+- 6.2 Hz는 contact-rich high-frequency control에 부족 — DA-CoT 38 ms가 주요 원인
+- 논문 부록의 disclaimer: "results presented are preliminary, experiments ongoing" — 최종 수치 변동 가능성 명시
+- Future work: $c_2$ grasp contact를 6-DoF orientation까지, opacity confidence를 active perception(다음 viewpoint 선택)에 활용 가능
 
-## 5. 한계 및 미해결 문제
-
-1. **Depth estimation 의존**: Real-world에서 monocular depth estimation의 부정확성이 Gaussian 품질을 제한
-2. **128 primitives의 한계**: Dense scene에서 정보 손실
-3. **DA-CoT annotation**: 4가지 spatial thought의 supervision 필요 → annotation 비용
-4. **3-stage training**: Progressive training이 복잡
-
----
-
-## 6. 총평
-
-| 항목 | 평가 |
-|------|------|
-| **Novelty** | ★★★★★ — Gaussian primitives의 VLA 적용이 매우 참신 |
-| **Technical depth** | ★★★★★ — 수학적으로 잘 정의된 representation |
-| **Experimental rigor** | ★★★★☆ — 체계적 ablation |
-| **Practical impact** | ★★★★☆ — 3D-aware VLA의 구체적 구현 |
-| **Writing quality** | ★★★★☆ |
-
-**강점**: 3D Gaussian을 VLA token으로 사용하는 혁신적 표현. SimplerEnv에서의 큰 향상이 3D 이해의 가치를 입증. **약점**: Pipeline 복잡성, depth 의존, annotation 비용.
-
----
-
-## 7. 🔥 예상 날카로운 질문 모음
-
-| # | 질문 | 핵심 답변 요점 |
-|---|------|---------------|
-| 1 | 3D Gaussian Splatting과의 관계는? | 영감을 받았으나, scene reconstruction이 아닌 token representation으로 활용. 렌더링 불필요 |
-| 2 | Gaussian primitive 수를 256으로 늘리면? | 미검증. Token budget 증가로 인한 latency 대비 성능 이득의 trade-off |
-| 3 | DA-CoT 없이 Gaussian token만으로는 부족한가? | Ablation에서 −1.6%p. DA-CoT는 보조적이며 Gaussian이 주된 기여 |
-| 4 | Real-world depth estimation 오류에 얼마나 robust한가? | 체계적 noise injection 실험 부재 |
-
-<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->
+<!-- VERIFIED: pdf -->

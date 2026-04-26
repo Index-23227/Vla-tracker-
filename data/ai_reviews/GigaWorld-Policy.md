@@ -1,103 +1,82 @@
-# GigaWorld-Policy: An Efficient Action-Centered World-Action Model
+# GigaWorld-Policy: An Efficient Action-Centered World–Action Model
 
-> **한 줄 요약**: 기존 video-centered WAM의 추론 병목을 해결하기 위해 action 예측을 중심으로 비디오 생성을 조건부로 재구성하는 action-centered WAM을 제안하여, 기존 대비 9배 빠른 추론과 7% 높은 성공률 달성.
-
----
-
-## 1. 배경 및 동기
-
-### 기존 연구의 구조적 한계
-- WAM (Motus, GR-1)은 **비디오와 action을 joint modeling** → 추론 시 비디오 생성이 필수적이어서 latency가 높음
-- Joint modeling에서 **visual token이 action token에 영향** → 비디오 예측 품질이 action 정확도를 좌우
-- Fast-WAM이 test-time video를 제거했으나, 학습 시에도 **action-centric 관점**에서 설계된 것은 아님
-
-### 핵심 질문
-- **Action 예측을 primary task로, 비디오 생성을 auxiliary task로 역할을 뒤집으면?**
-- **비디오 생성을 추론 시 optional로 만들면서도 학습 시의 이점을 유지할 수 있는가?**
+> **한 줄 요약**: Wan 2.2 5B DiT를 backbone으로 action token과 future-video token을 causal mask로 결합한 action-centered World–Action Model. Inference 시 video branch는 optional이라 action-only 360 ms (Motus 대비 9× 가속), RoboTwin 2.0 86%·실세계 0.83 SR 달성.
 
 ---
 
-## 2. 방법론 심층 분석
+## 1. 배경 및 문제의식
 
-### 2.1 Action-Centered Causal Design
+VLA 학습은 **supervision sparsity** 문제를 가진다 — 관찰·언어는 고차원/풍부하지만 action 라벨은 희박하다. 기존 World-Action Model(WAM) 계열(Motus, Cosmos-Policy, VideoVLA, Mimic-Video, LingBot-VA)은 미래 비디오 생성을 강제하여 supervision density를 높이지만, (i) inference 시 매 control step마다 비디오 토큰을 sampling해야 해서 latency가 크고, (ii) 픽셀 예측 오차가 action으로 전파된다 (Fig. 2 b–c, Sec. 1). GigaWorld-Policy는 학습 시에만 비디오를 dense supervision으로 쓰고 추론 시에는 video branch를 끌 수 있는 action-centered 설계를 제안 (Fig. 2 d).
 
-핵심 설계: future video token이 action token에 **영향을 줄 수 없도록** causal mask 설계:
+## 2. 아키텍처
 
-```
-Token sequence: [obs_tokens] → [action_tokens] → [future_video_tokens]
-Causal mask: action은 obs만 참조, future_video는 obs+action 참조
-```
+### 2.1 Backbone & Tokenization (Sec. 3.2)
+- **Wan 2.2 5B Diffusion Transformer**(Wan et al., 2025)를 정책 초기화로 사용
+- 3개 view(left/front/right)를 한 장의 composite image로 결합(Eq. 4) → 단일 backbone으로 cross-view consistency 확보
+- VAE로 현재/미래 관찰을 spatiotemporal latent $T_o, T_f$로 인코딩
+- 모든 token을 단일 transformer stack이 처리(MoE 아님). 단 positional encoding은 type별 분리 — 시각 토큰은 2D, state/action은 1D temporal
+- 언어 instruction은 self-attention 시퀀스에 포함되지 않고 cross-attention 외부 conditioning으로 들어감
 
-$$P(\mathbf{a}, \hat{\mathbf{v}} | \mathbf{o}) = P(\mathbf{a} | \mathbf{o}) \cdot P(\hat{\mathbf{v}} | \mathbf{o}, \mathbf{a})$$
+### 2.2 Causal Block-wise Attention Mask (Fig. 4, Eq. 5)
+시퀀스 $T_t = [T_o; T_s; T_a; T_f]$에 대해:
+1. $T_s, T_o$ ↔ 상호 attend, $T_a/T_f$는 못 봄
+2. $T_a$ → $\{T_s, T_o\}$만 attend, $T_f$는 못 봄
+3. $T_f$ → $\{T_s, T_o, T_a\}$ attend (action-conditioned dynamics)
 
-> ❓ **예상 질문**: Action이 video를 참조하지 못하면 video generation의 학습 signal이 action에 어떻게 전달되는가?
-> **답변**: **공유 encoder**를 통해 간접 전달. Video generation loss가 encoder를 업데이트 → encoder representation이 dynamics-aware가 됨 → action prediction이 이 representation을 활용. Fast-WAM과 유사한 메커니즘이나, causal 구조로 명시적으로 분리.
+이 비대칭 마스크가 핵심 — future-video 정보가 action 예측에 leak되는 것을 막아서 추론 시 video branch 제거가 가능해진다.
 
-### 2.2 Optional Video Generation at Inference
+### 2.3 Flow Matching Objective (Eqs. 6–10)
+$x(s) = (1-s)\epsilon + sx$, target velocity $\dot x(s) = x - \epsilon$. Action·video 두 modality에 모두 적용:
+$$\mathcal{L}_{all} = \lambda_{video}\mathcal{L}_{video} + \lambda_{action}\mathcal{L}_{action}$$
+실험 weight: $\lambda_{action}=5, \lambda_{video}=1$. Action chunk $p=48$, future stride $\Delta=12$ (즉 $K=4$ frame 예측).
 
-추론 시:
-- **Fast mode**: Action tokens만 생성 → 9x speedup
-- **Full mode**: Action + future video 생성 → 시각화, 안전 검증 등에 활용 가능
+### 2.4 Curriculum Pre-training (Tab. 1, Sec. 3.3)
+1. Web-video 초기화 (Wan)
+2. **Embodied data pre-training** ~10,000h: Agibot 2,500h + EGO4D 3,500h + Open X-Embodiment 3,500h + EgoDex 800h + DROID 350h + RoboMind 300h + Something-V2 200h + RDT 25h + ATARA 10h
+3. Target-robot post-training (image+language+action triplet)
 
-### 2.3 Large-scale Pre-training
+## 3. 핵심 결과
 
-Action-centered video generation model을 대규모 로봇 데이터로 사전학습한 후, policy learning backbone으로 활용.
+### 3.1 RoboTwin 2.0 (Tab. 2, 50+ task 평균)
+| Method | Clean | Rand. |
+|---|---|---|
+| π₀.₅ | 0.43 | 0.44 |
+| X-VLA | 0.73 | 0.73 |
+| Motus | 0.89 | 0.87 |
+| **GigaWorld-Policy** | **0.87** | **0.85** |
 
----
+VLA-Tracker YAML의 robotwin_v2_clean_avg=87.0, rand_avg=85.0과 정확히 일치(논문 본문은 평균 0.86으로 인용).
 
-## 3. 실험 결과 심층 분석
+### 3.2 Inference Latency on A100 (Tab. 3)
+| Method | Time (ms) | SR Sim | SR Real |
+|---|---|---|---|
+| π₀.₅ | 225 | 0.48 | 0.69 |
+| GigaBrain-0 | 452 | – | 0.68 |
+| Motus | 3231 | 0.88 | 0.76 |
+| Cosmos-Policy | 1413 | – | 0.58 |
+| **Ours** | **360** | 0.86 | **0.83** |
 
-| 모델 | SR (%) | Inference (ms) | 대비 |
-|------|--------|---------------|------|
-| Motus (WAM baseline) | 78.5 | ~900 | baseline |
-| pi-0.5 | 45.2 | ~200 | - |
-| **GigaWorld-Policy (fast)** | **85.5 (+7%)** | **~100 (9x)** | +7% SR, 9x faster |
+Motus 대비 ≈9× 가속(3231→360 ms = 8.97×) 하면서 real-world +7%. 실세계 4 task 평균(Tab. 4): 0.83 vs π₀.₅ 0.69.
 
-### RoboTwin 2.0
+### 3.3 Data Efficiency (Fig. 7)
+GigaWorld-Policy는 demonstration 10%만으로 π₀.₅의 100% 데이터 성능에 도달.
 
-| 모델 | SR (%) |
-|------|--------|
-| pi-0.5 | 41.3 |
-| **GigaWorld-Policy** | **80.5 (+95%)** |
+## 4. Ablation 핵심 (Sec. 4.5)
 
-- pi-0.5 대비 거의 **2배** 성능 → 주목할 만한 결과
+- **Stride sweep $\Delta$ (Tab. 5, $p=48$ 고정)**: $K=0$ (no future) 0.60 → $K=4$ ($\Delta=12$) **0.83** → $K=12$ ($\Delta=4$) 0.76. 즉 dense future prediction은 오히려 손해.
+- **Pre-training 구성 (Tab. 7)**: scratch 0.45 → video init only 0.57 → embodied only 0.73 → **video+embodied 0.83**. 둘 다 필요.
+- **Embodied data scale (Fig. 8)**: 0% → 100%로 갈수록 0.57 → 0.83 단조 증가
+- **Causal mask vs full self-attn (Tab. 6)**: SR 0.83 vs 0.81, 그리고 video 생성 PSNR 28.41/SSIM 0.901 vs 27.87/0.892 — causal mask가 성능과 deployability 둘 다 우수
 
----
+## 5. 의의 및 비판적 분석
 
-## 4. 한계 및 미해결 문제
+핵심 통찰은 "video supervision은 학습 신호로만 쓰고 추론에서는 분리 가능하게 둔다"는 것이다. Causal masking이 이 분리를 제도적으로 강제 — full self-attn 변형은 SR이 낮을 뿐 아니라 inference에서 future token을 드롭할 수 없다(action token이 future에 의존). RoboTwin 2.0에서 Motus와 평균 success가 거의 동등(0.86 vs 0.88)함에도 9× 가속한 점, 그리고 real-world에서는 오히려 +7%인 점은 "낮은 latency가 closed-loop error correction을 강화한다"는 저자의 주장(Sec. 4.3)과 일관된다.
 
-### 방법론적 미비점
-1. **Causal 분리의 trade-off**: Action이 future video를 참조하지 못하므로, 미래 상태 예측에 기반한 plan이 불가능. Long-horizon task에서 이 제약이 성능을 제한할 수 있음
-2. **사전학습 데이터 비공개**: 대규모 로봇 데이터의 구성과 규모가 불명확
-3. **Motus 외 WAM과의 비교 부족**: GR-1, DiT4DiT 등과의 직접 비교 미제공
-4. **Standard benchmark 부족**: RoboTwin 위주, LIBERO/CALVIN에서의 결과 부재
+## 6. 한계 및 향후 방향
 
-### Attribution 문제
-- 성능 향상이 **action-centered 설계** 때문인지, **대규모 사전학습 데이터** 때문인지 분리 어려움
+- π₀.₅(225 ms)보다는 여전히 60% 느림 — 5B DiT의 FLOPs 한계
+- $K=4$가 최적이라는 결과는 "어느 정도의 future modeling이면 충분하고 더는 오히려 noisy"임을 시사 → 더 긴 horizon 일반화는 미해결
+- VLA-Tracker YAML의 inference_hz=2.8는 360 ms latency(≈2.78 Hz)와 일관 ✓
+- Wan 2.2의 web video bias가 robot task와 mismatch될 수 있고, embodied pre-training에서 EGO4D 3,500h 의존도가 큼
 
----
-
-## 5. 총평
-
-| 항목 | 평가 |
-|------|------|
-| **Novelty** | ★★★★★ — Video-centered → action-centered 패러다임 전환 |
-| **Technical depth** | ★★★★☆ — Causal design이 잘 설계됨 |
-| **Experimental rigor** | ★★★☆☆ — 한정된 벤치마크 |
-| **Practical impact** | ★★★★★ — 9x speedup의 실용적 가치 |
-| **Writing quality** | ★★★★☆ — 명확 |
-
-**강점**: "Action이 video에 의존하면 안 된다"는 통찰이 설계에 잘 반영됨. 9x 속도와 7% 성능 동시 향상. **약점**: 데이터 비공개, 한정된 벤치마크, long-horizon에서의 검증 부재.
-
----
-
-## 6. 🔥 예상 날카로운 질문 모음
-
-| # | 질문 | 핵심 답변 요점 |
-|---|------|---------------|
-| 1 | Fast-WAM과 어떻게 다른가? | Fast-WAM은 test-time video를 단순 제거, GigaWorld는 학습 구조 자체를 action-centered로 재설계 |
-| 2 | Action이 future video를 참조하면 plan 능력이 생기지 않나? | 맞음, 이것이 trade-off. Plan이 필요한 long-horizon task에서는 이 제약이 문제될 수 있음 |
-| 3 | pi-0.5 대비 95% 향상의 공정성은? (학습 데이터 차이?) | 데이터 차이가 있을 수 있으며, 동일 데이터에서의 비교가 더 공정 |
-| 4 | Optional video generation의 실용적 활용 사례는? | Safety check (예측 비디오가 위험하면 action 거부), human supervision, debugging |
-
-<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->
+<!-- VERIFIED: pdf -->

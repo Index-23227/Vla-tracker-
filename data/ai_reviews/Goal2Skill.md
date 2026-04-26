@@ -31,10 +31,47 @@
 
 ## 3. 실험 결과
 
-> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.
+### RMBench 메인 비교 (Table 1, 5 tasks × 100 episodes)
 
-- **RMBench**의 대표 long-horizon 태스크에서 **평균 성공률 32.4%** 기록, 가장 강한 baseline(9.8%) 대비 3배 이상 향상.
-- Ablation: structured memory와 closed-loop recovery 모두 필수 요소로 확인.
+| 방법 | Obs&Pick | Rearrange | Battery Try | Blocks Rank | Press Btn | **Total** |
+|------|---------:|----------:|------------:|------------:|----------:|----------:|
+| DP | 1 | 0 | 10 | 10 | 0 | 4.2 |
+| ACT | 1 | 29 | 19 | 0 | 0 | 9.8 |
+| π0.5 | 9 | 13 | 16 | 6 | 0 | 8.8 |
+| X-VLA | 9 | 13 | 26 | 1 | 0 | 9.8 |
+| **Ours** | 8 | **38** | **46** | **60** | **10** | **32.4** |
+
+- **Total avg 32.4%** vs 가장 강한 baseline 9.8% (3.3×)
+- **M(n) 태스크(memory-heavy)** 에서 **38.7% vs 9.0%** (4.3×)
+- Blocks Ranking Try에서 60% (baseline 모두 ≤13%)
+
+### Memory Ablation (Table 2)
+
+| 설정 | Avg |
+|------|----:|
+| Base | 6.7 |
+| + H_t (episodic) | 27.7 |
+| + H_t + W_t | 28.0 |
+| Full | **35.3** |
+
+→ Episodic history만 추가해도 +21.0pp로 가장 큰 이득.
+
+### Recovery Ablation (Table 3)
+
+| 설정 | Avg |
+|------|----:|
+| Base | 8.0 |
+| + Φ_verify | 17.5 |
+| + Φ_verify + Φ_reflect | 24.0 |
+| Full | **28.0** |
+
+→ Reflection 없는 verify-only도 +9.5pp 개선.
+
+### 주의: VLM/Executor 구체 모델 미공개
+
+- Paper는 "VLM-based agentic module"이라고만 기술. GPT-4, Claude, Gemini, Qwen 중 어느 것인지 **명시 없음**.
+- Low-level executor도 "VLA-based diffusion visuomotor controller"로만 기술. π0/RDT-1B/OpenVLA 중 어느 backbone인지 미공개.
+- 재현성에 중대한 공백 (관련 질문 Sec 6 참조).
 
 ---
 

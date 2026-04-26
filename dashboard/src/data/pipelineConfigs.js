@@ -1587,4 +1587,847 @@ export const PIPELINE_CONFIGS = {
     meta: { loss: 'Flow matching + reasoning', notes: ['2B–8B params', 'Vlaser-6M dataset'] },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #74  OmniVLA-RL — Country Garden / Omni AI / VBot / ECNU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'OmniVLA-RL': {
+    inputs: [
+      { label: 'Multi-view RGB', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Encoders', sub: 'tri-modal', color: 'k', children: [
+        { label: 'SigLIP', sub: 'semantic vision', color: 'k' },
+        { label: 'VGGT', sub: '3D spatial encoder', color: 'c' },
+        { label: 'Text encoder', sub: 'instructions', color: 'b' },
+      ]},
+      { group: 'Mix-of-Transformers (MoT) backbone', sub: 'PaLiGemma VLM init, 3 experts share layers', color: 'p', children: [
+        { label: 'Reasoning expert', sub: 'semantics + language', color: 'i' },
+        { label: 'Spatial expert', sub: '3D geometry', color: 'c' },
+        { label: 'Action expert', sub: 'flow matching head', color: 'r' },
+      ]},
+      { label: 'Block-wise Causal Attention', sub: 'omni-visible prefix + causal action suffix', color: 'x' },
+      { group: 'Flow-GSPO online RL', sub: 'SDE reformulation + Group Segmented PO', color: 'a', children: [
+        { label: 'Conditional Flow Matching', sub: 'H=16, K=10 denoising', color: 'r' },
+        { label: 'SDE sampling', sub: 'Fokker–Planck', color: 'y' },
+        { label: 'GSPO update', sub: 'G=8, ε=0.2, β=0.01', color: 'a' },
+      ]},
+    ],
+    output: { label: 'Continuous action chunks', sub: 'spatially grounded, RL-refined', color: 'e' },
+    meta: { loss: 'CFM + Flow-GSPO', loop: '10 denoising / 200 RL steps', notes: ['LIBERO avg 97.6%', 'LIBERO-Plus 80.3% (+39.1pp over SFT)', 'No real-world eval'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #75  HEX — BICHR / XJTU / Nankai / PKU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'HEX': {
+    inputs: [
+      { label: 'Multi-view RGB', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Humanoid proprio', sub: 'upper+lower body, IMU, tactile', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Qwen3-VL-2B-Instruct', sub: 'VLM backbone, 2B', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'Qwen3-VL', color: 'k' },
+        { label: 'Qwen3 LLM', sub: '2B language', color: 'i' },
+        { label: 'History query tokens', sub: 'lightweight temporal cache', color: 'c' },
+      ]},
+      { group: 'Unified Proprioceptive Predictor (UPP)', sub: '4-layer, hidden 768, morphology-aware MoE', color: 'o', children: [
+        { label: 'Humanoid-aligned state repr.', sub: 'body-part encoders', color: 'g' },
+        { label: 'MoE: 16 routed + 2 shared', sub: 'top-1 softmax, LB=0.01', color: 'a' },
+        { label: 'Future state predictor', sub: '50-step proprio horizon', color: 't' },
+      ]},
+      { label: 'Residual-gated fusion', sub: 'blends VL features + predicted future states', color: 'x' },
+      { group: 'DiT-B flow-matching action head', sub: '16-layer, hidden 1024, 100-step chunks', color: 'r', children: [
+        { label: 'Flow-matching objective', sub: 'velocity field V_θ', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Whole-body action chunks', sub: '100-step, cross-embodiment', color: 'e' },
+    meta: { loss: 'L_action + α·L_state (flow + proprio pred)', loop: 'Real-time @ 73.34ms on RTX 4090 (≈13.6 Hz)', notes: ['2.4B params', 'Seen-scenario avg 79.8%', 'Generalization avg 61.8%', '~1K A100 GPU hrs'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #76  Goal2Skill — BUPT / InspireOmni AI / Tsinghua
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Goal2Skill': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Long-horizon goal G', color: 'b' },
+      { label: 'Proprio s_t', sub: '14-dim', color: 'g' },
+    ],
+    stages: [
+      { group: 'High-level VLM planner', sub: 'agentic (VLM identity not disclosed)', color: 'p', children: [
+        { label: 'Φ_plan', sub: 'goal decomposition', color: 'i' },
+        { label: 'Φ_verify', sub: 'VLM outcome check', color: 'c' },
+        { label: 'Φ_reflect', sub: 'failure diagnosis + replan', color: 'y' },
+        { label: 'Φ_mem', sub: 'memory updater', color: 'a' },
+      ]},
+      { group: 'Structured task memory M_t', sub: 'natural-language', color: 't', children: [
+        { label: 'Episodic H_t', sub: 'sliding-window summaries', color: 't' },
+        { label: 'Working W_t', sub: 'current state summary', color: 't' },
+        { label: 'Error register E_t', sub: 'diagnosed failures', color: 'r' },
+      ]},
+      { label: 'Geometry-preserving filter', sub: 'Î_t = I_t ⊙ (1−Q_t), zero-shot mask + temporal update', color: 'x' },
+      { group: 'Low-level skill library', sub: 'discrete diffusion primitives {π_1..π_J}', color: 'r', children: [
+        { label: 'Skill selector j_k', sub: 'chosen by planner', color: 'a' },
+        { label: 'Reverse diffusion (Eq.19)', sub: 'µ_θ + σ_m·ε, conditioned on Î, s, ℓ', color: 'r' },
+        { label: 'Receding-horizon chunks', sub: 'with VLM checkpoint verify', color: 'x' },
+      ]},
+    ],
+    output: { label: 'Continuous action chunks', sub: 'sub-task level, memory-aware', color: 'e' },
+    meta: { loss: 'Per-skill diffusion (50 demos/task, 30k steps)', loop: 'Closed-loop plan → exec → verify → (retry | replan)', notes: ['RMBench total 32.4% (vs 9.8% best baseline)', 'M(n) avg 38.7% vs 9.0%', 'VLM / executor identities NOT disclosed'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #77  UniT — XPeng / Tsinghua / HKU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'UniT': {
+    inputs: [
+      { label: 'Egocentric human video', color: 'b' },
+      { label: 'Humanoid robot RGB', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'State + action (human/robot)', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'UniT tokenizer (pretrain)', sub: 'tri-branch cross-reconstruction + shared RQ-VAE codebook', color: 'c', children: [
+        { label: 'Visual branch E_v', sub: 'frozen DINOv2 → IDM', color: 'k' },
+        { label: 'Action branch E_a', sub: 'state + action chunk', color: 'g' },
+        { label: 'Fusion branch E_m', sub: 'synergizes E_v + E_a features', color: 't' },
+      ]},
+      { group: 'VLA-UniT (policy)', sub: 'GR00T n1.5 framework + Qwen2.5-VL', color: 'p', children: [
+        { label: 'Qwen2.5-VL', sub: 'VL backbone', color: 'i' },
+        { label: 'Learnable UniT queries', sub: 'parallel CE classification (Eq.4)', color: 'a' },
+        { label: 'Flow-matching velocity head V_θ', sub: 'continuous actions (Eq.5)', color: 'r' },
+      ]},
+      { group: 'WM-UniT (world model, optional)', sub: 'Cosmos Predict 2.5', color: 'y', children: [
+        { label: 'UniT action features z_a', sub: 'control interface', color: 'g' },
+        { label: 'Video generation head', sub: 'flow matching on latent frames', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Continuous actions + future frames', sub: 'embodiment-agnostic', color: 'e' },
+    meta: { loss: 'L_VLA = L_token (CE) + λ_fm·L_fm (flow)', loop: 'WM-UniT autoregressive rollout', notes: ['RoboCasa GR1 overall 66.7% (vs FLARE 55.0)', 'IRON real-world 78% / 75% (vs GR00T 30% / 5%)', '10% data UniT ≈ full-data GR00T baseline'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #78  AnySlot — Stony Brook / CMU / MBZUAI / PKU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'AnySlot': {
+    inputs: [
+      { label: 'Multi-view RGB I^{1:m}', color: 'b' },
+      { label: 'Compositional language instr.', color: 'b' },
+      { label: 'Robot state q_t', color: 'g' },
+    ],
+    stages: [
+      { group: 'High-level: Scene-marker grounding', sub: 'Nano-Banana 2 (11s latency on H200)', color: 'y', children: [
+        { label: 'Guidance image Ĩ', sub: 'blue sphere overlay at target slot', color: 'a' },
+        { label: 'Marker center (u,v)', sub: 'pixel-aligned goal', color: 'y' },
+      ]},
+      { group: 'Low-level: π0.5 VLA (fully fine-tuned)', sub: 'PaliGemma-3B + flow-matching action expert', color: 'p', children: [
+        { label: 'PaliGemma-3B', sub: 'VL backbone', color: 'i' },
+        { label: 'Goal-conditioned prefix', sub: 'Ĩ injected into context', color: 'c' },
+        { label: 'Flow-matching action expert', sub: 'continuous denoising', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Precise slot placement actions', sub: 'sub-centimeter accuracy', color: 'e' },
+    meta: { loss: 'Flow matching fine-tune (D_syn, 20k steps, H200 bs=64)', notes: ['3B params', 'SlotBench avg SR 89.6% / IA 92.7%', 'Flat π0.5 scores 18% on Ord only, 0% elsewhere', 'Oracle ~96.7% → bottleneck is high-level grounding'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #79  StableIDM — GigaAI / CASIA / BIT
+  // ═══════════════════════════════════════════════════════════════════════════
+  'StableIDM': {
+    inputs: [
+      { label: 'RGB frames I_{t-K:t}', sub: 'causal history window', color: 'b' },
+      { label: 'Robot mask M_t', sub: 'from SAM', color: 'g' },
+    ],
+    stages: [
+      { group: 'Preprocessing + visual encoding', sub: 'fixed-length sliding window', color: 'k', children: [
+        { label: 'SAM', sub: 'robot-centric masking (suppresses bg)', color: 'c' },
+        { label: 'DINOv2', sub: 'frozen encoder → Embeddings + CLS tokens', color: 'k' },
+      ]},
+      { label: 'TDR step 1: Temporal Fusion (pre-DFA)', sub: 'repairs current visual features using adjacent frames', color: 't' },
+      { group: 'Directional Feature Aggregation (DFA)', sub: 'anisotropic spatial aggregation', color: 'o', children: [
+        { label: 'Directional weights from CLS tokens', sub: 'MLP over CLS → axis-aware coefficients', color: 'i' },
+        { label: 'Weighted global average pooling', sub: 'produces direction-aware feature', color: 'a' },
+      ]},
+      { label: 'TDR step 2: Temporal Regressor (post-DFA)', sub: 'MLP + causal TCN, dilations {1,2,4,8}', color: 't' },
+      { label: 'Residual action prediction', sub: 'denormalize via μ_train, σ_train per-dim', color: 'x' },
+    ],
+    output: { label: 'Current action a_t', sub: 'dual-arm joint angles + gripper', color: 'e' },
+    meta: { loss: 'Supervised IDM regression', loop: 'Single-step; fixed-length causal window', notes: ['AgiBot heavy trunc: acc 0.307, L1 0.493 (best)', 'Real-robot replay avg 47.4%', 'As π0.5 annotator: 35.3% → 52.9%'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #80  DA-PTQ — Tongji / UTS
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DA-PTQ': {
+    inputs: [
+      { label: 'Pretrained CogACT (FP)', sub: 'base VLA', color: 'p' },
+      { label: 'Calibration: 512 trajs', sub: 'BridgeData V2, 6 spatial bins', color: 'b' },
+    ],
+    stages: [
+      { group: 'Cross-Space Representation Compensation (CSRC)', sub: 'orthogonalize VL↔action interface', color: 'c', children: [
+        { label: 'Block-wise SVD rotation', sub: 'block size 16×16', color: 'c' },
+        { label: 'Smoothing + shrinkage', sub: 'λ_smooth=0.15, shrink=0.55', color: 't' },
+        { label: 'Fold compensation into weights', sub: 'zero inference overhead', color: 'x' },
+      ]},
+      { group: 'Drift-Aware Mixed-Precision Allocation (DA-MPA)', sub: 'trajectory-level drift optimization', color: 'o', children: [
+        { label: 'Structural Jacobian profiling', sub: 'Tikhonov damping λ=3e-4', color: 'a' },
+        { label: 'Per-dim motion-error scoring', sub: 'w_trans=1.8, w_rot=0.15', color: 'y' },
+        { label: 'Top-30% layers → BF16', sub: 'rest 70% → W4', color: 'r' },
+      ]},
+      { label: 'Final 2 DiT blocks preserved', sub: 'proximity to continuous output', color: 'x' },
+    ],
+    output: { label: 'Quantized CogACT (W4A8)', sub: '7-DoF diffusion actions, drift-stabilized', color: 'e' },
+    meta: { loss: 'Training-free PTQ (calibration only)', notes: ['42.5% memory reduction', '54.8% inference speedup', 'WidowX VM 48.9 (vs FP 51.3)', 'Google VM 68.5 (vs FP 74.8)', 'Google VA 51.7 (vs FP 61.3)'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #81  VLA-IAP — HKUST / CUHK / SCNU / NUDT / USTB
+  // ═══════════════════════════════════════════════════════════════════════════
+  'VLA-IAP': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Pretrained VLA (any)', sub: 'OpenVLA-OFT / π0 / π0.5 / DreamVLA', color: 'p' },
+    ],
+    stages: [
+      { group: 'Interaction-First signal extraction (training-free)', sub: 'per-frame geometric + motion priors', color: 'c', children: [
+        { label: 'Sobel edge map', sub: 'structural geometric anchors', color: 'c' },
+        { label: 'Motion denoise', sub: 'history smoothing, IoU tracking', color: 't' },
+        { label: 'Semantic-motion alignment', sub: 'low-IoU → pruned, high-IoU → preserved', color: 'a' },
+      ]},
+      { group: 'Dynamic pruning schedule', sub: 'conservative → aggressive', color: 'o', children: [
+        { label: 'Early phase', sub: 'minimal pruning (stability)', color: 'g' },
+        { label: 'Interaction phase', sub: 'aggressive pruning (speedup)', color: 'r' },
+      ]},
+      { label: 'Inject pruned tokens into backbone', sub: 'unchanged action head', color: 'x' },
+    ],
+    output: { label: 'Accelerated actions', sub: 'unchanged quality, 1.25–1.54× speedup', color: 'e' },
+    meta: { loss: 'None (training-free)', notes: ['LIBERO 97.8% with 1.25× speedup', 'Up to 1.54× speedup with comparable performance', 'Works across OpenVLA-OFT, π0, π0.5, DreamVLA', 'Validated on real robot + 3 sim envs'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #82  DeepThinkVLA — HUST / Tsinghua / RUC
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DeepThinkVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'PaliGemma 2 backbone (π0-FAST base)', sub: '2.9B params', color: 'p', children: [
+        { label: 'Vision encoder', sub: 'PaliGemma 2 ViT', color: 'k' },
+        { label: 'Gemma-2 2B', sub: 'language model', color: 'i' },
+      ]},
+      { group: 'Hybrid-Attention Decoder', sub: 'condition 1 of CoT effectiveness', color: 'o', children: [
+        { label: 'Causal attention for language CoT', sub: 'sequential reasoning tokens', color: 'a' },
+        { label: 'Bidirectional attention for actions', sub: 'parallel action decoding', color: 'y' },
+      ]},
+      { group: 'SFT-then-RL pipeline', sub: 'condition 2: outcome-aligned causal CoT', color: 'r', children: [
+        { label: 'Stage 1: SFT with CoT annotations', sub: 'reasoning-action chain', color: 't' },
+        { label: 'Stage 2: outcome-based RL', sub: 'sparse task-success reward', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Action tokens (FAST-style)', sub: 'reasoning-grounded', color: 'e' },
+    meta: { loss: 'CE on FAST action tokens + RL task reward', notes: ['LIBERO 97.0%', 'LIBERO-Plus 79.0% (vs π0-FAST 61.6%)', 'RoboTwin 2.0 59.3% (+21.7pp over best)', '2.9B params'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #83  StructVLA — USTC / MBZUAI
+  // ═══════════════════════════════════════════════════════════════════════════
+  'StructVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'Structured World-Model Planner', sub: 'sparse physically-meaningful future frames', color: 'c', children: [
+        { label: 'Kinematic milestone detector', sub: 'gripper transitions + turning points', color: 'k' },
+        { label: 'Structured frame predictor', sub: 'unified discrete token vocabulary', color: 't' },
+      ]},
+      { label: 'Unified discrete token vocabulary', sub: 'shared across visual + action tokens', color: 'p' },
+      { group: 'Two-stage training', sub: 'decoupled plan vs execute', color: 'o', children: [
+        { label: 'Stage 1: WM predicts structured frames', sub: 'sparse milestones (not dense rollout)', color: 'a' },
+        { label: 'Stage 2: map structured foresight → actions', sub: 'low-level motor tokens', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Actions', sub: 'milestone-aligned', color: 'e' },
+    meta: { loss: 'Token prediction on unified vocab', notes: ['LIBERO 94.8%', 'SimplerEnv-WidowX 75.0%', 'Sparse structured frames avoid dense-rollout error accumulation', 'Real-world deployments validated'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #84  SmoothVLA — CQUPT / CIGIT CAS / USTC
+  // ═══════════════════════════════════════════════════════════════════════════
+  'SmoothVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'Prismatic-7B (OpenVLA base)', sub: 'autoregressive VLA', color: 'p', children: [
+        { label: 'SigLIP + DinoV2', sub: 'vision encoders', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language model', color: 'i' },
+        { label: 'AR action head + chunking', sub: 'autoregressive tokens', color: 'a' },
+      ]},
+      { group: 'GRPO RL fine-tuning', sub: 'intrinsic smoothness optimization', color: 'o', children: [
+        { label: 'Binary sparse task reward', sub: 'success/fail signal', color: 'r' },
+        { label: 'Continuous jerk penalty', sub: 'trajectory jerk from policy rollouts', color: 't' },
+        { label: 'Hybrid reward combination', sub: 'task + physics-informed smoothness', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Smooth continuous actions', sub: 'physically feasible trajectories', color: 'e' },
+    meta: { loss: 'GRPO with task + jerk hybrid reward', notes: ['LIBERO 80.5% avg', '+13.8% smoothness over standard RL', 'Outperforms SFT generalization', 'Intrinsic reward (no extrinsic env feedback)'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #85  DMW (Drive My Way) — UC Riverside / U Michigan  (autonomous driving VLA)
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DMW': {
+    inputs: [
+      { label: 'Front-view RGB', color: 'b' },
+      { label: 'Natural language instr.', sub: 'short-term style guidance', color: 'b' },
+      { label: 'User embedding', sub: 'long-term preference', color: 'k' },
+    ],
+    stages: [
+      { group: 'SimLingo VLA backbone', sub: 'built on InternVL2-1B', color: 'p', children: [
+        { label: 'InternVL2 vision encoder', color: 'k' },
+        { label: 'InternVL2-1B LLM', sub: '1B', color: 'i' },
+      ]},
+      { group: 'Preference-alignment fine-tuning', sub: 'per-driver policy adaptation', color: 'o', children: [
+        { label: 'LLM-generated reward weights', sub: 'per-style safety/efficiency/comfort', color: 'y' },
+        { label: 'Policy FT with reward shaping', sub: 'AdamW lr=1e-4, wd=1e-3', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous driving control', sub: 'throttle / brake / steer, personalized', color: 'e' },
+    meta: { loss: 'RL-style reward shaping with LLM-generated weights', notes: ['1B params', 'Bench2Drive closed-loop', '25 drivers for preference alignment', 'CVPR 2026, open-source at dmw-cvpr.github.io'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #86  KineVLA — Gaoge Han et al.
+  // ═══════════════════════════════════════════════════════════════════════════
+  'KineVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'Prismatic-7B VLM (OpenVLA base)', sub: '7B', color: 'p', children: [
+        { label: 'SigLIP + DinoV2', sub: 'vision encoders', color: 'k' },
+        { label: 'Llama-2 7B', sub: 'language model', color: 'i' },
+      ]},
+      { group: 'Bi-level action tokenization (RVQ-VAE)', sub: 'goal vs kinematics decomposition', color: 'o', children: [
+        { label: 'Goal codebook', sub: 'coarse, goal-invariant intent', color: 'a' },
+        { label: 'Kinematics codebook', sub: 'fine, kinematics-variant execution', color: 't' },
+        { label: 'Mutual-information regularizer', sub: 'disentangle the two levels', color: 'y' },
+      ]},
+      { label: 'Autoregressive action-token decoder', sub: 'bi-level tokens', color: 'r' },
+    ],
+    output: { label: 'Discrete action tokens', sub: 'two-level structure', color: 'e' },
+    meta: { loss: 'CE on bi-level tokens + MI regularizer', notes: ['~7B params', 'Decouples task intent from motor execution', 'OpenVLA-style base'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #87  LLaVA-VLA — HKUST (GZ) / HUST / Westlake
+  // ═══════════════════════════════════════════════════════════════════════════
+  'LLaVA-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+    ],
+    stages: [
+      { group: 'LLaVA-OneVision-0.5B', sub: 'compact VLM', color: 'p', children: [
+        { label: 'LLaVA-OneVision vision tower', color: 'k' },
+        { label: 'Qwen-2 0.5B', sub: 'language model', color: 'i' },
+      ]},
+      { label: 'Discrete action tokenizer', sub: 'chunk size 5', color: 'o' },
+      { label: 'Autoregressive decoder', sub: 'action tokens', color: 'r' },
+    ],
+    output: { label: 'Action chunks', sub: '5-step discrete tokens', color: 'e' },
+    meta: { loss: 'CE on action tokens', notes: ['0.5B params (ultra-compact)', 'CALVIN 3.68 avg length', 'Action chunking on small VLM'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #88  Motus — Tsinghua / PKU / Horizon Robotics
+  // ═══════════════════════════════════════════════════════════════════════════
+  'Motus': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Mixture-of-Transformers backbone', sub: '~8B total', color: 'p', children: [
+        { label: 'Wan 2.2 VGM', sub: 'video generative model (5.0B)', color: 'y' },
+        { label: 'Qwen3-VL-2B', sub: 'VLM (2.13B)', color: 'i' },
+        { label: 'Understanding module', sub: '253.5M', color: 'c' },
+      ]},
+      { group: 'Action expert', sub: '30-layer transformer, 641.5M', color: 'o', children: [
+        { label: 'Flow-matching objective', sub: 'velocity prediction', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'video-grounded', color: 'e' },
+    meta: { loss: 'Flow matching + video generation', notes: ['~8B total params', 'RoboTwin v2 top-1 (87.8)', 'MoT combines video generation with VLA'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #89  GigaWorld-Policy — GigaAI
+  // ═══════════════════════════════════════════════════════════════════════════
+  'GigaWorld-Policy': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Wan 2.2 Diffusion Transformer', sub: '5B (video-generative backbone)', color: 'p', children: [
+        { label: 'Multi-modal encoder', color: 'k' },
+        { label: 'DiT backbone', sub: 'video generation', color: 'y' },
+      ]},
+      { label: 'Flow-matching action decoder', sub: 'velocity field head', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'world-model-grounded', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['5B params', 'RoboTwin v2 #2 (86.0)', 'Shared video-generation prior'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #90  MMaDA-VLA — (organization TBD from paper)
+  // ═══════════════════════════════════════════════════════════════════════════
+  'MMaDA-VLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Masked action tokens', color: 'o' },
+    ],
+    stages: [
+      { label: 'Multi-modal encoder', sub: 'unified VL tokens', color: 'p' },
+      { group: 'Discrete-diffusion action decoder', sub: 'masked token denoising', color: 'o', children: [
+        { label: 'Iterative order-free refinement', sub: 'multi-step unmask', color: 'a' },
+        { label: 'Parallel token recovery', sub: 'non-causal', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Discrete action tokens', sub: 'iteratively denoised', color: 'e' },
+    meta: { loss: 'Masked denoising CE over action codebook', notes: ['Discrete diffusion over action tokens', 'Order-free iterative refinement'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #91  UniDex — Tsinghua / Shanghai Qizhi / SYSU
+  // ═══════════════════════════════════════════════════════════════════════════
+  'UniDex': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Point cloud', sub: '3D geometry', color: 'c' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', sub: 'dexterous hand 6-24 DoF', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Multimodal encoding', sub: 'vision + 3D + language', color: 'p', children: [
+        { label: 'Uni3D (ViT)', sub: 'point-cloud encoder (2D ViT init)', color: 'k' },
+        { label: 'PaliGemma-style vision-language', sub: 'RGB + text', color: 'i' },
+      ]},
+      { label: 'FAAS (Function-Actuator-Aligned Space)', sub: '82-dim unified action space across 8 hands', color: 'c' },
+      { group: 'Flow-matching action head', sub: 'conditional flow matching', color: 'o', children: [
+        { label: 'Velocity field prediction', sub: 'Euler integration', color: 'r' },
+        { label: 'Step δ=0.1', sub: '10-step denoising', color: 'a' },
+      ]},
+    ],
+    output: { label: 'Dexterous hand actions', sub: '82-dim FAAS → embodiment-specific', color: 'e' },
+    meta: { loss: 'Conditional flow matching', notes: ['8 dexterous hands supported', '6-24 DoF range', 'FAAS enables cross-hand transfer'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #92  DiT4DiT — Cosmos video DiT × action DiT cascade
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DiT4DiT': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Cosmos-Predict2.5-2B Video DiT', sub: 'world-model backbone + causal Video VAE', color: 'p', children: [
+        { label: 'Cosmos-Reason1', sub: 'text encoder', color: 'i' },
+        { label: 'Causal Video VAE', sub: 'spatiotemporal latent', color: 'k' },
+        { label: 'Video DiT trunk', sub: 'AdaLN time-cond, cross-attn to text', color: 'y' },
+      ]},
+      { label: 'Intermediate feature extraction', sub: 'fixed feature layer (no full reconstruction)', color: 'x' },
+      { group: 'Action DiT (GR00T-N1 adapted)', sub: 'flow-matching action head', color: 'r', children: [
+        { label: 'AdaLN timestep injection', sub: 'diffusion-step conditioning', color: 'r' },
+        { label: 'Cross-attn to video features', sub: 'consume DiT hidden states', color: 't' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: '7-DoF, video-grounded', color: 'e' },
+    meta: { loss: 'Dual flow-matching (video + action)', notes: ['2.2B trainable', 'LIBERO 98.55 (#5)', 'RoboCasa-GR1 50.8', '7× faster convergence than dense rollouts', 'Open-source at dit4dit.github.io'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #93  ProgressVLA — diffusion + classifier guidance via progress estimator
+  // ═══════════════════════════════════════════════════════════════════════════
+  'ProgressVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Vision-Language Progress Estimator', sub: 'pretrained on Open X-Embodiment', color: 'c', children: [
+        { label: 'DINOv2 patch features', sub: 'frozen visual encoder', color: 'k' },
+        { label: 'Progress predictor', sub: 'differentiable scalar (0→1)', color: 'a' },
+      ]},
+      { group: 'UniVLA-style World Model', sub: 'inverse-dynamics in latent action space', color: 't', children: [
+        { label: 'Latent action encoder', sub: 'state + future frame → latent action', color: 't' },
+        { label: 'Inverse-dynamics decoder', sub: 'latent action → real action', color: 'g' },
+      ]},
+      { group: 'Latent Action Expert (DiTA-style)', sub: 'causal Transformer + diffusion', color: 'r', children: [
+        { label: 'Diffusion latent action chunks', sub: 'reverse process µ_θ + σ ε', color: 'r' },
+        { label: 'Classifier guidance', sub: '∇ progress estimator backprop', color: 'y' },
+        { label: 'Action Decoder', sub: 'latent → 7-DoF action', color: 'e' },
+      ]},
+    ],
+    output: { label: 'Progress-guided actions', sub: 'classifier-guided diffusion', color: 'e' },
+    meta: { loss: 'Diffusion + classifier guidance via progress gradient', notes: ['LIBERO 84.5 avg', 'CALVIN 3.73 avg_len', 'Differentiable progress signal as zero-shot classifier guidance', 'Latent action world-model decoupling'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Round 30 — 22 pipeline configs from PDF-verified Round 25-27 YAMLs
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'DualCoT-VLA': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language instr.', color: 'b' }, { label: 'Robot state', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Qwen3-VL-4B + dual frozen teachers', sub: 'Depth-Anything-3 (visual) + Qwen3-0.6B (linguistic)', color: 'p', children: [
+        { label: 'Qwen3-VL ViT', color: 'k' },
+        { label: 'Qwen3-VL-4B LLM', color: 'i' },
+        { label: '16 visual + 16 linguistic CoT query tokens', sub: 'parallel reasoning', color: 'c' },
+      ]},
+      { label: 'Diffusion Transformer (DiT) action expert', sub: 'Flow-Matching, conditioned on VLM hidden states', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'parallel CoT reasoning', color: 'e' },
+    meta: { loss: 'Flow matching + CoT distillation', notes: ['LIBERO 98.8 (#3)', 'RoboCasa GR1 55.1', 'Latency 3156→58.1 ms'] },
+  },
+
+  'SnapFlow': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Frozen base flow VLA', sub: 'pi0.5 (3B) or SmolVLA (500M)', color: 'p', children: [
+        { label: 'PaliGemma / SmolVLM', color: 'k' },
+        { label: 'Original flow-matching expert', color: 'r' },
+      ]},
+      { group: 'Two-Phase Distillation', sub: 'progressive FM/consistency mix', color: 'o', children: [
+        { label: 'Stage 1: progressive FM training', sub: 'reduce step count', color: 'a' },
+        { label: 'Stage 2: consistency distillation', sub: 'collapse to 1 step', color: 'y' },
+      ]},
+      { label: '1-NFE flow head', sub: 'single forward pass action', color: 'r' },
+    ],
+    output: { label: 'Action chunk in 1 step', sub: 'speedup w/o quality loss', color: 'e' },
+    meta: { loss: 'FM + consistency distillation', notes: ['LIBERO 98.75 (#4)', 'pi0.5 1-NFE', 'Pareto frontier vs concurrent methods'] },
+  },
+
+  'LaMP': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Qwen3-VL-4B-Instruct (frozen)', color: 'p', children: [
+        { label: 'Qwen3-VL ViT', color: 'k' },
+        { label: 'Qwen3-VL-4B LLM', color: 'i' },
+      ]},
+      { label: '3D Scene Flow Motion Expert', sub: 'predicts latent motion primitives', color: 'c' },
+      { group: 'Action Expert', sub: 'flow matching + gated cross-attention', color: 'o', children: [
+        { label: 'Single-layer gated CA', sub: 'motion guidance injection', color: 'a' },
+        { label: 'Flow-matching head', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'motion-guided', color: 'e' },
+    meta: { loss: 'Flow matching + motion regression', notes: ['LIBERO 98.3 (#6)', 'SimplerEnv WidowX 79.2 (#2)', 'LIBERO-Plus 7-axis robust'] },
+  },
+
+  'TAG': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { label: 'Frozen base VLA (pi0/pi0.5)', sub: 'Gemma + flow-matching head', color: 'p' },
+      { group: 'Test-time guidance (CFG-style)', sub: 'no parameter changes', color: 'y', children: [
+        { label: 'Target-Agnostic background prompt', sub: 'guidance signal', color: 'a' },
+        { label: 'Classifier-free composition', sub: 'shifts denoising trajectory', color: 'r' },
+      ]},
+    ],
+    output: { label: 'More stable actions', sub: 'object-centric', color: 'e' },
+    meta: { loss: 'None (test-time only)', notes: ['LIBERO 97.9 (with pi0.5)', 'LIBERO-Plus +9.3pp', 'VLABench +26.01pp'] },
+  },
+
+  'DepthCache': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Depth map', color: 'c' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { label: 'Host VLA backbone (frozen)', sub: 'pi0.5 / OpenVLA / GR00T', color: 'p' },
+      { group: 'Depth-guided token merging (training-free)', sub: 'inference-time wrapper', color: 'o', children: [
+        { label: 'Depth-region segmentation', color: 'c' },
+        { label: 'Progressive cross-frame merging', color: 't' },
+        { label: 'Dual protection mechanism', sub: 'preserves critical tokens', color: 'a' },
+      ]},
+      { label: 'Inject merged tokens into base', sub: 'unchanged action head', color: 'x' },
+    ],
+    output: { label: 'Accelerated actions', sub: '1.07-1.33× speedup', color: 'e' },
+    meta: { loss: 'None (training-free)', notes: ['LIBERO 97.6 (pi0.5+DepthCache)', '0.2-1.0pp drop', 'Real 191→143ms (1.33×)'] },
+  },
+
+  'AnchorRefine': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { label: 'Base policy (frozen GR-1 / X-VLA)', color: 'p' },
+      { group: 'Hierarchical Two-Branch Decoder', sub: 'anchor + residual + decision', color: 'o', children: [
+        { label: 'Trajectory Anchor Planner', sub: 'coarse arm scaffold (0.22B)', color: 'a' },
+        { label: 'Residual Refiner', sub: 'fine-grained correction (1.1B)', color: 'r' },
+        { label: 'Decision-aware gripper branch', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Refined actions', sub: 'anchor + residual', color: 'e' },
+    meta: { loss: 'Hybrid: anchor + residual + gripper', notes: ['LIBERO-Long 97.4 (X-VLA base)', 'CALVIN ABC→D 4.40', 'Real-world Avg SR 59%'] },
+  },
+
+  'OFlow': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'GR00T-N1.5 base', sub: 'Eagle-2.5 VLM + DINOv2 foresight', color: 'p', children: [
+        { label: 'Eagle-2.5 (SigLIP + Qwen2.5-VL)', color: 'k' },
+        { label: 'DINOv2-Base foresight model', color: 'c' },
+      ]},
+      { group: 'Object-Aware Flow Matching DiT', sub: 'ControlNet-style injection', color: 'o', children: [
+        { label: 'Zero-init cross-attention', sub: 'object-aware features', color: 'a' },
+        { label: 'Flow-matching velocity head', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'object-anchored', color: 'e' },
+    meta: { loss: 'Flow matching + object-aware reg.', notes: ['LIBERO 96.6', 'SimplerEnv 67.1', 'LIBERO-Plus avg 72.3'] },
+  },
+
+  'A1': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { label: 'Molmo VLM backbone', sub: 'open-source VLM', color: 'p' },
+      { group: 'Flow-matching action expert', sub: '~400M Qwen3 with KV self-attention', color: 'o', children: [
+        { label: 'KV-conditioned self-attention', color: 'a' },
+        { label: 'Flow-matching head', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['LIBERO 96.6 avg', 'VLABench avg 53.5', 'RoboChallenge 29.0', 'Open-source: github.com/ATeam-Research/A1'] },
+  },
+
+  'ProbeFlow': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { label: 'Evo-1 + frozen InternVL3-1B', sub: 'host flow-matching VLA', color: 'p' },
+      { group: 'Adaptive ODE Solver (training-free)', sub: 'wrapper on existing flow head', color: 'o', children: [
+        { label: 'Probe step', sub: 'estimate local trajectory curvature', color: 'a' },
+        { label: 'Adaptive step size', sub: 'denser steps where needed', color: 'y' },
+      ]},
+      { label: 'Existing 8-layer DiT, 1024 dim', sub: 'unmodified', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'no quality loss, faster', color: 'e' },
+    meta: { loss: 'None (training-free)', notes: ['LIBERO 88.7', 'MetaWorld 83.2', 'Zero training cost'] },
+  },
+
+  'RoboAlign': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Qwen2.5-VL-7B MLLM (frozen)', sub: 'reasoning aligned via GRPO', color: 'p', children: [
+        { label: 'Qwen2.5-VL ViT', color: 'k' },
+        { label: 'Qwen2.5 LLM', color: 'i' },
+      ]},
+      { group: 'Test-time reasoning + RL alignment', sub: 'GRPO objective', color: 'o', children: [
+        { label: 'CoT prompt template', color: 'a' },
+        { label: 'GRPO RL fine-tune', color: 'y' },
+      ]},
+      { label: 'Diffusion action expert (newly initialized)', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'reasoning-aligned', color: 'e' },
+    meta: { loss: 'Diffusion + GRPO reward', notes: ['LIBERO 86.8', 'CALVIN 2.57', 'Real-robot 66.7%'] },
+  },
+
+  'DIAL': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Qwen2.5-VL-3B base', color: 'p', children: [
+        { label: 'Qwen2.5-VL ViT', color: 'k' },
+        { label: 'Qwen2.5-VL-3B LLM', color: 'i' },
+      ]},
+      { label: 'Latent World Model', sub: 'predicts latent foresight', color: 'c' },
+      { group: 'Action decoder', sub: '4-layer fuser + 16-layer DiT', color: 'o', children: [
+        { label: 'Self-attention fuser', sub: 'visual + foresight fusion', color: 'a' },
+        { label: '16-layer Diffusion Transformer', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'foresight-conditioned', color: 'e' },
+    meta: { loss: 'Diffusion + latent WM loss', notes: ['RoboCasa GR1 70.2 (#1!)', 'XPeng project page', 'Decoupled intent + action'] },
+  },
+
+  'E-VLA': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Event camera frames', color: 'c' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { group: 'SmolVLA backbone', sub: 'frozen base VLA', color: 'p', children: [
+        { label: 'SigLIP visual encoder', color: 'k' },
+        { label: 'SmolVLM LLM', color: 'i' },
+      ]},
+      { group: '4-block Event Adapter (~13M)', sub: 'hierarchical event encoding', color: 'o', children: [
+        { label: 'Pre-encoding overlay', sub: 'optional alternative', color: 'a' },
+        { label: 'Weight-sharing ViT blocks', color: 'y' },
+      ]},
+      { label: 'SmolVLA action expert', sub: 'interleaved self+cross-attn', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'robust to dark/blur', color: 'e' },
+    meta: { loss: 'Flow matching (inherited)', notes: ['Real-world: 0→90% in 20-lux dark', 'OOD blur robustness', 'Event-augmented'] },
+  },
+
+  'HELM': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Episodic memory', color: 't' }],
+    stages: [
+      { label: 'Frozen base VLA (OpenVLA / Octo)', color: 'p' },
+      { group: 'Harness Wrapper', sub: 'long-horizon memory + recovery', color: 'o', children: [
+        { label: 'Episodic Memory Module (EMM)', sub: 'CLIP ViT-B/32 keyframe RAG', color: 't' },
+        { label: 'State Verifier (MLP)', sub: 'progress detection', color: 'c' },
+        { label: 'Harness Controller', sub: 'rollback / replan', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Long-horizon actions', sub: 'with memory + recovery', color: 'e' },
+    meta: { loss: 'Wrapper-only (frozen base)', notes: ['LIBERO-Long 81.5 (only Long suite reported)', 'CALVIN ABC→D 3.58', 'Code on acceptance'] },
+  },
+
+  'HiVLA': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Qwen3-VL 8B planner', sub: 'fine-tuned high-level', color: 'p', children: [
+        { label: 'DINOv2 + SigLIP vision', color: 'k' },
+        { label: 'Qwen3-VL-8B LLM', color: 'i' },
+      ]},
+      { group: 'Cascaded cross-attention DiT', sub: 'CFM, init from H-RDT', color: 'o', children: [
+        { label: 'LLaMA-style RoPE backbone', color: 'a' },
+        { label: 'Conditional Flow Matching', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: 'hierarchical planner+executor', color: 'e' },
+    meta: { loss: 'Conditional flow matching', notes: ['RoboTwin v2 9-task avg 83.3 (#3)', 'Easy 96.0 / Hard 73.2', 'Click Bell + Pick&Place real-world'] },
+  },
+
+  'HY-Embodied-0.5': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'HY-Embodied-0.5 MoT', sub: '2B activated / 4B total', color: 'p', children: [
+        { label: 'HY-ViT 2.0 (400M, native-res)', color: 'k' },
+        { label: 'Mixture-of-Transformers', sub: '32B MoE-A32B variant available', color: 'i' },
+        { label: 'Visual latent tokens', color: 'c' },
+      ]},
+      { label: 'pi0/pi0.5-style Action Expert', sub: '5K-hour UMI pretrain', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'real-world humanoid', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['Tencent open-source: github.com/Tencent-Hunyuan/HY-Embodied', 'Mug Hanging 75% vs π0 45%', 'Packing 85% / Stacking 80%'] },
+  },
+
+  'ProGAL-VLA': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { group: 'Dual-system architecture', sub: 'fast pi0 + slow planner', color: 'p', children: [
+        { label: 'OpenVLA-7B fast policy', color: 'i' },
+        { label: 'Qwen-2.5-VL-Instruct-7B slow planner', color: 'a' },
+      ]},
+      { group: 'Goal Alignment + Contrast (GAC)', sub: 'verified-goal-embedding bottleneck', color: 'o', children: [
+        { label: 'State-grounded goal prediction', color: 'c' },
+        { label: 'GAC contrastive training', color: 't' },
+      ]},
+      { label: 'Imitation regression head', sub: 'OpenVLA-7B controller', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'goal-aligned', color: 'e' },
+    meta: { loss: 'Regression + GAC contrastive', notes: ['LIBERO-Plus 85.5 avg', 'Hybrid: planner + verified bottleneck', '7B controller'] },
+  },
+
+  'ReFineVLA': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { group: 'PaliGemma 2 + SpatialVLA', sub: '3.5B base', color: 'p', children: [
+        { label: 'PaliGemma 2 ViT', color: 'k' },
+        { label: 'Gemma LLM', color: 'i' },
+      ]},
+      { group: 'Multi-objective Hybrid Head', sub: 'action + reasoning generation', color: 'o', children: [
+        { label: 'SpatialVLA action head', color: 'r' },
+        { label: 'Multimodal reasoning generation', sub: 'natural-language CoT', color: 'a' },
+      ]},
+    ],
+    output: { label: 'Action + reasoning', sub: 'teacher-guided', color: 'e' },
+    meta: { loss: 'Action + reasoning multi-task', notes: ['SimplerEnv WidowX avg 47.7', 'Google VM 76.6 / VA 68.8', '3.5B params'] },
+  },
+
+  'SAMoE-VLA': {
+    inputs: [{ label: 'Multi-camera RGB', color: 'b' }, { label: 'BEV features', color: 'c' }, { label: 'Language', color: 'b' }, { label: 'Ego state', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Multi-modal encoder', sub: 'autonomous driving stack', color: 'p', children: [
+        { label: 'OpenCLIP-ConvNext + CPFPN', color: 'k' },
+        { label: 'BEVFormer BEV encoder', color: 't' },
+        { label: 'InternVL2-2B planner', color: 'i' },
+      ]},
+      { group: 'SA-MoE Flow Matching', sub: 'every 4th transformer FFN replaced', color: 'o', children: [
+        { label: 'Scene-Adaptive routing', color: 'a' },
+        { label: 'Conditional Cross-Modal Causal Attention', color: 'y' },
+      ]},
+    ],
+    output: { label: 'Driving trajectory', sub: 'nuScenes / LangAuto', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['Autonomous driving (not manipulation)', 'nuScenes + LangAuto SOTA', '3.6B'] },
+  },
+
+  'TacVLA': {
+    inputs: [{ label: 'Front RGB', color: 'b' }, { label: 'Wrist RGB', color: 'b' }, { label: 'Tactile (15 sensors)', color: 'c' }, { label: 'Language', color: 'b' }, { label: 'State', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Pi0.5 backbone (frozen partially)', color: 'p', children: [
+        { label: 'SigLIP visual encoder', color: 'k' },
+        { label: 'PaliGemma / Gemma 2.6B', color: 'i' },
+      ]},
+      { label: 'MLP tactile encoder', sub: '15-sensor input', color: 'c' },
+      { label: 'Contact-aware gating', sub: 'fuses tactile + visual', color: 'a' },
+      { label: 'Pi0.5-style flow-matching action expert', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'tactile-aware', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['Real-world only (Franka)', '4 disassembly + in-box picking', 'Vision+tactile fusion'] },
+  },
+
+  'UniDriveVLA': {
+    inputs: [{ label: 'Front-view RGB', color: 'b' }, { label: 'Driving instr.', color: 'b' }, { label: 'Ego state', color: 'g' }, { label: 'Noise ε', color: 'o' }],
+    stages: [
+      { group: 'Qwen3-VL backbone', sub: '2B Base / 8B Large', color: 'p', children: [
+        { label: 'SigLIP-2 vision', color: 'k' },
+        { label: 'Qwen3 LM', color: 'i' },
+      ]},
+      { group: 'Mixture-of-Transformers', sub: 'autonomous driving experts', color: 'o', children: [
+        { label: 'Understanding expert', color: 'c' },
+        { label: 'Perception expert', color: 't' },
+        { label: 'Action expert', sub: 'flow matching', color: 'r' },
+      ]},
+    ],
+    output: { label: 'Driving trajectory', sub: 'Bench2Drive / nuScenes', color: 'e' },
+    meta: { loss: 'Flow matching', notes: ['Bench2Drive Driving Score 78.37', 'nuScenes L2 0.90', 'Xiaomi open-source'] },
+  },
+
+  'VP-VLA': {
+    inputs: [{ label: 'RGB frames', color: 'b' }, { label: 'Language + visual prompt', color: 'b' }, { label: 'State', color: 'g' }],
+    stages: [
+      { group: 'Dual-system planner + controller', sub: 'visual-prompt interface', color: 'p', children: [
+        { label: 'Qwen3-VL-4B Planner', sub: 'parses visual prompts', color: 'a' },
+        { label: 'QwenOFT Controller', sub: 'OpenVLA-OFT base + Qwen3-VL-4B', color: 'i' },
+      ]},
+      { label: 'Imitation regression head', sub: 'OFT-style action chunks', color: 'r' },
+    ],
+    output: { label: 'Continuous actions', sub: 'visual-prompt grounded', color: 'e' },
+    meta: { loss: 'Regression', notes: ['SimplerEnv WidowX 58.3', 'RoboCasa-GR1 53.8', 'Visual prompting interface'] },
+  },
+
 }

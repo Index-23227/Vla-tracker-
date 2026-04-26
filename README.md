@@ -5,14 +5,14 @@
 ### The most comprehensive benchmark tracker for Vision-Language-Action models
 
 [![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Visit-blue?style=for-the-badge)](https://hyeongjinkim.github.io/Vla-tracker-/)
-[![Models](https://img.shields.io/badge/Models-120-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-112-purple?style=flat-square)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
-[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-82-orange?style=flat-square)](data/ai_reviews/)
+[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-112-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
 
-**120 VLA models** · **8 benchmarks** · **82 AI paper reviews** · **Auto-updated from arXiv**
+**112 VLA models** · **8 benchmarks** · **112 AI paper reviews** · **Auto-updated from arXiv**
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
 
@@ -45,32 +45,35 @@ VLA-Tracker solves this by:
 |------|-------|-----|------|-------|-------------|
 | 1 | **PLD** | **99.0** | Oct 2025 | ICLR 2026 | Residual RL |
 | 2 | **SimpleVLA-RL** | **98.8** | Sep 2025 | ICLR 2026 | AR + GRPO RL |
-| 3 | **X-VLA** | **97.8** | Oct 2025 | ICLR 2026 | Flow matching + soft prompts |
-| 4 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
-| 5 | VLA-Thinker | 97.5 | Mar 2026 | — | AR + visual CoT + RL |
-| 6 | DreamVLA | 97.2 | Jul 2025 | — | Inverse dynamics |
-| 7 | DeepThinkVLA | 97.1 | Nov 2025 | ICLR 2026 | Hybrid attention |
-| 8 | AtomicVLA | 96.6 | Mar 2026 | CVPR 2026 | Flow + SG-MoE |
-| 9 | MemoryVLA | 96.5 | Aug 2025 | ICLR 2026 | Diffusion transformer |
-| 10 | dVLA | 96.4 | Sep 2025 | ICLR 2026 | Discrete diffusion |
+| 3 | **DualCoT-VLA** | **98.8** | Mar 2026 | — | Flow matching + parallel CoT |
+| 4 | **SnapFlow** | **98.8** | Apr 2026 | — | One-step flow distillation (pi0.5 base) |
+| 5 | DiT4DiT | 98.6 | Mar 2026 | — | Cosmos DiT + flow-matching action |
+| 6 | LaMP | 98.3 | Mar 2026 | — | Qwen3-VL + flow matching (3D scene flow) |
+| 7 | MMaDA-VLA | 98.0 | Mar 2026 | — | Discrete diffusion (masked token denoising) |
+| 8 | TAG | 97.9 | Mar 2026 | — | Test-time guidance on pi0.5 |
+| 9 | VLA-IAP | 97.8 | Mar 2026 | — | Training-free token pruning |
+| 10 | X-VLA | 97.8 | Oct 2025 | ICLR 2026 | Flow matching + soft prompts |
+| 11 | DepthCache | 97.6 | Mar 2026 | — | Depth-guided token merging (training-free) |
+| 12 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
+| 13 | OmniVLA-RL | 97.6 | Apr 2026 | — | Flow matching + Flow-GSPO RL |
 
-> Full leaderboard with 36 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 53 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
-| **CALVIN** (avg len) | LingBot-VLA (4.50) | UD-VLA (4.50) | DreamVLA (4.44) |
-| **SimplerEnv** (avg) | InstructVLA (80.3) | SpatialVLA (78.2) | X-VLA (78.1) |
+| **CALVIN** (avg len) | MMaDA-VLA (4.78) | LingBot-VLA (4.50) | UD-VLA (4.50) |
+| **SimplerEnv** (avg) | InstructVLA (80.3) | LaMP (79.2) | SpatialVLA (78.2) |
 | **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
-| **RoboTwin v2** (avg) | Motus (87.8) | GigaWorld-Policy (86.0) | X-VLA (72.5) |
-| **RoboCasa** (avg) | FLARE (70.1) | DiT4DiT (50.8) | — |
+| **RoboTwin v2** (avg) | Motus (87.8) | GigaWorld-Policy (86.0) | HiVLA (83.3) |
+| **RoboCasa** (avg) | DIAL (70.2) | UniT (66.0) | GR00T-N1.5 (64.1) |
 
 ---
 
 ## Paper Reviews
 
-VLA-Tracker includes **82 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
+VLA-Tracker includes **112 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
 
 1. One-line summary
 2. Background & motivation
@@ -82,7 +85,7 @@ VLA-Tracker includes **82 AI-generated seminar-style paper reviews** for every t
 8. Overall assessment with ratings
 9. Expected tough questions for seminars
 
-**37 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
+**110 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
 
 Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-tracker-/) · [Markdown files](data/ai_reviews/)
 
@@ -97,7 +100,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
 | **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (1700+ lines) |
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
-| **YAML** | [data/models/](data/models/) | Individual model files (120 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (112 files) |
 
 ### Quick Start (Python)
 
@@ -152,12 +155,12 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 | Benchmark | Tasks | Models | Focus | Venue |
 |-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 40 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 18 | Long-horizon, language | RA-L 2022 |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 17 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 11 | Bimanual manipulation | CVPR 2025 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 50 | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 22 | Long-horizon, language | RA-L 2022 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 20 | Sim-to-real transfer | NeurIPS 2024 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 12 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
-| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 6 | Home robot tasks | RSS 2024 |
+| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 10 | Home robot tasks | RSS 2024 |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity | CoRL 2020 |
 
 ---
@@ -176,9 +179,9 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 ```
 ├── data/
-│   ├── models/              # 120 model YAML files (source of truth)
+│   ├── models/              # 112 model YAML files (source of truth)
 │   ├── benchmarks/          # 8 benchmark definitions
-│   ├── ai_reviews/          # 82 AI-generated paper reviews (markdown)
+│   ├── ai_reviews/          # 112 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── paper_reviews.json   # Venue peer-review data (ICLR, NeurIPS, CoLM)
 ├── scripts/
@@ -216,7 +219,7 @@ We also welcome:
 
 - Benchmark numbers are from papers — evaluation conditions vary (fine-tuned vs. zero-shot)
 - Not all models report on all benchmarks (fair comparison is hard)
-- AI reviews are generated by Claude and may contain inaccuracies (37/82 are PDF-verified)
+- AI reviews are generated by Claude and may contain inaccuracies (110/112 are PDF-verified)
 - Real-world performance ≠ benchmark performance
 
 ---

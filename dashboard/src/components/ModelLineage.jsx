@@ -14,6 +14,9 @@ const CROSS_REFERENCES = [
   { from: 'pi0', to: 'DexVLA', label: 'Flow matching action head approach' },
   { from: 'OpenVLA', to: 'ECoT', label: 'ECoT adds embodied CoT reasoning to OpenVLA' },
   { from: 'OpenVLA-OFT', to: 'VLA-Thinker', label: 'Visual CoT + GRPO RL on OpenVLA-OFT' },
+  { from: 'pi0.5', to: 'AnySlot', label: 'AnySlot fully fine-tunes pi0.5 flow-matching expert on SAPIEN slot data' },
+  { from: 'GR00T-N1.5', to: 'UniT', label: 'VLA-UniT built on GR00T n1.5 framework + Qwen2.5-VL backbone' },
+  { from: 'CogACT', to: 'DA-PTQ', label: 'DA-PTQ quantizes CogACT DiT action head to W4A8 (training-free)' },
 ]
 
 // Model lineage data - curated family trees

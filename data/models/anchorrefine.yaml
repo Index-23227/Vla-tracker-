@@ -1,33 +1,37 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: AnchorRefine: Synergy-Manipulation Based on Trajectory Anchor and Residual Refinement for Vision-Language-Action Models
-# arXiv: 2604.17787
-
 name: AnchorRefine
 full_name: "AnchorRefine: Synergy-Manipulation Based on Trajectory Anchor and Residual Refinement for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Beijing University of Technology; Beihang University; Nanjing University of Science and Technology"
 date: "2026-04-20"
 paper_url: https://arxiv.org/abs/2604.17787
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Inherited from base policy (GR-1 or X-VLA)"
+  llm: "Inherited from base policy"
+  action_head: "Hierarchical two-branch decoder: a Trajectory Anchor Planner predicts a coarse arm-action scaffold and a Residual Refine Module predicts a residual correction in an anchor-relative space; a decision-aware MSE-based gripper refinement branch corrects boundary-sensitive gripper decisions"
+  action_head_category: hybrid
+  parameters: "0.22B (GR-1 backbone) / 1.1B (X-VLA backbone)"
+  key_innovation: "AnchorRefine factorizes VLA action generation into trajectory anchoring and residual refinement. A trajectory anchor planner first predicts a coarse motion scaffold; a refinement module then learns only the small execution-level residual relative to a stop-gradient detached anchor, yielding a more compact and learnable target. A decision-aware gripper refinement branch separately corrects discrete gripper switching errors near contact-sensitive phases. The framework is backbone-agnostic and improves both regression-based (GR-1) and diffusion-based (X-VLA) VLA backbones."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_long: 97.4
+    libero_avg: 97.4
+    source: "Table 1 (AnchorRefine on X-VLA)"
+    eval_condition: "fine-tuned; LIBERO-LONG suite only; X-VLA backbone reported as best variant"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_avg_len: 4.40
+    source: "Table 1 (AnchorRefine on X-VLA)"
+    eval_condition: "fine-tuned on CALVIN ABC->D; X-VLA backbone"
+
+training:
+  datasets: ["LIBERO-LONG", "CALVIN ABC->D", "real-robot teleoperation (LeRobot SO101, 50 trajectories per task)"]
+  method: "Sequential two-phase training: Phase 1 trains the anchor planner end-to-end with a reconstruction loss against full ground-truth arm action chunks (and BCE for gripper); Phase 2 freezes the anchor planner and trains the residual refinement module against an anchor-relative residual target plus the decision-aware gripper correction loss"
 
 eval_conditions:
   libero: "fine-tuned"
   calvin: "fine-tuned"
 
-tags: [libero, calvin]
+tags: [hierarchical, residual_refinement, libero, calvin, real_robot, anchor_refine]

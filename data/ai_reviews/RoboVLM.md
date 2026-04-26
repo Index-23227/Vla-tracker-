@@ -1,72 +1,92 @@
 # RoboVLMs: What Matters in Building VLA Models for Generalist Robots
 
-> **한 줄 요약**: 8개 VLM backbone, 4개 policy architecture, 600+ 실험을 통해 VLA 설계의 핵심 요인을 체계적으로 분석하고, 이를 바탕으로 구축한 RoboVLMs가 manipulation 벤치마크에서 SOTA 달성.
+> **한 줄 요약**: 8 VLM backbone × 4 policy architecture × 600+ 실험을 통해 VLA 설계 4대 질문(Why/Which/How/When)을 체계적으로 검증하고, KosMos+Policy-Head 구성이 CALVIN/SimplerEnv에서 SOTA를 달성함을 보임 (ICLR 2025).
 
 ---
 
 ## 1. 배경 및 동기
 
-- VLA 설계 공간(backbone, action head, tokenization 등)이 방대하나 **체계적 비교 연구 부재**
-- 각 논문이 자체 설정에서만 평가 → "어떤 선택이 진짜 중요한가?"에 대한 답이 없음
+- VLA 설계 공간(backbone, action space, history aggregation, cross-embodiment data 사용 시점)이 방대하나 **공정한 비교 연구가 부재** (Sec. I)
+- 저자들은 4가지 핵심 질문으로 정리: ① Why VLA? ② Which backbone? ③ How to formulate? ④ When to use cross-embodiment data? (Fig. 2)
+- 모든 코드/모델/데이터셋을 robovlms.github.io에 공개
 
 ---
 
-## 2. 방법론: 대규모 실험적 분석
+## 2. 방법론: RoboVLMs 통합 프레임워크
 
-### 탐구된 설계 축
-
+### 분석 축 (Fig. 1b)
 | 축 | 선택지 |
 |---|--------|
-| VLM Backbone | LLaVA, Prismatic, InternVL, Qwen-VL, Idefics, PaLI, BLIP-2, Fuyu |
-| Action Head | MLP, GMM, Diffusion, Token prediction |
-| Action Representation | Discrete (256/1024 bins), continuous, FAST |
-| Training Strategy | Frozen VLM, LoRA, full FT |
+| VLM Backbone | LLaVA, Flamingo, KosMos, PaliGemma, Qwen-VL, MoonDream, UForm, Phi (8종) |
+| Action Space | Discrete (token) vs Continuous |
+| History | One-Step vs Interleaved vs Policy-Head |
+| Training Objective | MSE+BCE vs Flow Matching |
+| Cross-Embodiment | Pre-train / Co-train / Post-train |
 
-### 핵심 발견
-
-1. **VLM backbone 선택이 가장 중요** (action head보다 중요)
-2. **Spatial feature가 풍부한 VLM** (DINOv2 포함)이 action에 유리
-3. **Diffusion head > MLP > token prediction** (일반적으로)
-4. **Full fine-tuning > LoRA** (성능은 높으나 비용 trade-off)
-
----
-
-## 3. 실험 결과
-
-| 최적 설정 RoboVLMs | LIBERO (%) | SimplerEnv (%) |
-|-------------------|-----------|---------------|
-| Best combination | 94.8 | 72.3 |
-| Worst combination | 62.1 | 38.5 |
-
-- **최적 vs 최악의 설계 조합: 32%p+ 차이** → 설계 선택이 결정적
+### 평가 환경 (Sec. II.A)
+- **CALVIN**: 34 tasks, 24K teleop demos, ABCD splits, 1~5 consecutive-task 평균길이(Avg.Len.)
+- **SimplerEnv**: WidowX+Bridge, Google Robot real-to-sim
+- **Real Robot**: Kinova Gen3 + Robotiq 2F-85, 105 tasks, 70K trajectories, 20 평가 task × 5 setting
 
 ---
 
-## 4. 한계 및 미해결 문제
+## 3. 실험 결과 (PDF 수치 인용)
 
-1. **Compute 비용**: 600+ 실험에 수만 GPU-hours 소요 → 재현 어려움
-2. **벤치마크 편향**: 특정 벤치마크에서의 최적이 다른 환경에서도 최적인지 불확실
-3. **시간에 따른 변화**: 새로운 VLM/기법의 등장으로 결론이 빠르게 outdated될 수 있음
+### Backbone × Structure ablation (Table I, CALVIN ABCD→D)
+| Backbone | Structure | Avg.Len. |
+|---|---|---|
+| LLaVA | One-Step Disc | 1.85 |
+| LLaVA | Policy-Head Cont | 2.71 |
+| Flamingo | One-Step Disc | 1.22 |
+| Flamingo | Policy-Head Cont | 4.09 |
+| KosMos | One-Step Disc | 0.55 |
+| **KosMos** | **Policy-Head Cont** | **4.49** |
+| PaliGemma | Policy-Head Cont | 4.42 |
+
+→ **Continuous + Policy-Head + KosMos가 모든 형태 중 최고**.
+
+### CALVIN ABCD→D, Extended Table 2: KosMos P.H. (RoboVLMs) Avg.Len. **4.25**, GR-1 3.06 → **+1.19 task** 향상 (Sec. II.B).
+
+### SimplerEnv Google Robot (Extended Table 3b)
+| Method | Pick Coke Can Avg | Move Near | Drawer Avg |
+|---|---|---|---|
+| RT-2-X | 0.787 | 0.779 | 0.250 |
+| OpenVLA-7b | 0.163 | 0.462 | 0.356 |
+| **RoboVLMs** | **0.970** | **0.888** | **0.551** |
+
+### Training objective (Table IIa, ABCD): Flow Matching Chunk Avg.Len. 4.09 vs MSE+BCE Chunk 4.04 → 거의 동등.
+
+### MoE (Table IIb, ABC): MoE+MSE 3.69 vs no-MoE 3.57 → MoE는 **unseen scene(ABC)에서만 일관된 이득**, ABCD에서는 오히려 손해.
 
 ---
 
-## 5. 총평
+## 4. 핵심 Findings
 
-| 항목 | 평가 |
-|------|------|
-| **Novelty** | ★★★★★ — VLA 설계의 대규모 체계적 분석 |
-| **Technical depth** | ★★★★★ — 600+ 실험 |
-| **Practical impact** | ★★★★★ — VLA 연구의 실용적 가이드 |
-
-**강점**: "무엇이 중요한가?"에 대한 실증적 답변. 커뮤니티에 엄청난 가치. **약점**: 결론의 시효성.
+- **Finding 1.1/1.2**: VLA는 generalist policy의 유망한 경로이며 real-robot에서도 강건 (Sec. II.B).
+- **Finding 2**: KosMos / PaliGemma처럼 **충분한 VL pre-training을 받은 backbone이 결정적** (Extended Table 5).
+- **Finding 3.1**: Continuous action + multi-step history + Policy-Head가 최적.
+- **Finding 3.3**: Flow Matching ≈ MSE+BCE (One-Step-Continuous에서); chunk 실행이 first/ensemble보다 안정적.
+- **Finding 4** (Sec. II.E, 본문에서 확인): Cross-embodiment **pre-training**의 일관된 이득은 없음. **Post-training**이 가장 효과적이며, 동일 robot/task data가 가장 큰 부스트.
 
 ---
 
-## 6. 🔥 예상 날카로운 질문 모음
+## 5. 한계 및 비판적 고찰
 
-| # | 질문 | 핵심 답변 요점 |
-|---|------|---------------|
-| 1 | 이 결론이 6개월 후에도 유효한가? | 핵심 원칙(backbone 중요성, spatial feature)은 유지될 가능성. 구체적 최적 조합은 변할 수 있음 |
-| 2 | Real-world에서도 동일한 설계 축 중요도인가? | Sim과 real에서 다를 수 있음. Real-world 대규모 분석은 미수행 |
+1. **Compute cost**: 8 backbone × 4 structure × 다수 data scale → 재현 비용이 매우 큼 (RoboVLMs가 32 A100을 쓴다고 YAML에 기재).
+2. **CALVIN/SimplerEnv 위주**: 두 sim benchmark 위주이므로 dexterous/contact-rich에서의 일반성은 미검증.
+3. **MoE 결론의 분기**: ABC vs ABCD에서 정반대 결론 → "언제 MoE를 쓸지" 판단 기준이 추가 필요.
+4. **YAML 불일치**: 본 PDF는 LIBERO 평가를 포함하지 않음 (CALVIN/SimplerEnv/Real만 다룸). 그러나 `data/models/robovlm.yaml`에는 LIBERO 4-suite 점수(91.8/93.4/86.8/64.2)가 기재됨 → **출처 검증 필요**.
 
-<!-- VERIFIED: abstract-only -->
+---
+
+## 6. 총평 및 예상 날카로운 질문
+
+**강점**: "무엇이 중요한가?"에 대한 600+ 실험 기반의 실증적 답. 프레임워크가 오픈소스. **약점**: 결론의 시효성, LIBERO 미평가.
+
+| # | 질문 | 핵심 답 |
+|---|------|---------|
+| 1 | KosMos가 PaliGemma 대비 우위인 이유는? | Table I에서 두 backbone 모두 P.H.+Cont로 4.4+ 달성, KosMos가 0.07 차이로 미세 우위. PDF는 "두 backbone이 distinguished" 표현 사용 (Finding 2). |
+| 2 | Cross-embedding pre-training이 효과적이지 않다는 결론은 다른 작업과 모순되지 않나? | 저자들은 in-domain 데이터로 post-training 시 큰 이득(+50%, Sec. II.E)을 확인. Pre-training만으로는 부족하다는 의미. |
+| 3 | LIBERO 점수가 paper에 없는데 어떻게 보고됐나? | PDF 기준 LIBERO 미평가. 추가 검증 필요. |
+
+<!-- VERIFIED: pdf -->

@@ -1,6 +1,8 @@
 # DA-PTQ: Drift-Aware Post-Training Quantization for Efficient Vision-Language-Action Models
 
-> **한 줄 요약**: 순차 제어 환경에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ 문제를, **Cross-Space Representation Compensation + Motion-Driven Mixed-Precision** 두 축으로 해결하는 **drift-aware PTQ** 프레임워크.
+> **한 줄 요약**: 순차 제어에서 **temporal error accumulation**으로 붕괴하는 VLA PTQ를, **Cross-Space Representation Compensation (CSRC) + Drift-Aware Mixed-Precision Allocation (DA-MPA)** 두 축으로 해결. CogACT W4A8에서 42.5% 메모리 감소 + 54.8% 속도 향상을 달성하면서 FP 대비 성능 손실을 최소화.
+>
+> ⚠️ **용어 혼동 주의**: Abstract/Introduction에서는 "Motion-Driven Mixed-Precision Allocation"이라는 legacy 용어를 사용하지만, Sec 3.4 본문과 DA-**MPA** 약어는 **"Drift-Aware"** 를 일관되게 사용. 본 문서는 Sec 3.4의 canonical 용어를 따릅니다.
 
 ---
 
@@ -22,19 +24,58 @@
 - Multimodal(비전/언어) representation과 action space 사이의 **구조적 왜곡(structured distortion)** 을 보정.
 - Action consistency를 개선하여 step-to-step error variance를 감소.
 
-### 2.3 Motion-Driven Mixed-Precision Allocation
-- Per-layer / per-component bit-width를 **trajectory-level motion error** 기준으로 할당.
-- 모션에 민감한 부위에 더 많은 비트를, 덜 민감한 부위엔 적은 비트를 배정 → 효율과 정확도의 trade-off 최적화.
+### 2.3 Drift-Aware Mixed-Precision Allocation (DA-MPA)
+- Structural Jacobian으로 per-layer drift sensitivity 프로파일링 (Tikhonov damping λ=3e-4).
+- Axis-dependent weights로 translation vs rotation 민감도 분리: **w_trans=1.8**, **w_rot=0.15** (translation 오차가 grasp 실패로 직결되어 높은 페널티).
+- Top-k=30% drift-sensitive layers → **BF16**, 나머지 70% → **W4** (W4A8 전체).
+- 최종 2개 DiT block은 continuous output에 근접하여 quantization 제외.
+
+### 2.4 구현
+- 구현: **PyTorch**, **NVIDIA RTX 5090**.
+- 완전 post-training, 파인튜닝 없음.
+- Calibration: **BridgeData V2 512 trajectories**, 6 spatial bins, 128 warmup steps.
 
 ---
 
 ## 3. 실험 결과
 
-> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.
+### Table 2 — WidowX SimplerEnv Visual Matching (기저 모델 CogACT, 대비 W4A8)
 
-- 저비트 설정에서 **full-precision과 비교 가능한 성능** 달성을 주장.
-- kinematic drift 유의미한 감소 보고.
-- 구체 bit-width, 벤치마크, 에너지/메모리 수치는 PDF 확인 필요.
+| Method | Put Spoon | Put Carrot | Stack | Put Eggplant | **Avg** |
+|--------|----------:|-----------:|------:|-------------:|--------:|
+| CogACT FP | 71.7 | 50.8 | 15.0 | 67.5 | 51.3 |
+| VLA-Cache | 78.3 | 39.1 | 17.4 | 52.2 | 46.8 |
+| QuantVLA | 47.8 | 39.1 | 17.4 | 69.6 | 43.5 |
+| **DA-PTQ (Ours)** | 65.2 | **52.2** | **17.4** | 60.9 | **48.9** |
+
+### Table 3 — Google Robot SimplerEnv
+
+| Method | Pick Coke | Move Near | Open/Close Drawer | Drawer+Apple | **Avg (VM/VA)** |
+|--------|----------:|----------:|------------------:|-------------:|----------------:|
+| CogACT FP | 91.3 / 89.6 | 85.0 / 80.8 | 71.8 / 28.3 | 50.9 / 46.6 | **74.8 / 61.3** |
+| **DA-PTQ** | 92.4 / 87.5 | 87.9 / 74.5 | 58.3 / 20.1 | 35.2 / 24.7 | **68.5 / 51.7** |
+
+- Pick Coke / Move Near는 FP를 **능가**하기도 (양자화 noise의 regularization 효과)
+- Drawer 계열 long-horizon 태스크에서 drop이 큼 → 저자도 인정한 한계
+
+### Table 4 — Ablation on WidowX VM, 메모리/속도 포함
+
+| 설정 | SR avg | **메모리 감소↑** | **속도↑** |
+|------|-------:|-----------------:|----------:|
+| + W4A8 + CSRC | 43.8 | 42.6% | 55.2% |
+| + W4A8 + DA-MPA | 39.6 | 42.9% | 54.8% |
+| **+ W4A8 + DA-PTQ (둘 다)** | **48.9** | **42.5%** | **54.8%** |
+
+→ CSRC와 DA-MPA의 **시너지**: 단독보다 합쳤을 때 SR이 크게 뛰고 메모리/속도 이점은 유지.
+
+### 벤치마크 종합
+
+- 기저 모델: **CogACT** (diffusion VLA, 7-DoF 출력)
+- 벤치마크: SimplerEnv (WidowX + Google Robot)
+- 평가 대상: W4A8 (weights 4-bit, activations 8-bit)
+- **42.5% 메모리 감소**, **54.8% 추론 속도 향상**
+- **WidowX VM**: FP 51.3 → DA-PTQ 48.9 (-2.4pp)
+- **Google Robot VM**: FP 74.8 → DA-PTQ 68.5 (-6.3pp; drawer 계열 민감)
 
 ---
 

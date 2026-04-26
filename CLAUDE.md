@@ -87,13 +87,14 @@ python scripts/validate_counts.py     # Count consistency
 ```
 
 ### 3. Update documentation counts
-The following files contain hardcoded counts that MUST match actual data:
+The following files contain hardcoded counts that MUST match actual data.
+`sync_counts.py` auto-updates most of these — run it after any model add/remove.
 
-- **README.md** line ~104: Benchmark table `Models Tracked` column
-- **README.md** line ~111: LIBERO leaderboard heading `(N models)`
-- **README.md** line ~171: Model YAML file count `(N YAML files)`
-- **README.md** line ~14: Total models tracked `**N** VLA models`
-- **physical-ai-dashboard-blueprint.md** line ~377: Benchmark table counts
+- **README.md** line ~15: Total models tracked `**N** VLA models · **M** benchmarks · **K** AI paper reviews` (auto-synced)
+- **README.md** line ~59: LIBERO leaderboard heading `Full leaderboard with N LIBERO models` (auto-synced)
+- **README.md** line ~65-70: "Other Benchmarks (Top 3)" table — verify top-3 per benchmark matches current leaderboard (NOT auto-synced; must be updated manually after benchmark score changes)
+- **README.md** line ~181: Model YAML file count `# N model YAML files` (auto-synced)
+- **physical-ai-dashboard-blueprint.md** line ~377: Benchmark table counts (auto-synced)
 
 ### 4. Update LIBERO leaderboard table
 If the model has LIBERO scores, add/update it in the README.md LIBERO leaderboard table.
@@ -110,6 +111,8 @@ Keep the table sorted by LIBERO Avg descending.
 | RoboTwin v2 | `robotwin_v2_avg`   | `benchmarks.robotwin_v2` |
 | RLBench     | `rlbench_avg`       | `benchmarks.rlbench` |
 | RoboCasa    | `robocasa_avg`      | `benchmarks.robocasa` |
+
+> **Note on naming**: Model YAMLs use split keys `benchmarks.robotwin_v1` and `benchmarks.robotwin_v2`, while the benchmark definition file lives at `data/benchmarks/robotwin.yaml` (single file covers both versions). This means `leaderboard.benchmarks_available` lists `robotwin` (from the YAML filename), but model score lookups must use the versioned keys. If you add a new RoboTwin-variant score, put it under `robotwin_v1` or `robotwin_v2`, NOT `robotwin`.
 
 ### Average Computation Rules
 - **LIBERO**: `libero_5_suite_avg` → mean of 4 suites → `libero_avg` fallback

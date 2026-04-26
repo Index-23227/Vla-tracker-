@@ -1,33 +1,48 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ProgressVLA: Progress-Guided Diffusion Policy for Vision-Language Robotic Manipulation
-# arXiv: 2603.27670
-
 name: ProgressVLA
 full_name: "ProgressVLA: Progress-Guided Diffusion Policy for Vision-Language Robotic Manipulation"
-organization: "TODO: check paper"
+organization: "Peking University / Microsoft Research Asia"
 date: "2026-03-29"
 paper_url: https://arxiv.org/abs/2603.27670
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
+  backbone: "DINOv2 patch features for progress estimator; UniVLA world model architecture; Latent Action Expert with DiTA-style causal Transformer"
+  llm: null
+  action_head: "Diffusion-based Latent Action Expert producing latent action chunks, decoded by an Action Decoder; classifier guidance steers diffusion via gradients backpropagated from a progress estimator through an inverse-dynamics world model"
+  action_head_category: diffusion
   parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  key_innovation: "Pretrains a vision-language progress estimator on Open X-Embodiment and integrates it as differentiable classifier guidance for a diffusion policy via an inverse-dynamics world model in latent action space; further refined with online RL fine-tuning to enforce monotonic progress and improve action accuracy."
+
+training:
+  dataset: "Open X-Embodiment (OXE) for pretraining of progress estimator, world model, and Latent Action Expert; finetuning on LIBERO and CALVIN; online RL trajectories collected from environments A/B/C of CALVIN"
+  method: "Stage 1: separate pretraining of progress estimator (L1 regression to normalized timestep), world model (latent dynamics reconstruction + KL), and DiTA-style Latent Action Expert. Stage 2: joint finetuning with Lworld + Lprog + Ljoint. Stage 3: progress-guided classifier guidance during diffusion sampling. Stage 4: KL-regularized RL finetuning of policy and progress estimator on online buffer."
+  compute: "Batch size 2048 on 8 NVIDIA H20 GPUs (256 per GPU); base learning rate 1e-4"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 88.2
+    libero_object: 96.4
+    libero_goal: 87.2
+    libero_long: 66.2
+    libero_avg: 84.5
+    source: "Table III, ProgressVLA paper (Pretrained ProgressVLA Full)"
+    date_reported: "2026-03-29"
+    eval_condition: fine-tuned
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_1: 95.2
+    calvin_abc_d_2: 84.8
+    calvin_abc_d_3: 73.6
+    calvin_abc_d_4: 67.2
+    calvin_abc_d_5: 52.0
+    calvin_abc_d_avg_len: 3.73
+    source: "Table II, ProgressVLA paper (Pretrained ProgressVLA Full, ABC->D, S-RGB)"
+    date_reported: "2026-03-29"
+    eval_condition: fine-tuned
 
 eval_conditions:
   libero: "fine-tuned"
-  calvin: "fine-tuned"
+  calvin: "fine-tuned (ABC->D, single S-RGB input)"
 
-tags: [libero, calvin]
+tags: [diffusion, classifier-guidance, world-model, progress-estimation, libero, calvin, latent-action]

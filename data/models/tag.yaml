@@ -1,30 +1,38 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: TAG: Target-Agnostic Guidance for Stable Object-Centric Inference in Vision-Language-Action Models
-# arXiv: 2603.24584
-
 name: TAG
 full_name: "TAG: Target-Agnostic Guidance for Stable Object-Centric Inference in Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Sun Yat-sen University; Guangdong Key Lab of Big Data Analysis & Processing; X-Era AI Lab"
 date: "2026-03-25"
 paper_url: https://arxiv.org/abs/2603.24584
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: "Inherits base VLA (Gemma vision-language backbone of Pi0/Pi0.5)"
+  llm: "Gemma (via Pi0/Pi0.5)"
+  action_head: "Inherits flow-matching action head from base VLA (Pi0/Pi0.5)"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: null
+  key_innovation: "Inference-time guidance method (not a new VLA architecture) inspired by classifier-free guidance. TAG contrasts policy predictions on the original observation versus a target-agnostic counterfactual observation (foreground-erased or black image) constructed via Grounding DINO + SAM 2 + MiniMaxRemover inpainting, then performs CFG-style residual extrapolation on the predicted velocity field. Training-time calibration randomly substitutes target-erased observations with probability p_cf=0.1. Applied to Pi0 and Pi0.5 base policies."
+
+training:
+  base_model: "Pi0 and Pi0.5 (Gemma VLM backbone)"
+  method: "30,000 steps fine-tuning with cosine decay LR, peak 2.5e-5, EMA 0.999, plus counterfactual training-time calibration (p_cf=0.1)"
+  dataset: "LIBERO and VLABench task data with auto-generated target-erased counterfactual observations"
+  hardware: "Single NVIDIA RTX PRO 6000 GPU"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 97.8
+    libero_object: 99.2
+    libero_goal: 97.4
+    libero_long: 97.0
+    libero_avg: 97.9
+    source: "TAG paper Table 1 (Pi0.5 + TAG-bg)"
+    date_reported: '2026-03-25'
+    eval_condition: fine-tuned
 
 eval_conditions:
   libero: "fine-tuned"
 
-tags: [libero]
+tags: [test-time-guidance, classifier-free-guidance, pi0.5-base, libero, inference-time, robustness]

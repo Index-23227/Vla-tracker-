@@ -1,30 +1,35 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: A1: A Fully Transparent Open-Source, Adaptive and Efficient Truncated Vision-Language-Action Model
-# arXiv: 2604.05672
-
 name: A1
 full_name: "A1: A Fully Transparent Open-Source, Adaptive and Efficient Truncated Vision-Language-Action Model"
-organization: "TODO: check paper"
+organization: "SYSU; MBZUAI; Spatialtemporal AI"
 date: "2026-04-07"
 paper_url: https://arxiv.org/abs/2604.05672
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/ATeam-Research/A1
 venue: null
-open_source: false  # TODO: verify
+open_source: true
 
 architecture:
-  action_head: "diffusion"
-  action_head_category: diffusion
+  backbone: "Molmo (vision-language model)"
+  llm: "Molmo"
+  action_head: "Flow-matching action expert (~400M Qwen3 model) with KV-conditioned self-attention; alternative MLP head supervised by L1 loss"
+  action_head_category: flow_matching
   parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  key_innovation: "A1 jointly accelerates the VLM backbone and the flow-matching action head. It introduces (1) action-consistency early-exit thresholding that terminates the VLM forward pass when intermediate-layer action predictions stabilize, and (2) Inter-Layer Truncated Flow Matching, which runs only a small number of denoising steps per VLM layer and warm-starts the next layer's denoising from the previous layer's prediction rather than from random noise. The result is substantial latency reduction with maintained success rate, plus a fully open-source training/inference stack."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 97.4
+    libero_object: 99.8
+    libero_goal: 97.6
+    libero_long: 91.4
+    libero_avg: 96.6
+    source: "Table 1"
+    eval_condition: "fine-tuned on LIBERO"
+
+training:
+  datasets: ["DROID", "AgiBot", "RoboCOIN", "RoboMind", "GM-100", "RoboChallenge", "in-house teleoperation (15,951 trajectories)"]
+  method: "Two-stage pretraining on diverse open-source robotic datasets followed by task-specific fine-tuning; layer-randomized supervision over LLM layers to enable adaptive inference"
 
 eval_conditions:
   libero: "fine-tuned"
 
-tags: [diffusion, libero]
+tags: [flow_matching, libero, vlabench, robochallenge, open_source, efficient_inference, early_exit]

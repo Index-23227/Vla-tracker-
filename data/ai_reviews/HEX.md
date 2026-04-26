@@ -30,10 +30,43 @@
 
 ## 3. 실험 결과
 
-> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.
+### Seen scenarios (Table 1, 7개 태스크 평균, 12 trials each)
 
-- 실제(real-world) humanoid 조작 태스크에서 강한 성능 보고.
-- Cross-embodiment (다양한 humanoid platform) 전이 실험 포함.
+| 방법 | Param. | Seen Avg |
+|------|-------:|---------:|
+| ACT | 80M | 57.1 |
+| SwitchVLA | 0.3B | 40.5 |
+| GR00T N1.5 | 3B | 70.2 |
+| π0.5 | 3.3B | 71.8 |
+| **HEX** | **2.4B** | **79.8** |
+
+- 작은 모델(ACT 80M)이 trajectory-fitting은 강하지만 HEX가 전반적 1위.
+- Mirror pose / Walking-avoid 태스크에서 **100%**.
+
+### Long-horizon Box Convey (Table 2, 4단계)
+
+| 단계 | ACT | π0.5 | **HEX** |
+|------|----:|-----:|--------:|
+| Grasp Box | 80.0 | 100.0 | **100.0** |
+| Turn Around | 80.0 | 100.0 | **100.0** |
+| Walk to Table | 46.7 | 73.3 | **73.3** |
+| Place Box | 26.7 | 40.0 | **53.3** |
+
+- 마지막 Place Box 단계에서 +15pp (+13pp over π0.5) → cascading error 억제 능력.
+
+### Generalization (Fig. 6, 8개 OOD 변형 평균)
+
+- **HEX 61.8%** vs π0.5 44.3%, GR00T N1.5 41.0%, SwitchVLA 22.4%.
+- Pouring 변형에서 baseline 모두 0%인데 HEX 53.3% (visual distractor) / 55.5% (position shift).
+
+### 실험 하이퍼파라미터
+
+- VLM: Qwen3-VL-2B-Instruct
+- UPP: 4-layer transformer, hidden 768, 50-step state horizon
+- MoE: 16 routed + 2 shared experts, top-1, load-balancing 0.01
+- Action head: 16-layer DiT-B, hidden 1024, 100-step chunks
+- Training: 200k pretraining + 20k per-task fine-tuning, ~1K A100 GPU hours
+- Latency: 73.34 ms on RTX 4090 (≈13.6 Hz)
 
 ---
 

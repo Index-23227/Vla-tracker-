@@ -1,27 +1,31 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: DIAL: Decoupling Intent and Action via Latent World Modeling for End-to-End VLA
-# arXiv: 2603.29844
-
 name: DIAL
 full_name: "DIAL: Decoupling Intent and Action via Latent World Modeling for End-to-End VLA"
-organization: "TODO: check paper"
+organization: "The University of Hong Kong; XPENG Robotics; University of North Carolina at Chapel Hill"
 date: "2026-03-31"
 paper_url: https://arxiv.org/abs/2603.29844
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
+  backbone: "Pretrained ViT (shared from Qwen2.5-VL)"
+  llm: "Qwen2.5-VL-3B"
+  action_head: "Lightweight 4-layer self-attention fuses current visual features with predicted latent foresight, then a 16-layer Diffusion Transformer (flow-matching) cross-attends to this conditioning to denoise an action chunk (horizon H=16)"
+  action_head_category: flow_matching
   parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  key_innovation: "DIAL introduces a differentiable latent intent bottleneck between a System-2 VLM and a System-1 flow-matching policy. System-2 (Qwen2.5-VL) performs latent world modeling by predicting the future visual representation of an H-step-ahead observation entirely within its native ViT feature space; this latent foresight is the only structural channel through which System-1 receives the VLM's intent. System-1 then acts as a latent inverse dynamics model, comparing the current observation against the predicted intent to produce actions. A two-stage decoupled-warmup-then-end-to-end training paradigm preserves VLM knowledge while enabling action gradients to refine the foresight."
 
 benchmarks:
   robocasa:
-    robocasa_avg: TODO
+    robocasa_gr1_avg: 70.2
+    source: "Figure 7 (24 GR Tasks Average, full-data setting)"
+    eval_condition: "fine-tuned on RoboCasa-GR1 Tabletop (full data: 1,000 trajectories per task)"
 
 eval_conditions:
   robocasa: "fine-tuned"
 
-tags: [robocasa]
+training:
+  datasets: ["RoboCasa GR1 Tabletop simulation (24 tasks, up to 24,000 trajectories)", "EgoDex human demonstrations (basic_pick_place: 27,419 trajectories; pour: 3,205 trajectories)", "Real-robot teleoperation on IRON-R01-1.11"]
+  method: "Two-stage paradigm. Stage 1 (Decoupled Warmup): System-2 trained only with MSE world-modeling loss against future ViT features; System-1 trained only with flow-matching loss conditioned on ground-truth future features. Stage 2 (End-to-End): System-1 conditions on System-2's predicted latent intent; total loss combines world modeling and flow matching, allowing action gradients to flow through the latent bottleneck into the VLM."
+
+tags: [flow_matching, dual_system, world_modeling, robocasa, latent_intent, qwen2.5_vl]

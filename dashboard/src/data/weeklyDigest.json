@@ -1,25 +1,25 @@
 {
-  "week": "2026-W12",
-  "week_display": "Week 12, March 2026",
-  "headline": "Flow matching VLAs now dominate 4/5 LIBERO suites",
+  "week": "2026-W17",
+  "week_display": "Week 17, April 2026",
+  "headline": "Training-free inference techniques (VLA-IAP, DA-PTQ) emerge as parallel scaling track",
   "insights": [
     {
-      "title": "Action head paradigm shift",
-      "body": "pi0.5 and HybridVLA both use flow matching action heads. Among the top 5 models on LIBERO, 3 now use flow matching or diffusion, up from 1/5 six months ago. Autoregressive tokenization (OpenVLA's approach) is losing ground except in long-horizon tasks.",
-      "delta": "+12.3%p",
+      "title": "Inference efficiency becomes a first-class axis",
+      "body": "Two new papers (VLA-IAP, DA-PTQ) deliver meaningful runtime wins without retraining: VLA-IAP prunes visual tokens via interaction-first geometric priors and gets 1.25× speedup at 97.8% LIBERO (matching the unpruned backbone), while DA-PTQ's W4A8 drift-aware quantization of CogACT yields 42.5% memory reduction and 54.8% speedup with only ~2pp SimplerEnv drop. Together they signal that optimization of deployed VLAs is maturing beyond architectural tweaks.",
+      "delta": "1.25-1.54× speedup",
       "direction": "up"
     },
     {
-      "title": "Long-horizon remains unsolved",
-      "body": "LIBERO-Long scores still lag behind other suites by 15-25%p across all models. Interestingly, CoT-VLA's chain-of-thought reasoning shows the smallest gap (17.1%p) vs pi0.5 (23.4%p gap), suggesting explicit reasoning may help in sequential decision-making.",
-      "delta": "17.1%p gap",
-      "direction": "neutral"
+      "title": "Humanoid whole-body VLAs start landing on real robots",
+      "body": "HEX (BICHR / XJTU / Nankai / PKU) delivers 79.8% seen-scenario avg and 61.8% generalization avg on Tienkung 2.0/3.0 bipedal humanoids at 13.6 Hz with 2.4B params. UniT (XPeng / Tsinghua / HKU) demonstrates 78% Pick&Place / 75% Pouring on IRON-R01-1.11 with just 10% of the baseline's training data via a hybrid discrete-token + flow-matching head. Real-world humanoid results are no longer a lone-outlier category.",
+      "delta": "+17.5pp on Tienkung",
+      "direction": "up"
     },
     {
-      "title": "Open-source catching up",
-      "body": "OpenVLA-OFT (open-source) now trails pi0.5 (closed weights) by only 1.5%p on average LIBERO score. Six months ago, the gap was 6.8%p. LoRA fine-tuning on domain-specific data is proving highly effective.",
-      "delta": "1.5%p gap",
-      "direction": "down"
+      "title": "LIBERO top-5 now has 3 flow-matching entries",
+      "body": "Top-5 LIBERO as of April 2026: PLD (99.0 residual RL), SimpleVLA-RL (98.8 AR+GRPO), VLA-IAP (97.8 token pruner on π0.5), X-VLA (97.8 flow matching), Fast-WAM (97.6 flow+video DiT). OmniVLA-RL (97.6 Flow-GSPO) ties for #6. Flow-matching action heads now underpin 3/5 top models, confirming the paradigm shift observed since late 2025.",
+      "delta": "3/5 flow-matching",
+      "direction": "up"
     }
   ]
 }

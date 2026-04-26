@@ -1,33 +1,48 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: LaMP: Learning Vision-Language-Action Policies with 3D Scene Flow as Latent Motion Prior
-# arXiv: 2603.25399
-
 name: LaMP
-full_name: "LaMP: Learning Vision-Language-Action Policies with 3D Scene Flow as Latent Motion Prior"
-organization: "TODO: check paper"
+full_name: "LaMP: Learning Vision-Language-Action Policy with 3D Scene Flow as Latent Motion Prior"
+organization: "Shanghai Jiao Tong University, Southeast University, Shanghai Innovation Institute"
 date: "2026-03-26"
 paper_url: https://arxiv.org/abs/2603.25399
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: Qwen3-VL-4B-Instruct (frozen)
+  llm: Qwen3-VL-4B-Instruct
+  action_head: flow matching Action Expert with single-layer gated cross-attention motion guidance
+  action_head_category: flow_matching
+  parameters: null
+  key_innovation: "Dual-expert VLA framework: a flow-matching Motion Expert generates one-step partially denoised dense 3D scene flow (Kh x Kw x T x 3) over a uniform spatial grid, and its hidden states condition a flow-matching Action Expert via gated cross-attention. Avoids full multi-step motion reconstruction at inference, providing geometric foresight without latency cost."
+
+training:
+  dataset: 1.6M observation-language-motion triplets generated via TraceForge from LIBERO, BridgeV2, DROID, and InternData-A1
+  framework: starVLA
+  hardware: 16 NVIDIA H100 GPUs
+  protocol: Two-stage (Stage 1 motion-prior pretraining; Stage 2 action expert + motion guidance training, VLM and Motion Expert frozen)
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.4
+    libero_object: 99.8
+    libero_goal: 97.4
+    libero_long: 96.7
+    libero_avg: 98.3
+    source: LaMP paper Table I
+    date_reported: '2026-03-26'
+    eval_condition: fine-tuned
   simpler_env:
-    google_robot_pick_coke_can: TODO
+    simpler_widowx_stack: 75.0
+    simpler_widowx_carrot: 66.7
+    simpler_widowx_spoon: 79.1
+    simpler_widowx_eggplant: 95.8
+    simpler_avg: 79.2
+    source: LaMP paper Table I (SimplerEnv-WidowX, BridgeV2-trained, no fine-tuning)
+    date_reported: '2026-03-26'
+    eval_condition: zero-shot
 
 eval_conditions:
   libero: "fine-tuned"
-  simpler_env: "fine-tuned"
+  simpler_env: "zero-shot"
 
-tags: [libero, simpler_env]
+tags: [flow-matching, 3d-flow, motion-prior, dual-expert, libero, simpler_env]

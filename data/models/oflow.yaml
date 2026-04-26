@@ -1,36 +1,51 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: OFlow: Injecting Object-Aware Temporal Flow Matching for Robust Robotic Manipulation
-# arXiv: 2604.17876
-
 name: OFlow
 full_name: "OFlow: Injecting Object-Aware Temporal Flow Matching for Robust Robotic Manipulation"
-organization: "TODO: check paper"
+organization: "Fudan University, University of Southern California, KAUST"
 date: "2026-04-20"
 paper_url: https://arxiv.org/abs/2604.17876
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: GR00T-N1.5 (Eagle-2.5 VLM with SigLIP visual encoder + Qwen2.5-VL); DINOv2-Base (with registers) for foresight
+  llm: Qwen2.5-VL (within Eagle-2.5)
+  action_head: flow matching DiT action expert with ControlNet-style zero-initialized cross-attention to inject object-aware features
+  action_head_category: flow_matching
+  parameters: "~3B (1.6B VLM + 1.2B action head + 0.2B foresight)"
+  key_innovation: "Injects object-aware temporal foresight into a flow-matching VLA. A causally-constrained autoregressive flow-matching DiT predicts future frame latents in DINOv2 semantic space; predicted latents are factorized via unsupervised hierarchical K-Means clustering into object-aware prototype tokens, then conditioned into the action policy via a ControlNet-style zero-initialized cross-attention, preserving compatibility with pretrained VLA backbones."
+
+training:
+  protocol: Two-stage (Stage 1 trains foresight model only; Stage 2 fine-tunes VLA with foresight model and VLM frozen)
+  hardware: 8 NVIDIA A100 GPUs
+  base_model: GR00T-N1.5
+  visual_encoder: DINOv2-Base with registers (768-d latents)
+  foresight_backbone: 12-layer causally-constrained DiT
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.0
+    libero_object: 99.0
+    libero_goal: 95.0
+    libero_long: 94.5
+    libero_avg: 96.6
+    source: OFlow paper Table 1
+    date_reported: '2026-04-20'
+    eval_condition: fine-tuned
   simpler_env:
-    google_robot_pick_coke_can: TODO
-  metaworld:
-    metaworld_avg: TODO
+    simpler_widowx_spoon: 76.8
+    simpler_widowx_carrot: 62.7
+    simpler_widowx_eggplant: 56.6
+    simpler_widowx_stack: 72.4
+    simpler_avg: 67.1
+    source: OFlow paper Table 2 (SimplerEnv WidowX, BridgeData-V2)
+    date_reported: '2026-04-20'
+    eval_condition: fine-tuned
 
 eval_conditions:
   libero: "fine-tuned"
   simpler_env: "fine-tuned"
   metaworld: "fine-tuned"
+  libero_plus: "zero-shot"
 
-tags: [reasoning, libero, simpler_env, metaworld]
+tags: [flow-matching, foresight, object-aware, dinov2, controlnet, libero, simpler_env, metaworld, libero_plus]

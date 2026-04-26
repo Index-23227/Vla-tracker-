@@ -1,27 +1,33 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: E-VLA: Event-Augmented Vision-Language-Action Model for Dark and Blurred Scenes
-# arXiv: 2604.04834
-
 name: E-VLA
 full_name: "E-VLA: Event-Augmented Vision-Language-Action Model for Dark and Blurred Scenes"
-organization: "TODO: check paper"
+organization: Zhejiang University / Ant Group / Hunan University
 date: "2026-04-06"
 paper_url: https://arxiv.org/abs/2604.04834
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: SigLIP (within SmolVLM), augmented with a 4-block weight-sharing ViT event adapter
+  llm: SmolVLM (within SmolVLA backbone)
+  action_head: "Lightweight transformer-based action expert from SmolVLA, with interleaved self-attention and cross-attention over fused visual tokens, predicting normalized action chunks (chunk size 40 at 30 Hz)."
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "~0.5B"
+  key_innovation: "Event-augmented VLA built on SmolVLA that fuses DAVIS346 event-camera streams with RGB to maintain perception under low light, motion blur, and black clipping. Two pretrained-compatible fusion strategies are studied: a parameter-free overlay that paints accumulated events onto the RGB frame before encoding, and a hierarchical event adapter (~13M parameters) that injects event features into intermediate SigLIP layers. A recent-count event-windowing scheme is used to stabilize event-rate variation under arm motion."
 
-benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+training:
+  dataset: Self-collected synchronized RGB-event-action manipulation dataset (SO100 + DAVIS346 teleoperation) covering Pick-Place, Sorting, and Stacking under multiple illumination conditions
+  method: Imitation learning with frozen VLM backbone; trains action expert and projection MLPs (and event adapter when used) for 20k iterations on a single NVIDIA A800; random RGB-branch dropout to encourage event utilization
+
+benchmarks: {}
 
 eval_conditions:
-  TODO: "check paper"
+  real_world: fine-tuned
 
-tags: []
+tags:
+  - event-camera
+  - smolvla
+  - low-light
+  - motion-blur
+  - real-world
+  - sensor-fusion

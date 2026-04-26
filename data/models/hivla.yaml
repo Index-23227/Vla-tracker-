@@ -1,27 +1,39 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: HiVLA: A Visual-Grounded-Centric Hierarchical Embodied Manipulation System
-# arXiv: 2604.14125
-
 name: HiVLA
 full_name: "HiVLA: A Visual-Grounded-Centric Hierarchical Embodied Manipulation System"
-organization: "TODO: check paper"
+organization: The University of Hong Kong / Shanghai AI Laboratory / Shanghai Jiao Tong University / CUHK
 date: "2026-04-15"
 paper_url: https://arxiv.org/abs/2604.14125
-code_url: null  # TODO: check for GitHub repo
+code_url: https://tianshuoy.github.io/HiVLA-page/
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
+  backbone: DINOv2 + SigLIP (vision encoder for the action expert)
+  llm: Qwen3-VL 8B (fine-tuned high-level VLM planner)
+  action_head: "Conditional Flow Matching Diffusion Transformer (DiT) action expert (initialized from H-RDT, LLaMA-style backbone with RMSNorm + SwiGLU + AdaLN), with a cascaded cross-attention block that sequentially conditions noisy action latents on global image features, position-aware high-resolution local-crop features extracted via the planner's bounding box, and a language embedding for the subtask skill."
+  action_head_category: flow_matching
   parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  key_innovation: "Hierarchical visual-grounded-centric VLA that explicitly decouples a Qwen3-VL 8B planner (producing structured plans with subtask skill + native bounding box) from a low-level DiT action expert. The action expert uses a novel cascaded cross-attention that sequentially fuses global context, high-resolution object-centric crops with absolute positional encoding, and skill semantics, avoiding catastrophic forgetting while preserving fine-grained visual fidelity for manipulation in cluttered scenes."
+
+training:
+  dataset: HiVLA-HD (15-task Hard-mode RoboTwin 2.0 dataset, ~1000 episodes per task, 1920x1080 head + 720p wrist cameras) plus 360 real-world Aloha-Agilex-1.0 teleoperated episodes annotated with GroundingDINO and SAM2; 210K-instance dialogue dataset for VLM planner fine-tuning
+  method: All baselines/HiVLA fine-tuned 150K steps on two H200 GPUs (batch size 64); DiT initialized from H-RDT EgoDex-pretrained weights; real-world fine-tuning for 80K additional steps
 
 benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+  robotwin_v2:
+    robotwin_v2_avg: 83.3
+    source: Table 1 (9-task average on RoboTwin 2.0 simulator), original paper
+    date_reported: "2026-04-15"
+    eval_condition: fine-tuned
+    notes: "Easy-task average 96.0% (Click Bell 94, Click Clock 97, Press Stapler 97, Lift Pot 96); Hard-task average 73.2% (Place Shoe 95, Move Stapler 60, Stamp Seal 76, Stack 3 Blocks 37, Click 3 Bells 98). 'Ours w/o Skill' variant scores 78.7% total."
 
 eval_conditions:
-  TODO: "check paper"
+  robotwin_v2: fine-tuned
 
-tags: [reasoning]
+tags:
+  - flow-matching
+  - hierarchical
+  - visual-grounding
+  - robotwin
+  - dual-system
+  - bimanual

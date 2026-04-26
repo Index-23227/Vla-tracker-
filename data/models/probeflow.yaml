@@ -1,33 +1,38 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ProbeFlow: Training-Free Adaptive Flow Matching for Vision-Language-Action Models
-# arXiv: 2603.17850
-
 name: ProbeFlow
 full_name: "ProbeFlow: Training-Free Adaptive Flow Matching for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Southeast University"
 date: "2026-03-18"
 paper_url: https://arxiv.org/abs/2603.17850
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "flow matching"
-  action_head_category: flow_matching
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: Evo-1 with frozen InternVL3-1B visual backbone (used as the underlying VLA; ProbeFlow itself is a training-free inference wrapper)
+  llm: InternVL3-1B
+  action_head: training-free adaptive ODE solver applied on top of an existing flow-matching action head (8-layer DiT, 1024 hidden dim, horizon T=50)
+  action_head_category: other
+  parameters: null
+  key_innovation: "Training-free adaptive inference framework for flow-matching VLA action heads. Evaluates trajectory complexity via cosine similarity between an initial velocity and a single lookahead velocity vector (Lookahead Linearity Probe), then dynamically schedules ODE integration steps (between Nmin and Nmax) so dense integration is only triggered in highly curved regions. Reduces MetaWorld action-head latency by 14.8x (avg steps 50 -> 2.6) and end-to-end latency by 2.8x without compromising success rate."
+
+training:
+  notes: "Training-free; no parameter updates. Applied to a pre-trained Evo-1 + InternVL3-1B flow-matching VLA."
+  hardware_eval: NVIDIA RTX 4090
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_avg: 88.7
+    source: ProbeFlow paper Table II (avg over LIBERO, ProbeFlow with epsilon=0.008)
+    date_reported: '2026-03-18'
+    eval_condition: fine-tuned (Evo-1 base; ProbeFlow training-free inference)
   metaworld:
-    metaworld_avg: TODO
+    metaworld_mt50_avg: 83.2
+    source: ProbeFlow paper Table I (MetaWorld MT50, ProbeFlow with epsilon=0.008)
+    date_reported: '2026-03-18'
+    eval_condition: fine-tuned (Evo-1 base; ProbeFlow training-free inference)
 
 eval_conditions:
   libero: "fine-tuned"
   metaworld: "fine-tuned"
 
-tags: [flow-matching, libero, metaworld]
+tags: [training-free, inference-acceleration, flow-matching-solver, libero, metaworld]

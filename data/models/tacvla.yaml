@@ -1,21 +1,29 @@
 name: TacVLA
 full_name: 'TacVLA: Contact-Aware Tactile Fusion for Robust Vision-Language-Action Manipulation'
-organization: 'TODO: check paper'
+organization: "Purdue University; Istituto Italiano di Tecnologia; Università di Genova"
 date: '2026-03-13'
 paper_url: https://arxiv.org/abs/2603.12665
-code_url: null
+code_url: https://sites.google.com/view/tacvla
 venue: null
 open_source: false
-architecture:
-  action_head: 'TODO: check paper'
-  parameters: TODO
-  action_head_category: diffusion
-key_innovation: 'TODO: Read paper and summarize key contribution in 2-3 sentences.
 
-  '
-benchmarks:
-  libero:
-    TODO: check paper for benchmark scores
+architecture:
+  backbone: SigLIP visual encoder (front + wrist cameras), MLP-based tactile encoder over 15x8 tactile array (36 tactile tokens)
+  llm: PaliGemma tokenizer / Gemma 2.6B (Pi0.5 VLM backbone)
+  action_head: flow-matching action expert (Pi0.5-style)
+  action_head_category: flow_matching
+  parameters: null
+  key_innovation: "Tactile-augmented Pi0.5-based VLA with compact MLP-based tactile tokenization (36 tokens for a 15x8 contact array) and a contact-aware gating module that selectively activates tactile tokens only when physical contact is detected (via threshold on taxel pressure). This state-dependent modality routing avoids interference from non-informative pre-contact tactile signals while preserving a fixed token topology."
+
+training:
+  base_model: OpenPI Pi0.5 checkpoint (pi05 base)
+  method: LoRA fine-tuning, 10000 gradient steps, tactile encoder frozen
+  dataset: "Real-world dataset of contact-rich manipulation: 4 constraint-locked disassembly tasks + 1 in-box picking task, 50 teleoperated demos per task, 10 Hz aligned RGB + tactile + proprioception"
+  hardware: "7-DoF Franka Emika Panda with parallel grippers, two RGB cameras (front + wrist), 15x8 tactile sensor on finger"
+
+benchmarks: {}
+
 eval_conditions:
-  TODO: check paper
-tags: []
+  real_world: "fine-tuned"
+
+tags: [tactile, contact-rich, multimodal-fusion, pi0.5-base, flow-matching, real-world, manipulation]

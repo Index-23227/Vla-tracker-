@@ -1,30 +1,37 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: SnapFlow: One-Step Action Generation for Flow-Matching VLAs via Progressive Self-Distillation
-# arXiv: 2604.05656
-
 name: SnapFlow
 full_name: "SnapFlow: One-Step Action Generation for Flow-Matching VLAs via Progressive Self-Distillation"
-organization: "TODO: check paper"
+organization: "Jilin University / Chongqing University / University of Liverpool / GenY"
 date: "2026-04-07"
 paper_url: https://arxiv.org/abs/2604.05656
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "flow matching"
+  backbone: "Applied to pi0.5 (3B, PaliGemma backbone, cross-attention action expert) and SmolVLA (~500M, SmolVLM backbone, concatenation-based action expert); VLM backbone frozen; only action expert (~300M for pi0.5) and target-time MLP trained"
+  llm: "PaliGemma (Gemma) for pi0.5; SmolVLM for SmolVLA"
+  action_head: "Flow-matching action expert distilled to a single forward pass (1-NFE) via progressive FM/consistency mixing using a two-step Euler shortcut target and a zero-initialized target-time MLP embedding that lets the network switch between local velocity estimation (s = t) and global one-step generation (s = 0)"
   action_head_category: flow_matching
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "3B (pi0.5) and 500M (SmolVLA)"
+  key_innovation: "Plug-and-play progressive self-distillation method that compresses 10-step Euler denoising of flow-matching VLAs into a single forward pass without external teachers or architecture changes. Mixes standard flow-matching samples with consistency samples whose target is a two-step Euler shortcut velocity computed from the model's own marginal velocity predictions, theoretically grounded in a corrected consistency objective that avoids trajectory drift from conditional velocities. Achieves 9.6x denoising speedup and 3.3x end-to-end speedup while matching or slightly exceeding teacher quality."
+
+training:
+  dataset: "LIBERO (4 suites, 40 tasks, 400 episodes) for pi0.5; PushT for SmolVLA"
+  method: "Self-distillation freezing the VLM backbone and training only the action expert plus zero-initialized target-time MLP (~10% of parameters); progressive FM/consistency mixing with alpha = 0.5, lambda = 0.1; 30k steps with gradient checkpointing"
+  compute: "Single A800 GPU, ~12 hours"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.0
+    libero_object: 100.0
+    libero_goal: 99.0
+    libero_long: 97.0
+    libero_avg: 98.75
+    source: "Table 1, SnapFlow paper (pi0.5 + SnapFlow, 1-step inference, 400 episodes)"
+    date_reported: "2026-04-07"
+    eval_condition: fine-tuned
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "fine-tuned (pi0.5 backbone + SnapFlow self-distillation, 1-NFE inference)"
 
-tags: [flow-matching, libero]
+tags: [flow-matching, distillation, consistency-models, inference-acceleration, one-step, libero, pi0.5, smolvla]

@@ -1,88 +1,73 @@
 # HiMoE-VLA: Hierarchical Mixture-of-Experts for Generalist VLA Policies
 
-> **한 줄 요약**: 로봇 데이터의 다층적 이질성(embodiment, action space, sensor, frequency)을 계층적 MoE로 계층별 적응적 처리하여, heterogeneous cross-embodiment 학습에서 일관적 성능 향상 달성.
+> **한 줄 요약**: 로봇 데이터의 이질성(action space, embodiment, sensor)을 처리하기 위해 boundary 층의 Action-Space MoE(AS-MoE)와 인접 층의 Heterogeneity-Balancing MoE(HB-MoE)를 dense Transformer block과 interleave한 계층 MoE 구조. PaliGemma backbone에 flow-matching action expert를 결합하여 LIBERO 평균 97.8 / CALVIN ABC→D avg-len 3.967 달성.
 
 ---
 
-## 1. 배경 및 동기
+## 1. 배경 및 동기 (Sec. 1)
 
-- Cross-embodiment VLA (Octo, CrossFormer)는 **이질적 데이터를 단일 네트워크로 처리** → 서로 다른 embodiment 간 interference
-- 이질성이 **다층적**: embodiment 차이, action space 차이, sensor 차이, control frequency 차이
-- 기존 MoE는 단일 수준의 routing만 수행 → 다층적 이질성 미처리
+VLM 데이터가 (텍스트·이미지로) 비교적 균질한 반면, 로봇 demonstration은 (i) **action space**(joint angle vs end-effector), (ii) **embodiment**(single/dual arm, 7D/14D), (iii) **sensor configuration & viewpoint**, (iv) **control frequency**, (v) tele-op 스타일까지 모든 축이 이질적이다. OpenVLA, RDT-1B, HPT 등 기존 OXE 기반 prior pre-train + fine-tune 모델은 이 이질성을 architecture 차원에서 다루지 않아 transfer가 비효율적이다. 저자들은 이질성의 **층별 추상화 위계**를 가정 — 얕은 층에서 action-space discrepancy를 specialize하고 깊은 층으로 갈수록 broader heterogeneity를 shared 표현으로 흡수.
 
----
+## 2. 아키텍처 (Sec. 3.2, Figs. 1–2)
 
-## 2. 방법론 심층 분석
+### 2.1 Vision-Language Module
+- **PaliGemma**(SigLIP + Gemma-2B), π₀와 동일 백본
+- 단일 마지막 layer 아닌 **모든 layer KV**를 action expert로 cross-attention 공급(stronger conditioning, Appendix B)
+- KV cache로 rollout 가속
 
-### 2.1 Hierarchical MoE
-
-각 transformer layer에서 **다중 수준의 routing**:
-
+### 2.2 Hierarchical MoE Action Expert
+입력: proprioception $q_t$ + noised action $A_t^\tau$ → 통일된 vector(action space는 고정 위치에 할당) → MLP → HiMoE
+구조(Fig. 2):
 ```
-Layer l:
-  Router 1: Embodiment-level routing → expert subset 선택
-  Router 2: Task-level routing → expert subset 내에서 세부 선택
-  Shared experts: 모든 입력에 공통 적용
+[AS-MoE] ─ [HB-MoE] ─ [Dense Transformer × N] ─ [HB-MoE] ─ [AS-MoE]
+   ↑boundary↑                  shared                    ↑boundary↑
 ```
+- **AS-MoE**(boundary, top-K routing): action-space별 specialization. AS-Reg(Eq. 4–5)로 contrastive 학습 — 같은 action-space token에 routed된 expert pair는 positive, 다른 것은 negative
+- **HB-MoE**(adjacent, top-K routing): embodiment·sensor 등 broader heterogeneity. HB-Reg(Eqs. 6–7) $\mathcal{L}_{HB} = \sum_i f_i P_i$ — load balance 보장
+- **중앙 dense Transformer**: heterogeneous signal을 shared knowledge로 통합
 
-$$h_l = \sum_{i \in \text{shared}} E_i^s(x) + \sum_{j \in \text{selected}} g_j(x) \cdot E_j^{h}(x)$$
+### 2.3 Flow-Matching Loss (Eqs. 1–3)
+$A_t^\tau = \tau A_t + (1-\tau)\epsilon$, $\tau \sim \text{Beta}$ (π₀ 관행). 최종 loss: $\mathcal{L} = \mathcal{L}_{flow} + \lambda_{AS}\mathcal{L}_{AS} + \lambda_{HB}\mathcal{L}_{HB}$
 
-> ❓ **예상 질문**: Hierarchical routing의 overhead는? 일반 MoE 대비 얼마나 추가 연산인가?
-> **답변**: Routing 자체는 경량 linear projection이므로 overhead 미미. 다만 expert 수 증가에 따른 메모리 사용량이 단일 MoE 대비 높을 수 있음.
+### 2.4 Pre-training 데이터
+OXE + open-source ALOHA — diverse embodiment·action space·state 표현·task 포괄. Output: 6D EEF, 7D joint, 14D bimanual joint를 한 모델이 모두 처리.
 
-### 2.2 Gradual Abstraction
+## 3. 핵심 결과
 
-하위 layer: embodiment-specific features 처리 (sensor alignment, action space normalization)
-상위 layer: task-agnostic shared knowledge (물체 인식, 공간 추론)
+### 3.1 CALVIN ABC→D (Tab. 1, sequence length 1–5의 average completed count)
+| Method | 1 | 2 | 3 | 4 | 5 | Sum |
+|---|---|---|---|---|---|---|
+| MDT | 0.937 | 0.845 | 0.741 | 0.644 | 0.556 | 3.723 |
+| π₀ | 0.914 | 0.830 | 0.739 | 0.676 | 0.599 | 3.758 |
+| **HiMoE-VLA** | **0.932** | **0.855** | **0.789** | **0.731** | **0.660** | **3.967** |
 
-> ❓ **예상 질문**: 이 abstraction 패턴이 자연스럽게 emerge하는가, 아니면 강제하는가?
-> **답변**: Routing이 학습을 통해 자동으로 결정되므로 emerge하는 것으로 주장. 그러나 이 패턴의 발현을 정량적으로 검증하는 분석(예: router decision 시각화)은 부분적.
+### 3.2 LIBERO (Tab. 2, success rate %)
+| Method | Spatial | Object | Goal | Long | Avg |
+|---|---|---|---|---|---|
+| OpenVLA-OFT | 97.6 | 98.4 | 97.9 | 94.5 | 97.1 |
+| UniVLA | 96.5 | 96.8 | 95.6 | 92.0 | 95.2 |
+| π₀ | 96.8 | 98.8 | 95.8 | 85.2 | 94.2 |
+| **HiMoE-VLA** | **98.2** | **99.4** | **98.6** | **94.8** | **97.8** |
 
----
+### 3.3 Real-world (Tabs. 3–4)
+- **xArm7 single-arm**(Fruit-to-Plate / Cup-in-Cup / Block-on-Block, 6 sub-stage): HiMoE-VLA 75.0% vs π₀ 62.5% vs CogACT 61.5% — π₀ 대비 +12.5 pp
+- **ALOHA dual-arm**(Cup-Handover / Scoop / Fold-Shorts): π₀, OpenVLA, RDT 등 baseline 대비 일관된 우위(논문 Tab. 4 page 7)
 
-## 3. 실험 결과 심층 분석
+## 4. Ablation (Tab. 6 등)
 
-| 모델 | Cross-embodiment 평균 SR (%) |
-|------|---------------------------|
-| Octo | 55.3 |
-| CrossFormer | 61.7 |
-| OpenVLA (single) | 68.5 |
-| **HiMoE-VLA** | **73.2** |
+- 단일 vanilla MoE (AS/HB 분리 없음, action space mixing): 통합이 어려움 — Tab. 6(b)에 정량화
+- AS-Reg 제거: action-space specialization 약화 → 동일 action space 데이터 간에도 expert가 공유되어 cross-action transfer 손실
+- HB-Reg 제거: load imbalance로 expert under-utilization
 
-- Cross-embodiment에서 일관적 향상
-- 특히 **이질성이 큰 조합** (manipulator + mobile)에서 개선폭이 큼
+## 5. 비판적 분석
 
----
+핵심 통찰은 "이질성은 균일한 단일 source가 아니라 **위계적**이다"는 것 — action space는 가장 'hard'한 partition(맞지 않으면 직접 충돌), embodiment·sensor는 더 부드러운 abstraction이다. AS-MoE를 boundary에 두는 것은 입력 transform/출력 detransform 모두에서 action-space 별 분기를 보장하고, 중앙 dense layer가 universal representation을 학습하도록 설계되었다. HPT의 dataset-specific stem/head 대비 **transfer 가능**하다는 것이 차별점.
 
-## 4. 한계 및 미해결 문제
+## 6. 한계 및 VLA-Tracker 데이터 정합성
 
-1. **Expert 수의 scalability**: Embodiment가 수십 개로 늘어나면 expert 수 폭발
-2. **새로운 embodiment 추가**: 기존 routing을 재학습해야 하는지, 새 expert만 추가하면 되는지 불명확
-3. **Routing의 해석가능성**: 어떤 expert가 어떤 embodiment에 특화되는지의 분석 부족
-4. **Standard benchmark 결과**: LIBERO/CALVIN 등 단일 embodiment 벤치마크에서의 경쟁력 미제시
+- **YAML 미스매치 플래그**: `data/models/himoe-vla.yaml`의 `benchmarks: {}`는 비어있으나 논문 Table 1·2에 LIBERO Spatial 98.2 / Object 99.4 / Goal 98.6 / Long 94.8 (Sum 97.8), CALVIN ABC→D length 3.967이 명시. 또한 YAML `action_head_category: regression`은 부정확 — 본 논문은 명시적으로 **flow matching**(Eq. 3)을 사용 → `flow_matching`으로 정정 권장.
+- **YAML `action_head: "Hierarchical MoE action module with Action-Space MoE at boundary layers"`**는 정확하지만 flow-matching 설명 누락
+- 논문은 추론 latency·HZ를 명시하지 않음 — deployment 측면 평가 부족
+- Action-Space MoE가 사전 정의된 action space partition에 의존 — completely novel action space에는 새 boundary expert 추가 필요
 
----
-
-## 5. 총평
-
-| 항목 | 평가 |
-|------|------|
-| **Novelty** | ★★★★☆ — Hierarchical MoE for heterogeneous robotics |
-| **Technical depth** | ★★★★☆ — 다층 routing 설계 |
-| **Experimental rigor** | ★★★★☆ — Cross-embodiment 포괄적 평가 |
-| **Practical impact** | ★★★★☆ — Multi-robot deployment에 직접적 가치 |
-| **Writing quality** | ★★★★☆ |
-
-**강점**: 로봇 데이터의 다층적 이질성을 구조적으로 다루는 최초의 체계적 접근. **약점**: Scalability 우려, 새 embodiment 추가의 용이성 미검증.
-
----
-
-## 6. 🔥 예상 날카로운 질문 모음
-
-| # | 질문 | 핵심 답변 요점 |
-|---|------|---------------|
-| 1 | Embodiment 수가 100개면 expert 몇 개 필요한가? | Linear scaling이면 비실용적. Expert sharing/clustering이 필요하나 미탐구 |
-| 2 | 단일 MoE (hierarchical 아닌)와의 차이는 얼마인가? | Ablation 포함. Hierarchical이 flat MoE 대비 ~3%p 향상 |
-| 3 | Load balancing은 어떻게 하는가? | Auxiliary loss로 balanced routing 유도하나, 특정 embodiment에 expert가 편중될 수 있음 |
-
-<!-- VERIFIED: abstract-only (full PDF not publicly accessible on ar5iv) -->
+<!-- VERIFIED: pdf -->

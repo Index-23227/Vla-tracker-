@@ -69,8 +69,11 @@ export const BENCHMARKS = {
     label: 'RoboCasa',
     max: 100,
     metric: 'Success Rate (%)',
-    suites: [],
-    suiteLabels: {},
+    suites: ['robocasa_gr1_pick_place', 'robocasa_gr1_articulated'],
+    suiteLabels: {
+      robocasa_gr1_pick_place: 'GR1 Pick & Place',
+      robocasa_gr1_articulated: 'GR1 Articulated',
+    },
   },
 }
 

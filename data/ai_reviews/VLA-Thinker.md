@@ -1,164 +1,65 @@
-# VLA-Thinker: Boosting Vision-Language-Action Models through Thinking-with-Image Reasoning
+# VLA-Thinker: Boosting VLAs through Thinking-with-Image Reasoning
 
-> **한 줄 요약**: Perception을 "동적으로 호출 가능한 reasoning action"으로 모델링하여 multimodal embodied CoT를 구현하고, 2-stage training (SFT + RL alignment)으로 LIBERO 97.5% 달성.
+**Wang, Bao, Gao, Xu, Tian, Rawat, Ge, Shang, 2026 (arXiv:2603.14523v1, UCF / U. Würzburg / USC / NVIDIA Research)**
 
----
+## 한 줄 요약
+OpenVLA-OFT 백본 위에 "perception을 동적으로 호출 가능한 reasoning action"으로 본 thinking-with-image 프레임워크를 도입, ZOOM-IN tool 호출과 (think) 토큰을 interleave하는 multimodal CoT를 SFT cold-start + GRPO RL 2단계로 학습 — LIBERO 평균 97.5% (OpenVLA-OFT 91.0 대비 +6.5%pp), RoboTwin 2.0의 Short/Medium/Long horizon에서 각 62.3 / 70.7 / 64.6%를 기록.
 
-## 1. 배경 및 동기
+## 핵심 기여
+- **Thinking-with-image paradigm**: 시각을 정적 컨텍스트가 아닌 동적 호출 가능한 reasoning action으로 격상시킨 첫 VLA. 매 추론 step에서 ZOOM-IN tool을 호출해 새로운 visual evidence 획득 가능.
+- **2-stage 학습 레시피**: (i) Qwen3-VL-30B-A3B-Instruct로 합성한 visual CoT 데이터 SFT cold-start, (ii) sparse task success 보상의 GRPO로 trajectory-level alignment.
+- **Long-horizon 우위**: LIBERO Long +10.4%pp, RoboTwin 2.0 Extra-Long(blocks_rank_rgb 79.3, put_bottles_dustbin 55.4)에서 OpenVLA-OFT 압도.
 
-### 기존 연구의 구조적 한계
-- 기존 CoT VLA (ECoT, CoT-VLA)는 **reasoning을 매 step 강제** → 불필요한 시점에서도 reasoning overhead
-- Text-only CoT는 spatial precision 부족, visual-only CoT는 semantic reasoning 부족
-- Reasoning의 "호출 시점"을 모델이 자체적으로 결정하는 메커니즘 부재
+## 배경
+기존 CoT-VLA류는 시각 입력을 한 번 임베딩한 뒤 모든 추론을 언어 공간에서 수행한다 (§1, Fig. 1 left). 이는 사람의 능동적 시지각(uncertainty 발생 시 줌인·재관찰)과 어긋나며, 특히 long-horizon에서 ambiguity·중간 오류 회복이 어렵다. VLA-Thinker는 perception을 "tool call로서의 reasoning action"으로 격상시켜 reasoning–perception–action을 interleave한다 (Fig. 1 right). 핵심 도전은 (i) 무엇을 추론할지뿐 아니라 언제·어떻게 시각 도구를 호출할지 학습, (ii) 전체 reasoning–action trajectory를 sparse task-success 보상으로 align하는 것이다.
 
-### 핵심 질문
-- **모델이 언제 "생각"할지를 스스로 결정하면, 효율성과 성능을 동시에 높일 수 있는가?**
-- **Multimodal reasoning (text + image)이 단일 modality CoT보다 우수한가?**
+## 방법론
+- **문제 정식화 (§2.1)**: τ = {T_1, C_1, V_1, ..., T_k, A_k} (Eq. 2). T_k는 think text, C_k는 perception 호출(tool name + args), V_k는 도구 반환 시각 증거, A_k는 environment action. Controller가 매 step "다음 reasoning + perception 호출" vs "action 출력"을 결정.
+- **Visual tool**: ZOOM-IN(crop_image, bbox_2d) 한 종류로 시작 — fine-grained 영역 inspection. Appendix에서 protocol 명시. 향후 detection, segmentation 등 확장 가능성을 future work로 둠 (§2.1 후반).
+- **백본 (§3.1)**: OpenVLA-OFT[26] 채택 (LLaMA2-7B + SigLIP+DINOv2 vision encoder, action chunking + parallel decoding). 효율성을 위해 wrist camera 미사용 — 단일 third-view RGB + 언어 + proprio.
+- **Stage 1 SFT cold-start (§2.2)**: Qwen3-VL-30B-A3B-Instruct로 embodied CoT 데이터 합성. Gripper state 변화로 keyframe 식별 → keyframe에는 "tool 호출 + think" 모두, intermediate frame에는 pure text think 생성. Schema validation + temporal consistency 강제.
+- **Stage 2 GRPO RL (§2.2, Eq. 3-7)**: π_θ가 trajectory τ 샘플링, 보상 R(τ) = α_s·I_success + α_f·I_format (Eq. 4). 그룹 M개 trajectory의 평균/표준편차로 advantage 정규화 (Eq. 6, DeepSeek-R1식). Eq. 7의 PPO-style clipped objective + KL 정규화. Sparse 성공 보상만으로 reasoning과 action을 jointly 최적화. SFT batch 64, RL batch 128.
 
----
+## 실험 결과
+### LIBERO
+- **LIBERO (Table 2)**: 평균 97.5% — Spatial 98.7 / Object 99.0 / Goal 95.2 / Long 96.9. OpenVLA-OFT(91.0) 대비 +7.1/+3.7/+4.6/+10.4pp, 평균 +6.5pp. Long suite에서 +10.4pp 개선이 가장 두드러져 thinking-with-image의 long-horizon 효과를 입증. 비교군: PD-VLA 94.7, π0-FAST 85.5, NORA 87.9, FlowVLA 88.1, UnifiedVLA 95.5, MolmoAct 86.6 등.
+### RoboTwin 2.0 (bimanual, 50 task suite)
+- **Short horizon (Table 3, 112-130 steps)**: 4 task 평균 62.3% (lift_pot 64.8 / beat_block_hammer 82.5 / pick_dual_bottles 65.4 / place_phone_stand 36.6). OpenVLA-OFT 21.3, π0 45.5, π0-FAST 27.3 대비 압도적.
+- **Medium horizon (151-223 steps)**: 평균 70.7% (move_can_pot 61.0 / place_a2b_left 39.1 / place_empty_cup 92.7 / handover_mic 89.9). OpenVLA-OFT 47.1 대비 +23.6pp.
+- **Long & Extra-Long (283-637 steps)**: 평균 64.6% (handover_block 52.8 / stack_bowls_two 71.1 / blocks_rank_rgb 79.3 / put_bottles_dustbin 55.4). OpenVLA-OFT 46.5, RDT 27.8 대비 큰 폭 우위.
 
-## 2. 방법론 심층 분석
+### Ablation
+- **Training stages (Table 4)**: SFT 단독 시 LIBERO 평균 88.2%로 OpenVLA-OFT(91.0)보다 오히려 떨어짐 — RL 정렬 없이는 reasoning이 노이즈로 작용. SFT + GRPO 모두 적용 시 97.5%로 최고. 이는 cold-start만으로는 부족하고 trajectory-level 보상 정렬이 필수임을 시사.
+- **GRPO 단독**: 본문 §3.2 후반에 "RL 단독 초기화는 형식·도구 사용 패턴 미정착으로 학습 불안정"이라고 보고 — 두 stage가 보완적.
 
-### 2.1 Perception as Dynamically Invocable Reasoning Action
+### 정성 분석
+- **Fig. 1 (right)**: 스토브 점등 + moka pot 옮기기 task에서 ZOOM-IN을 호출해 가스밸브 위치를 재확인 후 정확히 grasp — text-only CoT 모델은 동일 시나리오에서 grasp 실패로 task 미완료.
+- 모델은 `<think>...zoom in...</think><tool_call>{"name": "crop_image", "arguments": {"bbox_2d": [...]}}</tool_call>` 형식으로 도구 호출, 이후 반환 sub-image를 컨텍스트에 추가해 다음 reasoning step 진행.
 
-핵심 아이디어: "생각하기(thinking)"를 action의 일종으로 정의:
+## 한계
+- ZOOM-IN(crop_image)이라는 단일 시각 도구만 검증되어 있어, segmentation·depth·tracking 등 도구 다양화의 효과는 미검증 (§2.1 후반에서 future work로 명시).
+- SFT 데이터를 Qwen3-VL-30B로 합성 — 합성 라벨의 잠재 편향이 RL 단계까지 전이될 가능성. Filtering(schema/temporal) 외 검증 절차가 정량적으로 보고되지 않음.
+- LIBERO의 wrist camera 미사용 등 평가 조건이 OpenVLA-OFT 원래 셋업과 다름 — 동일 입력 조건의 직접 비교 시 격차 해석에 주의 필요.
+- RoboTwin 2.0 일부 task(place_phone_stand 36.6, place_a2b_left 39.1)는 여전히 낮아 dual-arm 조정이 어려운 영역에서는 thinking-with-image도 한계.
+- 추론 latency(매 step 도구 호출 + reasoning) 측정이 본문에 명시적이지 않아 실시간 제어 적용성 평가가 어렵다.
+- **YAML 점수 일치 확인**: `data/models/vla_thinker.yaml`의 LIBERO(98.7/99.0/95.2/96.9) 및 RoboTwin v2 sub-task 점수, short/medium/long 평균은 논문 Table 2/3과 일치. 점수 신뢰성 양호.
 
-```
-[Observation] → 모델 결정:
-  Option A: 바로 action 생성 (thinking 불필요)
-  Option B: [THINK] token 생성 → multimodal reasoning → action 생성
-```
+## 총평
+"text-only CoT의 한계를 perception tool call로 명시적으로 깬다"는 단순하지만 강한 메시지를 (i) 합성 visual CoT 데이터로 SFT cold-start, (ii) sparse success 보상의 GRPO로 trajectory-level alignment 하는 깔끔한 2단 학습으로 구현했다. LIBERO 97.5%(특히 Long +10.4pp)와 RoboTwin 2.0의 모든 horizon group에서 OpenVLA-OFT를 큰 폭으로 능가한 결과는, 시각을 능동적 도구로 다루는 패러다임이 long-horizon embodied reasoning에 실질적 이득을 가져옴을 보여준다. Ablation에서 SFT 단독이 오히려 성능을 떨어뜨리는 점은 RL alignment의 필수성을 명확히 한 정직한 발견이다.
 
-> ❓ **예상 질문**: "언제 생각할지"를 어떻게 학습하는가?
-> **답변**: RL alignment (Stage 2)에서 thinking의 가치를 학습. Thinking이 action 성공에 기여하면 positive reward, 불필요한 thinking은 latency 패널티로 discouraged. 그러나 이 reward shaping의 세부 설계가 성능에 민감.
+## 예상 질문
+1. **ZOOM-IN 외의 도구 없이도 정말 thinking-with-image라 부를 수 있는가?**
+   - 저자들도 이를 인정하고 "fundamental effectiveness 검증을 위한 대표 instance"로 사용. 다양 도구 확장(detection, segmentation, tracking)은 future work (§2.1).
+   - 단일 도구만으로도 LIBERO +6.5%pp, RoboTwin 2.0 +20pp 이상 — paradigm 자체의 효과 입증.
+2. **SFT만으로는 왜 떨어지는가(88.2%)?**
+   - 저자 분석(§3.2): SFT는 reasoning/tool format은 학습하지만 어느 시점에 호출이 task 성공에 기여하는지를 학습 못 함.
+   - 합성 데이터의 도구 호출 패턴이 실제 manipulation task의 success criterion과 어긋날 수 있어, 오히려 추론 비용만 증가시킴.
+   - RL의 sparse reward(I_success)만이 "언제 호출할지"를 align한다.
+3. **RoboTwin 2.0에서 horizon이 길수록 격차가 줄어드는 이유?**
+   - Long(64.6) < Medium(70.7) > Short(62.3) 패턴. 매우 긴 horizon에서는 제한된 도구(ZOOM-IN)와 sparse reward만으로는 충분한 신호 확보가 어렵다고 §3.2에서 언급.
+   - 더 풍부한 도구·dense reward·hierarchical RL 도입을 후속 과제로 제시.
+4. **GRPO를 선택한 이유는? PPO/SAC와 비교는?**
+   - DeepSeek-R1 식 group-relative advantage(Eq. 6)로 explicit value function 불필요 → long-horizon trajectory의 variance 감소.
+   - Sparse reward (Eq. 4)에서 PPO보다 안정적 학습이 가능하다는 게 저자 입장. 다만 다른 RL 알고리즘과의 직접 비교 ablation은 본문에 없음.
 
-### 2.2 Multimodal Embodied CoT
-
-Text + image reasoning을 결합:
-- **Text reasoning**: "빨간 컵의 왼쪽에 파란 블록이 있다"
-- **Image reasoning**: 미래 상태의 시각적 예측 (partial)
-- 두 modality가 상호 보완하여 spatial + semantic reasoning 동시 수행
-
-### 2.3 Two-stage Training
-
-**Stage 1 (SFT)**: Demonstration data에서 reasoning + action 패턴 학습
-$$\mathcal{L}_{\text{SFT}} = -\log P(\text{reasoning}, \text{action} | \text{observation}, \text{instruction})$$
-
-**Stage 2 (RL Alignment)**: Reasoning의 선택적 호출을 최적화
-$$\mathcal{L}_{\text{RL}} = -\mathbb{E}[R(\text{success}) - \lambda \cdot \text{thinking\_cost}]$$
-
-> ❓ **예상 질문**: RL alignment이 SFT 대비 얼마나 중요한가?
-> **답변**: SFT만으로 94.2%, RL alignment 추가 시 97.5% → +3.3%p. RL이 "언제 생각할지"의 최적 timing을 학습하는 데 기여. 이 3.3%p가 optimal thinking policy 학습의 효과.
-
----
-
-## 3. 데이터 전략
-
-- SFT: 기존 robot demonstration + reasoning annotation (GPT-4V 또는 자동 생성)
-- RL: 환경 상호작용에서 on-policy 데이터 수집
-- Thinking annotation의 자동 생성이 핵심 innovation
-
----
-
-## 4. 실험 결과 심층 분석
-
-### LIBERO Benchmark
-
-| 모델 | LIBERO Avg (%) | Thinking Ratio |
-|------|---------------|---------------|
-| OpenVLA | 76.5 | N/A (no thinking) |
-| ECoT | 79.1 | 100% (always) |
-| CoT-VLA | 82.3 | 100% (always) |
-| VLA-Thinker (SFT only) | 94.2 | ~60% |
-| **VLA-Thinker (SFT + RL)** | **97.5** | **~45%** |
-
-- **RL alignment 후 thinking ratio가 60%→45%로 감소**: 불필요한 thinking이 줄어듦
-- 성능은 오히려 향상 → **selective thinking > always thinking**
-
-### Thinking Behavior 분석
-
-| 상황 | Thinking 확률 |
-|------|-------------|
-| Object approach (쉬움) | ~15% |
-| Pre-grasp alignment (중간) | ~55% |
-| Precision placement (어려움) | ~90% |
-
-- **모델이 난이도에 따라 자연스럽게 thinking 조절** → interpretable
-
----
-
-## 5. Ablation 분석
-
-| 구성요소 | LIBERO (%) |
-|---------|-----------|
-| Full (SFT + RL, multimodal CoT) | 97.5 |
-| SFT only | 94.2 |
-| Text-only CoT | 93.5 |
-| Visual-only CoT | 92.8 |
-| Always think (no dynamic) | 95.1 |
-| Never think (no CoT) | 89.3 |
-| RL without thinking cost | 95.8 |
-
-- **Multimodal > text-only > visual-only** → 두 modality의 시너지
-- **Dynamic thinking > always thinking** → selective가 핵심
-- **Thinking cost penalty** 중요 (+1.7%p): 없으면 unnecessary thinking 증가
-
----
-
-## 6. 관련 연구 비교
-
-| 모델 | CoT Type | Dynamic | Multimodal | RL Alignment |
-|------|----------|---------|-----------|-------------|
-| ECoT | Text 4-layer | ✗ (always) | ✗ | ✗ |
-| CoT-VLA | Visual (frames) | ✗ (always) | ✗ | ✗ |
-| DeepThinkVLA | Hybrid attention | ✗ | △ | ✓ (outcome RL) |
-| **VLA-Thinker** | **Text + Image** | **✓** | **✓** | **✓** |
-
-핵심 차별점: **Dynamic invocation + multimodal + RL alignment**의 세 가지를 모두 달성하는 유일한 모델.
-
----
-
-## 7. 한계 및 미해결 문제
-
-### 방법론적 미비점
-1. **RL alignment의 reward design 민감도**: Thinking cost $\lambda$의 최적값이 태스크에 따라 다를 수 있음. Universal $\lambda$ 결정 전략 부재
-2. **Reasoning annotation 품질**: GPT-4V 기반 자동 생성의 hallucination 리스크. SFT의 reasoning 품질이 RL의 starting point를 결정하므로 중요
-3. **Long-horizon에서의 dynamic thinking**: 10+ step 태스크에서 thinking의 누적 latency와 성능 trade-off 미분석
-4. **Real-world 검증**: LIBERO 시뮬레이션 위주. 실제 환경에서의 dynamic thinking 행동 미검증
-5. **RL의 sample efficiency**: RL alignment에 필요한 환경 상호작용 양이 보고되지 않음
-
-### Attribution 문제
-- 97.5%의 기여가 **dynamic thinking mechanism** vs **2-stage training recipe** vs **multimodal CoT** 중 어디에서 주로 오는지 완전히 분리되지 않음
-- SFT만으로 94.2%이면, RL의 3.3%p 기여가 복잡한 RL pipeline의 ROI를 정당화하는지 논쟁 가능
-
----
-
-## 8. 총평
-
-| 항목 | 평가 |
-|------|------|
-| **Novelty** | ★★★★★ — "언제 생각할지"를 모델이 결정하는 패러다임 |
-| **Technical depth** | ★★★★★ — SFT + RL + dynamic thinking의 체계적 설계 |
-| **Experimental rigor** | ★★★★☆ — 풍부한 ablation, thinking behavior 분석 |
-| **Practical impact** | ★★★★★ — Adaptive compute allocation의 VLA 적용 |
-| **Writing quality** | ★★★★★ — 명확한 story, 설득력 있는 presentation |
-
-**강점**: "Thinking은 항상 해야 하는가?"라는 근본적 질문에 "아니오"라는 설득력 있는 답변. Dynamic thinking이 효율성(45% thinking ratio)과 성능(97.5%)을 동시에 달성. Multimodal CoT의 시너지 효과를 실증. 모델의 thinking behavior가 인간 직관과 일치(어려운 순간에 더 많이 생각).
-
-**약점**: RL pipeline의 복잡성, LIBERO saturation에 근접, real-world 미검증.
-
----
-
-## 9. 🔥 예상 날카로운 질문 모음
-
-| # | 질문 | 핵심 답변 요점 |
-|---|------|---------------|
-| 1 | DeeR-VLA (dynamic compute)와 VLA-Thinker (dynamic thinking)의 관계는? | DeeR는 모델 layer 수준의 compute allocation, VLA-Thinker는 reasoning level의 allocation. 상보적으로 결합 가능: DeeR로 layer를 줄이고, VLA-Thinker로 thinking을 줄이면 multiplicative 효율 |
-| 2 | RL 없이 dynamic thinking을 학습할 수 있는가? | Rule-based (confidence threshold)로 가능하나, RL이 더 최적. Rule-based variant와의 비교가 유용했을 것 |
-| 3 | Thinking ratio를 사용자가 제어할 수 있는가? (latency budget 설정) | $\lambda$로 간접 조절 가능하나, explicit latency budget constraint는 미구현. Constrained RL로 확장 가능 |
-| 4 | DeepThinkVLA와의 핵심 차이는? | DeepThinkVLA는 hybrid attention (causal for reasoning, bidirectional for action), VLA-Thinker는 dynamic invocation + multimodal. VLA-Thinker가 더 flexible |
-| 5 | 97.5%에서 남은 2.5% failure는 어떤 유형인가? | Thinking을 하고도 실패하는 경우 vs thinking을 하지 않아 실패하는 경우의 분리 분석이 insight를 줄 것 |
-| 6 | Text CoT와 visual CoT의 상보성의 메커니즘은? | Text가 high-level plan ("왼쪽으로 이동"), visual이 low-level target ("이 위치로"). 두 수준의 정보가 서로 다른 action dimension에 기여할 것으로 추정되나 정량적 분석 부재 |
-| 7 | Always-think (95.1%) vs dynamic (97.5%): dynamic이 왜 더 나은가? | Always-think에서 불필요한 reasoning이 noise로 작용하여 action을 방해. Selective thinking은 clean signal만 제공 |
-
-<!-- VERIFIED: abstract-only -->
+<!-- VERIFIED: pdf -->

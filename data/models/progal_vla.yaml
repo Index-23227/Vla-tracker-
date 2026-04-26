@@ -1,30 +1,41 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ProGAL-VLA: Grounded Alignment through Prospective Reasoning in Vision-Language-Action Models
-# arXiv: 2604.09824
-
 name: ProGAL-VLA
 full_name: "ProGAL-VLA: Grounded Alignment through Prospective Reasoning in Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "University of Illinois Chicago"
 date: "2026-04-10"
 paper_url: https://arxiv.org/abs/2604.09824
-code_url: null  # TODO: check for GitHub repo
+code_url: https://nstrndrbi.github.io/ProGAL
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: OpenVLA-7B (fast policy pi_fast); Qwen-2.5-VL-Instruct-7B (slow planner pi_slow, asynchronous, once per episode); YOLO-World detector for open-vocabulary detections
+  llm: Qwen-2.5-VL-Instruct-7B (planner) and OpenVLA-7B internal LLM
+  action_head: imitation-learning regression head from OpenVLA-7B controller, conditioned on a verified goal embedding produced by State Alignment Cross Attention (SACA); trained with action MSE loss plus Grounding Alignment Contrastive (GAC) InfoNCE loss
+  action_head_category: hybrid
+  parameters: "~7B (per-step controller; planner adds 7B but is invoked once per episode)"
+  key_innovation: "Hierarchical grounding-aware VLA: a Prospective Planner emits a symbolic sub-goal, a Grounded State Module (GSM) builds a 3D entity-centric graph from open-vocabulary detections, State Alignment Cross Attention (SACA) binds the symbolic sub-goal to grounded entities producing a verified goal embedding g_t, and the action policy conditions only on g_t. SACA attention entropy provides an intrinsic ambiguity signal for selective prediction; a contrastive GAC loss enforces symbolic-to-entity binding (entity-level InfoNCE bound)."
+
+training:
+  base_model: OpenVLA-7B (fine-tuned end-to-end on LIBERO-Plus and Custom Ambiguity Benchmark)
+  losses: action MSE + lambda * GAC contrastive loss
+  alignment_pairs: constructed offline via teacher-VLM symbolic segmentation, GSM 3D tracklets, and spatio-temporal nearest-neighbor matching
+  per_step_latency: ~96.4 ms (10.31 FPS) on LIBERO-Plus
 
 benchmarks:
-  libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+  libero_plus:
+    libero_plus_camera: 93.2
+    libero_plus_robot: 71.5
+    libero_plus_language: 93.6
+    libero_plus_light: 86.8
+    libero_plus_background: 92.3
+    libero_plus_noise: 74.8
+    libero_plus_layout: 86.7
+    libero_plus_avg: 85.5
+    source: ProGAL-VLA paper Table 2
+    date_reported: '2026-04-10'
+    eval_condition: fine-tuned
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero_plus: "fine-tuned"
 
-tags: [libero]
+tags: [grounding, hierarchical, dual-system, contrastive, ambiguity-detection, openvla, libero_plus]

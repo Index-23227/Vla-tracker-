@@ -1,27 +1,48 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ReFineVLA: Multimodal Reasoning-Aware Generalist Robotic Policies via Teacher-Guided Fine-Tuning
-# arXiv: 2604.17800
-
 name: ReFineVLA
 full_name: "ReFineVLA: Multimodal Reasoning-Aware Generalist Robotic Policies via Teacher-Guided Fine-Tuning"
-organization: "TODO: check paper"
+organization: "VinRobotics / UT Arlington / IMPRS-IS Stuttgart / TU Darmstadt / TU Wien / AIT / MBZUAI"
 date: "2026-04-20"
 paper_url: https://arxiv.org/abs/2604.17800
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "PaliGemma 2 VLM backbone (via SpatialVLA)"
+  llm: "PaliGemma 2 (Gemma LLM)"
+  action_head: "SpatialVLA-style action head augmented with a multimodal reasoning generation objective; jointly predicts actions and natural-language reasoning rationales (Observation / Situation Analysis / Spatial Reasoning / Task Planning) supervised by an expert teacher model"
+  action_head_category: hybrid
+  parameters: "3.5B"
+  key_innovation: "Teacher-guided fine-tuning that injects explicit chain-of-thought multimodal reasoning into a pretrained VLA. Curates a 125K-trajectory dataset of teacher-generated reasoning rationales and fine-tunes SpatialVLA with a multi-objective loss that jointly learns action prediction and reasoning generation, improving generalization on SimplerEnv WidowX and Google Robot tasks."
+
+training:
+  dataset: "125,000 manipulation trajectories annotated with teacher-generated multimodal reasoning rationales; fine-tuning data sources include BridgeData-v2 (WidowX) and Fractal (Google Robot)"
+  method: "Teacher-guided transfer fine-tuning of pretrained 3.5B SpatialVLA backbone with multi-objective loss (action + reasoning generation)"
 
 benchmarks:
   simpler_env:
-    google_robot_pick_coke_can: TODO
+    widowx_put_spoon_on_towel_grasp: 42.9
+    widowx_put_spoon_on_towel_success: 38.1
+    widowx_put_carrot_on_plate_grasp: 33.3
+    widowx_put_carrot_on_plate_success: 33.3
+    widowx_stack_green_on_yellow_grasp: 71.4
+    widowx_stack_green_on_yellow_success: 23.8
+    widowx_put_eggplant_in_basket_grasp: 100.0
+    widowx_put_eggplant_in_basket_success: 95.2
+    widowx_average: 47.7
+    google_robot_visual_matching_pick_coke_can: 83.0
+    google_robot_visual_matching_move_near: 95.3
+    google_robot_visual_matching_open_close_drawer: 51.4
+    google_robot_visual_matching_average: 76.6
+    google_robot_variant_aggregation_pick_coke_can: 83.8
+    google_robot_variant_aggregation_move_near: 88.1
+    google_robot_variant_aggregation_open_close_drawer: 34.4
+    google_robot_variant_aggregation_average: 68.8
+    source: "Tables 1 & 2, ReFineVLA paper"
+    date_reported: "2026-04-20"
+    eval_condition: fine-tuned
 
 eval_conditions:
-  simpler_env: "fine-tuned"
+  simpler_env: "fine-tuned (WidowX on BridgeData-v2; Google Robot on Fractal)"
 
-tags: [reasoning, simpler_env]
+tags: [reasoning, chain-of-thought, teacher-guided, fine-tuning, simpler_env, spatialvla, paligemma]
