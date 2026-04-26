@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-25T14:43:16.896224
+# Generated: 2026-04-26T08:08:30.824297
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -1608,8 +1608,8 @@ MODEL: GR-Dexter
     LLM: Qwen2.5 3B
     Parameters: not disclosed
   Tags: bimanual, dexterous-hands, 56-DoF, cross-embodiment
-  AI Review Summary: 21-DoF 소형 로봇 핸드 설계부터 양팔 텔레오퍼레이션, cross-embodiment VLA 학습까지를 통합한 하드웨어-모델-데이터 프레임워크로, dexterous hand 기반 범용 조작의 실용적 구현.
-  AI Review: Abstract-based
+  AI Review Summary: ByteDance Seed의 **holistic hardware-model-data 프레임워크**. 자체 개발한 21-DoF anthropomorphic ByteDexter V2 hand × 2 + bimanual Franka 팔, teleoperation 수집 robot trajectory + VL + cross-embodiment 데이터로 훈련. Real-world long-horizon 일상 + OOD pick-and-place 강건.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: GR-1
@@ -1869,8 +1869,8 @@ MODEL: LLARVA
     LLM: Llama-2 7B
     Parameters: 7B
   Tags: 7B, visual-trace, LLaVA, autoregressive, open-source
-  AI Review Summary: Structured prompt로 다양한 로봇 학습 태스크를 통합하고, 2D intermediate representation ("visual trace")을 예측하여 vision-action space를 정렬하는 instruction tuning 기반 VLA.
-  AI Review: Abstract-based
+  AI Review Summary: LLaVA-1.5 기반 LMM에 **2-D visual trace 예측**을 보조 태스크로 instruction tuning하여, RLBench 12-task에서 **avg 43.3%** (Image-BC ViT 1.3% 대비) 달성하고 real-Franka에서 SOTA. CLIP ViT-L + Llama-2 7B + 8.5M OXE 이미지-trace 페어 사전훈련.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: LLaVA-VLA
@@ -1890,8 +1890,8 @@ MODEL: LLaVA-VLA
     calvin (avg=3.68): calvin_task_1=94.8, calvin_task_2=84.5, calvin_task_3=71.3, calvin_task_4=62.5, calvin_task_5=53.8, calvin_abc_d_avg_len=3.68
     robotwin_v2 (avg=28.62): click_bell=72.0, click_alarmclock=65.0, lift_pot=21.0, move_can_pot=16.0, open_laptop=31.0, pick_dual_bottles=7.0, place_dual_shoes=5.0, rotate_qrcode=12.0
   Eval Conditions: {'calvin': 'fine-tuned', 'robotwin_v2': 'fine-tuned (domain randomization setting)'}
-  AI Review Summary: VLA의 실용성(practicality)을 체계적으로 재평가하기 위한 CEBench 벤치마크를 제안하고, consumer-grade GPU에서 구동 가능한 경량 LLaVA-VLA 모델을 설계.
-  AI Review: Abstract-based
+  AI Review Summary: HKUST(GZ)/HUST/Westlake가 제안한 **lightweight VLA + CEBench 벤치마크**. LLaVA-OneVision-0.5B 백본 + Qwen-2 0.5B + chunk-5 discrete action tokenizer. CALVIN avg 3.65, 작은 모델로 7B+ 모델에 근접. Open-source.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: Mobility VLA
@@ -2108,8 +2108,8 @@ MODEL: SAMoE-VLA
     Parameters: 3.6B (total)
   Tags: autonomous-driving, mixture-of-experts, flow-matching, BEV, nuscenes, langauto, internvl2
   Eval Conditions: {'nuscenes': "open-loop planning (not in VLA-Tracker's standard benchmark set)", 'langauto': "closed-loop CARLA (not in VLA-Tracker's standard benchmark set)"}
-  AI Review Summary: 자율주행에 VLA를 적용하여, BEV feature 기반 scene-adaptive MoE routing과 Conditional Cross-Modal Causal Attention으로 nuScenes 및 LangAuto SOTA 달성.
-  AI Review: Abstract-based
+  AI Review Summary: Tsinghua AIR 외 5기관. **Scene-Adaptive MoE** (SA-MoE) layer가 transformer 4번째마다 FFN을 대체. OpenCLIP-ConvNext + BEVFormer + InternVL2-2B 기반 + flow-matching action head로 자율주행에 VLA 적용 — **nuScenes L2 0.29m (SOTA)**, LangAuto Driving Score 51.4 (full) / 69.5 (short).
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: StableIDM
@@ -2327,8 +2327,8 @@ MODEL: VLA-RL
     Parameters: 7B
   Tags: 7B, RL, trajectory-level, VLM-reward
   Eval Conditions: {'libero': 'RL fine-tuned'}
-  AI Review Summary: Auto-regressive VLA에 online RL을 직접 적용하여, pretrained OpenVLA-7B가 fine-tuned baseline을 LIBERO 40개 태스크에서 4.5%p 능가하고, test-time compute 증가에 따른 성능 향상을 시현.
-  AI Review: Abstract-based
+  AI Review Summary: OpenVLA-7B를 baseline으로 **online RL**을 적용하여 LIBERO 40 tasks에서 **base 모델 대비 +4.5%p**, π0-FAST 수준에 도달. **Robotic Process Reward Model (PRM)** + multi-modal multi-turn formulation + critic warmup + curriculum이 핵심.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: Vlaser
