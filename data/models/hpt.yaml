@@ -17,20 +17,11 @@ training:
   dataset: 52 datasets, multiple embodiments
   method: Pre-training with heterogeneous stems → shared transformer
   compute: 64 A100 GPUs
-benchmarks:
-  libero:
-    libero_spatial: 86.4
-    libero_object: 89.2
-    libero_goal: 78.6
-    libero_long: 55.8
-    source: Table 2, HPT paper
-    date_reported: '2024-09-30'
-    eval_condition: fine-tuned
-  simpler_env:
-    google_robot_pick_coke_can: 62.4
-    source: HPT paper
-    date_reported: '2024-09-30'
-    eval_condition: fine-tuned
+benchmarks: {}
+# Note: Earlier YAML versions claimed LIBERO scores (avg ~77) and SimplerEnv 62.4 citing
+# "Table 2, HPT paper" — the actual paper Table 2 is the pre-train dataset list, not a
+# LIBERO benchmark table. The paper does not report LIBERO numbers. Removed in Round 32
+# audit to prevent attribution misrepresentation.
 open_source: true
 tags:
 - 300M

@@ -155,9 +155,9 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 | Benchmark | Tasks | Models | Focus | Venue |
 |-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 53 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 23 | Long-horizon, language | RA-L 2022 |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 21 | Sim-to-real transfer | NeurIPS 2024 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 50 | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 22 | Long-horizon, language | RA-L 2022 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 20 | Sim-to-real transfer | NeurIPS 2024 |
 | [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 12 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 3 | Diverse manipulation | RA-L 2020 |
 | [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 10 | Home robot tasks | RSS 2024 |

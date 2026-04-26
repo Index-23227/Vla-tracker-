@@ -2049,6 +2049,61 @@ export const PIPELINE_CONFIGS = {
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // #92  DiT4DiT — Cosmos video DiT × action DiT cascade
+  // ═══════════════════════════════════════════════════════════════════════════
+  'DiT4DiT': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Cosmos-Predict2.5-2B Video DiT', sub: 'world-model backbone + causal Video VAE', color: 'p', children: [
+        { label: 'Cosmos-Reason1', sub: 'text encoder', color: 'i' },
+        { label: 'Causal Video VAE', sub: 'spatiotemporal latent', color: 'k' },
+        { label: 'Video DiT trunk', sub: 'AdaLN time-cond, cross-attn to text', color: 'y' },
+      ]},
+      { label: 'Intermediate feature extraction', sub: 'fixed feature layer (no full reconstruction)', color: 'x' },
+      { group: 'Action DiT (GR00T-N1 adapted)', sub: 'flow-matching action head', color: 'r', children: [
+        { label: 'AdaLN timestep injection', sub: 'diffusion-step conditioning', color: 'r' },
+        { label: 'Cross-attn to video features', sub: 'consume DiT hidden states', color: 't' },
+      ]},
+    ],
+    output: { label: 'Continuous actions', sub: '7-DoF, video-grounded', color: 'e' },
+    meta: { loss: 'Dual flow-matching (video + action)', notes: ['2.2B trainable', 'LIBERO 98.55 (#5)', 'RoboCasa-GR1 50.8', '7× faster convergence than dense rollouts', 'Open-source at dit4dit.github.io'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // #93  ProgressVLA — diffusion + classifier guidance via progress estimator
+  // ═══════════════════════════════════════════════════════════════════════════
+  'ProgressVLA': {
+    inputs: [
+      { label: 'RGB frames', color: 'b' },
+      { label: 'Language instr.', color: 'b' },
+      { label: 'Robot state', color: 'g' },
+      { label: 'Noise ε', color: 'o' },
+    ],
+    stages: [
+      { group: 'Vision-Language Progress Estimator', sub: 'pretrained on Open X-Embodiment', color: 'c', children: [
+        { label: 'DINOv2 patch features', sub: 'frozen visual encoder', color: 'k' },
+        { label: 'Progress predictor', sub: 'differentiable scalar (0→1)', color: 'a' },
+      ]},
+      { group: 'UniVLA-style World Model', sub: 'inverse-dynamics in latent action space', color: 't', children: [
+        { label: 'Latent action encoder', sub: 'state + future frame → latent action', color: 't' },
+        { label: 'Inverse-dynamics decoder', sub: 'latent action → real action', color: 'g' },
+      ]},
+      { group: 'Latent Action Expert (DiTA-style)', sub: 'causal Transformer + diffusion', color: 'r', children: [
+        { label: 'Diffusion latent action chunks', sub: 'reverse process µ_θ + σ ε', color: 'r' },
+        { label: 'Classifier guidance', sub: '∇ progress estimator backprop', color: 'y' },
+        { label: 'Action Decoder', sub: 'latent → 7-DoF action', color: 'e' },
+      ]},
+    ],
+    output: { label: 'Progress-guided actions', sub: 'classifier-guided diffusion', color: 'e' },
+    meta: { loss: 'Diffusion + classifier guidance via progress gradient', notes: ['LIBERO 84.5 avg', 'CALVIN 3.73 avg_len', 'Differentiable progress signal as zero-shot classifier guidance', 'Latent action world-model decoupling'] },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // Round 30 — 22 pipeline configs from PDF-verified Round 25-27 YAMLs
   // ═══════════════════════════════════════════════════════════════════════════
 

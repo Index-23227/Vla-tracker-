@@ -18,25 +18,17 @@ training:
   method: MoT action expert + flow matching
   compute: 128 A100 GPUs
 benchmarks:
-  libero:
-    libero_spatial: 97.4
-    libero_object: 98.0
-    libero_goal: 94.2
-    libero_long: 80.6
-    source: LingBot-VLA paper
+  robotwin_v2:
+    robotwin_v2_clean: 88.56
+    robotwin_v2_random: 86.68
+    source: Table 2, LingBot-VLA paper (clean = standard scene; random = domain-randomized)
     date_reported: '2026-01-30'
     eval_condition: fine-tuned
-  calvin:
-    calvin_abc_d_avg_len: 4.5
-    source: LingBot-VLA paper
-    date_reported: '2026-01-30'
-    eval_condition: fine-tuned
-  robotwin_v1:
-    robotwin_easy: 74.2
-    robotwin_hard: 48.8
-    source: LingBot-VLA paper
-    date_reported: '2026-01-30'
-    eval_condition: fine-tuned
+# Note: Earlier YAML versions claimed LIBERO (avg ~92), CALVIN 4.5, robotwin v1 easy/hard
+# scores citing "LingBot-VLA paper" — but the actual paper only evaluates on GM-100
+# real-world (Table 1) and RoboTwin 2.0 (Table 2). Removed those scores in Round 32
+# audit. The GM-100 results are real-world specific and not in tracker's standard
+# benchmark schema.
 open_source: true
 open_source_note: Apache-2.0 license
 tags:
