@@ -662,6 +662,49 @@
       "rank": 13
     },
     {
+      "name": "OmniVLA-RL",
+      "organization": "Country Garden Services / Omni AI / VBot / East China Normal University",
+      "date": "2026-04-20",
+      "paper_url": "https://arxiv.org/abs/2604.17706",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "RL",
+        "online-RL",
+        "flow-matching",
+        "mixture-of-experts",
+        "spatial-understanding",
+        "libero"
+      ],
+      "architecture": {
+        "backbone": "SigLIP (semantic) + VGGT (Visual Geometry Grounded Transformer, spatial)",
+        "llm": "PaLiGemma (decoder-only Transformer; weights pretrained)",
+        "action_head": "Conditional Flow Matching with action chunking (H=16, K=10 denoising steps). Mix-of-Transformers backbone shares Spatial / Reasoning / Action experts under Block-wise Causal Attention. RL-tuned with Flow-GSPO (SDE reformulation via Fokker-Planck + Group Segmented PO; G=8 group size, β=0.01 KL).",
+        "action_head_category": "flow_matching",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 99.2,
+          "libero_object": 99.2,
+          "libero_goal": 98.5,
+          "libero_long": 93.5
+        }
+      },
+      "eval_conditions": {
+        "libero": "SFT + online RL (Flow-GSPO) fine-tuned"
+      },
+      "libero_avg": 97.6,
+      "ai_review": {
+        "content": "# OmniVLA-RL: A Vision-Language-Action Model with Spatial Understanding and Online RL\n\n> **한 줄 요약**: Reasoning/spatial/action 전문가를 Mix-of-Transformers로 통합하고, flow matching을 SDE로 재정식화한 Flow-GSPO를 GSPO와 결합하여 VLA의 공간 이해와 online RL 안정성을 동시에 끌어올리려는 시도.\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA는 공간 인지가 부정확하고 멀티모달 융합이 suboptimal, RL fine-tuning 시 불안정성이 고질적 문제\n- 하나의 monolithic transformer에 reasoning, spatial grounding, action generation을 모두 맡기면 expert 특화가 어려움\n- Flow matching 기반 action head를 RL로 업데이트할 때 policy gradient와의 호환성 확보가 challenging\n\n---\n\n## 2. 방법론\n\n### Mix-of-Transformers (MoT) 아키텍처\nReasoning expert, spatial expert, action expert를 별도의 transformer 모듈로 분리하여 각 modality/기능에 특화된 표현을 학습. 전문가 간 synergy를 통해 공간 인지와 multimodal fusion 정확도를 개선.\n\n### Flow-GSPO\nFlow matching을 Stochastic Differential Equation(SDE) process로 재정식화하고, 이를 Group Segmented Policy Optimization(GSPO)과 결합. SDE 형태의 샘플링이 RL 탐색에 필요한 stochasticity를 제공하면서 policy gradient 계산이 tractable해지는 구조.\n\n---\n\n## 3. 실험 결과\n\n> 논문 PDF 미검증 (abstract-only). 구체 수치는 paper 참조 필요.\n\n- Abstract상 LIBERO / LIBERO-Plus에서 평가 수행됨이 언급됨. 정량 수치는 PDF 확인 후 업데이트 예정.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **MoT 오버헤드**: 3개 expert 분리 시 파라미터/추론 비용 증가 가능성, Mixture-of-Experts sparsity 활용 여부 불명확.\n2. **Flow-GSPO 일반성**: 다른 action head (autoregressive, diffusion)와 비교했을 때 이득의 원천이 SDE 재정식화인지 GSPO인지 분리되지 않음.\n3. **Spatial expert ground-truth**: 공간 이해를 감독하는 신호(depth, 3D annotation 등)가 abstract에서 언급되지 않아 unclear.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Flow matching의 SDE 재정식화 + GSPO 결합은 신선하지만 MoE-style VLA 아이디어는 선행 연구 존재 |\n| **Practical impact** | ★★★☆☆ — LIBERO 수치 및 real-robot 검증 공개 여부에 따라 재평가 필요 |\n\n---\n\n## 6. 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Flow matching을 SDE로 바꾸는 이유는? | Deterministic ODE 형태로는 on-policy RL에 필요한 action distribution log-prob 계산/탐색이 어려움. SDE는 stochasticity와 tractable score-based policy gradient를 동시에 제공. |\n| 2 | MoT가 기존 MoE-VLA와 다른 점은? | Token-level routing 대신 reasoning/spatial/action이라는 기능 축으로 expert를 분리. 라우팅 불안정성을 회피하는 대신 expert 개수가 고정됨. |\n| 3 | GSPO의 Group Segmented는 무엇을 segmenting? | Action chunk 또는 trajectory segment 단위로 advantage를 그룹화하여 variance를 줄이는 variant로 추정. PDF 확인 필요. |\n\n<!-- VERIFIED: pdf -->\n",
+        "verified": true
+      },
+      "rank": 6
+    },
+    {
       "name": "VLA-Thinker",
       "organization": "University of Central Florida / University of Wurzburg / USC / NVIDIA Research",
       "date": "2026-03-15",
@@ -4249,7 +4292,41 @@
         "content": "# SAMoE-VLA: Scene Adaptive Mixture-of-Experts VLA for Autonomous Driving\n\n> **한 줄 요약**: Tsinghua AIR 외 5기관. **Scene-Adaptive MoE** (SA-MoE) layer가 transformer 4번째마다 FFN을 대체. OpenCLIP-ConvNext + BEVFormer + InternVL2-2B 기반 + flow-matching action head로 자율주행에 VLA 적용 — **nuScenes L2 0.29m (SOTA)**, LangAuto Driving Score 51.4 (full) / 69.5 (short).\n\n---\n\n## 1. 배경 및 동기\n\n- 기존 VLA는 **manipulation 위주**, 자율주행은 BEV 표현이 핵심이라 ego-centric 입력 기반 VLA 구조와 맞지 않음.\n- 자율주행에는 다양한 driving scenario (urban / highway / residential / 야간 등) 적응이 필요 → Scene-Adaptive routing이 자연스러운 해결책.\n- nuScenes (open-loop) + LangAuto/LMDrive (closed-loop CARLA) 두 축에서 통합 평가 필요.\n\n---\n\n## 2. 방법론\n\n### Multi-Modal Encoding\n- **Vision**: OpenCLIP-ConvNext + CPFPN (multi-scale) + **BEVFormer** (BEV encoder)\n- **Language**: InternVL2-2B (planning expert pre-train)\n- 이전 VLM과 달리 BEV feature를 명시적으로 받아들이는 hybrid 입력.\n\n### SA-MoE (Scene-Adaptive Mixture-of-Experts)\n- Transformer **layer 4번마다 FFN을 SA-MoE block으로 대체**.\n- Expert routing: scene-adaptive (BEV feature 기반).\n- Conditional Cross-Modal Causal Attention으로 video / language / state간 inter-modal causality 보장.\n\n### Action Head\n- **Flow-Matching trajectory generator**: Gaussian noise → target velocity sequence interpolation.\n- 자율주행 trajectory (steer / throttle / brake) 출력.\n- ~3.6B params (InternVL2-2B + BEVFormer + flow head).\n\n---\n\n## 3. 실험 결과\n\n### Table 1 — nuScenes Open-Loop Planning (L2 error, 1s/2s/3s)\n\n| 모델 | 평균 L2 (m) | 3s L2 (m) |\n|------|-----------:|----------:|\n| VAD | 0.78 | — |\n| UniAD | 0.73 | — |\n| **SAMoE-VLA** | **0.29** | **0.35** |\n\n→ 평균 L2 0.29m로 **15% 낮은 3s error** (0.35m vs 0.41m).\n\n### Table 2 — LangAuto Closed-Loop (CARLA)\n\n| Setting | DS | RC |\n|---------|---:|---:|\n| Full LangAuto | **51.4** | **63.5** |\n| LangAuto-Short | **69.5** | — |\n\n→ 7B baselines를 outperform, 3.6B로 SOTA.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Manipulation transfer 미검증**: 자율주행 특화로 manipulation/embodied AI에는 직접 적용 어려움.\n2. **CARLA-only closed-loop**: real-world driving 검증 부재 → sim-to-real gap 미평가.\n3. **BEV 의존**: BEVFormer의 multi-camera setup이 필수. Mono-camera 환경 (소형 로봇 등)에는 비현실적.\n4. **3-second prediction limit**: 더 long-horizon driving (15s+, urban tour 등) 미검증.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★★☆ — VLA를 자율주행에 도입하면서 SA-MoE + BEV 통합 |\n| **Practical impact** | ★★★☆☆ — nuScenes/LangAuto 양쪽 SOTA, 그러나 driving-only 적용 |\n\n**강점**: 7B baselines를 3.6B로 outperform. SA-MoE의 sparse activation으로 효율성 확보.\n**약점**: VLA-Tracker의 manipulation 중심 평가에 직접 비교 불가. Driving-specific solution.\n\n---\n\n## 6. 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | Manipulation VLA와 driving VLA 통합 가능? | 이론적으로 가능하나 BEV vs ego-centric의 representation gap이 본질적. 두 representation 사이의 unified encoder 연구 필요. |\n| 2 | SA-MoE가 매 4번째 layer에만 들어간 이유? | All-layer MoE는 학습 instability + 비용 큼. 4번째마다 sparse하게 두면 routing-FFN 다양성 + dense 안정성 trade-off 균형. |\n| 3 | UniDriveVLA와 차이? | UniDriveVLA는 Qwen3-VL-based MoT이고 SA-MoE는 InternVL2 + BEVFormer + SA-MoE FFN. SAMoE-VLA가 nuScenes에서 강하나 UniDriveVLA가 Bench2Drive에서 더 강함 (78.37 vs SAMoE 51.4). |\n| 4 | Flow-matching이 driving에 유리한가? | Trajectory의 continuous nature와 잘 맞음. Discretized action token (RT-2 같은) 대비 smooth control. |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 98
+      "rank": 103
+    },
+    {
+      "name": "StableIDM",
+      "organization": "GigaAI / Institute of Automation, Chinese Academy of Sciences / Beijing Institute of Technology",
+      "date": "2026-04-20",
+      "paper_url": "https://arxiv.org/abs/2604.17887",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "inverse-dynamics",
+        "manipulator-truncation",
+        "spatio-temporal",
+        "robustness",
+        "data-annotation",
+        "AgiBot",
+        "real-world"
+      ],
+      "architecture": {
+        "backbone": "DINOv2 (Oquab et al. 2023) as visual encoder + Segment Anything (Kirillov et al. 2023) for robot-centric masking",
+        "llm": null,
+        "action_head": "History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference.",
+        "action_head_category": "inverse_dynamics",
+        "parameters": "TODO"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {},
+      "ai_review": {
+        "content": "# StableIDM: Stabilizing Inverse Dynamics Model against Manipulator Truncation via Spatio-Temporal Refinement\n\n> **한 줄 요약**: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.\n\n---\n\n## 1. 배경 및 동기\n\n- IDM(Inverse Dynamics Model)은 visual obs → low-level action을 매핑, **데이터 라벨링**과 **policy 실행**의 핵심.\n- 그러나 manipulator가 카메라 프레임 밖으로 나가는 **truncation** 상황에서 상태 추정이 ill-posed → 제어 불안정.\n- 기존 IDM은 이런 partial observability를 명시적으로 다루지 않음.\n\n---\n\n## 2. 방법론\n\n### 2.1 Auxiliary robot-centric masking\n- 배경 잡음을 억제하는 보조 마스킹. \"어디에 로봇이 있는가/있었는가\"에 특징을 집중.\n- Masking을 보조 loss/입력으로 사용해 feature가 robot 주변 영역에 민감해지도록 유도.\n\n### 2.2 Directional Feature Aggregation (DFA)\n- **Geometry-aware spatial reasoning** 모듈.\n- 보이는 팔의 방향을 추정하고, 그 방향을 따라 **anisotropic feature** 를 집계 → 잘린 부분의 위치를 방향 단서로 외삽.\n\n### 2.3 Temporal Dynamics Refinement (TDR)\n- **motion continuity** 를 이용해 시간적으로 smooth/correct.\n- 순간적 truncation으로 인한 스파이크형 오차를 trajectory 수준에서 교정.\n\n---\n\n## 3. 실험 결과\n\n> Abstract에서 직접 인용 (PDF 미검증).\n\n- **AgiBot benchmark (severe truncation)**: strict action accuracy **+12.1%** 향상\n- **Real-robot replay**: 평균 task success **+9.7%**\n- **Video-generated plan decoding**: end-to-end grasp success **+11.5%**\n- **Data annotator로 사용 시**: downstream VLA real-robot success **+17.6%**\n\n모든 수치는 baseline 대비 향상폭이며 절대치는 PDF 참조.\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Truncation 외 failure mode**: Full occlusion, severe motion blur 등은 DFA의 \"visible arm direction\" 가정이 깨지면 효과가 떨어짐.\n2. **Cross-embodiment 일반화**: DFA가 특정 팔 형태에 과적합될 가능성 → 다른 모폴로지로의 전이는 별도 검증 필요.\n3. **IDM이 정책의 병목은 아닐 수 있음**: 상류 policy/perception 에러가 크면 IDM 정제의 이익이 제한적.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Truncation이라는 구체 failure mode를 타겟한 spatial+temporal 정제. 구성 요소는 기존 아이디어의 재조합. |\n| **Practical impact** | ★★★★☆ — 데이터 라벨링과 policy 실행 양쪽에서 IDM은 폭넓게 쓰이며, truncation은 실제 시설에서 흔함 → 실용적 가치 높음. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | DFA는 왜 isotropic feature보다 나은가? | Truncated 영역의 정보는 본질적으로 **방향성** 있음 (팔은 선형 구조). Anisotropic aggregation이 해당 방향으로 정보를 전파하기 적합. |\n| 2 | TDR이 진짜 motion continuity를 가정해도 되나? | 대부분 매니퓰레이션은 저가속도 연속 운동이라 합리적. 충격·접촉 순간에는 이 가정이 일시적으로 깨질 수 있음. |\n| 3 | 멀티뷰 카메라로 해결하면 되지 않나? | 실제 배포에서 멀티뷰 setup이 항상 가능한 건 아님. StableIDM은 single-view truncation robustness 자체를 목표로 함. |\n\n<!-- VERIFIED: pdf -->\n",
+        "verified": true
+      },
+      "rank": 104
     },
     {
       "name": "StableIDM",
@@ -4283,7 +4360,7 @@
         "content": "# StableIDM: Stabilizing Inverse Dynamics Model against Manipulator Truncation via Spatio-Temporal Refinement\n\n> **한 줄 요약**: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.\n\n---\n\n## 1. 배경 및 동기\n\n- IDM(Inverse Dynamics Model)은 visual obs → low-level action을 매핑, **데이터 라벨링**과 **policy 실행**의 핵심.\n- 그러나 manipulator가 카메라 프레임 밖으로 나가는 **truncation** 상황에서 상태 추정이 ill-posed → 제어 불안정.\n- 기존 IDM은 이런 partial observability를 명시적으로 다루지 않음.\n\n---\n\n## 2. 방법론\n\n### 2.1 Robot-centric masking (SAM preprocessing)\n- **Segment Anything**이 로봇 영역을 분할 → 배경 잡음을 마스킹으로 억제, encoder가 robot-centric 영역에 집중하도록.\n- 마스킹은 보조 입력 + loss 형태로 전달.\n\n### 2.2 DFA — Directional Feature Aggregation\n- **DINOv2**가 Embeddings + CLS tokens 산출.\n- **CLS tokens → MLP**로 *axis-dependent directional weights* 유도.\n- 이 방향 가중치를 feature embeddings에 적용 후 **weighted global average pooling** → direction-aware feature descriptor.\n- 핵심: truncation된 팔의 정보는 본질적으로 *방향성*을 가지므로, anisotropic aggregation이 누락 영역의 구조적 정보를 추론 가능.\n\n### 2.3 TDR — **Two-step** Temporal Dynamics Refinement (매우 중요)\n\n논문(Sec 3)은 TDR이 DFA의 **앞뒤**를 감싸는 two-step stack임을 명시:\n\n1. **Temporal Fusion (DFA 이전)**: 인접 프레임들을 사용해 현재 프레임의 시각 feature를 복원.\n2. **Temporal Regressor (DFA 이후)**: MLP + **causal TCN** (dilation factors 1, 2, 4, 8)로 최종 action을 안정화, spike 제거.\n\n따라서 파이프라인은 `SAM mask → DINOv2 → TDR step 1 → DFA → TDR step 2 → action` 순서.\n\n---\n\n## 3. 실험 결과\n\n### Table 1 — AgiBot offline (truncation split @ 15%)\n\n| 방법 | Light acc↑ | Light L1↓ | **Heavy acc↑** | **Heavy L1↓** |\n|------|-----------:|----------:|--------------:|-------------:|\n| ResNet | 0.179 | 0.189 | 0.150 | 0.679 |\n| AnyPos | 0.148 | 0.172 | 0.159 | 0.538 |\n| Vidar | 0.194 | 0.163 | 0.186 | 0.573 |\n| **StableIDM** | **0.286** | **0.142** | **0.307** | **0.493** |\n\n### Ablation (같은 Table 1)\n\n- Full - DFA: Heavy acc 0.158 (-14.9pp)\n- Full - TDR: Heavy acc 0.265 (거의 유지되지만 L1 0.662 → 스파이크 증가로 제어 불안정)\n- Full - mask: Heavy acc 0.288, L1 0.475 (**흥미롭게도 L1은 더 낮음**)\n  - 저자 해석: 마스크 없으면 정적 배경 cues에 overfit하는 \"spurious shortcut\" → 일시적으로 L1은 좋아 보이나 일반성 상실.\n\n### Table 3 — Real-robot open-loop replay SR (%)\n\n| 방법 | Pick&Place | Microwave | Sink Cleaning | Avg |\n|------|-----------:|----------:|--------------:|----:|\n| ResNet | 23.1 | 27.4 | 19.7 | 23.4 |\n| AnyPos | 34.6 | 39.2 | 34.5 | 36.1 |\n| Vidar | 46.2 | 37.9 | 29.1 | 37.7 |\n| **StableIDM** | **53.8** | **42.3** | **46.2** | **47.4** |\n\n### Table 4 — Video-plan grasp SR (%)\n\nResNet 11.5 / Vidar 26.9 / AnyPos 42.3 / **StableIDM 53.8**\n\n### Table 5 — π0.5 downstream VLA에 annotator로 활용\n\n- Real data only: 35.3%\n- Real + StableIDM-labeled video: **52.9%** (+17.6pp)\n\n### 실험 설정\n\n- 데이터: **AgiBot 100 episodes**, 10 tasks (articulated, pick-place, cleaning)\n- 액션: dual-arm joint angles + gripper opening (continuous)\n- `agibot_episodes.csv` 공개 (재현성)\n\n---\n\n## 4. 한계 및 미해결 문제\n\n1. **Truncation 외 failure mode**: Full occlusion, severe motion blur 등은 DFA의 \"visible arm direction\" 가정이 깨지면 효과가 떨어짐.\n2. **Cross-embodiment 일반화**: DFA가 특정 팔 형태에 과적합될 가능성 → 다른 모폴로지로의 전이는 별도 검증 필요.\n3. **IDM이 정책의 병목은 아닐 수 있음**: 상류 policy/perception 에러가 크면 IDM 정제의 이익이 제한적.\n\n---\n\n## 5. 총평\n\n| 항목 | 평가 |\n|------|------|\n| **Novelty** | ★★★☆☆ — Truncation이라는 구체 failure mode를 타겟한 spatial+temporal 정제. 구성 요소는 기존 아이디어의 재조합. |\n| **Practical impact** | ★★★★☆ — 데이터 라벨링과 policy 실행 양쪽에서 IDM은 폭넓게 쓰이며, truncation은 실제 시설에서 흔함 → 실용적 가치 높음. |\n\n---\n\n## 6. 🔥 예상 질문\n\n| # | 질문 | 핵심 답변 요점 |\n|---|------|---------------|\n| 1 | DFA는 왜 isotropic feature보다 나은가? | Truncated 영역의 정보는 본질적으로 **방향성** 있음 (팔은 선형 구조). Anisotropic aggregation이 해당 방향으로 정보를 전파하기 적합. |\n| 2 | TDR이 진짜 motion continuity를 가정해도 되나? | 대부분 매니퓰레이션은 저가속도 연속 운동이라 합리적. 충격·접촉 순간에는 이 가정이 일시적으로 깨질 수 있음. |\n| 3 | 멀티뷰 카메라로 해결하면 되지 않나? | 실제 배포에서 멀티뷰 setup이 항상 가능한 건 아님. StableIDM은 single-view truncation robustness 자체를 목표로 함. |\n\n<!-- VERIFIED: pdf -->\n",
         "verified": true
       },
-      "rank": 99
+      "rank": 105
     },
     {
       "name": "SuSIE",
