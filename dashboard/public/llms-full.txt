@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-04-26T08:37:24.587579
+# Generated: 2026-04-26T08:51:23.030569
 # Models: 112
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -1265,39 +1265,6 @@ MODEL: AnySlot
   AI Review: PDF-verified
 
 ------------------------------------------------------------
-MODEL: AnchorRefine
-  Organization: TODO: check paper
-  Date: 2026-04-20
-  Paper: https://arxiv.org/abs/2604.17787
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero, calvin
-  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-
-------------------------------------------------------------
-MODEL: AnySlot
-  Organization: Stony Brook University / Carnegie Mellon University / MBZUAI / Peking University
-  Date: 2026-04-12
-  Paper: https://arxiv.org/abs/2604.10432
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: π0.5 flow-matching action expert, fully fine-tuned (not PEFT — PEFT variant scored ~7% avg SR), conditioned on a scene-marker visual goal overlay Ĩ produced by Nano-Banana 2. Action chunking H≥1.
-    Backbone: PaliGemma-3B (multi-view images)
-    LLM: PaliGemma-3B (VL backbone, π0.5 inheritance); Nano-Banana 2 as out-of-box high-level image-generator grounding module (11s latency on H200)
-    Parameters: 3B
-  Tags: slot-placement, goal-conditioned, zero-shot, hierarchical, flow-matching, manipulation, SlotBench
-  AI Review Summary: 언어 지시를 **explicit visual goal (scene marker)** 로 먼저 변환한 뒤, goal-conditioned VLA policy로 실행하는 **hierarchical slot-level placement 프레임워크**. 새로운 SlotBench 9개 과제군에서 monolithic VLA 대비 zero-shot 성능 개선을 보고.
-  AI Review: PDF-verified
-
-------------------------------------------------------------
 MODEL: AVDC
   Organization: CMU
   Date: 2023-10-25
@@ -1391,22 +1358,6 @@ MODEL: DIAL
   Eval Conditions: {'robocasa': 'fine-tuned'}
   AI Review Summary: VLM(System-2)이 **자신의 ViT feature space 안에서** H-step 뒤의 visual foresight를 예측하고, flow-matching policy(System-1)가 latent inverse dynamics로 이를 풀어 action을 생성하는 differentiable bottleneck 구조. RoboCasa GR1 Tabletop 24-task 평균 **70.2%** (full data)로 FLARE 55.0%, GR00T-N1.6 47.6% 대비 큰 격차로 SOTA; few-shot(10%) 
   AI Review: PDF-verified
-
-------------------------------------------------------------
-MODEL: DIAL
-  Organization: TODO: check paper
-  Date: 2026-03-31
-  Paper: https://arxiv.org/abs/2603.29844
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: robocasa
-  Eval Conditions: {'robocasa': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: Diffusion-VLA
@@ -1575,23 +1526,6 @@ MODEL: Goal2Skill
   AI Review: PDF-verified
 
 ------------------------------------------------------------
-MODEL: Goal2Skill
-  Organization: Beijing University of Posts and Telecommunications / InspireOmni AI / Tsinghua University
-  Date: 2026-04-15
-  Paper: https://arxiv.org/abs/2604.13942
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: Discrete library of diffusion-based visuomotor primitives π_1..π_J (one per reusable skill). Reverse diffusion (Eq. 19: A^{m-1}_t = μ_θ(A^m_t, m, Î_t, s_t, ℓ_k) + σ_m·ε) conditioned on geometry-filtered observation Î_t = I_t ⊙ (1−Q_t), 14-dim proprioceptive state s_t, and sub-task instruction ℓ_k. Receding-horizon execution with checkpoint-based VLM verification.
-    Backbone: zero-shot segmentation model S for distractor masking + temporal mask update K (specific identities not disclosed)
-    LLM: single pre-trained VLM reused as Φ_plan / Φ_verify / Φ_reflect / Φ_mem (model identity not disclosed in paper)
-    Parameters: TODO
-  Tags: long-horizon, planning, reflection, dual-system, diffusion, multi-skill, RMBench
-  AI Review Summary: VLM 기반 high-level planner(메모리·검증·반성)와 diffusion VLA low-level executor를 **closed-loop**로 결합해 long-horizon manipulation에서 baseline 대비 3배 이상의 성공률 향상을 보인 dual-system 프레임워크.
-  AI Review: PDF-verified
-
-------------------------------------------------------------
 MODEL: GR-Dexter
   Organization: ByteDance Seed
   Date: 2025-12-30
@@ -1730,41 +1664,6 @@ MODEL: HEX
   AI Review: PDF-verified
 
 ------------------------------------------------------------
-MODEL: HELM
-  Organization: TODO: check paper
-  Date: 2026-04-20
-  Paper: https://arxiv.org/abs/2604.18791
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero, calvin
-  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-
-------------------------------------------------------------
-MODEL: HEX
-  Organization: Beijing Innovation Center of Humanoid Robotics / Xi'an Jiaotong University / Nankai University / Peking University
-  Date: 2026-04-09
-  Paper: https://arxiv.org/abs/2604.07993
-  Code: https://hex-humanoid.github.io/
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: 16-layer DiT-B decoder (hidden size 1024) predicting 100-step action chunks, trained with flow-matching objective. Unified Proprioceptive Predictor (4-layer transformer, hidden 768, 50-step state horizon) with morphology-aware MoE (16 routed + 2 shared experts, top-1 routing) + adaptive residual-gated fusion of future predicted states with VL features.
-    Backbone: Qwen3-VL-2B-Instruct (vision encoder inside the VLM)
-    LLM: Qwen3-VL-2B-Instruct
-    Parameters: 2.4B
-  Inference: 13.6 Hz
-  Tags: humanoid, whole-body, cross-embodiment, flow-matching, mixture-of-experts, real-world
-  Eval Conditions: {'real_world': 'Tienkung 2.0/3.0 humanoids, 12-15 trials per task, 73.34ms latency on RTX 4090'}
-  AI Review Summary: 부위별 독립 action prediction의 한계를 극복하기 위해, humanoid-aligned state 표현과 Mixture-of-Experts + flow-matching action generation을 결합한 **whole-body coordinated** VLA 프레임워크.
-  AI Review: PDF-verified
-
-------------------------------------------------------------
 MODEL: HiMoE-VLA
   Organization: Tsinghua University / Shanghai AI Lab
   Date: 2025-12-05
@@ -1818,22 +1717,6 @@ MODEL: HPT
   AI Review: PDF-verified
 
 ------------------------------------------------------------
-MODEL: HiVLA
-  Organization: TODO: check paper
-  Date: 2026-04-15
-  Paper: https://arxiv.org/abs/2604.14125
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: reasoning
-  Eval Conditions: {'TODO': 'check paper'}
-
-------------------------------------------------------------
 MODEL: Humanoid-VLA
   Organization: Multiple Chinese institutions
   Date: 2025-02-20
@@ -1865,21 +1748,6 @@ MODEL: HY-Embodied-0.5
   Tags: tencent, mixture-of-transformers, foundation-model, flow-matching, real-world, open-source
   Eval Conditions: {'real_world': 'fine-tuned'}
   AI Review: PDF-verified
-
-------------------------------------------------------------
-MODEL: HY-Embodied-0.5
-  Organization: TODO: check paper
-  Date: 2026-04-08
-  Paper: https://arxiv.org/abs/2604.07430
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Eval Conditions: {'TODO': 'check paper'}
 
 ------------------------------------------------------------
 MODEL: InternVLA-A1
@@ -1994,38 +1862,6 @@ MODEL: LLaVA-VLA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
-MODEL: ManipArena
-  Organization: TODO: check paper
-  Date: 2026-03-30
-  Paper: https://arxiv.org/abs/2603.28545
-  Code: None
-  Venue: CVPR 2026
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: CVPR-2026
-  Eval Conditions: {'TODO': 'check paper'}
-
-------------------------------------------------------------
-MODEL: MMaDA-VLA
-  Organization: TODO: check paper
-  Date: 2026-03-26
-  Paper: https://arxiv.org/abs/2603.25406
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: discrete diffusion (masked token denoising, iterative order-free refinement)
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: autoregressive, libero, calvin
-  Eval Conditions: {'libero': 'fine-tuned', 'calvin': 'fine-tuned'}
-
-------------------------------------------------------------
 MODEL: Mobility VLA
   Organization: Google DeepMind
   Date: 2024-07-10
@@ -2098,22 +1934,6 @@ MODEL: NaVILA
   Tags: 8B, navigation, hierarchical, legged-robot, open-source
   AI Review Summary: VILA 기반 VLA가 자연어 형태의 mid-level action(예: "turn right 30 degrees")을 생성하고, 단일 단계(single-stage) RL로 학습된 LiDAR 기반 visual locomotion policy가 이를 실행하는 2-level 계층 구조로, R2R-CE Val-Unseen에서 SR 54%, RxR-CE에서 SR 49.3%, 실세계 25 instructions에서 88% 성공률을 달성한 RSS 2025 논문.
   AI Review: PDF-verified
-
-------------------------------------------------------------
-MODEL: TODO_MODEL_NAME
-  Organization: TODO: check paper
-  Date: 2026-03-26
-  Paper: https://arxiv.org/abs/2603.25740
-  Code: None
-  Venue: CVPR 2026
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: CVPR-2026
-  Eval Conditions: {'TODO': 'check paper'}
 
 ------------------------------------------------------------
 MODEL: NORA
@@ -2242,22 +2062,6 @@ MODEL: RT-2-X
   AI Review: PDF-verified
 
 ------------------------------------------------------------
-MODEL: SABER
-  Organization: TODO: check paper
-  Date: 2026-03-26
-  Paper: https://arxiv.org/abs/2603.24935
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero
-  Eval Conditions: {'libero': 'fine-tuned'}
-
-------------------------------------------------------------
 MODEL: SAM2Act
   Organization: University of Washington / NVIDIA
   Date: 2025-01-30
@@ -2313,87 +2117,6 @@ MODEL: StableIDM
   AI Review: PDF-verified
 
 ------------------------------------------------------------
-MODEL: SnapFlow
-  Organization: TODO: check paper
-  Date: 2026-04-07
-  Paper: https://arxiv.org/abs/2604.05656
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: flow matching
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: flow-matching, libero
-  Eval Conditions: {'libero': 'fine-tuned'}
-
-------------------------------------------------------------
-MODEL: SOMA
-  Organization: TODO: check paper
-  Date: 2026-03-25
-  Paper: https://arxiv.org/abs/2603.24060
-  Code: None
-  Venue: IROS 2026
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero, IROS-2026
-  Eval Conditions: {'libero': 'fine-tuned'}
-
-------------------------------------------------------------
-MODEL: StableIDM
-  Organization: GigaAI / Institute of Automation, Chinese Academy of Sciences / Beijing Institute of Technology
-  Date: 2026-04-20
-  Paper: https://arxiv.org/abs/2604.17887
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference.
-    Backbone: DINOv2 (Oquab et al. 2023) as visual encoder + Segment Anything (Kirillov et al. 2023) for robot-centric masking
-    LLM: None
-    Parameters: TODO
-  Tags: inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot, real-world
-  AI Review Summary: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.
-  AI Review: PDF-verified
-
-------------------------------------------------------------
-MODEL: StarVLA
-  Organization: TODO: check paper
-  Date: 2026-04-06
-  Paper: https://arxiv.org/abs/2604.05014
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero, simpler_env, robotwin, robocasa
-  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'robotwin': 'fine-tuned', 'robocasa': 'fine-tuned'}
-
-------------------------------------------------------------
-MODEL: STRONG-VLA
-  Organization: TODO: check paper
-  Date: 2026-04-11
-  Paper: https://arxiv.org/abs/2604.10055
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero
-  Eval Conditions: {'libero': 'fine-tuned'}
-
-------------------------------------------------------------
 MODEL: SuSIE
   Organization: UC Berkeley
   Date: 2023-10-01
@@ -2427,22 +2150,6 @@ MODEL: TacVLA
   Eval Conditions: {'real_world': 'fine-tuned'}
   AI Review Summary: Pi0.5 backbone에 **15×8 taxel array → MLP-인코딩된 36개 tactile token**을 추가하고, 임계 압력 기반 binary contact flag로 tactile token을 **상태 의존적으로 attention에서 끄고 켜는** Contact-aware Gating을 도입. Constraint-locked disassembly 4종 평균 **83.75%** (Tab. II), 가려진 in-box picking **70%** (vs Pi0.5 10%, Tab. II), 전면 카메라 차단 시 평균 
   AI Review: PDF-verified
-
-------------------------------------------------------------
-MODEL: TAG
-  Organization: TODO: check paper
-  Date: 2026-03-25
-  Paper: https://arxiv.org/abs/2603.24584
-  Code: None
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: TODO: check paper
-    Backbone: None
-    LLM: None
-    Parameters: TODO
-  Tags: libero
-  Eval Conditions: {'libero': 'fine-tuned'}
 
 ------------------------------------------------------------
 MODEL: TinyVLA
@@ -2570,26 +2277,6 @@ MODEL: UniT
     LLM: Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)
     Parameters: TODO
   Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching
-  Benchmarks:
-    robocasa (avg=66.0): robocasa_gr1_pick_place=67.3, robocasa_gr1_articulated=64.7
-  Eval Conditions: {'robocasa': 'Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)'}
-  AI Review Summary: Human egocentric video와 humanoid action을 "visual consequence"를 공통 anchor로 삼아 **embodiment-agnostic discrete latent space**로 통합하는, tri-branch cross-reconstruction 기반의 통합 physical language tokenizer.
-  AI Review: PDF-verified
-
-------------------------------------------------------------
-MODEL: UniT
-  Organization: XPeng Robotics / Tsinghua University / The University of Hong Kong
-  Date: 2026-04-21
-  Paper: https://arxiv.org/abs/2604.19734
-  Code: https://xpeng-robotics.github.io/unit/
-  Venue: None
-  Open Source: False
-  Architecture:
-    Action Head: Hybrid two-stage. (1) UniT Token Prediction: learnable queries q_t appended to the VLM sequence; VLM predicts discrete UniT codes c_t = UniT(o_t, o_{t+k}, a_{t:t+k}, s_t) via parallel cross-entropy classification (not causal next-token AR). (2) Flow-Matching action head V_θ on action chunks A_t = [a_t,...,a_{t+H-1}], τ ∈ U[0,1], interpolated path A^τ_t = τA_t + (1−τ)ε; trained with L_fm = E[||V_θ(A^τ_t | x_t, Enc(o_t), τ) − (A_t − ε)||²]. Total: L_VLA = L_token + λ_fm·L_fm.
-    Backbone: frozen DINOv2 (visual branch acts as inverse-dynamics model anchor)
-    LLM: Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)
-    Parameters: TODO
-  Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching, autoregressive
   Benchmarks:
     robocasa (avg=66.0): robocasa_gr1_pick_place=67.3, robocasa_gr1_articulated=64.7
   Eval Conditions: {'robocasa': 'Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)'}
