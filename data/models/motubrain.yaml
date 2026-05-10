@@ -1,0 +1,32 @@
+name: MotuBrain
+full_name: 'MotuBrain: An Advanced World Action Model for Robot Control'
+organization: Shengshu (MotuBrain Team)
+date: '2026-04-30'
+paper_url: https://arxiv.org/abs/2604.27792
+code_url: null
+venue: null
+open_source: false
+architecture:
+  backbone: Three-stream Mixture-of-Transformers (text + video + action) with Vidu VAE visual encoder
+  llm: pretrained VLM (text stream)
+  action_head: shared cross-embodiment action stream over 10D relative end-effector representation (position, rotation, gripper)
+  action_head_category: diffusion
+  parameters: N/A
+  key_innovation: 'Unified UniDiffuser world-action formulation in which video and action are jointly modeled in a shared
+    generative framework, so that policy modeling, world modeling, video generation, inverse dynamics, and joint video-action
+    prediction become different inference modes of one model. Uses an H-bridge attention pattern (full joint attention only
+    in the middle 50% of layers) and view-dependent 3D RoPE offsets for multiview support, plus an inference stack (step
+    reduction, compilation, FP8 quantization, DiT caching) that yields up to 50x speedup and ~11 Hz inference.
+
+    '
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_clean_avg: 95.8
+    robotwin_v2_randomized_avg: 96.1
+eval_conditions:
+  robotwin_v2: fine-tuned
+tags:
+- robotwin
+- world-action-model
+- MoT
+- UniDiffuser

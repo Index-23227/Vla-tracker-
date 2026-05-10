@@ -1,0 +1,24 @@
+name: VILAS
+full_name: "VILAS: A VLA-Integrated Low-cost Architecture with Soft Grasping for Robotic Manipulation"
+organization: Independent / Multi-author (affiliation not specified in abstract)
+date: '2026-05-03'
+paper_url: https://arxiv.org/abs/2605.02037
+code_url: null
+venue: null
+open_source: false
+architecture:
+  backbone: "Fine-tuned VLA policies (pi_0, pi_0.5, GR00T N1.6)"
+  llm: inherited from each base VLA (pi_0 / pi_0.5 / GR00T N1.6)
+  action_head: inherited from each base VLA (flow-matching for pi_0 / pi_0.5; diffusion-style for GR00T N1.6)
+  action_head_category: hybrid
+  parameters: varies
+  key_innovation: |
+    Fully low-cost, modular robotic manipulation platform (Fairino FR5 arm + Jodell RG52-50 gripper +
+    dual-camera module, ZMQ-based comms) for end-to-end VLA policy learning and deployment on accessible
+    hardware. A kirigami-based soft gripper extension induces predictable compliant deformation, enabling
+    safe manipulation of fragile objects (validated on grape grasping) without explicit force sensing,
+    while pi_0, pi_0.5, and GR00T N1.6 are fine-tuned from public pretrained weights on identical
+    demonstration data collected on the platform.
+benchmarks: {}
+eval_conditions: {}
+tags: [low-cost, hardware-platform, soft-grasping, real-world]

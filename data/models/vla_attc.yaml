@@ -1,0 +1,21 @@
+name: VLA-ATTC
+full_name: "VLA-ATTC: Adaptive Test-Time Compute for VLA Models with Relative Action Critic Model"
+organization: University of Sydney / Central South University / Southeast University / UNSW / SenseTime Research
+date: '2026-05-02'
+paper_url: https://arxiv.org/abs/2605.01194
+code_url: null
+venue: ICML 2026
+open_source: true
+architecture:
+  backbone: PI0 / PI0.5 VLM backbone (frozen base VLA)
+  llm: Inherited from base VLA (PI0 / PI0.5)
+  action_head: "Plug-and-play test-time deliberation wrapper around base flow-matching action head; samples N candidate action chunks (sharing single VLM pre-fill), uses Dynamic Time Warping uncertainty over 2 candidate chunks as a 'cognitive clutch', and runs a Relative Action Critic (RAC) Transformer that performs iterative pairwise tournament selection (sigmoid + focal loss) using multi-branch attention (self / raw cross / query cross with learnable scalar gating) over Nq=8 learnable queries"
+  action_head_category: flow_matching
+  parameters: ~3B+
+  key_innovation: "Adaptive test-time compute framework that wraps a frozen flow-matching VLA: a DTW-based uncertainty 'cognitive clutch' triggers deliberation only on hard timesteps, and a lightweight Relative Action Critic (RAC) selects the best action via pairwise comparisons rather than unstable absolute scoring. Preference pairs for training RAC are auto-curated by varying the flow-matching ODE integration steps (Nhigh vs Nlow) — no human annotation required."
+benchmarks:
+  libero:
+    libero_long: 95.4
+eval_conditions:
+  libero: "fine-tuned (RAC trained on top of frozen PI0.5; LIBERO-LONG only, 50 trials per task, Full variant without cognitive clutch)"
+tags: [libero, test-time-compute, critic-model, flow-matching, plug-and-play, pairwise-preference]

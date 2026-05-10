@@ -1,0 +1,32 @@
+name: Phone2Act
+full_name: "Phone2Act: A Low-Cost, Hardware-Agnostic Teleoperation System for Scalable VLA Data Collection"
+organization: Independent (Mandhane, Yadav, Prasanna Ram, Narayanan)
+date: '2026-05-03'
+paper_url: https://arxiv.org/abs/2605.01948
+code_url: null
+venue: null
+open_source: false
+architecture:
+  backbone: GR00T-N1.5 (fine-tuned on Phone2Act-collected data)
+  llm: N/A (data collection system)
+  action_head: "GR00T-N1.5 fine-tuned policy (Phone2Act itself is a teleop/data-collection framework, not a policy)"
+  action_head_category: other
+  parameters: N/A
+  key_innovation: |
+    Smartphone-based 6-DoF teleoperation framework that transforms a commodity phone
+    into a robot controller via Google ARCore, eliminating the need for specialized
+    teleop hardware. Built on a modular ROS 2 architecture with interchangeable bridge
+    nodes, it is hardware-agnostic across industrial cobots and low-cost bimanual arms,
+    and a Universal Recorder exports synchronized multi-camera + state demonstrations
+    directly in LeRobot dataset format for immediate VLA fine-tuning.
+benchmarks: {}
+eval_conditions: {}
+tags:
+  - teleoperation
+  - data-collection
+  - low-cost
+  - smartphone
+  - ARCore
+  - ROS2
+  - LeRobot
+  - hardware-agnostic

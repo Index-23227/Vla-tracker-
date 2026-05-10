@@ -1,0 +1,32 @@
+name: VLA-GSE
+full_name: "VLA-GSE: Boosting Parameter-Efficient Fine-Tuning in VLA with Generalized and Specialized Experts"
+organization: Tsinghua University / Microsoft Research Asia
+date: '2026-05-07'
+paper_url: https://arxiv.org/abs/2605.06175
+code_url: https://github.com/YuhuaJiang2002/VLA-GSE
+venue: null
+open_source: true
+architecture:
+  backbone: Qwen3-VL-4B-Instruct (vision encoder + projector)
+  llm: Qwen3-VL-4B-Instruct
+  action_head: OFT-style action head (QwenOFT framework, 65.62M params, parallel/regression decoding)
+  action_head_category: regression
+  parameters: 4.55B
+  key_innovation: PEFT framework that decomposes frozen VLM weights spectrally via SVD, assigning leading singular components to one always-active generalized expert (preserving general knowledge) and disjoint residual components to top-k routed specialized experts (capturing task-specific control). Combined with expert-wise spectral scaling, initialization alignment, and an auxiliary load-balancing loss, it updates only 2.51% (114.04M) of parameters while outperforming full fine-tuning on LIBERO and LIBERO-Plus.
+benchmarks:
+  libero:
+    libero_avg: 81.2
+    source: Abstract (LIBERO-Plus zero-shot average)
+    date_reported: '2026-05-07'
+    eval_condition: zero-shot (LIBERO-Plus, perturbation suite)
+eval_conditions:
+  libero: "fine-tuned (PEFT, GSE) on standard LIBERO; zero-shot on LIBERO-Plus"
+tags:
+- libero
+- peft
+- mixture-of-experts
+- lora
+- svd
+- qwen3-vl
+- regression
+- open-source

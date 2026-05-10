@@ -1,0 +1,22 @@
+name: STARRY
+full_name: "STARRY: Spatial-Temporal Action-Centric World Modeling for Robotic Manipulation"
+organization: Beijing Institute of Technology
+date: '2026-04-29'
+paper_url: https://arxiv.org/abs/2604.26848
+code_url: null
+venue: null
+open_source: false
+architecture:
+  backbone: ST World Model (diffusion-based, video-generation initialized) + Qwen-VL Understanding Expert
+  llm: Qwen-VL
+  action_head: Diffusion Action Expert (30-layer Transformer, hidden 1024, 16 heads) jointly denoised with spatial-temporal latents under Geometry-Aware Selective Attention Modulation (GASAM)
+  action_head_category: diffusion
+  parameters: N/A
+  key_innovation: STARRY는 future spatial-temporal latents와 actions를 단일 unified diffusion process로 동시에 denoise하여 world modeling과 action generation을 정렬한다. Geometry-Aware Selective Attention Modulation (GASAM)이 예측된 depth와 end-effector geometry를 token-aligned weights로 변환해 selective action-attention modulation을 수행, 2D visual tokens와 3D metric control 사이의 격차를 해소한다.
+benchmarks:
+  robotwin_v2:
+    clean_avg: 93.82
+    randomized_avg: 93.30
+eval_conditions:
+  robotwin_v2: "fine-tuned, 50 bimanual tasks, Clean / Randomized settings"
+tags: [robotwin, world-model, spatial-temporal, action-centric, diffusion, GASAM]
