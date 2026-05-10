@@ -1,0 +1,44 @@
+name: Sentinel-VLA
+full_name: "Sentinel-VLA: A Metacognitive VLA Model with Active Status Monitoring for Dynamic Reasoning and Error Recovery"
+organization: University of Sydney / Central South University / USTC / SenseTime / HKUST
+date: '2026-05-02'
+paper_url: https://arxiv.org/abs/2605.01191
+code_url: null
+venue: ICML 2026
+open_source: false
+architecture:
+  backbone: PaliGemma (SigLIP + Gemma)
+  llm: PaliGemma 3B
+  action_head: flow matching action expert (330M Gemma) + Status Monitor expert
+  action_head_category: flow_matching
+  parameters: ~3.6B
+  key_innovation: Metacognitive "sentinel" Status Monitor expert that probes the VLM KV cache via a [MONITOR] query to classify execution status (Initial/Normal/New-subtask/Error) and triggers on-demand reasoning only when needed. Combined with EC-Gen synthetic error trajectory pipeline and Self-Evolving Continual Learning (SECL) with Orthogonal Continual Adapter (OC-Adapter) for catastrophic-forgetting-free skill expansion.
+benchmarks:
+  libero:
+    libero_long: 90.7
+    source: Sentinel-VLA paper Table 1
+    date_reported: '2026-05-02'
+    eval_condition: fine-tuned
+  rlbench:
+    rlbench_seen_avg: 63.5
+    rlbench_disturbed_avg: 54.7
+    rlbench_unseen_avg: 51.3
+    source: Sentinel-VLA paper Table 1
+    date_reported: '2026-05-02'
+    eval_condition: fine-tuned
+eval_conditions:
+  libero: fine-tuned
+  rlbench: fine-tuned
+training:
+  dataset: EC-Gen synthesized 11,000 trajectories / 2.6M transitions across 44 RLBench tasks
+  compute: 8x NVIDIA A100, batch size 128, 90,000 pre-training steps + 30,000 fine-tuning steps
+inference_hz: 77
+tags:
+- metacognitive
+- error-recovery
+- status-monitoring
+- flow-matching
+- rlbench
+- libero
+- continual-learning
+- pi0-based

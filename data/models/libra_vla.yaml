@@ -1,0 +1,25 @@
+name: Libra-VLA
+full_name: "Libra-VLA: Achieving Learning Equilibrium via Asynchronous Coarse-to-Fine Dual-System"
+organization: Beihang University, AgiBot
+date: '2026-04-27'
+paper_url: https://arxiv.org/abs/2604.24921
+code_url: null
+venue: null
+open_source: false
+architecture:
+  backbone: "InternVL2.5-2B (Semantic Planner) + SigLIP visual encoder (Action Refiner)"
+  llm: InternVL2.5-2B
+  action_head: "Asynchronous dual-system: Parallel Coarse-Action Head (discrete bidirectional transformer, cross-entropy) + Diffusion Transformer Fine-Action Head"
+  action_head_category: hybrid
+  parameters: ~3B
+  key_innovation: "Asynchronous coarse-to-fine dual-system where a Semantic Planner predicts discrete macro-directional action tokens at low frequency while an Action Refiner conditions on coarse intent to generate high-frequency continuous actions via diffusion. Discovers an inverted-U 'learning equilibrium' curve: performance peaks at the bin granularity (N=10) where learning difficulty is balanced between the two sub-systems."
+benchmarks:
+  libero:
+    libero_spatial: 98.6
+    libero_object: 99.4
+    libero_goal: 98.0
+    libero_long: 92.8
+    libero_avg: 97.2
+eval_conditions:
+  libero: "fine-tuned"
+tags: [dual-system, system1-system2, coarse-to-fine, asynchronous]

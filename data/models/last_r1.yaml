@@ -1,0 +1,25 @@
+name: LaST-R1
+full_name: "LaST-R1: Reinforcing Robotic Manipulation via Adaptive Physical Latent Reasoning"
+organization: CUHK / Peking University / Simplexity Robotics
+date: '2026-04-30'
+paper_url: https://arxiv.org/abs/2604.28192
+code_url: null
+venue: null
+open_source: false
+architecture:
+  backbone: SigLIP2-Large + DINOv3 (latent target)
+  llm: Qwen3-VL-4B
+  action_head: Autoregressive latent CoT tokens followed by parallel discrete action token decoding (hybrid causal/bidirectional attention mask)
+  action_head_category: autoregressive
+  parameters: ~4B
+  key_innovation: "LaST-R1은 latent Chain-of-Thought reasoning을 RL 최적화 루프 내부에서 직접 학습하는 Latent-to-Action Policy Optimization(LAPO)을 제안한다. Adaptive latent CoT 메커니즘이 환경 상태에 따라 reasoning horizon을 동적으로 조절하며, 단 1-shot SFT warm-up만으로 LIBERO 평균 99.8%를 달성한다."
+benchmarks:
+  libero:
+    libero_spatial: 99.8
+    libero_object: 100.0
+    libero_goal: 100.0
+    libero_long: 99.4
+    libero_avg: 99.8
+eval_conditions:
+  libero: "fine-tuned"
+tags: [libero, reinforcement-learning, latent-reasoning]
