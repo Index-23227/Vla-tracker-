@@ -5,14 +5,14 @@
 ### The most comprehensive benchmark tracker for Vision-Language-Action models
 
 [![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Visit-blue?style=for-the-badge)](https://hyeongjinkim.github.io/Vla-tracker-/)
-[![Models](https://img.shields.io/badge/Models-112-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-117-purple?style=flat-square)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
 [![AI Reviews](https://img.shields.io/badge/Paper_Reviews-112-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
 
-**112 VLA models** · **8 benchmarks** · **112 AI paper reviews** · **Auto-updated from arXiv**
+**117 VLA models** · **8 benchmarks** · **112 AI paper reviews** · **Auto-updated from arXiv**
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
 
@@ -100,7 +100,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
 | **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (1700+ lines) |
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
-| **YAML** | [data/models/](data/models/) | Individual model files (112 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (117 files) |
 
 ### Quick Start (Python)
 
@@ -179,7 +179,7 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 ```
 ├── data/
-│   ├── models/              # 112 model YAML files (source of truth)
+│   ├── models/              # 117 model YAML files (source of truth)
 │   ├── benchmarks/          # 8 benchmark definitions
 │   ├── ai_reviews/          # 112 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
