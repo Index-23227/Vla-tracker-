@@ -1,0 +1,57 @@
+name: CAPS
+full_name: "Drift is a Sampling Error: SNR-Aware Power Distributions for Long-Horizon Robotic Planning"
+organization: "Kewei Chen, Yayu Long, Mingsheng Shang"
+date: '2026-05-10'
+paper_url: https://arxiv.org/abs/2605.09537
+code_url: null
+venue: "ICML 2026"
+open_source: false
+
+architecture:
+  backbone: "Inference-time framework applied on top of base VLAs: pi0 (primary), pi0.5, OpenVLA"
+  action_head: "Inherits base VLA action head (pi0/pi0.5 flow-matching, OpenVLA discrete tokens) - CAPS only modifies the sampling procedure"
+  action_head_category: other
+  parameters: "Training-free; no parameter updates"
+  key_innovation: "Reframes long-horizon instruction drift as a systematic sampling error. CAPS samples from a sharpened power distribution pi(tau) proportional to p_theta(tau|I,H_t)^alpha (alpha >= 1) to amplify probability gaps between trajectories. A contextual Signal-to-Noise Ratio (SNR) defined as KL(policy || uniform) detects drift risk online; when SNR drops below threshold gamma, the system switches from System-1 greedy sampling to System-2 block-based autoregressive MCMC with Metropolis-Hastings acceptance (N=5-10 iterations). System 2 activates ~15-20% of timesteps, with ~2.15x latency overhead under SNR gating."
+
+training:
+  method: "Training-free inference-time computation; no parameter updates to base VLA"
+  hardware: "4x NVIDIA A100 GPUs (inference)"
+
+benchmarks:
+  libero:
+    libero_long: 97.6
+    source: "Paper Table - CAPS on top of pi0.5 base"
+    date_reported: "2026-05-10"
+    eval_condition: "Inference-time sampling, pi0.5 + CAPS; vs pi0.5 + TACO 96.6%"
+  robotwin_v1:
+    robotwin_v1_avg: 47.4
+    source: "Paper Table - CAPS on top of pi0 base"
+    date_reported: "2026-05-10"
+    eval_condition: "Inference-time sampling on pi0 base; vs pi0 + TACO 41.3%, pi0 baseline 32.2%"
+  robotwin_v2:
+    robotwin_v2_avg: 66.2
+    source: "Paper Table - CAPS on top of pi0.5 base"
+    date_reported: "2026-05-10"
+    eval_condition: "Inference-time sampling; vs pi0.5 + TACO 64.0%, RDT baseline 34.6%"
+  simpler_env:
+    simpler_avg: 60.5
+    source: "Paper Table (Simpler-WidowX)"
+    date_reported: "2026-05-10"
+    eval_condition: "Inference-time sampling on pi0 base; vs pi0 + TACO 55.5%, SpatialVLA 42.7%"
+
+eval_conditions:
+  real_world: "XLeRobot 10-task suite: CAPS 71.0%, TACO 53.0%, base policy 36.5%"
+  mcmc_settings: "N=5-10 MCMC iterations per drift point, alpha in [2,5], System-2 activation rate 15-20%"
+
+tags:
+  - inference-time-scaling
+  - training-free
+  - mcmc
+  - power-distribution
+  - snr
+  - dual-process
+  - long-horizon
+  - pi0-base
+  - pi0.5-base
+  - icml-2026

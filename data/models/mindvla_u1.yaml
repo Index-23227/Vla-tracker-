@@ -1,27 +1,40 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: MindVLA-U1: VLA Beats VA with Unified Streaming Architecture for Autonomous Driving
-# arXiv: 2605.12624
-
 name: MindVLA-U1
 full_name: "MindVLA-U1: VLA Beats VA with Unified Streaming Architecture for Autonomous Driving"
-organization: "TODO: check paper"
-date: "2026-05-12"
+organization: "Li Auto, CUHK MMLab, Tsinghua University"
+date: "2026-05-14"
 paper_url: https://arxiv.org/abs/2605.12624
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://mind-omni.github.io/
+venue: arXiv 2026
+open_source: false
+
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-VL-2B (also supports InternVL, Qwen2.5/3.5-VL, DeepSeek-R1)"
+  llm: "Qwen3-VL-2B"
+  action_head: "flow matching (continuous trajectory diffusion, 2 sampling steps)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "2B"
+  key_innovation: "Unified streaming VLA backbone where a single VLM forward pass jointly produces autoregressive language tokens and flow-matching continuous action trajectories. Adds Intent-CFG (classifier-free guidance steered by language-predicted intent tokens) and a Mixture-of-Transformers (MoT) decomposition for fast action / slow language execution, achieving VA-level latency (16 FPS) with VLA capabilities."
+
+training:
+  method: "Joint AR language + flow-matching action pretraining, with RL post-training"
+  dataset: "Waymo Open Dataset End-to-End (WOD-E2E) + internal Li Auto driving data"
 
 benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+  real_world:
+    wod_e2e_val_rfs: 8.20
+    wod_e2e_test_rfs: 7.87
+    wod_e2e_val_ade_3s: 0.86
+    wod_e2e_val_ade_5s: 2.13
+    wod_e2e_test_ade_3s: 1.09
+    wod_e2e_test_ade_5s: 2.66
+    inference_fps: 16.0
+    source: "Paper Table on WOD-E2E (val/test with RL post-training)"
 
 eval_conditions:
-  TODO: "check paper"
+  real_world: "WOD-E2E long-tail autonomous driving benchmark, RL post-training + Intent-CFG"
 
-tags: []
+inference_hz: 16
+tags: [autonomous-driving, flow-matching, streaming, unified, RL-finetuning]

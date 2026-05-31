@@ -1,27 +1,35 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: Hand-in-the-Loop: Improving VLA Policies for Dexterous Manipulation via Seamless Hand-Arm Intervention
-# arXiv: 2605.15157
-
 name: Hand-in-the-Loop
 full_name: "Hand-in-the-Loop: Improving VLA Policies for Dexterous Manipulation via Seamless Hand-Arm Intervention"
-organization: "TODO: check paper"
-date: "2026-05-14"
+organization: "Shanghai Jiao Tong University, ByteDance Seed, University of Tokyo"
+date: "2026-05-20"
 paper_url: https://arxiv.org/abs/2605.15157
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://simpson-li.github.io/Hand-in-the-Loop/
+venue: arXiv 2026
+open_source: false
+
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
+  backbone: "Gr-Dexter pre-trained VLA"
+  action_head: "regression (continuous hand-arm commands via optimization-based retargeting)"
+  action_head_category: regression
+  action_space: continuous
   parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  key_innovation: "Human-in-the-loop intervention framework (HandITL) that combines optimization-based relative hand retargeting with velocity-based shared arm control, eliminating gesture jumps during seamless takeover of a bimanual dexterous VLA policy and providing high-quality correction data for policy improvement."
+
+training:
+  method: "VLA fine-tuning with human-collected intervention/correction data"
+  dataset: "Bimanual dexterous manipulation demonstrations + HandITL intervention corrections"
 
 benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+  real_world:
+    intervention_jitter_reduction: 99.8
+    grasp_failure_reduction: 87.5
+    completion_time_reduction: 19.1
+    policy_improvement_long_horizon: 19.0
+    source: "Table in main paper (real-world dexterous tasks)"
 
 eval_conditions:
-  TODO: "check paper"
+  real_world: "Bimanual dexterous tasks with human teleoperation intervention"
 
-tags: [dexterous]
+tags: [dexterous, bimanual, human-in-the-loop, real-world, intervention-learning]

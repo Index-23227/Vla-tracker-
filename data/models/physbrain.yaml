@@ -1,0 +1,35 @@
+name: PhysBrain
+full_name: "PhysBrain 1.0 Technical Report"
+organization: "Shijie Lian et al. (PhysBrain Team)"
+date: '2026-05-14'
+paper_url: https://arxiv.org/abs/2605.15298
+code_url: https://phys-brain.github.io
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Vision-language-action backbone fine-tuned with physical commonsense priors (specific VLM not disclosed in technical report)"
+  action_head: "VLA action policy (action head details not specified in technical report excerpt)"
+  action_head_category: other
+  parameters: null
+  key_innovation: "Converts large-scale human egocentric video (Ego4D, BuildAI, EgoDex, EPIC, SEA-Small) into structured physical commonsense QA supervision across 22 reasoning families (spatial relations, depth, viewpoint, affordance, long-horizon planning, causal reasoning, etc.), then transfers these priors to VLA policies. Auxiliary general multimodal data (FineVision) prevents catastrophic forgetting during staged training."
+
+training:
+  data_sources: "Ego4D, BuildAI, EgoDex, EPIC, SEA-Small (egocentric video) + FineVision (auxiliary retention)"
+  method: "Staged construction of physical commonsense supervision from egocentric video; multi-model annotation pool (GPT-5, Gemini, Qwen variants) for scene meta-information and QA generation"
+  real_world: "Franka manipulation evaluated over 50 trials per task"
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "Franka single-object grasping: 47.1% -> 63.3%; Long-horizon: 31.0% -> 45.0% (50 trials per category)"
+  qa_benchmarks: "ERQA, PhysBench (reported as SOTA, numerical scores not provided in accessible technical report excerpt)"
+  embodied_benchmarks: "SimplerEnv-WidowX, LIBERO, RoboCasa-GR1 (reported as SOTA, numerical scores not provided in accessible technical report excerpt)"
+
+tags:
+  - physical-commonsense
+  - egocentric-video
+  - multimodal-qa
+  - vla
+  - franka
+  - long-horizon

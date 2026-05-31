@@ -1,0 +1,63 @@
+name: G3T-AML
+full_name: "Learning Action Manifold with Multi-view Latent Priors for Robotic Manipulation (G3T + AML)"
+organization: "Key Lab. of Machine Intelligence and Advanced Computing (MoE, China); AMap / Alibaba Group; Xi'an Jiaotong University; Shenzhen University of Advanced Technology"
+date: "2026-05-12"
+paper_url: https://arxiv.org/abs/2605.11832
+code_url: "https://junjxiao.github.io/Multi-view-VLA.github.io/"
+venue: "arXiv preprint"
+open_source: false
+
+architecture:
+  backbone: "Qwen3-VL (4B) as VLM; VGGT encoder for monocular geometric priors; LongCat-Image-Edit (6B latent-space multi-view diffusion) for synthesized novel views"
+  llm: "Qwen3-VL (4B)"
+  action_head: "16-layer Diffusion Transformer (DiT) operating on a learned action manifold via direct action prediction (a-prediction), with velocity-consistent reweighted MSE loss w(tau) = 1/(1-tau)^2; 4-step denoising at inference"
+  action_head_category: diffusion
+  parameters: "4B (Qwen3-VL VLM) + 6B (LongCat view-synthesis) + 16-layer DiT action expert"
+  key_innovation: "Two-pronged framework. (1) Geometry-Guided Gated Transformer (G3T) aligns synthesized multi-view latent features with VGGT-extracted monocular geometric priors under 3D guidance, adaptively gating out occlusion noise. (2) Action Manifold Learning (AML) replaces noise/velocity regression with direct action prediction on a learned low-dimensional manifold, using a velocity-consistent reweighted MSE objective. Achieves 98.6% LIBERO average and 85.7% LIBERO-Plus zero-shot robustness (camera/robot/language/light/background/noise/layout perturbations), 85.18% / 86.06% RoboTwin 2.0 Clean/Randomized averages."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.8
+    libero_object: 99.8
+    libero_goal: 99.0
+    libero_long: 96.6
+    libero_avg: 98.6
+    source: "Table II (paper main LIBERO results)"
+    eval_condition: "fine-tuned on LIBERO demonstrations"
+  robotwin_v2:
+    avg_clean: 85.18
+    avg_randomized: 86.06
+    source: "Table III (RoboTwin 2.0 average across tasks)"
+    eval_condition: "fine-tuned on RoboTwin 2.0"
+  real_world:
+    stack_block: 70.0
+    insert_cube: 60.0
+    place_cylinder: 60.0
+    place_cup: 70.0
+    avg: 65.0
+    source: "Table XI (Franka Emika Panda, 4 tasks)"
+    eval_condition: "real-robot Franka Panda fine-tuning"
+
+eval_conditions:
+  libero: "fine-tuned on LIBERO; also evaluated zero-shot on LIBERO-Plus (85.7% avg across 7 perturbation types)"
+  robotwin_v2: "fine-tuned on RoboTwin 2.0 (Clean and Randomized splits)"
+  real_world: "fine-tuned on Franka Panda real-robot demonstrations"
+
+training:
+  dataset: "LIBERO demonstrations; RoboTwin 2.0; real-robot Franka Panda data"
+  method: "Multi-view latent synthesis via LongCat-Image-Edit + VGGT monocular priors; cross-attention feature fusion in G3T with geometry-guided gating; direct-action diffusion training (AML) with velocity-consistent reweighted MSE w(tau)=1/(1-tau)^2"
+  num_trajectories: null
+  compute: "4 x NVIDIA H20 GPUs, ~27 hours for 30K training steps; batch size 16; bfloat16 precision; action horizon 8; 4-step denoising at inference"
+
+tags:
+  - multi_view
+  - diffusion
+  - libero
+  - libero_plus
+  - robotwin_v2
+  - real_world
+  - qwen3_vl
+  - vggt
+  - action_manifold
+  - novel_view_synthesis
+  - geometry_guided

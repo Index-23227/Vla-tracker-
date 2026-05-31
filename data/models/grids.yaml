@@ -1,0 +1,55 @@
+name: GridS
+full_name: "See What Matters: Differentiable Grid Sample Pruning for Generalizable Vision-Language-Action Model"
+organization: "(Authors: Yixu Feng, Zinan Zhao, Yanxiang Ma, Chenghao Xia, Chengbin Du, Yunke Wang, Chang Xu — affiliations not specified on arXiv listing)"
+date: "2026-05-12"
+paper_url: https://arxiv.org/abs/2605.11817
+code_url: "https://github.com/Fediory/Grid-Sampler"
+venue: "ICML 2026 (per author listing on arXiv abstract page)"
+open_source: true
+
+architecture:
+  backbone: "N/A (visual-token-pruning wrapper; inherits backbone of host VLA — SigLIP/PaliGemma for pi0/pi0.5, SmolVLM for SmolVLA)"
+  llm: "N/A (inherits LLM of host VLA, e.g., Gemma for pi0.5)"
+  action_head: "Inherits flow-matching action head from pi0/pi0.5 and autoregressive action head from SmolVLA; GridS replaces the visual-token grid with a differentiable bilinear-sampling module that produces K << 256 continuous-coordinate visual tokens"
+  action_head_category: flow_matching
+  parameters: "Negligible additional cost (a small coordinate-prediction head); host VLA parameters preserved"
+  key_innovation: "Differentiable grid sample pruning. Instead of discretely selecting which of the 256 patch tokens to keep (as in FastV / SparseVLM / VLA-Cache), GridS predicts a small set of K continuous (x, y) sample coordinates and extracts features via differentiable bilinear interpolation of four nearest neighbours, F_sampled(x,y) = sum_k(w_k * P_k). Sub-patch coordinate precision eliminates quantization error from discrete patch selection, preserving contact-relevant geometric details. Co-trained end-to-end with the host VLA, achieving 76% FLOPs reduction (256 -> 16 tokens, 216.01G -> 51.65G), 3.4x training speedup on pi0 and up to 3.2x inference speedup at batch 128, while improving LIBERO average from 94.4% (pi0 baseline) to 96.0% with GridS-16."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.0
+    libero_object: 99.2
+    libero_goal: 96.4
+    libero_long: 90.2
+    libero_avg: 96.0
+    source: "Table 1 (pi0 + GridS16)"
+    eval_condition: "fine-tuned; pi0 host + GridS visual-token pruner co-trained"
+  real_world:
+    stack_cubes_so100: 60.0
+    stack_cubes_ood: 38.1
+    source: "Real-world SO100 robot with SmolVLA + GridS; Stack Cubes 60.0% (baseline ~7.6%), OOD 38.1% (baseline ~0%)"
+    eval_condition: "fine-tuned SmolVLA + GridS on SO100 hardware"
+
+eval_conditions:
+  libero: "fine-tuned co-training with pi0 host; GridS-16 (K=16 continuous tokens, 76% FLOPs reduction)"
+  real_world: "real-robot SO100 platform with SmolVLA host"
+
+training:
+  dataset: "LIBERO (full benchmark); real-robot SO100 demonstrations (Stack Cubes)"
+  method: "End-to-end joint training of the grid coordinate predictor and the host VLA. Differentiable bilinear sampling allows gradient flow through token-selection coordinates."
+  num_trajectories: null
+  compute: "pi0/pi0.5 hosts: 30,000 steps, batch 32, lr 5e-5. SmolVLA host: 50,000 steps, batch 16, lr 1e-4. K is tunable in {4, 16, 32}; K=16 is the default optimum."
+
+tags:
+  - token_pruning
+  - visual_token_reduction
+  - differentiable_sampling
+  - flow_matching
+  - pi0
+  - pi0_5
+  - smolvla
+  - libero
+  - real_world
+  - icml_2026
+  - efficiency
+  - open_source
