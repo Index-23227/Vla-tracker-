@@ -1,34 +1,41 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: AttenA+: Rectifying Action Inequality in Robotic Foundation Models
 # arXiv: 2605.13548
 
 name: AttenA+
 full_name: "AttenA+: Rectifying Action Inequality in Robotic Foundation Models"
-organization: "TODO: check paper"
+organization: "HKUST(GZ); HKU; USTC; IDEA Research; SUSTech; X-Humanoid"
 date: "2026-05-13"
 paper_url: https://arxiv.org/abs/2605.13548
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: "Plug-in compatible with OpenVLA-OFT, Pi0, Pi0.5, FastWAM, Diffusion Policy"
+  action_head: "Architecture-agnostic plug-in; reweights per-timestep training loss via inverse velocity"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "+0"
+  key_innovation: "Velocity-aware loss reweighting w_t = 1/v_t^2 (with L2 norm of action delta as velocity) that prioritizes low-velocity precision-demanding interaction segments over high-velocity transit motions. Plug-and-play: no architectural changes, no extra parameters, no inference cost. Boosts OpenVLA-OFT on LIBERO from 97.10 to 98.6 avg, Pi0.5 from 96.85 to 97.95, and FastWAM on RoboTwin 2.0 from 91.8 to 92.46 (clean 93.06 / random 91.86)."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    libero_spatial: 99.0
+    libero_object: 100.0
+    libero_goal: 98.8
+    libero_long: 96.6
+    libero_avg: 98.6
+  robotwin_v2:
+    robotwin_v2_clean: 93.06
+    robotwin_v2_random: 91.86
+    robotwin_v2_avg: 92.46
 
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
+  libero: "fine-tuned; AttenA+OFT (OpenVLA-OFT base); 200K steps on H800"
+  robotwin_v2: "fine-tuned; AttenA+WAM (FastWAM base); 1 epoch RoboTwin 2.0; 50 bimanual tasks"
 
-tags: [libero, robotwin]
+training:
+  base_models: "OpenVLA-OFT, Pi0.5, Fast-WAM"
+  hardware: "1x H800 (~35 h) for AttenA+OFT; 2x H800 (~4 days) for AttenA+WAM"
+  weighting_function: "w_t = 1/v_t^2 with clipmax in {2.0, 3.0, 5.0}"
+
+tags: [loss-reweighting, libero, robotwin_v2, openvla-oft, plug-and-play]
