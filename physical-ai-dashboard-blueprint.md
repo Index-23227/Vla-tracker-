@@ -374,7 +374,7 @@ See [CONTRIBUTING.md](link) — we welcome:
 
 | Benchmark | Tasks | Models | Focus |
 |-----------|-------|--------|-------|
-| LIBERO | 4 suites | 50 | Manipulation generalization |
+| LIBERO | 4 suites | 55 | Manipulation generalization |
 | CALVIN | ABC→D | 22 | Long-horizon, language |
 | Meta-World | ML-10/45 | - | Multi-task dexterity |
 | SimplerEnv | 5 tasks | 20 | Sim-to-real transfer |

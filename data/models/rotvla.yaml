@@ -13,7 +13,7 @@ open_source: false
 
 architecture:
   action_head: "Flow-matching action expert that jointly denoises latent and robot actions, conditioned on a rotational latent planner"
-  action_head_category: flow-matching
+  action_head_category: flow_matching
   parameters: "1.7B"
   key_innovation: "Replaces the discrete-quantization latent action models (LAMs) commonly used for VLA pretraining with a continuous rotational latent representation in SO(n), providing continuity, compositionality, and physically meaningful geometric structure. A triplet frame learning framework enforces meaningful temporal dynamics and prevents degeneration. The pretrained latent action head is extended at downstream time into a unified flow-matching action expert that jointly denoises latent and robot actions, treating the latent action as a high-level planner."
 
