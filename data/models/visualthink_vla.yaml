@@ -1,27 +1,104 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: VisualThink-VLA: Visual Intermediate Reasoning for Effective and Low-Latency Vision-Language-Action Policies
-# arXiv: 2605.30011
-
 name: VisualThink-VLA
 full_name: "VisualThink-VLA: Visual Intermediate Reasoning for Effective and Low-Latency Vision-Language-Action Policies"
-organization: "TODO: check paper"
-date: "2026-05-28"
+organization: "Zhejiang University / Cornell University / National University of Singapore / Xidian University"
+date: '2026-05-28'
 paper_url: https://arxiv.org/abs/2605.30011
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/DCDmllm/VisualThink-VLA
 venue: null
-open_source: false  # TODO: verify
-
+open_source: true
 architecture:
-  action_head: "autoregressive"
+  backbone: "OpenVLA-7B (primary); also evaluated on Octo and SmolVLA"
+  llm: "Llama-2-7B (via OpenVLA)"
+  action_head: >-
+    OpenVLA's discrete autoregressive action tokens; the VLA backbone
+    is *frozen* and conditioned on a compact set of routed visual
+    evidence tokens produced upstream.
   action_head_category: autoregressive
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
-
+  parameters: "7B (OpenVLA backbone)"
+  visual_evidence_interface: >-
+    A "compact visual-evidence interface" with six candidate channels
+    (bbox, edge, motion, relation, depth, segment); a task-adaptive
+    router predicts channel probabilities and applies a hardening
+    operator that converts soft scores to binary masks. Four operational
+    channels are activated per decision step. Training uses
+    soft-hard collaborative masks with blending coefficient alpha=0.35.
+  key_innovation: >-
+    VisualThink-VLA replaces textual chain-of-thought reasoning (slow,
+    noisy) with *visual* intermediate reasoning: a routed set of
+    compact evidence vectors (bbox / edge / motion / relation / depth /
+    segment) that condition a frozen base VLA. The selective routing
+    keeps spatial accuracy without decoding latency, dropping
+    BridgeData V2 latency from 8.377s (textual CoT) to 0.367s
+    (22.8x speedup) while raising success from 75.37% to 89.49%.
+training:
+  dataset: >-
+    VisualEvidence-Kit (VisualEvidence-Set, 754.7k VLA instructions),
+    BridgeData V2, Fractal, RoboTurk, LIBERO, UT Austin MUTEX
+  hardware: "not disclosed in paper"
+  epochs: "not disclosed"
 benchmarks:
   libero:
-    TODO: "check paper for benchmark scores" 
-
+    libero_spatial: 96.69
+    libero_object: 97.74
+    libero_goal: 97.05
+    libero_long: 95.87
+    libero_avg: 96.84
+    libero_spatial_latency_s: 0.356
+    libero_object_latency_s: 0.385
+    libero_goal_latency_s: 0.345
+    libero_long_latency_s: 0.421
+    source: "Tables in VisualThink-VLA paper"
+    date_reported: '2026-05-28'
+    eval_condition: "frozen OpenVLA + VisualThink routing, fine-tuned per suite"
+  bridge_v2:
+    success: 89.49
+    latency_s: 0.367
+    baseline_openvla_success: 75.37
+    baseline_openvla_latency_s: 0.345
+    source: "VisualThink-VLA paper"
+    date_reported: '2026-05-28'
+    eval_condition: "BridgeData V2"
+  fractal:
+    success: 90.82
+    latency_s: 0.367
+    source: "VisualThink-VLA paper"
+  roboturk:
+    success: 96.10
+    latency_s: 0.415
+    source: "VisualThink-VLA paper"
+  ut_austin_mutex:
+    success: 77.26
+    latency_s: 0.451
+    source: "VisualThink-VLA paper"
+real_world:
+  arm: "PIPER NERO"
+  tasks:
+    multi_object_pick_place: 75.6
+    relation_sensitive_placement: 67.2
+    contact_sensitive_reorientation: 83.5
+    two_stage_compositional: 59.2
+  avg_completion_time_s: 25.6
+  baseline_dense_completion_time_s: 30.2
+  trials_per_task: 50
+  source: "VisualThink-VLA paper (real-robot section)"
+latency:
+  textual_cot_bridge_v2_s: 8.377
+  visualthink_bridge_v2_s: 0.367
+  speedup: 22.8
 eval_conditions:
-  TODO: "check paper"
-
-tags: [autoregressive, reasoning]
+  libero: "fine-tuned per suite; latency measured per-step"
+  bridge_v2: "BridgeData V2 (frozen OpenVLA + VisualThink)"
+  real_world: "PIPER NERO arm, 50 trials per task"
+tags:
+- libero
+- bridge-v2
+- fractal
+- roboturk
+- visual-cot
+- routing
+- low-latency
+- OpenVLA
+- frozen-backbone
+- open-source
+- autoregressive
+- reasoning

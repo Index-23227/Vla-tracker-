@@ -1,30 +1,37 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ActQuant: Sub-4-bit Action-Guided Quantization for Vision-Language-Action Models
-# arXiv: 2605.24011
-
 name: ActQuant
 full_name: "ActQuant: Sub-4-bit Action-Guided Quantization for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Northeastern University; University of Georgia; Cisco Research"
 date: "2026-05-19"
 paper_url: https://arxiv.org/abs/2605.24011
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://actquant.github.io
+venue: arXiv preprint
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: "OpenVLA-OFT (LLaMA-2 7B + SigLIP/DINOv2) and pi-0.5 quantized variants"
+  action_head: "Inherits from base VLA (discrete action tokens for OpenVLA-OFT; flow-matching for pi-0.5) with sub-4-bit quantized weights"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "7B (OpenVLA-OFT) compressed to 2.5-3.0 bits-per-weight, ~5.3x model size reduction"
+  key_innovation: "Action-guided mixed-precision PTQ that allocates bit-widths per weight matrix via HSIC-based inter-tensor importance scoring (using action-prediction signals) and refines block-wise scales using Action-Mixed Fisher (AMF) curvature. Paired with OmniModel.cpp, an agentic C/C++ deployment pipeline enabling sub-4-bit edge inference."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 92.8
+    libero_object: 97.4
+    libero_goal: 94.0
+    libero_long: 95.6
+    libero_avg: 95.0
+    source: "Table 1 (OpenVLA-OFT at 3.0 bpw)"
+    date_reported: "2026-05-19"
+    eval_condition: "fine-tuned; post-training quantized to 3.0 bits-per-weight"
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "fine-tuned and quantized (3.0 bpw configuration)"
 
-tags: [libero]
+training:
+  data: "60 episodes from LIBERO fine-tuning split used for calibration (post-training quantization, no retraining)"
+  hardware: "Single NVIDIA L40S GPU"
+  duration: "~2 hours wall-clock per model for quantization"
+  notes: "PTQ method; quantization-only, builds on pre-trained OpenVLA-OFT and pi-0.5"
+
+tags: [libero, quantization, efficiency, edge-deployment, openvla-oft, pi0.5]

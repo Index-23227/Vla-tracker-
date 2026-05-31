@@ -1,27 +1,35 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: X-DiffVLA: X-Embodied Diffusion Action Heads for Vision-Language-Action Models
-# arXiv: 2605.25044
-
 name: X-DiffVLA
 full_name: "X-DiffVLA: X-Embodied Diffusion Action Heads for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "SKL-MAIS, Chinese Academy of Sciences; University of Chinese Academy of Sciences; Beijing Academy of Artificial Intelligence; BeingBeyond; Peking University"
 date: "2026-05-24"
 paper_url: https://arxiv.org/abs/2605.25044
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv preprint
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Being-H0 2B vision-language model"
+  action_head: "Diffusion-based action head with Embodied Forcing (EBF) noise initialization and Morphological Tree Diffusion (MPTD) cross-embodiment knowledge transfer; soft prompts for embodied features"
+  action_head_category: diffusion
+  parameters: "~2B (Being-H0 backbone) plus diffusion action head"
+  key_innovation: "Unified cross-embodiment diffusion VLA that post-trains a single model across heterogeneous morphologies (grippers, dexterous hands). Introduces Embodied Forcing (morphology-aware noise initialization guided by global structure and local functions) and Morphological Tree Diffusion (MPTD) to capture behavioral correlations across embodiments via a unified action space with zero-padding."
 
 benchmarks:
   robocasa:
-    robocasa_avg: TODO
+    robocasa_avg: 64.5
+    source: "Per-embodiment: Panda 67.2, Robotiq-85 68.0, Inspire 58.3"
+    date_reported: "2026-05-24"
+    eval_condition: "fine-tuned cross-embodiment post-training; 50 trajectories per task"
 
 eval_conditions:
-  robocasa: "fine-tuned"
+  robocasa: "cross-embodiment fine-tuned (Panda, Robotiq-85, Inspire)"
+  isaac_gym: "cross-embodiment fine-tuned (Panda, Inspire, Shadow); 71.0% avg"
+  real_world: "Panda + Inspire; 63.5% avg"
 
-tags: [robocasa]
+training:
+  data: "50 trajectories per RoboCasa task; 10 per Isaac Gym object; 10 per real-world object (teleoperation)"
+  hardware: "Not specified in detail"
+  duration: "30k-50k iterations, batch size 32, learning rate 2e-5 to 5e-5; 50 diffusion steps"
+  notes: "Unified action space with zero-padding for lower-DoF robots; soft prompts encode embodiment features"
+
+tags: [robocasa, isaac-gym, diffusion, cross-embodiment, dexterous-hand, being-h0]

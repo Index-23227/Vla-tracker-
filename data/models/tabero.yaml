@@ -1,27 +1,74 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: Tabero: Learning Gentle Manipulation with Closed-Loop Force Feedback from Vision, Touch, and Language
-# arXiv: 2605.27886
-
 name: Tabero
 full_name: "Tabero: Learning Gentle Manipulation with Closed-Loop Force Feedback from Vision, Touch, and Language"
-organization: "TODO: check paper"
-date: "2026-05-27"
+organization: "affiliations not disclosed in arXiv preprint (authors: Qiwei Wu, Rui Zhang, Xin Xiang, Tao Li, Weihua Zhang, Junjie Lai, Renjing Xu)"
+date: '2026-05-27'
 paper_url: https://arxiv.org/abs/2605.27886
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
-
+code_url: https://github.com/NathanWu7/Tabero
+venue: "ICML (submission as listed in paper)"
+open_source: true
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
-
+  backbone: "pi0 (PaliGemma 3B VLM + flow-matching action expert) with added tactile tokenizers"
+  llm: PaliGemma (pi0 backbone)
+  action_head: >-
+    Flow-matching action expert (pi0-style) extended with a decoupled
+    force-position command interface: the policy outputs desired end-effector
+    pose plus a target applied force, executed by a fixed admittance-based
+    hybrid low-level controller with a grip-force feedback loop
+    (feedforward gain + admittance correction).
+  action_head_category: flow_matching
+  parameters: "pi0 base (~3B PaliGemma backbone; tactile tokenizers add minor overhead) -- exact total not reported"
+  tactile_input: "8-frame history of tactile signals sampled at 20 Hz, processed by TCN and MLP tokenizers"
+  key_innovation: >-
+    Tabero-VTLA tackles gentle manipulation by (1) repurposing open-source
+    robot trajectories in high-fidelity simulation with force modulation to
+    cheaply create vision-tactile-language datasets, and (2) decoupling the
+    VLA action head into a force-position hybrid interface so a pi0
+    backbone can modulate grip force in response to linguistic adverbs
+    ("gently", "firmly"). With LoRA fine-tuning, the model retains task
+    success while cutting average grip force by ~70% under "gentle"
+    instructions.
+training:
+  base_model: pi0
+  dataset: >-
+    Tabero dataset -- open-source LIBERO Object trajectories replayed in
+    a high-fidelity tactile simulator with two force regimes
+    (Dataset A: 25% reference force; Dataset B: 10% reference force)
+  finetune_method: LoRA
+  steps: 50000
+  batch_size: 32
+  peak_lr: 2.5e-5
+  tactile_sampling: "20 Hz, 8-frame history"
+  hardware: "not disclosed in paper"
 benchmarks:
   libero:
-    TODO: "check paper for benchmark scores" 
-
+    libero_object_partial: 87.0
+    notes: >-
+      Tabero reports a 9-task subset of LIBERO Object (Tabero benchmark),
+      not the full 10-task standard suite, and additionally evaluates
+      4 LIBERO subtasks for cross-platform validation. Numbers are not
+      directly comparable to the canonical LIBERO leaderboard.
+    libero_avg: null
+    dataset_A_firm_SR: 0.87
+    dataset_A_gentle_SR: 0.79
+    dataset_A_firm_grip_force_N: 31.3
+    dataset_A_gentle_grip_force_N: 8.5
+    dataset_B_firm_SR: 0.86
+    dataset_B_gentle_SR: 0.52
+    dataset_B_firm_grip_force_N: 32.4
+    dataset_B_gentle_grip_force_N: 3.7
+    source: "Tables 1-4 + Appendix C Table 11, Tabero paper"
+    date_reported: '2026-05-27'
+    eval_condition: "9-task Tabero-Object subset in tactile simulator (NOT standard LIBERO)"
 eval_conditions:
-  TODO: "check paper"
-
-tags: []
+  libero: "Tabero-Object 9-task subset in tactile simulator with force regimes A/B"
+  real_world: "not evaluated -- noted as future work"
+tags:
+- pi0
+- flow-matching
+- tactile
+- force-feedback
+- gentle-manipulation
+- libero-subset
+- simulation-only
+- open-source
+- lora

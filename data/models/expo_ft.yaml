@@ -1,27 +1,28 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: EXPO-FT: Sample-Efficient Reinforcement Learning Finetuning for Vision-Language-Action Models
-# arXiv: 2605.25477
-
 name: EXPO-FT
 full_name: "EXPO-FT: Sample-Efficient Reinforcement Learning Finetuning for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: Stanford University
 date: "2026-05-25"
 paper_url: https://arxiv.org/abs/2605.25477
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://pd-perry.github.io/expo-ft/
+venue: arXiv preprint
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "pi-0.5 generalist VLA (flow/diffusion base policy)"
+  action_head: "Inherits flow-matching action head from pi-0.5; augmented with a lightweight edit policy and a RedQ-style ensemble of 10 Q-networks (ResNet-50 visual backbone) used at inference to select value-maximizing action candidates"
+  action_head_category: flow-matching
+  parameters: "Inherits pi-0.5 (~3B-class); additional lightweight edit policy and Q-ensemble"
+  key_innovation: "Extends the EXPO RL framework to modern VLAs by supporting temporally-extended action chunks and integrating human-in-the-loop interventions. A lightweight edit policy is trained to maximize an ensemble Q-function on top of a frozen-style base VLA, enabling sample-efficient real-robot RL fine-tuning that achieves 100% success across 8 tasks in ~19 minutes of online data on average."
 
-benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+benchmarks: {}
 
 eval_conditions:
-  TODO: "check paper"
+  real_world: "Real-robot RL fine-tuning with human-in-the-loop interventions; 8 manipulation tasks (egg flip, string light routing, pool shot, flower insertion, etc.)"
 
-tags: []
+training:
+  data: "Online robot data collected during RL fine-tuning (~19.1 minutes per task average); base policy is pretrained pi-0.5"
+  hardware: "Real robot setup; details not exhaustively reported"
+  duration: "Per-task average of 19.1 minutes of online interaction; 30/30 successes across all 8 evaluated tasks"
+  notes: "Adam optimizer (lr 3e-4), batch size 64, update-to-data ratio 20, discount 0.99, edit scale 0.05-0.2"
+
+tags: [reinforcement-learning, fine-tuning, pi0.5, real-world, human-in-the-loop]
