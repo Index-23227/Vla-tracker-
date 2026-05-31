@@ -10,7 +10,7 @@ open_source: true
 architecture:
   backbone: "pi-0.5 generalist VLA (flow/diffusion base policy)"
   action_head: "Inherits flow-matching action head from pi-0.5; augmented with a lightweight edit policy and a RedQ-style ensemble of 10 Q-networks (ResNet-50 visual backbone) used at inference to select value-maximizing action candidates"
-  action_head_category: flow-matching
+  action_head_category: flow_matching
   parameters: "Inherits pi-0.5 (~3B-class); additional lightweight edit policy and Q-ensemble"
   key_innovation: "Extends the EXPO RL framework to modern VLAs by supporting temporally-extended action chunks and integrating human-in-the-loop interventions. A lightweight edit policy is trained to maximize an ensemble Q-function on top of a frozen-style base VLA, enabling sample-efficient real-robot RL fine-tuning that achieves 100% success across 8 tasks in ~19 minutes of online data on average."
 

@@ -10,7 +10,7 @@ open_source: false
 architecture:
   backbone: "Qwen2.5-0.5B VLM with DINOv2 + SigLIP visual encoders; Depth Anything 3 for metric depth"
   action_head: "Transformer-based SE(3) end-effector trajectory predictor (4 blocks) followed by an action decoder (2 blocks) generating executable action chunks"
-  action_head_category: transformer
+  action_head_category: regression
   parameters: "1.73B total (0.18B trainable); trajectory predictor + decoder ~70M parameters"
   key_innovation: "Aligns intermediate representations with the action space by predicting an explicit SE(3) end-effector trajectory in the camera frame. This provides a geometric inductive bias for the action decoder rather than relying solely on observation-space auxiliary cues or predictive visual features."
 
