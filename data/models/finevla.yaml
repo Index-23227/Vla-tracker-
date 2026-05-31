@@ -1,28 +1,56 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: FineVLA: Fine-Grained Instruction Alignment for Steerable Vision-Language-Action Policies
-# arXiv: 2605.27284
-
 name: FineVLA
 full_name: "FineVLA: Fine-Grained Instruction Alignment for Steerable Vision-Language-Action Policies"
-organization: "TODO: check paper"
+organization: "XLANG Lab, The University of Hong Kong; Qwen Team, Alibaba Inc."
 date: "2026-05-26"
 paper_url: https://arxiv.org/abs/2605.27284
-code_url: null  # TODO: check for GitHub repo
+code_url: https://finevla.xlang.ai/
+project_url: https://finevla.xlang.ai/
 venue: null
-open_source: false  # TODO: verify
+open_source: false  # project page only; full code release status not yet confirmed
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3.5-VL-4B"
+  llm: "Qwen3.5 (~4B class)"
+  action_head: "StarVLA variants: OFT MLP regression head and GR00T dual-system DiT flow-matching"
+  action_head_category: hybrid
+  action_space: continuous (per-step actions, dual-arm)
+  parameters: "~4B VL backbone + lightweight action head"
+  key_innovation: >
+    FineVLA studies how fine-grained, attribute-level (pose, color, approach-direction) instructions
+    affect steerability of VLA policies. It introduces FineVLA-Data (47,159 human-verified fine-grained
+    trajectories from 972,247 trajectories across 85K tasks in 10 open-source datasets) and a controlled
+    mixing recipe between fine-grained and raw goal-level instructions. The recipe yields an inverted-U
+    success curve peaking at FG:Raw ratios near 1:2-1:1 and produces large gains on execution-sensitive
+    attributes (pose +23, color +18, approach +18) in real-world dual-arm manipulation.
+
+training:
+  dataset: >
+    Pretraining over 972,247 trajectories / 85K tasks from 10 open-source robot datasets;
+    FineVLA-Data adds 47,159 human-verified fine-grained trajectories with per-attribute instruction labels
+  pretraining_steps: 100000
+  pretraining_batch_size: 512
+  finetune_steps: 100000
+  finetune_batch_size: 128
+  hardware: "64 x A100 (pretraining), 8 x A100 (RoboTwin fine-tuning)"
+  optimizer: "AdamW (details not explicit in main text)"
 
 benchmarks:
   robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    robotwin_easy: 86.8
+    robotwin_hard: 82.5
+    source: "FineVLA paper Table 4 (AlohaMix-OFT, FG:Raw 1:1)"
+    date_reported: "2026-05-26"
+    eval_condition: "fine-tuned"
 
 eval_conditions:
   robotwin: "fine-tuned"
+  real_world: "dual-arm (FG vs raw-only comparison: 62.7 vs 49.9 success)"
 
-tags: [robotwin]
+tags:
+  - steerable
+  - fine-grained-instruction
+  - robotwin
+  - qwen
+  - dual-arm
+  - flow-matching
+  - regression-head
