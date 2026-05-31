@@ -4,27 +4,37 @@
 
 name: RotVLA
 full_name: "RotVLA: Rotational Latent Action for Vision-Language-Action Model"
-organization: "TODO: check paper"
+organization: "Affiliations not disclosed in abstract (authors: Qiwei Li, Xicheng Gong, Xinghang Li, Peiyan Li, Quanyun Zhou, Hangjun Ye, Jiahuan Zhou, Yadong Mu)"
 date: "2026-05-13"
 paper_url: https://arxiv.org/abs/2605.13403
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_head: "Flow-matching action expert that jointly denoises latent and robot actions, conditioned on a rotational latent planner"
+  action_head_category: flow-matching
+  parameters: "1.7B"
+  key_innovation: "Replaces the discrete-quantization latent action models (LAMs) commonly used for VLA pretraining with a continuous rotational latent representation in SO(n), providing continuity, compositionality, and physically meaningful geometric structure. A triplet frame learning framework enforces meaningful temporal dynamics and prevents degeneration. The pretrained latent action head is extended at downstream time into a unified flow-matching action expert that jointly denoises latent and robot actions, treating the latent action as a high-level planner."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_avg: 98.2
+    source: "arXiv abstract"
+    date_reported: "2026-05-13"
+    eval_condition: "fine-tuned"
+  robotwin_v2:
+    robotwin_v2_clean_avg: 89.6
+    robotwin_v2_rand_avg: 88.5
+    source: "arXiv abstract"
+    date_reported: "2026-05-13"
+    eval_condition: "fine-tuned"
 
 eval_conditions:
   libero: "fine-tuned"
+  robotwin_v2: "fine-tuned; clean and randomized settings"
 
-tags: [libero]
+training:
+  pretrain_data: "Large-scale cross-embodiment robotic datasets and human videos; 1700+ hours"
+
+tags: [flow-matching, latent-action, SO(n), libero, robotwin, 1.7B]

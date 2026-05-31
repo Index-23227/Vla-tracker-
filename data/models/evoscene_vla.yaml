@@ -4,25 +4,29 @@
 
 name: EvoScene-VLA
 full_name: "EvoScene-VLA: Evolving Scene Beliefs Inside the Action Decoder for Chunked Robot Control"
-organization: "TODO: check paper"
+organization: "Affiliations not disclosed in abstract (authors: Chushan Zhang, Ruihan Lu, Jinguang Tong, Xuesong Li, Yikai Wang, Hongdong Li)"
 date: "2026-05-21"
 paper_url: https://arxiv.org/abs/2605.21862
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "Action decoder with recurrent scene prefix (chunked control)"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "Maintains a persistent action-updated scene state across chunked control calls via a recurrent scene prefix carried inside the action decoder. At each VLM call the model fuses fresh visual evidence with the action-updated prior from the previous chunk, while the decoder simultaneously outputs the next action chunk and a compact scene update. Training-time auxiliaries (Scene Predictor for future scene-token targets and Geometric Anchor aligning scene slots with frozen depth/3D teachers) are discarded at deployment."
 
 benchmarks:
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+  robotwin_v2:
+    robotwin_v2_clean_avg: 89.1
+    robotwin_v2_rand_avg: 88.5
+    source: "arXiv abstract"
+    date_reported: "2026-05-21"
+    eval_condition: "fine-tuned"
+    notes: "Abstract reports RoboTwin (version not explicitly stated; placed under v2 by convention given 31-task evaluation and high baseline scores). Fixed evaluation: 87.2% baseline -> 89.1% EvoScene-VLA. Randomized evaluation: 86.1% -> 88.5%."
 
 eval_conditions:
-  robotwin: "fine-tuned"
+  robotwin_v2: "fine-tuned; 31 RoboTwin tasks; fixed and randomized evaluation"
 
-tags: [robotwin]
+tags: [robotwin, scene-memory, chunked-control]

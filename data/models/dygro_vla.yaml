@@ -4,27 +4,25 @@
 
 name: DyGRO-VLA
 full_name: "DyGRO-VLA: Cross-Task Scaling of Vision-Language-Action Models via Dynamic Grouped Residual Optimization"
-organization: "TODO: check paper"
+organization: "Affiliations not disclosed in abstract (authors: Sixu Lin, Yunpeng Qing, Litao Liu, Ming Zhou, Ruixing Jin, Xiaoyi Fan, Guiliang Liu)"
 date: "2026-05-17"
 paper_url: https://arxiv.org/abs/2605.17486
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "RL-optimized VLA policy with mixture-of-RL-residuals"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "Two-stage RL optimization framework for cross-task scaling of VLAs. Stage 1 captures cross-task latent representations using information-theoretic principles, and Stage 2 dynamically refines policy optimization via a mixture-of-RL-residuals that exploits task-relevant latent information while mitigating adverse interference among tasks. Targets the common pitfall where RL fine-tuning collapses generalist VLAs into narrow task-specific policies."
 
 benchmarks:
-  libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+  libero: {}
+  robotwin_v2: {}
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "fine-tuned (RL); specific per-suite numbers not reported in abstract"
+  robotwin_v2: "fine-tuned (RL); specific numbers not reported in abstract"
 
-tags: [RL, libero]
+tags: [RL, libero, robotwin, cross-task, generalization]

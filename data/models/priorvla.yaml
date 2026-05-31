@@ -1,34 +1,41 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: PriorVLA: Prior-Preserving Adaptation for Vision-Language-Action Models
 # arXiv: 2605.10925
 
 name: PriorVLA
 full_name: "PriorVLA: Prior-Preserving Adaptation for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Affiliations not disclosed in abstract (authors: Xinyu Guo, Bin Xie, Wei Chai, Xianchi Deng, Tiancai Wang, Zhengxing Wu, Xingyu Chen)"
 date: "2026-05-11"
 paper_url: https://arxiv.org/abs/2605.10925
-code_url: null  # TODO: check for GitHub repo
+code_url: null  # Project page only: https://priorvla.github.io/
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "Dual-expert adaptation over a frozen pi0.5-style backbone (action head not specified in abstract)"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "Updates only 25% of the parameters that full fine-tuning would update; absolute count not stated in abstract"
+  key_innovation: "Prior-preserving adaptation framework that keeps a frozen Prior Expert as a read-only prior source and trains an Adaptation Expert for downstream specialisation. Expert Queries capture scene priors from the pretrained VLM and motor priors from the Prior Expert, integrating both into the Adaptation Expert to guide adaptation while avoiding the prior drift typical of full fine-tuning. Strongest gains appear under out-of-distribution and few-shot regimes."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    libero_avg: 99.1
+    source: "abstract"
+  robotwin_v2:
+    # Abstract reports +11 points over pi0.5 on RoboTwin 2.0-Hard but does not give the absolute score.
+    robotwin_v2_hard_delta_vs_pi0_5: 11.0
+    source: "abstract (absolute RoboTwin 2.0-Hard score not stated)"
+
+real_world:
+  in_distribution_success: 0.81
+  ood_success: 0.57
+  few_shot_10_demos_id_success: 0.48
+  few_shot_10_demos_ood_success: 0.32
+  few_shot_id_delta_vs_pi0_5: 24.0
+  few_shot_ood_delta_vs_pi0_5: 22.0
+  notes: "8 real-world tasks across 2 embodiments"
 
 eval_conditions:
   libero: "fine-tuned"
-  robotwin: "fine-tuned"
+  robotwin: "fine-tuned (RoboTwin 2.0-Hard)"
 
-tags: [libero, robotwin]
+tags: [prior-preserving, peft, adaptation, libero, robotwin, few-shot, ood]

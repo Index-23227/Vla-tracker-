@@ -4,27 +4,23 @@
 
 name: D-VLA
 full_name: "D-VLA: A High-Concurrency Distributed Asynchronous Reinforcement Learning Framework for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Affiliations not disclosed in abstract"
 date: "2026-05-13"
 paper_url: https://arxiv.org/abs/2605.13276
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "Framework-level work; agnostic to specific action head. Targets billion- to trillion-parameter VLA backbones trained with RL."
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "Framework supports billion-parameter and (in scalability tests) trillion-parameter VLAs; specific model size not stated in abstract"
+  key_innovation: "A distributed asynchronous RL system co-designed for VLA training that addresses the resource conflict between high-fidelity physical simulation and the VRAM/bandwidth demands of large deep models. Introduces 'Plane Decoupling' that physically separates high-frequency training data from low-frequency weight control, a four-thread asynchronous 'Swimlane' pipeline that overlaps sampling, inference, gradient computation, and parameter distribution, and a dual-pool VRAM management model with topology-aware replication for memory fragmentation and communication efficiency."
 
 benchmarks:
-  libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+  libero: {}
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "RL fine-tuning; abstract reports throughput and sampling-efficiency gains on LIBERO without per-suite success-rate numbers"
 
-tags: [RL, libero]
+tags: [RL, distributed-training, infrastructure, libero, scaling]

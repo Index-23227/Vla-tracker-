@@ -4,33 +4,29 @@
 
 name: IntentVLA
 full_name: "IntentVLA: Short-Horizon Intent Modeling for Aliased Robot Manipulation"
-organization: "TODO: check paper"
+organization: "TODO: affiliations not stated in abstract page (authors: Shijie Lian, Bin Yu, Xiaopeng Lin, Zhaolong Shen, Laurence Tianruo Yang, Yurun Jin, Haishan Liu, Changti Wu, Hang Yuan, Cong Huang, Kai Chen; GitHub org suggests ZGC-EmbodyAI)"
 date: "2026-05-14"
 paper_url: https://arxiv.org/abs/2605.14712
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/ZGC-EmbodyAI/IntentVLA
 venue: null
-open_source: false  # TODO: verify
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "History-conditioned chunk generator conditioned on a compact short-horizon intent representation encoded from recent visual observations"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "IntentVLA is a history-conditioned VLA framework that encodes recent visual observations into a compact short-horizon intent representation and uses it to condition action-chunk generation, addressing inter-chunk conflict caused by short-horizon observation aliasing in frame-conditioned policies. The authors also introduce AliasBench, a 12-task ambiguity-aware benchmark built on RoboTwin2 with matched training and evaluation environments that isolate short-horizon observation aliasing."
 
 benchmarks:
-  libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  simpler_env:
-    google_robot_pick_coke_can: TODO
-  robocasa:
-    robocasa_avg: TODO
+  libero: {}  # abstract reports IntentVLA outperforms strong VLA baselines on LIBERO but no numeric scores
+  simpler_env: {}  # abstract reports gains on SimplerEnv but no numeric scores
+  robocasa: {}  # abstract reports gains on RoboCasa but no numeric scores
+  # AliasBench: 12-task ambiguity-aware benchmark on RoboTwin2 introduced by the paper; numeric scores not stated in abstract
 
 eval_conditions:
   libero: "fine-tuned"
   simpler_env: "fine-tuned"
   robocasa: "fine-tuned"
+  aliasbench: "introduced by authors; built on RoboTwin2 with matched training/eval environments"
 
-tags: [libero, simpler_env, robocasa]
+tags: [libero, simpler_env, robocasa, aliasbench, robotwin, history-conditioned]

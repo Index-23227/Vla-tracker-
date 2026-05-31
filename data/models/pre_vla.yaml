@@ -4,27 +4,24 @@
 
 name: Pre-VLA
 full_name: "Pre-VLA: Preemptive Runtime Verification for Reliable Vision-Language-Action and World-Model Rollouts"
-organization: "TODO: check paper"
+organization: "TODO: affiliations not stated in abstract page (authors: Zhen Sun, Yongjian Guo, Haoran Sun, Luqiao Wang, Wei Lu, Jiachi Ji, Shengzhe Ji, Junwu Xiong, Zhijun Meng)"
 date: "2026-05-21"
 paper_url: https://arxiv.org/abs/2605.22446
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "Runtime verification head (lightweight dual-branch: safety confidence + critic-derived advantage) on top of RynnVLA-002 base policy"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "Pre-VLA introduces a unified runtime verification architecture that preemptively assesses action validity before physical execution or world-model imagination. It uses an efficient multimodal backbone with modality-aware pooling and a lightweight dual-branch head that predicts both safety confidence and critic-derived advantage scores for candidate action chunks, trained with a multi-task objective combining Focal classification, advantage regression, and soft-threshold calibration. At deployment a dual-mode preemptive resampling scheduler filters low-quality actions and triggers adaptive resampling under a limited compute budget."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_avg: 37.62  # closed-loop average over four suites (vs RynnVLA-002 baseline 30.79%); per-suite scores not stated in abstract
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "closed-loop, fine-tuned (Pre-VLA verification head on top of RynnVLA-002)"
 
-tags: [libero]
+tags: [libero, runtime-verification, world-model]

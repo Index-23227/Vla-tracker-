@@ -4,24 +4,23 @@
 
 name: StableVLA
 full_name: "StableVLA: Towards Robust Vision-Language-Action Models without Extra Data"
-organization: "TODO: check paper"
+organization: "TODO: affiliations not stated in abstract page (authors: Yiyang Fu, Chubin Zhang, Shukai Gong, Yufan Deng, Kaiwei Sun, Qiyang Min, Qibin Hou, Yansong Tang, Jianan Wang, Daquan Zhou)"
 date: "2026-05-18"
 paper_url: https://arxiv.org/abs/2605.18287
-code_url: null  # TODO: check for GitHub repo
+code_url: null  # abstract page mentions "Code: this https URL" but link target could not be verified from abstract
 venue: "ICML 2026"
-open_source: false  # TODO: verify
+open_source: false  # code release status not verified from abstract alone
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "Information Bottleneck Adapter (IB-Adapter) — lightweight adapter module that filters noise from visual inputs; <10M parameter overhead added to a 0.5B-parameter VLA backbone"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "0.5B (backbone) + <10M (IB-Adapter overhead)"
+  key_innovation: "StableVLA proposes the Information Bottleneck Adapter (IB-Adapter), a lightweight information-theoretic adapter that selectively filters noise from visual inputs to improve VLA robustness under unseen real-world visual disturbances, without requiring extra data or augmentation. With fewer than 10M added parameters and a 14x smaller 0.5B backbone trained without Open X-Embodiment pre-training, StableVLA matches the robustness of 7B-scale state-of-the-art VLAs and surpasses OpenPi under synthetic and physical visual corruptions."
 
-benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+benchmarks: {}  # No specific benchmark scores stated in abstract; abstract reports ~30% average improvement over baseline and superiority over OpenPi under visual corruptions, but no numeric LIBERO/CALVIN/SimplerEnv scores
 
 eval_conditions:
-  TODO: "check paper"
+  visual_robustness: "evaluated under synthetic and physical visual corruptions"
+  long_horizon: "abstract reports accuracy is maintained on long-horizon tasks"
 
-tags: [ICML-2026]
+tags: [ICML-2026, robustness, visual-corruption, adapter]

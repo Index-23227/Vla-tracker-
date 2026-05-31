@@ -4,27 +4,26 @@
 
 name: LoopVLA
 full_name: "LoopVLA: Learning Sufficiency in Recurrent Refinement for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "TODO: affiliations not stated in abstract page (authors: Boyang Shen, Kaixiang Yang, Hao Wang, Qiuyu Yu, Qiang Xie, Qiang Li, Zhiwei Wang)"
 date: "2026-05-11"
 paper_url: https://arxiv.org/abs/2605.09948
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "Recurrent shared Transformer block that iteratively refines multimodal tokens; at each iteration produces a candidate action together with a learned sufficiency score that estimates whether further refinement is necessary"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "TODO: not stated in abstract; abstract reports 45% parameter reduction vs baselines"
+  key_innovation: "LoopVLA proposes a recurrent VLA architecture that jointly learns representation refinement, action prediction, and sufficiency estimation by iteratively applying a shared Transformer block to refine multimodal tokens. Because sufficiency has no direct supervision, the authors introduce a self-supervised distribution-alignment objective that trains intermediate confidence scores to match the relative action quality across refinement steps, linking sufficiency learning to policy optimization signals and decoupling refinement from absolute layer indices."
 
 benchmarks:
-  libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+  libero: {}  # abstract reports LoopVLA matches or outperforms strong baselines on LIBERO but no numeric per-suite scores
+  # LIBERO-Plus and VLA-Arena are also evaluated in the paper; not represented as benchmark keys in leaderboard.json
 
 eval_conditions:
   libero: "fine-tuned"
+  libero_plus: "fine-tuned (abstract-only)"
+  vla_arena: "fine-tuned (abstract-only)"
 
-tags: [libero]
+tags: [libero, libero-plus, vla-arena, recurrent, early-exit, efficiency]

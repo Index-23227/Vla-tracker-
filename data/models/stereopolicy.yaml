@@ -1,27 +1,28 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: StereoPolicy: Improving Robotic Manipulation Policies via Stereo Perception
 # arXiv: 2605.09989
 
 name: StereoPolicy
 full_name: "StereoPolicy: Improving Robotic Manipulation Policies via Stereo Perception"
-organization: "TODO: check paper"
+organization: "TODO: not stated in abstract (authors include Stanford-affiliated researchers Li Fei-Fei, Jiajun Wu, Ruohan Zhang, et al.)"
 date: "2026-05-11"
 paper_url: https://arxiv.org/abs/2605.09989
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  action_head: "Pretrained 2D vision encoders per stereo view + Stereo Transformer fusion module; integrates with diffusion-based and pretrained VLA policy heads"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "StereoPolicy is a visuomotor policy learning framework that directly leverages synchronized stereo image pairs to strengthen geometric reasoning, without requiring explicit 3D reconstruction or camera calibration. Pretrained 2D vision encoders process each view independently and a Stereo Transformer fuses the representations, implicitly capturing spatial correspondence and disparity. The module plugs into diffusion-based and pretrained VLA policies and consistently outperforms RGB, RGB-D, point cloud, and multi-view baselines."
 
 benchmarks:
   robocasa:
-    robocasa_avg: TODO
+    robocasa_avg: "abstract에 미명시"
+  # Note: abstract also reports gains on RoboMimic and OmniGibson (no leaderboard.json keys);
+  # specific numeric results were not given in the abstract.
 
 eval_conditions:
-  robocasa: "fine-tuned"
+  robocasa: "fine-tuned; abstract reports consistent improvements over RGB, RGB-D, point cloud, and multi-view baselines across RoboMimic, RoboCasa, and OmniGibson plus real-robot tabletop and bimanual mobile manipulation, but no exact numbers."
 
 tags: [robocasa]
