@@ -1,27 +1,36 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ElegantVLA: Learning When to Think for Efficient Vision-Language-Action Models
-# arXiv: 2605.29438
-
 name: ElegantVLA
 full_name: "ElegantVLA: Learning When to Think for Efficient Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Tsinghua University; University of Illinois at Urbana-Champaign"
 date: "2026-05-28"
 paper_url: https://arxiv.org/abs/2605.29438
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv preprint
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Applied to GR00T (N1/N1.5) and CogACT; modular VLA wrapper (vision encoder + LLM + action head)"
+  action_head: "Three-level denoising mode for diffusion/flow-matching action heads (reuses intermediate denoising states during stable motion; full refinement at goal-sensitive stages)"
+  action_head_category: hybrid
+  parameters: "Underlying VLAs (CogACT ~7B, GR00T ~2.5B); lightweight scheduler adds minimal parameters"
+  key_innovation: "Lightweight intra-model compute scheduler that dynamically allocates computation across vision encoding, LLM, and action denoising. Five-level Vision-LLM compute modes (full recomputation to multi-step reuse) paired with three-level denoising modes enable 2.55x-3.77x speedup on GR00T/CogACT while maintaining or improving success rate. Model-agnostic plug-in requiring no retraining."
 
 benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+  simpler_env:
+    visual_matching: 77.59
+    variant_aggregation: 72.54
+    simpler_avg: 75.07
+    source: "Paper SimplerEnv table (CogACT + ElegantVLA)"
+    date_reported: "2026-05-28"
+    eval_condition: "applied to CogACT (training-free); 3.72x / 3.77x speedup"
+    notes: "GR00T baseline 64.00% -> 65.88% with up to 2.55x speedup"
 
 eval_conditions:
-  TODO: "check paper"
+  simpler_env: "Two settings: Visual Matching and Variant Aggregation; CogACT and GR00T backbones"
+  real_world: "Franka Research 3, six tasks (stationary + conveyor-belt pickup); 61.67% -> 65.00% avg success with 2.18x speedup; 13.8 Hz -> 26.3 Hz; latency 72.44ms -> 38.00ms"
 
-tags: []
+training:
+  data: "Lightweight scheduler trained on profiling data; base VLA models frozen"
+  hardware: "NVIDIA RTX 4090 for profiling; Franka Research 3 for real-robot evaluation"
+  notes: "No retraining of base models; scheduler is plug-in"
+
+tags: [efficiency, adaptive-compute, scheduler, cogact, groot, simpler-env, real-world, plug-in]
