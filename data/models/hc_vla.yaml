@@ -1,0 +1,37 @@
+name: HC-VLA
+full_name: "Health-Conditioned Vision-Language-Action Models for Malfunction-Aware Robot Control"
+organization: "Hacettepe University (Arslan & Erkent)"
+date: '2026-05-15'
+paper_url: https://arxiv.org/abs/2605.16056
+code_url: https://github.com/h-arslan/health-aware-vla
+venue: "ICRA 2026 VLA Pipelines Workshop"
+open_source: true
+model_type: malfunction-aware-vla
+architecture:
+  backbone: "VLA-Adapter-Pro (DINOv2 + SigLIP vision, Qwen2.5-0.5B LLM frozen)"
+  llm: Qwen2.5-0.5B (frozen)
+  action_head: "L1 regression with action queries, conditioned on 7D health vector via Health Projector"
+  action_head_category: regression
+  action_space: continuous (7-DoF action chunks, C=8)
+  parameters: "900K trainable (810K Health Projector + 57K Action Queries) on top of frozen VLA-Adapter-Pro"
+  health_vector_dim: 7
+  key_innovation: "Two-layer MLP Health Projector maps 7D per-joint health vector (operation angle & torque capability) into 896-D embedding, zero-initialized to preserve pretrained behaviour; injects malfunction awareness without retraining the VLA backbone"
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    source: "Table I (healthy), HC-VLA paper"
+    date_reported: '2026-05-15'
+    eval_condition: "fine-tuned on LIBERO-Spatial (128 malfunction + 50 healthy episodes); healthy-baseline evaluation"
+training:
+  dataset: "LIBERO-Spatial (128 teleoperated malfunction episodes across joint weakness w in {0.3, 0.5, 0.7, 0.9} + 50 healthy episodes)"
+  method: "Freeze VLA-Adapter-Pro backbone; train only Health Projector and Action Queries with L1 loss on action chunks"
+  loss: "L1 regression on action chunks (chunk size C=8)"
+tags:
+- malfunction-aware
+- health-conditioned
+- VLA-Adapter
+- LIBERO
+- robust-control
+- workshop
+- small-parameters
+- open-source

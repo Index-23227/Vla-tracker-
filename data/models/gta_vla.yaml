@@ -1,0 +1,49 @@
+name: GTA-VLA
+full_name: "Guide, Think, Act: Interactive Embodied Reasoning in Vision-Language-Action Models"
+organization: "Futian Laboratory / Harbin Institute of Technology / IDEA / Hunan University / SCUT / Visincept"
+date: '2026-05-13'
+paper_url: https://arxiv.org/abs/2605.13632
+code_url: https://signalispupupu.github.io/GTA-VLA_ProjPage/
+venue: arXiv 2026
+open_source: false
+model_type: interactive-reasoning-vla
+architecture:
+  backbone: "Qwen3-VL-2B"
+  llm: Qwen3-VL-2B
+  action_head: "flow matching action head for continuous action chunk prediction"
+  action_head_category: flow_matching
+  action_space: continuous (action chunks)
+  parameters: "~2B (Qwen3-VL-2B backbone + flow-matching head)"
+  key_innovation: "Unified spatial-visual Chain-of-Thought (Guide / Think / Act) where users can optionally inject affordance points, boxes, and traces; the reasoning stage performs task decomposition, visual grounding, and robot-oriented motion reasoning, then a lightweight reactive flow-matching head executes actions. Enables interactive disambiguation and failure recovery."
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 98.8
+    libero_goal: 98.4
+    libero_long: 97.6
+    libero_avg: 98.6
+    source: "Table 1, GTA-VLA paper"
+    date_reported: '2026-05-13'
+    eval_condition: "fine-tuned on LIBERO suites"
+  simpler_env:
+    widowx_spoon_on_towel: 95.8
+    widowx_carrot_on_plate: 87.5
+    widowx_cube_stacking: 66.7
+    widowx_eggplant_in_basket: 75.0
+    simpler_avg: 81.2
+    source: "Table 1 (SimplerEnv WidowX in-domain), GTA-VLA paper"
+    date_reported: '2026-05-13'
+    eval_condition: "fine-tuned on Bridge data; in-domain WidowX evaluation"
+training:
+  dataset: "Interact-306K (constructed from Open X-Embodiment, DROID, RoboMind, and proprietary data with automatically generated spatial-reasoning annotations) + domain fine-tune (e.g., BridgeData V2)"
+  method: "Two-stage: (1) pre-train Qwen3-VL-2B backbone on Interact-306K with Guide/Think CoT supervision and flow-matching action head; (2) joint fine-tune on target robot data"
+  compute: "48 NVIDIA H800 GPUs (pre-training); 16 H800 GPUs (fine-tuning)"
+tags:
+- interactive
+- chain-of-thought
+- spatial-reasoning
+- flow-matching
+- Qwen3-VL
+- LIBERO
+- SimplerEnv
+- affordance-guidance

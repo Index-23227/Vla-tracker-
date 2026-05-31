@@ -1,0 +1,48 @@
+name: Fast-dDrive
+full_name: "Fast-dDrive: Efficient Block-Diffusion VLM for Autonomous Driving"
+version: '1.0'
+organization: NVIDIA / Peking University / University of Hong Kong / MIT
+paper_url: https://arxiv.org/abs/2605.23163
+code_url: https://github.com/NVlabs/Fast-dLLM
+date: '2026-05-22'
+venue: arXiv 2026
+architecture:
+  backbone: Qwen2.5-VL-3B
+  action_head: block-diffusion with masked diffusion modeling (MDM) over JSON-structured trajectory tokens, with Scaffold Speculative Decoding for verification
+  action_space: structured trajectory waypoints (autonomous driving)
+  parameters: 3B
+  key_innovation: "Block-diffusion VLA that performs bidirectional refinement within semantic units while enforcing strict causal ordering across sections. Introduces Scaffold Speculative Decoding for efficiency and test-time stochastic trajectory rollouts with shared KV-cache for variance suppression"
+  action_head_category: discrete_diffusion
+training:
+  dataset: WOD-E2E (30K CoT + 60K trajectory-only) and nuScenes (23K samples)
+  epochs: 3
+  compute: 8 x H100 GPUs
+benchmarks:
+  nuscenes:
+    l2_error_1s: 0.12
+    l2_error_2s: 0.33
+    l2_error_3s: 0.50
+    l2_error_avg: 0.32
+    source: "Fast-dDrive paper, nuScenes validation"
+    date_reported: '2026-05-22'
+    eval_condition: open-loop trajectory prediction
+  wod_e2e:
+    ade_3s: 1.254
+    ade_5s: 2.907
+    rfs: 7.823
+    ade_3s_4rollouts: 1.240
+    ade_5s_4rollouts: 2.821
+    rfs_4rollouts: 7.827
+    source: "Fast-dDrive paper, WOD-E2E test"
+    date_reported: '2026-05-22'
+    eval_condition: open-loop with optional 4-rollout test-time stochastic decoding
+open_source: true
+inference_hz: 521
+tags:
+- autonomous-driving
+- block-diffusion
+- discrete-diffusion
+- end-to-end
+- speculative-decoding
+- nuScenes
+- Waymo
