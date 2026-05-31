@@ -1,27 +1,38 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: LVDrive: Latent Visual Representation Enhanced Vision-Language-Action Autonomous Driving Model
-# arXiv: 2605.22089
-
 name: LVDrive
+version: '1.0'
 full_name: "LVDrive: Latent Visual Representation Enhanced Vision-Language-Action Autonomous Driving Model"
-organization: "TODO: check paper"
-date: "2026-05-21"
+organization: "HKUST / Xiaomi EV"
+date: '2026-05-21'
 paper_url: https://arxiv.org/abs/2605.22089
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
-
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
-
-benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
-
+  backbone: "EVA-02-L vision encoder + QT-Former scene feature extractor"
+  llm: "Vicuna v1.5 (LoRA fine-tuned)"
+  action_head: "Two-stage trajectory decoder over LLM hidden states (latent future representations from ViS_theta)"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "7B+"
+  key_innovation: "Future scene prediction performed entirely in a high-level latent space (256 tokens per future frame, supervised by VQGAN-ImageNet features) rather than pixel reconstruction, with joint future-scene-and-motion modeling in a single forward pass; two-stage trajectory decoding explicitly conditions planning on the learned latent futures, yielding +1.49 Driving Score and +1.84 SR over UniDrive-WM on Bench2Drive"
+training:
+  dataset: "Bench2Drive base split (~950 training clips across 44 interactive scenes, 23 weathers, 12 towns)"
+  method: "End-to-end training with combined loss L = L_vis + L_plan + L_plan_r + L_qt + L_ce (visual prediction + planning + planning refinement + QT-Former + cross-entropy); 6 epochs"
+  num_trajectories: 950
+  compute: "32x NVIDIA H20 (96GB) GPUs, 6 epochs"
+  bench2drive_results: "Driving Score 80.71, Success Rate 58.26, Efficiency 155.77, Comfort 14.34, L2 error (3s) 0.63; Multi-Ability: Traffic Sign 74.21, Merging 39.74, Overtaking 68.89, Emergency Brake 71.67, Give Way 20.00, Mean 54.90"
+benchmarks: {}
 eval_conditions:
-  TODO: "check paper"
-
-tags: [reasoning]
+  bench2drive: "fine-tuned (closed-loop CARLA simulation); ~2.03s per inference step"
+inference_hz: 0.49
+tags:
+- autonomous-driving
+- vla
+- latent-world-model
+- future-prediction
+- vicuna
+- eva-02
+- bench2drive
+- vqgan-supervision
+- reasoning

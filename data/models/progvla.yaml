@@ -1,27 +1,61 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ProgVLA: Progress-Aware Robot Manipulation Skill Learning
-# arXiv: 2605.28231
-
 name: ProgVLA
+version: '1.0'
 full_name: "ProgVLA: Progress-Aware Robot Manipulation Skill Learning"
-organization: "TODO: check paper"
-date: "2026-05-27"
+organization: "NAVER LABS / NAVER LABS Europe"
+date: '2026-05-27'
 paper_url: https://arxiv.org/abs/2605.28231
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
-
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
-
+  backbone: "DUNE (ViT-Small distilled from multiple vision specialists) + frozen T5 text encoder"
+  llm: frozen T5 text encoder
+  action_head: "flow matching expert with receding-horizon control (predict 16, execute 8)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: 109M
+  key_innovation: "Compact 0.1B VLA combining two-stage Perceiver resampling (per-modality + post-fusion bottleneck) with internally-coupled progress heads (Q/V/S) that advantage- and success-weight the imitation loss, enabling a 70x smaller model to outperform OpenVLA-7B and pi0-3.3B on LIBERO"
+training:
+  dataset: "LIBERO (2,000 demos: 50/task x 40 tasks) and Meta-World (49 tasks x 50 demos)"
+  method: "Imitation learning + offline-RL progress heads (Huber Q-loss, expectile V-loss rho=0.8, BCE success head); progress weights w_A,t = min{exp(A_t/beta), C} and w_S,t = 0.5 + 0.5*p_succ"
+  num_trajectories: 2000
+  compute: "25h on NVIDIA H100 (LIBERO), 32h on H100 (Meta-World); 500 epochs, batch 256, AdamW"
 benchmarks:
   libero:
-    TODO: "check paper for benchmark scores" 
-
+    libero_spatial: 87.6
+    libero_object: 96.0
+    libero_goal: 92.0
+    libero_long: 88.6
+    libero_avg: 91.1
+    source: ProgVLA paper Table 1
+    date_reported: '2026-05-27'
+    eval_condition: fine-tuned
+  metaworld:
+    easy: 84.9
+    medium: 72.7
+    hard: 77.0
+    very_hard: 79.6
+    metaworld_avg: 78.5
+    source: ProgVLA paper Table 1
+    date_reported: '2026-05-27'
+    eval_condition: fine-tuned
+  real_world:
+    piper_6dof_10tasks: 68.0
+    source: ProgVLA paper
+    date_reported: '2026-05-27'
+    eval_condition: fine-tuned
 eval_conditions:
-  TODO: "check paper"
-
-tags: []
+  libero: fine-tuned
+  metaworld: fine-tuned
+  real_world: "PiPER 6-DOF arm with RealSense D405 (wrist) + D435 (agent), 10 tasks x 10 trials"
+tags:
+- 0.1B
+- compact
+- flow-matching
+- perceiver-resampler
+- progress-aware
+- offline-rl
+- DUNE
+- manipulation
+- real-world
