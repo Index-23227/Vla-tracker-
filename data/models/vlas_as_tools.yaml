@@ -30,15 +30,11 @@ benchmarks:
     source: "Paper main results - pi0.5 + TAPT (IL)"
     date_reported: "2026-05-13"
     eval_condition: "pi0.5 base with full TAPT, +23.1 over pi0.5 baseline on RoboTwin"
-  calvin:
-    calvin_abc_d_avg_len: 82.3
-    source: "Paper RL results - pi0.5 + TAPT (RL)"
-    date_reported: "2026-05-13"
-    eval_condition: "pi0.5 base with full TAPT; note reported as a percentage score (82.3%), not the official 5-task avg length metric"
 
 eval_conditions:
   invocation_fidelity: "Non-biased Rate (LIBERO-CF-Long): +16.2 pts (OpenVLA-OFT), +15.0 pts (pi0.5)"
   rl_libero_long: "OpenVLA-OFT 82.6%, pi0.5 91.2% with tool-family interface"
+  calvin_note: "Paper reports CALVIN as 82.3% success rate, NOT the official 5-task avg-length metric (0-5); omitted from leaderboard to avoid scale mismatch."
 
 tags:
   - hierarchical

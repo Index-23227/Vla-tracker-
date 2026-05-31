@@ -5,14 +5,14 @@
 ### The most comprehensive benchmark tracker for Vision-Language-Action models
 
 [![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Visit-blue?style=for-the-badge)](https://hyeongjinkim.github.io/Vla-tracker-/)
-[![Models](https://img.shields.io/badge/Models-171-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-183-purple?style=flat-square)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
-[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-171-orange?style=flat-square)](data/ai_reviews/)
+[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-183-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
 
-**171 VLA models** · **8 benchmarks** · **171 AI paper reviews** · **Auto-updated from arXiv**
+**183 VLA models** · **8 benchmarks** · **183 AI paper reviews** · **Auto-updated from arXiv**
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
 
@@ -73,7 +73,7 @@ VLA-Tracker solves this by:
 
 ## Paper Reviews
 
-VLA-Tracker includes **171 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
+VLA-Tracker includes **183 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
 
 1. One-line summary
 2. Background & motivation
@@ -85,7 +85,7 @@ VLA-Tracker includes **171 AI-generated seminar-style paper reviews** for every 
 8. Overall assessment with ratings
 9. Expected tough questions for seminars
 
-**171 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
+**183 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
 
 Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-tracker-/) · [Markdown files](data/ai_reviews/)
 
@@ -100,7 +100,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
 | **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (1700+ lines) |
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
-| **YAML** | [data/models/](data/models/) | Individual model files (171 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (183 files) |
 
 ### Quick Start (Python)
 
@@ -155,12 +155,12 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 | Benchmark | Tasks | Models | Focus | Venue |
 |-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 87 | Manipulation generalization | NeurIPS 2023 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 91 | Manipulation generalization | NeurIPS 2023 |
 | [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 26 | Long-horizon, language | RA-L 2022 |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 31 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 30 | Bimanual manipulation | CVPR 2025 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 33 | Sim-to-real transfer | NeurIPS 2024 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 34 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 5 | Diverse manipulation | RA-L 2020 |
-| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 17 | Home robot tasks | RSS 2024 |
+| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 18 | Home robot tasks | RSS 2024 |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity | CoRL 2020 |
 
 ---
@@ -179,9 +179,9 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 ```
 ├── data/
-│   ├── models/              # 171 model YAML files (source of truth)
+│   ├── models/              # 183 model YAML files (source of truth)
 │   ├── benchmarks/          # 8 benchmark definitions
-│   ├── ai_reviews/          # 171 AI-generated paper reviews (markdown)
+│   ├── ai_reviews/          # 183 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── paper_reviews.json   # Venue peer-review data (ICLR, NeurIPS, CoLM)
 ├── scripts/
@@ -219,7 +219,7 @@ We also welcome:
 
 - Benchmark numbers are from papers — evaluation conditions vary (fine-tuned vs. zero-shot)
 - Not all models report on all benchmarks (fair comparison is hard)
-- AI reviews are generated by Claude and may contain inaccuracies (171/171 are PDF-verified)
+- AI reviews are generated by Claude and may contain inaccuracies (183/183 are PDF-verified)
 - Real-world performance ≠ benchmark performance
 
 ---

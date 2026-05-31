@@ -1,0 +1,56 @@
+name: ConSFT
+full_name: "Preserving Foundational Capabilities in Flow-Matching VLAs through Conservative SFT (ConSFT)"
+organization: "Shanghai Artificial Intelligence Laboratory"
+date: "2026-05-09"
+paper_url: https://arxiv.org/abs/2605.08879
+code_url: null
+venue: "arXiv preprint"
+open_source: false
+
+architecture:
+  backbone: "N/A (training-recipe / fine-tuning algorithm; inherits backbone of host flow-matching VLA — PaliGemma/SigLIP for pi0 and pi0.5, Eagle backbone for GR00T-N1.6-3B)"
+  llm: "N/A (inherits LLM of host VLA)"
+  action_head: "Inherits flow-matching action head of host VLA (pi0, pi0.5, GR00T-N1.6-3B); ConSFT modifies only the SFT objective, not the architecture"
+  action_head_category: flow_matching
+  parameters: "Inherits host (pi0 ~3B, pi0.5 ~3B-class, GR00T-N1.6-3B)"
+  key_innovation: "Conservative supervised fine-tuning objective for flow-matching VLAs that mitigates catastrophic forgetting without parallel reference networks or replay buffers. Loss: J_ConSFT(theta) = sg[exp(-L_SFT(theta)/tau)] * L_SFT(theta), where sg is stop-gradient and tau is a temperature parameter (initial tau_start = 0.003, scaling factor kappa = 25.0, lower bound omega_min = 0.001). The exp(-L/tau) gating dynamically suppresses gradients on low-confidence samples (high loss), inspired by trust-region methods, yielding sparse parameter updates and preserving foundational pre-trained skills. Achieves average +20% absolute margin over vanilla SFT in capability retention across LIBERO and RoboTwin domains."
+
+benchmarks:
+  libero:
+    libero_spatial: 90.0
+    libero_object: 32.0
+    libero_goal: 35.0
+    libero_prior_avg: 34.0
+    source: "Table 2 (pi0 + ConSFT). Target task: LIBERO-Spatial 0.90 ± 0.067. Prior-capability retention: LIBERO-Object 0.32, LIBERO-Goal 0.35, avg 0.34"
+    eval_condition: "fine-tuned on LIBERO-Spatial target; LIBERO-Object/Goal evaluated as prior-capability retention"
+  robotwin_v2:
+    target_indep: 60.0
+    single_arm_retention: 43.0
+    coord_retention: 13.0
+    prior_avg: 28.0
+    source: "Table 2 (pi0 + ConSFT). RoboTwin-Indep target 0.60; prior retention: Single-Arm 0.43, Coord 0.13, avg 0.28"
+    eval_condition: "fine-tuned on RoboTwin-Indep target; Single-Arm and Coord evaluated as prior-capability retention"
+
+eval_conditions:
+  libero: "pi0 / pi0.5 / GR00T-N1.6-3B fine-tuned with ConSFT on LIBERO-Spatial; retention measured on LIBERO-Object and LIBERO-Goal"
+  robotwin_v2: "fine-tuned with ConSFT on RoboTwin-Indep; retention measured on Single-Arm and Coord subsets"
+
+training:
+  dataset: "LIBERO (Spatial as target; Object/Goal for retention); RoboTwin (Indep as target; Single-Arm/Coord for retention)"
+  method: "Conservative SFT with confidence-gated loss J = sg[exp(-L/tau)] * L. Compared against vanilla SFT, LoRA, Experience Replay, and KL-Regularization baselines."
+  num_trajectories: null
+  compute: "8 x NVIDIA A100 (80GB) with FSDP. Learning rate 2.5e-5, global batch size 1024. Hyperparameters: tau_start = 0.003, kappa = 25.0, omega_min = 0.001."
+
+tags:
+  - fine_tuning
+  - catastrophic_forgetting
+  - flow_matching
+  - pi0
+  - pi0_5
+  - groot_n1_6
+  - libero
+  - robotwin_v2
+  - conservative_training
+  - trust_region
+  - capability_retention
+  - shanghai_ai_lab
