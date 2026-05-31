@@ -1,30 +1,30 @@
 name: GR00T-N1.5
 version: '1.5'
-organization: NVIDIA
+organization: NVIDIA GEAR Lab
 model_type: vla
 inference_hz: null
 paper_url: null
 project_url: https://research.nvidia.com/labs/gear/gr00t-n1_5/
 code_url: https://github.com/NVIDIA/Isaac-GR00T
 date: '2025-06-11'
-venue: Announced at Computex 2025 (industry release, no peer-reviewed paper)
+venue: Announced at Computex 2025 (industry release; NVIDIA tech blog only, no peer-reviewed paper or arXiv preprint)
 architecture:
-  backbone: Eagle 2.5 VLM
-  llm: Eagle 2.5 VLM
-  action_head: diffusion transformer + FLARE objective
+  backbone: Eagle 2.5 VLM (frozen during pretraining/finetuning)
+  llm: Eagle 2.5 VLM (2.1B parameters)
+  action_head: diffusion transformer + FLARE (Future LAtent Representation Alignment) objective
   action_space: continuous
-  parameters: 3B
-  key_innovation: FLARE (Future LAtent Representation Alignment) enables learning from human videos; trained in 36 hours using
-    GR00T-Dreams synthetic data pipeline
+  parameters: 3B (2.1B VLM + DiT action expert)
+  key_innovation: FLARE (Future LAtent Representation Alignment) aligns the model with target future embeddings instead of generatively modelling frames, enabling learning from action-free human videos; trained with GR00T-Dreams neural-trajectory pipeline; simplified MLP adapter with layer normalization replaces N1's vision adapter
   action_head_category: diffusion
 training:
-  dataset: Real robot data + GR00T-Dreams synthetic data + human videos
-  method: Dual-system pre-training with FLARE alignment
-  compute: 1K H100 GPUs, 250K steps, batch size 16384
+  dataset: Real GR-1 teleop + simulated GR-1 (DexMG) + DreamGen neural trajectories + OpenXE + AgiBot-Beta
+  method: Dual-system pre-training with FLARE alignment (loss coefficient 0.2)
+  compute: 1K H100 GPUs, 250K steps, global batch size 16384, AdamW with cosine LR schedule (warmup ratio 0.05)
 benchmarks:
   dreamgen:
     dreamgen_12task_success: 38.3
-    source: NVIDIA research page
+    n1_baseline: 13.1
+    source: NVIDIA GR00T-N1.5 project page (12 new verbs)
     date_reported: '2025-05-19'
     eval_condition: zero-shot and few-shot
   robocasa:
@@ -32,6 +32,34 @@ benchmarks:
     source: HAMLET paper (GR00T N1.5 baseline, RoboCasa Kitchen 100-demo, 24 atomic tasks)
     date_reported: '2025-10-01'
     eval_condition: fine-tuned
+  robocasa_30demo:
+    robocasa_30demo_avg: 47.5
+    n1_baseline: 17.4
+    source: NVIDIA GR00T-N1.5 project page
+    eval_condition: 30-demo post-training
+  sim_gr1:
+    language_table: 93.2
+    n1_language_table: 52.8
+    sim_gr1_language: 54.4
+    n1_sim_gr1_language: 36.4
+    sim_gr1_zero_shot: 43.9
+    sim_gr1_30demo: 47.4
+    source: NVIDIA GR00T-N1.5 project page (architecture validation)
+  real_gr1:
+    language_following_rate: 93.3
+    overall_success: 83.0
+    n1_language_following: 46.6
+    n1_overall_success: 43.3
+    source: NVIDIA GR00T-N1.5 project page (Real GR-1)
+  novel_object_generalization:
+    zero_shot: 15.0
+    n1_zero_shot: 0.0
+    post_trained_on_human_videos: 55.0
+    source: NVIDIA GR00T-N1.5 project page
+  unitree_g1:
+    post_training_avg: 98.8
+    n1_post_training_avg: 44.0
+    source: NVIDIA GR00T-N1.5 project page
 open_source: true
 open_source_note: Open model weights on HuggingFace (nvidia/GR00T-N1.5-3B)
 tags:

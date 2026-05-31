@@ -3,7 +3,7 @@
 
 name: BlockVLA
 full_name: "BlockVLA: Accelerating Autoregressive VLA via Block Diffusion Finetuning"
-organization: "Affiliations not disclosed in abstract (authors: Ruiheng Wang, Shuanghao Bai, Haoran Zhang, Badong Chen, Xiangyu Xu)"
+organization: "Xi'an Jiaotong University"
 date: "2026-05-13"
 paper_url: https://arxiv.org/abs/2605.13382
 code_url: null
@@ -11,29 +11,47 @@ venue: null
 open_source: false
 
 architecture:
-  action_head: "discrete diffusion (block diffusion)"
+  action_head: "discrete block diffusion (AR dependency across blocks, parallel denoising within blocks)"
   action_head_category: discrete_diffusion
-  parameters: "TODO: not stated in abstract"
-  key_innovation: "Adapts pretrained autoregressive VLA backbones into an efficient discrete diffusion policy via a block diffusion paradigm: autoregressive dependencies are kept at the block level while denoising is parallelised within each block. This enables prefix KV-cache reuse across completed blocks, reduces iterative denoising cost, and provides a smooth transition from AR pretraining to diffusion-based policy fine-tuning."
+  parameters: "Prismatic-7B backbone (~7B); SigLIP + DINOv2 vision; 256-bin action tokenization (7 tokens/timestep: 3 trans + 3 rot + 1 gripper); exact trainable count not stated"
+  key_innovation: "Adapts a pretrained autoregressive VLA backbone (Prismatic-7B + SigLIP/DINOv2) into a discrete block diffusion policy. Token sequence is split into blocks of size B (e.g., B=14); inter-block dependencies remain autoregressive (block-wise causal mask) while intra-block tokens are denoised in parallel (bidirectional attention within block). This (i) enables prefix KV-cache reuse across completed blocks, (ii) reduces denoising-NFE cost vs full-sequence dLLM, (iii) gives smooth AR-pretraining → diffusion fine-tuning transition. Compares Teacher Forcing vs Diffusion Forcing training objectives; removes token shift for better convergence."
 
 benchmarks:
   libero:
-    # Abstract reports evaluation on LIBERO but does not provide absolute suite scores.
-    libero_spatial: null  # abstract에 미명시
-    libero_object: null   # abstract에 미명시
-    libero_goal: null     # abstract에 미명시
-    libero_long: null     # abstract에 미명시
-    source: "abstract (no absolute scores reported)"
+    # Reported at 50k steps (training curves Table 3)
+    libero_spatial: 90.6
+    libero_object: 97.6
+    libero_goal: 93.2
+    libero_long: 85.2
+    libero_avg: 91.7
+    source: "paper Table 3 (50k step checkpoint)"
+    date_reported: "2026-05-13"
   simpler_env:
-    # Abstract reports evaluation on SimplerEnv but does not provide absolute scores.
-    google_robot_pick_coke_can: null  # abstract에 미명시
-    source: "abstract (no absolute scores reported)"
+    # WidowX setup, success count out of 24 episodes at 60k steps (Table 4)
+    widowx_put_carrot_on_plate: 16.7   # 4/24
+    widowx_put_spoon_on_towel: 50.0    # 12/24
+    widowx_stack_green_on_yellow: 12.5 # 3/24
+    widowx_put_eggplant_in_basket: 62.5 # 15/24
+    simpler_widowx_avg: 35.4   # mean of 4 tasks
+    simpler_avg: 35.4
+    source: "paper Table 4 (60k step, WidowX, S=Success out of 24)"
+    date_reported: "2026-05-13"
 
 inference_speedup:
   speedup_vs_discrete_diffusion_baseline: "3.3x"
+  speedup_vs_autoregressive_openvla: "8.0x"
+  throughput_tokens_per_second: 186.7
+  hardware: "Single NVIDIA RTX 4090"
 
 eval_conditions:
-  libero: "fine-tuned"
-  simpler_env: "fine-tuned"
+  libero: "fine-tuned (500 episodes per suite = 50 demos × 10 tasks; evaluated at 50k step)"
+  simpler_env: "fine-tuned (WidowX, 60k step checkpoint, 24 episodes per task)"
+
+training:
+  block_size: 14   # outperforms B=7
+  optimal_denoise_steps_per_block: 3
+  forcing_strategy: "Diffusion Forcing (outperforms Teacher Forcing)"
+  training_budget: "50k steps on 2 GPUs"
+  removes_token_shift: true   # 59.6% vs 51.2% at 5k steps
 
 tags: [diffusion, block-diffusion, autoregressive, kv-cache, libero, simpler_env]

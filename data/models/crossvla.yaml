@@ -3,7 +3,7 @@
 
 name: CrossVLA
 full_name: "CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for Vision-Language-Action Models"
-organization: "Independent (Zhi Liu); affiliation not disclosed in abstract"
+organization: "Tianjin University"
 date: "2026-05-21"
 paper_url: https://arxiv.org/abs/2605.21854
 code_url: https://github.com/lz-googlefycy/vla-lab
@@ -11,23 +11,48 @@ venue: null
 open_source: true
 
 architecture:
-  action_head: "flow matching"
+  action_head: "flow matching (analysis on OpenVLA AR backbone + pi0.5 flow-matching backbone)"
   action_head_category: flow_matching
-  parameters: "TODO: not stated in abstract"
-  key_innovation: "Cross-paradigm post-training study for VLA models that brings Direct Preference Optimisation (DPO) to continuous-action flow-matching backbones via a surrogate flow-matching log-probability estimator (avoiding probability-flow ODE integration). Compares LoRA vs DoRA as the PEFT layer for VLA DPO and provides an inference-time anatomy showing the denoise loop dominates 78.6% of sample_actions latency, with prefix-K/V caching capped at ~21% acceleration."
+  parameters: "OpenVLA-7B backbone (~7.5B); LoRA-r32 33.55M trainable (0.44%); DoRA-r32 34.08M trainable (0.45%); multi-view projection head 656K"
+  key_innovation: "Cross-paradigm post-training study that brings DPO to continuous-action flow-matching VLAs via a surrogate flow-matching log-probability estimator (sum of squared velocity errors at stratified t-samples, Teval=4) — no probability-flow ODE integration required. Provides head-to-head LoRA vs DoRA comparison as the PEFT layer for VLA DPO, an inference-time anatomy showing denoise loop dominates 78.6% of sample_actions latency in pi0.5 (with prefix K/V caching capped at ~21% acceleration ceiling), and a multi-view + temporal contrastive projection head pretrained on 6000 LIBERO frames (99.5% same-task k-NN recall@1)."
 
 benchmarks:
   libero:
-    # Reported as improvement over OpenVLA SFT baseline (DoRA + DPO, 600 trials, 3 seeds)
-    # Absolute LIBERO suite scores are not stated in the abstract.
+    # Reproduced OpenVLA SFT baseline and applied DoRA+DPO on top.
+    # Each suite has 10 tasks × 5 trials × 3 seeds = 150 trials.
+    libero_spatial: 74.7   # DoRA+DPO (112/150)
+    libero_object: 76.0    # DoRA+DPO (114/150); per-seed 38/50 ×3 (zero variance)
+    libero_goal: 78.0      # DoRA+DPO (117/150)
+    libero_long: 64.0      # DoRA+DPO (96/150)
+    libero_avg: 73.2       # mean of 4 suites under DoRA+DPO
+    # Baseline (OpenVLA SFT, single-seed): spatial 72%, object 56%, goal 70%, long 53%, avg 62.75%
     libero_spatial_delta_vs_openvla_sft: 2.7
     libero_object_delta_vs_openvla_sft: 20.0
     libero_goal_delta_vs_openvla_sft: 8.0
     libero_long_delta_vs_openvla_sft: 11.0
     libero_avg_delta_vs_openvla_sft: 10.4
-    source: "abstract"
+    source: "paper Table 3 (3 seeds × 600 trials)"
+    date_reported: "2026-05-21"
+
+inference_analysis:
+  pi0_5_total_latency_ms: 280
+  denoise_loop_share: 0.786
+  prefix_forward_share: 0.214
+  prefix_kv_cache_acceleration_ceiling: 0.21
+  chunk_level_cache_success: 0.80   # vs 1.00 no-cache baseline; +30% slower
+  chunk_level_cache_reuse_rate: 0.821
 
 eval_conditions:
-  libero: "fine-tuned (DPO over OpenVLA SFT; 600 trials, 3 seeds)"
+  libero: "fine-tuned (DPO over OpenVLA SFT; DoRA-r32; 600 trials, 3 seeds × 50 trials/suite)"
 
-tags: [flow-matching, dpo, post-training, lora, dora, libero]
+training:
+  dpo_lr: 5e-5
+  dpo_batch_size: 1
+  dpo_max_steps: 500
+  dpo_warmup: 100
+  dpo_beta: 0.1
+  dpo_pairs_per_suite: 200
+  contrastive_pretraining_frames: 6000
+  hardware: "NVIDIA H20-3e (144GB) cloud pod + H20 (96GB) dev pod"
+
+tags: [flow-matching, dpo, post-training, lora, dora, libero, kv-cache, inference-analysis]

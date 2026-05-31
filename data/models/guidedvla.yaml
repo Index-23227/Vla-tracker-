@@ -3,27 +3,51 @@
 
 name: GuidedVLA
 full_name: "GuidedVLA: Specifying Task-Relevant Factors via Plug-and-Play Action Attention Specialization"
-organization: "TODO: not stated in abstract"
+organization: "Institute of Trustworthy Embodied AI (TEAI), Fudan University / Shanghai Key Laboratory of Multimodal Embodied AI / Shanghai Jiao Tong University / OpenDriveLab, The University of Hong Kong"
 date: "2026-05-12"
 paper_url: https://arxiv.org/abs/2605.12369
-code_url: null
+code_url: https://guidedvla.github.io/project_page/
 venue: "RSS 2026"
 open_source: false
 
 architecture:
-  action_head: "VLM action decoder with specialized attention heads (object grounding, spatial geometry, temporal skill logic)"
-  action_head_category: other
-  parameters: "TODO: not stated in abstract"
-  key_innovation: "GuidedVLA treats the action decoder as an assembly of functional components rather than a monolithic learner, and supervises individual attention heads with manually defined auxiliary signals to capture distinct task-relevant factors. The initial instantiation uses three specialized heads for object grounding, spatial geometry, and temporal skill logic, yielding decoupled high-quality features. This explicit guidance mitigates overfitting to spurious correlations (visual shortcuts, environmental noise) and improves in-domain and out-of-domain generalization."
+  action_head: "pi0 flow-matching action expert with ControlNet-style residual adapter (zero-initialized projection) that injects factor-specific biases over a frozen pretrained backbone, then assigns specific attention heads to three task-relevant factors: object grounding (Object Head), 3D geometry (Depth Head), and temporal skill logic (Skill Head)."
+  action_head_category: flow_matching
+  parameters: "Built on pi0 backbone (~3B params); GuidedVLA adapter adds attention specialization without changing total scale"
+  backbone: "pi0 (SigLIP vision encoder + flow-matching action expert)"
+  key_innovation: "Treats the action decoder as an assembly of functional components rather than a monolithic learner, and explicitly supervises individual attention heads with auxiliary signals to capture distinct task-relevant factors. Object head: supervised by Grounded-SAM masks via negative log object-mass loss to concentrate attention on target objects. Skill head: supervised by KL divergence against soft temporal sub-skill labels (task class + null/background). Depth head: constrained to attend only to keys/values from a frozen DepthAnything-v3 (DA3) depth encoder for implicit geometric awareness. Annotation pipeline is ~92% automatic (4 min vs 43.5 min manual per 50 episodes). Plug-and-play: zero-init ControlNet-style residual preserves pretrained behavior."
 
 benchmarks:
-  libero:
-    libero_spatial: "abstract에 미명시"
-    libero_object: "abstract에 미명시"
-    libero_goal: "abstract에 미명시"
-    libero_long: "abstract에 미명시"
+  libero_plus:
+    libero_spatial: 84.0
+    libero_object: 80.9
+    libero_goal: 70.8
+    libero_long: 66.2
+    libero_avg: 75.4
+    pi0_baseline_avg: 68.2
+    source: "Paper Table I (LIBERO-Plus, harder generalization variant of LIBERO)"
+    date_reported: "2026-05-12"
+    eval_condition: "fine-tuned on LIBERO-Plus; full model with all three heads"
+  robotwin_v2:
+    robotwin_v2_avg: 90.63
+    pi0_baseline_avg: 77.38
+    source: "Paper Table (8 RoboTwin 2.0 tasks, Agilex Piper dual-arm)"
+    date_reported: "2026-05-12"
+    eval_condition: "fine-tuned, 8 tasks aggregated average"
 
 eval_conditions:
-  libero: "fine-tuned (per abstract, simulation + real-robot experiments; specific numbers not in abstract)"
+  libero: "Evaluated on LIBERO-Plus (harder variant emphasizing OOD generalization), NOT the original LIBERO suite. Standard LIBERO numbers not reported."
+  real_world: "Cross-platform evaluation on ALOHA AgileX (Platform A) and PSI-Bot RealMan RM63 (Platform B); in-domain 75.8% vs 55.8% baseline; scene generalization 67.5% vs 44.2%; lighting generalization 79.2% vs 57.5%"
+  ablation: "Per-suite head dominance: object head best on Object/Long, skill head best on Goal, depth head best on Spatial — complementary specialization."
 
-tags: [RSS-2026]
+ablations:
+  object_head_only:
+    libero_plus_avg: 73.4
+  skill_head_only:
+    libero_plus_avg: 72.5
+  depth_head_only:
+    libero_plus_avg: 71.7
+  full_model:
+    libero_plus_avg: 75.4
+
+tags: [RSS-2026, libero-plus, robotwin, pi0, attention-specialization, depth, grounding, controlnet]

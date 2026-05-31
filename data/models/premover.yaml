@@ -3,7 +3,7 @@
 
 name: Premover
 full_name: "Premover: Fast Vision-Language-Action Control by Acting Before Instructions Are Complete"
-organization: "TODO: not stated in abstract"
+organization: "UNIST (Ulsan National Institute of Science and Technology) / The Catholic University of Korea"
 date: "2026-05-12"
 paper_url: https://arxiv.org/abs/2605.12160
 code_url: null
@@ -11,20 +11,42 @@ venue: null
 open_source: false
 
 architecture:
-  action_head: "Frozen VLA backbone + two lightweight projection heads (image patches, language tokens) producing a focus map that reweights image tokens; learned scalar readiness threshold gates action start"
+  action_head: "Frozen pi0.5 VLA backbone + two lightweight 2-layer MLP projection heads (image patches f_img and language tokens f_lang) with GELU activations and L2 normalization, producing a focus map from cosine similarity in a shared latent space; a learnable scalar readiness threshold gates action start."
   action_head_category: other
-  parameters: "TODO: not stated in abstract (lightweight projection heads on a frozen backbone)"
-  key_innovation: "Premover turns the idle window during user instruction entry into useful precomputation for VLA policies. Two small projection heads map an intermediate layer of a frozen VLA backbone into a shared image-language space, producing a focus map (supervised by simulator-rendered target-object masks) that reweights next-step image tokens. A jointly trained scalar readiness threshold decides when to begin acting on streaming prefixes, reducing latency without sacrificing success rate."
+  parameters: "2.36M trainable (projection heads + scalar threshold); <1% of frozen pi0.5 backbone (~3B). Inference overhead: 0.232 ms/step over 65.84 ms backbone forward (0.35%)"
+  backbone: "pi0.5 (frozen, bfloat16); trainable parameters held in float32"
+  key_innovation: "Converts the user's instruction-input idle window (averaging 39% of LIBERO interaction time at 52.24 WPM typing) into useful precomputation. Two small MLP projection heads map an intermediate frozen-backbone layer to a shared image-language space; per-patch cosine similarity vs streaming-prefix tokens (max over tokens, sigmoid) produces a focus map supervised by simulator-rendered target-object segmentation masks via class-balanced BCE. Focus map at step t reweights image-token embeddings at step t+1 via w = alpha + (1-alpha)*p with alpha=0.2. A learnable readiness gate r_t = mean(top-K=10 patches) - mean(all patches) compared to learnable threshold tau decides when prefix is informative enough to act. Trained jointly with focus loss + BCE readiness loss; backbone never updated."
 
 benchmarks:
   libero:
-    libero_spatial: "abstract에 미명시"
-    libero_object: "abstract에 미명시"
-    libero_goal: "abstract에 미명시"
-    libero_long: "abstract에 미명시"
-    libero_avg: 95.1  # full-prompt Premover success rate reported in abstract (baseline 95.0)
+    libero_spatial: 98.6
+    libero_object: 99.1
+    libero_goal: 93.7
+    libero_long: 88.9
+    libero_avg: 95.1
+    source: "Paper Table 1 (350 rollouts per suite)"
+    date_reported: "2026-05-12"
+    eval_condition: "fine-tuned (projection heads only, backbone frozen) on pi0.5; streaming-prefix evaluation at 52.24 WPM typing rate; full-prompt baseline 95.0%, naive premoving collapses to 66.4%"
+  vla_arena:
+    extrapolation: 25.9
+    distractor: 41.4
+    safe: 35.9
+    long_horizon: 0.0
+    avg: 30.9
+    pi0_5_baseline_avg: 33.0
+    source: "Paper Table 2 (Level-1 suites, episodes 15-49)"
+    date_reported: "2026-05-12"
+    eval_condition: "frozen pi0.5; LongHorizon 0% for all settings"
 
 eval_conditions:
-  libero: "fine-tuned; Premover reduces mean wall-clock time 34.0s -> 29.4s (-13.6%) while matching 95.0% baseline (95.1%). Naive premoving collapses to 66.4%."
+  libero: "fine-tuned (heads only). LIBERO wall-clock: 34.0s -> 29.4s (-13.6%); 95.1% vs 95.0% baseline; naive premoving 66.4% collapse. Per-suite times (all): Spatial 22.7s, Object 24.4s, Goal 21.9s, L-10 48.6s."
+  vla_arena: "Wall-clock 85.4s -> 76.6s (-10.3%); success 33.0% -> 30.9% (-2.1pp gap)."
+  ablation: "Readiness gate alone: 88.4% avg; +focus map injection: 95.1% (close gap to full-prompt 95.0%). Stream + focus only (no ready): 69.5%."
 
-tags: [libero]
+training:
+  data: "Per-frame observations from expert demonstrations in segmentation-enabled simulator. LIBERO: 10 tasks * episodes 0-9 (train) / 10-14 (calibrate) / 15-49 (eval). VLA-arena: 4 Level-1 families, 55 tasks across 11 suites, episodes 0-7 (train)."
+  prefix_construction: "4 cumulative word-level prefixes per frame (e.g., 'pick', 'pick up', ..., full instruction)."
+  optimizer: "AdamW lr=1e-4 wd=1e-4 grad clip 1.0; loss weights lambda_focus = lambda_ready = 1.0; T=0.10, s=6.0"
+  hardware: "8 NVIDIA H200 (141 GB each); one head set trained per GPU"
+
+tags: [libero, vla-arena, pi0.5, frozen-backbone, latency, streaming-prefix, focus-map, plug-and-play]

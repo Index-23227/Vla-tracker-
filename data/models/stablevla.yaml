@@ -1,26 +1,43 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: StableVLA: Towards Robust Vision-Language-Action Models without Extra Data
 # arXiv: 2605.18287
 
 name: StableVLA
 full_name: "StableVLA: Towards Robust Vision-Language-Action Models without Extra Data"
-organization: "TODO: affiliations not stated in abstract page (authors: Yiyang Fu, Chubin Zhang, Shukai Gong, Yufan Deng, Kaiwei Sun, Qiyang Min, Qibin Hou, Yansong Tang, Jianan Wang, Daquan Zhou)"
+organization: "Peking University, Tsinghua University, Astribot, Nanjing University, Nankai University"
 date: "2026-05-18"
 paper_url: https://arxiv.org/abs/2605.18287
-code_url: null  # abstract page mentions "Code: this https URL" but link target could not be verified from abstract
+code_url: https://github.com/DAGroup-PKU/HumanNet/tree/main/src/model/StableVLA
 venue: "ICML 2026"
-open_source: false  # code release status not verified from abstract alone
+open_source: true
 
 architecture:
-  action_head: "Information Bottleneck Adapter (IB-Adapter) — lightweight adapter module that filters noise from visual inputs; <10M parameter overhead added to a 0.5B-parameter VLA backbone"
+  action_head: "Fused Information Bottleneck Adapter (Fused IB-Adapter) on top of a Prismatic-style VLA. Combines a standard MLP pathway with an IB pathway that uses subspace covariance (Gram-matrix) modeling + sigmoid gating + GELU MLP to filter noise from vision-language features. Output Z = MLP(X) + tanh(lambda)*IB-Adapter(X) with stochastic pathway dropout p_drop."
   action_head_category: other
-  parameters: "0.5B (backbone) + <10M (IB-Adapter overhead)"
-  key_innovation: "StableVLA proposes the Information Bottleneck Adapter (IB-Adapter), a lightweight information-theoretic adapter that selectively filters noise from visual inputs to improve VLA robustness under unseen real-world visual disturbances, without requiring extra data or augmentation. With fewer than 10M added parameters and a 14x smaller 0.5B backbone trained without Open X-Embodiment pre-training, StableVLA matches the robustness of 7B-scale state-of-the-art VLAs and surpasses OpenPi under synthetic and physical visual corruptions."
+  backbone: "Qwen2.5-0.5B LLM + DINO-SigLIP (224px) vision encoder (frozen)"
+  parameters: "0.5B (Qwen2.5-0.5B backbone) + <10M (Fused IB-Adapter overhead)"
+  key_innovation: "Information Bottleneck Adapter (IB-Adapter) is a lightweight (<10M params) information-theoretic adapter that selectively filters noise from visual inputs to improve VLA robustness under unseen real-world visual disturbances without requiring extra data or augmentation. The Fused IB-Adapter uses subspace covariance modeling with sigmoid gating and a dual-pathway design (MLP + IB). Despite a 14x smaller 0.5B backbone trained without Open X-Embodiment pre-training, StableVLA matches the robustness of 7B-scale state-of-the-art VLAs and surpasses OpenPi-0.5 under synthetic (ImageNet-C 19 corruption types) and physical visual corruptions."
 
-benchmarks: {}  # No specific benchmark scores stated in abstract; abstract reports ~30% average improvement over baseline and superiority over OpenPi under visual corruptions, but no numeric LIBERO/CALVIN/SimplerEnv scores
+benchmarks:
+  libero:
+    libero_spatial: 96.2
+    libero_object: 98.8
+    libero_goal: 98.0
+    libero_long: 93.6
+    libero_avg: 96.65
+    source: "arXiv:2605.18287 Table 1 (clean evaluation)"
+    date_reported: "2026-05-18"
+    eval_condition: "fine-tuned; clean evaluation; per-suite averages over 3 seeds"
+    notes: "Under high-severity corruption (ImageNet-C levels 3-5) the model maintains substantially higher robustness than 7B baselines such as OpenPi-0.5; corruption-averaged scores reported separately in the paper."
+  calvin:
+    calvin_abc_d_avg_len: 4.17
+    calvin_avg: 4.17
+    source: "arXiv:2605.18287"
+    date_reported: "2026-05-18"
+    eval_condition: "fine-tuned; clean ABC->D long-horizon chain (average completed tasks out of 5); 2.13 under high-severity corruption"
 
 eval_conditions:
-  visual_robustness: "evaluated under synthetic and physical visual corruptions"
-  long_horizon: "abstract reports accuracy is maintained on long-horizon tasks"
+  visual_robustness: "ImageNet-C 19 corruption types at severity levels 3-5; zero-shot (no corruption training)"
+  long_horizon: "LIBERO-Long 93.6% clean; CALVIN 4.17 avg-len clean; degradation under corruption is substantially smaller than 7B baselines"
+  real_world: "Astribot S1; 4 tasks (Pick and Place, Throw Basketball, Pour Water, Pack Doll); -14 to -18pp drop under corruption vs -25 to -49pp for VLA-Adapter and -30 to -42pp for OpenPi-0.5"
 
-tags: [ICML-2026, robustness, visual-corruption, adapter]
+tags: [ICML-2026, robustness, visual-corruption, adapter, information-bottleneck, libero, calvin, real-robot]

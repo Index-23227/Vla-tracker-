@@ -3,39 +3,87 @@
 
 name: PriorVLA
 full_name: "PriorVLA: Prior-Preserving Adaptation for Vision-Language-Action Models"
-organization: "Affiliations not disclosed in abstract (authors: Xinyu Guo, Bin Xie, Wei Chai, Xianchi Deng, Tiancai Wang, Zhengxing Wu, Xingyu Chen)"
+organization: "Institute of Automation, CAS; Dexmal; UCAS; Zhongguancun Academy; Nanjing University of Aeronautics and Astronautics"
 date: "2026-05-11"
 paper_url: https://arxiv.org/abs/2605.10925
-code_url: null  # Project page only: https://priorvla.github.io/
+code_url: null  # Project page: https://priorvla.github.io/
 venue: null
 open_source: false
 
 architecture:
-  action_head: "Dual-expert adaptation over a frozen pi0.5-style backbone (action head not specified in abstract)"
-  action_head_category: other
-  parameters: "Updates only 25% of the parameters that full fine-tuning would update; absolute count not stated in abstract"
-  key_innovation: "Prior-preserving adaptation framework that keeps a frozen Prior Expert as a read-only prior source and trains an Adaptation Expert for downstream specialisation. Expert Queries capture scene priors from the pretrained VLM and motor priors from the Prior Expert, integrating both into the Adaptation Expert to guide adaptation while avoiding the prior drift typical of full fine-tuning. Strongest gains appear under out-of-distribution and few-shot regimes."
+  action_head: "Dual-expert flow-matching (frozen Prior Expert + trainable Adaptation Expert) over pi0.5-style VLM (SigLIP + Gemma-2B)"
+  action_head_category: flow_matching
+  parameters: "Backbone: SigLIP vision encoder + Gemma-2B language model + flow-matching action expert (pi0.5-style); PriorVLA updates ~25% of the parameters that full fine-tuning would update. Absolute trainable count not stated."
+  key_innovation: "Prior-preserving adaptation framework. Keeps a frozen Prior Expert as read-only prior source and trains an Adaptation Expert (initialized from identical weights) for downstream specialization. Three learnable Expert Query token groups capture (a) Scene Queries — task-relevant visual priors from the pretrained VLM, (b) Motor Queries — motor priors from the frozen Prior Expert, (c) Action Queries — integrating scene+motor priors inside the Adaptation Expert. Both experts receive identical noisy action chunks during denoising but only Adaptation Expert's output updates the trajectory. Yields strong OOD / few-shot gains by avoiding prior drift typical of full fine-tuning."
 
 benchmarks:
   libero:
+    libero_spatial: 99.4
+    libero_object: 99.8
+    libero_goal: 99.4
+    libero_long: 97.6
     libero_avg: 99.1
-    source: "abstract"
+    source: "paper Table 3"
+    date_reported: "2026-05-11"
+    baseline_pi0_5: {spatial: 98.8, object: 98.2, goal: 98.0, long: 92.4, avg: 96.9}
   robotwin_v2:
-    # Abstract reports +11 points over pi0.5 on RoboTwin 2.0-Hard but does not give the absolute score.
+    # RoboTwin 2.0-Hard per-task (Table 1, OOD)
+    grab_roller: 93
+    handover_mic: 84
+    lift_pot: 66
+    move_can_pot: 57
+    open_laptop: 83
+    pick_dual_bottles: 26
+    place_object_basket: 42
+    place_dual_shoes: 20
+    place_phone_stand: 35
+    put_bottles_dustbin: 45
+    put_object_cabinet: 45
+    stack_blocks_two: 17
+    stack_bowls_two: 73
+    robotwin_v2_hard_avg: 52.8   # mean of 13 tasks above
+    robotwin_v2_avg: 52.8
     robotwin_v2_hard_delta_vs_pi0_5: 11.0
-    source: "abstract (absolute RoboTwin 2.0-Hard score not stated)"
+    source: "paper Table 1 (RoboTwin 2.0-Hard, 13 tasks, OOD)"
+    date_reported: "2026-05-11"
 
 real_world:
-  in_distribution_success: 0.81
-  ood_success: 0.57
-  few_shot_10_demos_id_success: 0.48
-  few_shot_10_demos_ood_success: 0.32
-  few_shot_id_delta_vs_pi0_5: 24.0
-  few_shot_ood_delta_vs_pi0_5: 22.0
-  notes: "8 real-world tasks across 2 embodiments"
+  standard_data:   # Table 4: 100-300 demos per task
+    place_ring: {id: 90, ood: 55}
+    insert_peg: {id: 75, ood: 30}
+    pick_object: {id: 90, ood: 60}
+    stack_blocks: {id: 90, ood: 65}
+    stack_bowls: {id: 95, ood: 85}
+    sweep_blocks: {id: 95, ood: 85}
+    arrange_cups: {id: 50, ood: 25}
+    hang_towel: {id: 65, ood: 50}
+    average_id: 81
+    average_ood: 57
+  few_shot_10_demos:   # Table 5
+    place_ring: {id: 75, ood: 40}
+    insert_peg: {id: 30, ood: 20}
+    pick_object: {id: 85, ood: 50}
+    stack_blocks: {id: 65, ood: 55}
+    stack_bowls: {id: 55, ood: 30}
+    sweep_blocks: {id: 35, ood: 30}
+    arrange_cups: {id: 15, ood: 10}
+    hang_towel: {id: 25, ood: 20}
+    average_id: 48
+    average_ood: 32
+    delta_vs_pi0_5_id: 24
+    delta_vs_pi0_5_ood: 22
+  notes: "8 real-world tasks × 2 embodiments"
 
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned (RoboTwin 2.0-Hard)"
+  libero: "fine-tuned (50 demonstrations per task)"
+  robotwin: "fine-tuned (RoboTwin 2.0-Hard, 50 demonstrations per task)"
+  real_world: "100-300 demonstrations per task standard; 10 demonstrations per task few-shot"
 
-tags: [prior-preserving, peft, adaptation, libero, robotwin, few-shot, ood]
+training:
+  steps: 30000
+  batch_sizes: "32-256 (benchmark-dependent)"
+  learning_rates: "2.5e-5 to 5.0e-5"
+  hardware: "8 NVIDIA GPUs (H20 for RoboTwin 2.0; A100 for LIBERO and real-world)"
+  training_time_hours: {robotwin_standard: 5.6, libero: 23.6, real_world: 5.0}
+
+tags: [prior-preserving, peft, adaptation, libero, robotwin, few-shot, ood, flow-matching, expert-queries]
