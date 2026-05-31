@@ -1,34 +1,75 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: Qwen-VLA: Unifying Vision-Language-Action Modeling across Tasks, Environments, and Robot Embodiments
-# arXiv: 2605.30280
-
 name: Qwen-VLA
 full_name: "Qwen-VLA: Unifying Vision-Language-Action Modeling across Tasks, Environments, and Robot Embodiments"
-organization: "TODO: check paper"
+organization: "Qwen Team, Alibaba Inc."
 date: "2026-05-28"
 paper_url: https://arxiv.org/abs/2605.30280
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/QwenLM/Qwen-VLA
+project_url: https://qwen.ai/blog?id=qwenvla
 venue: null
-open_source: false  # TODO: verify
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3.5-4B (vision-language)"
+  llm: "Qwen3.5-4B"
+  action_head: "DiT-based flow-matching action decoder (1.15B)"
+  action_head_category: flow_matching
+  action_space: continuous (trajectory and action generation)
+  parameters: "~5.15B (4B VLM + 1.15B DiT)"
+  key_innovation: >
+    Unified VLA generalist that extends the Qwen vision-language stack to continuous action and trajectory
+    generation via a 1.15B DiT flow-matching decoder. Introduces embodiment-aware prompt conditioning where
+    robot-specific textual descriptions specify the current embodiment and control convention, enabling a
+    single checkpoint to drive manipulation (LIBERO, RoboCasa-GR1, Simpler-WidowX, RoboTwin), navigation
+    (R2R, RxR) and dynamic out-of-distribution tasks (DOMINO, SimplerEnv-OOD).
+
+training:
+  dataset: >
+    Joint pretraining on robotics manipulation trajectories, human egocentric demonstrations,
+    synthetic simulation data, vision-and-language navigation (R2R/RxR), trajectory-centric
+    supervision and auxiliary vision-language data
+  method: "Large-scale multi-embodiment joint pretraining + instruction tuning (Qwen-VLA-Base -> Qwen-VLA-Instruct)"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_avg: 97.9
+    source: "Qwen-VLA paper Table (Qwen-VLA-Instruct), aggregate only"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (instruct)"
+  simpler_env:
+    widowx_avg: 73.7
+    simpler_ood_avg: 32.0
+    source: "Qwen-VLA paper / GitHub README (Qwen-VLA-Instruct)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (instruct)"
   robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    robotwin_easy: 86.1
+    robotwin_hard: 87.2
+    source: "Qwen-VLA paper (Qwen-VLA-Instruct)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (instruct)"
+  robocasa:
+    robocasa_gr1_avg: 56.7
+    source: "Qwen-VLA paper (Qwen-VLA-Instruct)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (instruct)"
 
 eval_conditions:
   libero: "fine-tuned"
+  simpler_env: "fine-tuned"
   robotwin: "fine-tuned"
+  robocasa: "fine-tuned"
+  aloha_real: "in-domain + OOD"
+  navigation: "R2R / RxR fine-tuned"
 
-tags: [libero, robotwin]
+tags:
+  - generalist
+  - flow-matching
+  - DiT
+  - libero
+  - robotwin
+  - simpler_env
+  - robocasa
+  - navigation
+  - aloha
+  - open-source
+  - qwen

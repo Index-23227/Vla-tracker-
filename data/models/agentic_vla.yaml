@@ -1,34 +1,66 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: Agentic-VLA: Efficient Online Adaptation for Vision-Language-Action Models
-# arXiv: 2605.22896
-
 name: Agentic-VLA
 full_name: "Agentic-VLA: Efficient Online Adaptation for Vision-Language-Action Models"
-organization: "TODO: check paper"
-date: "2026-05-21"
+organization: not disclosed in arXiv preprint (authors: Ruofan Jin, Zaixi Zhang)
+date: '2026-05-21'
 paper_url: https://arxiv.org/abs/2605.22896
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
-
+open_source: false
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
-
+  backbone: OpenVLA-OFT (autoregressive VLA with action chunking + parallel decoding)
+  llm: Llama-3-8B (task decomposition), Qwen3-VL-8B-Instruct (exploration guidance, later experiments)
+  critic: VLAC (Vision-Language-Action-Critic) + fine-tuned CLIP
+  action_head: discrete action tokens with action chunking and parallel decoding (inherited from OpenVLA-OFT)
+  action_head_category: autoregressive
+  parameters: ~7B (OpenVLA backbone) + 8B helper LMs
+  key_innovation: >-
+    Agentic-VLA is an online adaptation framework that wraps a base VLA
+    (OpenVLA-OFT) with three components: (1) Adaptive Reward Synthesis (ARS)
+    automatically decomposes tasks into sub-goals and weights rewards by an
+    EMA-tracked capability estimate, creating a self-paced curriculum;
+    (2) Language-Guided Exploration (LGE) uses a VLM to inject actionable
+    suggestions with adaptive frequency; (3) Experience Memory (EM) stores
+    adapted policy parameters keyed by task embedding for warm-start
+    interpolation. Optimised with GRPO, it converges 2.4x faster than prior
+    online-adaptation baselines.
+training:
+  dataset: LIBERO (50 demos/task across 4 suites x 50 tasks) + RoboTwin 2.0 (50 demos/task, 50 tasks, dual-arm)
+  algorithm: GRPO
+  hardware: 4x NVIDIA A100 80GB
+  optimizer: lr 1e-5, batch size 32, group size 8, max rollout horizon 500
+  compute: ~8 hours per LIBERO suite on 4xA100
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
-
+    libero_spatial: 97.2
+    libero_object: 98.6
+    libero_goal: 97.4
+    libero_long: 98.1
+    libero_avg: 97.8
+    source: Table 1, Agentic-VLA paper (mean over 5 seeds)
+    date_reported: '2026-05-21'
+    eval_condition: online-adapted (GRPO on top of OpenVLA-OFT)
+  robotwin_v2:
+    easy_avg: 62.5
+    hard_avg: 34.7
+    robotwin_v2_avg: 48.6
+    source: Table 8 (representative subset), Agentic-VLA paper
+    date_reported: '2026-05-21'
+    eval_condition: online-adapted
+one_shot:
+  libero_avg: 70.5
+  source: Table 2, Agentic-VLA paper
+cross_task:
+  libero_long_to_object: 31.2
+  source: Table 3, Agentic-VLA paper
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
-
-tags: [libero, robotwin]
+  libero: online-adapted (GRPO)
+  robotwin: online-adapted
+tags:
+- libero
+- robotwin
+- online-adaptation
+- GRPO
+- experience-memory
+- reward-synthesis
+- OpenVLA-OFT
+- Llama-3

@@ -1,34 +1,76 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: RoVLA: Multi-Consistency Constraints for Robust Vision-Language-Action Models
-# arXiv: 2605.19678
-
 name: RoVLA
 full_name: "RoVLA: Multi-Consistency Constraints for Robust Vision-Language-Action Models"
-organization: "TODO: check paper"
-date: "2026-05-19"
+organization: Sun Yat-sen University / Peng Cheng Laboratory / Guangdong Key Lab of Big Data Analysis and Processing / X-Era AI Lab
+date: '2026-05-19'
 paper_url: https://arxiv.org/abs/2605.19678
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/HCPLab-SYSU/RoVLA
 venue: null
-open_source: false  # TODO: verify
-
+open_source: true
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
-
+  backbone: InternVL3.5-2B (first 16 decoder layers as semantic encoder; last 4 layers unfrozen)
+  llm: InternVL3.5-2B
+  action_head: Diffusion Transformer (DiT, 32 layers) with conditional flow-matching + AdaLN timestep conditioning; action chunks of length 16
+  action_head_category: flow_matching
+  parameters: ~2B (InternVL3.5-2B backbone) + DiT action expert
+  key_innovation: >-
+    RoVLA introduces three multi-consistency constraints to harden VLA policies:
+    (1) Instructional Consistency (IC) samples one of ~15 Qwen3-generated
+    paraphrases per trajectory to enforce invariance to phrasing;
+    (2) Evolutionary Consistency (EC) draws two flow-matching timesteps and
+    L2-penalises divergence of predicted clean-velocity fields across them;
+    (3) Observational Consistency (OC) applies gradient-based adversarial
+    perturbations to vision and proprioception and enforces prediction
+    consistency with stop-gradient targets. The combination cuts superficial
+    correlations and yields large robustness gains on LIBERO-Plus.
+training:
+  dataset: LIBERO-Plus (15,874 demos, merged 4 suites) + RoboTwin 2.0 (2,500 clean + 25,000 randomized demos) + real-world (125 trajectories, 5 tasks)
+  instruction_paraphrases: ~15 per trajectory via Qwen3-8B (7 prompt templates)
+  steps: 60K (LIBERO-Plus / real-world); 120K (RoboTwin 2.0)
+  hardware: NVIDIA H20 GPUs
+  optimizer: AdamW, peak lr 1e-4, 5% warmup, cosine decay
+  inference: 8 denoising steps via forward Euler integration
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
-
+    libero_plus_overall_zero_shot: 74.3
+    libero_plus_language_zero_shot: 92.9
+    libero_plus_camera_zero_shot: 58.4
+    libero_plus_light_zero_shot: 95.6
+    libero_plus_background_zero_shot: 95.0
+    libero_plus_overall_finetuned: 82.0
+    libero_plus_language_finetuned: 91.5
+    libero_plus_camera_finetuned: 96.6
+    libero_plus_light_finetuned: 95.9
+    libero_plus_background_finetuned: 96.1
+    libero_avg: 82.0
+    source: LIBERO-Plus tables, RoVLA paper
+    date_reported: '2026-05-19'
+    eval_condition: fine-tuned on perturbation data
+  robotwin_v2:
+    clean: 48.2
+    randomized: 50.0
+    robotwin_v2_avg: 49.1
+    source: RoboTwin 2.0 table, RoVLA paper
+    date_reported: '2026-05-19'
+    eval_condition: fine-tuned
+real_world:
+  pick_up_banana: 80
+  pick_up_apple: 70
+  put_banana_in_bowl: 80
+  put_apple_in_bowl: 50
+  put_apple_in_drawer: 20
+  overall: 60
+  source: Real-world tabletop tasks, RoVLA paper
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
-
-tags: [libero, robotwin]
+  libero: fine-tuned (on perturbation-augmented LIBERO-Plus)
+  robotwin: fine-tuned
+  real_world: fine-tuned
+tags:
+- libero
+- libero-plus
+- robotwin
+- flow-matching
+- diffusion-transformer
+- robustness
+- consistency
+- InternVL
+- open-source
