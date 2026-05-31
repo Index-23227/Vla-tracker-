@@ -1,0 +1,30 @@
+name: TriRelVLA
+full_name: "TriRelVLA: Triadic Relational Structure for Generalizable Embodied Manipulation"
+organization: NUS / HUST
+date: '2026-05-07'
+paper_url: https://arxiv.org/abs/2605.05714
+code_url: null
+venue: null
+open_source: false
+architecture:
+  backbone: SigLIP + VGGT (3D geometry)
+  llm: Qwen3-4B
+  action_head: MLP regression head with L1 loss on continuous action parameters
+  action_head_category: regression
+  parameters: ~4B
+  key_innovation: >-
+    Disentangles entangled visual representations into explicit object-hand-task
+    triadic primitives, building a task-grounded relational graph via task-guided
+    cross-attention and a relation-aware graph transformer. The relational structure
+    is compressed into a bottleneck and projected into the LLM, reducing reliance on
+    appearance statistics and enabling cross-scene/object/task generalization.
+benchmarks:
+  libero:
+    libero_spatial: 98.2
+    libero_object: 99.0
+    libero_goal: 97.8
+    libero_long: 94.8
+    libero_avg: 97.6
+eval_conditions:
+  libero: "fine-tuned"
+tags: [triadic-relations, disentanglement, generalization, relational-graph, bottleneck]
