@@ -1,0 +1,43 @@
+name: SAFE-Pruner
+full_name: "SAFE-Pruner: Semantic Attention-Guided Future-Aware Token Pruning for Efficient Vision-Language-Action Manipulation"
+organization: "Tsinghua Shenzhen International Graduate School; GigaAI"
+date: "2026-05-28"
+paper_url: https://arxiv.org/abs/2605.29662
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "Applied to OpenVLA, OpenVLA-OFT, CogACT, and pi-0.5 (cross-architecture)"
+  action_head: "Inherits base VLA action head (discrete autoregressive for OpenVLA; parallel-decode for OpenVLA-OFT; diffusion for CogACT; flow matching for pi-0.5) with 70-90% visual token pruning"
+  action_head_category: other
+  parameters: "Underlying VLAs (7B class); training-free plug-in pruner with no added trainable parameters"
+  key_innovation: "Training-free visual token pruner that exploits semantic attention consistency across execution steps and forecasts deep-layer token saliency to avoid premature removal of critical tokens. Adaptive subtask division detects attention shifts and re-evaluates token importance, enabling 70-90% token pruning with <1.7% success-rate degradation across four different VLA architectures."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.0
+    libero_object: 98.0
+    libero_goal: 96.2
+    libero_long: 93.4
+    libero_avg: 96.4
+    source: "Paper LIBERO table (OpenVLA-OFT + SAFE-Pruner)"
+    date_reported: "2026-05-28"
+    eval_condition: "training-free token pruning applied to fine-tuned OpenVLA-OFT; 70-90% visual tokens pruned"
+  simpler_env:
+    simpler_avg: null
+    notes: "1.73x and 1.67x speedup reported across Visual Matching and Variant Aggregation settings; absolute success rates not extracted"
+    source: "Paper SIMPLER section"
+    date_reported: "2026-05-28"
+
+eval_conditions:
+  libero: "OpenVLA-OFT fine-tuned baseline + SAFE-Pruner (training-free); 2000 episodes across 4 suites"
+  simpler_env: "Visual Matching and Variant Aggregation"
+  real_world: "Astribot S1 dual-arm; latency reduced 80.63ms -> 43.72ms"
+
+training:
+  data: "No training; calibration-free / training-free post-hoc pruner"
+  hardware: "Inference on standard GPUs; real-robot tests on Astribot S1"
+  notes: "Plug-and-play, no retraining or architectural changes; FLOPs reduced to 37.4-42% of baseline; up to 1.89x speedup"
+
+tags: [token-pruning, efficiency, training-free, openvla-oft, cogact, pi0.5, libero, plug-in]

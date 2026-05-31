@@ -1,0 +1,67 @@
+# Paper: IntentVLA: Short-Horizon Intent Modeling for Aliased Robot Manipulation
+# arXiv: 2605.14712
+
+name: IntentVLA
+full_name: "IntentVLA: Short-Horizon Intent Modeling for Aliased Robot Manipulation"
+organization: "Huazhong University of Science and Technology (HUST), Zhongguancun Academy (Beijing), Zhongguancun Computing Institute, Harbin Institute of Technology, HKUST(GZ), BUAA, Zhejiang Normal University, East China Normal University, USTC, DeepCybo"
+date: "2026-05-14"
+paper_url: https://arxiv.org/abs/2605.14712
+code_url: https://github.com/ZGC-EmbodyAI/IntentVLA
+venue: null
+open_source: true
+
+architecture:
+  action_head: "DiT-based flow-matching action chunk head conditioned on a short-horizon intent representation. Recent visual observations are encoded by a frozen VGGT-1B (camera + register tokens retained), then fused with the current Qwen3-VL 4B context via gated cross-attention to form the intent condition. Conditional flow-matching loss L_flow = E[||V_hat(X_s, s | C_t) - (tau_t - eps)||_2^2]."
+  action_head_category: flow_matching
+  backbone: "Qwen3-VL 4B (current context) + VGGT-1B (frozen, history encoder)"
+  parameters: "~5B total (Qwen3-VL 4B trainable + VGGT-1B frozen)"
+  key_innovation: "IntentVLA is a history-conditioned VLA framework that addresses short-horizon observation aliasing — the multimodal nature of imitation demonstrations where similar visual-language observations are followed by different action chunks depending on the demonstrator's short-horizon intent. The model encodes recent visual observations via frozen VGGT-1B into a compact intent representation and uses gated cross-attention to condition flow-matching chunk generation. The authors also introduce AliasBench, a 12-task ambiguity-aware benchmark built on RoboTwin2 with matched train/eval environments that isolate short-horizon observation aliasing."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.3
+    libero_object: 99.7
+    libero_goal: 98.1
+    libero_long: 97.4
+    libero_avg: 98.625
+    source: "arXiv:2605.14712"
+    date_reported: "2026-05-14"
+    eval_condition: "fine-tuned; single unified policy across all 4 suites; vs 96.5% baseline avg"
+  simpler_env:
+    simpler_put_spoon_on_towel: 70.8
+    simpler_put_carrot_on_plate: 66.7
+    simpler_stack_green_block: 54.2
+    simpler_put_eggplant_in_basket: 100.0
+    simpler_avg: 72.9
+    source: "arXiv:2605.14712"
+    date_reported: "2026-05-14"
+    eval_condition: "fine-tuned; WidowX setup; vs 65.3% Qwen3-VL frame-only baseline"
+  robocasa:
+    robocasa_pnp_close_avg: 59.7
+    robocasa_novel_cuttingboard: 54.8
+    robocasa_novel_placemat: 55.5
+    robocasa_novel_tray: 49.6
+    robocasa_novel_plate: 66.5
+    robocasa_avg: 57.0
+    source: "arXiv:2605.14712"
+    date_reported: "2026-05-14"
+    eval_condition: "fine-tuned; RoboCasa-GR1 Tabletop 24-task; vs 54.6% TwinBrainVLA baseline"
+  robotwin_v2:
+    aliasbench_back_and_forth: 49.3
+    aliasbench_crossing_path: 74.7
+    aliasbench_bimanual: 17.0
+    aliasbench_multi_goal: 31.3
+    aliasbench_avg: 45.8
+    robotwin_v2_avg: 45.8
+    source: "arXiv:2605.14712"
+    date_reported: "2026-05-14"
+    eval_condition: "AliasBench (12-task ambiguity-aware benchmark on RoboTwin2 introduced by authors); baseline 9.0%; ICC-L2 = 0.181 (17.6% inter-chunk inconsistency reduction)"
+    notes: "AliasBench is built on RoboTwin2 simulator; categorized under robotwin_v2 keys as per CLAUDE.md naming conventions."
+
+eval_conditions:
+  libero: "fine-tuned (single unified policy)"
+  simpler_env: "fine-tuned; WidowX"
+  robocasa: "fine-tuned; RoboCasa-GR1 Tabletop (24 tasks)"
+  aliasbench: "introduced by authors; built on RoboTwin2 with matched train/eval environments to isolate short-horizon observation aliasing"
+
+tags: [libero, simpler_env, robocasa, aliasbench, robotwin, history-conditioned, flow-matching, qwen3-vl, vggt]

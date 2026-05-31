@@ -1,0 +1,50 @@
+name: VLA-AD
+full_name: "VLA-AD: Vision-Language-Action distillation with Auxiliary semantic Description"
+version: '1.0'
+organization: University College London / University of Oxford
+paper_url: https://arxiv.org/abs/2605.16241
+code_url: null
+date: '2026-05-15'
+venue: arXiv 2026
+architecture:
+  backbone: Long-CLIP encoder + LoRA adapters
+  teacher: OpenVLA-7B and pi0.5-4B (distillation teachers)
+  action_head: tri-stream MLP head predicting action chunks (K=5)
+  action_space: continuous (7-DoF)
+  parameters: 158M (8.6M trainable via rank-8 LoRA)
+  key_innovation: "Offline semantic guidance from a VLM supervisor: task phase anchors and multi-frame operating-direction descriptions act as training-only auxiliary signals to distill 7B/4B VLA teachers into a 158M student with negligible performance loss"
+  action_head_category: regression
+training:
+  dataset: Successful teacher rollouts on LIBERO tasks
+  method: LoRA distillation with offline VLM-generated phase/direction labels
+  optimizer: AdamW
+  epochs: 30
+  batch_size: 32
+  compute: ~22 GPU-hours per student
+  annotation: Qwen2.5-VL API (~7 USD for 81K frames)
+benchmarks:
+  libero:
+    libero_spatial: 93.0
+    libero_object: 96.5
+    libero_goal: 94.0
+    libero_avg: 94.5
+    source: "VLA-AD paper Table (pi0.5-4B teacher variant)"
+    date_reported: '2026-05-15'
+    eval_condition: distilled student (158M)
+  libero_openvla_teacher:
+    libero_spatial: 79.5
+    libero_object: 62.5
+    libero_goal: 79.5
+    libero_avg: 73.8
+    source: "VLA-AD paper Table (OpenVLA-7B teacher variant)"
+    date_reported: '2026-05-15'
+    eval_condition: distilled student (158M)
+open_source: false
+inference_hz: 12.5
+tags:
+- distillation
+- LoRA
+- lightweight
+- semantic-guidance
+- VLM-supervised
+- manipulation

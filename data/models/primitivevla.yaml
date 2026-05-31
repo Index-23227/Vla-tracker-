@@ -1,0 +1,41 @@
+name: PrimitiveVLA
+full_name: "PrimitiveVLA: Learning Reusable Motion Primitives for Efficient and Generalizable Robotic Manipulation"
+organization: "Institute of Computing Technology, Chinese Academy of Sciences; Jiangsu Key Laboratory of AI for Industries; Cambricon Technologies"
+date: "2026-05-28"
+paper_url: https://arxiv.org/abs/2605.28634
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "Model-agnostic; demonstrated on OpenVLA, OpenVLA-OFT, and pi-0.5. Uses Qwen3-VL for primitive reasoning, Qwen2.5-VL-72B for visual grounding, DeepSeek-V3 for boundary segmentation code, SAM for segmentation, Cutie for object tracking."
+  action_head: "Inherits base VLA action head (autoregressive for OpenVLA, parallel for OpenVLA-OFT, flow matching for pi-0.5); 7-D action space (6-DoF delta pose + gripper)"
+  action_head_category: hybrid
+  parameters: "Varies with base VLA (7B class for OpenVLA family; pi-0.5 ~3B)"
+  key_innovation: "Primitive-Centric Disassemble & Assemble paradigm that decomposes task trajectories into 11 reusable motion primitives (Grasp, Place, Lift, Move, Push, Pull, Insert, Press, Twist, Tilt, Rotate) organized into spatial-transport, contact-interaction, and orientation categories. Uses Multimodal Canonical Representation (MCR) for unified task encoding, with automated disassembly via VLM/LLM during fine-tuning and runtime assembly via VLM planner + LLM-generated switching code."
+
+benchmarks:
+  libero:
+    libero_long: 80.25
+    source: "Paper LIBERO table; PrimitiveVLA on top of pi-0.5 baseline"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned with primitive disassembly; +9.2% on Libero-90, 45.50% on Libero-90-Novel (0-shot, 6x baseline)"
+    notes: "Reports Libero-90 +9.2% over OpenVLA baseline; Libero-90-Novel 0-shot 45.50% (6x OpenVLA); Libero-Long 80.25% vs SOTA baseline 30.50%"
+  rlbench:
+    rlbench_avg: null
+    notes: "+7.0% average improvement across 10 tasks (absolute baseline not extracted)"
+    source: "Paper RLBench section"
+    date_reported: "2026-05-28"
+
+eval_conditions:
+  libero: "Fine-tuned on Libero-90 with primitive decomposition; 50% data variant still beats 100%-data OpenVLA"
+  rlbench: "10 tasks, average over baselines"
+  real_world: "UR5e robot; in-distribution 90%, OOD task generalization 57%, compositional tasks 65%"
+
+training:
+  data: "Libero-90 primitive-decomposed; demonstrations re-segmented into primitive chunks via SAM + Cutie + VLM/LLM pipeline"
+  hardware: "Not explicitly specified in paper"
+  optimizer: "Inherits base VLA training recipe"
+  notes: "Two-phase: (1) fine-tuning with primitive disassembly, (2) inference with VLM planner + LLM switching code"
+
+tags: [motion-primitives, libero, rlbench, model-agnostic, openvla, pi0.5, data-efficiency, generalization]

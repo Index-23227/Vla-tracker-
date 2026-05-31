@@ -1,0 +1,60 @@
+name: IDL-VLA
+full_name: "Mitigating State Aliasing in Vision-Language-Action Models via Inverse Dynamics Learning"
+organization: "Korea University"
+date: "2026-05-28"
+paper_url: https://arxiv.org/abs/2605.29577
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "plug-in on VLM4VLA (Qwen3-VL), FLOWER, SpatialVLA"
+  llm: "inherited from base VLA"
+  action_head: "inherited from base VLA + auxiliary inverse-dynamics head (training-only)"
+  action_head_category: inverse_dynamics
+  action_space: "continuous action chunks (inherited)"
+  parameters: "no inference-time cost (auxiliary head removed after training)"
+  key_innovation: >
+    Auxiliary inverse-dynamics objective that supervises the VLA vision encoder directly: given
+    current and future observations, a lightweight patch-wise fusion MLP predicts the connecting
+    action chunk, forcing the encoder to capture fine-grained visual distinctions and resolve
+    state aliasing where visually similar states require different actions. Augmented with
+    Pseudo Time Reversal (PTR) that flips trajectory direction to expand the diversity of
+    action directions exposed during training. The auxiliary head is discarded at inference,
+    so the deployed VLA has identical compute as the baseline while gaining systematic
+    accuracy improvements across diverse backbones (regression, flow-matching, 3D-spatial).
+
+training:
+  dataset: >
+    Standard observation-action pairs without extra annotations. Evaluated on CALVIN ABC,
+    Bridge (SimplerEnv), and LIBERO-90 pretraining.
+  method: "Joint training of base VLA loss + inverse-dynamics auxiliary loss + Pseudo Time Reversal"
+
+benchmarks:
+  calvin:
+    calvin_abc_d_avg_len: 4.10
+    calvin_avg: 4.10
+    source: "IDL-VLA paper Table 1 (VLM4VLA + IDL on CALVIN ABC→D)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (VLM4VLA backbone + IDL)"
+  simpler_env:
+    bridge_widowx_avg: 33.3
+    bridge_eggplant: 66.6
+    bridge_cube: 20.8
+    simpler_avg: 33.3
+    source: "IDL-VLA paper Table 2 (SpatialVLA + IDL on SimplerEnv-Bridge)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (SpatialVLA backbone + IDL)"
+
+eval_conditions:
+  calvin: "ABC→D"
+  simpler_env: "Bridge / WidowX"
+
+tags:
+  - vla
+  - inverse-dynamics
+  - state-aliasing
+  - auxiliary-objective
+  - plug-and-play
+  - calvin
+  - simpler_env

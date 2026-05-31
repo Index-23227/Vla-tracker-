@@ -1,0 +1,57 @@
+name: X-Foresight
+full_name: "X-Foresight: A Joint Vision-Action Causal Forecasting Network via Predictive World Modeling"
+organization: "XPeng Inc. (PWM Team)"
+date: "2026-05-24"
+paper_url: https://arxiv.org/abs/2605.24892
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Large Drive Model (LDM) auto-regressive transformer + X-World diffusion vision renderer (DiT + 3D causal VAE)"
+  llm: "Custom auto-regressive transformer (text instructions, observation/action/state/query tokens)"
+  action_head: "chunk-wise auto-regressive (1s chunks at 4 Hz) jointly predicting ego actions, multi-view camera tokens, and BEV"
+  action_head_category: autoregressive
+  action_space: continuous
+  parameters: "undisclosed (production-scale, trained on 128-1024 GPUs)"
+  key_innovation: >
+    Joint vision-action world model for end-to-end autonomous driving that predicts long-horizon
+    futures via a chunk-wise auto-regressive strategy: dense intra-chunk frames capture instantaneous
+    dynamics while sparse inter-chunk transitions capture long-term causality, escaping trivial
+    frame-to-frame extrapolation. Adds Temporal Importance Sampling (TIS) weighting safety-critical
+    high-acceleration chunks and Curriculum Learning with Extended Foresight (CLEF) progressively
+    extending the 1s->3s inter-chunk stride. A diffusion-based multi-view renderer with cross-view
+    attention conditions on LDM camera tokens for geometrically consistent 7-camera synthesis.
+
+training:
+  dataset: "280,000 hours in-house driving data: 34M video clips (~30s each), 13.8T tokens, 7-camera surround-view, 4 Hz sampling (86.8% urban / 13.2% highway)"
+  method: "Three stages: (I) LDM teacher-forcing with block-sparse semi-causal attention (1.59x speedup vs FlashAttention-2), (II) X-World vision renderer adapted to 4 Hz, (III) renderer fine-tuning on LDM-predicted camera tokens"
+  compute: "128-1024 GPUs (production scale)"
+  optimizer: "Muon (vision renderer), lr 8e-5, batch size 11 per device"
+  curriculum: "short-to-long horizons, 1s -> 3s inter-chunk stride"
+
+benchmarks:
+  real_world:
+    safety_score: 85.83
+    compliance_score: 87.08
+    collision_rate_pct: 0.191
+    lateral_ade_m: "0.1567"
+    longitudinal_ade_m: "1.0982"
+    total_cces: "3.6535"
+    fid_rendering_6s: "2.84"
+    fvd_rendering_6s: "29.52"
+    source: "X-Foresight paper, production-scale evaluation on XPeng proprietary driving test set; baseline (single-frame, no world model) values: lateral ADE 0.1675 m, longitudinal ADE 1.1387 m, collision 0.228%, safety 94.41, compliance 94.83, CCES 3.8296"
+    date_reported: "2026-05-24"
+    eval_condition: "real-world autonomous driving (XPeng proprietary), no simulator"
+
+eval_conditions:
+  real_world: "real-world (XPeng proprietary driving dataset), open-loop trajectory prediction + closed-loop safety metrics"
+
+tags:
+  - autonomous-driving
+  - world-model
+  - autoregressive
+  - chunk-wise
+  - diffusion-renderer
+  - real-world
+  - large-scale

@@ -1,0 +1,49 @@
+name: DEFLECT
+version: '1.0'
+full_name: "DEFLECT: Delay-Robust Execution via Flow-matching Likelihood-Estimated Counterfactual Tuning for VLA Policies"
+organization: "HKUST (Guangzhou) / Sun Yat-sen University"
+date: '2026-05-19'
+paper_url: https://arxiv.org/abs/2605.19294
+code_url: https://anonymous.4open.science/r/deflect-release-7388
+venue: arXiv preprint
+open_source: true
+model_type: vla
+architecture:
+  backbone: pi0.5 VLA (LIBERO) / VLASH-Kinetix (33M, Kinetix)
+  llm: PaliGemma-based VLM (frozen on LIBERO, full fine-tune on Kinetix)
+  action_head: flow matching action expert (ODE integration); inference unchanged from base policy
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: 3.6B
+  key_innovation: "Fully offline post-training refinement that converts deployment latency into a label-free preference signal: counterfactual fresh/stale action pairs from a frozen reference policy are scored via an implicit flow-matching likelihood-ratio surrogate and optimized with a DPO objective anchored by SFT; extends the usable delay envelope of async VLA control with +6.4 SR gain at high latency (5-7 control steps)"
+training:
+  dataset: Kinetix (12 contact-rich tasks, 1024 rollouts/cell) + LIBERO (4 suites, 500 episodes/suite)
+  method: "DEFLECT post-training: L(theta) = lambda_SFT * L_FM(expert chunk) + lambda_DPO * L_DPO; trained on delays d in {0..4}, generalizes to d in {0..7}; lambda_SFT=1.0, beta=1.0, lambda_DPO=0.02 (Kinetix) / 0.1 (LIBERO); AdamW with cosine schedule (1000-step warmup)"
+  compute: LIBERO uses 200 steps post-training (action expert only, 19% trainable); Kinetix uses full fine-tuning of 33M model
+benchmarks:
+  libero:
+    avg_improvement_over_vlash_d1: 0.2
+    avg_improvement_over_vlash_d7: 4.6
+    source: DEFLECT paper (per-suite breakdown in Appendix F)
+    date_reported: '2026-05-19'
+    eval_condition: async post-training of pi0.5 base
+  real_world:
+    conveyor_i: 96.7
+    conveyor_ii: 90.0
+    whack_a_mole_moles_per_30s: 13.6
+    source: DEFLECT paper
+    date_reported: '2026-05-19'
+    eval_condition: bimanual arm, 30s trials
+eval_conditions:
+  libero: async post-training; baseline pi0.5/VLASH, delays d=0..7
+  kinetix: 12 contact-rich tasks, 1024 rollouts/cell, d=0..7
+  real_world: bimanual arm, 3 tasks
+tags:
+- post-training
+- preference-optimization
+- dpo
+- flow-matching
+- async-inference
+- delay-robust
+- counterfactual
+- pi0.5

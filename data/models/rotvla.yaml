@@ -1,0 +1,63 @@
+# Paper: RotVLA: Rotational Latent Action for Vision-Language-Action Model
+# arXiv: 2605.13403
+
+name: RotVLA
+full_name: "RotVLA: Rotational Latent Action for Vision-Language-Action Model"
+organization: "Peking University (Wangxuan Institute) / Xiaomi Robotics / CASIA"
+date: "2026-05-13"
+paper_url: https://arxiv.org/abs/2605.13403
+code_url: https://qiweili00.github.io/rotvla-page/
+venue: null
+open_source: false
+
+architecture:
+  action_head: "Unified flow-matching action expert (24-layer DiT) that jointly denoises latent action (SO(n)) and robot action; latent action serves as high-level planner conditioning robot-action generation via structured causal attention."
+  action_head_category: flow_matching
+  parameters: "1.7B (304M ViT + 752M LLM + 305M action head + 290M LAM)"
+  backbone: "InternVL3.5-1B VLM + frozen DINOv2 for LAM encoder"
+  key_innovation: "Replaces discrete-quantization Latent Action Models (LAMs) with a continuous SO(n) rotational latent representation projected via SVD-based orthogonal projection. A triplet frame learning framework (single-step + composed two-step reconstruction loss) prevents degeneration into trivial frame copying. SoftVQ replaces VQ-VAE to keep latent space continuous. Downstream finetuning uses a unified action expert that jointly denoises latent action (n=16) and robot action (xyz + Rotate6D abs EEF) with causal attention so the latent acts as a learned planner."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.2
+    libero_object: 99.6
+    libero_goal: 98.4
+    libero_long: 96.4
+    libero_avg: 98.2
+    source: "Paper Table 1"
+    date_reported: "2026-05-13"
+    eval_condition: "fine-tuned, single multi-task model across 4 suites, 80k steps"
+  robotwin_v2:
+    robotwin_v2_clean_avg: 89.6
+    robotwin_v2_rand_avg: 88.5
+    robotwin_v2_avg: 89.05
+    source: "Paper Table 1 / Table 6 (per-task in Appendix F)"
+    date_reported: "2026-05-13"
+    eval_condition: "fine-tuned, single model across 50 tasks, 100 rollouts/task, 120k steps"
+
+eval_conditions:
+  libero: "fine-tuned; OpenVLA-style filtering of unsuccessful trajectories from training data"
+  robotwin_v2: "fine-tuned; clean (50 demos/task) and randomized (500 demos/task) settings; 50 dual-arm tasks"
+
+training:
+  pretrain_data: "1700+ hours: Open X-Embodiment (31.43%), RoboMIND (29.06%), RoboCOIN (24.36%), AGIBOT-beta (10.78%), Ego4D human videos (4.37%); single-arm 47.44%, dual-arm 31.01%, dexterous-hand 17.18%, human 4.37%"
+  pretrain_steps: "200k steps, batch size 256, 8x NVIDIA H200 for 50 hours"
+  finetune_steps: "LIBERO 80k / RoboTwin2 120k / real-world 40k, batch size 128"
+  optimizer: "AdamW lr=1e-4, weight decay 0.01, 5k warmup, cosine LR"
+  inference_latency: "79 ms/step on NVIDIA H20 (vs pi0.5: 61 ms)"
+
+real_world:
+  platform: "Dual-arm ARX R5 with 3 RealSense D405 cameras (head + 2 wrists)"
+  tasks:
+    pick_and_place:
+      clean: 93.3
+      randomized: 90.0
+    put_and_close:
+      clean: 96.7
+      randomized: 90.0
+    stack_three_cups:
+      clean: 66.7
+      randomized: 60.0
+  baseline_compared: "pi0.5"
+
+tags: [flow-matching, latent-action, SO(n), libero, robotwin, 1.7B, internvl, rotation-representation]

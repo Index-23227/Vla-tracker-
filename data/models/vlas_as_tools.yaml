@@ -1,0 +1,48 @@
+name: VLAs-as-Tools
+full_name: "Towards Long-horizon Embodied Agents with Tool-Aligned Vision-Language-Action Models"
+organization: "Shanghai Jiao Tong University et al. (Zixing Lei, Changxing Liu, Yichen Xiong, Minhao Xiong, Yuanzhuo Ding, Zhipeng Zhang, Weixin Li, Siheng Chen)"
+date: '2026-05-13'
+paper_url: https://arxiv.org/abs/2605.13119
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Hierarchical: high-level VLM orchestrator (Gemini / GPT / Qwen) + family of specialized VLA tools (OpenVLA, OpenVLA-OFT, pi0.5)"
+  action_head: "Inherits backbone-specific heads: OpenVLA discrete tokens, OpenVLA-OFT regression, pi0.5 flow-matching"
+  action_head_category: hybrid
+  parameters: "Tool-family residual LoRA adapters add ~9% parameters over OpenVLA-OFT base; ~7% inference overhead"
+  key_innovation: "Tool-Aligned Post-Training (TAPT) framework that decomposes robot tasks into a high-level VLM agent for temporal reasoning and a family of specialized VLA tools for diverse local operations. Uses invocation-aligned training units, tool-family residual LoRA adapters, and bounded subtask reinforcement learning via GRPO. Improves both task success and invocation fidelity (non-biased rate) on long-horizon tasks."
+
+training:
+  base_models: "OpenVLA, OpenVLA-OFT, pi0.5"
+  data_sources: "DROID dataset split, LIBERO, RoboTwin, CALVIN"
+  method: "Tool-Aligned Post-Training (TAPT): invocation-aligned supervised fine-tuning + bounded subtask RL with GRPO"
+
+benchmarks:
+  libero:
+    libero_long: 97.2
+    source: "Paper main results - pi0.5 + TAPT (IL)"
+    date_reported: "2026-05-13"
+    eval_condition: "pi0.5 base with full TAPT, imitation learning regime, +4.8 over pi0.5 baseline on LIBERO-Long"
+  robotwin_v1:
+    robotwin_v1_avg: 62.5
+    source: "Paper main results - pi0.5 + TAPT (IL)"
+    date_reported: "2026-05-13"
+    eval_condition: "pi0.5 base with full TAPT, +23.1 over pi0.5 baseline on RoboTwin"
+
+eval_conditions:
+  invocation_fidelity: "Non-biased Rate (LIBERO-CF-Long): +16.2 pts (OpenVLA-OFT), +15.0 pts (pi0.5)"
+  rl_libero_long: "OpenVLA-OFT 82.6%, pi0.5 91.2% with tool-family interface"
+  calvin_note: "Paper reports CALVIN as 82.3% success rate, NOT the official 5-task avg-length metric (0-5); omitted from leaderboard to avoid scale mismatch."
+
+tags:
+  - hierarchical
+  - tool-use
+  - long-horizon
+  - reinforcement-learning
+  - grpo
+  - lora
+  - pi0.5-base
+  - openvla-base
+  - tapt

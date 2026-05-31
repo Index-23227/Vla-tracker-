@@ -1,33 +1,42 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: OA-WAM: Object-Addressable World Action Model for Robust Robot Manipulation
+# OA-WAM: Object-Addressable World Action Model for Robust Robot Manipulation
 # arXiv: 2605.06481
 
 name: OA-WAM
 full_name: "OA-WAM: Object-Addressable World Action Model for Robust Robot Manipulation"
-organization: "TODO: check paper"
+organization: "Tsinghua University"
 date: "2026-05-07"
 paper_url: https://arxiv.org/abs/2605.06481
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: "arXiv 2026"
+open_source: false
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Chameleon-7B (32-layer multimodal transformer, slot-aware variant) + SAM 3 + DINOv3 perception"
+  llm: "Chameleon-7B"
+  action_head: "flow matching MLP predicting velocity field over 16-step continuous action chunk (4-step Euler integration at inference)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "7B"
+  key_innovation: "Object-addressable slot decomposition splitting each per-object token into a frozen 32-dim identity address and a 256-dim time-varying content vector; cross-slot attention keys at every transformer layer are restricted to the address subvector via key-projection masking and a per-layer reset hook, architecturally decoupling target selection from scene context. Combined with a world-action auxiliary head that predicts next-frame per-slot state for robustness."
+
+training:
+  dataset: "Stage 0: DROID + RoboCasa + Open X-Embodiment (slot-aware trunk pretraining, ~600k steps). Stage I: LIBERO slot-adapter alignment (50k steps). Stage II: full-system LoRA finetuning on LIBERO (100k steps, 80M LoRA + 47M prediction heads = ~127M trainable parameters)."
+  method: "Three-stage curriculum with composite loss L_act + 0.5*L_world + 0.04*L_vq + 0.1*L_compose + 0.05*L_role"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.9
+    libero_object: 99.0
+    libero_goal: 97.4
+    libero_long: 95.9
+    libero_avg: 97.8
   simpler_env:
-    google_robot_pick_coke_can: TODO
+    simpler_widowx_visual_matching: 79.3
+    simpler_avg: 79.3
 
 eval_conditions:
   libero: "fine-tuned"
   simpler_env: "fine-tuned"
 
-tags: [libero, simpler_env]
+tags: [libero, simpler_env, libero-plus, flow-matching, world-model, slot-attention, object-addressable, robust-manipulation]

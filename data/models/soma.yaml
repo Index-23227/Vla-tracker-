@@ -1,0 +1,64 @@
+name: SOMA
+full_name: "Spatial Memory for Out-of-Vision Manipulation in Vision-Language-Action"
+organization: "HKUST (GZ) / OPPO Research"
+date: "2026-05-21"
+paper_url: https://arxiv.org/abs/2605.22283
+code_url: null
+venue: "ICML 2026"
+open_source: false
+
+architecture:
+  backbone: "GR00T N1.5 (VLM)"
+  llm: "GR00T N1.5 language decoder (frozen)"
+  action_head: "DiT-based action decoder (inherited from GR00T N1.5)"
+  action_head_category: diffusion
+  action_space: "continuous bimanual end-effector actions"
+  parameters: "GR00T N1.5 base (~2B+) + spatial memory modules"
+  key_innovation: >
+    Augments GR00T N1.5 with a persistent spatial memory built from multi-view observations acquired
+    via a movable head camera, enabling action generation when task-relevant objects leave the current
+    camera frustum. Three components: Spatial Memory Construction (aggregating multi-view features
+    into a persistent 3D scene representation), Dynamic Memory Refinement (updating memory as the
+    head moves), and Contextual Memory Retrieval (fetching task-relevant memory for the policy).
+
+training:
+  dataset: >
+    Real-world: 400 VR-teleoperated demonstrations per task across 5 out-of-vision manipulation tasks.
+    Simulation: full RoboCasa Tabletop dataset (300 demos per evaluation setting).
+  method: "Fine-tuning GR00T N1.5 with spatial memory modules; VLM language decoder kept frozen"
+
+benchmarks:
+  simpler_env:
+    visual_matching_avg: 63.2
+    variant_aggregation_avg: 52.5
+    simpler_avg: 57.85
+    source: "SOMA paper Table 4"
+    date_reported: "2026-05-21"
+    eval_condition: "fine-tuned"
+  robocasa:
+    robocasa_gr1_container_interaction: 53.3
+    robocasa_gr1_cooking_preparation: 48.4
+    robocasa_gr1_tabletop_serving: 54.0
+    robocasa_gr1_dish_transfer: 55.0
+    robocasa_gr1_tray_organization: 48.8
+    robocasa_gr1_avg: 52.0
+    robocasa_avg: 52.0
+    source: "SOMA paper Table 3 (300 demos)"
+    date_reported: "2026-05-21"
+    eval_condition: "fine-tuned, 300 demos"
+
+eval_conditions:
+  simpler_env: "fine-tuned"
+  robocasa: "fine-tuned (300 demos)"
+  real_world: "5 out-of-vision tasks, 20 episodes each"
+
+tags:
+  - vla
+  - spatial-memory
+  - out-of-vision
+  - gr00t
+  - diffusion
+  - real-world
+  - simpler_env
+  - robocasa
+  - icml2026

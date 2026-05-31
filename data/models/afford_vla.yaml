@@ -1,0 +1,84 @@
+name: Afford-VLA
+full_name: "Afford-VLA: Action-Aligned Visual Planning via Internalized Affordance"
+organization: "Fudan University; KAUST; Shanghai Jiao Tong University; East China Normal University"
+date: "2026-05-22"
+paper_url: https://arxiv.org/abs/2605.24203
+code_url: https://github.com/RZkiller/AffordVLA
+venue: null
+open_source: true  # "Codes and Models will be released" per paper
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct"
+  llm: "Qwen3 (~4B)"
+  action_head: "GR00T-style DiT-B flow-matching with internal affordance conditioning"
+  action_head_category: flow_matching
+  action_space: continuous (7-DoF)
+  parameters: "~4B (Qwen3-VL-4B backbone + DiT-B head + lightweight affordance decoder)"
+  key_innovation: >
+    Internalizes task-conditioned affordance as an explicit visual planning interface inside the VLA.
+    Four learnable <AFF> query tokens per view attend over multimodal features, are decoded by a
+    lightweight two-way decoder (2 layers, 8 heads, 256 hidden) to affordance masks, then converted to
+    embeddings via a differentiable Top-K patch pooling with straight-through softmax surrogate
+    (temperature 1.0). The resulting embeddings directly condition flow-matching action generation,
+    coupling visual planning and action prediction in one model.
+
+training:
+  dataset: "LIBERO; SimplerEnv (Google Robot + WidowX). Affordance supervised with ground-truth masks in warmup."
+  schedule:
+    stage1_warmup_steps: 4000  # frozen VLM + action head, GT masks
+    stage2_joint_steps_libero: 140000
+    stage2_joint_steps_simpler: 200000
+  batch_size: 16  # per GPU
+  hardware: "4 x H200 (LIBERO ~20h), 8 x H200 (SimplerEnv ~48h)"
+  optimizer: "AdamW with cosine schedule"
+  learning_rates:
+    base: 2.5e-5
+    vlm: 1.0e-5
+    action_head: 1.0e-4
+
+benchmarks:
+  libero:
+    libero_spatial: 97.8
+    libero_object: 99.6
+    libero_goal: 97.6
+    libero_long: 96.8
+    libero_avg: 97.4
+    source: "Afford-VLA paper, LIBERO four-suite average"
+    date_reported: "2026-05-22"
+    eval_condition: "fine-tuned"
+  libero_plus:
+    camera: 56.0
+    robot: 56.8
+    language: 91.5
+    light: 96.8
+    background: 97.0
+    noise: 80.9
+    layout: 78.9
+    libero_plus_avg: 78.1
+    source: "Afford-VLA paper Table 2 (LIBERO-Plus perturbations)"
+    date_reported: "2026-05-22"
+    eval_condition: "fine-tuned, zero-shot perturbations"
+  simpler_env:
+    put_spoon: 66.6
+    put_carrot: 54.2
+    stack_block: 14.6
+    put_eggplant: 96.8
+    simpler_avg: 58.1
+    source: "Afford-VLA paper Table 1 (WidowX SimplerEnv)"
+    date_reported: "2026-05-22"
+    eval_condition: "fine-tuned"
+
+eval_conditions:
+  libero: "fine-tuned"
+  libero_plus: "fine-tuned, zero-shot perturbations"
+  simpler_env: "fine-tuned (WidowX bridge tasks)"
+
+tags:
+  - affordance
+  - visual-planning
+  - flow-matching
+  - libero
+  - libero-plus
+  - simpler_env
+  - qwen
+  - open-source

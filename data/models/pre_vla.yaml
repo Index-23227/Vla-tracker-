@@ -1,0 +1,83 @@
+# Paper: Pre-VLA: Preemptive Runtime Verification for Reliable Vision-Language-Action and World-Model Rollouts
+# arXiv: 2605.22446
+
+name: Pre-VLA
+full_name: "Pre-VLA: Preemptive Runtime Verification for Reliable Vision-Language-Action and World-Model Rollouts"
+organization: "Multi-institution (authors with affiliations 1-5; affiliation list shown only via superscripts in paper)"
+date: "2026-05-21"
+paper_url: https://arxiv.org/abs/2605.22446
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "Dual-branch runtime verifier head on improved WorldVLA / Chameleon-based unified multimodal backbone (verifier output: safety confidence p_t in [0,1] via sigmoid + advantage scalar A^K_t via regression; two-layer FFN each)"
+  action_head_category: other
+  parameters: "Verifier head: lightweight 2-layer FFN per branch; exact count not reported. Backbone: improved WorldVLA (Chameleon VLM + action/state tokenizers, unified discrete-token sequence)"
+  key_innovation: "Preemptive runtime verification of candidate action chunks BEFORE physical execution or world-model imagination. Built on improved WorldVLA (Chameleon-based) with action/state tokenizers that represent text/image/state/action as unified discrete tokens; modality-aware pooling extracts per-modality token representations via masked mean pooling. Dual-branch head: (a) classification branch -> safety confidence, (b) regression branch -> critic-derived advantage A^K_t. Multi-task loss: Focal classification + MSE advantage regression + soft-threshold calibration. Deployment-time dual-mode preemptive resampling scheduler filters low-quality chunks and triggers adaptive resampling within compute budget. Improves RynnVLA-002 closed-loop LIBERO 4-suite average 30.79% -> 37.62% at 183.9 ms verification overhead."
+
+benchmarks:
+  libero:
+    # Closed-loop success rates (Table III)
+    libero_spatial: 45.66
+    libero_object: 3.95
+    libero_goal: 81.26
+    libero_long: 19.61   # LIBERO-10
+    libero_avg: 37.62
+    source: "paper Table III (closed-loop, Pre-VLA on RynnVLA-002)"
+    date_reported: "2026-05-21"
+    baseline_rynnvla_002: {libero_spatial: 39.48, libero_object: 1.14, libero_goal: 72.25, libero_10: 10.29, avg: 30.79}
+
+verifier_metrics:
+  # Table IV: offline test set discrimination
+  f1: 0.8303
+  accuracy: 0.9542
+  invalid_precision: 0.7200
+  invalid_recall: 0.9800
+  false_pass_rate: 0.0200
+  false_reject_rate: 0.0491
+  pass_rate_on_failed_traj: 0.5167
+  pass_rate_on_successful_traj: 0.8424
+
+resampling_attempts_per_suite:
+  libero_goal: 1.4216
+  libero_spatial: 2.0038
+  libero_object: 1.3696
+  libero_10: 1.2841
+
+eval_conditions:
+  libero: "closed-loop, fine-tuned (Pre-VLA verifier on top of RynnVLA-002; 4 suites)"
+
+training:
+  action_chunk_samples: 1284485
+  positive_negative_ratio_initial: "95:5"
+  train_test_split: "92:8"
+  batch_negative_ratio: 0.30
+  classification_threshold: -0.21
+  per_gpu_batch_size: 512
+  epochs: 10
+  training_time: "8d 16h 43m"
+  training_hardware: "8x NVIDIA H20D GPUs (~141 GB each), DDP"
+  inference_hardware: "16x NVIDIA RTX 5090 GPUs (32 GB each)"
+  hyperparameters:
+    action_chunk_length_K: 5
+    gamma: 0.99
+    kappa: 3
+    lambda_fail: 1
+    alpha_focal: 0.25
+    beta_focal: 2
+    lambda_reg: 0.05
+    lambda_soft: 0.2
+    tau_temp: 0.25
+    tau_p: 0.275
+    warmup_steps: 20
+    max_retries: 5
+    lr: 3.0e-4
+    weight_decay: 0.01
+    dropout: 0.1
+
+inference_latency:
+  avg_forward_time_per_chunk_ms: 183.9
+  avg_per_step_inference_time_ms: 1097.73
+
+tags: [libero, runtime-verification, world-model, verifier, focal-loss, chameleon, worldvla]

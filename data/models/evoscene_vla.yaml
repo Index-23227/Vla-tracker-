@@ -1,0 +1,40 @@
+# Paper: EvoScene-VLA: Evolving Scene Beliefs Inside the Action Decoder for Chunked Robot Control
+# arXiv: 2605.21862
+
+name: EvoScene-VLA
+full_name: "EvoScene-VLA: Evolving Scene Beliefs Inside the Action Decoder for Chunked Robot Control"
+organization: "Australian National University (ANU), University of Queensland, Beijing Normal University"
+date: "2026-05-21"
+paper_url: https://arxiv.org/abs/2605.21862
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "Action decoder with recurrent scene prefix. Maintains a persistent action-updated scene state across chunked control calls. At each VLM call: (a) observation slots extract fresh visual evidence per-view; (b) prior slots inherit the scene state from the previous chunk; (c) action decoder jointly denoises the next action chunk AND a compact scene update via flow-matching ('Joint Action-Scene Denoising'). Two training-only auxiliaries: Scene Predictor (supervises future scene-token targets) and Geometric Anchor (two-level: local depth + global 3D foundation model teacher). Both are discarded at deployment."
+  action_head_category: flow_matching
+  backbone: "Qwen2.5-VL-3B-Instruct (hidden dim D=2048)"
+  parameters: "3B (Qwen2.5-VL-3B backbone)"
+  key_innovation: "EvoScene-VLA addresses the blind-spot of chunked VLA policies: each chunk is conditioned only on the single observation at chunk start, even though robot actions cause contact, occlusion, and object motion before the next visual update. The model introduces a recurrent scene prefix carried inside the action decoder that fuses fresh visual evidence with an action-updated prior from the previous chunk via Joint Action-Scene Denoising. Training-only Scene Predictor and Geometric Anchor (depth + 3D foundation teachers) shape the scene tokens but are discarded at inference, so deployment cost is unchanged."
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_clean_avg: 89.1
+    robotwin_v2_rand_avg: 88.5
+    robotwin_v2_avg: 88.8
+    source: "arXiv:2605.21862; RoboTwin 2.0 31-task benchmark"
+    date_reported: "2026-05-21"
+    eval_condition: "fine-tuned; 31 RoboTwin 2.0 tasks; clean = 89.1% vs LingBot-VLA* 87.2% baseline; randomized = 88.5% vs LingBot-VLA* 86.1%"
+    notes: "Baselines: pi0.5 (81.2/75.9), LingBot-VLA (85.3/84.1), LingBot-VLA* depth-augmented (87.2/86.1). EvoScene-VLA gains: +1.9pp clean, +2.4pp randomized."
+
+eval_conditions:
+  robotwin_v2: "fine-tuned; 31 RoboTwin 2.0 tasks; fixed and randomized evaluation"
+  real_robot: "Galaxea R1-Lite; indoor-cleaning subset (3 tasks: Mirror 29%, Sink 51%, Cutting-board 46%); 439 episodes / ~9 hours data; average 42.0% vs 37.3% baseline"
+
+training:
+  hardware: "8x A800 GPUs"
+  batch_size: 256
+  learning_rate: 1.0e-4
+  total_steps: 20000
+
+tags: [robotwin, scene-memory, chunked-control, flow-matching, qwen2.5-vl, joint-denoising, geometric-anchor]

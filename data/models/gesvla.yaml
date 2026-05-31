@@ -1,0 +1,44 @@
+name: GesVLA
+version: '1.0'
+full_name: "GesVLA: Gesture-Aware Vision-Language-Action Model with Embedded Representations"
+organization: "Tsinghua University / Dexmal"
+date: '2026-05-21'
+paper_url: https://arxiv.org/abs/2605.22812
+code_url: https://gwxuan.github.io/GesVLA/
+venue: arXiv preprint
+open_source: false
+model_type: vla
+architecture:
+  backbone: "PaliGemma-2B (dual-VLM: VLMint for intent reasoning + VLMper for perception/action)"
+  llm: "PaliGemma (Gemma-2B based)"
+  action_head: "flow matching action expert with asymmetric cross-attention"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~4B (dual PaliGemma-2B)"
+  key_innovation: "Dual-VLM architecture that encodes pointing-gesture features directly into latent space (rather than converting to discrete text), letting gestures participate in both high-level intent reasoning and low-level flow-matching action generation; trained on ~16k semi-synthetic samples produced by rendering hand meshes onto real RGB-D scenes"
+training:
+  dataset: "~16,000 semi-synthetic gesture samples (rendered hand meshes on real RGB-D scenes with 3D pointing annotations) + real robot demonstrations"
+  method: "Two-stage training - Stage 1 intent reasoning pre-training on synthetic gesture data, Stage 2 dual-VLM policy training with flow matching on real robot demos"
+  num_trajectories: null
+benchmarks:
+  real_world:
+    pick_and_place_block: 95.0
+    select_jelly: 75.0
+    select_fruit_vegetable: 80.0
+    overall_avg: 83.3
+    intent_reasoning_accuracy: 94.3
+    source: GesVLA paper Table I
+    date_reported: '2026-05-21'
+    eval_condition: fine-tuned
+eval_conditions:
+  real_world: "Real robot manipulation under gesture+language instructions; tested in simple and hard (cluttered, similar-distractor) conditions"
+tags:
+- gesture-aware
+- multimodal-input
+- flow-matching
+- dual-vlm
+- paligemma
+- pointing
+- human-robot-interaction
+- real-world
+- semi-synthetic-data

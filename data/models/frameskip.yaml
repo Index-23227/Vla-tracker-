@@ -1,36 +1,51 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: FrameSkip: Learning from Fewer but More Informative Frames in VLA Training
 # arXiv: 2605.13757
 
 name: FrameSkip
 full_name: "FrameSkip: Learning from Fewer but More Informative Frames in VLA Training"
-organization: "TODO: check paper"
+organization: "Harbin Institute of Technology; Zhongguancun Academy; HKUST(GZ)"
 date: "2026-05-13"
 paper_url: https://arxiv.org/abs/2605.13757
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/ZGC-EmbodyAI/FrameSkip
+venue: arXiv
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-4B-VL-Instruct (understanding expert) + DiT action expert (StarVLA two-expert framework)"
+  action_head: "Diffusion Transformer (DiT) with flow-matching objective"
+  action_head_category: flow_matching
+  parameters: "4B+DiT"
+  key_innovation: "Data-layer frame selection that retains only ~20% of training frames using four scoring signals (action variation, visual-action coherence via DINOv2, task-progress prior via 1D GMM, and gripper-transition preservation). Operates entirely in the dataloader with no changes to VLA architecture, action head, training objective, or inference, yet improves macro-average success from 66.50% to 76.15% across LIBERO/SimplerEnv/RoboCasa-GR1."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.6
+    libero_object: 99.0
+    libero_goal: 98.2
+    libero_long: 93.8
+    libero_avg: 97.4
   simpler_env:
-    google_robot_pick_coke_can: TODO
+    simpler_widowx_put_spoon_on_towel: 90.63
+    simpler_widowx_put_carrot_on_plate: 54.17
+    simpler_widowx_stack_blocks: 45.59
+    simpler_widowx_eggplant_in_basket: 95.83
+    simpler_avg: 71.55
   robocasa:
-    robocasa_avg: TODO
+    robocasa_pnp_bottle: 74.0
+    robocasa_pnp_can: 80.0
+    robocasa_pnp_cup: 46.0
+    robocasa_pnp_milk: 60.0
+    robocasa_avg: 59.5
 
 eval_conditions:
-  libero: "fine-tuned"
-  simpler_env: "fine-tuned"
-  robocasa: "fine-tuned"
+  libero: "fine-tuned; 30K training steps"
+  simpler_env: "fine-tuned; 60K training steps; WidowX subset"
+  robocasa: "fine-tuned; 100K training steps; RoboCasa-GR1, 24 tasks"
 
-tags: [libero, simpler_env, robocasa]
+training:
+  base_model: "StarVLA (Qwen3-4B-VL-Instruct + DiT)"
+  hardware: "8x NVIDIA H100 GPUs with DeepSpeed ZeRO-2"
+  batch_size: 128
+  frame_retention_ratio: 0.20
+
+tags: [frame-selection, flow_matching, libero, simpler_env, robocasa, data-efficiency]

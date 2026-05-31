@@ -1,0 +1,53 @@
+# Paper: ECHO: Continuous Hierarchical Memory for Vision-Language-Action Models
+# arXiv: 2605.10993
+
+name: ECHO
+full_name: "ECHO: Experience Consolidation and Hierarchical Organization — Continuous Hierarchical Memory for Vision-Language-Action Models"
+organization: "Xi'an Jiaotong University (School of Software; School of Artificial Intelligence; State Key Laboratory of Human-Machine Hybrid Augmented Intelligence)"
+date: "2026-05-09"
+paper_url: https://arxiv.org/abs/2605.10993
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "pi_0 foundation model action head augmented with a Hyperbolic Autoencoder (HAE) memory module — MLP encoder/decoder mapping VLA hidden states into a 513-dim Lorentz manifold; entailment-constrained Cone Tree retrieval with beam width k=3; background consolidation via geometric interpolation and structural splitting (virtual memory synthesis). Memory injected as a residual into the suffix embedding: E'_suffix = E_suffix + proj(alpha_t * (v_prior - h_last)), with injection strength alpha_0 = 0.03."
+  action_head_category: other
+  parameters: "Lightweight HAE MLP on top of pi_0; pi_0 parameter count unchanged. Latent dim n+1 with n=512."
+  key_innovation: "Continuous hierarchical memory in the Lorentz hyperbolic space. A hyperbolic autoencoder maps pi_0 hidden states onto a Lorentz manifold where entailment penalties enforce parent-child semantics, building a tree organized by Cone Tree retrieval. A background consolidation thread continuously interpolates and splits nodes (virtual memory synthesis), giving plug-and-play long-horizon memory: +12.78% absolute on LIBERO-Long over vanilla pi_0 and +11.7 avg on real-world tabletop tasks."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.3
+    libero_object: 98.8
+    libero_goal: 98.6
+    libero_long: 93.5
+    libero_avg: 97.3
+    libero_plus: 56.5
+    source: "ECHO paper Table 1"
+    date_reported: "2026-05-09"
+    eval_condition: "ECHO on top of vanilla pi_0; numbers are mean +/- std over 3 seeds. LIBERO-Plus is the perturbed evaluation set."
+
+real_world:
+  place_banana: 90.0
+  stack_blocks: 55.0
+  insert_circle: 65.0
+  average: 70.0
+  baseline_pi0_average: 58.3
+  notes: "Franka Emika Panda at 15 Hz; 3 tabletop tasks, 20 trials each (ECHO paper Table 5)."
+
+ablations:
+  libero_long_table2:
+    vanilla_pi0: 80.70
+    short_term_buffer_only: 88.81
+    flat_memory_knn: 83.25
+    hyperbolic_memory_knn: 91.11
+    cone_tree_retrieval: 92.04
+    full_echo_cone_tree_plus_consolidation: 93.48
+  cross_suite_source_memory_libero_long: 89.31  # trained only on Spatial/Object/Goal, evaluated on Long
+
+eval_conditions:
+  libero: "Fine-tuned on top of vanilla pi_0 for each LIBERO suite; 3 seeds reported. Cross-suite generalization: training memory only from Spatial/Object/Goal still yields 89.31% on LIBERO-Long."
+  hardware: "8 x NVIDIA RTX 6000 Ada (49 GB each); AMD EPYC 7H12 64-core CPU with 2.0 TiB RAM; memory-bank construction approximately 4.1-4.6 minutes per run."
+
+tags: [libero, memory, hyperbolic, pi0, long-horizon]

@@ -1,0 +1,91 @@
+name: QuoVLA
+full_name: "QuoVLA: Quotient Space for Vision-Language-Action Models"
+organization: "Tsinghua University (Department of Automation)"
+date: '2026-05-24'
+paper_url: https://arxiv.org/abs/2605.24890
+code_url: null  # "Code will be made publicly available" -- no repo URL in v1
+venue: null
+open_source: false
+architecture:
+  backbone: "pi0.5 with PaliGemma-2.6B VLM"
+  llm: PaliGemma-2.6B
+  action_head: >-
+    Flow-matching action expert (~300M, inherited from pi0.5) preceded by
+    a quantized 1-layer Transformer prefix module. Dual-branch design:
+    main branch uses 8-bit symmetric uniform quantization on prefix
+    tokens (with adaptive straight-through estimator) while a
+    stop-gradient raw-prefix reference branch supplies temporal
+    complexity targets.
+  action_head_category: flow_matching
+  parameters: "2.6B VLM (PaliGemma) + 300M action expert (~2.9B total)"
+  key_innovation: >-
+    QuoVLA proposes Quotient Theory for VLA: pretrained VLM latents are
+    *action-sufficient yet overcomplete* because prompt-level variations
+    produce identical optimal actions. The method removes this redundancy
+    via 8-bit symmetric uniform quantization of prefix tokens inside a
+    Transformer block, combined with a dual-branch architecture and a
+    relative temporal-complexity regulariser L_tc that pushes the
+    quantised trajectory's temporal smoothness toward the raw reference.
+    The result lifts LIBERO average from pi0.5's 96.9% to 99.6% and
+    delivers a 23.5-point real-robot gain.
+training:
+  base_model: pi0.5
+  dataset: "LIBERO (Spatial/Object/Goal/Long), RoboTwin 2.0, real-robot 4-task dataset"
+  hardware: "8x NVIDIA A800 80GB"
+  epochs: "~10 on LIBERO, 5 on RoboTwin 2.0"
+  optimizer: "AdamW, lr 2.5e-5, weight decay 0.01"
+  image_resolution: 224
+  action_chunk: 50
+  real_robot: "100 samples, 5000 steps per task on single A800"
+benchmarks:
+  libero:
+    libero_spatial: 99.8
+    libero_object: 99.9
+    libero_goal: 100.0
+    libero_long: 98.7
+    libero_avg: 99.6
+    source: "Table 1a, QuoVLA paper"
+    date_reported: '2026-05-24'
+    eval_condition: "fine-tuned per suite"
+  libero_plus:
+    zero_shot_avg: 90.3
+    finetuned_avg: 90.9
+    source: "Table 2, QuoVLA paper"
+    date_reported: '2026-05-24'
+    eval_condition: "LIBERO-Plus robustness suite"
+  robotwin_v2:
+    easy_avg: 45.1
+    hard_avg: 58.6
+    robotwin_v2_avg: 51.85
+    source: "Table 3, QuoVLA paper"
+    date_reported: '2026-05-24'
+    eval_condition: "RoboTwin 2.0 (mean of easy and hard); pi0.5 baseline hard = 43.84"
+real_world:
+  average_success: 88.0
+  baseline_pi0_5: 64.5
+  improvement: 23.5
+  source: "Table 4, QuoVLA paper (4 real-robot manipulation tasks)"
+ablation:
+  default_libero_avg: 99.6
+  no_quantization: 96.85
+  quant_depth_2: 95.7
+  quant_depth_6: 92.2
+  bits_16: 97.1
+  no_adaptive_STE: 98.45
+  no_dual_branch: 98.65
+  no_constraints: 98.78
+  source: "Table 5, QuoVLA paper"
+eval_conditions:
+  libero: "fine-tuned per suite"
+  robotwin_v2: "RoboTwin 2.0 easy + hard splits"
+  real_world: "4 real-robot manipulation tasks, 100 demos each"
+tags:
+- libero
+- libero-plus
+- robotwin
+- flow-matching
+- quantization
+- pi0.5
+- PaliGemma
+- prefix-compression
+- real-world

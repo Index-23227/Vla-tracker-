@@ -1,0 +1,46 @@
+name: OneWM-VLA
+full_name: "One Token Per Frame: Reconsidering Visual Bandwidth in World Models for VLA Policy"
+organization: "Zuojin Tang, Shengchao Yuan, Xiaoxin Bai, Zhiyuan Jing, De Ma, Gang Pan, Bin Liu"
+date: '2026-05-08'
+paper_url: https://arxiv.org/abs/2605.07931
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "pi0 (PaliGemma-2B vision-language encoder + Gemma-300M joint expert), ~2B parameters total"
+  action_head: "Unified flow-matching head jointly predicting future latent stream and actions (10 ODE inference steps)"
+  action_head_category: flow_matching
+  parameters: "2B base (frozen except LoRA); 14.71M trainable LoRA parameters"
+  key_innovation: "Adaptive Attention Pooling (AAP) compresses each camera view into a single semantic latent token per frame, drastically reducing visual bandwidth in the world model. Combines three complementary pooling strategies - Max (peak channel response), Sum (total response), and Learn (task-aware MLP) - and fuses multi-view tokens via softmax-normalized trainable view-level weights. A single unified flow-matching objective replaces separate decoders for the latent stream and action prediction, integrating world modeling and policy in one head."
+
+training:
+  base_model: "pi0 (2B)"
+  method: "LoRA fine-tuning (14.71M trainable params), 30K steps"
+  hardware: "8x NVIDIA A800 GPUs"
+  loss: "Unified flow-matching loss over actions and pooled per-frame latents; 10 ODE inference steps"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.2
+    libero_object: 99.6
+    libero_goal: 99.0
+    libero_long: 95.6
+    libero_avg: 98.1
+    source: "Paper Table 2"
+    date_reported: "2026-05-08"
+    eval_condition: "pi0 + AAP + LoRA fine-tuning, LIBERO-Long +10.4 over pi0 (85.2%)"
+
+eval_conditions:
+  metaworld_mt50: "H=30 horizon - Easy 74.64%, Medium 30.00%, Hard 26.00%, Very Hard 54.00%, Avg 46.16% (vs 47.9% baseline reported as 61.3% in abstract under different setting)"
+  real_world_piper: "Clean conditions - Pick Banana 100.0%, Fold Cloth 60.0%, Pull Drawer 55.0%, Avg 71.7%; Fold Cloth +40 over pi0 (20.0%)"
+
+tags:
+  - world-model
+  - flow-matching
+  - pi0-base
+  - lora
+  - adaptive-attention-pooling
+  - visual-bandwidth
+  - single-token
+  - real-world

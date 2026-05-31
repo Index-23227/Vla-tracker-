@@ -1,0 +1,41 @@
+name: Evo-Depth
+full_name: "Evo-Depth: A Lightweight Depth-Enhanced Vision-Language-Action Model"
+organization: "Shanghai Jiao Tong University (MINT Lab), KAUST, Nanyang Technological University"
+date: "2026-05-14"
+paper_url: https://arxiv.org/abs/2605.14950
+code_url: https://github.com/MINT-SJTU/Evo-Depth
+venue: arXiv 2026
+open_source: true
+
+model_type: vla
+
+architecture:
+  backbone: "InternVL3-1B vision-language backbone"
+  llm: "Qwen2.5-0.5B (14 layers)"
+  action_head: "flow matching (Diffusion Transformer)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "0.9B"
+  key_innovation: "Lightweight depth-enhanced VLA combining an Implicit Depth Encoding Module (IDEM) that extracts compact depth features from multi-view RGB and a Spatial Enhancement Module (SEM) using depth-aware modulation for spatial-semantic fusion, trained via a Progressive Alignment Training strategy that aligns depth-enhanced representations with action learning."
+
+training:
+  method: "Progressive Alignment Training (vision-depth alignment, then action learning)"
+  dataset: "Multi-source robot manipulation demonstrations (LIBERO, MetaWorld, real-world tasks)"
+
+benchmarks:
+  libero:
+    libero_avg: 95.4
+    source: "Paper main table"
+  metaworld:
+    metaworld_avg: 84.4
+    source: "Paper main table"
+  real_world:
+    success_avg: 90.0
+    source: "Paper real-world experiments"
+
+eval_conditions:
+  libero: "fine-tuned"
+  metaworld: "fine-tuned"
+  real_world: "fine-tuned (4 task suites, average across tasks)"
+
+tags: [flow-matching, depth, lightweight, multi-view, real-world]

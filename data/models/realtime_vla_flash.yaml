@@ -1,0 +1,41 @@
+name: Realtime-VLA-FLASH
+full_name: "Realtime-VLA FLASH: Speculative Inference Framework for Diffusion-based VLAs"
+organization: "Institute of Computing Technology CAS / UCAS / Nanjing University / Dexmal"
+date: '2026-05-13'
+paper_url: https://arxiv.org/abs/2605.13778
+code_url: https://dexmal.github.io/realtime-vla-flash
+venue: arXiv 2026
+open_source: false
+model_type: speculative-inference-vla
+architecture:
+  backbone: "pi0 (PaliGemma-style 2.7B VLM + flow-matching action expert)"
+  llm: "PaliGemma 2.7B (pi0 base)"
+  action_head: "flow matching action expert (pi0) with speculative draft model + parallel verification"
+  action_head_category: flow_matching
+  action_space: continuous action chunks
+  parameters: "2.7B main VLM + ~110M draft model (single Gemma block + linear action head with learned action queries)"
+  key_innovation: "Speculative inference for diffusion/flow VLAs: a 110M draft model proposes full action chunks that the main pi0 verifies in parallel, with a phase-aware fallback that detects gripper-switch events (precision-critical phases) and reverts to full inference; combined with Triton kernel fusion delivers 3.04x speedup while preserving LIBERO success"
+  inference_hz: "~52 Hz per action (19.1 ms / 1.9 ms per-action with FLASH+Triton; vs 58 ms / 5 ms baseline)"
+benchmarks:
+  libero:
+    libero_spatial: 96.8
+    libero_object: 99.2
+    libero_goal: 94.4
+    libero_long: 84.6
+    libero_avg: 93.8
+    source: "Table 1 (FLASH+Triton-pi0), Realtime-VLA FLASH paper"
+    date_reported: '2026-05-13'
+    eval_condition: "pi0 fine-tuned on LIBERO; FLASH+Triton-pi0 inference on RTX 4090D, 50 trials/task"
+training:
+  dataset: "pi0 base checkpoint; real-world LoRA fine-tune with 200 demonstrations per object category on UR5 conveyor-belt sorting"
+  method: "Train lightweight Gemma-block draft model jointly to mimic pi0 action chunks; deploy with speculative verification and phase-aware fallback"
+  hardware: "NVIDIA RTX 4090D for inference benchmarks"
+tags:
+- speculative-inference
+- flow-matching
+- pi0
+- inference-acceleration
+- diffusion-vla
+- LIBERO
+- realtime
+- Triton-kernels

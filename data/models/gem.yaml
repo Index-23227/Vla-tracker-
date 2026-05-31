@@ -1,0 +1,70 @@
+name: GEM
+full_name: "GEM: Generative Supervision Helps Embodied Intelligence"
+organization: "Tsinghua University / Tencent Hunyuan"
+date: '2026-05-27'
+paper_url: https://arxiv.org/abs/2605.28548
+code_url: https://zhaorw02.github.io/GEM/
+venue: null
+open_source: false  # project page only; code release not confirmed
+architecture:
+  backbone: "Qwen3-VL (2B and 8B variants)"
+  llm: Qwen3-VL
+  action_head: "RDT2-style Diffusion Transformer (DiT) action expert trained with flow matching; action chunk size = 32"
+  action_head_category: flow_matching
+  parameters: "Qwen3-VL 2B/8B backbone + DiT action expert (exact action-expert size not disclosed)"
+  key_innovation: >-
+    GEM injects a depth-map generation task directly into VLM pre-training,
+    coupling autoregressive language modelling with diffusion-based geometric
+    supervision so the VLM acquires explicit spatial/3D grounding before
+    action fine-tuning. The resulting GEM-VLA combines this geometry-aware
+    VLM with an RDT2-style flow-matching DiT action expert, reaching 96.1%
+    average on LIBERO and 67.0% on SimplerEnv WidowX -- substantially
+    outperforming pi0 and OpenVLA on both simulation suites and three
+    long-horizon UR5 real-world tasks (43% vs. 28.7% prior).
+training:
+  pretraining_dataset: "GEM-4M (4M samples combining grounding, reasoning, and depth/planning data)"
+  finetuning_dataset: "LIBERO, SimplerEnv (Bridge/Fractal), real-world UR5 demonstrations"
+  hardware: "32x A800 GPUs (pretraining); 8 GPUs per task (fine-tuning)"
+  finetune_steps: 50000
+  batch_size: 256
+  cameras: "3 views (1 top, 2 wrist)"
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 98.8
+    libero_goal: 97.1
+    libero_long: 89.3
+    libero_avg: 96.1
+    source: "Table 3, GEM paper"
+    date_reported: '2026-05-27'
+    eval_condition: "fine-tuned per suite; GEM-VLA (8B)"
+  simpler_env:
+    put_spoon_on_towel: 82.0
+    put_carrot_on_plate: 58.0
+    stack_blocks: 44.0
+    put_eggplant_in_basket: 84.0
+    simpler_avg: 67.0
+    source: "Table 5, GEM paper (SimplerEnv WidowX)"
+    date_reported: '2026-05-27'
+    eval_condition: "WidowX SimplerEnv visual matching"
+real_world:
+  tasks:
+    - table bussing (long-horizon)
+    - cloth folding (deformable)
+    - unzipping backpack (deformable)
+  average_success: 43.0
+  baseline_average_success: 28.7
+  source: "GEM paper, real-world UR5 evaluation"
+eval_conditions:
+  libero: "fine-tuned per suite, GEM-VLA-8B"
+  simpler_env: "WidowX visual-matching, fine-tuned"
+tags:
+- libero
+- simpler-env
+- flow-matching
+- diffusion-transformer
+- depth-supervision
+- generative-pretraining
+- Qwen3-VL
+- RDT2
+- real-world

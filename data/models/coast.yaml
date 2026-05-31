@@ -1,0 +1,63 @@
+name: COAST
+full_name: "COAST: Contrastive Conceptor Activation Steering — Unlocking Vision-Language-Action Models through Hidden States"
+organization: "University of Pennsylvania"
+date: "2026-05-16"
+paper_url: https://arxiv.org/abs/2605.17144
+code_url: null
+venue: "Submitted to NeurIPS 2026"
+open_source: false
+
+architecture:
+  backbone: "N/A (training-free inference-time steering wrapper; inherits backbone of host VLA — e.g., PaliGemma/SigLIP for pi0.5, Eagle for GR00T N1.5, ResNet for Diffusion Policy)"
+  llm: "N/A (inherits LLM of host VLA)"
+  action_head: "Training-free activation-steering wrapper that does not modify the underlying VLA action head (works across flow-matching pi0.5, autoregressive pi0-FAST, GR00T N1.5, and Diffusion Policy)"
+  action_head_category: other
+  parameters: "N/A (wrapper; conceptor matrix size equals hidden-state dimension)"
+  key_innovation: "Training-free activation steering using contrastive conceptors. Computes a positive conceptor C_success and negative conceptor C_failure from a small number of rollout activations via the closed-form C = R(R + alpha^-2 I)^-1 (R = covariance of mean-centered activations). The contrastive steering operator C_steer = C_success AND NOT C_failure is applied at inference via multiplicative gating M = (1 - beta) I + beta * C_steer to project hidden states toward success-aligned subspaces. Per-denoising-step conceptors yield best gains. No retraining required, works on flow-matching, autoregressive, and diffusion VLAs."
+
+benchmarks:
+  libero:
+    libero_long: 80.0
+    source: "Table on LIBERO-10 (long-horizon suite); pi0.5 + COAST per-step. Baseline pi0.5: 0.43 -> 0.80"
+    eval_condition: "training-free inference-time steering on top of pi0.5"
+  metaworld:
+    ml45_avg: 94.0
+    source: "MetaWorld ML45 with pi0.5 + COAST per-step (baseline 0.69 -> 0.94)"
+    eval_condition: "training-free inference-time steering on top of pi0.5"
+  robocasa:
+    robocasa_avg_pi05: 56.0
+    robocasa_avg_groot_n15: 75.0
+    robocasa_avg_dp: 46.0
+    source: "RoboCasa results; pi0.5 0.40->0.56, GR00T-N1.5 0.59->0.75, Diffusion Policy 0.32->0.46"
+    eval_condition: "training-free inference-time steering"
+  real_world:
+    droid_avg_improvement: 40.0
+    source: "Real-world DROID platform; pi0.5 + COAST achieves +40% average improvement on 3 tasks"
+    eval_condition: "real-robot DROID platform with pi0.5 base"
+
+eval_conditions:
+  libero: "training-free inference-time steering on top of pi0.5 (LIBERO-10 long-horizon)"
+  metaworld: "training-free inference-time steering on top of pi0.5 (ML45 suite)"
+  robocasa: "training-free inference-time steering across pi0.5, GR00T-N1.5, Diffusion Policy"
+  real_world: "real-robot DROID platform with pi0.5 base"
+
+training:
+  dataset: "N/A — training-free method. Conceptor matrices are estimated from ~50-100 success/failure rollouts per task."
+  method: "Closed-form conceptor computation: C = R(R + alpha^-2 I)^-1 from mean-centered activation covariance R; contrastive aperture-based combination yields C_steer. Applied at inference via multiplicative gating with strength beta in [0,1]."
+  num_trajectories: null
+  compute: "Negligible — single closed-form matrix inversion per layer; no gradient updates."
+
+tags:
+  - activation_steering
+  - conceptor
+  - training_free
+  - inference_time
+  - contrastive
+  - pi0_5
+  - groot_n1_5
+  - diffusion_policy
+  - libero
+  - metaworld
+  - robocasa
+  - droid
+  - real_world

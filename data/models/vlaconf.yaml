@@ -1,0 +1,33 @@
+name: VLAConf
+full_name: "VLAConf: Calibrated Task-Success Confidence for Vision-Language-Action Models"
+organization: "Southern University of Science and Technology; Zhongguancun Academy; Wuhan University"
+date: "2026-05-28"
+paper_url: https://arxiv.org/abs/2605.29605
+code_url: https://sites.google.com/view/vlaconf
+venue: arXiv preprint
+open_source: true
+
+architecture:
+  backbone: "Frozen pretrained VLAs (OpenVLA-OFT for discrete actions; pi-0.5 for continuous flow-matching)"
+  action_head: "Inherits from base VLA; adds a lightweight two-layer MLP one-class discriminative confidence head operating on internal representations"
+  action_head_category: other
+  parameters: "VLA backbone frozen; auxiliary confidence head: two-layer MLPs with coin-vector dim d=64 (negligible overhead)"
+  key_innovation: "Shifts success-confidence estimation from action-output ensembles to internal hidden-state representations via a Coin-Flip Network objective trained on successes only, with Platt-scaled calibration. Supports both discrete and continuous action spaces in a single forward pass without resampling."
+
+benchmarks:
+  libero:
+    libero_avg: 91.3
+    source: "Reported success rate on LIBERO standard suites with pi-0.5 backbone (also OpenVLA-OFT: 78.2%)"
+    date_reported: "2026-05-28"
+    eval_condition: "VLA backbone frozen; confidence head trained on success-only demonstrations and calibrated via Platt scaling"
+
+eval_conditions:
+  libero: "frozen base VLA with auxiliary confidence head"
+
+training:
+  data: "Success-only demonstrations from LIBERO; separate outcome-labeled rollouts for Platt calibration"
+  hardware: "Standard single-GPU training (not heavily detailed)"
+  duration: "AdamW optimization, same step budget across backbones"
+  notes: "Coin-Flip Network MSE loss on successes; backbone weights frozen throughout"
+
+tags: [libero, confidence-calibration, uncertainty, openvla-oft, pi0.5]

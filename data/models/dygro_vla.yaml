@@ -1,0 +1,47 @@
+# Paper: DyGRO-VLA: Cross-Task Scaling of Vision-Language-Action Models via Dynamic Grouped Residual Optimization
+# arXiv: 2605.17486
+
+name: DyGRO-VLA
+full_name: "DyGRO-VLA: Cross-Task Scaling of Vision-Language-Action Models via Dynamic Grouped Residual Optimization"
+organization: "Affiliations from Shenzhen and Guangdong institutions (specific institutions not enumerated in arXiv abstract page; authors: Sixu Lin, Yunpeng Qing, Litao Liu, Ming Zhou, Ruixing Jin, Xiaoyi Fan, Guiliang Liu)"
+date: "2026-05-17"
+paper_url: https://arxiv.org/abs/2605.17486
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "Two-stage cross-task RL framework. Stage 1 (offline pre-training): Information Bottleneck objective max I(Z;A) - lambda_IB * I(Z;O), implemented via variational lower bound L_base = E[-log pi(a|z)] + lambda_IB * MINE-style term. Stage 2 (online fine-tuning): Mixture-of-RL-Residuals (MoRR) — Delta_a = sum omega_i(z_T) * a_tilde_i, with routing omega over expert residual policies guided by task embeddings learned via contrastive loss. RL optimizer is a Soft Actor-Critic variant with h-step action chunking."
+  action_head_category: other
+  backbone: "DINOv2 vision encoder + SigLIP language model + Qwen2.5-0.5B LLM"
+  parameters: "0.5B+ (Qwen2.5-0.5B core LLM; total with vision/language modules not stated explicitly)"
+  key_innovation: "DyGRO-VLA addresses the common pitfall where RL fine-tuning collapses generalist VLAs into narrow task-specific policies. The framework decouples representation learning (Stage 1, IB objective + contrastive task embeddings) from policy optimization (Stage 2, Mixture-of-RL-Residuals). Eight expert residuals dynamically route based on task embeddings, predicting policy adjustments rather than modifying the base policy directly. Achieves LIBERO 97.1% avg (+4.4 over offline base), RoboTwin2 79.2% (4 task subset), and Sim2Real 57.5% across 4 real-world tasks."
+
+benchmarks:
+  libero:
+    libero_spatial: 97.6
+    libero_object: 98.6
+    libero_goal: 97.2
+    libero_long: 95.0
+    libero_avg: 97.1
+    source: "arXiv:2605.17486 Table (4-suite co-training)"
+    date_reported: "2026-05-17"
+    eval_condition: "fine-tuned (RL after SFT); +4.4pp absolute over offline base; +9.8pp on LIBERO-Long specifically"
+    notes: "Strongest baseline pi0 reports 94.4% avg (Spatial 98.0/Object 96.8/Goal 94.4/Long 88.4). DyGRO-VLA (SFT) reports 92.6%, (Offline) 92.7%, full DyGRO-VLA RL 97.1%."
+  robotwin_v2:
+    robotwin_beat_block_hammer: 72.2
+    robotwin_pick_dual_bottles: 57.0
+    robotwin_stack_bowls_two: 90.4
+    robotwin_place_empty_cup: 97.0
+    robotwin_v2_avg: 79.2
+    source: "arXiv:2605.17486 RoboTwin2 4-task simulation table"
+    date_reported: "2026-05-17"
+    eval_condition: "fine-tuned (RL); 4-task subset; vs OpenVLA-oft (RFT) 78.5% baseline"
+    notes: "Real-world Sim2Real (20 trials/task): Beat Block Hammer 30%, Pick Dual Bottles 40%, Stack Bowls Two 90%, Place Empty Cup 70% (avg 57.5%, vs OpenVLA-oft RFT 55.0%)."
+
+eval_conditions:
+  libero: "fine-tuned (RL, 4-suite co-training); h-step action chunking"
+  robotwin_v2: "fine-tuned (RL); 4-task simulation subset"
+  real_world: "Sim2Real transfer; domain randomization in sim; 20 trials per task"
+
+tags: [RL, libero, robotwin, cross-task, generalization, mixture-of-experts, information-bottleneck, sim2real]

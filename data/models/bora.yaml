@@ -1,0 +1,79 @@
+name: BORA
+full_name: "BORA: Bridging Offline Reinforcement Learning and Online Residual Adaptation for Real-World Dexterous VLA Models"
+organization: "Shanghai Jiao Tong University / CASIA / Shanghai AI Laboratory / USTC"
+date: '2026-05-28'
+paper_url: https://arxiv.org/abs/2605.30226
+code_url: https://chenzhongxi-sjtu.github.io/BORA/  # project page; no code repository linked
+venue: null
+open_source: false
+architecture:
+  backbone: "VITRA (pretrained VLA, Li et al. 2025) -- backbone VLM and parameter count not disclosed"
+  llm: "inherited from VITRA (unspecified)"
+  action_head: >-
+    Consistency Policy generating continuous action chunks in 1-3
+    denoising steps (replaces VITRA's diffusion action expert). The
+    base policy is frozen at deployment; an MLP-based residual actor
+    pi_res produces additive compensations A_final = A_base +
+    lambda_res * pi_res(s_prop, A_base, z_VLM).
+  action_head_category: diffusion
+  parameters: "inherited VITRA size (not disclosed); residual actor is a lightweight MLP"
+  critic: >-
+    Action-conditioned Q-function that ingests VLM cognition tokens,
+    action chunks, and position embeddings. Bellman backups propagate
+    credit *within* each action chunk via shifted value bootstrap.
+    Trained with an IQL-style expectile value objective and combined
+    with BC regularisation plus PPO-style improvement.
+  key_innovation: >-
+    BORA is a two-stage RL pipeline tailored to dexterous VLA models.
+    Offline phase: an action-conditioned critic over (VLM tokens, action
+    chunks) extracts conservative value targets from sub-optimal demos
+    via IQL expectile loss, mitigating visual overfitting that plagues
+    pure imitation. Online phase: a frozen base VLA is augmented with a
+    lightweight chunk-wise residual actor trained by an Intervention-
+    Driven RLPD pipeline (HITL corrections, asymmetric reward
+    penalties). Yields +33% absolute success on dexterous tasks and
+    +43% under unseen-object generalisation.
+training:
+  base_model: VITRA
+  hardware: "8x NVIDIA H100 (offline) + 1x RTX 4090 (online)"
+  offline_updates: 70000
+  batch_size: 8  # per GPU
+  action_chunk_size: 32
+  online_updates: 15000  # up to
+  data_per_task: "~60-100 offline trajectories + ~10 online intervention trajectories per iteration"
+  human_interventions: "~1-2 per task"
+benchmarks:
+  real_world:
+    standard_setting:
+      pick_plush_toy: 100.0
+      pick_and_place: 90.0
+      open_box: 75.0
+      pull_tissue: 80.0
+      press_button: 85.0
+      average: 86.0
+    object_unseen_setting:
+      pick_plush_toy: 85.0
+      pick_and_place: 70.0
+      open_box: 50.0
+      pull_tissue: 70.0
+      press_button: 75.0
+      average: 70.0
+    source: "Tables 1 and 2, BORA paper"
+    date_reported: '2026-05-28'
+    eval_condition: "Franka arm + 12-DoF dexterous hand (DexHand021), 20 trials per task"
+hardware:
+  arm: "Franka Emika"
+  hand: "12-DoF dexterous hand (DexHand021, per appendix)"
+eval_conditions:
+  real_world: "Franka + 12-DoF dexterous hand; 20 trials per task"
+  benchmarks_not_run: "LIBERO, CALVIN, SimplerEnv -- BORA evaluates real-world dexterous tasks only"
+tags:
+- dexterous
+- real-world
+- offline-rl
+- online-adaptation
+- consistency-policy
+- residual-policy
+- VITRA
+- human-in-the-loop
+- IQL

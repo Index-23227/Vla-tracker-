@@ -1,34 +1,33 @@
 name: GR00T-N1.6
 version: '1.6'
-organization: NVIDIA
+organization: NVIDIA GEAR Lab
 model_type: vla
 inference_hz: null
 paper_url: null
 project_url: https://research.nvidia.com/labs/gear/gr00t-n1_6/
 code_url: https://github.com/NVIDIA/Isaac-GR00T
 date: '2025-09-29'
-venue: Announced at CoRL 2025 (keynote, no peer-reviewed paper)
+venue: Announced at CoRL 2025 keynote (no peer-reviewed paper / arXiv preprint)
 architecture:
-  backbone: Cosmos-Reason-2B VLM (flexible resolution, native aspect ratio)
+  backbone: Internal NVIDIA Cosmos-Reason-2B VLM variant (flexible resolution, native aspect ratio)
   llm: Cosmos-Reason-2B
-  action_head: large diffusion transformer (32 layers)
-  action_space: continuous (state-relative action chunks)
+  action_head: large diffusion transformer (32 layers — 2x N1.5's 16-layer DiT)
+  action_space: continuous; state-relative action chunks for most embodiments
   parameters: 3B
-  key_innovation: 2x larger DiT (32 layers vs 16); Cosmos-Reason VLM for step-by-step task planning; state-relative action
-    prediction; full-body humanoid control
+  key_innovation: 2x larger DiT (32 layers vs 16); removes N1.5's post-VLM 4-layer transformer adapter and instead unfreezes the top 4 layers of the VLM; state-relative action chunk prediction for smoother motion (with caveats on error accumulation); full-body humanoid control; Cosmos-Reason VLM for step-by-step task planning
   action_head_category: diffusion
 training:
-  dataset: Real robot data + synthetic data
+  dataset: Several thousand hours of teleoperated data from YAM, AgiBot Genie-1, Galaxea R1 Pro, Unitree G1 + synthetic
   method: Pre-training with top 4 VLM layers unfrozen
-  compute: 300K steps, batch size 16384
+  compute: 300K pretraining steps, global batch size 16384; post-training typically 10K-30K steps with global batch <= 1K
 benchmarks:
   robocasa:
     robocasa_avg: 47.6
-    source: LangForce paper (RoboCasa GR1 Tabletop, 24 tasks — different protocol from Kitchen setup)
+    source: LangForce paper (RoboCasa GR1 Tabletop, 24 tasks — different protocol from N1.5 Kitchen setup)
     date_reported: '2026-01-28'
     eval_condition: fine-tuned
 open_source: true
-open_source_note: Open model weights on HuggingFace (nvidia/GR00T-N1.6-3B)
+open_source_note: Open model weights on HuggingFace (nvidia/GR00T-N1.6-3B). No standalone benchmark numbers published by NVIDIA on the project page; reported scores come from third-party papers using N1.6 as a baseline.
 tags:
 - 3B
 - diffusion-transformer
@@ -36,5 +35,6 @@ tags:
 - humanoid
 - cosmos-reason
 - full-body-control
+- state-relative-action
 - open-model
 - open-source

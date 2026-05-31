@@ -1,0 +1,69 @@
+name: BehaviorVLA
+full_name: "From Abstraction to Instantiation: Learning Behavioral Representation for Vision-Language-Action Model"
+organization: "Harbin Institute of Technology / Sun Yat-sen University"
+date: "2026-05-21"
+paper_url: https://arxiv.org/abs/2605.22671
+code_url: null
+project_url: https://BehaviorVLA.github.io
+venue: null
+open_source: false
+
+architecture:
+  backbone: "π₀.₅ VLM backbone"
+  llm: "π₀.₅ language model"
+  action_head: "Phase-conditioned Behavior Decoder (PBD) with flow-matching Predictor-Corrector"
+  action_head_category: flow_matching
+  action_space: "continuous trajectories (long-horizon behavioral chunks)"
+  parameters: "not disclosed (π₀.₅ scale)"
+  key_innovation: >
+    Two-stage abstraction-to-instantiation framework that learns temporally coherent behavioral
+    representations rather than direct action regression. Visuomotor Behavior Encoder (VBE) uses a
+    three-stream causal Mamba (vision / action / behavior) to aggregate long-horizon trajectories
+    into compact behavioral priors. Phase-conditioned Behavior Decoder (PBD) instantiates these
+    priors into executable actions via a Predictor-Corrector flow-matching scheme conditioned on
+    the current execution phase, yielding higher data efficiency and robustness under distribution
+    shift.
+
+training:
+  dataset: >
+    Simulation benchmarks (LIBERO, CALVIN ABC→D, RoboTwin 2.0) and 100-200 real-world expert
+    demonstrations per task on GALAXEA R1 Lite (8 tasks).
+  method: "Two-stage: behavioral representation pretraining (VBE) + phase-conditioned decoder fine-tuning (PBD)"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 99.4
+    libero_goal: 98.8
+    libero_10: 94.6
+    libero_avg: 98.0
+    source: "BehaviorVLA paper LIBERO table"
+    date_reported: "2026-05-21"
+    eval_condition: "fine-tuned"
+  calvin:
+    calvin_abc_d_avg_len: 4.36
+    calvin_avg: 4.36
+    source: "BehaviorVLA paper (CALVIN ABC→D)"
+    date_reported: "2026-05-21"
+    eval_condition: "fine-tuned"
+  robotwin_v2:
+    robotwin_v2_hard_avg: 58.0
+    source: "BehaviorVLA paper RoboTwin 2.0 Hard setting (10 tasks)"
+    date_reported: "2026-05-21"
+    eval_condition: "fine-tuned"
+
+eval_conditions:
+  libero: "fine-tuned"
+  calvin: "ABC→D"
+  robotwin: "v2.0 Hard"
+  real_world: "GALAXEA R1 Lite, 8 tasks, 100-200 demos/task"
+
+tags:
+  - vla
+  - flow-matching
+  - mamba
+  - behavioral-representation
+  - libero
+  - calvin
+  - robotwin
+  - pi0.5

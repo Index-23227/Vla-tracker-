@@ -1,0 +1,39 @@
+name: PCM
+full_name: "Probabilistic Chunk Masking (PCM): Efficient VLA RL via Probabilistic Chunk Masking"
+version: '1.0'
+organization: Indian Institute of Technology Madras
+paper_url: https://arxiv.org/abs/2605.16154
+code_url: null
+date: '2026-05-15'
+venue: arXiv 2026
+architecture:
+  backbone: OpenVLA-OFT (RL-finetuned base)
+  action_head: action-chunk regression head (chunk length L=8, 7-DoF)
+  action_space: continuous (7-DoF)
+  parameters: 7B (base) + LoRA
+  key_innovation: "Drop-in modification to GRPO that scores semantic chunks by success-failure action variance and probabilistically masks gradient backprop to high-divergence chunks only. Requires no reward model or learned critic, backprops through fewer than 20% of trajectory chunks while matching final SR"
+  action_head_category: regression
+training:
+  base_policy: OpenVLA-OFT (7B)
+  method: GRPO with probabilistic chunk masking (LoRA fine-tuning)
+  framework: SimpleVLA-RL (verl pipeline)
+  rl_setup: GRPO with 10 rollouts per prompt
+  steps: 200
+  compute: 2 x NVIDIA H100 GPUs
+benchmarks:
+  libero:
+    libero_spatial: 98.0
+    libero_object: 98.0
+    libero_goal: 98.0
+    libero_avg: 98.0
+    source: "PCM paper (target 98% SR matched by both PCM and vanilla GRPO)"
+    date_reported: '2026-05-15'
+    eval_condition: RL fine-tuned (matches GRPO endpoint)
+open_source: false
+tags:
+- reinforcement-learning
+- GRPO
+- chunk-masking
+- efficient-training
+- LoRA
+- manipulation

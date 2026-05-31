@@ -1,27 +1,44 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: Retrieve-then-Steer: Online Success Memory for Test-Time Adaptation of Generative VLAs
-# arXiv: 2605.10094
-
 name: Retrieve-then-Steer
 full_name: "Retrieve-then-Steer: Online Success Memory for Test-Time Adaptation of Generative VLAs"
-organization: "TODO: check paper"
+organization: "Xi'an Jiaotong University, One Robotics, Shenzhen University of Advanced Technology"
 date: "2026-05-11"
 paper_url: https://arxiv.org/abs/2605.10094
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv 2026
+open_source: false
+
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Frozen pretrained generative VLAs: pi_0, pi_0.5, CogACT"
+  action_head: "hybrid (test-time guidance over flow-matching and diffusion VLAs)"
+  action_head_category: hybrid
+  action_space: continuous
+  parameters: "depends on base VLA (pi_0/pi_0.5/CogACT)"
+  key_innovation: "Training-free test-time adaptation for generative VLAs: maintains an online progress-calibrated success memory of observation-action segments, retrieves state-relevant action chunks, filters inconsistent candidates via DTW (Dynamic Time Warping) trajectory-level consistency, and aggregates retained chunks into an elite action prior that is injected into the generative sampler via confidence-adaptive prior guidance at an intermediate denoising state."
+
+training:
+  method: "Training-free; frozen base VLA + online success memory"
 
 benchmarks:
   libero:
-    TODO: "check paper for benchmark scores" 
+    libero_10_pi0: 84.4
+    libero_10_pi0_5: 94.4
+    source: "Paper main table (improvements over base VLA: +2.8 / +2.0)"
+  simpler_env:
+    simpler_avg: 79.5
+    source: "Paper main table (CogACT base, +3.7 over baseline)"
+  real_world:
+    openarm_bowl_stacking: 80.0
+    openarm_cube_handoff: 52.0
+    openarm_test_tube: 24.0
+    aloha_piper_tshirt_yellow: 50.0
+    aloha_piper_tshirt_white: 46.0
+    source: "Paper real-robot evaluations (OpenArm + ALOHA-PiPER)"
 
 eval_conditions:
-  TODO: "check paper"
+  libero: "test-time adaptation, frozen base VLA"
+  simpler_env: "test-time adaptation, frozen base VLA"
+  real_world: "test-time adaptation on OpenArm and ALOHA-PiPER platforms"
 
-tags: []
+tags: [test-time-adaptation, retrieval-augmented, training-free, memory, generative-VLA]

@@ -1,33 +1,44 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: ALAM: Algebraically Consistent Latent Action Model for Vision-Language-Action Models
 # arXiv: 2605.10819
 
 name: ALAM
 full_name: "ALAM: Algebraically Consistent Latent Action Model for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Zhejiang University; Amap, Alibaba Group; Nanjing University; Shenzhen University of Advanced Technology; Beijing University of Chemical Technology; Chery Auto; Tsinghua University; Queen Mary University of London"
 date: "2026-05-11"
 paper_url: https://arxiv.org/abs/2605.10819
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Pi0 (PaliGemma-2B vision-language encoder + Gemma-300M action expert)"
+  action_head: "Joint K-step flow matching over robot actions and latent transitions"
+  action_head_category: flow_matching
+  parameters: "2.3B"
+  key_innovation: "Latent action pretraining with two algebraic regularizers: composition consistency (z^c_a approx z^b_a + z^c_b) and reversal consistency (z^a_b approx -z^b_a), enforced as L2 soft losses. In transfer stage, the frozen relational encoder is coupled with the robot action expert via joint K-step flow matching. Reduces additivity/reversibility errors 25-85x over unstructured baselines and lifts MetaWorld MT50 from 47.9% (pi0) to 85.0%, and LIBERO Avg from 94.1% (pi0) to 98.1%."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.2
+    libero_object: 99.6
+    libero_goal: 99.0
+    libero_long: 94.4
+    libero_avg: 98.1
   metaworld:
-    metaworld_avg: TODO
+    metaworld_easy: 89.3
+    metaworld_medium: 83.6
+    metaworld_hard: 85.0
+    metaworld_very_hard: 82.0
+    metaworld_avg: 85.0
 
 eval_conditions:
-  libero: "fine-tuned"
-  metaworld: "fine-tuned"
+  libero: "fine-tuned; Pi0 backbone with frozen relational encoder"
+  metaworld: "fine-tuned; MT50 with 4 difficulty splits"
 
-tags: [libero, metaworld]
+training:
+  base_model: "Pi0"
+  pretrain_data: "1111 action-free video sources (Open-X-Embodiment subset + CALVIN)"
+  pretrain_hardware: "128 x H20 90G GPUs, ~44 days, 3939 epochs"
+  action_chunk_size: 16
+
+tags: [latent-action, flow_matching, libero, metaworld, action-free-pretraining, algebraic-consistency]

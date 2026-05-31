@@ -1,0 +1,67 @@
+# Paper: GaussianDream: A Feed-Forward 3D Gaussian World Model for Robotic Manipulation
+# arXiv: 2605.20752
+
+name: GaussianDream
+full_name: "GaussianDream: A Feed-Forward 3D Gaussian World Model for Robotic Manipulation"
+organization: "Tuojing Intelligence; UCAS; Institute of Automation, CAS; Tsinghua University; Zhejiang University; Beihang University; CMU; University of Hong Kong"
+date: "2026-05-20"
+paper_url: https://arxiv.org/abs/2605.20752
+code_url: https://github.com/TuojingAI/GaussianDream
+venue: null
+open_source: true
+
+architecture:
+  action_head: "flow-matching action expert with GaussianDream prefix conditioning"
+  action_head_category: flow_matching
+  parameters: "1024 GaussianDream query tokens (2048-d VLM space); TGE module with 12 attention blocks × 8 heads; 256×256 Gaussian centers per frame; total VLA parameter count not stated"
+  key_innovation: "Feed-forward 3D Gaussian world-model plug-in for VLA. Learnable GaussianDream Queries inserted into the encoder produce a compact prefix that captures current-frame 3D structure and short-horizon (t+1...t+5) future evolution via the Temporal Gaussian Evolution (TGE) module. During training two auxiliary heads supervise the prefix: a current-reconstruction head outputs 256x256 Gaussian centers from depth unprojection (depth + RGB rendering loss) and a future-prediction head predicts horizon-conditioned center displacements (depth + RGB + pseudo 3D scene-flow loss). Pseudo depth from Depth Anything V2, pseudo flow from RAFT. At inference all auxiliary heads are discarded — only the learned prefix conditions flow-matching action generation, avoiding Gaussian decoding/rendering/video rollout at test time."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 99.6
+    libero_goal: 99.0
+    libero_long: 96.0
+    libero_avg: 98.4
+    source: "paper Table 1"
+    date_reported: "2026-05-20"
+  robocasa:
+    robocasa_pick_place: 43.8
+    robocasa_doors_drawers: 66.3
+    robocasa_others: 54.4
+    robocasa_human50_avg: 54.8
+    robocasa_avg: 54.8
+    source: "paper Table 2 (Human-50 split, 24 long-horizon tasks, 5 scenes)"
+    date_reported: "2026-05-20"
+
+real_world:
+  scene_a: 55.0
+  scene_b: 70.0
+  scene_c: 35.0
+  scene_d: 40.0
+  average: 50.0
+  baseline_pi0_5_average: 34.4
+  notes: "Dual-arm leader/follower platform; two RGB cameras (agent + wrist)"
+
+inference_latency:
+  gaussiandream_ms_per_chunk: 531
+  gaussiandream_with_diagnostic_decoder_ms_per_chunk: 569
+  wam_baseline_ms_per_chunk: 700
+
+eval_conditions:
+  libero: "fine-tuned (50 demonstrations, 50 trials per task)"
+  robocasa: "fine-tuned (Human-50 split, 24 long-horizon tasks, 5 scenes)"
+  real_world: "4 scenes (A/B/C/D)"
+
+training:
+  optimization_steps: 60000
+  global_batch_size: 24
+  optimizer: AdamW
+  peak_lr: 5.0e-5
+  schedule: "cosine with 10K warmup"
+  grad_clip_norm: 1.0
+  ema_decay: 0.999
+  precision: "mixed-precision"
+  hardware: "NVIDIA A100 GPUs"
+
+tags: [3d-gaussian, world-model, flow-matching, libero, robocasa, real-world, feed-forward]

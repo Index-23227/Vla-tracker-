@@ -1,30 +1,39 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: ConsisVLA-4D: Advancing Spatiotemporal Consistency in Efficient 3D-Perception and 4D-Reasoning for Robotic Manipulation
 # arXiv: 2605.05126
 
 name: ConsisVLA-4D
 full_name: "ConsisVLA-4D: Advancing Spatiotemporal Consistency in Efficient 3D-Perception and 4D-Reasoning for Robotic Manipulation"
-organization: "TODO: check paper"
+organization: "Harbin Institute of Technology, Shenzhen; ZTE State Key Lab; Shenzhen Loop Area Institute"
 date: "2026-05-06"
 paper_url: https://arxiv.org/abs/2605.05126
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/JiuTian-VL/ConsisVLA-4D
 venue: "CVPR 2026"
-open_source: false  # TODO: verify
+open_source: true
+
+inference_hz: 72.7
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "OpenVLA (7B) + SigLIP (semantics) + DINOv2 (geometry) + VGGT (3D features)"
+  action_head: "Action chunking with parallel decoding, L1 loss"
+  action_head_category: regression
+  parameters: "7B"
+  key_innovation: "Three-module spatiotemporal consistency pipeline: CV-Aligner (cross-view semantic consistency via FiLM modulation + Top-32 token selection + 4-layer Transformer fusion), CO-Fuser (cross-object geometric consistency via 64 aggregation tokens with block-wise causal self-attention), and CS-Thinker (cross-scene reasoning via Spatiotemporal Consistency Attention with 1 dynamic + 3 depth decoders, each 8 transformer blocks/1024 hidden/16 heads). Predicts future dynamic objects and global depth as actions unfold, achieving 21.6% LIBERO gain over OpenVLA with 2.3x inference speedup."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.8
+    libero_object: 99.8
+    libero_goal: 98.0
+    libero_long: 95.6
+    libero_avg: 98.1
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "fine-tuned; OpenVLA backbone; action chunk K=8 single-arm"
 
-tags: [reasoning, libero, CVPR-2026]
+training:
+  base_model: "OpenVLA"
+  action_chunk_single_arm: 8
+  action_chunk_dual_arm: 25
+  steps: 80000
+
+tags: [3d-perception, 4d-reasoning, libero, CVPR-2026, openvla, consistency]

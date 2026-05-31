@@ -1,0 +1,43 @@
+name: OASIS
+full_name: "OASIS: Observation-Action Space Alignment via SE(3) Trajectory Prediction for Robotic Manipulation"
+organization: "Xi'an Jiaotong University (National Key Laboratory of Human-Machine Hybrid Augmented Intelligence; Institute of Artificial Intelligence and Robotics)"
+date: "2026-05-25"
+paper_url: https://arxiv.org/abs/2605.25829
+code_url: https://npuhandsome.github.io/OASIS_web
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "Qwen2.5-0.5B VLM with DINOv2 + SigLIP visual encoders; Depth Anything 3 for metric depth"
+  action_head: "Transformer-based SE(3) end-effector trajectory predictor (4 blocks) followed by an action decoder (2 blocks) generating executable action chunks"
+  action_head_category: regression
+  parameters: "1.73B total (0.18B trainable); trajectory predictor + decoder ~70M parameters"
+  key_innovation: "Aligns intermediate representations with the action space by predicting an explicit SE(3) end-effector trajectory in the camera frame. This provides a geometric inductive bias for the action decoder rather than relying solely on observation-space auxiliary cues or predictive visual features."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 98.8
+    libero_goal: 97.4
+    libero_long: 95.2
+    libero_avg: 97.6
+    source: "Table 1"
+    date_reported: "2026-05-25"
+    eval_condition: "fine-tuned per suite; 50k steps; LoRA-tuned VLM"
+  calvin:
+    calvin_abc_d_avg_len: 4.57
+    source: "Table 2 (ABC->D split: t1 98.1, t2 94.9, t3 91.7, t4 88.9, t5 83.3)"
+    date_reported: "2026-05-25"
+    eval_condition: "fine-tuned on CALVIN ABC->D"
+
+eval_conditions:
+  libero: "fine-tuned per suite"
+  calvin: "fine-tuned on ABC->D"
+
+training:
+  data: "Standard LIBERO and CALVIN expert demonstrations; no large-scale robotic pretraining"
+  hardware: "4x NVIDIA A800 GPUs"
+  duration: "50,000 steps per simulation suite, batch size 64"
+  notes: "LoRA fine-tunes the VLM; trajectory predictor and action decoder trained from scratch end-to-end"
+
+tags: [libero, calvin, se3, trajectory-prediction, depth, qwen2.5]

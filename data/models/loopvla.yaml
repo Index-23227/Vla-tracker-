@@ -1,0 +1,37 @@
+# Paper: LoopVLA: Learning Sufficiency in Recurrent Refinement for Vision-Language-Action Models
+# arXiv: 2605.09948
+
+name: LoopVLA
+full_name: "LoopVLA: Learning Sufficiency in Recurrent Refinement for Vision-Language-Action Models"
+organization: "Huazhong University of Science and Technology (HUST), Wuhan United Imaging Surgical Co., Ltd."
+date: "2026-05-11"
+paper_url: https://arxiv.org/abs/2605.09948
+code_url: null  # GitHub URL not provided in paper; implemented on StarVLA framework
+venue: null
+open_source: false
+
+architecture:
+  action_head: "Recurrent refinement: first 4 transformer layers (Perceptual Anchor Layers, PAL) are frozen, then a shared 3-layer Loop Block is applied iteratively (up to 8 iterations) on multimodal tokens. Each iteration produces (a) a candidate action via the action head and (b) a halting probability via the sufficiency head. Remaining Mass Allocation (RMA) converts halting scores into a valid distribution p(n) = s(n)*r(n) over refinement steps. Two-stage training: Stage 1 supervises all intermediates with L1 + entropy/diversity regularization; Stage 2 calibrates halting distribution to action-quality-derived target via KL divergence."
+  action_head_category: other
+  backbone: "Qwen3VL-2B-Instruction (SigLIP-2 visual encoder + 28-layer transformer decoder)"
+  parameters: "LoopOFT*: 1.2B (vs 2.2B Qwen3OFT baseline, -45%); LoopFM: 1.3B (vs 2.3B Qwen3FM, -43%)"
+  key_innovation: "LoopVLA proposes a recurrent VLA architecture that jointly learns representation refinement, action prediction, and sufficiency estimation by iteratively applying a shared 3-layer Transformer Loop Block on top of 4 frozen Perceptual Anchor Layers. Each iteration emits both a candidate action and a sufficiency score; Remaining Mass Allocation normalizes these into a valid stopping distribution. Because sufficiency has no direct supervision, a self-supervised distribution-alignment objective trains intermediate confidence scores to match relative action quality across refinement steps. Achieves 45% parameter reduction (2.2B -> 1.2B) and up to 1.7x throughput while matching or surpassing strong baselines on LIBERO (96.0% avg), LIBERO-Plus, and VLA-Arena."
+
+benchmarks:
+  libero:
+    libero_spatial: 95.0
+    libero_object: 100.0
+    libero_goal: 97.4
+    libero_long: 91.0
+    libero_avg: 95.85
+    source: "arXiv:2605.09948 (LoopOFT* configuration)"
+    date_reported: "2026-05-11"
+    eval_condition: "fine-tuned; vs Qwen3OFT baseline 94.9% avg and pi0 94.1% avg"
+    notes: "LIBERO-Plus zero-shot generalization aggregate: 65.8% (LoopOFT alpha). VLA-Arena L0 average: 48.7%."
+
+eval_conditions:
+  libero: "fine-tuned"
+  libero_plus: "zero-shot generalization (camera/robot/language/light/background factors)"
+  vla_arena: "fine-tuned; L0 (safety/distractor/extrapolation/long-horizon)"
+
+tags: [libero, libero-plus, vla-arena, recurrent, sufficiency, early-exit, efficiency, qwen3-vl]

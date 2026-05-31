@@ -1,0 +1,56 @@
+name: "Ω-QVLA"
+full_name: "Ω-QVLA: Robust Quantization for Vision-Language-Action Models via Composite Rotation and Per-step Scaling"
+organization: "McGill University / Mila"
+date: "2026-05-27"
+paper_url: https://arxiv.org/abs/2605.28803
+code_url: https://github.com/UCMP13753/Omega-QVLA
+venue: null
+open_source: true
+
+architecture:
+  backbone: "π₀.₅ and GR00T N1.5 (quantized)"
+  llm: "VLM backbone quantized via GPTQ (W4A4)"
+  action_head: "Diffusion Transformer (DiT) action head, quantized (W4A4)"
+  action_head_category: diffusion
+  action_space: "continuous (inherited from π₀.₅ / GR00T N1.5)"
+  parameters: "π₀.₅ and GR00T N1.5 scale, but 71.3% smaller static memory at W4A4"
+  key_innovation: >
+    Post-training W4A4 quantization recipe for the full VLA stack (LLM + DiT action head) that
+    survives both 4-bit weights and 4-bit activations with near-FP16 task success. Two main
+    techniques: (1) Composite SVD-Hadamard rotation in 64-sized blocks that equalizes per-channel
+    weight energy while diffusing residual activation outliers; (2) per-step, per-channel
+    activation scaling for the DiT across all 8 denoising steps, handling the inherently
+    non-stationary activation statistics of diffusion sampling. GPTQ for LLM weights, RTN for
+    DiT weights. Enables on-device deployment with 71.3% smaller static memory.
+
+training:
+  dataset: >
+    Calibration only — no fine-tuning. Pre-trained Pi 0.5 and GR00T N1.5 checkpoints are
+    post-training quantized using small LIBERO calibration sets.
+  method: "Post-training quantization (PTQ): GPTQ for LLM, RTN + composite rotation + per-step scaling for DiT"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 97.0
+    libero_goal: 100.0
+    libero_10: 96.0
+    libero_avg: 98.0
+    source: "Ω-QVLA paper (Pi 0.5 W4A4 on LIBERO, FP16 baseline 97.1%)"
+    date_reported: "2026-05-27"
+    eval_condition: "post-training quantized (W4A4), Pi 0.5 backbone"
+
+eval_conditions:
+  libero: "post-training quantized W4A4, Pi 0.5 backbone"
+  real_world: "ARX R5 bimanual, 5 tasks; Ω-QVLA 51.0 avg progress vs QuantVLA 25.0 at W4A4"
+
+tags:
+  - vla
+  - quantization
+  - w4a4
+  - on-device
+  - pi0.5
+  - gr00t
+  - diffusion
+  - libero
+  - open-source

@@ -1,0 +1,40 @@
+name: Gaze2Act
+full_name: "Gaze2Act: Gaze-Conditioned Vision-Language-Action Policies for Interactive Robot Manipulation"
+organization: "MARS Lab, Nanyang Technological University"
+date: "2026-05-28"
+paper_url: https://arxiv.org/abs/2605.30282
+code_url: https://zuo-kuangji.github.io/Gaze2Act/
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "GROOT N1.5 with frozen Eagle2 VLM encoder; DINOv3 ViT-L/16 for cross-view gaze grounding; DINOv3 ViT-S+/16 (29M) as object encoder"
+  action_head: "Diffusion Transformer (DiT) with flow matching for action generation; decoupled cross-attention branch for gaze token injection; zero-initialized gaze conditioning"
+  action_head_category: flow_matching
+  parameters: "2.533B total (adds 119.5M, ~4.95% over vanilla GROOT N1.5)"
+  key_innovation: "Bridges ego-exo view gap by mapping first-person human gaze into robot's third-person perspective via cross-view semantic matching (producing object mask + gaze point), then injects gaze cues into a GROOT N1.5 backbone via decoupled cross-attention with zero-init gating, enabling coarse-to-fine target specification and dynamic intent steering during manipulation."
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "Unitree G1 humanoid, 16 tasks x 50 trials each; ego-exo cross-view gaze grounding"
+
+real_world_results:
+  object_level_intent_accuracy: 93.0
+  object_level_task_success: 89.0
+  part_level_intent_accuracy: 80.4
+  part_level_task_success: 72.4
+  dynamic_intent_steering: 47.0
+  source: "Paper Tables; 16 tasks x 50 trials on Unitree G1"
+  date_reported: "2026-05-28"
+
+training:
+  data: "Teleoperated demonstrations on Unitree G1 across 16 manipulation tasks with paired ego-view (gaze tracker) and exo-view (third-person)"
+  hardware: "Single NVIDIA RTX PRO 6000 GPU (96 GB)"
+  optimizer: "AdamW (beta1=0.95, beta2=0.999, weight_decay=1e-5, lr=1e-4)"
+  steps: "20,000 per task group"
+  batch_size: 80
+  precision: "bf16 mixed precision"
+  action_horizon: "50 steps with 4-step Euler integration"
+
+tags: [gaze-conditioned, ego-exo, flow-matching, groot, dinov3, humanoid, real-world]

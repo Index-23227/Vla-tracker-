@@ -1,0 +1,55 @@
+name: VLA-Pro
+full_name: "VLA-Pro: Cross-Task Procedural Memory Transfer for Vision-Language-Action Models"
+organization: Fudan University
+date: '2026-05-28'
+paper_url: https://arxiv.org/abs/2605.29562
+code_url: https://github.com/ketchup45/VLA-Pro
+venue: null
+open_source: true
+architecture:
+  backbone: backbone-agnostic — tested on X-VLA, RDT, pi0.5
+  action_head: inherits backbone action head (flow-matching for pi0.5, diffusion for RDT) with retrieved LoRA-adapter fusion
+  action_head_category: hybrid
+  parameters: depends on backbone (RDT ~1B, pi0.5 ~3B) + task-specific LoRA adapters
+  key_innovation: >-
+    VLA-Pro stores task-specific LoRA adapters as parameterized procedural
+    memories during training; at inference it retrieves the top-k most relevant
+    memories using action type, object geometry, end-effector orientation and
+    target interaction point, and fuses them via softmax normalization before
+    generating actions. The framework is backbone-agnostic, two-stage (base
+    LoRA on mixed data + per-task LoRA fine-tuning), and yields large gains on
+    unseen RoboTwin tasks across multiple VLA backbones.
+training:
+  dataset: RoboTwin (8 train tasks + 9 held-out test tasks); cross-backbone training
+  hardware: not explicitly disclosed
+  optimizer: LoRA fine-tuning of pretrained VLA backbones
+benchmarks:
+  robotwin_v2:
+    pi0_5_backbone: 59.3
+    rdt_backbone: 34.1
+    x_vla_backbone: 30.0
+    robotwin_v2_avg: 59.3
+    source: RoboTwin simulation, VLA-Pro project page (pi0.5 best backbone)
+    date_reported: '2026-05-28'
+    eval_condition: held-out tasks, fine-tuned
+  rlbench:
+    rlbench_avg: 20.9
+    source: VLA-Pro project page (zero-shot)
+    date_reported: '2026-05-28'
+    eval_condition: zero-shot
+real_world:
+  6_tasks_avg: 65.0
+  baseline_pi0_5: 5.8
+  source: VLA-Pro project page (held-out real-world tasks)
+eval_conditions:
+  robotwin: fine-tuned (held-out tasks)
+  rlbench: zero-shot
+  real_world: fine-tuned
+tags:
+- robotwin
+- rlbench
+- procedural-memory
+- lora
+- adapter
+- backbone-agnostic
+- open-source

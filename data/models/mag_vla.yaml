@@ -1,0 +1,43 @@
+name: Mag-VLA
+full_name: "Mag-VLA: Vision-Language-Action Model for Bimanual Magnetically Actuated Microrobot Manipulation"
+organization: "Department of Bioengineering, Imperial-X, Imperial College London"
+date: "2026-05-27"
+paper_url: https://arxiv.org/abs/2605.28486
+code_url: null
+venue: "MARSS 2026"
+open_source: false
+
+architecture:
+  backbone: "Qwen2.5-VL-7B with LoRA adapters (rank 16, scale 32, dropout 0.10); frozen backbone, only LoRA updated; 448x448 input; 4-frame observation history"
+  action_head: "Phase-conditioned Action Chunking Transformer (ACT) decoder with 5 DETR-style learnable action queries; outputs 5-step action chunks of 4-D actions [dxL, dyL, dxR, dyR]; temporal ensembling with decay lambda=0.01"
+  action_head_category: regression
+  parameters: "~7B (Qwen2.5-VL-7B) + LoRA adapters + small ACT decoder"
+  key_innovation: "First VLA for bimanual magnetically actuated microrobot manipulation. Combines Qwen2.5-VL-7B (LoRA) backbone with phase-conditioned ACT decoder and motion-aware phase classifier (>97% acc) that distinguishes approach vs transport phases. Action chunking with temporal ensembling produces temporally coherent multi-step control for sub-mm magnetic field manipulation, substantially outperforming alternative generative action heads in ablations."
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "Bimanual magnetic microrobot manipulation; three task configurations with increasing path curvature (Task A small turn, Task B larger turn, Task C sharpest turn)"
+
+real_world_results:
+  task_a_approach: 90.0
+  task_a_transport: 80.0
+  task_b_approach: 90.0
+  task_b_transport: 70.0
+  task_c_approach: 90.0
+  task_c_transport: 50.0
+  phase_classifier_accuracy: 97.0
+  source: "Paper real-world tables"
+  date_reported: "2026-05-27"
+
+training:
+  data: "75 teleoperated episodes / 20,724 RGB frames across 3 task configurations; split 60/9/6 episodes (train/val/test); ~16.6k/2.5k/1.6k samples"
+  hardware: "4x NVIDIA A100 (80 GB)"
+  optimizer: "AdamW (weight_decay=0.01)"
+  steps: 5000
+  batch_size: 64
+  precision: "bfloat16 mixed precision"
+  schedule: "cosine learning-rate schedule"
+  augmentation: "Random brightness [0.85, 1.15] p=0.5; random contrast [0.90, 1.10] p=0.3"
+
+tags: [bimanual, microrobot, magnetic-actuation, qwen2.5-vl, act, lora, real-world, marss2026, medical-robotics]

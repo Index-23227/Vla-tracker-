@@ -1,0 +1,44 @@
+# Paper: D-VLA: A High-Concurrency Distributed Asynchronous Reinforcement Learning Framework for Vision-Language-Action Models
+# arXiv: 2605.13276
+
+name: D-VLA
+full_name: "D-VLA: A High-Concurrency Distributed Asynchronous Reinforcement Learning Framework for Vision-Language-Action Models"
+organization: "JDT AI Infra (Tsinghua University, Peking University, Tianjin University, Beihang University collaborators)"
+date: "2026-05-14"
+paper_url: https://arxiv.org/abs/2605.13276
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "Framework-level work; agnostic to specific action head. Validated on pi0.5 (diffusion / flow-matching) and OpenVLA-OFT (autoregressive Transformer + PEFT)."
+  action_head_category: other
+  parameters: "Framework supports billion-parameter VLAs (pi0.5 ~3B, OpenVLA-OFT ~7B); trillion-parameter scalability claimed without specific trained model"
+  key_innovation: "Distributed asynchronous RL system co-designed for VLA training, addressing resource conflict between high-fidelity physics simulation and the VRAM/bandwidth demands of large deep-learning models. Four pillars: (1) Plane Decoupling that physically separates high-frequency Data Plane (env trajectories) from low-frequency Weight Control Plane (param sync); the Control Plane is offloaded to a CPU-based Gloo channel to avoid CUDA stream contention with PhysX. (2) Four-thread asynchronous 'Swimlane' pipeline that overlaps sampling, inference, gradient computation, and parameter distribution. (3) Dual-pool VRAM management (Model Computation Pool via Torch caching allocator + Environment Auxiliary Pool for simulator temporaries) prevents fragmentation. (4) Topology-aware local replication keeps the sampling-inference closed loop inside a node and uses FSDP for global gradient reduction. RL algorithm is GRPO."
+
+benchmarks:
+  libero:
+    libero_avg: null
+    source: "Paper trains on ManiSkill; LIBERO mentioned in intro/related but reported metric is throughput, not per-suite success"
+    date_reported: "2026-05-14"
+    eval_condition: "RL training throughput benchmark; not a per-suite success-rate result"
+  maniskill:
+    pi0_5_throughput_steps_per_sec: 376.0
+    openvla_oft_throughput_steps_per_sec: 250.9
+    pi0_5_throughput_improvement_vs_RLinf_co: "86.26% (237.0 vs 127.24 single-node) / 376 vs 232 (16 GPU multi-node)"
+    source: "Paper Table 1 / Figures 4-7"
+    date_reported: "2026-05-14"
+    eval_condition: "ManiSkill RL training, 16 GPUs, batch size matched across frameworks"
+
+eval_conditions:
+  primary: "System / infrastructure benchmark: throughput (steps/s), step time, rollout time, actor time"
+  baselines: "RLinf-VLA (co-located, disaggregated, hybrid), RL-VLA3 (three-stage async), all with same 16-GPU cluster"
+  scalability: "Single-node and 16-GPU multi-node; environment-count sweep 384 -> 3072, peak throughput 379 steps/s at 768 envs"
+
+training:
+  models_evaluated: ["pi0.5", "OpenVLA-OFT"]
+  simulator: "ManiSkill (GPU-parallel physics)"
+  rl_algorithm: "GRPO (Group Relative Policy Optimization)"
+  hardware: "16 NVIDIA GPUs (single node + multi-node, InfiniBand interconnect)"
+
+tags: [RL, distributed-training, infrastructure, GRPO, maniskill, scaling, system]
