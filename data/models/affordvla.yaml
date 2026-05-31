@@ -1,27 +1,65 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: AffordVLA: Injecting Affordance Representations into Vision-Language-Action Models via Implicit Feature Alignment
-# arXiv: 2605.17517
-
 name: AffordVLA
 full_name: "AffordVLA: Injecting Affordance Representations into Vision-Language-Action Models via Implicit Feature Alignment"
-organization: "TODO: check paper"
+organization: "Grasp Lab, Zhejiang University; Torch Kernel Co., Ltd."
 date: "2026-05-17"
 paper_url: https://arxiv.org/abs/2605.17517
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "pi0.5 (PaliGemma-3B + SigLIP-So400m vision encoder)"
+  llm: "Gemma-2B (within PaliGemma)"
+  action_head: "conditional flow matching with 18-layer Transformer action expert, chunk size H=30"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~3.3B (understanding expert ~3.0B + action expert ~0.3B); affordance teacher ~0.8B (frozen)"
+  key_innovation: >
+    Injects task-conditioned affordance representations into a pi0.5 VLA via implicit feature
+    alignment rather than explicit mask injection, avoiding cascading perception errors and inference
+    overhead. A frozen zero-shot affordance teacher (Qwen3-VL task parser + SAM3 open-vocabulary
+    perception) produces a target representation Z_t^aff that is aligned with the VLA's 12th-layer
+    visual features (d_v=2048) through a 2-layer MLP into the teacher space (d=256), using cosine
+    similarity loss L_align combined with the action flow-matching loss via lambda=0.5. The
+    intermediate-deep alignment layer balances semantic abstraction with visual detail and shifts
+    attention from dispersed global appearance to task-relevant functional regions, achieving 12.4 Hz
+    inference vs 4.8 Hz for explicit-affordance baselines.
+
+training:
+  dataset: "RoboTwin2.0 (simulation, 5 tasks); 50 disturbance-free real-world demonstrations per task across 8 tasks; AGD20K for affordance evaluation"
+  method: "Joint training with action flow-matching loss + cosine-similarity alignment loss (lambda=0.5); affordance teacher frozen"
+  hardware: "1x NVIDIA A100-SXM4-80GB"
+  optimizer: "AdamW (beta1=0.9, beta2=0.999)"
+  learning_rate: "linear warmup to 1e-4 over 10k steps, cosine decay to 5e-5"
+  batch_size: 32
+  steps: "30000 (simulation); 50 epochs (real-world)"
+  precision: "bfloat16 mixed-precision"
 
 benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+  robotwin_v2:
+    easy_setting_avg: 61.2
+    hard_setting_avg: 28.8
+    robotwin_v2_avg: 45.0
+    source: "AffordVLA paper, RoboTwin2.0 5 tasks x 100 trials"
+    date_reported: "2026-05-17"
+    eval_condition: "fine-tuned"
+  real_world:
+    eight_task_avg: "best across all 8 tasks vs pi0, pi0.5, pi0.5+explicit-affordance"
+    inference_hz: 12.4
+    inference_latency_ms: 80.4
+    source: "AffordVLA paper, 8 real-world tasks x 15 trials on UR5 + Robotiq 2F-85"
+    date_reported: "2026-05-17"
+    eval_condition: "fine-tuned, 50 demos per task"
 
 eval_conditions:
-  TODO: "check paper"
+  robotwin_v2: "fine-tuned"
+  real_world: "fine-tuned, 50 demonstrations per task"
 
-tags: []
+tags:
+  - affordance
+  - flow-matching
+  - pi0
+  - implicit-alignment
+  - robotwin
+  - real-world
+  - sam3

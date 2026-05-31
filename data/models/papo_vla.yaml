@@ -1,27 +1,60 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: PAPO-VLA: Planning-Aware Policy Optimization for Vision-Language-Action Models
-# arXiv: 2605.19580
-
 name: PAPO-VLA
 full_name: "PAPO-VLA: Planning-Aware Policy Optimization for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Institute of Software, Chinese Academy of Sciences; University of Chinese Academy of Sciences"
 date: "2026-05-19"
 paper_url: https://arxiv.org/abs/2605.19580
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: "Backbone-agnostic RL fine-tuning wrapper (evaluated atop standard VLA bases comparable to OpenVLA / pi0 / RDT / OpenVLA-OFT family)"
+  action_head: "inherited from base VLA; PAPO modifies GRPO-style RL advantage estimation rather than the action head"
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_space: continuous
+  parameters: "depends on base policy (results reported atop OpenVLA-OFT class models)"
+  key_innovation: >
+    Planning-Aware Policy Optimization (PAPO) identifies which steps in a manipulation trajectory are
+    high-level planning decisions versus low-level execution motions, by jointly considering action
+    variation and outcome-aware gating. Each planning action is weighted by a unified importance score,
+    defined as the harmonic mean of causal sufficiency (does preserving the action support successful
+    execution?) and causal necessity (does perturbing it degrade the outcome?), then injected into a
+    GRPO advantage estimator (Eq. 11) with weighting parameter eta=0.15. This focuses RL credit on
+    critical planning decisions and yields large gains on long-horizon LIBERO and RoboTwin2.0 tasks.
+
+training:
+  dataset: "LIBERO four-suite (Spatial, Object, Goal, Long); RoboTwin2.0 across short/medium/long/extra-long horizons"
+  method: "RL fine-tuning of a base VLA with planning-aware GRPO advantage (eta=0.15)"
+  hardware: "H100 GPU clusters"
+  optimizer: "not disclosed in paper"
 
 benchmarks:
   libero:
-    TODO: "check paper for benchmark scores" 
+    libero_spatial: 93.0
+    libero_object: 98.0
+    libero_goal: 98.0
+    libero_long: 94.0
+    libero_avg: 95.75
+    source: "PAPO-VLA paper Table 1"
+    date_reported: "2026-05-19"
+    eval_condition: "fine-tuned"
+  robotwin_v2:
+    short_horizon_100_130_steps_avg: 58.6
+    medium_horizon_150_230_steps_avg: 69.5
+    long_extra_long_280_650_steps_avg: 63.8
+    robotwin_v2_avg: 63.97
+    source: "PAPO-VLA paper Table 2 (RoboTwin2.0)"
+    date_reported: "2026-05-19"
+    eval_condition: "fine-tuned"
 
 eval_conditions:
-  TODO: "check paper"
+  libero: "fine-tuned (RL with planning-aware GRPO)"
+  robotwin_v2: "fine-tuned"
 
-tags: []
+tags:
+  - rl-fine-tuning
+  - grpo
+  - planning-aware
+  - libero
+  - robotwin
+  - causal
