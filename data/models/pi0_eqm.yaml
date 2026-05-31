@@ -1,0 +1,60 @@
+name: "π₀-EqM"
+full_name: "π₀-EqM: Equilibrium Matching for Closed-Loop Vision-Language-Action Control"
+organization: "USTC / HKU"
+date: "2026-05-22"
+paper_url: https://arxiv.org/abs/2605.23128
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "π₀ VLM (representation stack and conditioning interface kept fixed)"
+  llm: "π₀ language model (frozen / inherited)"
+  action_head: "Equilibrium Matching (EqM) decoder — time-invariant conditional vector field"
+  action_head_category: flow_matching
+  action_space: "continuous action chunks (π₀ format)"
+  parameters: "π₀ scale (~3B+); only action decoder is replaced"
+  key_innovation: >
+    Replaces π₀'s flow-matching expert with an Equilibrium Matching (EqM) decoder that learns a
+    single time-invariant conditional vector field whose fixed points coincide with the executable
+    action distribution. Casts inference as fixed-point iteration on the residual rather than
+    forward Euler integration of a time-dependent flow, giving genuine closed-loop control where
+    the number of inference steps is itself a tunable policy parameter (the "stationarity–
+    executability gap"). On RoboTwin (19 tasks) the swap raises average success from 40.4% to
+    50.2% with no change to the upstream VLA; LIBERO-10 also improves from 85.2% to 87.0%.
+
+training:
+  dataset: >
+    Same data pipelines as π₀ baselines on RoboTwin (19 tasks) and LIBERO 4-suite. No real-world
+    experiments reported; evaluation is fully simulated.
+  method: "Train EqM decoder with an interpolant + structural-noise objective while keeping π₀ upstream fixed"
+
+benchmarks:
+  libero:
+    libero_spatial: 97.2
+    libero_object: 98.4
+    libero_goal: 94.8
+    libero_10: 87.0
+    libero_avg: 94.35
+    source: "π₀-EqM paper Table II"
+    date_reported: "2026-05-22"
+    eval_condition: "fine-tuned (π₀ backbone + EqM decoder)"
+  robotwin_v1:
+    robotwin_19task_avg: 50.2
+    robotwin_v1_avg: 50.2
+    source: "π₀-EqM paper Table I (19 tasks, +9.8 over π₀ flow-matching baseline at 40.4)"
+    date_reported: "2026-05-22"
+    eval_condition: "fine-tuned (π₀ backbone + EqM decoder)"
+
+eval_conditions:
+  libero: "fine-tuned, 4 suites"
+  robotwin: "19 tasks, fine-tuned"
+
+tags:
+  - vla
+  - equilibrium-matching
+  - flow-matching
+  - closed-loop
+  - pi0
+  - libero
+  - robotwin

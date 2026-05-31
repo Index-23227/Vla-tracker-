@@ -1,0 +1,65 @@
+name: 3DVLA-2026
+full_name: "3DVLA: Enhancing Vision-Language-Action Models via 3D Spatial and Instance Understanding"
+organization: "Peking University"
+date: "2026-05-28"
+paper_url: https://arxiv.org/abs/2605.29416
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "plug-and-play on top of π₀, π₀.₅, X-VLA (DINOv2/SigLIP visual encoders inherited)"
+  llm: "inherited from base VLA"
+  action_head: "inherited task-specific action expert from base VLA"
+  action_head_category: hybrid
+  action_space: "depends on base VLA (continuous)"
+  parameters: "+~0.086B added on top of base VLA"
+  key_innovation: >
+    Plug-and-play 3D enhancement framework that injects robust 3D reasoning into pretrained VLAs
+    via three components: (1) Spatially-Conditioned Geometry Aggregation that fuses 2D features
+    with explicit 3D geometry to produce pervasive 3D feature encoding; (2) instance estimation
+    via high-level tokens distilled from 300 initial state probes down to a maximum of 16 instance
+    tokens per scene; (3) masked self-supervised 3D encoding pre-training for occlusion handling.
+    Adds only ~0.086B parameters with negligible computational overhead and is demonstrated to
+    boost three different VLA backbones consistently.
+
+training:
+  dataset: >
+    LIBERO-Plus and RoboTwin 2.0 official splits; 3D pretraining via masked self-supervision on
+    indoor scene depth data.
+  method: "Frozen / lightly-tuned base VLA + 3D module insertion + masked 3D pretraining"
+
+benchmarks:
+  libero:
+    libero_plus_avg: 86.0
+    libero_plus_camera: 75.6
+    libero_plus_robot: 77.4
+    libero_plus_language: 88.6
+    libero_plus_light: 97.4
+    libero_plus_background: 97.7
+    libero_plus_noise: 85.3
+    libero_plus_layout: 86.6
+    libero_avg: 86.0
+    source: "3DVLA paper Table 1 (π₀.₅ + 3DVLA on LIBERO-Plus)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (π₀.₅ + 3DVLA)"
+  robotwin_v2:
+    robotwin_v2_easy: 72.6
+    robotwin_v2_hard: 42.1
+    robotwin_v2_avg: 57.35
+    source: "3DVLA paper Table 2 (X-VLA + 3DVLA)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned (X-VLA + 3DVLA)"
+
+eval_conditions:
+  libero: "fine-tuned, LIBERO-Plus (7 perturbations)"
+  robotwin: "v2.0 Easy and Hard"
+
+tags:
+  - vla
+  - 3d-understanding
+  - plug-and-play
+  - libero-plus
+  - robotwin
+  - pi0
+  - x-vla
