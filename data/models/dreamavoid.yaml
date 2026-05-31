@@ -1,27 +1,50 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: DreamAvoid: Critical-Phase Test-Time Dreaming to Avoid Failures in VLA Policies
+# DreamAvoid: Critical-Phase Test-Time Dreaming to Avoid Failures in VLA Policies
 # arXiv: 2605.11750
 
 name: DreamAvoid
 full_name: "DreamAvoid: Critical-Phase Test-Time Dreaming to Avoid Failures in VLA Policies"
-organization: "TODO: check paper"
+organization: "HKU, HKUST, Northwestern University"
 date: "2026-05-12"
 paper_url: https://arxiv.org/abs/2605.11750
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/XianzheFan/DreamAvoid
+venue: "arXiv 2026"
+open_source: true
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Base VLA policies: pi0.5 (real-world, LIBERO) and GR00T-N1.6 (SimplerEnv); DreamDojo-2B world model (distilled to autoregressive student via Self Forcing); DINOv2-ViT-B/14 for Dream Trigger; Robometer for value estimation"
+  llm: "inherits base VLA backbone"
+  action_head: "flow matching with SDE (stochastic) sampling for multi-candidate generation, replacing standard deterministic ODE inference"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "2B (DreamDojo world model)"
+  key_innovation: "Critical-phase test-time dreaming framework that augments any base VLA at inference: (1) Dream Trigger detects high-risk phases via DINOv2 features + proprioception, (2) Action Proposer generates K diverse candidates by converting flow-matching ODE to SDE, (3) Dream Evaluator rolls out each candidate in a distilled DreamDojo world model and scores with a Robometer value model trained jointly on success, failure, and boundary cases for autonomous failure avoidance."
+
+training:
+  dataset: "Base policy: 100 human teleoperation demonstrations (real-world). Dream Evaluator: joint training on teleop demonstrations + online dream rollouts with priority sampling (20% terminal success, 40% boundary/failure, 40% steady progression)."
+  method: "Test-time plug-and-play intervention; value model trained with Huber regression + ranking loss on success/failure/boundary trajectories"
 
 benchmarks:
   libero:
-    TODO: "check paper for benchmark scores" 
+    libero_spatial: 99.0
+    libero_object: 98.5
+    libero_goal: 99.0
+    libero_long: 94.5
+    libero_avg: 97.8
+  simpler_env:
+    simpler_bridge: 63.6
+    simpler_fractal: 80.7
+    simpler_avg: 72.15
+  real_world:
+    cup_sleeving: 90.0
+    charger_plugging: 67.5
+    cap_opening: 80.0
+    screw_insertion: 52.5
+    avg_success: 72.5
 
 eval_conditions:
-  TODO: "check paper"
+  libero: "test-time augmentation over pi0.5 base (200 trials/task)"
+  simpler_env: "test-time augmentation over GR00T-N1.6 base"
+  real_world: "40 trials per task over pi0.5 base"
 
-tags: []
+tags: [libero, simpler_env, real-world, world-model, flow-matching, test-time-compute, safety, failure-avoidance, dream, plug-and-play]

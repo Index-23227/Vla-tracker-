@@ -1,30 +1,41 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: VLA-GSE: Boosting Parameter-Efficient Fine-Tuning in VLA with Generalized and Specialized Experts
+# VLA-GSE: Boosting Parameter-Efficient Fine-Tuning in VLA with Generalized and Specialized Experts
 # arXiv: 2605.06175
 
 name: VLA-GSE
 full_name: "VLA-GSE: Boosting Parameter-Efficient Fine-Tuning in VLA with Generalized and Specialized Experts"
-organization: "TODO: check paper"
-date: "2026-05-07"
+organization: "Microsoft Research Asia, Tsinghua University"
+date: "2026-05-08"
 paper_url: https://arxiv.org/abs/2605.06175
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/YuhuaJiang2002/VLA-GSE
+venue: "arXiv 2026"
+open_source: true
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-VL-4B-Instruct"
+  llm: "Qwen3-VL-4B-Instruct"
+  action_head: "MLP head with parallel decoding (OpenVLA-OFT style)"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "4B"
+  key_innovation: "SVD-based decomposition of trainable adapters into always-active Generalized Experts and routed Specialized Experts, with expert-wise gradient scale balancing and backbone weight adjustment. Tunes only 2.51% of parameters while preserving multimodal understanding (MMMU, MMStar, OCRBench, MMB, DocVQA, InfoVQA, AI2D, RealWorldQA) at LoRA-level and outperforming full fine-tuning on LIBERO-Plus robustness."
+
+training:
+  dataset: "LIBERO demonstrations (standard 4 suites)"
+  method: "PEFT with GSE adapters; 80,000 optimization steps, batch size 128 (16 per GPU x 8 GPUs)"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 90.3
+    libero_object: 86.2
+    libero_goal: 74.2
+    libero_long: 74.1
+    libero_avg: 81.2
+  real_world:
+    avg_success: 82.5
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "fine-tuned (evaluated zero-shot on LIBERO-Plus perturbation axes)"
+  real_world: "four manipulation tasks under distribution shifts"
 
-tags: [libero]
+tags: [libero, libero-plus, peft, lora, moe, parameter-efficient, qwen3-vl, openvla-oft]
