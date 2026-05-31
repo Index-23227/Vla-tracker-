@@ -1,0 +1,33 @@
+# Paper: CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for Vision-Language-Action Models
+# arXiv: 2605.21854
+
+name: CrossVLA
+full_name: "CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for Vision-Language-Action Models"
+organization: "Independent (Zhi Liu); affiliation not disclosed in abstract"
+date: "2026-05-21"
+paper_url: https://arxiv.org/abs/2605.21854
+code_url: https://github.com/lz-googlefycy/vla-lab
+venue: null
+open_source: true
+
+architecture:
+  action_head: "flow matching"
+  action_head_category: flow_matching
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "Cross-paradigm post-training study for VLA models that brings Direct Preference Optimisation (DPO) to continuous-action flow-matching backbones via a surrogate flow-matching log-probability estimator (avoiding probability-flow ODE integration). Compares LoRA vs DoRA as the PEFT layer for VLA DPO and provides an inference-time anatomy showing the denoise loop dominates 78.6% of sample_actions latency, with prefix-K/V caching capped at ~21% acceleration."
+
+benchmarks:
+  libero:
+    # Reported as improvement over OpenVLA SFT baseline (DoRA + DPO, 600 trials, 3 seeds)
+    # Absolute LIBERO suite scores are not stated in the abstract.
+    libero_spatial_delta_vs_openvla_sft: 2.7
+    libero_object_delta_vs_openvla_sft: 20.0
+    libero_goal_delta_vs_openvla_sft: 8.0
+    libero_long_delta_vs_openvla_sft: 11.0
+    libero_avg_delta_vs_openvla_sft: 10.4
+    source: "abstract"
+
+eval_conditions:
+  libero: "fine-tuned (DPO over OpenVLA SFT; 600 trials, 3 seeds)"
+
+tags: [flow-matching, dpo, post-training, lora, dora, libero]

@@ -1,0 +1,39 @@
+# Paper: BlockVLA: Accelerating Autoregressive VLA via Block Diffusion Finetuning
+# arXiv: 2605.13382
+
+name: BlockVLA
+full_name: "BlockVLA: Accelerating Autoregressive VLA via Block Diffusion Finetuning"
+organization: "Affiliations not disclosed in abstract (authors: Ruiheng Wang, Shuanghao Bai, Haoran Zhang, Badong Chen, Xiangyu Xu)"
+date: "2026-05-13"
+paper_url: https://arxiv.org/abs/2605.13382
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "discrete diffusion (block diffusion)"
+  action_head_category: discrete_diffusion
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "Adapts pretrained autoregressive VLA backbones into an efficient discrete diffusion policy via a block diffusion paradigm: autoregressive dependencies are kept at the block level while denoising is parallelised within each block. This enables prefix KV-cache reuse across completed blocks, reduces iterative denoising cost, and provides a smooth transition from AR pretraining to diffusion-based policy fine-tuning."
+
+benchmarks:
+  libero:
+    # Abstract reports evaluation on LIBERO but does not provide absolute suite scores.
+    libero_spatial: null  # abstract에 미명시
+    libero_object: null   # abstract에 미명시
+    libero_goal: null     # abstract에 미명시
+    libero_long: null     # abstract에 미명시
+    source: "abstract (no absolute scores reported)"
+  simpler_env:
+    # Abstract reports evaluation on SimplerEnv but does not provide absolute scores.
+    google_robot_pick_coke_can: null  # abstract에 미명시
+    source: "abstract (no absolute scores reported)"
+
+inference_speedup:
+  speedup_vs_discrete_diffusion_baseline: "3.3x"
+
+eval_conditions:
+  libero: "fine-tuned"
+  simpler_env: "fine-tuned"
+
+tags: [diffusion, block-diffusion, autoregressive, kv-cache, libero, simpler_env]

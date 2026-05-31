@@ -1,0 +1,30 @@
+# Paper: Premover: Fast Vision-Language-Action Control by Acting Before Instructions Are Complete
+# arXiv: 2605.12160
+
+name: Premover
+full_name: "Premover: Fast Vision-Language-Action Control by Acting Before Instructions Are Complete"
+organization: "TODO: not stated in abstract"
+date: "2026-05-12"
+paper_url: https://arxiv.org/abs/2605.12160
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "Frozen VLA backbone + two lightweight projection heads (image patches, language tokens) producing a focus map that reweights image tokens; learned scalar readiness threshold gates action start"
+  action_head_category: other
+  parameters: "TODO: not stated in abstract (lightweight projection heads on a frozen backbone)"
+  key_innovation: "Premover turns the idle window during user instruction entry into useful precomputation for VLA policies. Two small projection heads map an intermediate layer of a frozen VLA backbone into a shared image-language space, producing a focus map (supervised by simulator-rendered target-object masks) that reweights next-step image tokens. A jointly trained scalar readiness threshold decides when to begin acting on streaming prefixes, reducing latency without sacrificing success rate."
+
+benchmarks:
+  libero:
+    libero_spatial: "abstract에 미명시"
+    libero_object: "abstract에 미명시"
+    libero_goal: "abstract에 미명시"
+    libero_long: "abstract에 미명시"
+    libero_avg: 95.1  # full-prompt Premover success rate reported in abstract (baseline 95.0)
+
+eval_conditions:
+  libero: "fine-tuned; Premover reduces mean wall-clock time 34.0s -> 29.4s (-13.6%) while matching 95.0% baseline (95.1%). Naive premoving collapses to 66.4%."
+
+tags: [libero]

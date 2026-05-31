@@ -1,0 +1,29 @@
+# Paper: GuidedVLA: Specifying Task-Relevant Factors via Plug-and-Play Action Attention Specialization
+# arXiv: 2605.12369
+
+name: GuidedVLA
+full_name: "GuidedVLA: Specifying Task-Relevant Factors via Plug-and-Play Action Attention Specialization"
+organization: "TODO: not stated in abstract"
+date: "2026-05-12"
+paper_url: https://arxiv.org/abs/2605.12369
+code_url: null
+venue: "RSS 2026"
+open_source: false
+
+architecture:
+  action_head: "VLM action decoder with specialized attention heads (object grounding, spatial geometry, temporal skill logic)"
+  action_head_category: other
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "GuidedVLA treats the action decoder as an assembly of functional components rather than a monolithic learner, and supervises individual attention heads with manually defined auxiliary signals to capture distinct task-relevant factors. The initial instantiation uses three specialized heads for object grounding, spatial geometry, and temporal skill logic, yielding decoupled high-quality features. This explicit guidance mitigates overfitting to spurious correlations (visual shortcuts, environmental noise) and improves in-domain and out-of-domain generalization."
+
+benchmarks:
+  libero:
+    libero_spatial: "abstract에 미명시"
+    libero_object: "abstract에 미명시"
+    libero_goal: "abstract에 미명시"
+    libero_long: "abstract에 미명시"
+
+eval_conditions:
+  libero: "fine-tuned (per abstract, simulation + real-robot experiments; specific numbers not in abstract)"
+
+tags: [RSS-2026]

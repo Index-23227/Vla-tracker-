@@ -1,0 +1,31 @@
+# Paper: GaussianDream: A Feed-Forward 3D Gaussian World Model for Robotic Manipulation
+# arXiv: 2605.20752
+
+name: GaussianDream
+full_name: "GaussianDream: A Feed-Forward 3D Gaussian World Model for Robotic Manipulation"
+organization: "Affiliations not disclosed in abstract (authors: Zijian Zhang, Yuqing Jiang, Qian Cheng, Xiaofan Li, Si Liu, Ding Zhao, Ping Luo, Weitao Zhou, Haibao Yu)"
+date: "2026-05-20"
+paper_url: https://arxiv.org/abs/2605.20752
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  action_head: "VLA policy with 3D Gaussian world-model plug-in (action head not specified in abstract)"
+  action_head_category: other
+  parameters: "TODO: not stated in abstract"
+  key_innovation: "Feed-forward 3D Gaussian world-model plug-in for VLA policies. Learnable GaussianDream Queries in the encoder capture current-frame 3D structure and short-horizon future evolution; during training two auxiliary heads (static reconstruction, future prediction) supervise the prefix with RGB, depth and pseudo 3D scene-flow signals. At inference all auxiliary heads are discarded and only the learned prefix conditions action generation, giving 3D geometric grounding without test-time Gaussian reconstruction or future prediction."
+
+benchmarks:
+  libero:
+    libero_avg: 98.4
+    source: "abstract"
+  robocasa:
+    robocasa_human50: 54.8
+    source: "abstract"
+
+eval_conditions:
+  libero: "fine-tuned"
+  robocasa: "fine-tuned (Human-50 split)"
+
+tags: [3d-gaussian, world-model, libero, robocasa]
