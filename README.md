@@ -43,31 +43,31 @@ VLA-Tracker solves this by:
 
 | Rank | Model | Avg | Date | Venue | Action Head |
 |------|-------|-----|------|-------|-------------|
-| 1 | **PLD** | **99.0** | Oct 2025 | ICLR 2026 | Residual RL |
-| 2 | **SimpleVLA-RL** | **98.8** | Sep 2025 | ICLR 2026 | AR + GRPO RL |
-| 3 | **DualCoT-VLA** | **98.8** | Mar 2026 | — | Flow matching + parallel CoT |
-| 4 | **SnapFlow** | **98.8** | Apr 2026 | — | One-step flow distillation (pi0.5 base) |
-| 5 | DiT4DiT | 98.6 | Mar 2026 | — | Cosmos DiT + flow-matching action |
-| 6 | LaMP | 98.3 | Mar 2026 | — | Qwen3-VL + flow matching (3D scene flow) |
-| 7 | MMaDA-VLA | 98.0 | Mar 2026 | — | Discrete diffusion (masked token denoising) |
-| 8 | TAG | 97.9 | Mar 2026 | — | Test-time guidance on pi0.5 |
-| 9 | VLA-IAP | 97.8 | Mar 2026 | — | Training-free token pruning |
-| 10 | X-VLA | 97.8 | Oct 2025 | ICLR 2026 | Flow matching + soft prompts |
-| 11 | DepthCache | 97.6 | Mar 2026 | — | Depth-guided token merging (training-free) |
-| 12 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
-| 13 | OmniVLA-RL | 97.6 | Apr 2026 | — | Flow matching + Flow-GSPO RL |
+| 1 | **LaST-R1** | **99.8** | Apr 2026 | — | AR latent CoT + parallel discrete action tokens |
+| 2 | **QuoVLA** | **99.6** | May 2026 | — | Flow matching + 8-bit quantized prefix (pi0.5 base) |
+| 3 | **PriorVLA** | **99.05** | May 2026 | — | Dual-expert flow matching (pi0.5 backbone) |
+| 4 | PLD | 99.0 | Oct 2025 | ICLR 2026 | Residual RL |
+| 5 | SimpleVLA-RL | 98.83 | Sep 2025 | ICLR 2026 | AR + GRPO RL |
+| 6 | DualCoT-VLA | 98.8 | Mar 2026 | — | Flow matching + parallel CoT |
+| 7 | SnapFlow | 98.75 | Apr 2026 | — | One-step flow distillation (pi0.5 base) |
+| 8 | **IntentVLA** | **98.62** | May 2026 | — | DiT flow-matching + VGGT short-horizon intent |
+| 9 | **AttenA+** | **98.6** | May 2026 | arXiv | Inverse-velocity loss reweighting (plug-in) |
+| 10 | DiT4DiT | 98.55 | Mar 2026 | — | Cosmos DiT + flow-matching action |
+| 11 | **G3T-AML** | **98.55** | May 2026 | arXiv | 16-layer DiT on learned action manifold |
+| 12 | **GTA-VLA** | **98.45** | May 2026 | arXiv | Flow matching + Guide-Think-Act reasoning |
+| 13 | **GaussianDream** | **98.4** | May 2026 | — | Flow matching + Gaussian world model prefix |
 
-> Full leaderboard with 53 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 100 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
-| **CALVIN** (avg len) | MMaDA-VLA (4.78) | LingBot-VLA (4.50) | UD-VLA (4.50) |
-| **SimplerEnv** (avg) | InstructVLA (80.3) | LaMP (79.2) | SpatialVLA (78.2) |
-| **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
-| **RoboTwin v2** (avg) | Motus (87.8) | GigaWorld-Policy (86.0) | HiVLA (83.3) |
-| **RoboCasa** (avg) | DIAL (70.2) | UniT (66.0) | GR00T-N1.5 (64.1) |
+| **CALVIN** (avg len) | MMaDA-VLA (4.78) | UD-VLA (4.64) | OASIS (4.57) |
+| **SimplerEnv** (avg) | GTA-VLA (81.2) | InstructVLA (80.3) | Retrieve-then-Steer (79.5) |
+| **RoboTwin v1** (avg) | Fast-WAM (91.8) | Qwen-VLA (86.7) | FineVLA (84.7) |
+| **RoboTwin v2** (avg) | MotuBrain (96.0) | STARRY (93.6) | AttenA+ (92.5) |
+| **RoboCasa** (avg) | StereoPolicy (75.6) | DIAL (70.2) | UniT (66.0) |
 
 ---
 
