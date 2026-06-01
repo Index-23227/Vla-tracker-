@@ -165,6 +165,31 @@ def sync_readme(leaderboard: dict, dry_run: bool) -> list[str]:
         changes.append(f"Reviews section count: → {num_reviews}")
         text = new_text
 
+    # Comparison table cell: **XX AI-generated seminar-style reviews** (no "paper")
+    new_text, n = re.subn(
+        r"\*\*\d+ AI-generated seminar-style reviews\*\*",
+        f"**{num_reviews} AI-generated seminar-style reviews**",
+        text,
+    )
+    if n and new_text != text:
+        changes.append(f"Comparison table reviews count: → {num_reviews}")
+        text = new_text
+
+    # llms-full.txt line-count reference: "Complete model database (NNNN+ lines)"
+    llms_full = ROOT / "dashboard" / "public" / "llms-full.txt"
+    if llms_full.exists():
+        n_lines = sum(1 for _ in llms_full.open(encoding="utf-8"))
+        # round down to nearest 100 for a stable "N+ lines" floor
+        floor = (n_lines // 100) * 100
+        new_text, n = re.subn(
+            r"Complete model database \(\d+\+? lines\)",
+            f"Complete model database ({floor}+ lines)",
+            text,
+        )
+        if n and new_text != text:
+            changes.append(f"llms-full line count: → {floor}+")
+            text = new_text
+
     # PDF verified count: **XX reviews are PDF-verified**
     new_text, n = re.subn(
         r"\*\*\d+ reviews are PDF-verified\*\*",
@@ -282,6 +307,7 @@ def sync_blueprint(leaderboard: dict, dry_run: bool) -> list[str]:
     for bench_name, avg_key in [
         ("LIBERO", "libero_avg"), ("CALVIN", "calvin_avg"),
         ("SimplerEnv", "simpler_avg"), ("RLBench", "rlbench_avg"),
+        ("RoboCasa", "robocasa_avg"),
     ]:
         actual = count_benchmark_models(leaderboard, avg_key)
         pattern = rf"(\|\s*{bench_name}\s*\|[^|]*\|\s*)\d+\+?(\s*\|)"
@@ -289,6 +315,17 @@ def sync_blueprint(leaderboard: dict, dry_run: bool) -> list[str]:
         if n and new_text != text:
             changes.append(f"Blueprint {bench_name}: → {actual}")
             text = new_text
+
+    # RoboTwin (unique models across v1+v2) — table label is "RoboTwin v1/v2"
+    rt_total = len(set(
+        m["name"] for m in leaderboard["models"]
+        if m.get("robotwin_v1_avg") is not None or m.get("robotwin_v2_avg") is not None
+    ))
+    pattern = r"(\|\s*RoboTwin[^|]*\|[^|]*\|\s*)\d+\+?(\s*\|)"
+    new_text, n = re.subn(pattern, rf"\g<1>{rt_total}\2", text)
+    if n and new_text != text:
+        changes.append(f"Blueprint RoboTwin: → {rt_total}")
+        text = new_text
 
     if text != original:
         if not dry_run:
