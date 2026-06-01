@@ -48,6 +48,60 @@ def count_reviews() -> tuple[int, int]:
     return total, verified
 
 
+def get_top3(leaderboard: dict, avg_key: str) -> list[tuple[str, float]]:
+    """Return [(name, score), ...] for top-3 models by avg_key (descending)."""
+    scored = [(m["name"], m[avg_key]) for m in leaderboard["models"]
+              if m.get(avg_key) is not None]
+    scored.sort(key=lambda x: -x[1])
+    return scored[:3]
+
+
+def _fmt_score(score: float, calvin: bool = False) -> str:
+    """Format score: CALVIN keeps 2 decimals (0-5 scale), others 1 decimal."""
+    if calvin:
+        return f"{score:.2f}"
+    # 1 decimal place, drop trailing .0 for integers (e.g. 80 not 80.0)
+    s = f"{score:.1f}"
+    return s
+
+
+def sync_top3_table(text: str, leaderboard: dict) -> tuple[str, list[str]]:
+    """Sync the 'Other Benchmarks (Top 3)' table in README.
+
+    Each row format:
+      | **<Name>** (...) | model1 (score) | model2 (score) | model3 (score) |
+    """
+    changes = []
+    benchmarks = [
+        ("CALVIN", "calvin_avg", True),
+        ("SimplerEnv", "simpler_avg", False),
+        ("RoboTwin v1", "robotwin_v1_avg", False),
+        ("RoboTwin v2", "robotwin_v2_avg", False),
+        ("RoboCasa", "robocasa_avg", False),
+    ]
+    for bench_name, avg_key, is_calvin in benchmarks:
+        top3 = get_top3(leaderboard, avg_key)
+        if len(top3) < 3:
+            continue
+        new_row = "| " + " | ".join(
+            [f"**{bench_name}** ({'avg len' if is_calvin else 'avg'})"]
+            + [f"{n} ({_fmt_score(s, is_calvin)})" for n, s in top3]
+        ) + " |"
+        # Replace the existing row, matching the label cell and 3 data cells
+        bench_escaped = re.escape(bench_name)
+        pattern = (
+            rf"\|\s*\*\*{bench_escaped}\*\*\s*\([^)]+\)\s*"
+            rf"\|[^\n|]+\|[^\n|]+\|[^\n|]+\|"
+        )
+        new_text, n = re.subn(pattern, new_row, text, count=1)
+        if n and new_text != text:
+            changes.append(f"Top-3 {bench_name}: → "
+                           + ", ".join(f"{n} ({_fmt_score(s, is_calvin)})"
+                                       for n, s in top3))
+            text = new_text
+    return text, changes
+
+
 def sync_readme(leaderboard: dict, dry_run: bool) -> list[str]:
     """Sync README.md counts. Returns list of changes made."""
     if not README.exists():
@@ -154,6 +208,20 @@ def sync_readme(leaderboard: dict, dry_run: bool) -> list[str]:
     if n and new_text != text:
         changes.append(f"LIBERO leaderboard heading: → {num_libero}")
         text = new_text
+
+    # README LIBERO callout: "Full leaderboard with N LIBERO models"
+    new_text, n = re.subn(
+        r"Full leaderboard with \d+ LIBERO models",
+        f"Full leaderboard with {num_libero} LIBERO models",
+        text,
+    )
+    if n and new_text != text:
+        changes.append(f"Full leaderboard callout: → {num_libero}")
+        text = new_text
+
+    # Other Benchmarks (Top 3) table: per-benchmark top-3
+    text, top3_changes = sync_top3_table(text, leaderboard)
+    changes.extend(top3_changes)
 
     # Project Structure: ## model YAML files
     new_text, n = re.subn(
