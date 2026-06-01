@@ -12,7 +12,7 @@ architecture:
   llm: "Molmo"
   action_head: "Flow-matching action expert (~400M Qwen3 model) with KV-conditioned self-attention; alternative MLP head supervised by L1 loss"
   action_head_category: flow_matching
-  parameters: "TODO"
+  parameters: "~7.4B total (Molmo-7B VLM: vision encoder + 28-layer Qwen2-7B) + ~400M Qwen3 flow-matching action expert"
   key_innovation: "A1 jointly accelerates the VLM backbone and the flow-matching action head. It introduces (1) action-consistency early-exit thresholding that terminates the VLM forward pass when intermediate-layer action predictions stabilize, and (2) Inter-Layer Truncated Flow Matching, which runs only a small number of denoising steps per VLM layer and warm-starts the next layer's denoising from the previous layer's prediction rather than from random noise. The result is substantial latency reduction with maintained success rate, plus a fully open-source training/inference stack."
 
 benchmarks:

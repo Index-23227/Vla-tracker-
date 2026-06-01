@@ -12,7 +12,7 @@ architecture:
   llm: Qwen3-VL-4B (Qwen3-0.6B as frozen auxiliary linguistic teacher during training)
   action_head: "Diffusion Transformer (DiT) action expert trained with Flow Matching, conditioned on VLM hidden states (including 16 visual CoT and 4 linguistic CoT learnable query tokens) via cross-attention."
   action_head_category: flow_matching
-  parameters: "TODO"
+  parameters: "~4B (Qwen3-VL-4B backbone) + DiT action expert (size not stated in paper); training-only Qwen3-0.6B linguistic teacher and Depth Anything 3 visual teacher discarded at inference"
   key_innovation: "Parallel implicit visual-linguistic Chain-of-Thought via two sets of learnable query tokens (16 visual + 4 linguistic) inserted into the VLM input. Visual CoT tokens are aligned with frozen Depth Anything 3 features (geometric distillation) and linguistic CoT tokens condition a frozen Qwen3-0.6B decoder to reproduce explicit CoT text, forcing the VLM to internalize spatial perception and logical planning in a single forward pass instead of sequential autoregressive reasoning."
 
 training:

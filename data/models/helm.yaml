@@ -12,7 +12,7 @@ architecture:
   llm: inherited from underlying VLA backbone (OpenVLA / Octo)
   action_head: "Wraps a frozen VLA backbone with three components: an Episodic Memory Module (CLIP ViT-B/32 keyframe store with top-k cosine retrieval), a learned State Verifier (3-layer MLP 1024->512->256->1 predicting pre-execution failure probability from memory-augmented observation, action, and subgoal), and a Harness Controller that triggers rollback or replanning when failure is predicted."
   action_head_category: other
-  parameters: "TODO"
+  parameters: "Only the State Verifier is trained: 3-layer MLP [1024->512->256->1], ~0.7M params; frozen CLIP ViT-B/32 (~86M) for retrieval; frozen VLA backbone (OpenVLA-7B or Octo-Base); total system params not stated in paper"
   key_innovation: "Model-agnostic execution-loop framework that addresses three structural failure modes of long-horizon VLA manipulation: the memory gap (EMM with CLIP-indexed keyframe retrieval), the verification gap (a learned MLP State Verifier that predicts pre-execution failure conditioned on retrieved memory), and the recovery gap (a Harness Controller implementing memory-conditioned rollback or forward replanning). The State Verifier is the core learning contribution and depends critically on memory-augmented context."
 
 training:

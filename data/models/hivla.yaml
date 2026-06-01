@@ -12,7 +12,7 @@ architecture:
   llm: Qwen3-VL 8B (fine-tuned high-level VLM planner)
   action_head: "Conditional Flow Matching Diffusion Transformer (DiT) action expert (initialized from H-RDT, LLaMA-style backbone with RMSNorm + SwiGLU + AdaLN), with a cascaded cross-attention block that sequentially conditions noisy action latents on global image features, position-aware high-resolution local-crop features extracted via the planner's bounding box, and a language embedding for the subtask skill."
   action_head_category: flow_matching
-  parameters: "TODO"
+  parameters: "8B VLM planner (Qwen3-VL 8B); DiT action expert size not stated in paper (16 layers, hidden dim 2176, 16 heads); total not reported"
   key_innovation: "Hierarchical visual-grounded-centric VLA that explicitly decouples a Qwen3-VL 8B planner (producing structured plans with subtask skill + native bounding box) from a low-level DiT action expert. The action expert uses a novel cascaded cross-attention that sequentially fuses global context, high-resolution object-centric crops with absolute positional encoding, and skill semantics, avoiding catastrophic forgetting while preserving fine-grained visual fidelity for manipulation in cluttered scenes."
 
 training:

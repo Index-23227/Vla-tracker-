@@ -12,7 +12,7 @@ architecture:
   llm: "N/A (inherits LLM of host VLA, e.g., Gemma for pi0.5, Llama 2 for OpenVLA)"
   action_head: "Training-free inference-time visual token merging wrapper; does not modify the underlying VLA action head (e.g., flow-matching for pi0.5, autoregressive for OpenVLA, Diffusion Transformer for GR00T)"
   action_head_category: other
-  parameters: "TODO"
+  parameters: "not stated in paper (training-free wrapper adds no learnable parameters; inherits host VLA size)"
   key_innovation: "DepthCache is a training-free, model-agnostic visual-token compression wrapper for VLA inference that repurposes depth as an external structural prior rather than a perceptual input. It partitions unprotected visual tokens into K depth-based regions via K-Means and assigns spatially differentiated merge ratios that scale with mean depth (preserving near-field workspace, compressing distant background). Token merging is distributed progressively across consecutive frames rather than within a single forward pass, with attention- and depth-edge-based dual protection of task-critical tokens, plus a motion-adaptive state machine for wrist cameras. Wraps base VLAs (pi0.5, OpenVLA, GR00T) for 1.07x-1.28x speedup with <1% LIBERO success-rate degradation."
 
 benchmarks:
