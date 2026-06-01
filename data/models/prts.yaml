@@ -1,33 +1,59 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: PRTS: A Primitive Reasoning and Tasking System via Contrastive Representations
 # arXiv: 2604.27472
 
 name: PRTS
 full_name: "PRTS: A Primitive Reasoning and Tasking System via Contrastive Representations"
-organization: "TODO: check paper"
+organization: "TeleAI (China Telecom), Tsinghua University, Shanghai Jiao Tong University, Fudan University"
 date: "2026-04-30"
 paper_url: https://arxiv.org/abs/2604.27472
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/TeleHuman/PRTS
+venue: arXiv 2026
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-VL-4B-Instruct"
+  action_head: "Flow-matching Diffusion Transformer (DiT) action expert producing action chunks over 5 denoising steps"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~4.7B (4B VLM + 675M DiT action expert)"
+  key_innovation: "Reformulates VLA pre-training as Goal-Conditioned Reinforcement Learning via contrastive representations: state-action and goal embeddings are aligned so their inner product approximates the log-discounted goal occupancy. The contrastive RL (CRL) objective acts as an auxiliary head during large-scale pre-training, yielding sizeable gains on out-of-distribution generalization (LIBERO-Plus +4.9%, LIBERO-Pro +5.0%) while keeping the base flow-matching action expert architecture."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.8
+    libero_object: 99.8
+    libero_goal: 98.4
+    libero_long: 96.6
+    libero_avg: 98.4
+    source: "PRTS paper Table 2"
+    date_reported: "2026-04-30"
+    eval_condition: "fine-tuned"
   simpler_env:
-    google_robot_pick_coke_can: TODO
+    widowx_avg: 77.1
+    simpler_avg: 77.1
+    source: "PRTS paper (SimplerEnv WidowX, average over 4 tasks)"
+    date_reported: "2026-04-30"
+    eval_condition: "fine-tuned"
 
 eval_conditions:
   libero: "fine-tuned"
   simpler_env: "fine-tuned"
+  libero_plus: "zero-shot"
+  libero_pro: "zero-shot"
 
-tags: [libero, simpler_env]
+training:
+  dataset: "AgiBotWorld, RoboMind, Open X-Embodiment, self-collected (404M samples, 167.8B tokens)"
+  hardware: "64x NVIDIA H100 GPUs"
+  batch_size: "256 packed sequences (global)"
+  steps: "~220K gradient steps (~1 week)"
+  post_training: "Task-dependent, batch 32-1024, 20K-100K steps"
+
+tags:
+- flow-matching
+- contrastive-rl
+- goal-conditioned
+- pretraining
+- libero
+- simpler-env
+- qwen-vl
+- manipulation

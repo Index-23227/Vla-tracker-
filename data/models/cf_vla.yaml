@@ -1,33 +1,63 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: CF-VLA: Efficient Coarse-to-Fine Action Generation for Vision-Language-Action Policies
 # arXiv: 2604.24622
 
 name: CF-VLA
 full_name: "CF-VLA: Efficient Coarse-to-Fine Action Generation for Vision-Language-Action Policies"
-organization: "TODO: check paper"
+organization: "Southern University of Science and Technology, Xi'an Jiaotong University, USTC, United Nova Technology"
 date: "2026-04-27"
 paper_url: https://arxiv.org/abs/2604.24622
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/EmbodiedAI-RoboTron/CF-VLA
+venue: arXiv 2026
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "PaliGemma (SigLIP + Gemma); validated on PaliGemma 2"
+  action_head: "Coarse-to-fine flow matching: coarse stage predicts endpoint velocity posterior from Gaussian noise to form an action-prior initialization, fine stage performs a single fixed-time refinement step"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "3B"
+  key_innovation: "Decomposes flow-matching action generation into two specialized stages: a coarse endpoint-velocity stage that builds an action-prior-guided initialization via KL divergence to a target distribution, followed by a single-step local refinement. This replaces iterative multi-step ODE sampling with two stages, cutting action sampling latency by 75.4% (to 7.81 ms) while matching or exceeding multi-step flow-matching baselines on LIBERO and CALVIN."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.0
+    libero_object: 99.2
+    libero_goal: 96.6
+    libero_long: 92.0
+    libero_avg: 96.5
+    source: "CF-VLA paper Table 1 (replay-filtered)"
+    date_reported: "2026-04-27"
+    eval_condition: "fine-tuned (replay-filtered trajectories, 60K steps)"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_1: 91.1
+    calvin_abc_d_2: 80.2
+    calvin_abc_d_3: 71.8
+    calvin_abc_d_4: 66.2
+    calvin_abc_d_5: 57.3
+    calvin_abc_d_avg_len: 3.67
+    source: "CF-VLA paper Table 2 (D->D protocol)"
+    date_reported: "2026-04-27"
+    eval_condition: "fine-tuned (D->D)"
+
+training:
+  dataset: "LIBERO (replay-filtered demonstrations); CALVIN D->D; 5 real-robot tasks (25-50 demos each)"
+  hardware: "8x NVIDIA A100 GPUs (FSDP)"
+  batch_size: "16 global (2 per GPU)"
+  learning_rate: 5.0e-5
+  steps: "60,000 (LIBERO)"
+  optimizer: "AdamW"
 
 eval_conditions:
   libero: "fine-tuned"
   calvin: "fine-tuned"
 
-tags: [libero, calvin]
+inference_hz: 128
+
+tags:
+- flow-matching
+- coarse-to-fine
+- efficient-inference
+- libero
+- calvin
+- paligemma
+- manipulation

@@ -1,15 +1,15 @@
 name: VILAS
 full_name: "VILAS: A VLA-Integrated Low-cost Architecture with Soft Grasping for Robotic Manipulation"
-organization: Independent / Multi-author (affiliation not specified in abstract)
+organization: "Drexel University; Virginia Tech Seafood Agricultural Research Center; Amazon Store Foundation AI"
 date: '2026-05-03'
 paper_url: https://arxiv.org/abs/2605.02037
 code_url: null
-venue: null
-open_source: false
+venue: arXiv preprint
+open_source: true
 architecture:
   backbone: "Fine-tuned VLA policies (pi_0, pi_0.5, GR00T N1.6)"
   llm: inherited from each base VLA (pi_0 / pi_0.5 / GR00T N1.6)
-  action_head: inherited from each base VLA (flow-matching for pi_0 / pi_0.5; diffusion-style for GR00T N1.6)
+  action_head: "inherited from each base VLA (flow-matching for pi_0; MoE flow-matching for pi_0.5; diffusion transformer for GR00T N1.6)"
   action_head_category: hybrid
   parameters: varies
   key_innovation: |
