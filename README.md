@@ -57,17 +57,17 @@ VLA-Tracker solves this by:
 | 12 | Fast-WAM | 97.6 | Mar 2026 | — | Flow + video DiT |
 | 13 | OmniVLA-RL | 97.6 | Apr 2026 | — | Flow matching + Flow-GSPO RL |
 
-> Full leaderboard with 53 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 100 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
-| **CALVIN** (avg len) | MMaDA-VLA (4.78) | LingBot-VLA (4.50) | UD-VLA (4.50) |
-| **SimplerEnv** (avg) | InstructVLA (80.3) | LaMP (79.2) | SpatialVLA (78.2) |
-| **RoboTwin v1** (avg) | Fast-WAM (91.8) | SimpleVLA-RL (70.4) | LingBot-VLA (61.5) |
-| **RoboTwin v2** (avg) | Motus (87.8) | GigaWorld-Policy (86.0) | HiVLA (83.3) |
-| **RoboCasa** (avg) | DIAL (70.2) | UniT (66.0) | GR00T-N1.5 (64.1) |
+| **CALVIN** (avg len) | MMaDA-VLA (4.78) | UD-VLA (4.64) | OASIS (4.57) |
+| **SimplerEnv** (avg) | GTA-VLA (81.2) | InstructVLA (80.3) | Retrieve-then-Steer (79.5) |
+| **RoboTwin v1** (avg) | Fast-WAM (91.8) | Qwen-VLA (86.7) | FineVLA (84.7) |
+| **RoboTwin v2** (avg) | MotuBrain (96.0) | STARRY (93.6) | AttenA+ (92.5) |
+| **RoboCasa** (avg) | StereoPolicy (75.6) | DIAL (70.2) | UniT (66.0) |
 
 ---
 
