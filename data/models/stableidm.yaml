@@ -12,7 +12,7 @@ architecture:
   llm: null
   action_head: "History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference."
   action_head_category: inverse_dynamics
-  parameters: "TODO"
+  parameters: "not stated in paper"
   key_innovation: "StableIDM is a spatio-temporal refinement framework for inverse dynamics under manipulator truncation, combining robot-centric SAM masking, Directional Feature Aggregation (anisotropic features along inferred arm direction) and Temporal Dynamics Refinement (causal TCN smoothing kinematics). On AgiBot heavy-truncation it reaches strict acc 0.307 / per-dim acc 0.447 / L1 dist 0.493 vs Vidar 0.186/0.322/0.573 and ResNet 0.150/0.291/0.679. Real-world open-loop replay avg 47.4% (Pick&Place 53.8 / Microwave 42.3 / Sink 46.2) vs Vidar 37.7%. Video-plan grasp 53.8% vs AnyPos 42.3%. As auto-annotator for π0.5 VLA training: real-only 35.3% -> real+StableIDM-labeled 52.9% (+17.6pp)."
 
 training:

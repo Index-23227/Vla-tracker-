@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-06-01T10:41:15.639632
+# Generated: 2026-06-01T10:54:50.147630
 # Models: 200
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -377,7 +377,7 @@ MODEL: DualCoT-VLA
     Action Head: Diffusion Transformer (DiT) action expert trained with Flow Matching, conditioned on VLM hidden states (including 16 visual CoT and 4 linguistic CoT learnable query tokens) via cross-attention.
     Backbone: Qwen3-VL-4B (with Depth Anything 3 as frozen visual teacher during training)
     LLM: Qwen3-VL-4B (Qwen3-0.6B as frozen auxiliary linguistic teacher during training)
-    Parameters: TODO
+    Parameters: ~4B (Qwen3-VL-4B backbone) + DiT action expert (size not stated in paper); training-only Qwen3-0.6B linguistic teacher and Depth Anything 3 visual teacher discarded at inference
   Tags: flow-matching, chain-of-thought, dual-cot, libero, robocasa, parallel-reasoning, latent-reasoning
   Benchmarks:
     libero (avg=98.8): libero_spatial=99.4, libero_object=99.8, libero_goal=97.8, libero_long=98.2, libero_avg=98.8
@@ -926,7 +926,7 @@ MODEL: DepthCache
     Action Head: Training-free inference-time visual token merging wrapper; does not modify the underlying VLA action head (e.g., flow-matching for pi0.5, autoregressive for OpenVLA, Diffusion Transformer for GR00T)
     Backbone: N/A (training-free wrapper; inherits backbone of host VLA, e.g., SigLIP for pi0.5, SigLIP+DINOv2 for OpenVLA, Eagle for GR00T)
     LLM: N/A (inherits LLM of host VLA, e.g., Gemma for pi0.5, Llama 2 for OpenVLA)
-    Parameters: TODO
+    Parameters: not stated in paper (training-free wrapper adds no learnable parameters; inherits host VLA size)
   Tags: training_free, token_merging, inference_acceleration, depth_guided, libero, wrapper
   Benchmarks:
     libero (avg=97.6): libero_spatial=98.9, libero_object=97.1, libero_goal=98.3, libero_long=96.1, libero_avg=97.6
@@ -989,7 +989,7 @@ MODEL: OmniVLA-RL
     Action Head: Conditional Flow Matching with action chunking (H=16, K=10 denoising steps). Mix-of-Transformers backbone shares Spatial / Reasoning / Action experts under Block-wise Causal Attention. RL-tuned with Flow-GSPO (SDE reformulation via Fokker-Planck + Group Segmented PO; G=8 group size, β=0.01 KL).
     Backbone: SigLIP (semantic) + VGGT (Visual Geometry Grounded Transformer, spatial)
     LLM: PaLiGemma (decoder-only Transformer; weights pretrained)
-    Parameters: TODO
+    Parameters: not stated in paper
   Tags: RL, online-RL, flow-matching, mixture-of-experts, spatial-understanding, libero
   Benchmarks:
     libero (avg=97.6): libero_spatial=99.2, libero_object=99.2, libero_goal=98.5, libero_long=93.5
@@ -1277,7 +1277,7 @@ MODEL: A1
     Action Head: Flow-matching action expert (~400M Qwen3 model) with KV-conditioned self-attention; alternative MLP head supervised by L1 loss
     Backbone: Molmo (vision-language model)
     LLM: Molmo
-    Parameters: TODO
+    Parameters: ~7.4B total (Molmo-7B VLM: vision encoder + 28-layer Qwen2-7B) + ~400M Qwen3 flow-matching action expert
   Tags: flow_matching, libero, vlabench, robochallenge, open_source, efficient_inference, early_exit
   Benchmarks:
     libero (avg=96.55): libero_spatial=97.4, libero_object=99.8, libero_goal=97.6, libero_long=91.4, libero_avg=96.6
@@ -1633,7 +1633,7 @@ MODEL: StructVLA
     Action Head: structured world model planner with unified discrete token vocabulary (2-stage)
     Backbone: None
     LLM: None
-    Parameters: TODO
+    Parameters: not stated in paper
   Tags: world-model, structured-planner, libero, simpler_env, discrete-token
   Benchmarks:
     libero (avg=94.8): libero_avg=94.8
@@ -2135,7 +2135,7 @@ MODEL: ProgressVLA
     Action Head: Diffusion-based Latent Action Expert producing latent action chunks, decoded by an Action Decoder; classifier guidance steers diffusion via gradients backpropagated from a progress estimator through an inverse-dynamics world model
     Backbone: DINOv2 patch features for progress estimator; UniVLA world model architecture; Latent Action Expert with DiTA-style causal Transformer
     LLM: None
-    Parameters: TODO
+    Parameters: not stated in paper
   Tags: diffusion, classifier-guidance, world-model, progress-estimation, libero, calvin, latent-action
   Benchmarks:
     libero (avg=84.5): libero_spatial=88.2, libero_object=96.4, libero_goal=87.2, libero_long=66.2, libero_avg=84.5
@@ -2577,7 +2577,7 @@ MODEL: DA-PTQ
     Action Head: Post-training quantization applied over an existing diffusion VLA (CogACT). Targets the MLP blocks within the Diffusion Transformer (DiT) action head; final 2 DiT blocks (closest to continuous output) are preserved at high precision. Top 30% drift-sensitive DiT layers retained at BF16, remaining 70% quantized to W4. Outputs 7-DoF (3D translation + 3D rotation + gripper) continuous control via the original CogACT diffusion denoiser.
     Backbone: inherited from base VLA (CogACT in paper experiments)
     LLM: inherited from CogACT
-    Parameters: TODO
+    Parameters: not stated in paper (inherits base CogACT model size; W4A8 quantization yields 42.5% memory reduction)
   Tags: quantization, post-training, efficiency, deployment, mixed-precision, drift-aware, CogACT
   Benchmarks:
     simpler_env: widowx_vm_put_spoon=65.2, widowx_vm_put_carrot=52.2, widowx_vm_stack_blocks=17.4, widowx_vm_put_eggplant=60.9, google_vm_pick_coke=92.4, google_vm_move_near=87.9, google_vm_open_close_drawer=58.3, google_vm_drawer_apple=35.2, google_va_pick_coke=87.5, google_va_move_near=74.5, google_va_open_close_drawer=20.1, google_va_drawer_apple=24.7
@@ -2653,7 +2653,7 @@ MODEL: DIAL
     Action Head: Lightweight 4-layer self-attention fuses current visual features with predicted latent foresight, then a 16-layer Diffusion Transformer (flow-matching) cross-attends to this conditioning to denoise an action chunk (horizon H=16)
     Backbone: Pretrained ViT (shared from Qwen2.5-VL)
     LLM: Qwen2.5-VL-3B
-    Parameters: TODO
+    Parameters: Qwen2.5-VL-3B backbone (ViT encoder + text embedding frozen); total / action-head param count not stated in paper
   Tags: flow_matching, dual_system, world_modeling, robocasa, latent_intent, qwen2.5_vl
   Benchmarks:
     robocasa (avg=70.2): robocasa_gr1_avg=70.2
@@ -2954,7 +2954,7 @@ MODEL: Goal2Skill
     Action Head: Discrete library of diffusion-based visuomotor primitives π_1..π_J (one per reusable skill). Reverse diffusion (Eq. 19: A^{m-1}_t = μ_θ(A^m_t, m, Î_t, s_t, ℓ_k) + σ_m·ε) conditioned on geometry-filtered observation Î_t = I_t ⊙ (1−Q_t), 14-dim proprioceptive state s_t, and sub-task instruction ℓ_k. Receding-horizon execution with checkpoint-based VLM verification.
     Backbone: zero-shot segmentation model S for distractor masking + temporal mask update K (specific identities not disclosed)
     LLM: single pre-trained VLM reused as Φ_plan / Φ_verify / Φ_reflect / Φ_mem (model identity not disclosed in paper)
-    Parameters: TODO
+    Parameters: not stated in paper
   Tags: long-horizon, planning, reflection, dual-system, diffusion, multi-skill, RMBench
   AI Review Summary: VLM 기반 high-level planner(메모리·검증·반성)와 diffusion VLA low-level executor를 **closed-loop**로 결합해 long-horizon manipulation에서 baseline 대비 3배 이상의 성공률 향상을 보인 dual-system 프레임워크.
   AI Review: PDF-verified
@@ -3090,7 +3090,7 @@ MODEL: Hand-in-the-Loop
     Action Head: regression (continuous hand-arm commands via optimization-based retargeting)
     Backbone: Gr-Dexter pre-trained VLA
     LLM: None
-    Parameters: TODO
+    Parameters: not stated in paper (inherits Gr-Dexter backbone size, undisclosed)
   Tags: dexterous, bimanual, human-in-the-loop, real-world, intervention-learning
   Eval Conditions: {'real_world': 'Bimanual dexterous tasks with human teleoperation intervention'}
   AI Review Summary: Gr-Dexter VLA 기반 bimanual dexterous 정책에 **optimization-based relative hand retargeting**과 **velocity-based shared arm control**을 결합한 human-in-the-loop 개입 프레임워크(HandITL)로, 개입 시 발생하는 "gesture jump"를 99.8% 줄이고 개입 중 수집한 correction 데이터로 long-horizon 태스크 정책을 19% 향상.
@@ -3128,7 +3128,7 @@ MODEL: HELM
     Action Head: Wraps a frozen VLA backbone with three components: an Episodic Memory Module (CLIP ViT-B/32 keyframe store with top-k cosine retrieval), a learned State Verifier (3-layer MLP 1024->512->256->1 predicting pre-execution failure probability from memory-augmented observation, action, and subgoal), and a Harness Controller that triggers rollback or replanning when failure is predicted.
     Backbone: model-agnostic wrapper (evaluated with OpenVLA and Octo backbones, both kept frozen)
     LLM: inherited from underlying VLA backbone (OpenVLA / Octo)
-    Parameters: TODO
+    Parameters: Only the State Verifier is trained: 3-layer MLP [1024->512->256->1], ~0.7M params; frozen CLIP ViT-B/32 (~86M) for retrieval; frozen VLA backbone (OpenVLA-7B or Octo-Base); total system params not stated in paper
   Tags: wrapper, long-horizon, episodic-memory, failure-recovery, libero, calvin
   Benchmarks:
     libero: libero_long=81.5
@@ -3184,7 +3184,7 @@ MODEL: HiVLA
     Action Head: Conditional Flow Matching Diffusion Transformer (DiT) action expert (initialized from H-RDT, LLaMA-style backbone with RMSNorm + SwiGLU + AdaLN), with a cascaded cross-attention block that sequentially conditions noisy action latents on global image features, position-aware high-resolution local-crop features extracted via the planner's bounding box, and a language embedding for the subtask skill.
     Backbone: DINOv2 + SigLIP (vision encoder for the action expert)
     LLM: Qwen3-VL 8B (fine-tuned high-level VLM planner)
-    Parameters: TODO
+    Parameters: 8B VLM planner (Qwen3-VL 8B); DiT action expert size not stated in paper (16 layers, hidden dim 2176, 16 heads); total not reported
   Tags: flow-matching, hierarchical, visual-grounding, robotwin, dual-system, bimanual
   Benchmarks:
     robotwin_v2 (avg=83.3): robotwin_v2_avg=83.3
@@ -3820,7 +3820,7 @@ MODEL: StableIDM
     Action Head: History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference.
     Backbone: DINOv2 (Oquab et al. 2023) as visual encoder + Segment Anything (Kirillov et al. 2023) for robot-centric masking
     LLM: None
-    Parameters: TODO
+    Parameters: not stated in paper
   Tags: inverse-dynamics, manipulator-truncation, spatio-temporal, robustness, data-annotation, AgiBot, real-world
   AI Review Summary: **manipulator truncation** (로봇 팔이 시야에서 잘림) 상황에서 IDM이 붕괴하는 문제를, **robot-centric masking + Directional Feature Aggregation (DFA) + Temporal Dynamics Refinement (TDR)** 의 **공간-시간 정제**로 안정화.
   AI Review: PDF-verified
@@ -3988,7 +3988,7 @@ MODEL: UniDex
     Action Head: flow matching (conditional flow-matching loss, Euler integration, step δ=0.1)
     Backbone: Uni3D pointcloud encoder (ViT, initialized from 2D pretrained ViT) + PaliGemma-style
     LLM: None
-    Parameters: TODO
+    Parameters: not stated in paper
   Tags: dexterous-hand, flow-matching, cross-hand-transfer, egocentric-video, CVPR-2026, FAAS, pointcloud
   Peer Review:
     Venue: CVPR 2026, Decision: None
@@ -4043,7 +4043,7 @@ MODEL: UniT
     Action Head: Hybrid two-stage. (1) UniT Token Prediction: learnable queries q_t appended to the VLM sequence; VLM predicts discrete UniT codes c_t = UniT(o_t, o_{t+k}, a_{t:t+k}, s_t) via parallel cross-entropy classification (not causal next-token AR). (2) Flow-Matching action head V_θ on action chunks A_t = [a_t,...,a_{t+H-1}], τ ∈ U[0,1], interpolated path A^τ_t = τA_t + (1−τ)ε; trained with L_fm = E[||V_θ(A^τ_t | x_t, Enc(o_t), τ) − (A_t − ε)||²]. Total: L_VLA = L_token + λ_fm·L_fm.
     Backbone: frozen DINOv2 (visual branch acts as inverse-dynamics model anchor)
     LLM: Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)
-    Parameters: TODO
+    Parameters: not stated in paper
   Tags: latent-action, cross-embodiment, humanoid, human-video, world-model, hybrid, flow-matching
   Benchmarks:
     robocasa (avg=66.0): robocasa_gr1_pick_place=67.3, robocasa_gr1_articulated=64.7

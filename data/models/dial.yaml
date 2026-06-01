@@ -12,7 +12,7 @@ architecture:
   llm: "Qwen2.5-VL-3B"
   action_head: "Lightweight 4-layer self-attention fuses current visual features with predicted latent foresight, then a 16-layer Diffusion Transformer (flow-matching) cross-attends to this conditioning to denoise an action chunk (horizon H=16)"
   action_head_category: flow_matching
-  parameters: "TODO"
+  parameters: "Qwen2.5-VL-3B backbone (ViT encoder + text embedding frozen); total / action-head param count not stated in paper"
   key_innovation: "DIAL introduces a differentiable latent intent bottleneck between a System-2 VLM and a System-1 flow-matching policy. System-2 (Qwen2.5-VL) performs latent world modeling by predicting the future visual representation of an H-step-ahead observation entirely within its native ViT feature space; this latent foresight is the only structural channel through which System-1 receives the VLM's intent. System-1 then acts as a latent inverse dynamics model, comparing the current observation against the predicted intent to produce actions. A two-stage decoupled-warmup-then-end-to-end training paradigm preserves VLM knowledge while enabling action gradients to refine the foresight."
 
 benchmarks:

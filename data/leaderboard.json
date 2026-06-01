@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-01T10:41:15.639632",
+  "generated_at": "2026-06-01T10:54:50.147630",
   "num_models": 200,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -308,7 +308,7 @@
         "llm": "Qwen3-VL-4B (Qwen3-0.6B as frozen auxiliary linguistic teacher during training)",
         "action_head": "Diffusion Transformer (DiT) action expert trained with Flow Matching, conditioned on VLM hidden states (including 16 visual CoT and 4 linguistic CoT learnable query tokens) via cross-attention.",
         "action_head_category": "flow_matching",
-        "parameters": "TODO"
+        "parameters": "~4B (Qwen3-VL-4B backbone) + DiT action expert (size not stated in paper); training-only Qwen3-0.6B linguistic teacher and Depth Anything 3 visual teacher discarded at inference"
       },
       "model_type": null,
       "inference_hz": null,
@@ -1692,7 +1692,7 @@
         "llm": "N/A (inherits LLM of host VLA, e.g., Gemma for pi0.5, Llama 2 for OpenVLA)",
         "action_head": "Training-free inference-time visual token merging wrapper; does not modify the underlying VLA action head (e.g., flow-matching for pi0.5, autoregressive for OpenVLA, Diffusion Transformer for GR00T)",
         "action_head_category": "other",
-        "parameters": "TODO"
+        "parameters": "not stated in paper (training-free wrapper adds no learnable parameters; inherits host VLA size)"
       },
       "model_type": null,
       "inference_hz": null,
@@ -1829,7 +1829,7 @@
         "llm": "PaLiGemma (decoder-only Transformer; weights pretrained)",
         "action_head": "Conditional Flow Matching with action chunking (H=16, K=10 denoising steps). Mix-of-Transformers backbone shares Spatial / Reasoning / Action experts under Block-wise Causal Attention. RL-tuned with Flow-GSPO (SDE reformulation via Fokker-Planck + Group Segmented PO; G=8 group size, β=0.01 KL).",
         "action_head_category": "flow_matching",
-        "parameters": "TODO"
+        "parameters": "not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -2535,7 +2535,7 @@
         "llm": "Molmo",
         "action_head": "Flow-matching action expert (~400M Qwen3 model) with KV-conditioned self-attention; alternative MLP head supervised by L1 loss",
         "action_head_category": "flow_matching",
-        "parameters": "TODO"
+        "parameters": "~7.4B total (Molmo-7B VLM: vision encoder + 28-layer Qwen2-7B) + ~400M Qwen3 flow-matching action expert"
       },
       "model_type": null,
       "inference_hz": null,
@@ -3369,7 +3369,7 @@
         "llm": null,
         "action_head": "structured world model planner with unified discrete token vocabulary (2-stage)",
         "action_head_category": "other",
-        "parameters": "TODO"
+        "parameters": "not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -4514,7 +4514,7 @@
         "llm": null,
         "action_head": "Diffusion-based Latent Action Expert producing latent action chunks, decoded by an Action Decoder; classifier guidance steers diffusion via gradients backpropagated from a progress estimator through an inverse-dynamics world model",
         "action_head_category": "diffusion",
-        "parameters": "TODO"
+        "parameters": "not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -5554,7 +5554,7 @@
         "llm": "inherited from CogACT",
         "action_head": "Post-training quantization applied over an existing diffusion VLA (CogACT). Targets the MLP blocks within the Diffusion Transformer (DiT) action head; final 2 DiT blocks (closest to continuous output) are preserved at high precision. Top 30% drift-sensitive DiT layers retained at BF16, remaining 70% quantized to W4. Outputs 7-DoF (3D translation + 3D rotation + gripper) continuous control via the original CogACT diffusion denoiser.",
         "action_head_category": "diffusion",
-        "parameters": "TODO"
+        "parameters": "not stated in paper (inherits base CogACT model size; W4A8 quantization yields 42.5% memory reduction)"
       },
       "model_type": null,
       "inference_hz": null,
@@ -5721,7 +5721,7 @@
         "llm": "Qwen2.5-VL-3B",
         "action_head": "Lightweight 4-layer self-attention fuses current visual features with predicted latent foresight, then a 16-layer Diffusion Transformer (flow-matching) cross-attends to this conditioning to denoise an action chunk (horizon H=16)",
         "action_head_category": "flow_matching",
-        "parameters": "TODO"
+        "parameters": "Qwen2.5-VL-3B backbone (ViT encoder + text embedding frozen); total / action-head param count not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -6321,7 +6321,7 @@
         "llm": "single pre-trained VLM reused as Φ_plan / Φ_verify / Φ_reflect / Φ_mem (model identity not disclosed in paper)",
         "action_head": "Discrete library of diffusion-based visuomotor primitives π_1..π_J (one per reusable skill). Reverse diffusion (Eq. 19: A^{m-1}_t = μ_θ(A^m_t, m, Î_t, s_t, ℓ_k) + σ_m·ε) conditioned on geometry-filtered observation Î_t = I_t ⊙ (1−Q_t), 14-dim proprioceptive state s_t, and sub-task instruction ℓ_k. Receding-horizon execution with checkpoint-based VLM verification.",
         "action_head_category": "diffusion",
-        "parameters": "TODO"
+        "parameters": "not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -6604,7 +6604,7 @@
         "llm": null,
         "action_head": "regression (continuous hand-arm commands via optimization-based retargeting)",
         "action_head_category": "regression",
-        "parameters": "TODO"
+        "parameters": "not stated in paper (inherits Gr-Dexter backbone size, undisclosed)"
       },
       "model_type": "vla",
       "inference_hz": null,
@@ -6680,7 +6680,7 @@
         "llm": "inherited from underlying VLA backbone (OpenVLA / Octo)",
         "action_head": "Wraps a frozen VLA backbone with three components: an Episodic Memory Module (CLIP ViT-B/32 keyframe store with top-k cosine retrieval), a learned State Verifier (3-layer MLP 1024->512->256->1 predicting pre-execution failure probability from memory-augmented observation, action, and subgoal), and a Harness Controller that triggers rollback or replanning when failure is predicted.",
         "action_head_category": "other",
-        "parameters": "TODO"
+        "parameters": "Only the State Verifier is trained: 3-layer MLP [1024->512->256->1], ~0.7M params; frozen CLIP ViT-B/32 (~86M) for retrieval; frozen VLA backbone (OpenVLA-7B or Octo-Base); total system params not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -6791,7 +6791,7 @@
         "llm": "Qwen3-VL 8B (fine-tuned high-level VLM planner)",
         "action_head": "Conditional Flow Matching Diffusion Transformer (DiT) action expert (initialized from H-RDT, LLaMA-style backbone with RMSNorm + SwiGLU + AdaLN), with a cascaded cross-attention block that sequentially conditions noisy action latents on global image features, position-aware high-resolution local-crop features extracted via the planner's bounding box, and a language embedding for the subtask skill.",
         "action_head_category": "flow_matching",
-        "parameters": "TODO"
+        "parameters": "8B VLM planner (Qwen3-VL 8B); DiT action expert size not stated in paper (16 layers, hidden dim 2176, 16 heads); total not reported"
       },
       "model_type": null,
       "inference_hz": null,
@@ -8128,7 +8128,7 @@
         "llm": null,
         "action_head": "History-conditioned IDM f_θ over a fixed-length causal sliding window. Per-frame base MLP regressor h(z_t) + causal TCN with dilation factors {1,2,4,8} for residual correction (Directional Feature Aggregation + Temporal Dynamics Refinement). Outputs continuous dual-arm joint angles + gripper opening, normalized via per-dimension training statistics (μ_train, σ_train) at inference.",
         "action_head_category": "inverse_dynamics",
-        "parameters": "TODO"
+        "parameters": "not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -8475,7 +8475,7 @@
         "llm": null,
         "action_head": "flow matching (conditional flow-matching loss, Euler integration, step δ=0.1)",
         "action_head_category": "flow_matching",
-        "parameters": "TODO"
+        "parameters": "not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
@@ -8585,7 +8585,7 @@
         "llm": "Qwen2.5-VL (used as VL backbone within the GR00T n1.5 framework)",
         "action_head": "Hybrid two-stage. (1) UniT Token Prediction: learnable queries q_t appended to the VLM sequence; VLM predicts discrete UniT codes c_t = UniT(o_t, o_{t+k}, a_{t:t+k}, s_t) via parallel cross-entropy classification (not causal next-token AR). (2) Flow-Matching action head V_θ on action chunks A_t = [a_t,...,a_{t+H-1}], τ ∈ U[0,1], interpolated path A^τ_t = τA_t + (1−τ)ε; trained with L_fm = E[||V_θ(A^τ_t | x_t, Enc(o_t), τ) − (A_t − ε)||²]. Total: L_VLA = L_token + λ_fm·L_fm.",
         "action_head_category": "hybrid",
-        "parameters": "TODO"
+        "parameters": "not stated in paper"
       },
       "model_type": null,
       "inference_hz": null,
