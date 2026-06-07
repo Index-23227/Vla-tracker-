@@ -5,14 +5,14 @@
 ### The most comprehensive benchmark tracker for Vision-Language-Action models
 
 [![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Visit-blue?style=for-the-badge)](https://hyeongjinkim.github.io/Vla-tracker-/)
-[![Models](https://img.shields.io/badge/Models-205-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-209-purple?style=flat-square)](data/models/)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
-[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-205-orange?style=flat-square)](data/ai_reviews/)
+[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-209-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
 
-**205 VLA models** · **8 benchmarks** · **205 AI paper reviews** · **Auto-updated from arXiv**
+**209 VLA models** · **8 benchmarks** · **209 AI paper reviews** · **Auto-updated from arXiv**
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
 
@@ -32,7 +32,7 @@ VLA-Tracker solves this by:
 | New paper discovery | Manual updates | **Auto-scanned from arXiv twice weekly** |
 | Data validation | None | **CI checks on every PR** |
 | Interactive exploration | None | **Full React dashboard with filters** |
-| Paper reviews | None | **205 AI-generated seminar-style reviews** |
+| Paper reviews | None | **209 AI-generated seminar-style reviews** |
 | Machine-readable | None | **JSON API + llms.txt for AI agents** |
 
 ---
@@ -57,7 +57,7 @@ VLA-Tracker solves this by:
 | 12 | **GTA-VLA** | **98.45** | May 2026 | arXiv | Flow matching + Guide-Think-Act reasoning |
 | 13 | **GaussianDream** | **98.4** | May 2026 | — | Flow matching + Gaussian world model prefix |
 
-> Full leaderboard with 103 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 106 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
@@ -73,7 +73,7 @@ VLA-Tracker solves this by:
 
 ## Paper Reviews
 
-VLA-Tracker includes **205 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
+VLA-Tracker includes **209 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
 
 1. One-line summary
 2. Background & motivation
@@ -85,7 +85,7 @@ VLA-Tracker includes **205 AI-generated seminar-style paper reviews** for every 
 8. Overall assessment with ratings
 9. Expected tough questions for seminars
 
-**205 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
+**209 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
 
 Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-tracker-/) · [Markdown files](data/ai_reviews/)
 
@@ -98,9 +98,9 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | Format | URL | Description |
 |--------|-----|-------------|
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
-| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (4200+ lines) |
+| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (4300+ lines) |
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
-| **YAML** | [data/models/](data/models/) | Individual model files (205 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (209 files) |
 
 ### Quick Start (Python)
 
@@ -155,8 +155,8 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 | Benchmark | Tasks | Models | Focus | Venue |
 |-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 103 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 28 | Long-horizon, language | RA-L 2022 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 106 | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 29 | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 37 | Sim-to-real transfer | NeurIPS 2024 |
 | [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 37 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 6 | Diverse manipulation | RA-L 2020 |
@@ -179,9 +179,9 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 ```
 ├── data/
-│   ├── models/              # 205 model YAML files (source of truth)
+│   ├── models/              # 209 model YAML files (source of truth)
 │   ├── benchmarks/          # 8 benchmark definitions
-│   ├── ai_reviews/          # 205 AI-generated paper reviews (markdown)
+│   ├── ai_reviews/          # 209 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── paper_reviews.json   # Venue peer-review data (ICLR, NeurIPS, CoLM)
 ├── scripts/
@@ -219,7 +219,7 @@ We also welcome:
 
 - Benchmark numbers are from papers — evaluation conditions vary (fine-tuned vs. zero-shot)
 - Not all models report on all benchmarks (fair comparison is hard)
-- AI reviews are generated by Claude and may contain inaccuracies (205/205 are PDF-verified)
+- AI reviews are generated by Claude and may contain inaccuracies (209/209 are PDF-verified)
 - Real-world performance ≠ benchmark performance
 
 ---
