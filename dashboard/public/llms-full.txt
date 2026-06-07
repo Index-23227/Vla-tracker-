@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-06-01T10:54:50.147630
-# Models: 200
+# Generated: 2026-06-07T15:10:35.667317
+# Models: 205
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -15,132 +15,136 @@ SECTION 1: RANKINGS
    2. QuoVLA                    avg= 99.6  spatial=99.8  object=99.9  goal=100.0  long=98.7  org=Tsinghua University (Department of Automation)  date=2026-05-24
    3. PriorVLA                  avg= 99.0  spatial=99.4  object=99.8  goal=99.4  long=97.6  org=Institute of Automation, CAS; Dexmal; UCAS; Zhongguancun Academy; Nanjing University of Aeronautics and Astronautics  date=2026-05-11
    4. PLD                       avg= 99.0  spatial=—  object=—  goal=—  long=—  org=NVIDIA GEAR Lab  date=2025-10-30
-   5. SimpleVLA-RL              avg= 98.8  spatial=99.1  object=99.2  goal=98.5  long=98.5  org=Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU  date=2025-09-11
-   6. DualCoT-VLA               avg= 98.8  spatial=99.4  object=99.8  goal=97.8  long=98.2  org=HKUST (Guangzhou) / Huawei Foundation Model Department  date=2026-03-23
-   7. SnapFlow                  avg= 98.8  spatial=99.0  object=100.0  goal=99.0  long=97.0  org=Jilin University / Chongqing University / University of Liverpool / GenY  date=2026-04-07
-   8. IntentVLA                 avg= 98.6  spatial=99.3  object=99.7  goal=98.1  long=97.4  org=Huazhong University of Science and Technology (HUST), Zhongguancun Academy (Beijing), Zhongguancun Computing Institute, Harbin Institute of Technology, HKUST(GZ), BUAA, Zhejiang Normal University, East China Normal University, USTC, DeepCybo  date=2026-05-14
-   9. AttenA+                   avg= 98.6  spatial=99.0  object=100.0  goal=98.8  long=96.6  org=HKUST(GZ); HKU; USTC; IDEA Research; SUSTech; X-Humanoid  date=2026-05-13
-  10. DiT4DiT                   avg= 98.5  spatial=98.4  object=99.6  goal=98.6  long=97.6  org=Mondo Robotics; HKUST(GZ); HKUST  date=2026-03-11
-  11. G3T-AML                   avg= 98.5  spatial=98.8  object=99.8  goal=99.0  long=96.6  org=Key Lab. of Machine Intelligence and Advanced Computing (MoE, China); AMap / Alibaba Group; Xi'an Jiaotong University; Shenzhen University of Advanced Technology  date=2026-05-12
-  12. GTA-VLA                   avg= 98.5  spatial=99.0  object=98.8  goal=98.4  long=97.6  org=Futian Laboratory / Harbin Institute of Technology / IDEA / Hunan University / SCUT / Visincept  date=2026-05-13
-  13. GaussianDream             avg= 98.4  spatial=99.0  object=99.6  goal=99.0  long=96.0  org=Tuojing Intelligence; UCAS; Institute of Automation, CAS; Tsinghua University; Zhejiang University; Beihang University; CMU; University of Hong Kong  date=2026-05-20
-  14. PRTS                      avg= 98.4  spatial=98.8  object=99.8  goal=98.4  long=96.6  org=TeleAI (China Telecom), Tsinghua University, Shanghai Jiao Tong University, Fudan University  date=2026-04-30
-  15. LaMP                      avg= 98.3  spatial=99.4  object=99.8  goal=97.4  long=96.7  org=Shanghai Jiao Tong University, Southeast University, Shanghai Innovation Institute  date=2026-03-26
-  16. RotVLA                    avg= 98.2  spatial=98.2  object=99.6  goal=98.4  long=96.4  org=Peking University (Wangxuan Institute) / Xiaomi Robotics / CASIA  date=2026-05-13
-  17. OneWM-VLA                 avg= 98.1  spatial=98.2  object=99.6  goal=99.0  long=95.6  org=Zuojin Tang, Shengchao Yuan, Xiaoxin Bai, Zhiyuan Jing, De Ma, Gang Pan, Bin Liu  date=2026-05-08
-  18. ALAM                      avg= 98.0  spatial=99.2  object=99.6  goal=99.0  long=94.4  org=Zhejiang University; Amap, Alibaba Group; Nanjing University; Shenzhen University of Advanced Technology; Beijing University of Chemical Technology; Chery Auto; Tsinghua University; Queen Mary University of London  date=2026-05-11
-  19. ConsisVLA-4D              avg= 98.0  spatial=98.8  object=99.8  goal=98.0  long=95.6  org=Harbin Institute of Technology, Shenzhen; ZTE State Key Lab; Shenzhen Loop Area Institute  date=2026-05-06
-  20. BehaviorVLA               avg= 98.0  spatial=99.2  object=99.4  goal=98.8  long=—  org=Harbin Institute of Technology / Sun Yat-sen University  date=2026-05-21
-  21. Ω-QVLA                    avg= 98.0  spatial=99.0  object=97.0  goal=100.0  long=—  org=McGill University / Mila  date=2026-05-27
-  22. PCM                       avg= 98.0  spatial=98.0  object=98.0  goal=98.0  long=—  org=Indian Institute of Technology Madras  date=2026-05-15
-  23. Afford-VLA                avg= 98.0  spatial=97.8  object=99.6  goal=97.6  long=96.8  org=Fudan University; KAUST; Shanghai Jiao Tong University; East China Normal University  date=2026-05-22
-  24. MMaDA-VLA                 avg= 98.0  spatial=98.8  object=99.8  goal=98.0  long=95.2  org=Westlake University, Zhejiang University, East China University of Science and Technology, Huawei Celia Team, HKUST(GZ), OpenHelix Robotics  date=2026-03-26
-  25. Qwen-VLA                  avg= 97.9  spatial=—  object=—  goal=—  long=—  org=Qwen Team, Alibaba Inc.  date=2026-05-28
-  26. TAG                       avg= 97.8  spatial=97.8  object=99.2  goal=97.4  long=97.0  org=Sun Yat-sen University; Guangdong Key Lab of Big Data Analysis & Processing; X-Era AI Lab  date=2026-03-25
-  27. Agentic-VLA               avg= 97.8  spatial=97.2  object=98.6  goal=97.4  long=98.1  org=not disclosed in arXiv preprint (authors: Ruofan Jin, Zaixi Zhang)  date=2026-05-21
-  28. OA-WAM                    avg= 97.8  spatial=98.9  object=99.0  goal=97.4  long=95.9  org=Tsinghua University  date=2026-05-07
-  29. VLA-IAP                   avg= 97.8  spatial=97.6  object=99.6  goal=98.4  long=95.6  org=HKUST / CUHK / South China Normal University / NUDT / USTB  date=2026-03-24
-  30. X-VLA                     avg= 97.8  spatial=98.4  object=98.8  goal=97.6  long=96.4  org=Tsinghua University AIR / Shanghai AI Lab  date=2025-10-11
-  31. DreamAvoid                avg= 97.8  spatial=99.0  object=98.5  goal=99.0  long=94.5  org=HKU, HKUST, Northwestern University  date=2026-05-12
-  32. DepthCache                avg= 97.6  spatial=98.9  object=97.1  goal=98.3  long=96.1  org=Huazhong University of Science and Technology  date=2026-03-11
-  33. Fast-WAM                  avg= 97.6  spatial=—  object=—  goal=—  long=—  org=Tsinghua University (IIIS) / Galaxea AI  date=2026-03-17
-  34. OASIS                     avg= 97.6  spatial=99.0  object=98.8  goal=97.4  long=95.2  org=Xi'an Jiaotong University (National Key Laboratory of Human-Machine Hybrid Augmented Intelligence; Institute of Artificial Intelligence and Robotics)  date=2026-05-25
-  35. OmniVLA-RL                avg= 97.6  spatial=99.2  object=99.2  goal=98.5  long=93.5  org=Country Garden Services / Omni AI / VBot / East China Normal University  date=2026-04-20
-  36. TriRelVLA                 avg= 97.5  spatial=98.2  object=99.0  goal=97.8  long=94.8  org=NUS / HUST  date=2026-05-07
-  37. VLA-Thinker               avg= 97.5  spatial=98.7  object=99.0  goal=95.2  long=96.9  org=University of Central Florida / University of Wurzburg / USC / NVIDIA Research  date=2026-03-15
-  38. AnchorRefine              avg= 97.4  spatial=—  object=—  goal=—  long=97.4  org=Beijing University of Technology; Beihang University; Nanjing University of Science and Technology  date=2026-04-20
-  39. FrameSkip                 avg= 97.4  spatial=98.6  object=99.0  goal=98.2  long=93.8  org=Harbin Institute of Technology; Zhongguancun Academy; HKUST(GZ)  date=2026-05-13
-  40. ECHO                      avg= 97.3  spatial=98.3  object=98.8  goal=98.6  long=93.5  org=Xi'an Jiaotong University (School of Software; School of Artificial Intelligence; State Key Laboratory of Human-Machine Hybrid Augmented Intelligence)  date=2026-05-09
-  41. DreamVLA                  avg= 97.2  spatial=—  object=—  goal=—  long=—  org=Shanghai AI Lab / Fudan University / NUS  date=2025-07-06
-  42. Libra-VLA                 avg= 97.2  spatial=98.6  object=99.4  goal=98.0  long=92.8  org=Beihang University, AgiBot  date=2026-04-27
-  43. DyGRO-VLA                 avg= 97.1  spatial=97.6  object=98.6  goal=97.2  long=95.0  org=Affiliations from Shenzhen and Guangdong institutions (specific institutions not enumerated in arXiv abstract page; authors: Sixu Lin, Yunpeng Qing, Litao Liu, Ming Zhou, Ruixing Jin, Xiaoyi Fan, Guiliang Liu)  date=2026-05-17
-  44. DeepThinkVLA              avg= 97.0  spatial=96.6  object=99.0  goal=96.4  long=96.2  org=Huazhong University of Science and Technology / Tsinghua University / Renmin University of China  date=2025-11-24
-  45. VisualThink-VLA           avg= 96.8  spatial=96.69  object=97.74  goal=97.05  long=95.87  org=Zhejiang University / Cornell University / National University of Singapore / Xidian University  date=2026-05-28
-  46. StableVLA                 avg= 96.7  spatial=96.2  object=98.8  goal=98.0  long=93.6  org=Peking University, Tsinghua University, Astribot, Nanjing University, Nankai University  date=2026-05-18
-  47. OFlow                     avg= 96.6  spatial=98.0  object=99.0  goal=95.0  long=94.5  org=Fudan University, University of Southern California, KAUST  date=2026-04-20
-  48. AtomicVLA                 avg= 96.6  spatial=—  object=—  goal=—  long=95.2  org=Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology  date=2026-03-08
-  49. A1                        avg= 96.5  spatial=97.4  object=99.8  goal=97.6  long=91.4  org=SYSU; MBZUAI; Spatialtemporal AI  date=2026-04-07
-  50. MemoryVLA                 avg= 96.5  spatial=—  object=—  goal=—  long=—  org=PKU / Tsinghua University / Shanghai AI Lab  date=2025-08-26
-  51. CF-VLA                    avg= 96.5  spatial=98.0  object=99.2  goal=96.6  long=92.0  org=Southern University of Science and Technology, Xi'an Jiaotong University, USTC, United Nova Technology  date=2026-04-27
-  52. dVLA                      avg= 96.4  spatial=—  object=—  goal=—  long=—  org=Midea Group  date=2025-09-30
-  53. SAFE-Pruner               avg= 96.4  spatial=98.0  object=98.0  goal=96.2  long=93.4  org=Tsinghua Shenzhen International Graduate School; GigaAI  date=2026-05-28
-  54. GST-VLA                   avg= 96.3  spatial=98.2  object=97.4  goal=97.1  long=92.6  org=Yeungnam University / KAIST  date=2026-03-10
-  55. DD-VLA                    avg= 96.3  spatial=—  object=—  goal=—  long=—  org=PKU / Shanghai AI Lab  date=2025-08-27
-  56. GEM                       avg= 96.0  spatial=99.0  object=98.8  goal=97.1  long=89.3  org=Tsinghua University / Tencent Hunyuan  date=2026-05-27
-  57. GridS                     avg= 96.0  spatial=98.0  object=99.2  goal=96.4  long=90.2  org=(Authors: Yixu Feng, Zinan Zhao, Yanxiang Ma, Chenghao Xia, Chengbin Du, Yunke Wang, Chang Xu — affiliations not specified on arXiv listing)  date=2026-05-12
-  58. PointACT                  avg= 96.0  spatial=97.4  object=99.6  goal=96.2  long=90.6  org=Inria / ENS / CNRS / PSL Research University  date=2026-05-20
-  59. LoopVLA                   avg= 95.8  spatial=95.0  object=100.0  goal=97.4  long=91.0  org=Huazhong University of Science and Technology (HUST), Wuhan United Imaging Surgical Co., Ltd.  date=2026-05-11
-  60. InstructVLA               avg= 95.8  spatial=97.3  object=99.6  goal=96.5  long=89.8  org=Shanghai AI Lab (InternRobotics)  date=2025-07-23
-  61. PAPO-VLA                  avg= 95.8  spatial=93.0  object=98.0  goal=98.0  long=94.0  org=Institute of Software, Chinese Academy of Sciences; University of Chinese Academy of Sciences  date=2026-05-19
-  62. Evo-Depth                 avg= 95.4  spatial=—  object=—  goal=—  long=—  org=Shanghai Jiao Tong University (MINT Lab), KAUST, Nanyang Technological University  date=2026-05-14
-  63. UniVLA                    avg= 95.2  spatial=96.5  object=96.8  goal=95.6  long=92.0  org=HKU / OpenDriveLab / AgiBot  date=2025-05-04
-  64. Premover                  avg= 95.1  spatial=98.6  object=99.1  goal=93.7  long=88.9  org=UNIST (Ulsan National Institute of Science and Technology) / The Catholic University of Korea  date=2026-05-12
-  65. ActQuant                  avg= 95.0  spatial=92.8  object=97.4  goal=94.0  long=95.6  org=Northeastern University; University of Georgia; Cisco Research  date=2026-05-19
-  66. StructVLA                 avg= 94.8  spatial=—  object=—  goal=—  long=—  org=Minghao Jin, Mozheng Liao, Mingfei Han, Zhihui Li, Xiaojun Chang  date=2026-03-13
-  67. VLA-AD                    avg= 94.5  spatial=93.0  object=96.5  goal=94.0  long=—  org=University College London / University of Oxford  date=2026-05-15
-  68. π₀-EqM                    avg= 94.3  spatial=97.2  object=98.4  goal=94.8  long=—  org=USTC / HKU  date=2026-05-22
-  69. GR00T-N1                  avg= 93.9  spatial=94.4  object=97.6  goal=93.0  long=90.6  org=NVIDIA  date=2025-03-18
-  70. Realtime-VLA-FLASH        avg= 93.8  spatial=96.8  object=99.2  goal=94.4  long=84.6  org=Institute of Computing Technology CAS / UCAS / Nanjing University / Dexmal  date=2026-05-13
-  71. pi*0.6                    avg= 93.1  spatial=96.4  object=97.2  goal=95.6  long=83.2  org=Physical Intelligence  date=2025-11-18
-  72. UD-VLA                    avg= 92.7  spatial=94.1  object=95.7  goal=91.2  long=89.6  org=Tsinghua University / Shanghai AI Lab  date=2025-11-03
-  73. BlockVLA                  avg= 91.7  spatial=90.6  object=97.6  goal=93.2  long=85.2  org=Xi'an Jiaotong University  date=2026-05-13
-  74. VLAConf                   avg= 91.3  spatial=—  object=—  goal=—  long=—  org=Southern University of Science and Technology; Zhongguancun Academy; Wuhan University  date=2026-05-28
-  75. ProgVLA                   avg= 91.0  spatial=87.6  object=96.0  goal=92.0  long=88.6  org=NAVER LABS / NAVER LABS Europe  date=2026-05-27
-  76. ECoT                      avg= 90.8  spatial=—  object=—  goal=—  long=—  org=UC Berkeley / Stanford / University of Warsaw  date=2024-07-11
-  77. FLARE                     avg= 89.2  spatial=95.8  object=96.4  goal=91.4  long=73.2  org=NVIDIA  date=2025-05-21
-  78. pi0.5                     avg= 88.9  spatial=96.2  object=97.1  goal=89.4  long=72.8  org=Physical Intelligence  date=2025-04-22
-  79. ProbeFlow                 avg= 88.7  spatial=—  object=—  goal=—  long=—  org=Southeast University  date=2026-03-18
-  80. SpatialVLA                avg= 88.0  spatial=95.6  object=96.0  goal=90.2  long=70.4  org=Shanghai AI Lab / Tsinghua University  date=2025-01-27
-  81. DexVLA                    avg= 87.8  spatial=94.2  object=95.8  goal=89.8  long=71.6  org=ByteDance / Tsinghua University  date=2025-02-03
-  82. OpenVLA-OFT               avg= 87.3  spatial=94.8  object=95.2  goal=91.0  long=68.4  org=Stanford / UC Berkeley / TRI  date=2025-02-27
-  83. RoboAlign                 avg= 86.8  spatial=93.8  object=96.0  goal=87.2  long=70.0  org=KAIST / RLWRLD / Yonsei University / UC Berkeley  date=2026-03-22
-  84. CoT-VLA                   avg= 86.3  spatial=92.1  object=93.8  goal=88.2  long=71.2  org=UC Berkeley  date=2025-03-27
-  85. pi0-FAST                  avg= 86.1  spatial=93.8  object=95.4  goal=88.0  long=67.2  org=Physical Intelligence  date=2025-01-23
-  86. 3DVLA-2026                avg= 86.0  spatial=—  object=—  goal=—  long=—  org=Peking University  date=2026-05-28
-  87. CogACT                    avg= 85.9  spatial=93.6  object=94.8  goal=88.4  long=66.8  org=Microsoft Research / Tsinghua University  date=2024-11-29
-  88. HybridVLA                 avg= 85.8  spatial=91.4  object=94.2  goal=87.6  long=69.8  org=ByteDance  date=2025-03-13
-  89. pi0                       avg= 84.8  spatial=92.4  object=94.6  goal=86.2  long=65.8  org=Physical Intelligence  date=2024-10-31
-  90. ProgressVLA               avg= 84.5  spatial=88.2  object=96.4  goal=87.2  long=66.2  org=Peking University / Microsoft Research Asia  date=2026-03-29
-  91. RDT-1B                    avg= 82.5  spatial=90.2  object=91.8  goal=85.6  long=62.4  org=Tsinghua University / Shanghai Qi Zhi Institute  date=2024-10-10
-  92. RoVLA                     avg= 82.0  spatial=—  object=—  goal=—  long=—  org=Sun Yat-sen University / Peng Cheng Laboratory / Guangdong Key Lab of Big Data Analysis and Processing / X-Era AI Lab  date=2026-05-19
-  93. VLA-GSE                   avg= 81.2  spatial=90.3  object=86.2  goal=74.2  long=74.1  org=Microsoft Research Asia, Tsinghua University  date=2026-05-08
-  94. SmoothVLA                 avg= 80.5  spatial=—  object=—  goal=—  long=—  org=Chongqing University of Posts and Telecommunications / Chinese Academy of Sciences / USTC  date=2026-03-14
-  95. SmolVLA                   avg= 79.5  spatial=88.6  object=90.4  goal=82.8  long=56.2  org=Hugging Face  date=2025-06-02
-  96. OpenVLA                   avg= 74.5  spatial=84.2  object=88.4  goal=72.0  long=53.4  org=Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT  date=2024-06-13
-  97. CrossVLA                  avg= 73.2  spatial=74.7  object=76.0  goal=78.0  long=64.0  org=Tianjin University  date=2026-05-21
-  98. Octo                      avg= 67.2  spatial=78.9  object=82.3  goal=65.4  long=42.1  org=UC Berkeley / Stanford / CMU / Google DeepMind  date=2024-05-20
-  99. Diffusion Policy          avg= 66.8  spatial=78.4  object=80.6  goal=68.2  long=39.8  org=Columbia University / MIT / TRI  date=2023-03-07
-  100. Pre-VLA                   avg= 37.6  spatial=45.66  object=3.95  goal=81.26  long=19.61  org=Multi-institution (authors with affiliations 1-5; affiliation list shown only via superscripts in paper)  date=2026-05-21
+   5. MPCoT                     avg= 98.8  spatial=98.2  object=99.7  goal=98.6  long=98.9  org=Boston University; Tsinghua University  date=2026-06-04
+   6. SimpleVLA-RL              avg= 98.8  spatial=99.1  object=99.2  goal=98.5  long=98.5  org=Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU  date=2025-09-11
+   7. DualCoT-VLA               avg= 98.8  spatial=99.4  object=99.8  goal=97.8  long=98.2  org=HKUST (Guangzhou) / Huawei Foundation Model Department  date=2026-03-23
+   8. SnapFlow                  avg= 98.8  spatial=99.0  object=100.0  goal=99.0  long=97.0  org=Jilin University / Chongqing University / University of Liverpool / GenY  date=2026-04-07
+   9. 3DThinkVLA                avg= 98.7  spatial=100.0  object=100.0  goal=98.8  long=95.8  org=Shanghai Jiao Tong University; Harbin Institute of Technology; Nanyang Technological University; Fudan University; Nanjing University; Daimon Robotics; Great Bay University  date=2026-06-03
+  10. IntentVLA                 avg= 98.6  spatial=99.3  object=99.7  goal=98.1  long=97.4  org=Huazhong University of Science and Technology (HUST), Zhongguancun Academy (Beijing), Zhongguancun Computing Institute, Harbin Institute of Technology, HKUST(GZ), BUAA, Zhejiang Normal University, East China Normal University, USTC, DeepCybo  date=2026-05-14
+  11. AttenA+                   avg= 98.6  spatial=99.0  object=100.0  goal=98.8  long=96.6  org=HKUST(GZ); HKU; USTC; IDEA Research; SUSTech; X-Humanoid  date=2026-05-13
+  12. DiT4DiT                   avg= 98.5  spatial=98.4  object=99.6  goal=98.6  long=97.6  org=Mondo Robotics; HKUST(GZ); HKUST  date=2026-03-11
+  13. G3T-AML                   avg= 98.5  spatial=98.8  object=99.8  goal=99.0  long=96.6  org=Key Lab. of Machine Intelligence and Advanced Computing (MoE, China); AMap / Alibaba Group; Xi'an Jiaotong University; Shenzhen University of Advanced Technology  date=2026-05-12
+  14. GTA-VLA                   avg= 98.5  spatial=99.0  object=98.8  goal=98.4  long=97.6  org=Futian Laboratory / Harbin Institute of Technology / IDEA / Hunan University / SCUT / Visincept  date=2026-05-13
+  15. GaussianDream             avg= 98.4  spatial=99.0  object=99.6  goal=99.0  long=96.0  org=Tuojing Intelligence; UCAS; Institute of Automation, CAS; Tsinghua University; Zhejiang University; Beihang University; CMU; University of Hong Kong  date=2026-05-20
+  16. PRTS                      avg= 98.4  spatial=98.8  object=99.8  goal=98.4  long=96.6  org=TeleAI (China Telecom), Tsinghua University, Shanghai Jiao Tong University, Fudan University  date=2026-04-30
+  17. LaMP                      avg= 98.3  spatial=99.4  object=99.8  goal=97.4  long=96.7  org=Shanghai Jiao Tong University, Southeast University, Shanghai Innovation Institute  date=2026-03-26
+  18. RotVLA                    avg= 98.2  spatial=98.2  object=99.6  goal=98.4  long=96.4  org=Peking University (Wangxuan Institute) / Xiaomi Robotics / CASIA  date=2026-05-13
+  19. OneWM-VLA                 avg= 98.1  spatial=98.2  object=99.6  goal=99.0  long=95.6  org=Zuojin Tang, Shengchao Yuan, Xiaoxin Bai, Zhiyuan Jing, De Ma, Gang Pan, Bin Liu  date=2026-05-08
+  20. ALAM                      avg= 98.0  spatial=99.2  object=99.6  goal=99.0  long=94.4  org=Zhejiang University; Amap, Alibaba Group; Nanjing University; Shenzhen University of Advanced Technology; Beijing University of Chemical Technology; Chery Auto; Tsinghua University; Queen Mary University of London  date=2026-05-11
+  21. ConsisVLA-4D              avg= 98.0  spatial=98.8  object=99.8  goal=98.0  long=95.6  org=Harbin Institute of Technology, Shenzhen; ZTE State Key Lab; Shenzhen Loop Area Institute  date=2026-05-06
+  22. BehaviorVLA               avg= 98.0  spatial=99.2  object=99.4  goal=98.8  long=—  org=Harbin Institute of Technology / Sun Yat-sen University  date=2026-05-21
+  23. Ω-QVLA                    avg= 98.0  spatial=99.0  object=97.0  goal=100.0  long=—  org=McGill University / Mila  date=2026-05-27
+  24. PCM                       avg= 98.0  spatial=98.0  object=98.0  goal=98.0  long=—  org=Indian Institute of Technology Madras  date=2026-05-15
+  25. Afford-VLA                avg= 98.0  spatial=97.8  object=99.6  goal=97.6  long=96.8  org=Fudan University; KAUST; Shanghai Jiao Tong University; East China Normal University  date=2026-05-22
+  26. MMaDA-VLA                 avg= 98.0  spatial=98.8  object=99.8  goal=98.0  long=95.2  org=Westlake University, Zhejiang University, East China University of Science and Technology, Huawei Celia Team, HKUST(GZ), OpenHelix Robotics  date=2026-03-26
+  27. Qwen-VLA                  avg= 97.9  spatial=—  object=—  goal=—  long=—  org=Qwen Team, Alibaba Inc.  date=2026-05-28
+  28. TAG                       avg= 97.8  spatial=97.8  object=99.2  goal=97.4  long=97.0  org=Sun Yat-sen University; Guangdong Key Lab of Big Data Analysis & Processing; X-Era AI Lab  date=2026-03-25
+  29. Agentic-VLA               avg= 97.8  spatial=97.2  object=98.6  goal=97.4  long=98.1  org=not disclosed in arXiv preprint (authors: Ruofan Jin, Zaixi Zhang)  date=2026-05-21
+  30. OA-WAM                    avg= 97.8  spatial=98.9  object=99.0  goal=97.4  long=95.9  org=Tsinghua University  date=2026-05-07
+  31. VLA-IAP                   avg= 97.8  spatial=97.6  object=99.6  goal=98.4  long=95.6  org=HKUST / CUHK / South China Normal University / NUDT / USTB  date=2026-03-24
+  32. X-VLA                     avg= 97.8  spatial=98.4  object=98.8  goal=97.6  long=96.4  org=Tsinghua University AIR / Shanghai AI Lab  date=2025-10-11
+  33. DreamAvoid                avg= 97.8  spatial=99.0  object=98.5  goal=99.0  long=94.5  org=HKU, HKUST, Northwestern University  date=2026-05-12
+  34. DepthCache                avg= 97.6  spatial=98.9  object=97.1  goal=98.3  long=96.1  org=Huazhong University of Science and Technology  date=2026-03-11
+  35. Fast-WAM                  avg= 97.6  spatial=—  object=—  goal=—  long=—  org=Tsinghua University (IIIS) / Galaxea AI  date=2026-03-17
+  36. OASIS                     avg= 97.6  spatial=99.0  object=98.8  goal=97.4  long=95.2  org=Xi'an Jiaotong University (National Key Laboratory of Human-Machine Hybrid Augmented Intelligence; Institute of Artificial Intelligence and Robotics)  date=2026-05-25
+  37. OmniVLA-RL                avg= 97.6  spatial=99.2  object=99.2  goal=98.5  long=93.5  org=Country Garden Services / Omni AI / VBot / East China Normal University  date=2026-04-20
+  38. TriRelVLA                 avg= 97.5  spatial=98.2  object=99.0  goal=97.8  long=94.8  org=NUS / HUST  date=2026-05-07
+  39. VLA-Thinker               avg= 97.5  spatial=98.7  object=99.0  goal=95.2  long=96.9  org=University of Central Florida / University of Wurzburg / USC / NVIDIA Research  date=2026-03-15
+  40. AnchorRefine              avg= 97.4  spatial=—  object=—  goal=—  long=97.4  org=Beijing University of Technology; Beihang University; Nanjing University of Science and Technology  date=2026-04-20
+  41. FrameSkip                 avg= 97.4  spatial=98.6  object=99.0  goal=98.2  long=93.8  org=Harbin Institute of Technology; Zhongguancun Academy; HKUST(GZ)  date=2026-05-13
+  42. ECHO                      avg= 97.3  spatial=98.3  object=98.8  goal=98.6  long=93.5  org=Xi'an Jiaotong University (School of Software; School of Artificial Intelligence; State Key Laboratory of Human-Machine Hybrid Augmented Intelligence)  date=2026-05-09
+  43. DreamVLA                  avg= 97.2  spatial=—  object=—  goal=—  long=—  org=Shanghai AI Lab / Fudan University / NUS  date=2025-07-06
+  44. Libra-VLA                 avg= 97.2  spatial=98.6  object=99.4  goal=98.0  long=92.8  org=Beihang University, AgiBot  date=2026-04-27
+  45. DyGRO-VLA                 avg= 97.1  spatial=97.6  object=98.6  goal=97.2  long=95.0  org=Affiliations from Shenzhen and Guangdong institutions (specific institutions not enumerated in arXiv abstract page; authors: Sixu Lin, Yunpeng Qing, Litao Liu, Ming Zhou, Ruixing Jin, Xiaoyi Fan, Guiliang Liu)  date=2026-05-17
+  46. DeepThinkVLA              avg= 97.0  spatial=96.6  object=99.0  goal=96.4  long=96.2  org=Huazhong University of Science and Technology / Tsinghua University / Renmin University of China  date=2025-11-24
+  47. ELAN4D                    avg= 97.0  spatial=97.4  object=99.0  goal=96.4  long=95.2  org=University of Oxford / CUHK-Shenzhen / Tsinghua / SJTU  date=2026-05-28
+  48. VisualThink-VLA           avg= 96.8  spatial=96.69  object=97.74  goal=97.05  long=95.87  org=Zhejiang University / Cornell University / National University of Singapore / Xidian University  date=2026-05-28
+  49. StableVLA                 avg= 96.7  spatial=96.2  object=98.8  goal=98.0  long=93.6  org=Peking University, Tsinghua University, Astribot, Nanjing University, Nankai University  date=2026-05-18
+  50. OFlow                     avg= 96.6  spatial=98.0  object=99.0  goal=95.0  long=94.5  org=Fudan University, University of Southern California, KAUST  date=2026-04-20
+  51. AtomicVLA                 avg= 96.6  spatial=—  object=—  goal=—  long=95.2  org=Sun Yat-sen University / Peng Cheng Laboratory / Yinwang Intelligent Technology  date=2026-03-08
+  52. A1                        avg= 96.5  spatial=97.4  object=99.8  goal=97.6  long=91.4  org=SYSU; MBZUAI; Spatialtemporal AI  date=2026-04-07
+  53. MemoryVLA                 avg= 96.5  spatial=—  object=—  goal=—  long=—  org=PKU / Tsinghua University / Shanghai AI Lab  date=2025-08-26
+  54. CF-VLA                    avg= 96.5  spatial=98.0  object=99.2  goal=96.6  long=92.0  org=Southern University of Science and Technology, Xi'an Jiaotong University, USTC, United Nova Technology  date=2026-04-27
+  55. dVLA                      avg= 96.4  spatial=—  object=—  goal=—  long=—  org=Midea Group  date=2025-09-30
+  56. SAFE-Pruner               avg= 96.4  spatial=98.0  object=98.0  goal=96.2  long=93.4  org=Tsinghua Shenzhen International Graduate School; GigaAI  date=2026-05-28
+  57. GST-VLA                   avg= 96.3  spatial=98.2  object=97.4  goal=97.1  long=92.6  org=Yeungnam University / KAIST  date=2026-03-10
+  58. DD-VLA                    avg= 96.3  spatial=—  object=—  goal=—  long=—  org=PKU / Shanghai AI Lab  date=2025-08-27
+  59. GEM                       avg= 96.0  spatial=99.0  object=98.8  goal=97.1  long=89.3  org=Tsinghua University / Tencent Hunyuan  date=2026-05-27
+  60. GridS                     avg= 96.0  spatial=98.0  object=99.2  goal=96.4  long=90.2  org=(Authors: Yixu Feng, Zinan Zhao, Yanxiang Ma, Chenghao Xia, Chengbin Du, Yunke Wang, Chang Xu — affiliations not specified on arXiv listing)  date=2026-05-12
+  61. PointACT                  avg= 96.0  spatial=97.4  object=99.6  goal=96.2  long=90.6  org=Inria / ENS / CNRS / PSL Research University  date=2026-05-20
+  62. LoopVLA                   avg= 95.8  spatial=95.0  object=100.0  goal=97.4  long=91.0  org=Huazhong University of Science and Technology (HUST), Wuhan United Imaging Surgical Co., Ltd.  date=2026-05-11
+  63. InstructVLA               avg= 95.8  spatial=97.3  object=99.6  goal=96.5  long=89.8  org=Shanghai AI Lab (InternRobotics)  date=2025-07-23
+  64. PAPO-VLA                  avg= 95.8  spatial=93.0  object=98.0  goal=98.0  long=94.0  org=Institute of Software, Chinese Academy of Sciences; University of Chinese Academy of Sciences  date=2026-05-19
+  65. Evo-Depth                 avg= 95.4  spatial=—  object=—  goal=—  long=—  org=Shanghai Jiao Tong University (MINT Lab), KAUST, Nanyang Technological University  date=2026-05-14
+  66. UniVLA                    avg= 95.2  spatial=96.5  object=96.8  goal=95.6  long=92.0  org=HKU / OpenDriveLab / AgiBot  date=2025-05-04
+  67. Premover                  avg= 95.1  spatial=98.6  object=99.1  goal=93.7  long=88.9  org=UNIST (Ulsan National Institute of Science and Technology) / The Catholic University of Korea  date=2026-05-12
+  68. ActQuant                  avg= 95.0  spatial=92.8  object=97.4  goal=94.0  long=95.6  org=Northeastern University; University of Georgia; Cisco Research  date=2026-05-19
+  69. StructVLA                 avg= 94.8  spatial=—  object=—  goal=—  long=—  org=Minghao Jin, Mozheng Liao, Mingfei Han, Zhihui Li, Xiaojun Chang  date=2026-03-13
+  70. VLA-AD                    avg= 94.5  spatial=93.0  object=96.5  goal=94.0  long=—  org=University College London / University of Oxford  date=2026-05-15
+  71. π₀-EqM                    avg= 94.3  spatial=97.2  object=98.4  goal=94.8  long=—  org=USTC / HKU  date=2026-05-22
+  72. GR00T-N1                  avg= 93.9  spatial=94.4  object=97.6  goal=93.0  long=90.6  org=NVIDIA  date=2025-03-18
+  73. Realtime-VLA-FLASH        avg= 93.8  spatial=96.8  object=99.2  goal=94.4  long=84.6  org=Institute of Computing Technology CAS / UCAS / Nanjing University / Dexmal  date=2026-05-13
+  74. pi*0.6                    avg= 93.1  spatial=96.4  object=97.2  goal=95.6  long=83.2  org=Physical Intelligence  date=2025-11-18
+  75. UD-VLA                    avg= 92.7  spatial=94.1  object=95.7  goal=91.2  long=89.6  org=Tsinghua University / Shanghai AI Lab  date=2025-11-03
+  76. BlockVLA                  avg= 91.7  spatial=90.6  object=97.6  goal=93.2  long=85.2  org=Xi'an Jiaotong University  date=2026-05-13
+  77. VLAConf                   avg= 91.3  spatial=—  object=—  goal=—  long=—  org=Southern University of Science and Technology; Zhongguancun Academy; Wuhan University  date=2026-05-28
+  78. ProgVLA                   avg= 91.0  spatial=87.6  object=96.0  goal=92.0  long=88.6  org=NAVER LABS / NAVER LABS Europe  date=2026-05-27
+  79. ECoT                      avg= 90.8  spatial=—  object=—  goal=—  long=—  org=UC Berkeley / Stanford / University of Warsaw  date=2024-07-11
+  80. FLARE                     avg= 89.2  spatial=95.8  object=96.4  goal=91.4  long=73.2  org=NVIDIA  date=2025-05-21
+  81. pi0.5                     avg= 88.9  spatial=96.2  object=97.1  goal=89.4  long=72.8  org=Physical Intelligence  date=2025-04-22
+  82. ProbeFlow                 avg= 88.7  spatial=—  object=—  goal=—  long=—  org=Southeast University  date=2026-03-18
+  83. SpatialVLA                avg= 88.0  spatial=95.6  object=96.0  goal=90.2  long=70.4  org=Shanghai AI Lab / Tsinghua University  date=2025-01-27
+  84. DexVLA                    avg= 87.8  spatial=94.2  object=95.8  goal=89.8  long=71.6  org=ByteDance / Tsinghua University  date=2025-02-03
+  85. OpenVLA-OFT               avg= 87.3  spatial=94.8  object=95.2  goal=91.0  long=68.4  org=Stanford / UC Berkeley / TRI  date=2025-02-27
+  86. RoboAlign                 avg= 86.8  spatial=93.8  object=96.0  goal=87.2  long=70.0  org=KAIST / RLWRLD / Yonsei University / UC Berkeley  date=2026-03-22
+  87. CoT-VLA                   avg= 86.3  spatial=92.1  object=93.8  goal=88.2  long=71.2  org=UC Berkeley  date=2025-03-27
+  88. pi0-FAST                  avg= 86.1  spatial=93.8  object=95.4  goal=88.0  long=67.2  org=Physical Intelligence  date=2025-01-23
+  89. 3DVLA-2026                avg= 86.0  spatial=—  object=—  goal=—  long=—  org=Peking University  date=2026-05-28
+  90. CogACT                    avg= 85.9  spatial=93.6  object=94.8  goal=88.4  long=66.8  org=Microsoft Research / Tsinghua University  date=2024-11-29
+  91. HybridVLA                 avg= 85.8  spatial=91.4  object=94.2  goal=87.6  long=69.8  org=ByteDance  date=2025-03-13
+  92. pi0                       avg= 84.8  spatial=92.4  object=94.6  goal=86.2  long=65.8  org=Physical Intelligence  date=2024-10-31
+  93. ProgressVLA               avg= 84.5  spatial=88.2  object=96.4  goal=87.2  long=66.2  org=Peking University / Microsoft Research Asia  date=2026-03-29
+  94. RDT-1B                    avg= 82.5  spatial=90.2  object=91.8  goal=85.6  long=62.4  org=Tsinghua University / Shanghai Qi Zhi Institute  date=2024-10-10
+  95. RoVLA                     avg= 82.0  spatial=—  object=—  goal=—  long=—  org=Sun Yat-sen University / Peng Cheng Laboratory / Guangdong Key Lab of Big Data Analysis and Processing / X-Era AI Lab  date=2026-05-19
+  96. VLA-GSE                   avg= 81.2  spatial=90.3  object=86.2  goal=74.2  long=74.1  org=Microsoft Research Asia, Tsinghua University  date=2026-05-08
+  97. SmoothVLA                 avg= 80.5  spatial=—  object=—  goal=—  long=—  org=Chongqing University of Posts and Telecommunications / Chinese Academy of Sciences / USTC  date=2026-03-14
+  98. SmolVLA                   avg= 79.5  spatial=88.6  object=90.4  goal=82.8  long=56.2  org=Hugging Face  date=2025-06-02
+  99. OpenVLA                   avg= 74.5  spatial=84.2  object=88.4  goal=72.0  long=53.4  org=Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT  date=2024-06-13
+  100. CrossVLA                  avg= 73.2  spatial=74.7  object=76.0  goal=78.0  long=64.0  org=Tianjin University  date=2026-05-21
+  101. Octo                      avg= 67.2  spatial=78.9  object=82.3  goal=65.4  long=42.1  org=UC Berkeley / Stanford / CMU / Google DeepMind  date=2024-05-20
+  102. Diffusion Policy          avg= 66.8  spatial=78.4  object=80.6  goal=68.2  long=39.8  org=Columbia University / MIT / TRI  date=2023-03-07
+  103. Pre-VLA                   avg= 37.6  spatial=45.66  object=3.95  goal=81.26  long=19.61  org=Multi-institution (authors with affiliations 1-5; affiliation list shown only via superscripts in paper)  date=2026-05-21
 
 ## CALVIN Benchmark Rankings (sorted by avg length)
 
-   1. MMaDA-VLA                 avg_len=4.78  org=Westlake University, Zhejiang University, East China University of Science and Technology, Huawei Celia Team, HKUST(GZ), OpenHelix Robotics  date=2026-03-26
-   2. UD-VLA                    avg_len=4.64  org=Tsinghua University / Shanghai AI Lab  date=2025-11-03
-   3. OASIS                     avg_len=4.57  org=Xi'an Jiaotong University (National Key Laboratory of Human-Machine Hybrid Augmented Intelligence; Institute of Artificial Intelligence and Robotics)  date=2026-05-25
-   4. DreamVLA                  avg_len=4.44  org=Shanghai AI Lab / Fudan University / NUS  date=2025-07-06
-   5. X-VLA                     avg_len=4.40  org=Tsinghua University AIR / Shanghai AI Lab  date=2025-10-11
-   6. AnchorRefine              avg_len=4.40  org=Beijing University of Technology; Beihang University; Nanjing University of Science and Technology  date=2026-04-20
-   7. InstructVLA               avg_len=4.40  org=Shanghai AI Lab (InternRobotics)  date=2025-07-23
-   8. BehaviorVLA               avg_len=4.36  org=Harbin Institute of Technology / Sun Yat-sen University  date=2026-05-21
-   9. RoboVLM                   avg_len=4.25  org=Tsinghua University / ByteDance Research / CASIA / SJTU / NUS  date=2024-12-18
-  10. pi0.5                     avg_len=4.20  org=Physical Intelligence  date=2025-04-22
-  11. StableVLA                 avg_len=4.17  org=Peking University, Tsinghua University, Astribot, Nanjing University, Nankai University  date=2026-05-18
-  12. FLARE                     avg_len=4.10  org=NVIDIA  date=2025-05-21
-  13. IDL-VLA                   avg_len=4.10  org=Korea University  date=2026-05-28
-  14. DexVLA                    avg_len=4.00  org=ByteDance / Tsinghua University  date=2025-02-03
-  15. UniVLA                    avg_len=3.80  org=HKU / OpenDriveLab / AgiBot  date=2025-05-04
-  16. pi0                       avg_len=3.80  org=Physical Intelligence  date=2024-10-31
-  17. GR-2                      avg_len=3.80  org=ByteDance  date=2024-10-08
-  18. ProgressVLA               avg_len=3.73  org=Peking University / Microsoft Research Asia  date=2026-03-29
-  19. LLaVA-VLA                 avg_len=3.68  org=HKUST (Guangzhou) / Huazhong University / Westlake University / Zhejiang University  date=2026-02-26
-  20. CF-VLA                    avg_len=3.67  org=Southern University of Science and Technology, Xi'an Jiaotong University, USTC, United Nova Technology  date=2026-04-27
-  21. HybridVLA                 avg_len=3.60  org=ByteDance  date=2025-03-13
-  22. HELM                      avg_len=3.58  org=Tsinghua University / Alibaba Group / Bengbu University  date=2026-04-20
-  23. RDT-1B                    avg_len=3.40  org=Tsinghua University / Shanghai Qi Zhi Institute  date=2024-10-10
-  24. 3D Diffuser Actor         avg_len=3.20  org=ETH Zurich / NVIDIA  date=2024-02-16
-  25. GR-1                      avg_len=3.10  org=ByteDance  date=2023-12-20
-  26. RoboAlign                 avg_len=2.57  org=KAIST / RLWRLD / Yonsei University / UC Berkeley  date=2026-03-22
-  27. Octo                      avg_len=2.40  org=UC Berkeley / Stanford / CMU / Google DeepMind  date=2024-05-20
+   1. MPCoT                     avg_len=4.92  org=Boston University; Tsinghua University  date=2026-06-04
+   2. MMaDA-VLA                 avg_len=4.78  org=Westlake University, Zhejiang University, East China University of Science and Technology, Huawei Celia Team, HKUST(GZ), OpenHelix Robotics  date=2026-03-26
+   3. UD-VLA                    avg_len=4.64  org=Tsinghua University / Shanghai AI Lab  date=2025-11-03
+   4. OASIS                     avg_len=4.57  org=Xi'an Jiaotong University (National Key Laboratory of Human-Machine Hybrid Augmented Intelligence; Institute of Artificial Intelligence and Robotics)  date=2026-05-25
+   5. DreamVLA                  avg_len=4.44  org=Shanghai AI Lab / Fudan University / NUS  date=2025-07-06
+   6. X-VLA                     avg_len=4.40  org=Tsinghua University AIR / Shanghai AI Lab  date=2025-10-11
+   7. AnchorRefine              avg_len=4.40  org=Beijing University of Technology; Beihang University; Nanjing University of Science and Technology  date=2026-04-20
+   8. InstructVLA               avg_len=4.40  org=Shanghai AI Lab (InternRobotics)  date=2025-07-23
+   9. BehaviorVLA               avg_len=4.36  org=Harbin Institute of Technology / Sun Yat-sen University  date=2026-05-21
+  10. RoboVLM                   avg_len=4.25  org=Tsinghua University / ByteDance Research / CASIA / SJTU / NUS  date=2024-12-18
+  11. pi0.5                     avg_len=4.20  org=Physical Intelligence  date=2025-04-22
+  12. StableVLA                 avg_len=4.17  org=Peking University, Tsinghua University, Astribot, Nanjing University, Nankai University  date=2026-05-18
+  13. FLARE                     avg_len=4.10  org=NVIDIA  date=2025-05-21
+  14. IDL-VLA                   avg_len=4.10  org=Korea University  date=2026-05-28
+  15. DexVLA                    avg_len=4.00  org=ByteDance / Tsinghua University  date=2025-02-03
+  16. UniVLA                    avg_len=3.80  org=HKU / OpenDriveLab / AgiBot  date=2025-05-04
+  17. pi0                       avg_len=3.80  org=Physical Intelligence  date=2024-10-31
+  18. GR-2                      avg_len=3.80  org=ByteDance  date=2024-10-08
+  19. ProgressVLA               avg_len=3.73  org=Peking University / Microsoft Research Asia  date=2026-03-29
+  20. LLaVA-VLA                 avg_len=3.68  org=HKUST (Guangzhou) / Huazhong University / Westlake University / Zhejiang University  date=2026-02-26
+  21. CF-VLA                    avg_len=3.67  org=Southern University of Science and Technology, Xi'an Jiaotong University, USTC, United Nova Technology  date=2026-04-27
+  22. HybridVLA                 avg_len=3.60  org=ByteDance  date=2025-03-13
+  23. HELM                      avg_len=3.58  org=Tsinghua University / Alibaba Group / Bengbu University  date=2026-04-20
+  24. RDT-1B                    avg_len=3.40  org=Tsinghua University / Shanghai Qi Zhi Institute  date=2024-10-10
+  25. 3D Diffuser Actor         avg_len=3.20  org=ETH Zurich / NVIDIA  date=2024-02-16
+  26. GR-1                      avg_len=3.10  org=ByteDance  date=2023-12-20
+  27. RoboAlign                 avg_len=2.57  org=KAIST / RLWRLD / Yonsei University / UC Berkeley  date=2026-03-22
+  28. Octo                      avg_len=2.40  org=UC Berkeley / Stanford / CMU / Google DeepMind  date=2024-05-20
 
 ## SimplerEnv Rankings
 
@@ -157,28 +161,30 @@ SECTION 1: RANKINGS
   11. StructVLA                 avg= 75.0  org=Minghao Jin, Mozheng Liao, Mingfei Han, Zhihui Li, Xiaojun Chang
   12. Vlaser                    avg= 73.5  org=USTC / Shanghai AI Lab / SJTU / Zhejiang University / NJU / Fudan / Tsinghua / NUS
   13. IntentVLA                 avg= 72.9  org=Huazhong University of Science and Technology (HUST), Zhongguancun Academy (Beijing), Zhongguancun Computing Institute, Harbin Institute of Technology, HKUST(GZ), BUAA, Zhejiang Normal University, East China Normal University, USTC, DeepCybo
-  14. MemoryVLA                 avg= 72.3  org=PKU / Tsinghua University / Shanghai AI Lab
-  15. DreamAvoid                avg= 72.2  org=HKU, HKUST, Northwestern University
-  16. FrameSkip                 avg= 71.5  org=Harbin Institute of Technology; Zhongguancun Academy; HKUST(GZ)
-  17. CogACT                    avg= 70.3  org=Microsoft Research / Tsinghua University
-  18. OFlow                     avg= 67.1  org=Fudan University, University of Southern California, KAUST
-  19. GEM                       avg= 67.0  org=Tsinghua University / Tencent Hunyuan
-  20. DreamVLA                  avg= 66.0  org=Shanghai AI Lab / Fudan University / NUS
-  21. SmolVLA                   avg= 64.8  org=Hugging Face
-  22. TraceVLA                  avg= 64.6  org=University of Michigan / NVIDIA
-  23. ReFineVLA                 avg= 62.8  org=VinRobotics / UT Arlington / IMPRS-IS Stuttgart / TU Darmstadt / TU Wien / AIT / MBZUAI
-  24. DD-VLA                    avg= 62.7  org=PKU / Shanghai AI Lab
-  25. CAPS                      avg= 60.5  org=Kewei Chen, Yayu Long, Mingsheng Shang
-  26. VP-VLA                    avg= 58.3  org=HKUST; CUHK; SmartMore
-  27. Afford-VLA                avg= 58.1  org=Fudan University; KAUST; Shanghai Jiao Tong University; East China Normal University
-  28. SOMA                      avg= 57.9  org=HKUST (GZ) / OPPO Research
-  29. DA-PTQ                    avg= 56.4  org=Tongji University / University of Technology Sydney
-  30. RT-2-X                    avg= 53.8  org=Google DeepMind
-  31. Qwen-VLA                  avg= 52.9  org=Qwen Team, Alibaba Inc.
-  32. OpenVLA                   avg= 42.3  org=Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT
-  33. IDL-VLA                   avg= 38.5  org=Korea University
-  34. BlockVLA                  avg= 35.4  org=Xi'an Jiaotong University
-  35. Octo                      avg= 31.4  org=UC Berkeley / Stanford / CMU / Google DeepMind
+  14. 3DThinkVLA                avg= 72.9  org=Shanghai Jiao Tong University; Harbin Institute of Technology; Nanyang Technological University; Fudan University; Nanjing University; Daimon Robotics; Great Bay University
+  15. MemoryVLA                 avg= 72.3  org=PKU / Tsinghua University / Shanghai AI Lab
+  16. DreamAvoid                avg= 72.2  org=HKU, HKUST, Northwestern University
+  17. FrameSkip                 avg= 71.5  org=Harbin Institute of Technology; Zhongguancun Academy; HKUST(GZ)
+  18. CogACT                    avg= 70.3  org=Microsoft Research / Tsinghua University
+  19. OFlow                     avg= 67.1  org=Fudan University, University of Southern California, KAUST
+  20. GEM                       avg= 67.0  org=Tsinghua University / Tencent Hunyuan
+  21. DreamVLA                  avg= 66.0  org=Shanghai AI Lab / Fudan University / NUS
+  22. SmolVLA                   avg= 64.8  org=Hugging Face
+  23. TraceVLA                  avg= 64.6  org=University of Michigan / NVIDIA
+  24. OneVLA                    avg= 64.5  org=Tsinghua University / Pengcheng Laboratory / Xiaomi EV / CASIA / PKU / HKUST(GZ)
+  25. ReFineVLA                 avg= 62.8  org=VinRobotics / UT Arlington / IMPRS-IS Stuttgart / TU Darmstadt / TU Wien / AIT / MBZUAI
+  26. DD-VLA                    avg= 62.7  org=PKU / Shanghai AI Lab
+  27. CAPS                      avg= 60.5  org=Kewei Chen, Yayu Long, Mingsheng Shang
+  28. VP-VLA                    avg= 58.3  org=HKUST; CUHK; SmartMore
+  29. Afford-VLA                avg= 58.1  org=Fudan University; KAUST; Shanghai Jiao Tong University; East China Normal University
+  30. SOMA                      avg= 57.9  org=HKUST (GZ) / OPPO Research
+  31. DA-PTQ                    avg= 56.4  org=Tongji University / University of Technology Sydney
+  32. RT-2-X                    avg= 53.8  org=Google DeepMind
+  33. Qwen-VLA                  avg= 52.9  org=Qwen Team, Alibaba Inc.
+  34. OpenVLA                   avg= 42.3  org=Stanford / UC Berkeley / TRI / Google DeepMind / PI / MIT
+  35. IDL-VLA                   avg= 38.5  org=Korea University
+  36. BlockVLA                  avg= 35.4  org=Xi'an Jiaotong University
+  37. Octo                      avg= 31.4  org=UC Berkeley / Stanford / CMU / Google DeepMind
 
 ## Robotwin V1 Rankings
 
@@ -221,8 +227,9 @@ SECTION 1: RANKINGS
   24. Agentic-VLA               avg= 48.6
   25. IntentVLA                 avg= 45.8
   26. AffordVLA                 avg= 45.0
-  27. ConSFT                    avg= 36.0
-  28. LLaVA-VLA                 avg= 28.6
+  27. ELAN4D                    avg= 37.0
+  28. ConSFT                    avg= 36.0
+  29. LLaVA-VLA                 avg= 28.6
 
 ## Robocasa Rankings
 
@@ -340,6 +347,27 @@ MODEL: PLD
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: MPCoT
+  Organization: Boston University; Tsinghua University
+  Date: 2026-06-04
+  Paper: https://arxiv.org/abs/2606.06245
+  Code: https://github.com/EDGSCOUT/MPCoT
+  Venue: arXiv preprint
+  Open Source: True
+  Architecture:
+    Action Head: OFT-style parallel-decoding regression head; predicts fixed 8-step continuous action chunks; M=4 parallel latent paths refined K=5 times by a weight-tied MLP and aggregated by a soft scorer
+    Backbone: OpenVLA-OFT (Llama-2 7B + SigLIP vision; parallel-decoding action interface)
+    LLM: Llama-2 7B (inherited from OpenVLA-OFT)
+    Parameters: 7B backbone + ~2.7% added (multi-path latent CoT module + scorer)
+  Tags: vla, reasoning, chain-of-thought, latent-cot, test-time-scaling, reward-guided, openvla-oft, libero, calvin, 7B
+  Benchmarks:
+    libero (avg=98.85): libero_spatial=98.2, libero_object=99.7, libero_goal=98.6, libero_long=98.9, libero_avg=98.9
+    calvin (avg=4.92): calvin_abc_d_1=0.998, calvin_abc_d_2=0.989, calvin_abc_d_3=0.968, calvin_abc_d_4=0.937, calvin_abc_d_5=0.894, calvin_abc_d_avg_len=4.92
+  Eval Conditions: {'libero': 'fine-tuned, one policy across four suites', 'calvin': 'ABC->D generalization, fine-tuned'}
+  AI Review Summary: OpenVLA-OFT 7B 위에 M=4 병렬 잠재 가설을 K=5번 가중치 공유 MLP로 정제한 뒤 학습 시에만 동작하는 reward-guided scorer로 soft aggregation하는 multi-path latent CoT 모듈을 얹어, LIBERO 평균 98.9% (단일 정책), CALVIN ABC→D avg-len 4.92를 달성한 test-time scalable VLA.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: SimpleVLA-RL
   Organization: Shanghai Jiao Tong University / Peking University / Shanghai AI Lab / HKU
   Date: 2025-09-11
@@ -404,6 +432,27 @@ MODEL: SnapFlow
     libero (avg=98.75): libero_spatial=99.0, libero_object=100.0, libero_goal=99.0, libero_long=97.0, libero_avg=98.75
   Eval Conditions: {'libero': 'fine-tuned (pi0.5 backbone + SnapFlow self-distillation, 1-NFE inference)'}
   AI Review Summary: pi0.5(3B)와 SmolVLA(500M) 같은 flow-matching VLA의 10-step Euler denoising을 "FM sample + two-step Euler shortcut consistency sample" progressive mixing과 zero-initialized target-time embedding으로 **1-NFE forward pass**에 압축하는 plug-and-play self-distillation. pi0.5 LIBERO 평균 98.75%(10-step teacher 97.75% 대비
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: 3DThinkVLA
+  Organization: Shanghai Jiao Tong University; Harbin Institute of Technology; Nanyang Technological University; Fudan University; Nanjing University; Daimon Robotics; Great Bay University
+  Date: 2026-06-03
+  Paper: https://arxiv.org/abs/2606.04436
+  Code: None
+  Venue: arXiv preprint
+  Open Source: False
+  Architecture:
+    Action Head: OFT-style regression head predicting 7-DoF robot commands, conditioned on spatially-augmented action queries
+    Backbone: Qwen3-VL 2B vision-language model
+    LLM: Qwen3-VL 2B
+    Parameters: ~2B (Qwen3-VL backbone) + lightweight 3D geometry / reasoning adapters
+  Tags: vla, 3d-reasoning, latent-3d, co-training, distillation, qwen3-vl, libero, libero-plus, simpler-env, 2B
+  Benchmarks:
+    libero (avg=98.65): libero_spatial=100.0, libero_object=100.0, libero_goal=98.8, libero_long=95.8, libero_avg=98.7
+    simpler_env: simpler_widowx_put_carrot_on_plate=75.0, simpler_widowx_put_eggplant_in_basket=95.8, simpler_widowx_put_spoon_on_towel=87.5, simpler_widowx_stack_block=33.3, simpler_avg=72.9
+  Eval Conditions: {'libero': 'fine-tuned, standard LIBERO 4-suite', 'simpler_env': 'WidowX subset, fine-tuned', 'libero_plus': 'perturbed (camera/robot/language/light/background/noise/layout)'}
+  AI Review Summary: Qwen3-VL 2B 위에 VGGT-aligned 3D geometry adapter, Spatial-Reasoner teacher와 공유하는 reasoning anchor token, action query에 hierarchical injection하는 spatial augmentation 모듈을 결합하고, VLA 데이터와 SR-CoT 24K + LLaVA 24K를 dual dataloader로 co-training하여 LIBERO 평균 98.7%, LIBERO-Plus 평균 81.0%, SimplerEnv WidowX 평균 72
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -1182,6 +1231,27 @@ MODEL: DeepThinkVLA
     Venue: ICLR 2026, Decision: poster
     Review Avg: 4.5, Confidence: 3.25
   AI Review Summary: CoT 추론이 VLA에서 효과를 내려면 (1) Decoding Alignment(언어는 causal AR, 액션은 bidirectional 병렬)와 (2) Causal Alignment(outcome-based RL로 추론과 행동을 인과 연결)이 동시에 충족되어야 함을 실증하고, hybrid-attention decoder + SFT→GRPO 파이프라인으로 LIBERO 97.0%, RoboTwin 2.0 59.3%를 달성한 2.9B 모델.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: ELAN4D
+  Organization: University of Oxford / CUHK-Shenzhen / Tsinghua / SJTU
+  Date: 2026-05-28
+  Paper: https://arxiv.org/abs/2605.30484
+  Code: None
+  Venue: arXiv preprint
+  Open Source: False
+  Architecture:
+    Action Head: Conditional flow-matching action expert (7-DoF end-effector delta + gripper) with plug-and-play 4D control branch (ControlNet-style residual, gradient-isolated, zero-initialized projection) and lightweight track decoder (Point MLP + Control MLP + Fusion MLP) predicting H x K x 3 robot-keypoint displacements
+    Backbone: PaliGemma VLM + Action Expert (built on top of pi_0 / pi_0.5)
+    LLM: None
+    Parameters: ~3B (PaliGemma 3B backbone + action expert, plug-and-play 4D branch is lightweight)
+  Tags: libero, robotwin, flow_matching, 4D_supervision, pi_0, plug_and_play, controlnet
+  Benchmarks:
+    libero (avg=97.0): libero_spatial=97.4, libero_object=99.0, libero_goal=96.4, libero_long=95.2, libero_avg=97.0
+    robotwin_v2 (avg=37.0): robotwin_v2_avg=37.0
+  Eval Conditions: {'libero': 'fine-tuned', 'robotwin_v2': 'fine-tuned, bimanual'}
+  AI Review Summary: 외부 트래커 없이 로봇 자체의 proprioception(joint angle)과 forward kinematics만으로 **로봇 keypoint의 미래 변위(4D track)** 를 생성하고, 이를 ControlNet 스타일의 **gradient-isolated 보조 branch** 로 pi_0 / pi_0.5 backbone에 plug-and-play 주입하여 LIBERO 97.0% / LIBERO-Plus +14.0% / 실제 환경 spatial generalization +50%p를 달성한 embodiment-centric 
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -2701,6 +2771,24 @@ MODEL: DMW
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: DriveMA
+  Organization: Shanghai Qi Zhi Institute / Tsinghua University / Tongji University
+  Date: 2026-05-29
+  Paper: https://arxiv.org/abs/2605.31271
+  Code: None
+  Venue: arXiv preprint
+  Open Source: False
+  Architecture:
+    Action Head: Two-stage textual decoding: first emit verifiable meta-action tokens (longitudinal: stop/decelerate/keep/accelerate; lateral: turning / lane-changing / etc.), then condition on m to autoregressively decode the trajectory waypoints tau (5-second horizon at 1Hz for Waymo, 4-second for NAVSIM)
+    Backbone: Qwen3.5 VLM family (2B and 4B variants)
+    LLM: None
+    Parameters: 2B and 4B variants
+  Tags: autonomous_driving, meta_action, autoregressive, waymo, navsim, grpo, rl, qwen3_5
+  Eval Conditions: {'driving': 'fine-tuned, end-to-end (WOD-E2E + NAVSIM)'}
+  AI Review Summary: Autonomous driving VLA에서 **언어-trajectory gap**을 해결하기 위해 longitudinal(stop/decel/keep/accel) + lateral(turning/lane-change) **verifiable meta-action**을 중간 인터페이스로 도입하고, trajectory-grounded auto-labeling → action-centric pretraining → meta-action conditioned SFT → **turn-level credit assignment GRPO RL
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: E0
   Organization: Sun Yat-sen University
   Date: 2025-11-26
@@ -3541,6 +3629,26 @@ MODEL: NORA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: OneVLA
+  Organization: Tsinghua University / Pengcheng Laboratory / Xiaomi EV / CASIA / PKU / HKUST(GZ)
+  Date: 2026-05-31
+  Paper: https://arxiv.org/abs/2606.01241
+  Code: https://github.com/linglingxiansen/OneVLA
+  Venue: arXiv preprint
+  Open Source: True
+  Architecture:
+    Action Head: Unified 11-dim action head: 4D discrete navigation logits (forward / left / right / stop) concatenated with 7D continuous end-effector manipulation control, trained with task-specific weight masks so a single head emits both modalities
+    Backbone: Qwen2.5-VL-3B-Instruct (36-layer Transformer, hidden dim 2048)
+    LLM: None
+    Parameters: 3B
+  Tags: simpler_env, navigation, manipulation, unified_vla, qwen2_5_vl, chain_of_thought, vln_ce
+  Benchmarks:
+    simpler_env: simpler_avg=64.5
+  Eval Conditions: {'simpler_env': 'fine-tuned'}
+  AI Review Summary: Qwen2.5-VL-3B를 backbone으로 **하나의 11차원 action head** (4D discrete navigation + 7D continuous manipulation)를 공유하고, manipulation → navigation → Chain-of-Thought의 3단계 점진적 학습으로 navigation과 manipulation을 단일 모델에서 동시 처리하는 unified VLA. SimplerEnv 64.5% (+29.1%p), VLN-CE R2R 68.6% (+21.5%p), real-world manipul
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: Phone2Act
   Organization: Vivekanand Education Society's Institute of Technology (VESIT), Mumbai
   Date: 2026-05-03
@@ -4271,5 +4379,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 200 models, 100 with LIBERO scores
+Total: 205 models, 103 with LIBERO scores
 ================================================================================

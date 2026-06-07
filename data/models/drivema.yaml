@@ -1,27 +1,55 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: DriveMA: Driving Vision-Language-Action Models with verifiable Meta-Actions
 # arXiv: 2605.31271
 
 name: DriveMA
 full_name: "DriveMA: Driving Vision-Language-Action Models with verifiable Meta-Actions"
-organization: "TODO: check paper"
+organization: "Shanghai Qi Zhi Institute / Tsinghua University / Tongji University"
 date: "2026-05-29"
 paper_url: https://arxiv.org/abs/2605.31271
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv preprint
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3.5 VLM family (2B and 4B variants)"
+  action_head: "Two-stage textual decoding: first emit verifiable meta-action tokens (longitudinal: stop/decelerate/keep/accelerate; lateral: turning / lane-changing / etc.), then condition on m to autoregressively decode the trajectory waypoints tau (5-second horizon at 1Hz for Waymo, 4-second for NAVSIM)"
+  action_head_category: autoregressive
+  parameters: "2B and 4B variants"
+  key_innovation: "Introduces verifiable meta-actions as an intermediate language-domain interface between vision-language understanding and continuous trajectory generation (x -> m -> tau), enabling rule-based projection verification and turn-level credit assignment in RL. Combines trajectory-grounded meta-action labeling (automatically derived from expert trajectories), action-centric pretraining on 240K driving VQA, meta-action-conditioned planning SFT, and a turn-level GRPO RL stage with dense trajectory + language-action consistency reward."
 
 benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+  driving:
+    wod_e2e_rfs_overall_2b: 8.060
+    wod_e2e_rfs_overall_4b: 8.079
+    wod_e2e_rfs_spotlight_2b: 7.251
+    wod_e2e_rfs_spotlight_4b: 7.169
+    wod_e2e_ade_5s_2b: 2.616
+    wod_e2e_ade_5s_4b: 2.670
+    navsim_pdms_2b: 90.5
+    navsim_pdms_4b: 91.2
+    source: "Main results tables in DriveMA paper (vs RAP SOTA: 8.043 WOD-E2E RFS, 93.8 NAVSIM PDMS)"
+    date_reported: "2026-05-29"
+    eval_condition: "fine-tuned, end-to-end driving planning on Waymo Open Dataset E2E and NAVSIM"
+
+training:
+  sft:
+    epochs: 1
+    learning_rate: 1.0e-5
+    batch_size: 64
+    full_parameter_finetuning: true
+  rl:
+    steps: 600
+    learning_rate: 1.0e-6
+    generations_per_sample: 8
+    kl_beta: 0.4
+    algorithm: "Turn-level GRPO with separate decision/planning advantage normalization"
+  data:
+    planning_samples: 77000
+    preference_samples: 479
+    vqa_samples: 240000
+  hardware: "8 x NVIDIA A800 GPUs"
 
 eval_conditions:
-  TODO: "check paper"
+  driving: "fine-tuned, end-to-end (WOD-E2E + NAVSIM)"
 
-tags: []
+tags: [autonomous_driving, meta_action, autoregressive, waymo, navsim, grpo, rl, qwen3_5]

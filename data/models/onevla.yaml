@@ -1,27 +1,43 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: OneVLA: A Unified Framework for Embodied Tasks
 # arXiv: 2606.01241
 
 name: OneVLA
 full_name: "OneVLA: A Unified Framework for Embodied Tasks"
-organization: "TODO: check paper"
+organization: "Tsinghua University / Pengcheng Laboratory / Xiaomi EV / CASIA / PKU / HKUST(GZ)"
 date: "2026-05-31"
 paper_url: https://arxiv.org/abs/2606.01241
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/linglingxiansen/OneVLA
+venue: arXiv preprint
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen2.5-VL-3B-Instruct (36-layer Transformer, hidden dim 2048)"
+  action_head: "Unified 11-dim action head: 4D discrete navigation logits (forward / left / right / stop) concatenated with 7D continuous end-effector manipulation control, trained with task-specific weight masks so a single head emits both modalities"
+  action_head_category: hybrid
+  parameters: "3B"
+  key_innovation: "Single VLA policy that unifies navigation and manipulation through one 11-dimensional action head (4D discrete navigation + 7D continuous manipulation) without task-specific variants. Trained via three-stage progressive curriculum: (1) manipulation + VQA, (2) navigation injection for cross-task transfer, (3) Chain-of-Thought reasoning data, with learnable loss weights balancing VLM / text / action objectives."
 
 benchmarks:
-  libero:
-    TODO: "check paper for benchmark scores" 
+  simpler_env:
+    simpler_avg: 64.5
+    source: "Table reported as SimplerEnv Average, +29.1% vs UniVLA"
+    date_reported: "2026-05-31"
+    eval_condition: "fine-tuned, action horizon 5"
+
+training:
+  stages:
+    - "Stage 1: Manipulation + VQA datasets"
+    - "Stage 2: Navigation data introduction for cross-task transfer"
+    - "Stage 3: Chain-of-Thought data for reasoning enhancement"
+  action_horizon: 5
+  loss: "weighted sum of VLM, text, and action losses with learnable weights"
+  additional_benchmarks:
+    vln_ce_r2r_oracle_sr: 68.6
+    vln_ce_rxr_oracle_sr: 58.2
+    real_world_manipulation_sr: 78.8
+    real_world_navigation_sr: 77.5
 
 eval_conditions:
-  TODO: "check paper"
+  simpler_env: "fine-tuned"
 
-tags: []
+tags: [simpler_env, navigation, manipulation, unified_vla, qwen2_5_vl, chain_of_thought, vln_ce]

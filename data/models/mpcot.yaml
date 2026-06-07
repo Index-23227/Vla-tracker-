@@ -1,33 +1,67 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: MPCoT: Reward-Guided Multi-Path Latent Reasoning for Test-Time Scalable Vision-Language-Action
-# arXiv: 2606.06245
-
 name: MPCoT
 full_name: "MPCoT: Reward-Guided Multi-Path Latent Reasoning for Test-Time Scalable Vision-Language-Action"
-organization: "TODO: check paper"
+organization: "Boston University; Tsinghua University"
 date: "2026-06-04"
 paper_url: https://arxiv.org/abs/2606.06245
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/EDGSCOUT/MPCoT
+venue: arXiv preprint
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "OpenVLA-OFT (Llama-2 7B + SigLIP vision; parallel-decoding action interface)"
+  llm: "Llama-2 7B (inherited from OpenVLA-OFT)"
+  action_head: "OFT-style parallel-decoding regression head; predicts fixed 8-step continuous action chunks; M=4 parallel latent paths refined K=5 times by a weight-tied MLP and aggregated by a soft scorer"
+  action_head_category: regression
+  action_space: "continuous 7-DoF; 8-step chunk, predict 8 / execute 8 open-loop"
+  parameters: "7B backbone + ~2.7% added (multi-path latent CoT module + scorer)"
+  key_innovation: >
+    Reward-guided multi-path latent chain-of-thought layered on top of an OpenVLA-OFT backbone.
+    M parallel latent hypotheses are initialized from a shared perception-language context,
+    refined for K weight-tied steps via a shared MLP operator, then softly aggregated by a
+    learned scorer before action decoding. The scorer is trained with training-only reward
+    supervision (action consistency, world-model progress, success labels) and is removed at
+    inference, giving test-time scalability without rollout-time reward signals.
+
+training:
+  dataset: "LIBERO and CALVIN ABC->D fine-tuning data (OpenVLA-OFT default training recipe)"
+  method: "LoRA r=32 fine-tuning of OpenVLA-OFT backbone; L1 continuous-action loss; multi-path latent reasoning trained jointly with reward-guided scorer supervision"
+  optimizer: "AdamW, LR 5e-4 decayed to 5e-5 by step 100K; batch size 64"
+  steps: "150K (Spatial/Object/Long); 50K (Goal)"
+  hardware: "not specified in paper"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.2
+    libero_object: 99.7
+    libero_goal: 98.6
+    libero_long: 98.9
+    libero_avg: 98.9
+    source: "MPCoT paper Table 1 (one policy, all four LIBERO suites)"
+    date_reported: "2026-06-04"
+    eval_condition: "fine-tuned"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_1: 0.998
+    calvin_abc_d_2: 0.989
+    calvin_abc_d_3: 0.968
+    calvin_abc_d_4: 0.937
+    calvin_abc_d_5: 0.894
+    calvin_abc_d_avg_len: 4.92
+    source: "MPCoT paper Table 2 (CALVIN ABC->D)"
+    date_reported: "2026-06-04"
+    eval_condition: "fine-tuned"
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero: "fine-tuned, one policy across four suites"
+  calvin: "ABC->D generalization, fine-tuned"
 
-tags: [reasoning, libero, calvin]
+tags:
+  - vla
+  - reasoning
+  - chain-of-thought
+  - latent-cot
+  - test-time-scaling
+  - reward-guided
+  - openvla-oft
+  - libero
+  - calvin
+  - 7B

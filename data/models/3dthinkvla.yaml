@@ -1,33 +1,80 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: 3DThinkVLA: Endowing Vision-Language-Action Models with Latent 3D Priors via 3D-Thinking-Guided Co-training
-# arXiv: 2606.04436
-
-name: TODO_MODEL_NAME
+name: 3DThinkVLA
 full_name: "3DThinkVLA: Endowing Vision-Language-Action Models with Latent 3D Priors via 3D-Thinking-Guided Co-training"
-organization: "TODO: check paper"
+organization: "Shanghai Jiao Tong University; Harbin Institute of Technology; Nanyang Technological University; Fudan University; Nanjing University; Daimon Robotics; Great Bay University"
 date: "2026-06-03"
 paper_url: https://arxiv.org/abs/2606.04436
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv preprint
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-VL 2B vision-language model"
+  llm: "Qwen3-VL 2B"
+  action_head: "OFT-style regression head predicting 7-DoF robot commands, conditioned on spatially-augmented action queries"
+  action_head_category: regression
+  action_space: "continuous 7-DoF"
+  parameters: "~2B (Qwen3-VL backbone) + lightweight 3D geometry / reasoning adapters"
+  key_innovation: >
+    Three coupled latent-space modules that inject 3D priors into a 2D VLA without point-cloud
+    or depth input at inference: (1) a Latent 3D Geometry Perception adapter aligned to VGGT
+    features; (2) Online 3D Reasoning Distillation via a teacher-student scheme that shares a
+    reasoning anchor token between a Spatial-Reasoner (SR-CoT) teacher and the policy student;
+    (3) a Spatially Augmented Action Integration module that hierarchically injects the 3D
+    anchor into action queries. Trained with a dual-dataloader co-training recipe over VLA data
+    and 3D reasoning data.
+
+training:
+  dataset: "LIBERO (50 demos/task) for VLA training; 24K SR-CoT samples + 24K LLaVA general image-text instructions for 3D reasoning co-training; real-world Realman-platform demos (100 episodes/task) for real-world experiments"
+  method: "Co-training with dual dataloader (VLA + 3D reasoning); online self-distillation via shared reasoning anchor token"
+  optimizer: "AdamW with parameter-wise learning rates; base LR 2.5e-5; bfloat16 mixed precision"
+  steps: "not explicitly reported (1.5x training overhead vs vanilla VLA)"
+  hardware: "8x NVIDIA A100 80GB"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 100.0
+    libero_object: 100.0
+    libero_goal: 98.8
+    libero_long: 95.8
+    libero_avg: 98.7
+    source: "3DThinkVLA paper Table 1"
+    date_reported: "2026-06-03"
+    eval_condition: "fine-tuned"
+  libero_plus:
+    libero_plus_avg: 81.0
+    libero_plus_camera: 73.8
+    libero_plus_robot: 64.5
+    libero_plus_language: 78.0
+    libero_plus_light: 98.4
+    libero_plus_background: 94.8
+    libero_plus_noise: 84.7
+    libero_plus_layout: 81.5
+    source: "3DThinkVLA paper Table 2 (LIBERO-Plus 7 perturbations)"
+    date_reported: "2026-06-03"
+    eval_condition: "fine-tuned, perturbed evaluation"
   simpler_env:
-    google_robot_pick_coke_can: TODO
+    simpler_widowx_put_carrot_on_plate: 75.0
+    simpler_widowx_put_eggplant_in_basket: 95.8
+    simpler_widowx_put_spoon_on_towel: 87.5
+    simpler_widowx_stack_block: 33.3
+    simpler_avg: 72.9
+    source: "3DThinkVLA paper Table 3 (SimplerEnv WidowX)"
+    date_reported: "2026-06-03"
+    eval_condition: "fine-tuned"
 
 eval_conditions:
-  libero: "fine-tuned"
-  simpler_env: "fine-tuned"
+  libero: "fine-tuned, standard LIBERO 4-suite"
+  libero_plus: "perturbed (camera/robot/language/light/background/noise/layout)"
+  simpler_env: "WidowX subset, fine-tuned"
 
-tags: [reasoning, libero, simpler_env]
+tags:
+  - vla
+  - 3d-reasoning
+  - latent-3d
+  - co-training
+  - distillation
+  - qwen3-vl
+  - libero
+  - libero-plus
+  - simpler-env
+  - 2B
