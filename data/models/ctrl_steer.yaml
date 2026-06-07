@@ -1,0 +1,92 @@
+# Paper: Closed-Loop Neural Activation Control in Vision-Language-Action Models
+# arXiv: 2606.00269
+
+name: CTRL-STEER
+full_name: "Closed-Loop Neural Activation Control in Vision-Language-Action Models"
+organization: "Florida International University; SRI International; United States Military Academy; Oak Ridge National Laboratory; University of Florida"
+date: "2026-05-29"
+paper_url: https://arxiv.org/abs/2606.00269
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Inference-time framework applied on top of base VLAs: OpenVLA (primary, 7B, LLaMA-2 + Prismatic VLM) and X-VLA (transferability)"
+  llm: "LLaMA-2 7B (inherited from base OpenVLA)"
+  action_head: "Inherits base VLA action head (OpenVLA discrete action tokens); CTRL-STEER only modulates FFN neuron activations in LLaMA-2 decoder via closed-loop steering coefficients - no architectural change to the action decoder itself"
+  action_head_category: other
+  action_space: "Inherits OpenVLA 7-DoF discretized action tokens"
+  parameters: "Training-free for PID; per-task PPO policy for RL controller; no updates to base VLA weights"
+  key_innovation: >
+    Reformulates activation-level steering of VLA models as a closed-loop control problem.
+    Identifies a set of FFN neurons (k=10 selected from all LLaMA-2 layers) semantically aligned
+    with a control concept (e.g., height, speed) via mechanistic interpretability - projecting
+    value vectors into vocabulary logit space and matching against a representative feature set
+    {up, down, left, right, forward, backward} using k-NN cosine similarity on token embeddings.
+    Then replaces a fixed steering coefficient alpha with a time-varying signal alpha_t computed
+    by either (a) a PID controller on the concept tracking error e_t = c* - c_t, or (b) a PPO
+    policy that takes (a_t, Delta a_t, alpha_{t-1}, t/T) as state and outputs k-dim per-neuron
+    coefficients, trained per-task with reward r_steer + lambda * r_task and warm-started from
+    the PID controller. Coefficients bounded in [0, 20]. No retraining of the base VLA.
+
+training:
+  method: "Training-free for neuron identification + PID; PPO with PID warm-start for RL controller (per-task)"
+  base_models: "OpenVLA (fine-tuned per LIBERO suite); X-VLA on LIBERO-Goal"
+  hyperparameters:
+    pid_gains: "KP=4.0, KI=0.5, KD=1.0"
+    control_horizon: 20
+    alpha_bound: "[0, 20]"
+    rl_algorithm: "PPO"
+    rl_horizon: "T=920 steps (20 warm-up + 900 execution)"
+    selected_neurons: 10
+    knn_k: 5
+    height_target: "c* = 2 * h_0 (twice initial end-effector height)"
+    speed_target: "c* = 30 cm/s"
+    speed_threshold: "s_thr = 20 cm/s"
+    lambda_sweep: "{100, 200, 500, 1000}"
+
+benchmarks:
+  libero:
+    libero_spatial: 79.5
+    libero_object: 77.0
+    libero_goal: 82.0
+    libero_long: 57.0
+    libero_avg: 73.88
+    source: "Paper Tables 3 (height steering, CTRL-STEER RL controller, SR%); reported avg 73.88% matches"
+    date_reported: "2026-05-29"
+    eval_condition: "OpenVLA fine-tuned per suite + CTRL-STEER (RL+PID) closed-loop height steering"
+  bridge_v2_simpler:
+    aat_height: 48.13
+    sr_height: 47.6
+    avg_speed_cms: 21.38
+    sr_speed: 48.9
+    source: "Paper Table 2 (OpenVLA + CTRL-STEER RL on BridgeData V2 pick-and-place in SimplerEnv)"
+    date_reported: "2026-05-29"
+    eval_condition: "OpenVLA + CTRL-STEER RL on BridgeData V2 / SimplerEnv pick-place tasks"
+
+eval_conditions:
+  libero: "Per-suite fine-tuned OpenVLA with closed-loop height-steering applied; unsteered baseline avg 71.37%"
+  libero_speed_steering: "CTRL-STEER RL avg SR 76.12% (Long 66.5, Goal 83.0, Object 76.5, Spatial 78.5) vs unsteered 71.37%"
+  pid_only: "PID controller avg SR: 71.00% (height), 72.50% (speed)"
+  static_steering_c20: "Static baseline C=20 collapses to 27.37% (height) / 1.8% (speed)"
+  x_vla_transfer: "On LIBERO-Goal: RL SR 60% (vs unsteered 59%) with AAT 400.33 (vs 161.58)"
+  inference_overhead: "PID 0.2021 s/step, RL 0.2094 s/step vs OpenVLA 0.1869 s/step (<13% overhead); peak GPU 14.26 GB unchanged"
+  hardware: "single-GPU inference; 14.26 GB peak"
+
+tags:
+  - vla
+  - test-time-steering
+  - closed-loop-control
+  - pid
+  - reinforcement-learning
+  - ppo
+  - mechanistic-interpretability
+  - activation-steering
+  - openvla-base
+  - x-vla-base
+  - libero
+  - simpler_env
+  - inference-time
+  - training-free-pid
