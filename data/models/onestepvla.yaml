@@ -1,0 +1,71 @@
+# Paper: Let It Be Simple: One-Step Action Generation for Vision-Language-Action Models
+# arXiv: 2606.05737
+
+name: OneStepVLA
+full_name: "Let It Be Simple: One-Step Action Generation for Vision-Language-Action Models"
+organization: "University of Science and Technology of China / Shanghai Innovation Institute / Fudan University"
+date: "2026-06-04"
+paper_url: https://arxiv.org/abs/2606.05737
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "OpenPI-style VLM: SigLIP-So400m vision encoder + PaliGemma (Gemma) multimodal fusion. Tiny variant uses a 4-layer Gemma-tiny backbone (width 512, mlp 2048, 8 heads, 1 KV head) with a 4-layer SigLIP slice; Full-encoder variant restores the full SigLIP-So400m vision tower and uses a Gemma-2b 4-layer stack (width 2048, mlp 16384, head_dim 256). Full-encoder model is the 1.4B VLM referenced in the abstract."
+  llm: "PaliGemma / Gemma (4 used layers in both tiny and full variants; tiny=Gemma-tiny 512-dim, full=Gemma-2b 2048-dim)"
+  action_head: "Lightweight bidirectional Transformer flow-matching decoder (SimVLA-style depth=4, width 768, 12 heads, mlp 3072), 32-dim action interface (only 7 physical dims supervised on LIBERO), action horizon 10 by default; predicts velocities from concatenated condition / state / time / noised-action tokens via pre-LN self-attention + MLP blocks, total ~30M parameters"
+  action_head_category: flow_matching
+  action_space: "continuous 7-DoF physical action (padded into 32-dim OpenPI interface); default 10-step action chunk"
+  parameters: "1.4B VLM (full-encoder variant) + ~30M action head; tiny variant much smaller (4-layer Gemma-tiny + 4-layer SigLIP slice)"
+  key_innovation: >
+    A condition-target view of VLA action generation: because the policy is conditioned on rich
+    observations/language/state but predicts only a compact low-dimensional action chunk, strong
+    one-step (1-NFE) action generation does NOT require consistency distillation, shortcut models,
+    mean-flow, teachers, or auxiliary losses. The recipe keeps standard flow-matching velocity
+    prediction and simply biases the training-time distribution toward high-noise states via a
+    Beta(1, 1.5) base shifted by t = u / (1 + (alpha-1)(1-u)) with alpha=3 or 4. Velocity-field
+    diagnostics (Fig. 4) show MSE/cosine error decrease toward the noise endpoint where one-step
+    inference starts, explaining why a single forward pass suffices. Includes a controlled MNIST
+    grid-to-sequence toy probe that isolates the rich-condition / compact-target regime.
+
+training:
+  dataset: "LIBERO (4 suites: Spatial, Object, Goal, Long; 10 tasks/suite, 50 episodes/task at eval). Real-robot transfer uses bimanual YAM RSS expert-data splits (OpenPI-baseline repo) with a fine-tuned pi0.5 policy."
+  method: "Standard conditional flow matching (LCFM = E ||v_theta(xt,t,c) - (x1-x0)||^2) with shifted time sampling t = u / (1 + (alpha-1)(1-u)) where u ~ Beta(1, 1.5) and alpha in {3, 4} biases toward high noise (t -> 0); loss applied only to 7 physical action dims (mask7); EMA decay 0.99; pure-noise control replaces noised-action with independent Gaussian as a one-step diagnostic."
+  optimizer: "AdamW (beta1=0.9, beta2=0.95, eps=1e-8); weight decay 1e-10; grad clip 1.0; cosine LR decay; 1k warmup steps; backbone LR multiplier 0.1"
+  steps_lr_batch:
+    tiny_ablation: "50k steps, batch 64, peak/final LR 1e-4 / 1e-5"
+    full_encoder: "150k steps, batch 256, peak/final LR 2e-4 / 2e-5"
+  hardware: "Shanghai Innovation Institute GPU cluster (specific GPUs not stated)"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 100.0
+    libero_goal: 97.0
+    libero_long: 95.6
+    libero_avg: 97.75
+    source: "OneStepVLA paper Table 4 (full-encoder, full32 action loss, 1 flow step / one-step Euler decoding); LIBERO-Long 95.6% is the headline 1.4B-VLM + 30M-head result"
+    date_reported: "2026-06-04"
+    eval_condition: "fine-tuned, full-encoder model, 1-step inference (10 tasks x 50 episodes per suite)"
+
+eval_conditions:
+  libero: "fine-tuned per suite, OpenPI-style 32-dim action interface (full32 supervision), action horizon H10, one-step Euler decoding, replanning interval = action horizon"
+  libero_plus: "tiny-model recipe; 2000 episodes/suite distribution-shift evaluation"
+  libero_pro: "full-encoder standard-LIBERO checkpoint applied zero-shot to LIBERO-Pro perturbations (500 episodes/cell); 1-step 44.2% vs 10-step 43.5% mean success"
+  rss_yam_bimanual: "fine-tuned pi0.5 policy, real-robot, 5 trials/task; one-step decoding matches/exceeds the 10-step baseline (Insert mouse battery 80%/80%, Seal water bottle cap 60%/35%, Tower of Hanoi 100%/50%)"
+
+tags:
+  - vla
+  - flow-matching
+  - one-step
+  - inference-acceleration
+  - paligemma
+  - siglip
+  - openpi
+  - simvla
+  - libero
+  - libero-plus
+  - libero-pro
+  - real-robot
+  - pi0.5
+  - high-noise-schedule
