@@ -1,0 +1,137 @@
+# Paper: HOIST: Humanoid Optimization with Imitation and Sample-efficient Tuning for Manipulating Suspended Loads
+# arXiv: 2606.00252
+
+name: HOIST
+full_name: "HOIST: Humanoid Optimization with Imitation and Sample-efficient Tuning for Manipulating Suspended Loads"
+organization: "University of Florida"
+date: "2026-05-29"
+paper_url: https://arxiv.org/abs/2606.00252
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "GR00T N1.6 (modified) — multimodal VLM + flow-matching action expert; ego RGB + ego depth + side-view RGB + proprioceptive state + language + previous navigation command"
+  llm: "GR00T N1.6 VLM (final 4 layers fine-tuned; remaining VLM layers frozen)"
+  action_head: "Flow-matching diffusion-transformer action expert that outputs short-horizon planner-command-increment chunks ΔU_t = (Δu_t, ..., Δu_{t+H-1}); each Δu_τ = (Δy^head, Δy^L, Δy^R, Δc^nav, Δh^base); commands are accumulated and executed by a fixed GR00T Whole-Body Controller (πwbc). RL refinement keeps the VLA frozen and trains an actor-critic noise-steering module that predicts the initial flow-matching noise vector deterministically; VLM features cached for efficiency."
+  action_head_category: flow_matching
+  action_space: "high-level planner commands (head target, bimanual hand targets, navigation command, base height); NOT joint torques"
+  parameters: "not specified (GR00T N1.6 backbone; only final 4 VLM layers + action expert + new modality encoders + noise-steering actor-critic are trained)"
+  key_innovation: >
+    Three-stage pipeline for humanoid hoisting of externally suspended, underactuated payloads:
+    (1) VR teleoperation (PICO headset) provides safe approach/push/stop demonstrations;
+    (2) supervised finetuning of a GR00T N1.6 VLA policy with newly added depth and navigation-command
+    modalities (final 4 VLM layers + flow-matching action expert + new encoders trained);
+    (3) iterative batched flow-matching-steering RL refinement that freezes the VLA and trains a
+    deterministic noise-steering actor-critic on small batches of autonomous rollouts with a simple
+    weighted reward over translational and raw angular placement errors. The whole-body controller
+    is fixed throughout, isolating task adaptation to the high-level command policy and the noise
+    steering module.
+
+training:
+  dataset: "VR-teleoperation demonstrations on humanoid hoisting (50 or 80 demonstrations per domain); up to 30 autonomous VLA rollouts per domain for RL refinement"
+  method: "Supervised VLA finetuning on action-chunk targets ΔU_t^demo, followed by iterative batched flow-matching-steering RL (offline actor-critic update of an initial-noise steering module; VLA policy frozen). Reward = weighted combination of translational placement errors and raw angular error."
+  optimizer: "not specified"
+  steps: "VLA-50 (50 demos), VLA-80 (80 demos); HOIST = VLA-50 + up to 30 RL rollouts"
+  hardware: "Real humanoid platform (GR00T Whole-Body Control deployment stack); PICO VR headset + controllers for teleoperation"
+
+inference_hz: null
+
+benchmarks:
+  simulation:
+    vla_50_dx_cm: 21.56
+    vla_50_dy_cm: 0.88
+    vla_50_dpsi_deg: 3.85
+    vla_50_manhattan_cm: 22.44
+    vla_50_plus_10_rl_dx_cm: 15.09
+    vla_50_plus_10_rl_dy_cm: 1.83
+    vla_50_plus_10_rl_dpsi_deg: 4.58
+    vla_50_plus_10_rl_manhattan_cm: 16.92
+    vla_50_plus_20_rl_dx_cm: 1.72
+    vla_50_plus_20_rl_dy_cm: 0.82
+    vla_50_plus_20_rl_dpsi_deg: 0.29
+    vla_50_plus_20_rl_manhattan_cm: 2.54
+    hoist_dx_cm: 5.16
+    hoist_dy_cm: 1.09
+    hoist_dpsi_deg: 2.76
+    hoist_manhattan_cm: 6.25
+    vla_80_dx_cm: 15.69
+    vla_80_dy_cm: 2.89
+    vla_80_dpsi_deg: 12.14
+    vla_80_manhattan_cm: 18.58
+    human_expert_teleop_dx_cm: 4.35
+    human_expert_teleop_dy_cm: 3.00
+    human_expert_teleop_dpsi_deg: 8.48
+    human_expert_teleop_manhattan_cm: 7.35
+    source: "Paper Tables 1 and 2"
+    date_reported: "2026-05-29"
+    eval_condition: "Humanoid hoisting in simulation; each trial starts with the payload away from the target; humanoid positions it through whole-body contact without actuating the suspension; fixed GR00T whole-body execution stack across all methods; errors are absolute translational and yaw (∆x, ∆y, ∆ψ) and Manhattan |∆x|+|∆y|."
+    notes: "VLA-50 + 30 RL rollouts (the HOIST configuration reported in Table 2) achieves Manhattan 6.25 cm vs VLA-50 22.44 cm and VLA-80 18.58 cm. VLA-50 + 20 RL rollouts is the best intermediate point (Manhattan 2.54 cm)."
+  real_robot:
+    vla_50_dx_cm: 1.60
+    vla_50_dy_cm: 7.68
+    vla_50_dpsi_deg: 14.5
+    vla_50_manhattan_cm: 9.28
+    vla_50_plus_10_rl_dx_cm: 2.15
+    vla_50_plus_10_rl_dy_cm: 5.22
+    vla_50_plus_10_rl_dpsi_deg: 21.0
+    vla_50_plus_10_rl_manhattan_cm: 7.37
+    vla_50_plus_20_rl_dx_cm: 4.20
+    vla_50_plus_20_rl_dy_cm: 2.49
+    vla_50_plus_20_rl_dpsi_deg: 12.1
+    vla_50_plus_20_rl_manhattan_cm: 6.69
+    hoist_dx_cm: 1.64
+    hoist_dy_cm: 4.74
+    hoist_dpsi_deg: 28.9
+    hoist_manhattan_cm: 6.38
+    vla_80_dx_cm: 0.54
+    vla_80_dy_cm: 8.03
+    vla_80_dpsi_deg: 27.0
+    vla_80_manhattan_cm: 8.57
+    headline_translational_reduction_cm: 19.9
+    headline_angular_reduction_deg: 3.56
+    source: "Paper Tables 1 and 2; abstract headline numbers"
+    date_reported: "2026-05-29"
+    eval_condition: "Real humanoid platform pushing an externally suspended payload toward a target region; fixed GR00T Whole-Body Control deployment stack; payload IMU used for residual-motion analysis."
+    notes: "Abstract headline (vs pure VLA rollouts): translational placement error reduced by 19.9 cm and raw angular error by 3.56 degrees. Residual-motion analysis: HOIST gyroscope readings approximately half those of imitation-only policy."
+
+additional_benchmarks:
+  modality_ablation:
+    base_vla_dx_cm: 1.54
+    base_vla_dy_cm: 10.52
+    base_vla_dpsi_deg: 26.6
+    base_vla_manhattan_cm: 12.06
+    plus_depth_dx_cm: 0.78
+    plus_depth_dy_cm: 8.78
+    plus_depth_dpsi_deg: 14.8
+    plus_depth_manhattan_cm: 9.57
+    plus_nav_dx_cm: 1.30
+    plus_nav_dy_cm: 9.90
+    plus_nav_dpsi_deg: 32.5
+    plus_nav_manhattan_cm: 11.20
+    plus_nav_plus_depth_dx_cm: 1.60
+    plus_nav_plus_depth_dy_cm: 7.68
+    plus_nav_plus_depth_dpsi_deg: 14.5
+    plus_nav_plus_depth_manhattan_cm: 9.28
+    source: "Paper Table 3 (ablation of VLA input modalities before RL refinement; same demos, no RL)"
+    date_reported: "2026-05-29"
+
+eval_conditions:
+  simulation: "Humanoid hoisting simulation; suspended payload positioned through whole-body contact; placement metrics ∆x, ∆y, ∆ψ, |∆x|+|∆y|"
+  real_robot: "Real humanoid platform with GR00T Whole-Body Control; PICO VR teleoperation for demo collection; suspended payload with IMU for residual-motion analysis"
+
+tags:
+  - vla
+  - humanoid
+  - loco-manipulation
+  - whole-body-control
+  - flow-matching
+  - gr00t
+  - rl-refinement
+  - noise-steering
+  - vr-teleoperation
+  - suspended-payload
+  - contact-rich
+  - underactuated
