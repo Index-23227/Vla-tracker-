@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-06-08T03:20:36.923514
-# Models: 215
+# Generated: 2026-06-08T03:24:43.336599
+# Models: 216
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -3844,6 +3844,26 @@ MODEL: PrimitiveVLA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: PrimSubVLA
+  Organization: Rellings Systems (Anya Singh, Cabrel Happi, Jai Relan, Varun Nair, Vidyut Baradwaj)
+  Date: 2026-05-29
+  Paper: https://arxiv.org/abs/2605.30695
+  Code: None
+  Venue: arXiv preprint
+  Open Source: False
+  Architecture:
+    Action Head: Inherits backbone action heads. OpenVLA-primitive: autoregressive discrete-action tokens. π0.5-primitive: flow-matching action expert with 16-step chunks. Primitive-aware training only modifies data segmentation and language conditioning — no architectural change. A 4-D primitive-decodable subspace emerges at layer 24 of OpenVLA / equivalent layer of π0.5.
+    Backbone: Two cells: (a) OpenVLA-primitive — OpenVLA 7B autoregressive (Llama-2 + Prismatic VLM) with primitive-aware LoRA fine-tuning; (b) π0.5-primitive — π0.5 flow-matching policy on PaliGemma backbone with 16-step action chunks under matched LoRA recipe.
+    LLM: Llama-2 7B (OpenVLA cell); PaliGemma (π0.5 cell)
+    Parameters: OpenVLA-primitive: 7B base + LoRA rank-32 adapter (~25M trainable). π0.5-primitive: ~3B base + matched LoRA. Total ~3,600 H100-hours across 12 main cells + ablations.
+  Tags: vla, few-shot-transfer, in-context-learning, primitive-decomposition, hierarchical, subspace-ablation, linear-probing, mechanistic-interpretability, openvla-base, pi0.5-base, lora, reassemble, libero, chunked-policy, causal-intervention
+  Benchmarks:
+    libero: libero_long=71.0
+  Eval Conditions: {'libero': 'm=3 few-shot transfer on held-out LIBERO-Long tasks; no weight updates; primitive boundaries constructed via sub-task structure (move-to/grasp/transport/place)', 'primary': 'Industrial contact-rich assembly on REASSEMBLE (NIST Task Board 1) — 6 held-out (object, primitive) combinations spanning compositional distance 1–3 held-out pairs', 'cross_dataset': 'LIBERO-Long household manipulation with sub-task primitive boundaries (move-to / grasp / transport / place)', 'out_of_vocabulary': 'Threaded-fastener rotate-to-engage task where rotate-to-engage primitive is absent from training vocabulary — primitive-trained underperforms flat-trained (0.08 vs 0.14 at m=5)', 'subspace_ablation': 'Layer-24 4-D primitive-decodable subspace ablation drops m=3 success 0.62→0.30 (OpenVLA) and 0.66→0.34 (π0.5); random subspace control drops by 0.02 only', 'evaluation_gate': 'Corrected element-level rate (vmodel) calibrated against ground-truth chunk distributions with τ=0.01; replaces legacy 3σ frame gate that fails π0.5 16-step ground-truth chunks at 42% rate', 'hardware_real': 'Simulation only — sim-to-real not tested'}
+  AI Review Summary: OpenVLA 7B와 π0.5에 **architectural 변경 없이** primitive-segmented data + primitive-specific 언어 prompt로 LoRA fine-tune하면, test time에 m=3 시범만으로 fine-tune upper-bound의 78–80%를 달성. Linear probe로 식별한 layer-24의 **4-D primitive-decodable subspace**를 inference time에 orthogonal projection으로 제거하면 success가 32 pp 폭
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: ProGAL-VLA
   Organization: University of Illinois Chicago
   Date: 2026-04-10
@@ -4575,5 +4595,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 215 models, 106 with LIBERO scores
+Total: 216 models, 106 with LIBERO scores
 ================================================================================
