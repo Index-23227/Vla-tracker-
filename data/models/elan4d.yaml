@@ -1,0 +1,49 @@
+# Paper: ELAN4D: Embodiment-Centric 4D Supervision for Vision-Language-Action Models via Plug-and-Play Adaptation
+# arXiv: 2605.30484
+
+name: ELAN4D
+full_name: "ELAN4D: Embodiment-Centric 4D Supervision for Vision-Language-Action Models via Plug-and-Play Adaptation"
+organization: "University of Oxford / CUHK-Shenzhen / Tsinghua / SJTU"
+date: "2026-05-28"
+paper_url: https://arxiv.org/abs/2605.30484
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "PaliGemma VLM + Action Expert (built on top of pi_0 / pi_0.5)"
+  action_head: "Conditional flow-matching action expert (7-DoF end-effector delta + gripper) with plug-and-play 4D control branch (ControlNet-style residual, gradient-isolated, zero-initialized projection) and lightweight track decoder (Point MLP + Control MLP + Fusion MLP) predicting H x K x 3 robot-keypoint displacements"
+  action_head_category: flow_matching
+  parameters: "~3B (PaliGemma 3B backbone + action expert, plug-and-play 4D branch is lightweight)"
+  key_innovation: "Embodiment-centric 4D supervision using robot keypoint displacement tracks derived from proprioceptive joint angles via forward kinematics, avoiding expensive external trackers (saves ~4 GPU-hours vs whole-scene tracking, only ~1 CPU-min). The 4D signal is injected via a ControlNet-style residual control branch with stop-gradient and zero-initialized projection that preserves the pretrained VLA backbone, with auxiliary track loss L = L_act + 0.1 * L_track."
+
+benchmarks:
+  libero:
+    libero_spatial: 97.4
+    libero_object: 99.0
+    libero_goal: 96.4
+    libero_long: 95.2
+    libero_avg: 97.0
+    source: "Table 2 (ELAN4D applied to pi_0.5 backbone)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned, pi_0.5 backbone with ELAN4D 4D supervision"
+  robotwin_v2:
+    robotwin_v2_avg: 37.0
+    source: "Table on RoboTwin2.0 bimanual (ELAN4D on pi_0.5)"
+    date_reported: "2026-05-28"
+    eval_condition: "fine-tuned bimanual, pi_0.5 backbone with ELAN4D"
+
+training:
+  dataset: "LIBERO (~2K demonstrations); RoboTwin 2.0 bimanual; real-world tasks (visual robustness / spatial generalization / temporal reasoning)"
+  steps: 30000
+  hardware: "8 x NVIDIA GH200 GPUs"
+  batch_size: 64
+  optimizer: "AdamW (LR 2.5e-5)"
+  keypoints: "K=8 (LIBERO), K=14 (RoboTwin 2.0), K=7 (real-world)"
+  track_loss_weight: 0.1
+
+eval_conditions:
+  libero: "fine-tuned"
+  robotwin_v2: "fine-tuned, bimanual"
+
+tags: [libero, robotwin, flow_matching, 4D_supervision, pi_0, plug_and_play, controlnet]

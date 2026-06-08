@@ -1,0 +1,139 @@
+# Paper: Revisiting Embodied Chain-of-Thought for Generalizable Robot Manipulation
+# arXiv: 2606.03784
+
+name: ERVLA
+full_name: "Revisiting Embodied Chain-of-Thought for Generalizable Robot Manipulation"
+organization: "Tsinghua University; Xiaomi Robotics; Peking University; CASIA; HKUST(GZ); Zhejiang University; Fudan University; Wuhan University; Shanghai Innovation Institute"
+date: "2026-06-03"
+paper_url: https://arxiv.org/abs/2606.03784
+code_url: https://taoshuaiz.github.io/ERVLA/
+venue: arXiv preprint
+open_source: true
+
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct (vision-language reasoning backbone)"
+  llm: "Qwen3-VL-4B"
+  action_head: "Mixture-of-Transformers: 36-layer Diffusion Transformer (DiT) policy with flow-matching for continuous action generation. DiT conditions only on the knowledge-truncated semantic-prefix KV cache from the VLM (state token, projected state, noisy action tokens with AdaLN-injected diffusion timestep). An auxiliary 'choice policy' branch reads action-query hidden states inside the VLM to predict N=5 candidate action chunks plus scalar scores via L1+score loss; the DiT loss back-propagates through the VLM only via the semantic prefix (knowledge truncation) so synthetic control-query tokens cannot leak into action conditioning."
+  action_head_category: flow_matching
+  action_space: "continuous; 60-dim padded action vector supporting single-arm and dual-arm; pre-train action horizon 30, LIBERO horizon 10, VLABench horizon 10"
+  parameters: "~4B VLM (Qwen3-VL-4B) + 36-layer DiT action head"
+  key_innovation: >
+    Reframes embodied CoT as a *training signal* that reshapes the VLA representation space rather
+    than a mandatory autoregressive prefix. Three core ingredients: (1) reasoning dropout (p_cot=0.5)
+    that randomly replaces the explicit CoT span with an empty <cot></cot> token while still
+    supervising the same action outputs, bypassing autoregressive compounding errors at inference,
+    (2) auxiliary choice-policy branch on the VLM backbone that supervises N=5 candidate
+    continuous-action chunks via action-query tokens, injecting action-level discrimination into the
+    VLM, and (3) knowledge-truncated KV conditioning: DiT only attends to the semantic-prefix KV
+    cache, never to action-query or state-query control tokens, preventing shortcut copying.
+    Identifies a 'CoT contamination' failure mode where jittery dense grounding labels degrade
+    control and shows it is mitigated by sparse supervision plus reasoning dropout. Curates the
+    largest embodied-CoT corpus to date: 978,743 trajectories, 226.3M samples, 2592.5 hours.
+
+training:
+  dataset: "Pre-training corpus: 978.7K trajectories / 226.3M samples / 2592.5 hours mixed from AgiBot (765.6K traj, weight 0.518), DROID (74.7K, 0.180), Fractal (86.7K, 0.120), BridgeData V2 (43.8K, 0.100), MolmoAct (7.9K, 0.082). Post-training: LIBERO-10/Spatial/Object/Goal (500 traj each, 138K+63K+74K+62K samples) and VLABench (5,000 traj, 575K samples). All annotated with structured CoT (Understanding, Grounding, Planning, Acting) including multi-view object grounding."
+  method: "Two-stage: (1) large-scale embodied-CoT pre-training with end-to-end joint optimization of flow-matching diffusion loss, choice/score loss, and CoT next-token-prediction loss, p_cot=0.5 reasoning dropout; (2) benchmark-specific post-training on LIBERO (10K steps) or VLABench (20K steps). Zero-shot LIBERO-to-LIBERO-Plus transfer for the headline LIBERO-Plus number."
+  pretrain_steps: 120000
+  batch_size: 64
+  optimizer: "DeepSpeed FusedAdam (betas (0.9, 0.95), wd 0.1)"
+  learning_rate: "5e-5 with 2,000-step warmup and cosine decay; bfloat16 mixed precision; gradient clip 1.0"
+  token_packing: "Enabled, max packed length 17,600 tokens"
+  hardware: "Not specified in the paper; DeepSpeed distributed training"
+
+benchmarks:
+  libero:
+    libero_plus_spatial: 96.2
+    libero_plus_object: 89.6
+    libero_plus_goal: 79.6
+    libero_plus_long: 82.1
+    libero_plus_camera: 77.2
+    libero_plus_robot: 75.3
+    libero_plus_language: 87.1
+    libero_plus_light: 95.1
+    libero_plus_background: 94.7
+    libero_plus_noise: 92.3
+    libero_plus_layout: 86.4
+    libero_plus_avg: 86.9
+    source: "ERVLA paper Table 3 (LIBERO-Plus zero-shot transfer; post-trained on LIBERO only)"
+    date_reported: "2026-06-03"
+    eval_condition: "post-trained on LIBERO-10/Spatial/Object/Goal, zero-shot evaluation on the LIBERO-Plus perturbation suite (camera, state, language, background, layout, lighting, noise, robot shifts)"
+    notes: "LIBERO-Plus average 86.9 surpasses pi0.5 (85.5), PokeVLA (79.3), OpenVLA-OFT (69.6), pi0-FAST (61.6), pi0 (53.6); 100% on background and lighting variations of Spatial track."
+  real_world:
+    basic_sr: 96.0
+    basic_ps: 97.0
+    distractor_sr: 44.0
+    distractor_ps: 58.0
+    semantic_sr: 42.0
+    semantic_ps: 58.0
+    long_horizon_sr: 38.0
+    long_horizon_ps: 55.0
+    avg_sr: 55.0
+    avg_ps: 67.0
+    source: "ERVLA paper Table 14 (real-robot 20 tasks across 4 difficulty tiers, 5 trials/task, third-person + wrist camera)"
+    date_reported: "2026-06-03"
+    eval_condition: "Real-robot drawer-placing + table-clearing across Basic/Distractor/Semantic/Long-horizon tiers; outperforms pi0.5 (53/60), UniVLA (37/50), WorldVLA (34/47), ECoT (24/35)."
+
+vlabench:
+  in_dist_sr: 69.7
+  in_dist_ps: 81.1
+  in_dist_is: 84.2
+  cross_category_sr: 47.0
+  cross_category_ps: 61.0
+  cross_category_is: 66.4
+  commonsense_sr: 44.0
+  commonsense_ps: 55.0
+  commonsense_is: 57.2
+  instruction_sr: 58.0
+  instruction_ps: 70.2
+  instruction_is: 73.8
+  texture_sr: 47.4
+  texture_ps: 62.3
+  texture_is: 70.6
+  avg_sr: 53.2
+  avg_ps: 65.9
+  avg_is: 70.4
+  source: "ERVLA paper Table 4 (VLABench, post-trained on VLABench 5K traj for 20K steps)"
+  date_reported: "2026-06-03"
+  eval_condition: "post-trained on VLABench, full benchmark eval across 5 tracks (In-dist, Cross-Category, Commonsense, Instruction, Texture); SR/PS/IS = Success Rate / Progress Score / Intention Score."
+  notes: "Avg SR 53.2 beats pi0.5 (48.1), pi0-FAST (39.8), ACoT-VLA (47.4 PS), X-VLA (51.1 PS), pi0 (29.4)."
+
+ablations:
+  libero_plus_total:
+    no_choice_e2e: 61.9
+    no_cot: 70.8
+    no_choice_plus_knowledge_insulation: 76.5
+    choice_no_knowledge_truncation: 84.7
+    full_ervla: 86.9
+    source: "ERVLA paper Table 3 (gray rows)"
+    notes: "Demonstrates that BOTH the choice-policy branch AND knowledge truncation contribute substantially; removing choice drops 25 pts, removing knowledge-truncation drops 2.2 pts."
+  vlabench_avg_sr:
+    no_choice_e2e: 39.2
+    no_cot: 40.9
+    no_choice_plus_knowledge_insulation: 42.6
+    choice_no_knowledge_truncation: 47.2
+    full_ervla: 53.2
+    source: "ERVLA paper Table 4 (gray rows)"
+
+eval_conditions:
+  libero: "post-trained on LIBERO 4 suites (10K steps)"
+  libero_plus: "zero-shot direct transfer from LIBERO post-training"
+  vlabench: "post-trained on VLABench (20K steps)"
+  real_world: "Franka-style single-arm with third-person + wrist camera; 5 trials per task across 20 tasks"
+
+tags:
+  - vla
+  - embodied-cot
+  - chain-of-thought
+  - flow-matching
+  - dit
+  - mixture-of-transformers
+  - knowledge-truncation
+  - reasoning-dropout
+  - choice-policy
+  - qwen3-vl
+  - libero-plus
+  - vlabench
+  - real-world
+  - 4B

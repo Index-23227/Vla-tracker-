@@ -1,0 +1,105 @@
+# Paper: Primitive Subspaces Mediate Few-Shot Transfer in VLAs
+# arXiv: 2605.30695
+
+name: PrimSubVLA
+full_name: "Primitive Subspaces Mediate Few-Shot Transfer in VLAs"
+organization: "Rellings Systems (Anya Singh, Cabrel Happi, Jai Relan, Varun Nair, Vidyut Baradwaj)"
+date: "2026-05-29"
+paper_url: https://arxiv.org/abs/2605.30695
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Two cells: (a) OpenVLA-primitive — OpenVLA 7B autoregressive (Llama-2 + Prismatic VLM) with primitive-aware LoRA fine-tuning; (b) π0.5-primitive — π0.5 flow-matching policy on PaliGemma backbone with 16-step action chunks under matched LoRA recipe."
+  llm: "Llama-2 7B (OpenVLA cell); PaliGemma (π0.5 cell)"
+  action_head: "Inherits backbone action heads. OpenVLA-primitive: autoregressive discrete-action tokens. π0.5-primitive: flow-matching action expert with 16-step chunks. Primitive-aware training only modifies data segmentation and language conditioning — no architectural change. A 4-D primitive-decodable subspace emerges at layer 24 of OpenVLA / equivalent layer of π0.5."
+  action_head_category: hybrid
+  action_space: "OpenVLA cell: 7-DoF discretized tokens; π0.5 cell: 16-step continuous flow-matched chunks (D=8)"
+  parameters: "OpenVLA-primitive: 7B base + LoRA rank-32 adapter (~25M trainable). π0.5-primitive: ~3B base + matched LoRA. Total ~3,600 H100-hours across 12 main cells + ablations."
+  key_innovation: >
+    Primitive-aware training as a data-view modification (no architectural change): training
+    episodes are segmented at primitive boundaries (pick / insert / remove / place on REASSEMBLE;
+    move-to / grasp / transport / place on LIBERO-Long) and conditioned on primitive-specific
+    language prompts rather than flat task descriptions. At test time the same model accepts
+    m demonstrations encoded as mean-pooled vision features prepended to the prompt — no
+    weight updates — and composes learned sub-skills to execute held-out tasks. A 4-dimensional
+    primitive-decodable subspace of layer-24 hidden states is shown via linear probes (macro-F1
+    0.79–0.81) and is causally necessary: orthogonal projection that ablates only this subspace
+    drops few-shot success by 32 percentage points (0.62 → 0.30 OpenVLA; 0.66 → 0.34 π0.5),
+    while ablating a random subspace of equal dimensionality leaves success within 2 pp of
+    baseline. The paper also corrects a family-wise inflation in single-step action-range gates
+    applied to chunked policies (π0.5's 16-step chunks suffer a structural 13.4× false-failure
+    inflation vs. single-step policies; legacy gate fails ground-truth REASSEMBLE chunks at 42%).
+
+training:
+  dataset: "REASSEMBLE (4,551 demos, 17 objects × 4 primitives) primary; LIBERO-Long cross-dataset replication. 56 demos per held-out task in REASSEMBLE; 40–75 in LIBERO-Long."
+  method: "Matched LoRA fine-tuning across 4 cells (2 architectures × 2 data views) × 3 seeds = 12 main cells. Both views share source-demo split assignments to control for data quantity. Held-out: 6 (object, primitive) combinations excluded entirely from training."
+  hyperparameters:
+    lora_rank: 32
+    lora_alpha: 64
+    lora_dropout: 0.05
+    learning_rate: 5.0e-5
+    optimizer: "AdamW (β1=0.9, β2=0.999), weight decay 0.01"
+    training_steps: 30000
+    batch_size: 32
+    precision: bfloat16
+    warmup_steps: 500
+    lr_schedule: "cosine decay"
+    gradient_clipping: 1.0
+    seeds: "{42, 123, 456}"
+  hardware: "~3,600 H100-hours total. OpenVLA fits on single H100; π0.5 needs 2 H100s with model parallelism."
+  few_shot_protocol: "At test time, m ∈ {0, 1, 3, 5, 10} demonstration episodes encoded via mean-pooled vision features over 4 uniformly sampled keyframes per demo, concatenated, prepended to language prompt. No weight updates."
+
+benchmarks:
+  libero:
+    libero_long: 71.0
+    source: "Paper Table 3 / Table 15 — LIBERO-Long few-shot at m=3, OpenVLA-primitive cell, mean across 3 seeds (per-task: L1=0.85, L2=0.74, L3=0.72, L4=0.69, L5=0.65, L6=0.61). π0.5-primitive: 74.0%. OpenVLA-flat baseline: 42.0%."
+    date_reported: "2026-05-29"
+    eval_condition: "m=3 few-shot transfer on held-out LIBERO-Long tasks; no weight updates; primitive boundaries constructed via sub-task structure (move-to/grasp/transport/place)"
+    notes: "Not directly comparable to standard LIBERO leaderboard (different protocol: held-out task few-shot transfer, not full fine-tuning per suite). Reported as percentage of trials succeeding."
+  reassemble:
+    success_m0: 27.0
+    success_m1: 41.0
+    success_m3: 62.0
+    success_m5: 71.0
+    success_m10: 78.0
+    finetune_upper_bound_50demos: 79.0
+    source: "Paper Table 2 — OpenVLA-primitive cell on REASSEMBLE held-out tasks, mean ± SD across 3 seeds, 50 rollouts per cell"
+    date_reported: "2026-05-29"
+    eval_condition: "6 held-out (object, primitive) pairs; few-shot transfer with m demonstrations; chunked-policy evaluation uses corrected element-level gate"
+    notes: "π0.5-primitive cell achieves 0.31 / 0.44 / 0.66 / 0.74 / 0.81 at same m budgets; FT upper bound 0.82. Flat-trained cells achieve roughly half: OpenVLA-flat m=3 = 0.34, π0.5-flat m=3 = 0.31."
+
+eval_conditions:
+  primary: "Industrial contact-rich assembly on REASSEMBLE (NIST Task Board 1) — 6 held-out (object, primitive) combinations spanning compositional distance 1–3 held-out pairs"
+  cross_dataset: "LIBERO-Long household manipulation with sub-task primitive boundaries (move-to / grasp / transport / place)"
+  out_of_vocabulary: "Threaded-fastener rotate-to-engage task where rotate-to-engage primitive is absent from training vocabulary — primitive-trained underperforms flat-trained (0.08 vs 0.14 at m=5)"
+  subspace_ablation: "Layer-24 4-D primitive-decodable subspace ablation drops m=3 success 0.62→0.30 (OpenVLA) and 0.66→0.34 (π0.5); random subspace control drops by 0.02 only"
+  baselines:
+    zero_shot_primitive_sequencing: 0.27
+    flat_few_shot: 0.34
+    diffusion_policy_cnn: 0.36
+    octo_style_demo_conditioned: 0.41
+    primitive_few_shot_ours: 0.62
+    full_finetune_50demos_ub: 0.79
+  evaluation_gate: "Corrected element-level rate (vmodel) calibrated against ground-truth chunk distributions with τ=0.01; replaces legacy 3σ frame gate that fails π0.5 16-step ground-truth chunks at 42% rate"
+  hardware_real: "Simulation only — sim-to-real not tested"
+
+tags:
+  - vla
+  - few-shot-transfer
+  - in-context-learning
+  - primitive-decomposition
+  - hierarchical
+  - subspace-ablation
+  - linear-probing
+  - mechanistic-interpretability
+  - openvla-base
+  - pi0.5-base
+  - lora
+  - reassemble
+  - libero
+  - chunked-policy
+  - causal-intervention

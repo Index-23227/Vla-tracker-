@@ -1,0 +1,126 @@
+# Paper: Continuous Reasoning for Vision-Language-Action
+# arXiv: 2606.00229
+
+name: CR-VLA
+full_name: "Continuous Reasoning for Vision-Language-Action"
+organization: "AIRoA"
+date: "2026-05-29"
+paper_url: https://arxiv.org/abs/2606.00229
+code_url: null
+venue: arXiv technical report
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (PaliGemma-style VLM with chunked flow-matching action expert)"
+  llm: "pi0.5 base VLM (inherited)"
+  action_head: "Chunked flow-matching action head conditioned on a shared continuous-reasoning interface; block-causal attention across K=4 chunks of length C=4 (action horizon H=16); within-chunk flow matching predicts a temporally extended action segment in parallel"
+  action_head_category: flow_matching
+  action_space: "continuous; H=16 action horizon split into K=4 chunks of size C=4"
+  parameters: "pi0.5-scale (backbone unchanged); reasoning interface adds N_tau=2 thought slots + WAE encoder/decoder with latent dim d_z=128"
+  key_innovation: >
+    Continuous Reasoning treats VLA reasoning as a reusable internal interface rather than a language-like trace.
+    The student VLA-A generates N_tau=2 raw continuous "thought" vectors slot-by-slot (autoregressively committed
+    to KV cache), regularizes them into a shared Gaussian latent code z via a Wasserstein autoencoder
+    (reconstruction + IMQ-MMD prior matching, distributed across GPUs), and decodes z into a shared reasoning
+    interface that conditions a chunk-structured flow-matching action head. An EMA teacher (gamma_EMA=0.994)
+    receives the SAME latent code z, decodes it with its own WAE decoder, and must use the resulting interface
+    to predict the same target velocity field. This "self-verification" loss (L_verify, weight 0.1) operationally
+    enforces that thoughts are shareable across model instances rather than producer-private. Block-causal
+    chunk masking + absence of per-chunk shortcut paths force action prediction to depend on the shared
+    reasoning interface, aligning reasoning granularity with chunk-level control.
+
+training:
+  dataset: "LIBERO-PRO (4 suites x 10 tasks) for sim; ~1198 TX-G2 trajectories (Bowl Stacking 129 / Clothes Sorting 514 / Cutlery Transfer 206 / Dish Racking 349) and ~1205 HSR trajectories (Mug Rectangle 399 / Coffee Bottle->Box 295 / Box Rearrangement 195 / Coffee Bottles->Table 316) for real-robot fine-tuning"
+  method: "Combined objective L = L_fm + L_wae + lambda_verify * L_verify, with L_fm flow-matching MSE on velocity field, L_wae = lambda_rec * reconstruction MSE + lambda_mmd * MMD(z, N(0,I)), and L_verify the EMA-teacher self-verification MSE"
+  config:
+    action_horizon_H: 16
+    chunk_size_C: 4
+    num_chunks_K: 4
+    thought_slots_N_tau: 2
+    latent_dim_d_z: 128
+    lambda_verify: 0.1
+    ema_decay: 0.994
+    thought_curriculum_steps: "[0, 2000]"
+  real_robot_finetune_steps: "150k for all real-robot baselines"
+  hardware: "RTX 5070 for real-robot inference; multi-GPU multi-node training with distributed WAE-MMD aggregation"
+
+benchmarks:
+  libero:
+    libero_spatial: 76.1
+    libero_object: 86.5
+    libero_goal: 61.6
+    libero_long: 49.6
+    libero_avg: 64.0
+    note: "LIBERO-PRO suite means (object/position/semantic/task averaged within each suite), NOT standard LIBERO. Per-suite means computed from Table 1: libero_spatial = mean(97.5,51.0,96.0,60.0)=76.125; libero_object = mean(93.0,54.5,99.0,27.0)=68.375; libero_goal = mean(81.5,36.0,96.0,33.0)=61.625; libero_long(libero_10) = mean(66.5,15.5,88.5,28.5)=49.75. Overall mean = 64.0 (paper-reported)."
+    libero_pro_object_avg: 84.6
+    libero_pro_position_avg: 39.3
+    libero_pro_semantic_avg: 94.9
+    libero_pro_task_avg: 37.1
+    source: "Paper Table 1 + Appendix C Table A2; suite means recomputed from per-perturbation cells"
+    date_reported: "2026-05-29"
+    eval_condition: "fine-tuned, LIBERO-PRO protocol (20 trials/task x 10 tasks = 200 episodes per suite-perturbation cell)"
+  calvin:
+    calvin_abc_d_avg_len: 4.27
+    source: "Paper Figure A2 (Appendix D); pi0.5 reports 3.92, X-VLA 4.43, VLA-Adapter 4.42, OpenVLA-OFT 3.27, UniVLA 3.80"
+    date_reported: "2026-05-29"
+    eval_condition: "fine-tuned, CALVIN ABC->D"
+
+real_robot:
+  tx_g2:
+    description: "AgiBot G2-compatible bimanual platform, 3 cameras, 10 Hz; 10 episodes per task (8 in-dist + 2 OOD placements)"
+    cutlery_transfer_subtask: 22.5
+    bowl_stacking_subtask: 70.0
+    clothes_sorting_subtask: 95.0
+    dish_racking_subtask: 87.5
+    cutlery_transfer_e2e: 0.0
+    bowl_stacking_e2e: 40.0
+    clothes_sorting_e2e: 80.0
+    dish_racking_e2e: 60.0
+    mean_subtask_success: 68.75
+    pi0_5_mean_subtask: 48.95
+    improvement_over_pi0_5_subtask: "+40.4% relative (mean over four tasks)"
+    source: "Paper Table 2 + Appendix E Table A5"
+  hsr:
+    description: "Toyota HSR mobile-manipulation platform, 2 Hz; four long-horizon tasks combining locomotion + manipulation"
+    coffee_bottle_to_box_subtask: 83.3
+    coffee_bottles_to_table_subtask: 83.3
+    box_rearrangement_subtask: 58.3
+    mug_rectangle_subtask: 75.0
+    coffee_bottle_to_box_e2e: 66.7
+    coffee_bottles_to_table_e2e: 66.7
+    box_rearrangement_e2e: 16.7
+    mug_rectangle_e2e: 50.0
+    mean_subtask_success: 74.975
+    pi0_5_mean_subtask: 59.375
+    improvement_over_pi0_5_subtask: "+26.3% relative (mean over four tasks)"
+    source: "Paper Table 2 + Appendix E Table A6"
+
+eval_conditions:
+  libero: "fine-tuned, LIBERO-PRO robustness protocol (NOT standard LIBERO)"
+  calvin: "fine-tuned, ABC->D generalization"
+  real_robot: "fine-tuned 150k steps per platform; RTX 5070 deployment"
+
+ablation:
+  full_cr_overall: 64.0
+  wo_gaussian_latent: 59.2
+  wo_chunk_causal_mask: 61.1
+  wo_continuous_thoughts: 60.6
+  wo_self_verification: 60.5
+  note: "Largest degradation when Gaussian latent structuring is removed (-4.8 overall, -9.1 position, -12.2 task)"
+
+tags:
+  - vla
+  - reasoning
+  - latent-cot
+  - continuous-reasoning
+  - flow-matching
+  - pi0.5
+  - wasserstein-autoencoder
+  - ema-teacher
+  - self-verification
+  - libero-pro
+  - calvin
+  - real-robot
+  - tx-g2
+  - hsr
+  - airoa

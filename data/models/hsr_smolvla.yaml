@@ -1,0 +1,70 @@
+# Paper: Per-Group Error, Not Total MSE: Fine-Tuning Vision-Language-Action Models for 11-DoF Mobile Manipulation
+# arXiv: 2606.00253
+
+name: HSR-SmolVLA
+full_name: "HSR-SmolVLA: Per-Group Error Fine-Tuning of SmolVLA for 11-DoF Toyota HSR Mobile Manipulation"
+organization: "Vision for Robotics Lab (V4R), TU Wien"
+date: "2026-05-29"
+paper_url: https://arxiv.org/abs/2606.00253
+code_url: https://github.com/paumontagut/per-group-mse-vla
+venue: "ICRA 2026 Workshop: From Data to Decisions - VLA Pipelines for Real Robots"
+open_source: true
+
+architecture:
+  backbone: "SmolVLA (SmolVLM2-500M VL encoder, frozen)"
+  llm: "SmolLM2 (via SmolVLM2-500M)"
+  action_head: "Flow-matching action expert with configurable output dimensionality, natively set to 11D for the Toyota HSR (5 arm + 1 gripper + 2 head + 3 base joints). Predicts 50-step action chunks at 129 ms cadence. Action expert is the only trainable module; the SmolVLM2 backbone stays frozen."
+  action_head_category: flow_matching
+  action_space: "continuous 11-DoF (arm 5, gripper 1, head 2, base 3); 50-step chunk"
+  parameters: "450M total (SmolVLA), action expert only is trained"
+  key_innovation: >
+    A two-phase fine-tuning pipeline that produces a native 11-DoF SmolVLA variant for the Toyota HSR mobile
+    manipulator and, alongside it, a per-joint-group MSE analysis (arm / gripper / head / base) used as the
+    checkpoint-selection signal in place of aggregate MSE. The work shows that on heterogeneous action spaces
+    the aggregate MSE hides slow-converging groups (mobile base for SmolVLA, arm under expert-only fine-tuning
+    of pi_0.5), so per-group error tracks real-robot success better than total MSE. HSR-SmolVLA is the named
+    Phase-2 checkpoint released by this study (B32 40k).
+
+training:
+  dataset: >
+    Phase 1: 109,269-episode HSR-only subset of the AIRoA 10k / ICRA 2026 workshop dataset (531 tasks).
+    Phase 2: 3,971-episode six-task HSR pick-up release from the same workshop.
+  method: "Two-phase training. Phase 1: 20k steps of action-expert pretraining on 109k HSR episodes (batch size 32, SmolVLM2 backbone frozen). Phase 2: 50k steps of task-specific fine-tuning on the pick-up release with checkpoints saved every 5k steps; HSR-SmolVLA is the B32 40k checkpoint (lowest total MSE, 1.61 x 10^-3)."
+  optimizer: "Default LeRobot training recipe (SmolVLA flow-matching loss)"
+  batch_size: 32
+  steps: "20k (Phase 1 pretraining) + 50k (Phase 2 fine-tuning); HSR-SmolVLA = 40k checkpoint of Phase 2"
+  hardware: "1 x NVIDIA RTX 3090 (24 GB)"
+
+benchmarks:
+  hsr_pickup:
+    real_robot_score_mean: 3.5
+    real_robot_score_max: 4.0
+    real_robot_trials: 20
+    real_robot_n4_complete: 12
+    real_robot_n3_touch_no_lift: 6
+    real_robot_n2_approach_no_grasp: 2
+    real_robot_n1_no_approach: 0
+    offline_total_mse_x1e3: 1.61
+    offline_arm_mse_x1e3: 0.88
+    offline_gripper_mse_x1e3: 3.77
+    offline_head_mse_x1e3: 0.01
+    offline_base_mse_x1e3: 3.18
+    source: "Per-Group Error paper Tables I and III; B32 40k checkpoint, Toyota HSR mug + cracker-box pick-up"
+    date_reported: "2026-05-29"
+    eval_condition: "fine-tuned, real-robot 20 trials on Toyota HSR pick-up task"
+
+eval_conditions:
+  hsr_pickup: "fine-tuned on 3,971-episode HSR pick-up release; 20 real-robot trials per model graded on a 4-point rubric (4 = complete, 3 = touches no lift, 2 = approaches no grasp, 1 = no approach)"
+
+tags:
+  - vla
+  - smolvla
+  - mobile-manipulation
+  - 11-dof
+  - flow-matching
+  - per-group-error
+  - toyota-hsr
+  - fine-tuning
+  - real-robot
+  - icra2026-workshop
+  - 450M
