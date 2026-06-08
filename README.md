@@ -47,15 +47,15 @@ VLA-Tracker solves this by:
 | 2 | **QuoVLA** | **99.6** | May 2026 | — | Flow matching + 8-bit quantized prefix (pi0.5 base) |
 | 3 | **PriorVLA** | **99.05** | May 2026 | — | Dual-expert flow matching (pi0.5 backbone) |
 | 4 | PLD | 99.0 | Oct 2025 | ICLR 2026 | Residual RL |
-| 5 | SimpleVLA-RL | 98.83 | Sep 2025 | ICLR 2026 | AR + GRPO RL |
-| 6 | DualCoT-VLA | 98.8 | Mar 2026 | — | Flow matching + parallel CoT |
-| 7 | SnapFlow | 98.75 | Apr 2026 | — | One-step flow distillation (pi0.5 base) |
-| 8 | **IntentVLA** | **98.62** | May 2026 | — | DiT flow-matching + VGGT short-horizon intent |
-| 9 | **AttenA+** | **98.6** | May 2026 | arXiv | Inverse-velocity loss reweighting (plug-in) |
-| 10 | DiT4DiT | 98.55 | Mar 2026 | — | Cosmos DiT + flow-matching action |
-| 11 | **G3T-AML** | **98.55** | May 2026 | arXiv | 16-layer DiT on learned action manifold |
-| 12 | **GTA-VLA** | **98.45** | May 2026 | arXiv | Flow matching + Guide-Think-Act reasoning |
-| 13 | **GaussianDream** | **98.4** | May 2026 | — | Flow matching + Gaussian world model prefix |
+| 5 | **MPCoT** | **98.85** | Jun 2026 | arXiv | OFT parallel-decoding + multi-path latent CoT |
+| 6 | SimpleVLA-RL | 98.83 | Sep 2025 | ICLR 2026 | AR + GRPO RL |
+| 7 | DualCoT-VLA | 98.8 | Mar 2026 | — | Flow matching + parallel CoT |
+| 8 | SnapFlow | 98.75 | Apr 2026 | — | One-step flow distillation (pi0.5 base) |
+| 9 | **3DThinkVLA** | **98.65** | Jun 2026 | arXiv | OFT regression + 3D-thinking-guided co-training |
+| 10 | IntentVLA | 98.62 | May 2026 | — | DiT flow-matching + VGGT short-horizon intent |
+| 11 | AttenA+ | 98.6 | May 2026 | arXiv | Inverse-velocity loss reweighting (plug-in) |
+| 12 | DiT4DiT | 98.55 | Mar 2026 | — | Cosmos DiT + flow-matching action |
+| 13 | G3T-AML | 98.55 | May 2026 | arXiv | 16-layer DiT on learned action manifold |
 
 > Full leaderboard with 106 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
