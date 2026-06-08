@@ -1,0 +1,60 @@
+name: WALL-WM
+full_name: "WALL-WM: Carving World Action Modeling at the Event Joints"
+organization: "X-Square-Robot"
+date: "2026-06-01"
+paper_url: https://arxiv.org/abs/2606.01955
+code_url: https://github.com/X-Square-Robot/wall-x
+venue: arXiv preprint
+open_source: true
+
+architecture:
+  backbone: "Wan2.2-5B video tower + Qwen3.5-VL-9B reasoning module (event mode)"
+  llm: "Qwen3.5-VL-9B (event-mode reasoning); WALL-WM core uses 3D causal VAE + Wan-style DiT"
+  action_head: "Action DiT with Wan-style flow matching (v-prediction); Staircase Decoding partitions transformer at relay depth N_r to enable parallel generation of continuous latent reasoning sequences; supports variable-length event-mode chunks and fixed-length unified-mode chunks"
+  action_head_category: flow_matching
+  action_space: "bimanual continuous; variable-length action chunks (event mode) or fixed-length (unified mode)"
+  parameters: "Wan2.2-5B (video) + 9B (Qwen3.5-VL reasoning), total ~14B"
+  key_innovation: >
+    Event-centric world action modeling. The pretrained video backbone (Wan2.2-5B) is repurposed
+    via embodied training into a physical prior, and an action DiT layer is coupled through
+    cross-attention to matched video-DiT layers. Two inference modes: (1) event mode uses a
+    fine-tuned Qwen3.5-VL-9B to convert task instructions into next-event descriptions that
+    condition the pretrained world-action backbone, (2) unified mode uses Staircase Decoding
+    for fixed-length chunk inference. Event mode provides reusable physical priors for grasp,
+    transfer, alignment, and release phases.
+
+training:
+  dataset: "Generalized embodied data mixture (multi-task, multi-embodiment, multi-view); Embodied Video Generation benchmark held-out split (200 ID + 50 OOD tasks)"
+  method: "Muon-optimizer-based large-scale pretraining; layer-coupled training of action DiT on top of Wan video tower; event-conditioned reasoning fine-tuning of Qwen3.5-VL-9B"
+  optimizer: "Muon optimizer"
+  steps: "not specified"
+  hardware: "not specified (paper mentions internally developed deployment platform suite)"
+
+benchmarks:
+  internal:
+    diverse_manipulation_task_progress: 75.86
+    reasoning_manipulation_task_progress: 71.60
+    co3dv2_point_err: 0.271
+    co3dv2_depth_err: 0.132
+    co3dv2_auc_5: 0.210
+    co3dv2_auc_30: 0.727
+    source: "WALL-WM paper Tables 2, 3, 5; Figures 16, 17"
+    date_reported: "2026-06-01"
+    eval_condition: "real-robot tabletop bimanual; Task Progress dense 0-100 metric"
+    notes: "WALL-WM uses Task Progress (continuous 0-100 with partial credit) instead of binary success rate; baselines: pi0.5 55.64 (Diverse), DreamZero 39.97, LingBot-VA 29.71; pi0.5 56.40 (Reasoning), DreamZero 32.70, LingBot-VA 31.60. WALL-WM-U-Scratch ablation: 63.00 / 59.50."
+
+eval_conditions:
+  real_robot: "high-performance tabletop bimanual arms; synchronized multi-view; Task Progress 0-100 with task-specific rubrics"
+  ood: "50 OOD tasks with novel object-verb pairings, paraphrased instructions"
+
+tags:
+  - vla
+  - world-model
+  - event-centric
+  - flow-matching
+  - dit
+  - bimanual
+  - wan
+  - qwen3-vl
+  - staircase-decoding
+  - 14B

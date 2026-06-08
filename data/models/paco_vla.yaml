@@ -1,0 +1,85 @@
+# Paper: PaCo-VLA: Passivity-Shielded Compliance Prior for Contact-Rich Vision-Language-Action Manipulation
+# arXiv: 2606.00515
+
+name: PaCo-VLA
+full_name: "PaCo-VLA: Passivity-Shielded Compliance Prior for Contact-Rich Vision-Language-Action Manipulation"
+organization: "Southwest Jiaotong University; University of Leeds"
+date: "2026-05-30"
+paper_url: https://arxiv.org/abs/2606.00515
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "OpenVLA as semantic proposal source (treated as black box; only used for binding/stage/recovery/admittance proposals)"
+  action_head: "Compliance prior interface: VLA emits a low-rate (50 Hz) tuple (semantic binding, task stage, recovery cue, diagonal admittance schedule M/D/K, validity quantities) instead of motor commands; a 250 Hz proposal-independent passivity shield projects the proposal into admissible boxes, enforces a sampled diagonal-admittance passivity margin, charges active mass/stiffness increases against an energy tank, and only then drives the Cartesian admittance port"
+  action_head_category: other
+  action_space: continuous
+  parameters: "Underlying OpenVLA backbone (7B class) used as proposal source; shield/runtime contract has no trainable parameters"
+  key_innovation: "Reframes the VLA-to-robot interface for contact-rich manipulation: rather than letting the VLA directly emit motor commands, treat its outputs as task-level compliance proposals (semantic binding, task stage, recovery cue, diagonal admittance schedule). A proposal-independent 250 Hz passivity shield then (i) clips into parameter boxes, (ii) enforces a sampled diagonal-admittance passivity margin (2D_i - (M_i - M_{k-1,i})/Δt_k >= 2*d_margin), and (iii) charges only positive M/K jumps to an energy tank with bounded interpolation β_k ∈ [0,1]. Because learned, classical, delayed, random, and recovery proposals all pass through the same shield, the applied-command contract is provably proposal-independent — enabling a sampled storage inequality S_k - S_{k-1} ≤ F_k^T v_k Δt_k + ε_k^num and clean causal attribution of semantic value via paired counterfactuals."
+
+training:
+  method: "No additional VLA training; PaCo-VLA wraps a pretrained OpenVLA service with a passivity-shielded compliance interface. The shield itself is parameter-free (governed by box / margin / tank hyperparameters in Table 5 of the paper)."
+  compute: "2 x NVIDIA RTX 4090 GPUs for OpenVLA inference (bfloat16); 250 Hz shield, classical controllers, force/torque logging and real-robot servo loop run without GPU acceleration"
+  notes: "Default runtime: safety projection/compliance 250 Hz, policy proposals 50 Hz, camera 10 Hz, d_margin=2, E_min=0.5, E_max=20, α=1.2, mass box [0.1,10], damping box [5,500], stiffness box [0,2000], OpenVLA service timeout 0.20 s, stale-proposal threshold 0.30 s. Seed 2026."
+
+inference_hz: 250
+
+benchmarks:
+  real_world:
+    connector_insertion_task_success_pct: 90.0
+    connector_insertion_physical_contact_success_pct: 100.0
+    ev_charging_gun_task_success_pct: 53.3
+    lateral_error_mm: 0.181
+    nonsemantic_baseline_task_success_pct: 40.0
+    energy_tank_baseline_task_success_pct: 60.0
+    nonsemantic_baseline_lateral_error_mm: 0.622
+    energy_tank_baseline_lateral_error_mm: 0.617
+    force_torque_threshold_violations: 0
+    vla_accept_fraction: 96.8
+    guarded_recovery_fraction: 2.7
+    source: "Paper Table 4 / Table 6 (balanced real-robot connector insertion, 10 trials per method) and main text (EV charging-gun transfer, 15 trials)"
+    date_reported: "2026-05-30"
+    eval_condition: "AUBO-i5 6-DoF arm, AG-160-95 gripper, wrist RealSense D435i + external D415, KWR75B six-axis F/T sensor; 4.5 mm target insertion depth, 4 N contact limit; balanced protocol 30 physical trials"
+  simpler_env:
+    notes: "Not evaluated; PaCo-VLA targets contact-rich admittance benchmarks, not SimplerEnv tabletop tasks"
+    source: "Paper scope"
+    date_reported: "2026-05-30"
+
+eval_conditions:
+  real_world: "Real AUBO-i5 connector / EV charging-gun insertion with 250 Hz passivity shield and F/T governor"
+  simulation: "MuJoCo connector-insertion: 1000-trial runtime-contract adversarial sampling (0/1000 violations vs 50.5% without projection); 192-trial matched classical-control comparison (PaCo-VLA proposals 31.8% task success, all baselines <=26%); 1584 paired counterfactual semantic trials (Live L+V 97.9% / Oracle 99.3%; all 7 counterfactual ablations 0% task success)"
+
+additional_benchmarks:
+  simulated_classical_control:
+    paco_vla_task_success: 0.318
+    rule_admittance: 0.255
+    passivity_observer: 0.250
+    energy_tank: 0.260
+    fixed_admittance: 0.000
+    force_scheduling: 0.000
+    source: "Paper Table 1, 192 matched simulated connector trials per controller"
+  semantic_counterfactual:
+    oracle_task_success: 0.993
+    live_lang_plus_vision_task_success: 0.979
+    shuffled_language: 0.000
+    masked_image: 0.000
+    wrong_object: 0.000
+    contradictory_language: 0.000
+    same_geom_diff_instr: 0.000
+    same_instr_diff_target: 0.000
+    stale_context: 0.000
+    random_proposal: 0.000
+    source: "Paper Table 2, 144 paired trials per condition (1584 total)"
+  direct_action_interface:
+    paco_vla_task_success: 0.7361
+    openvla_task_success: 0.0000
+    openvla_with_proj_task_success: 0.0000
+    diffusion_policy_task_success: 0.0139
+    act_task_success: 0.0000
+    octo_task_success: 0.0000
+    source: "Paper Table 3, N=144 direct learned-action matrix; PaCo-VLA dominates direct action-token interfaces under the same shield"
+
+tags: [contact-rich, compliance-control, admittance-control, passivity-shield, energy-tank, runtime-assurance, safety-filter, real-world, openvla-wrapper, connector-insertion]

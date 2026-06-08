@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-06-07T15:39:59.727208
-# Models: 209
+# Generated: 2026-06-08T02:50:52.351703
+# Models: 211
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -3732,6 +3732,25 @@ MODEL: OneVLA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: PaCo-VLA
+  Organization: Southwest Jiaotong University; University of Leeds
+  Date: 2026-05-30
+  Paper: https://arxiv.org/abs/2606.00515
+  Code: None
+  Venue: arXiv preprint
+  Open Source: False
+  Architecture:
+    Action Head: Compliance prior interface: VLA emits a low-rate (50 Hz) tuple (semantic binding, task stage, recovery cue, diagonal admittance schedule M/D/K, validity quantities) instead of motor commands; a 250 Hz proposal-independent passivity shield projects the proposal into admissible boxes, enforces a sampled diagonal-admittance passivity margin, charges active mass/stiffness increases against an energy tank, and only then drives the Cartesian admittance port
+    Backbone: OpenVLA as semantic proposal source (treated as black box; only used for binding/stage/recovery/admittance proposals)
+    LLM: None
+    Parameters: Underlying OpenVLA backbone (7B class) used as proposal source; shield/runtime contract has no trainable parameters
+  Inference: 250 Hz
+  Tags: contact-rich, compliance-control, admittance-control, passivity-shield, energy-tank, runtime-assurance, safety-filter, real-world, openvla-wrapper, connector-insertion
+  Eval Conditions: {'real_world': 'Real AUBO-i5 connector / EV charging-gun insertion with 250 Hz passivity shield and F/T governor', 'simulation': 'MuJoCo connector-insertion: 1000-trial runtime-contract adversarial sampling (0/1000 violations vs 50.5% without projection); 192-trial matched classical-control comparison (PaCo-VLA proposals 31.8% task success, all baselines <=26%); 1584 paired counterfactual semantic trials (Live L+V 97.9% / Oracle 99.3%; all 7 counterfactual ablations 0% task success)'}
+  AI Review Summary: OpenVLA를 black-box proposal source로 두고, 250 Hz **proposal-independent passivity shield**가 (i) admittance 파라미터 box 사영 + (ii) sampled passivity margin + (iii) energy tank로 양수 M/K jump만 차감하는 contact-rich VLA 인터페이스. AUBO-i5 실 로봇 connector insertion 90%(vs 비-semantic 40%, energy-tank 60%), 0/1000 시뮬레이션 p
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: Phone2Act
   Organization: Vivekanand Education Society's Institute of Technology (VESIT), Mumbai
   Date: 2026-05-03
@@ -4400,6 +4419,24 @@ MODEL: VP-VLA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: WALL-WM
+  Organization: X-Square-Robot
+  Date: 2026-06-01
+  Paper: https://arxiv.org/abs/2606.01955
+  Code: https://github.com/X-Square-Robot/wall-x
+  Venue: arXiv preprint
+  Open Source: True
+  Architecture:
+    Action Head: Action DiT with Wan-style flow matching (v-prediction); Staircase Decoding partitions transformer at relay depth N_r to enable parallel generation of continuous latent reasoning sequences; supports variable-length event-mode chunks and fixed-length unified-mode chunks
+    Backbone: Wan2.2-5B video tower + Qwen3.5-VL-9B reasoning module (event mode)
+    LLM: Qwen3.5-VL-9B (event-mode reasoning); WALL-WM core uses 3D causal VAE + Wan-style DiT
+    Parameters: Wan2.2-5B (video) + 9B (Qwen3.5-VL reasoning), total ~14B
+  Tags: vla, world-model, event-centric, flow-matching, dit, bimanual, wan, qwen3-vl, staircase-decoding, 14B
+  Eval Conditions: {'real_robot': 'high-performance tabletop bimanual arms; synchronized multi-view; Task Progress 0-100 with task-specific rubrics', 'ood': '50 OOD tasks with novel object-verb pairings, paraphrased instructions'}
+  AI Review Summary: Wan2.2-5B video tower를 embodied 데이터로 재학습시킨 14B 규모의 event-centric world action model. Action DiT + Staircase Decoding으로 가변 길이 action chunk를 생성하며, real-robot Diverse Manipulation 75.86 / Reasoning Manipulation 71.60 Task Progress로 π0.5(55.64/56.40) 대비 20점대 우위.
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: X-DiffVLA
   Organization: SKL-MAIS, Chinese Academy of Sciences; University of Chinese Academy of Sciences; Beijing Academy of Artificial Intelligence; BeingBeyond; Peking University
   Date: 2026-05-24
@@ -4462,5 +4499,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 209 models, 106 with LIBERO scores
+Total: 211 models, 106 with LIBERO scores
 ================================================================================
