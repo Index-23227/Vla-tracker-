@@ -1,0 +1,124 @@
+# Paper: Dive into the Scene: Breaking the Perceptual Bottleneck in Vision-Language Decision Making via Focus Plan Generation
+# arXiv: 2606.04046
+
+name: SceneDiver
+full_name: "Dive into the Scene: Breaking the Perceptual Bottleneck in Vision-Language Decision Making via Focus Plan Generation"
+organization: "State Key Lab of CAD&CG, Zhejiang University; Baiont Quant; Zhejiang Key Laboratory of Intelligent Medical Decision Support"
+date: "2026-06-02"
+paper_url: https://arxiv.org/abs/2606.04046
+code_url: https://future-item.github.io/SceneDiver
+venue: "ICML 2026 (PMLR 306)"
+open_source: true
+
+model_type: vla
+
+architecture:
+  backbone: "OpenVLA-OFT base policy + SceneDiver Adapter (Slot Attention + Scene-Aware MaskNet) positioned after the visual projector in cross-modal alignment space. VLM frontend evaluated with Qwen2.5-VL-7B/32B-Instruct-AWQ, InternVL2.5-8B, gpt-4o-mini, gemini-2.5-flash, doubao-seed-1.6-flash"
+  llm: "OpenVLA-OFT LLM backbone (Llama-2 7B family); SceneDiver itself is VLM-agnostic and tested with multiple open/closed-source VLMs"
+  action_head: "Inherited from OpenVLA-OFT; SceneDiver Adapter inserts between projector and LLM, generating task-conditioned soft focus masks via (1) Task-Guided Slot Attention with K object-centric slots (d_s=256) initialized from task vector v_task with T=5 refinement iterations and temperature tau=0.4, and (2) Scene-Aware MaskNet that combines slot-level relevance r_k = MLP([LN(s_k); Proj(m_k); Proj(v_task)]) with per-patch residual correction Delta_l (alpha~=0, learnable scale exp(beta), beta_init=1.1). Soft modulation I_out = s * I_dim + (1-s) * B_sigma(I_dim) attenuates luminance/high-frequency on background"
+  action_head_category: other
+  action_space: "continuous (inherits OpenVLA-OFT 7-DoF end-effector)"
+  parameters: "OpenVLA-OFT backbone (~7B class) + SceneDiver Adapter overhead ~3.01 ms / 2.64% of total 114.45 ms action generation on RTX 4090"
+  key_innovation: >
+    Reframes the VLA perceptual bottleneck (object hallucination, attention drift, mis-grounding) as a
+    *focus plan generation* problem rather than a representation problem. Two contributions:
+    (1) SceneDiver — a coarse-to-fine focus plan pipeline for VLMs: build OvSGTR scene graph -> coarse
+    graph reasoning to decompose scene into sub-scenes -> fine-stage agentic exploration with three
+    primitives (multi-scale verify / semantic zoom / local spatial search) -> rasterize candidate boxes
+    to focus score map -> dual modulation I_out = s * I_dim + (1-s) * B_sigma(I_dim);
+    (2) SceneDiver Adapter — distills this deliberate focus into a lightweight VLA adapter via
+    Hungarian-matched slot/mask supervision (Structure Loss + Mask Loss) with entropy-based dynamic
+    gating that falls back to raw observations under high uncertainty. Achieves 9.6% LIBERO-plus SR
+    gain at only 2.64% latency overhead.
+
+training:
+  dataset: "LIBERO joint training (libero_spatial + libero_object + libero_goal + libero_long) on interference-free original LIBERO data only; OvSGTR scene-graph generator pretrained on AI2-THOR / MuJoCo synthesized RGB + instance masks + <subj,pred,obj> triples (image-topology + 3D-geometry relations)"
+  method: "Two-objective distillation: Structure Loss supervises Slot Attention with Hungarian matching against scene-graph-derived objects (slot-level alignment); Mask Loss supervises the Scene-Aware MaskNet (mask-level refinement). Task-Conditional Initialization: S0_k ~ N(Proj(v_task) + delta_k, sigma). T=5 slot iterations with GRUCell update. Entropy-based dynamic gating bypasses masking when ambiguous-patch uncertainty exceeds threshold (raw observations fed to VLA for graceful degradation)"
+  optimizer: "not specified (paper reports only LIBERO-OFT-compatible joint training, 3 seeds)"
+  hardware: "Single NVIDIA RTX 4090 for latency profiling (10,000-step benchmark)"
+  notes: "VLA trained only on clean LIBERO; LIBERO-plus interference (Layout / Camera / Initial / Background / Light) is zero-shot. Mean/P95/P99 latency of adapter modules: SlotAttention 2.18/2.30/2.33 ms, MaskNet 0.83/0.86/0.87 ms"
+
+benchmarks:
+  libero:
+    libero_plus_spatial_objects_layout: 94.43
+    libero_plus_spatial_camera_viewpoints: 54.35
+    libero_plus_spatial_robot_initial_states: 29.49
+    libero_plus_spatial_background_textures: 87.41
+    libero_plus_spatial_light_conditions: 97.37
+    libero_plus_object_objects_layout: 76.82
+    libero_plus_object_camera_viewpoints: 64.56
+    libero_plus_object_robot_initial_states: 15.72
+    libero_plus_object_background_textures: 90.61
+    libero_plus_object_light_conditions: 99.50
+    libero_plus_goal_objects_layout: 52.53
+    libero_plus_goal_camera_viewpoints: 52.74
+    libero_plus_goal_robot_initial_states: 18.85
+    libero_plus_goal_background_textures: 91.09
+    libero_plus_goal_light_conditions: 97.35
+    libero_plus_long_objects_layout: 74.52
+    libero_plus_long_camera_viewpoints: 42.97
+    libero_plus_long_robot_initial_states: 37.73
+    libero_plus_long_background_textures: 90.00
+    libero_plus_long_light_conditions: 92.42
+    source: "Paper Table 3 (LIBERO-plus, 3 seeds); zero-shot transfer from clean LIBERO training"
+    date_reported: "2026-06-02"
+    eval_condition: "OpenVLA-OFT + SceneDiver Adapter, trained only on original LIBERO, evaluated on LIBERO-plus 5 interference axes per suite"
+    notes: "Baseline OpenVLA-OFT (rows beneath each cell in paper Table 3): Spatial 92.39/49.16/19.91/82.67/93.86; Object 76.01/62.50/14.36/89.74/98.99; Goal 49.36/51.02/12.56/81.78/93.94; Long 65.28/40.13/32.32/81.07/84.47. Largest gains in Long-horizon Object Layout (+9.24) and Goal Background Textures (+9.31)"
+
+additional_benchmarks:
+  vlm_robot_manipulation_mujoco:
+    qwen25_vl_7b_base: 14.7
+    qwen25_vl_7b_with_scenediver: 28.7
+    qwen25_vl_32b_base: 21.3
+    qwen25_vl_32b_with_scenediver: 31.3
+    gpt_4o_mini_base: 28.7
+    gpt_4o_mini_with_scenediver: 34.0
+    gemini_25_flash_base: 38.7
+    gemini_25_flash_with_scenediver: 46.7
+    source: "Paper Table 1, MuJoCo brick-assembly with decoy board + decoy pieces, 30 scenes x 5 seeds, 30-step horizon"
+  vlm_room_navigation_embodiedbench_modified:
+    qwen25_vl_7b_base_avg: 30.7
+    qwen25_vl_7b_ours_avg: 38.2
+    qwen25_vl_32b_base_avg: 45.7
+    qwen25_vl_32b_ours_avg: 53.0
+    gemini_25_flash_base_avg: 61.3
+    gemini_25_flash_ours_avg: 67.0
+    source: "Paper Table 2 (modified room-navigation 4 sub-tasks: Base / CS / CI / VA), 5 seeds"
+    notes: "Outperforms SoM, Multi-Resolution (Monkey/LLaVA/Sphinx), VCD, and thinking-enhanced gemini/doubao baselines"
+  scene_graph_stress_test:
+    drop_10pct_recovery_rate: 96.78
+    drop_20pct_recovery_rate: 98.01
+    drop_30pct_recovery_rate: 97.16
+    drop_50pct_recovery_rate: 97.69
+    drop_10pct_hallucination_rate: 1.52
+    drop_50pct_hallucination_rate: 1.02
+    source: "Paper Table 5, 500 scenes per drop ratio; demonstrates fine-stage exploration recovers from partial scene-graph collapse"
+  latency_overhead:
+    total_action_generation_ms: 114.45
+    slot_attention_ms: 2.18
+    masknet_ms: 0.83
+    scenediver_overhead_pct: 2.64
+    source: "Paper Table 10, RTX 4090, 10,000 action generations"
+
+eval_conditions:
+  libero_plus: "OpenVLA-OFT + SceneDiver Adapter joint-trained on libero_spatial/object/goal/long; zero-shot evaluation on LIBERO-plus's 5 interference axes (Object Layout, Camera Viewpoints, Robot Initial States, Background Textures, Light Conditions)"
+  manipulation_mujoco: "MuJoCo brick assembly per Feng et al. 2025 + decoy board / 3-5 decoy cubes (6-10 voxels) distractors, 30 random scenes, 30-step horizon, discrete (pick/insert/reorient/put-down) action space"
+  navigation: "Modified EmbodiedBench room navigation: harder scenes, smaller / occluded / confusable targets, distance-based far-object sampling on AI2-THOR; 4 sub-tasks (Base / Common-Sense / Complex-Instruction / Visual-Appearance)"
+
+tags:
+  - vla
+  - vla-adapter
+  - openvla-oft
+  - slot-attention
+  - scene-graph
+  - ovsgtr
+  - focus-plan
+  - perception
+  - hallucination
+  - coarse-to-fine
+  - libero-plus
+  - icml-2026
+  - mujoco
+  - embodiedbench
+  - distillation
+  - hungarian-matching

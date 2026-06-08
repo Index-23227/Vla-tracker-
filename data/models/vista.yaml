@@ -1,0 +1,118 @@
+# Paper: VISTA: Vision-Grounded and Physics-Validated Adaptation of UMI data for VLA Training
+# arXiv: 2606.04708
+
+name: VISTA
+full_name: "VISTA: Vision-Grounded and Physics-Validated Adaptation of UMI data for VLA Training"
+organization: "Institute of AI (TeleAI), China Telecom; Lumos Robotics"
+date: "2026-05-01"
+paper_url: https://arxiv.org/abs/2606.04708
+code_url: https://github.com/TeleHuman/umi-vista
+venue: arXiv preprint
+open_source: true
+
+model_type: vla
+
+architecture:
+  backbone: "Initialized from π0.5 checkpoint (PaliGemma-style VLM); inputs are paired left/right wrist-mounted fisheye images + proprioceptive state + language instruction"
+  llm: "PaliGemma-class VLM inherited from π0.5"
+  action_head: "Two-stage training. Stage 1: autoregressive next-token prediction co-training over FAST discrete action tokens and UMI-VQA answer tokens. Stage 2: knowledge-isolated continuous flow-matching action expert f_phi trained on top of frozen Stage-1 backbone with linear interpolation a_tau = (1-tau)eps + tau*a and velocity-prediction loss L_fm = E ||f_phi(a_tau, tau, h_theta(o_t, l, s_t)) - (a - eps)||^2; predicts delta actions over chunk horizon H conditioned on proprioceptive state."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "Inherits π0.5 backbone scale plus a separate continuous flow-matching action expert (exact parameter count not stated in the paper)"
+  key_innovation: >
+    A UMI-to-VLA adaptation framework that closes two structural gaps in handheld UMI data:
+    (i) visual grounding — UMI-VQA, an 8M-sample VQA dataset built on wrist-mounted fisheye
+    observations (3M real-world wrist-fisheye pairs across five capability subsets + 5M
+    perspective-to-fisheye images translated via FLUX.2-dev image-editing model), used as
+    auxiliary co-training signal to align the VLM backbone to the distorted, gripper-centric
+    visual regime; (ii) physical plausibility — a cross-embodiment trajectory replay system
+    in MuJoCo + Mink that scores every UMI trajectory along three dimensions: trajectory
+    continuity s_tc (piecewise scoring of positional/angular displacements with d_min=5mm,
+    d_max=45mm, d_scale=100mm for translation), self-collision risk s_sr (linear interpolation
+    between d_col,min and d_col,max), and execution fidelity s_ef (replay tracking error vs
+    desired pose); aggregated as S(xi,e) = 100*(s_tc/100)^w1 * (s_sr/100)^w2 * (s_ef/100)^w3
+    with sum(w_i)=3. Lenient pre-training threshold, strict downstream fine-tuning threshold.
+    Two-stage training: Stage-1 autoregressive FAST-token + VQA co-training to adapt
+    perception, then Stage-2 knowledge-isolated continuous flow-matching expert that reuses
+    the frozen Stage-1 representation. Initialized from π0.5 checkpoint, pre-trained on 8M
+    UMI-VQA + 100K validated real-world UMI trajectories.
+
+training:
+  dataset: "8M UMI-VQA samples (3M real-world wrist-fisheye UMI pairs covering Object Grounding 842K / Scene Understanding 406K / Captioning 103K / Interaction Grounding 894K / Spatial Reasoning 824K + 5M RefSpatial perspective images translated to fisheye via FLUX.2-dev) and 100K real-world UMI trajectories passing the physical-validation pipeline; collected via FastUMI Pro (~600g handheld gripper, main fisheye + 2 lateral fisheye + depth camera, Vive Tracker + visual-inertial SLAM fusion, ~3mm pose accuracy); deployed on RealMan, AC one, and Galaxea R1 Pro dual-arm platforms"
+  method: "Stage 1: autoregressive co-training on UMI-VQA + FAST-tokenized validated UMI actions (next-token prediction). Stage 2: knowledge-isolated continuous flow-matching action expert (linear interpolation, velocity-prediction loss) trained on top of frozen Stage-1 backbone. Downstream fine-tuning unfreezes both backbone and action expert end-to-end on per-embodiment validated subsets. Uses delta action prediction and proprioceptive state conditioning."
+  initialization: "π0.5 checkpoint"
+  hardware: "Multi-machine, multi-GPU distributed deployment via Zenoh middleware (host-satellite architecture); training hardware not specified"
+
+benchmarks:
+  simulation:
+    robotwin_umi_avg: 0.683
+    libero_umi_avg: 0.943
+    overall_avg: 0.813
+    source: "VISTA paper Table 6 (UMI-style wrist-fisheye observations, same-data controlled comparison)"
+    date_reported: "2026-05-01"
+    eval_condition: "RoboTwin-UMI and LIBERO-UMI are fisheye-adapted versions of standard RoboTwin/LIBERO; all methods trained on the same recollected wrist-fisheye demonstrations; NOT comparable to standard LIBERO/RoboTwin numbers"
+    notes: "Baselines on the same UMI-style benchmarks: pi0.5 RoboTwin-UMI 0.594 / LIBERO-UMI 0.922 / Avg 0.758; LingBot-VLA 0.499 / 0.817 / 0.658; Wall-X 0.152 / 0.700 / 0.426."
+  real_world:
+    twenty_task_avg_success: 0.598
+    source: "VISTA paper Table 7 (20 UMI-collected real-world manipulation tasks, 20 trials each)"
+    date_reported: "2026-05-01"
+    eval_condition: "RealMan/AC one/Galaxea R1 Pro dual-arm platforms with wrist-mounted fisheye cameras; same validated UMI dataset across methods"
+    notes: "Baselines: pi0.5 0.528, LingBot-VLA 0.313. VISTA improves over pi0.5 by +7.0 absolute points and over LingBot-VLA by +28.5 points."
+
+eval_conditions:
+  simulation: "RoboTwin-UMI and LIBERO-UMI: fisheye-adapted versions of original benchmarks reconstructed with wrist-only fisheye observations to match UMI deployment distribution"
+  real_robot: "FastUMI Pro handheld for collection; deployment on RealMan, AC one, Galaxea R1 Pro (dual-arm). Multi-machine Zenoh-based distributed inference with temporal action ensembling and routing"
+
+additional_benchmarks:
+  perception_diagnostics:
+    notes: "Table 1: fisheye observations degrade VLA policies across benchmarks. pi0.5 LIBERO standard 96.3 / wrist-fisheye 92.2, RoboTwin standard 82.0 / wrist-fisheye 59.4 (Avg drop 13.4). LingBot-VLA standard avg 81.5 → wrist-fisheye 65.8 (drop 15.7). Wall-X 74.6/14.9 → 70.0/15.2 (drop 2.2). Table 2 (VLM benchmarks): fisheye transformation causes mean absolute 4.0pt / 8.6% relative drop across Qwen2.5VL-3B, Qwen3VL-4B, Embodied-R1-3B-v1, RoboBrain2.5-4B, VLASER-2B on Where2Place/RefSpatial/ERQA/EmbSpatial."
+    source: "VISTA paper Tables 1, 2"
+  perception_aligned_vqa_ablation:
+    action_only_pi05: 0.450
+    pi05_plus_standard_view_vqa: 0.317
+    pi05_plus_umi_vqa: 0.550
+    source: "VISTA paper Table 3 (real-robot, 3 stacking tasks x 20 trials = 60 trials per setting)"
+    notes: "Stack Side Cubes on Center / Stack Paper Cups / Stack Pen Holders. Standard-view VQA HURTS performance (0.317 < 0.450); UMI-VQA helps (+10pt over action-only). Most pronounced gain on Stack Pen Holders."
+  physical_score_realman_stapler:
+    low_score_subset_overall: 0.00
+    low_score_subset_grasp: 0.55
+    high_score_subset_overall: 0.65
+    high_score_subset_grasp: 0.65
+    high_score_subset_post_grasp: 1.00
+    source: "VISTA paper Table 4 (50 demos each, 20 RealMan stapler-placement trials)"
+    notes: "Low-score continuity 100, collision 94.69, fidelity 39.35, avg 35.50. High-score continuity 100, collision 100, fidelity 99.21, avg 99.21. Both achieve similar grasping; only high-score completes post-grasp placement."
+  cross_embodiment_score_filtering:
+    low_score_realman_osr: 0.00
+    low_score_acone_osr: 0.00
+    low_score_r1pro_osr: 0.80
+    high_score_realman_osr: 0.65
+    high_score_acone_osr: 0.55
+    high_score_r1pro_osr: 0.75
+    source: "VISTA paper Table 5 (cross-embodiment deployment of policies trained on RealMan-selected subsets)"
+    notes: "Embodiment-conditioned: RealMan-low subset fails on RealMan and AC one but succeeds on R1Pro, showing trajectory executability depends on target embodiment."
+  component_ablation:
+    full_vista: 0.683
+    scratch_expert: 0.524
+    pi05_expert: 0.602
+    no_state: 0.619
+    no_delta_action: 0.531
+    source: "VISTA paper Table 8 (RoboTwin-UMI)"
+    notes: "Full system 68.3%. Replacing Stage-2 expert with scratch -15.9pt or with pi0.5 expert -8.1pt. Removing proprioceptive state -6.4pt. Removing delta action prediction -15.2pt. Confirms learned action expert, state conditioning, and delta-action representation all matter."
+
+tags:
+  - vla
+  - umi
+  - fastumi
+  - fisheye
+  - wrist-camera
+  - flow-matching
+  - knowledge-isolation
+  - vqa-cotraining
+  - physical-validation
+  - cross-embodiment
+  - pi0.5-init
+  - mujoco
+  - mink
+  - zenoh
+  - libero-umi
+  - robotwin-umi
