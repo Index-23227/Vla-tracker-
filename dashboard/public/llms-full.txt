@@ -1,6 +1,6 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-06-08T02:50:52.351703
-# Models: 211
+# Generated: 2026-06-08T03:20:36.923514
+# Models: 215
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
 # Dashboard: https://hyeongjinkim.github.io/Vla-tracker-/
@@ -2909,6 +2909,26 @@ MODEL: ElegantVLA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: ERVLA
+  Organization: Tsinghua University; Xiaomi Robotics; Peking University; CASIA; HKUST(GZ); Zhejiang University; Fudan University; Wuhan University; Shanghai Innovation Institute
+  Date: 2026-06-03
+  Paper: https://arxiv.org/abs/2606.03784
+  Code: https://taoshuaiz.github.io/ERVLA/
+  Venue: arXiv preprint
+  Open Source: True
+  Architecture:
+    Action Head: Mixture-of-Transformers: 36-layer Diffusion Transformer (DiT) policy with flow-matching for continuous action generation. DiT conditions only on the knowledge-truncated semantic-prefix KV cache from the VLM (state token, projected state, noisy action tokens with AdaLN-injected diffusion timestep). An auxiliary 'choice policy' branch reads action-query hidden states inside the VLM to predict N=5 candidate action chunks plus scalar scores via L1+score loss; the DiT loss back-propagates through the VLM only via the semantic prefix (knowledge truncation) so synthetic control-query tokens cannot leak into action conditioning.
+    Backbone: Qwen3-VL-4B-Instruct (vision-language reasoning backbone)
+    LLM: Qwen3-VL-4B
+    Parameters: ~4B VLM (Qwen3-VL-4B) + 36-layer DiT action head
+  Tags: vla, embodied-cot, chain-of-thought, flow-matching, dit, mixture-of-transformers, knowledge-truncation, reasoning-dropout, choice-policy, qwen3-vl, libero-plus, vlabench, real-world, 4B
+  Benchmarks:
+    libero: libero_plus_spatial=96.2, libero_plus_object=89.6, libero_plus_goal=79.6, libero_plus_long=82.1, libero_plus_camera=77.2, libero_plus_robot=75.3, libero_plus_language=87.1, libero_plus_light=95.1, libero_plus_background=94.7, libero_plus_noise=92.3, libero_plus_layout=86.4, libero_plus_avg=86.9
+  Eval Conditions: {'libero': 'post-trained on LIBERO 4 suites (10K steps)', 'libero_plus': 'zero-shot direct transfer from LIBERO post-training', 'vlabench': 'post-trained on VLABench (20K steps)', 'real_world': 'Franka-style single-arm with third-person + wrist camera; 5 trials per task across 20 tasks'}
+  AI Review Summary: Embodied CoT는 inference-time 자기회귀 prefix가 아니라 **VLM 표현 공간을 reshape하는 training signal**이어야 한다는 가설을 226M 샘플 규모로 검증. ERVLA는 (i) p=0.5 **reasoning dropout**, (ii) **choice policy** auxiliary branch (N=5 후보 action chunk), (iii) **knowledge-truncated KV conditioning** (DiT가 semantic prefix만 attend)의 3종 세트
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: EvoScene-VLA
   Organization: Australian National University (ANU), University of Queensland, Beijing Normal University
   Date: 2026-05-21
@@ -3342,6 +3362,24 @@ MODEL: HiVLA
   Benchmarks:
     robotwin_v2 (avg=83.3): robotwin_v2_avg=83.3
   Eval Conditions: {'robotwin_v2': 'fine-tuned'}
+  AI Review: PDF-verified
+
+------------------------------------------------------------
+MODEL: HOIST
+  Organization: University of Florida
+  Date: 2026-05-29
+  Paper: https://arxiv.org/abs/2606.00252
+  Code: None
+  Venue: arXiv preprint
+  Open Source: False
+  Architecture:
+    Action Head: Flow-matching diffusion-transformer action expert that outputs short-horizon planner-command-increment chunks ΔU_t = (Δu_t, ..., Δu_{t+H-1}); each Δu_τ = (Δy^head, Δy^L, Δy^R, Δc^nav, Δh^base); commands are accumulated and executed by a fixed GR00T Whole-Body Controller (πwbc). RL refinement keeps the VLA frozen and trains an actor-critic noise-steering module that predicts the initial flow-matching noise vector deterministically; VLM features cached for efficiency.
+    Backbone: GR00T N1.6 (modified) — multimodal VLM + flow-matching action expert; ego RGB + ego depth + side-view RGB + proprioceptive state + language + previous navigation command
+    LLM: GR00T N1.6 VLM (final 4 layers fine-tuned; remaining VLM layers frozen)
+    Parameters: not specified (GR00T N1.6 backbone; only final 4 VLM layers + action expert + new modality encoders + noise-steering actor-critic are trained)
+  Tags: vla, humanoid, loco-manipulation, whole-body-control, flow-matching, gr00t, rl-refinement, noise-steering, vr-teleoperation, suspended-payload, contact-rich, underactuated
+  Eval Conditions: {'simulation': 'Humanoid hoisting simulation; suspended payload positioned through whole-body contact; placement metrics ∆x, ∆y, ∆ψ, |∆x|+|∆y|', 'real_robot': 'Real humanoid platform with GR00T Whole-Body Control; PICO VR teleoperation for demo collection; suspended payload with IMU for residual-motion analysis'}
+  AI Review Summary: GR00T N1.6를 modify한 high-level VLA가 PICO VR teleoperation 50개 데모로 finetune되고, **flow-matching initial-noise를 steering**하는 actor-critic이 30개 autonomous rollout만으로 RL refinement를 수행하는 humanoid hoisting 시스템. 실 humanoid에서 pure VLA rollouts 대비 **translational placement 19.9 cm 감소**, **raw angular 3.56° 감
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -3974,6 +4012,26 @@ MODEL: SAMoE-VLA
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: SceneDiver
+  Organization: State Key Lab of CAD&CG, Zhejiang University; Baiont Quant; Zhejiang Key Laboratory of Intelligent Medical Decision Support
+  Date: 2026-06-02
+  Paper: https://arxiv.org/abs/2606.04046
+  Code: https://future-item.github.io/SceneDiver
+  Venue: ICML 2026 (PMLR 306)
+  Open Source: True
+  Architecture:
+    Action Head: Inherited from OpenVLA-OFT; SceneDiver Adapter inserts between projector and LLM, generating task-conditioned soft focus masks via (1) Task-Guided Slot Attention with K object-centric slots (d_s=256) initialized from task vector v_task with T=5 refinement iterations and temperature tau=0.4, and (2) Scene-Aware MaskNet that combines slot-level relevance r_k = MLP([LN(s_k); Proj(m_k); Proj(v_task)]) with per-patch residual correction Delta_l (alpha~=0, learnable scale exp(beta), beta_init=1.1). Soft modulation I_out = s * I_dim + (1-s) * B_sigma(I_dim) attenuates luminance/high-frequency on background
+    Backbone: OpenVLA-OFT base policy + SceneDiver Adapter (Slot Attention + Scene-Aware MaskNet) positioned after the visual projector in cross-modal alignment space. VLM frontend evaluated with Qwen2.5-VL-7B/32B-Instruct-AWQ, InternVL2.5-8B, gpt-4o-mini, gemini-2.5-flash, doubao-seed-1.6-flash
+    LLM: OpenVLA-OFT LLM backbone (Llama-2 7B family); SceneDiver itself is VLM-agnostic and tested with multiple open/closed-source VLMs
+    Parameters: OpenVLA-OFT backbone (~7B class) + SceneDiver Adapter overhead ~3.01 ms / 2.64% of total 114.45 ms action generation on RTX 4090
+  Tags: vla, vla-adapter, openvla-oft, slot-attention, scene-graph, ovsgtr, focus-plan, perception, hallucination, coarse-to-fine, libero-plus, icml-2026, mujoco, embodiedbench, distillation, hungarian-matching
+  Benchmarks:
+    libero: libero_plus_spatial_objects_layout=94.43, libero_plus_spatial_camera_viewpoints=54.35, libero_plus_spatial_robot_initial_states=29.49, libero_plus_spatial_background_textures=87.41, libero_plus_spatial_light_conditions=97.37, libero_plus_object_objects_layout=76.82, libero_plus_object_camera_viewpoints=64.56, libero_plus_object_robot_initial_states=15.72, libero_plus_object_background_textures=90.61, libero_plus_object_light_conditions=99.5, libero_plus_goal_objects_layout=52.53, libero_plus_goal_camera_viewpoints=52.74, libero_plus_goal_robot_initial_states=18.85, libero_plus_goal_background_textures=91.09, libero_plus_goal_light_conditions=97.35, libero_plus_long_objects_layout=74.52, libero_plus_long_camera_viewpoints=42.97, libero_plus_long_robot_initial_states=37.73, libero_plus_long_background_textures=90.0, libero_plus_long_light_conditions=92.42
+  Eval Conditions: {'libero': 'OpenVLA-OFT + SceneDiver Adapter, trained only on original LIBERO, evaluated on LIBERO-plus 5 interference axes per suite', 'libero_plus': "OpenVLA-OFT + SceneDiver Adapter joint-trained on libero_spatial/object/goal/long; zero-shot evaluation on LIBERO-plus's 5 interference axes (Object Layout, Camera Viewpoints, Robot Initial States, Background Textures, Light Conditions)", 'manipulation_mujoco': 'MuJoCo brick assembly per Feng et al. 2025 + decoy board / 3-5 decoy cubes (6-10 voxels) distractors, 30 random scenes, 30-step horizon, discrete (pick/insert/reorient/put-down) action space', 'navigation': 'Modified EmbodiedBench room navigation: harder scenes, smaller / occluded / confusable targets, distance-based far-object sampling on AI2-THOR; 4 sub-tasks (Base / Common-Sense / Complex-Instruction / Visual-Appearance)'}
+  AI Review Summary: VLM/VLA의 perceptual bottleneck(object hallucination, attention drift, mis-grounding)을 **focus plan 생성 문제**로 재정의. OvSGTR scene graph로 coarse-stage 추론 → fine-stage agentic exploration(multi-scale verify / semantic zoom / local spatial search) → focus score map으로 입력 영상 modulation. 실시간 VLA용으로는 **SceneDi
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: Sentinel-VLA
   Organization: University of Sydney / Central South University / USTC / SenseTime / HKUST
   Date: 2026-05-02
@@ -4296,6 +4354,24 @@ MODEL: VILAS
   AI Review: PDF-verified
 
 ------------------------------------------------------------
+MODEL: VISTA
+  Organization: Institute of AI (TeleAI), China Telecom; Lumos Robotics
+  Date: 2026-05-01
+  Paper: https://arxiv.org/abs/2606.04708
+  Code: https://github.com/TeleHuman/umi-vista
+  Venue: arXiv preprint
+  Open Source: True
+  Architecture:
+    Action Head: Two-stage training. Stage 1: autoregressive next-token prediction co-training over FAST discrete action tokens and UMI-VQA answer tokens. Stage 2: knowledge-isolated continuous flow-matching action expert f_phi trained on top of frozen Stage-1 backbone with linear interpolation a_tau = (1-tau)eps + tau*a and velocity-prediction loss L_fm = E ||f_phi(a_tau, tau, h_theta(o_t, l, s_t)) - (a - eps)||^2; predicts delta actions over chunk horizon H conditioned on proprioceptive state.
+    Backbone: Initialized from π0.5 checkpoint (PaliGemma-style VLM); inputs are paired left/right wrist-mounted fisheye images + proprioceptive state + language instruction
+    LLM: PaliGemma-class VLM inherited from π0.5
+    Parameters: Inherits π0.5 backbone scale plus a separate continuous flow-matching action expert (exact parameter count not stated in the paper)
+  Tags: vla, umi, fastumi, fisheye, wrist-camera, flow-matching, knowledge-isolation, vqa-cotraining, physical-validation, cross-embodiment, pi0.5-init, mujoco, mink, zenoh, libero-umi, robotwin-umi
+  Eval Conditions: {'simulation': 'RoboTwin-UMI and LIBERO-UMI: fisheye-adapted versions of original benchmarks reconstructed with wrist-only fisheye observations to match UMI deployment distribution', 'real_robot': 'FastUMI Pro handheld for collection; deployment on RealMan, AC one, Galaxea R1 Pro (dual-arm). Multi-machine Zenoh-based distributed inference with temporal action ensembling and routing'}
+  AI Review Summary: UMI(Universal Manipulation Interface) 손잡이형 데이터로 VLA를 학습시킬 때 발생하는 두 가지 구조적 불일치(wrist-fisheye 시각 도메인 갭, 인간 수집 궤적의 물리적 비실현성)를 진단하고, **8M UMI-VQA 보조 감독 + trajectory-level 물리 검증 파이프라인 + 2-stage 공동학습**으로 해결. π0.5에서 초기화 후 RoboTwin-UMI 0.683, LIBERO-UMI 0.943, 20개 실로봇 태스크 평균 0.598로 π0.5/LingBot-VLA/Wall-X를 
+  AI Review: PDF-verified
+
+------------------------------------------------------------
 MODEL: VLA-RL
   Organization: ByteDance / Tsinghua University
   Date: 2025-05-24
@@ -4499,5 +4575,5 @@ RoboCasa: Home robot manipulation tasks
 
 ================================================================================
 END OF FILE
-Total: 211 models, 106 with LIBERO scores
+Total: 215 models, 106 with LIBERO scores
 ================================================================================
