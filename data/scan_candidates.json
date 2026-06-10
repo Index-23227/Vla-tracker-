@@ -1,29 +1,148 @@
 {
-  "scan_date": "2026-06-06T11:24:56.396629+00:00",
+  "scan_date": "2026-06-10T12:55:47.623684+00:00",
   "lookback_days": 14,
   "source": "arxiv",
-  "total_queried": 91,
-  "vla_related": 89,
-  "new_candidates": 65,
+  "total_queried": 113,
+  "vla_related": 113,
+  "new_candidates": 80,
   "candidates": [
     {
-      "arxiv_id": "2606.06245",
-      "title": "MPCoT: Reward-Guided Multi-Path Latent Reasoning for Test-Time Scalable Vision-Language-Action",
-      "model_name": "MPCoT",
-      "paper_url": "https://arxiv.org/abs/2606.06245",
-      "published": "2026-06-04",
+      "arxiv_id": "2606.09827",
+      "title": "MemoryVLA++: Temporal Modeling via Memory and Imagination in Vision-Language-Action Models",
+      "model_name": "MemoryVLA++",
+      "paper_url": "https://arxiv.org/abs/2606.09827",
+      "published": "2026-06-08",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [
         "libero",
+        "calvin",
+        "simpler_env"
+      ],
+      "relevance_score": 12.5,
+      "authors_first3": [
+        "Hao Shi",
+        "Weiye Li",
+        "Bin Xie"
+      ],
+      "abstract_snippet": "Temporal modeling is essential for robotic manipulation, as effective control requires both memory of past interactions and imagination of future states. However, most VLA models rely primarily on the current observation and therefore struggle with long-horizon, temporally dependent tasks. Cognitive..."
+    },
+    {
+      "arxiv_id": "2606.08530",
+      "title": "GEAR-VLA: Learning Geometry-Aware Action Representations for Generalizable Robotic Manipulation",
+      "model_name": "GEAR-VLA",
+      "paper_url": "https://arxiv.org/abs/2606.08530",
+      "published": "2026-06-07",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero",
+        "robotwin"
+      ],
+      "relevance_score": 12.0,
+      "authors_first3": [
+        "Yuan Zhang",
+        "Shiqi Zhang",
+        "Yedong Shen"
+      ],
+      "abstract_snippet": "Vision-Language-Action (VLA) models achieve strong benchmark performance but still struggle in real-world deployment with unseen objects, background shifts, and different robot embodiments. We argue that this stems from the lack of a unified geometry-aware manipulation representation, leaving existi..."
+    },
+    {
+      "arxiv_id": "2606.10862",
+      "title": "LIBERO-Occ: Evaluating and Improving Vision-Language-Action Models under Scene-Induced Occlusion via Viewpoint Imagination",
+      "model_name": "LIBERO-Occ",
+      "paper_url": "https://arxiv.org/abs/2606.10862",
+      "published": "2026-06-09",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero"
+      ],
+      "relevance_score": 10.5,
+      "authors_first3": [
+        "Taishan Li",
+        "Jiwen Zhang",
+        "Siyuan Wang"
+      ],
+      "abstract_snippet": "Vision-Language-Action (VLA) models achieve strong performance on standard manipulation benchmarks, but most evaluations assume that task-relevant objects are fully visible. This assumption often fails in realistic settings, where occlusion makes manipulation partially observable. In this paper, we ..."
+    },
+    {
+      "arxiv_id": "2606.08653",
+      "title": "FiberTune: Preserving Action-Fiber Visual Residuals in Vision-Language-Action Fine-Tuning",
+      "model_name": "FiberTune",
+      "paper_url": "https://arxiv.org/abs/2606.08653",
+      "published": "2026-06-07",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
         "calvin"
       ],
-      "relevance_score": 11.0,
+      "relevance_score": 10.5,
       "authors_first3": [
-        "Boyang Zhang",
-        "Lianlei Shan"
+        "Haihao Lin",
+        "Xiangsheng Huang",
+        "Xiao Yang"
       ],
-      "abstract_snippet": "Vision-Language-Action (VLA) policies remain brittle in long-horizon and high-uncertainty control, where one-pass action decoding provides limited inference-time deliberation. Explicit chain-of-thought can increase reasoning depth, but introduces token latency and an indirect text-to-action interfac..."
+      "abstract_snippet": "Action-supervised fine-tuning of vision-language-action (VLA) policies fits demonstrations effectively but constrains only the directions that change predicted actions, leaving visual structure consistent across action-equivalent states free to collapse. We formalize this as residual visual collapse..."
+    },
+    {
+      "arxiv_id": "2606.08015",
+      "title": "Q-VGM: Q-Guided Value-Gradient Matching for Flow-Matching VLA Policies",
+      "model_name": "Q-VGM",
+      "paper_url": "https://arxiv.org/abs/2606.08015",
+      "published": "2026-06-06",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero",
+        "robotwin"
+      ],
+      "relevance_score": 10.5,
+      "authors_first3": [
+        "Ziqian Wang",
+        "Jiayu Sun",
+        "Xingjian Mao"
+      ],
+      "abstract_snippet": "We propose Q-Guided Value-Gradient Matching (Q-VGM), an off-policy reinforcement learning (RL) method that tackles a long-standing challenge in fine-tuning flow-matching vision-language-action (VLA) policies: efficiently improving an expressive flow-matching action expert with respect to a learned Q..."
+    },
+    {
+      "arxiv_id": "2606.07107",
+      "title": "Coarse-to-Control: Action-Token Planning for Vision-Language-Action Models",
+      "model_name": "Coarse-to-Control",
+      "paper_url": "https://arxiv.org/abs/2606.07107",
+      "published": "2026-06-05",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero",
+        "simpler_env"
+      ],
+      "relevance_score": 10.5,
+      "authors_first3": [
+        "Jinhao Wu",
+        "Shiduo Zhang",
+        "Yicheng Liu"
+      ],
+      "abstract_snippet": "Most vision-language-action (VLA) models map observations directly to actions without explicit intermediate planning, which limits performance on long-horizon tasks where early mistakes compound. We propose Coarse-to-Control, a plan-execute VLA that introduces planning natively in the action-token s..."
+    },
+    {
+      "arxiv_id": "2606.06904",
+      "title": "ActionMap: Robot Policy Learning via Voxel Action Heatmap",
+      "model_name": "ActionMap",
+      "paper_url": "https://arxiv.org/abs/2606.06904",
+      "published": "2026-06-05",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero"
+      ],
+      "relevance_score": 10.5,
+      "authors_first3": [
+        "Pei Yang",
+        "Hai Ci",
+        "Yanzhe Chen"
+      ],
+      "abstract_snippet": "Vision-language-action (VLA) models have advanced rapidly across backbones, training recipes, and data scale, yet the action decoder, which converts the backbone's hidden state into a continuous control signal, has barely changed and remains a single-point predictor across the majority of current VL..."
     },
     {
       "arxiv_id": "2606.00773",
@@ -46,24 +165,23 @@
       "abstract_snippet": "Vision-language-action (VLA) benchmarks measure whether a policy completes a requested manipulation task, but binary success can hide safety-relevant trajectory behavior: reaching the goal while applying excessive contact, disturbing bystander objects, destabilizing the held object, or entering robo..."
     },
     {
-      "arxiv_id": "2606.04436",
-      "title": "3DThinkVLA: Endowing Vision-Language-Action Models with Latent 3D Priors via 3D-Thinking-Guided Co-training",
+      "arxiv_id": "2606.08094",
+      "title": "vla.cpp: A Unified Inference Runtime for Vision-Language-Action Models",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.04436",
-      "published": "2026-06-03",
+      "paper_url": "https://arxiv.org/abs/2606.08094",
+      "published": "2026-06-06",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [
-        "libero",
-        "simpler_env"
+        "libero"
       ],
       "relevance_score": 10.0,
       "authors_first3": [
-        "Jiaxin Shi",
-        "Xidong Zhang",
-        "Fucai Zhu"
+        "Khanh D. Nguyen",
+        "Hung T. Ho",
+        "Chinh T. Nguyen"
       ],
-      "abstract_snippet": "We propose a 3D-thinking-guided co-training framework that enables vision-language-action (VLA) models to perform 3D spatial reasoning implicitly during action prediction. Our core insight is that 3D geometry perception and 3D spatial reasoning are distinct capabilities that can be disentangled and ..."
+      "abstract_snippet": "Vision-Language-Action (VLA) policies are typically shipped as Python/PyTorch stacks that assume a workstation-class GPU, a mismatch for the hardware on which robots actually run. We present vla.cpp, a portable C++ inference runtime built on llama.cpp. To our knowledge, it is the first ggml-class en..."
     },
     {
       "arxiv_id": "2606.03598",
@@ -85,78 +203,40 @@
       "abstract_snippet": "Vision-Language-Action (VLA) models have achieved remarkable success in language-conditioned robotic manipulation. However, deploying these models in open-ended environments requires continuously acquiring novel skills, a process that inevitably triggers severe catastrophic forgetting of previously ..."
     },
     {
-      "arxiv_id": "2606.00269",
-      "title": "Closed-Loop Neural Activation Control in Vision-Language-Action Models",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.00269",
-      "published": "2026-05-29",
-      "venue": "CVPR 2026",
+      "arxiv_id": "2606.09572",
+      "title": "CT-VAM: A Cerebello-Thalamic-Inspired Vision-Action Model for Efficient Visuomotor Control",
+      "model_name": "CT-VAM",
+      "paper_url": "https://arxiv.org/abs/2606.09572",
+      "published": "2026-06-08",
+      "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [
         "libero"
       ],
-      "relevance_score": 10.0,
+      "relevance_score": 9.5,
       "authors_first3": [
-        "Abhijith Babu",
-        "Ramneet Kaur",
-        "Nathaniel D. Bastian"
+        "Jiacheng Li",
+        "Yize Guo",
+        "Jiabin Guo"
       ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models can be steered at test time by intervening on semantically meaningful internal directions, but existing methods use a fixed steering coefficient, effectively operating in open loop. This is poorly suited to embodied control, where task state and concept error evol..."
+      "abstract_snippet": "Vision-language-action models have shown strong promise for robot manipulation, yet raw language is primarily needed to specify task intent rather than to be repeatedly processed during high-frequency low-level execution. Motivated by this separation, we propose a cerebello-thalamic-inspired vision-..."
     },
     {
-      "arxiv_id": "2606.00253",
-      "title": "Per-Group Error, Not Total MSE: Fine-Tuning Vision-Language-Action Models for 11-DoF Mobile Manipulation",
+      "arxiv_id": "2606.09009",
+      "title": "Scaling by Diversified Experience for Vision-Language-Action Models",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.00253",
-      "published": "2026-05-29",
-      "venue": "ICRA 2026",
+      "paper_url": "https://arxiv.org/abs/2606.09009",
+      "published": "2026-06-08",
+      "venue": "ICML 2026",
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 10.0,
-      "authors_first3": [
-        "Pau Montagut Bofi",
-        "Mario García Blasco",
-        "Tessa Pulli"
-      ],
-      "abstract_snippet": "Fine-tuning Vision-Language-Action (VLA) models for mobile manipulators with heterogeneous joint spaces can produce a counterintuitive result: the checkpoint with the lowest aggregate MSE is not the one that performs best on the real robot. We argue this is a predictable consequence of collapsing he..."
-    },
-    {
-      "arxiv_id": "2606.05737",
-      "title": "Let It Be Simple: One-Step Action Generation for Vision-Language-Action Models",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.05737",
-      "published": "2026-06-04",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [
-        "libero"
-      ],
       "relevance_score": 9.5,
       "authors_first3": [
-        "Yitong Chen",
-        "Shiduo Zhang",
-        "Jingjing Gong"
+        "Leiyu Wang",
+        "Zhaofengnian Wang",
+        "Xueqi Li"
       ],
-      "abstract_snippet": "Diffusion-based vision-language-action (VLA) models often inherit the image-generation view: actions are generated by iterative denoising. We argue that VLA action generation has a different condition-target structure: the policy is conditioned on rich observations, language, and state, but predicts..."
-    },
-    {
-      "arxiv_id": "2606.02745",
-      "title": "SeeTraceAct: Visibility-Aware Latent Planning from Cross-Embodiment Demonstration Videos",
-      "model_name": "SeeTraceAct",
-      "paper_url": "https://arxiv.org/abs/2606.02745",
-      "published": "2026-06-01",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [
-        "robocasa"
-      ],
-      "relevance_score": 9.5,
-      "authors_first3": [
-        "Jaehyeon Son",
-        "Junhyun Kim",
-        "Kyle Kam"
-      ],
-      "abstract_snippet": "Vision-language-action models (VLAs) are promising general-purpose robot policies, but adapting them to new tasks typically requires costly task-specific teleoperation data. As an alternative, we study one-shot demo-conditioned VLAs, where a robot policy is conditioned on a single demonstration vide..."
+      "abstract_snippet": "Vision-Language-Action models face significant challenges in real-world deployment due to the entanglement of high-level reasoning with low-level control, and the instability of policy optimization. In this paper, we introduce SyVLA, a robust VLA model trained with diversified experiences. We propos..."
     },
     {
       "arxiv_id": "2605.31286",
@@ -178,6 +258,44 @@
       "abstract_snippet": "Real-world household robots require Vision-Language-Action (VLA) foundation models that can acquire reusable manipulation skills across diverse objects, task conditions, and household environments. Deformable-object folding is a representative challenge, requiring robots to handle clothing items fro..."
     },
     {
+      "arxiv_id": "2606.09740",
+      "title": "ProbeAct: Probe-Guided Training-Free Failure Recovery in Vision-Language-Action Models",
+      "model_name": "ProbeAct",
+      "paper_url": "https://arxiv.org/abs/2606.09740",
+      "published": "2026-06-08",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero"
+      ],
+      "relevance_score": 9.0,
+      "authors_first3": [
+        "Fan Zhang",
+        "Seongbin Park",
+        "Baharan Mirzasoleiman"
+      ],
+      "abstract_snippet": "Vision-Language-Action (VLA) models demonstrate strong perfor-1 mance on language-conditioned robotic manipulation within their training dis-2 tribution, yet their generalization capabilities remain fundamentally limited. They3 lack the robustness required to handle perturbations, frequently failing..."
+    },
+    {
+      "arxiv_id": "2606.07217",
+      "title": "Robotic Policy Adaptation via Weight-Space Meta-Learning",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.07217",
+      "published": "2026-06-05",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero"
+      ],
+      "relevance_score": 9.0,
+      "authors_first3": [
+        "Christian Bianchi",
+        "Siamak Yousefi",
+        "Alessio Sampieri"
+      ],
+      "abstract_snippet": "Vision-Language-Action (VLA) models are emerging as a promising paradigm for robotic manipulation, enabling general-purpose policies trained from large corpora of demonstrations and action labels. However, adapting these models to new tasks still typically requires task-specific demonstrations, acti..."
+    },
+    {
       "arxiv_id": "2606.03127",
       "title": "TTT-VLA: Test-Time Latent Prompt Optimization for Vision-Language-Action Models",
       "model_name": "TTT-VLA",
@@ -195,25 +313,6 @@
         "Shuai Yang"
       ],
       "abstract_snippet": "Vision-Language-Action (VLA) models trained on large-scale data have made remarkable progress, but they remain vulnerable to distribution shifts at deployment time. Recent VLA models suggest that prompts can serve as an efficient interface for steering policy behavior, but existing prompt-based stee..."
-    },
-    {
-      "arxiv_id": "2606.00229",
-      "title": "Continuous Reasoning for Vision-Language-Action",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.00229",
-      "published": "2026-05-29",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [
-        "libero"
-      ],
-      "relevance_score": 9.0,
-      "authors_first3": [
-        "Yueh-Hua Wu",
-        "Tatsuya Matsushima",
-        "Kei Ota"
-      ],
-      "abstract_snippet": "Natural language is a powerful reasoning medium for language and vision-language models, but it is mismatched to the granularity of continuous control. Text and explicit subgoals operate at task-level granularity, whereas vision-language-action (VLA) policies must choose actions at a much finer temp..."
     },
     {
       "arxiv_id": "2605.31234",
@@ -235,25 +334,6 @@
       "abstract_snippet": "Learning generalizable vision-language-action (VLA) models from large-scale human videos is promising but challenging due to cross-embodiment discrepancies in both visual observations and executable actions. While latent action models reduce the action execution gap by learning action abstractions, ..."
     },
     {
-      "arxiv_id": "2605.30484",
-      "title": "ELAN4D: Embodiment-Centric 4D Supervision for Vision-Language-Action Models via Plug-and-Play Adaptation",
-      "model_name": "ELAN4D",
-      "paper_url": "https://arxiv.org/abs/2605.30484",
-      "published": "2026-05-28",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [
-        "libero"
-      ],
-      "relevance_score": 9.0,
-      "authors_first3": [
-        "Zeyuan He",
-        "Bowen Yang",
-        "Zhirui Fang"
-      ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models have shown promise for robotic manipulation, yet most existing policies operate reactively by directly regressing actions from current observations, without explicitly modeling future dynamics. This limits their ability to generalize under out-of-distribution pert..."
-    },
-    {
       "arxiv_id": "2605.30795",
       "title": "Feat2Go: Visual Feature-Grounded Value Estimation for Embodied Reinforcement Learning",
       "model_name": "Feat2Go",
@@ -273,6 +353,57 @@
       "abstract_snippet": "Reinforcement learning is a promising approach for improving the capabilities of vision-language-action (VLA) models while avoiding the heavy data requirements of imitation learning. However, its effectiveness for VLA models is often constrained by sparse supervision and the difficulty of designing ..."
     },
     {
+      "arxiv_id": "2606.09630",
+      "title": "ReCoVLA: VLM-Guided Reward Compilation for Failure Recovery in Vision-Language-Action Policies",
+      "model_name": "ReCoVLA",
+      "paper_url": "https://arxiv.org/abs/2606.09630",
+      "published": "2026-06-08",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 8.5,
+      "authors_first3": [
+        "Haodi Hu",
+        "Chung-Ta Huang",
+        "Jing Liu"
+      ],
+      "abstract_snippet": "Vision-language-action (VLA) policies provide strong priors for language-conditioned manipulation, but remain brittle in off-nominal states requiring targeted recovery. We propose ReCoVLA -- a failure-conditioned residual recovery framework that keeps a pretrained VLA policy frozen, uses an external..."
+    },
+    {
+      "arxiv_id": "2606.08684",
+      "title": "BLUE: Toward Better Language Use in Efficient Vision-Language-Action Models for Autonomous Driving",
+      "model_name": "BLUE",
+      "paper_url": "https://arxiv.org/abs/2606.08684",
+      "published": "2026-06-07",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 8.5,
+      "authors_first3": [
+        "George Ling",
+        "Lijin Yang",
+        "Hao Yang"
+      ],
+      "abstract_snippet": "We present BLUE, a minimal method for better language use in vision-language-action (VLA) models for autonomous driving (AD). Through extensive analysis, we reveal that language matters on only a small fraction of routes, but on those routes it can greatly improve or degrade performance. Generating ..."
+    },
+    {
+      "arxiv_id": "2606.08169",
+      "title": "CLASP: Language-Driven Robot Skill Selection and Composition using Task-Parameterized Learning",
+      "model_name": "CLASP",
+      "paper_url": "https://arxiv.org/abs/2606.08169",
+      "published": "2026-06-06",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 8.5,
+      "authors_first3": [
+        "Markus Knauer",
+        "Valentin Gieraths",
+        "Tai Mai"
+      ],
+      "abstract_snippet": "Enabling robots to understand and execute tasks from natural language commands while maintaining data efficiency remains challenging. Foundation models such as vision-language-action (VLA) and vision-language models (VLMs) provide intuitive interaction channels but require extensive data; task-param..."
+    },
+    {
       "arxiv_id": "2606.03392",
       "title": "OpenEAI-Platform: An Open-source Embodied Artificial Intelligence Hardware-Software Unified Platform",
       "model_name": "OpenEAI-Platform",
@@ -288,23 +419,6 @@
         "Leiyu Wang"
       ],
       "abstract_snippet": "Embodied AI in the real world requires both accurate hardware and robust vision-language-action (VLA) policies. We present OpenEAI-Platform, a fully open-source platform that integrates a low-cost 6+1 degree-of-freedom (dof) robotic arm (OpenEAI-Arm) and a reproducible VLA model (OpenEAI-VLA). OpenE..."
-    },
-    {
-      "arxiv_id": "2606.01241",
-      "title": "OneVLA: A Unified Framework for Embodied Tasks",
-      "model_name": "OneVLA",
-      "paper_url": "https://arxiv.org/abs/2606.01241",
-      "published": "2026-05-31",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 8.5,
-      "authors_first3": [
-        "Lingfeng Zhang",
-        "Xiaoshuai Hao",
-        "Yingbo Tang"
-      ],
-      "abstract_snippet": "Navigation and manipulation are fundamental capabilities of embodied intelligence, enabling robots to interpret natural language commands and interact physically with their surroundings. However, current Vision-Language-Action (VLA) models remain constrained by task-specific architectures, specializ..."
     },
     {
       "arxiv_id": "2606.01095",
@@ -326,23 +440,6 @@
       "abstract_snippet": "Vision-language-action (VLA) policies and World-Action Models (WAM) represent two increasingly important paradigms for robotic manipulation. However, it remains unclear whether future prediction in WAMs leads to behaviorally meaningful improvements beyond final task success. In this paper, we ask wh..."
     },
     {
-      "arxiv_id": "2605.31271",
-      "title": "DriveMA: Driving Vision-Language-Action Models with verifiable Meta-Actions",
-      "model_name": "DriveMA",
-      "paper_url": "https://arxiv.org/abs/2605.31271",
-      "published": "2026-05-29",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 8.5,
-      "authors_first3": [
-        "Weicheng Zheng",
-        "Yixin Huang",
-        "Qiao Sun"
-      ],
-      "abstract_snippet": "Driving Vision-Language-Action Models (Driving VLAs) aim to use language to improve end-to-end planning, but the language-action gap limits this promise. We propose DriveMA, a Driving VLA framework built on verifiable meta-actions, which summarize future ego motion into compact language-domain inten..."
-    },
-    {
       "arxiv_id": "2605.30834",
       "title": "Hide-and-Seek in Trajectories: Discovering Failure Signals for VLA Runtime Monitoring",
       "model_name": "[needs manual extraction]",
@@ -360,6 +457,76 @@
         "Changdae Oh"
       ],
       "abstract_snippet": "Vision-Language-Action (VLA) models enable robots to follow natural language instructions and generalize across diverse tasks, but they remain vulnerable to execution failures that compromise reliability in real-world deployment. Detecting such failures during execution is therefore critical for the..."
+    },
+    {
+      "arxiv_id": "2606.09258",
+      "title": "Back to the Familiar Future: Failure Recovery for VLA Policies via Pre-Imagined Milestone Selection",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.09258",
+      "published": "2026-06-08",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [
+        "libero"
+      ],
+      "relevance_score": 8.0,
+      "authors_first3": [
+        "Suyeon Shin",
+        "Juwon Kim",
+        "Hyeonbin Park"
+      ],
+      "abstract_snippet": "Vision-language-action (VLA) policies can deviate from nominal trajectories during manipulation, even when tasks remain physically feasible. Recovering from these deviations is challenging, as they push the policy into unfamiliar state spaces where direct re-planning frequently destabilizes action s..."
+    },
+    {
+      "arxiv_id": "2606.07895",
+      "title": "TBD-VLA: Temporal Block Diffusion Vision Language Action Model",
+      "model_name": "TBD-VLA",
+      "paper_url": "https://arxiv.org/abs/2606.07895",
+      "published": "2026-06-05",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 8.0,
+      "authors_first3": [
+        "Sung-Wook Lee",
+        "Xuhui Kang",
+        "Yen-Ling Kuo"
+      ],
+      "abstract_snippet": "Discrete Vision-Language-Action (VLA) models typically formulate action generation as next-token prediction over discretized action spaces, conditioning each token autoregressively on prior context. While effective, this paradigm incurs high inference latency and largely ignores the temporal structu..."
+    },
+    {
+      "arxiv_id": "2606.07383",
+      "title": "RhinoVLA Technical Report",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.07383",
+      "published": "2026-06-05",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 8.0,
+      "authors_first3": [
+        "Huixi Intelligence",
+        " :",
+        "Chen Zhang"
+      ],
+      "abstract_snippet": "Vision-Language-Action (VLA) models have shown strong potential for robotic manipulation, but real-time deployment on edge hardware remains challenging. In this work, we identify VLM visual and context tokens as a major source of deployment latency: for GEMM-dominated projection operators, computati..."
+    },
+    {
+      "arxiv_id": "2606.07100",
+      "title": "LARA: Latent Action Representation Alignment for Vision-Language-Action Models",
+      "model_name": "LARA",
+      "paper_url": "https://arxiv.org/abs/2606.07100",
+      "published": "2026-06-05",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 8.0,
+      "authors_first3": [
+        "Mengya Liu",
+        "Baoxiong Jia",
+        "Jiangyong Huang"
+      ],
+      "abstract_snippet": "Visual-language action (VLA) models enable robots to predict actions directly from observations and language instructions, but their performance depends on large-scale, high-quality data and is limited by the scarcity of real-world robot action datasets. To facilitate VLA model learning with abundan..."
     },
     {
       "arxiv_id": "2606.06491",
@@ -396,161 +563,157 @@
       "abstract_snippet": "Vision-Language-Action (VLA) models leverage the rich world knowledge of pretrained vision-language models (VLMs) to enable instruction-following robotic manipulation. However, the structural mismatch between VLM semantic spaces and embodied control policies often hinders the learning of precise per..."
     },
     {
-      "arxiv_id": "2606.04708",
-      "title": "VISTA: Vision-Grounded and Physics-Validated Adaptation of UMI data for VLA Training",
-      "model_name": "VISTA",
-      "paper_url": "https://arxiv.org/abs/2606.04708",
-      "published": "2026-06-03",
+      "arxiv_id": "2606.10568",
+      "title": "VeriSpace: Spatially Grounded Action Verification for Vision-Language-Action Models",
+      "model_name": "VeriSpace",
+      "paper_url": "https://arxiv.org/abs/2606.10568",
+      "published": "2026-06-09",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 8.0,
+      "relevance_score": 7.5,
       "authors_first3": [
-        "Siyuan Yang",
-        "Linzheng Guo",
-        "Ouyang Lu"
+        "Guiyu Zhao",
+        "Longteng Guo",
+        "Junyou Zhu"
       ],
-      "abstract_snippet": "Universal Manipulation Interface (UMI) enables scalable real-world robot data collection without hardware-specific teleoperation, yet leveraging UMI data to train large-scale Vision-Language-Action (VLA) models remains fundamentally challenging. We identify two critical mismatches: wrist-mounted fis..."
+      "abstract_snippet": "Vision-language-action (VLA) models have shown strong promise for robotic manipulation, but their reliability at test time remains limited by one-shot action prediction, where even small action errors can cause grasp failure, collision, or incorrect task progression. A natural alternative is to equi..."
     },
     {
-      "arxiv_id": "2606.03784",
-      "title": "Revisiting Embodied Chain-of-Thought for Generalizable Robot Manipulation",
+      "arxiv_id": "2606.10305",
+      "title": "SARM2: Multi-Task Stage Aware Reward Modeling for Self Improving Robotic Manipulation",
+      "model_name": "SARM2",
+      "paper_url": "https://arxiv.org/abs/2606.10305",
+      "published": "2026-06-09",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 7.5,
+      "authors_first3": [
+        "Qianzhong Chen",
+        "Hau Zheng",
+        "Justin Yu"
+      ],
+      "abstract_snippet": "Fine-tuning vision-language-action (VLA) policies for long-horizon manipulation still relies heavily on behavior cloning, which requires costly high-quality demonstrations and keeps policies near the demonstration distribution. Reward models can reduce this dependence by reweighting demonstrations a..."
+    },
+    {
+      "arxiv_id": "2606.10267",
+      "title": "What Matters in Orchestrating Robot Policies: A Systematic Study of Hierarchical VLA Agents",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.03784",
-      "published": "2026-06-02",
+      "paper_url": "https://arxiv.org/abs/2606.10267",
+      "published": "2026-06-09",
       "venue": null,
       "organizations": [],
-      "benchmarks_mentioned": [
-        "libero"
-      ],
-      "relevance_score": 8.0,
+      "benchmarks_mentioned": [],
+      "relevance_score": 7.5,
       "authors_first3": [
-        "Nan Sun",
-        "Yuan Zhang",
-        "Yongkun Yang"
+        "Jiaheng Hu",
+        "Mohit Shridhar",
+        "Caden Lu"
       ],
-      "abstract_snippet": "Embodied chain-of-thought (CoT) aims to bridge linguistic reasoning and robotic control, but its effective form and integration strategy remain underexplored. In this paper, we revisit embodied CoT for vision-language-action (VLA) models at large scale. We construct the largest embodied CoT corpus t..."
+      "abstract_snippet": "Hierarchical vision-language-action (Hi-VLA) systems have emerged as a promising paradigm for complex robot manipulation, by using high-level VLM planners to decompose tasks into language subgoals executed by low-level VLA controllers. Despite recent empirical progress, there is a lack of unified de..."
     },
     {
-      "arxiv_id": "2606.04046",
-      "title": "Dive into the Scene: Breaking the Perceptual Bottleneck in Vision-Language Decision Making via Focus Plan Generation",
+      "arxiv_id": "2606.09337",
+      "title": "TORL-VLA: Tactile Guided Online Reinforcement Learning for Contact-Rich Manipulation",
+      "model_name": "TORL-VLA",
+      "paper_url": "https://arxiv.org/abs/2606.09337",
+      "published": "2026-06-08",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 7.5,
+      "authors_first3": [
+        "Huaihang Zheng",
+        "Yi Yang",
+        "Kai Ma"
+      ],
+      "abstract_snippet": "Vision-Language-Action (VLA) models have become a powerful framework for robotic manipulation, and recent studies have introduced tactile or force feedback into VLAs to address contact-rich tasks. However, these models are typically deployed as offline policies. When contact conditions shift from th..."
+    },
+    {
+      "arxiv_id": "2606.09215",
+      "title": "MotionWAM: Towards Foundation World Action Models for Real-Time Humanoid Loco-Manipulation",
+      "model_name": "MotionWAM",
+      "paper_url": "https://arxiv.org/abs/2606.09215",
+      "published": "2026-06-08",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 7.5,
+      "authors_first3": [
+        "Jia Zheng",
+        "Teli Ma",
+        "Yudong Fan"
+      ],
+      "abstract_snippet": "World Action Models (WAMs) couple a video dynamics prior to the policy and have shown encouraging results on tabletop manipulation, but iterative denoising over high-dimensional video-action latents leaves them too slow for real-time humanoid loco-manipulation. The problem is compounded by the domin..."
+    },
+    {
+      "arxiv_id": "2606.08962",
+      "title": "C$^3$ache: Accelerating World Action Models with Cross Inference Chunk Cache",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.04046",
-      "published": "2026-06-02",
-      "venue": "ICML 2026",
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 8.0,
-      "authors_first3": [
-        "Boyuan Xiao",
-        "Bohong Chen",
-        "Yumeng Li"
-      ],
-      "abstract_snippet": "In embodied vision-language decision making tasks such as robotic manipulation and navigation, Vision-Language and Vision-Language-Action Models (VLMs & VLAs) are powerful tools with different benefits: VLMs are better at long-term planning, while VLAs are better at reactive control. However, their ..."
-    },
-    {
-      "arxiv_id": "2606.01955",
-      "title": "WALL-WM: Carving World Action Modeling at the Event Joints",
-      "model_name": "WALL-WM",
-      "paper_url": "https://arxiv.org/abs/2606.01955",
-      "published": "2026-06-01",
+      "paper_url": "https://arxiv.org/abs/2606.08962",
+      "published": "2026-06-08",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 8.0,
+      "relevance_score": 7.5,
       "authors_first3": [
-        "Shalfun Li",
-        "Victor Yao",
-        "Charles Yang"
+        "Weisen Zhao",
+        "Lam Nguyen",
+        "Zhicong Lu"
       ],
-      "abstract_snippet": "WALL-WM is a World Action Model that shifts video-action learning from chunk-centric optimization to event-grounded Vision-Language-Action pretraining, using semantically coherent action events as the atomic unit of learning. Existing WAMs commonly initialize from multimodal or video foundation mode..."
+      "abstract_snippet": "World Action Models (WAMs) generalize better than standard Vision-Language-Action (VLA) policies to novel motions and environments, because a video-modeling objective lets them learn from abundant unlabeled video rather than scarce labeled robot demonstrations. This generalization is computationally..."
     },
     {
-      "arxiv_id": "2606.00515",
-      "title": "PaCo-VLA: Passivity-Shielded Compliance Prior for Contact-Rich Vision-Language-Action Manipulation",
-      "model_name": "PaCo-VLA",
-      "paper_url": "https://arxiv.org/abs/2606.00515",
-      "published": "2026-05-30",
+      "arxiv_id": "2606.08288",
+      "title": "MotionVLA: Injecting Geometric Motion into Vision-Language-Action Model",
+      "model_name": "MotionVLA",
+      "paper_url": "https://arxiv.org/abs/2606.08288",
+      "published": "2026-06-06",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 8.0,
+      "relevance_score": 7.5,
       "authors_first3": [
-        "Haofan Cao",
-        "Zhaoyang Li",
-        "Zhichao You"
+        "Shanglin Yuan",
+        "Weiheng Zhao",
+        "Xianda Guo"
       ],
-      "abstract_snippet": "Contact-rich manipulation demands both high-level semantic reasoning and the safe regulation of high-frequency contact dynamics. While Vision-Language-Action (VLA) models provide unprecedented semantic generalization, their low-rate outputs lack the reliability required for direct plant authority in..."
+      "abstract_snippet": "Vision-language-action (VLA) models increasingly condition robot policies on history, depth, or 4D features to resolve ambiguity in long-horizon manipulation. However, more spatiotemporal evidence is not necessarily better: when the injected evidence is not motion-consistent, it can introduce geomet..."
     },
     {
-      "arxiv_id": "2606.00252",
-      "title": "HOIST: Humanoid Optimization with Imitation and Sample-efficient Tuning for Manipulating Suspended Loads",
-      "model_name": "HOIST",
-      "paper_url": "https://arxiv.org/abs/2606.00252",
-      "published": "2026-05-29",
+      "arxiv_id": "2606.08278",
+      "title": "SIMPLE: Simulation-Based Policy Learning and Evaluation for Humanoid Loco-manipulation",
+      "model_name": "SIMPLE",
+      "paper_url": "https://arxiv.org/abs/2606.08278",
+      "published": "2026-06-06",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 8.0,
+      "relevance_score": 7.5,
       "authors_first3": [
-        "Songyang Liu",
-        "Shunyu Yao",
-        "Dingyuan Huang"
+        "Songlin Wei",
+        "Zhenhao Ni",
+        "Jie Liu"
       ],
-      "abstract_snippet": "Manipulating suspended payloads with humanoid robots is challenging because the robot can only influence an underactuated, oscillatory load through whole-body motion and intermittent contact. Imitation learning provides safe initial behavior but does not directly optimize final placement, while rein..."
+      "abstract_snippet": "Humanoid foundation models are advancing faster than we can evaluate them. While real-world testing is expensive and difficult to reproduce, existing simulation benchmarks focus primarily on table-top or wheeled robots. A scalable and reproducible benchmark for whole-body humanoid loco-manipulation ..."
     },
     {
-      "arxiv_id": "2605.29114",
-      "title": "ReasonBreak: Probing Vulnerabilities in Reasoning-Enabled Vision-Language-Action Models for Autonomous Driving",
-      "model_name": "ReasonBreak",
-      "paper_url": "https://arxiv.org/abs/2605.29114",
-      "published": "2026-05-27",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 8.0,
-      "authors_first3": [
-        "Mohammadreza Teymoorianfard",
-        "Jean-Philippe Monteuuis",
-        "Jonathan Petit"
-      ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models with integrated reasoning have been proposed for end-to-end autonomous driving, assuming a tight coupling between reasoning and trajectory generation. However, the robustness of such systems under realistic input perturbations remains largely unexplored. We show t..."
-    },
-    {
-      "arxiv_id": "2605.30695",
-      "title": "Primitive Subspaces Mediate Few-Shot Transfer in VLAs",
+      "arxiv_id": "2606.06836",
+      "title": "Think Like a Pilot: Fine-Grained Long-Horizon UAV Navigation",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2605.30695",
-      "published": "2026-05-29",
+      "paper_url": "https://arxiv.org/abs/2606.06836",
+      "published": "2026-06-05",
       "venue": null,
       "organizations": [],
-      "benchmarks_mentioned": [
-        "libero"
-      ],
-      "relevance_score": 8.0,
+      "benchmarks_mentioned": [],
+      "relevance_score": 7.5,
       "authors_first3": [
-        "Anya Singh",
-        "Cabrel Happi",
-        "Jai Relan"
+        "Xiangyi Zheng",
+        "Xiangyu Wang",
+        "Qinan Liao"
       ],
-      "abstract_snippet": "Deploying vision-language-action (VLA) policies in industrial environments requires the ability to teach new tasks at low cost, a property current VLAs lack, since each new task requires fine-tuning. We investigate whether primitive-aware training produces a transferable artifact: a learned library ..."
-    },
-    {
-      "arxiv_id": "2605.25889",
-      "title": "Capability and Robustness Cannot Both Be Free: An Information-Theoretic Bound for Vision-Language-Action Models",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2605.25889",
-      "published": "2026-05-25",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [
-        "libero"
-      ],
-      "relevance_score": 8.0,
-      "authors_first3": [
-        "Jianwei Tai"
-      ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models reach high success rates on clean inputs but collapse under small adversarial perturbations: a $16/255$ PGD attack drops OpenVLA-7B's LIBERO success from $95\\%$ to under $5\\%$. Whether this trade-off has a theoretical floor was open. We prove that it does. For any..."
+      "abstract_snippet": "Language-guided UAV agents must execute long-horizon semantic instructions while producing smooth, physically feasible continuous flight commands, yet existing Vision-Language Navigation (VLN) benchmarks typically use discrete or coarse actions and existing UAV Vision-Language-Action (VLA) tasks foc..."
     },
     {
       "arxiv_id": "2606.06147",
@@ -658,23 +821,6 @@
       "abstract_snippet": "Current Vision--Language--Action (VLA) models often optimize for semantic grounding, whereas executable manipulation requires geometry-aware spatial alignment and dynamic affordance selection. We introduce GeoAlign, a state-guided spatial alignment architecture for VLA policy learning. GeoAlign post..."
     },
     {
-      "arxiv_id": "2606.02735",
-      "title": "See Less, Specify More: Visual Evidence Budgets for Generalizable VLAs",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.02735",
-      "published": "2026-06-01",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 7.5,
-      "authors_first3": [
-        "Yueh-Hua Wu",
-        "Tatsuya Matsushima",
-        "Kei Ota"
-      ],
-      "abstract_snippet": "Generalization remains a central bottleneck for vision-language-action (VLA) models: under distractors, appearance shifts, and semantically similar tasks, the policy must often infer local execution details from coarse instructions while also deciding which parts of the image matter for control. We ..."
-    },
-    {
       "arxiv_id": "2606.02277",
       "title": "RoboSemanticBench: Diagnosing Semantic Grounding in Action Prediction for VLA Models",
       "model_name": "RoboSemanticBench",
@@ -728,23 +874,6 @@
       "abstract_snippet": "Training vision-language-action (VLA) policies for humanoid loco-manipulation is constrained by the high cost and complexity of collecting human teleoperation demonstrations. VLA policies fine-tuned in simulators have, until now, failed to transfer effectively in humanoid loco-manipulation tasks. We..."
     },
     {
-      "arxiv_id": "2606.01205",
-      "title": "ImagineUAV: Aerial Vision-Language Navigation via World-Action Modeling and Kinodynamic Planning",
-      "model_name": "ImagineUAV",
-      "paper_url": "https://arxiv.org/abs/2606.01205",
-      "published": "2026-05-31",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 7.5,
-      "authors_first3": [
-        "Xuchen Liu",
-        "Jiawei Huang",
-        "Shihao Xia"
-      ],
-      "abstract_snippet": "Vision-language navigation (VLN) for UAVs demands grounding free-form instructions into 6-DoF flight under partial observability. While Vision-Language-Action (VLA) models excel at semantic reasoning, they suffer from brittleness due to geometric inconsistency and dynamics mismatch. To address this,..."
-    },
-    {
       "arxiv_id": "2606.00449",
       "title": "ROG-Grasp: Root-Oriented Geometry for Robotic Grasping and Placement",
       "model_name": "ROG-Grasp",
@@ -762,70 +891,88 @@
       "abstract_snippet": "Orientation-aware manipulation is essential in post-harvest agricultural processing, where produce must be grasped and placed in consistent configurations. This paper presents ROG-Grasp, a geometry-based robotic grasping and placement framework that estimates the produce orientation from root surfac..."
     },
     {
-      "arxiv_id": "2605.31066",
-      "title": "Can Aerial VLA Models Cooperate? Evaluating Closed-Loop Air-Ground Coordination with CARLA-Air",
+      "arxiv_id": "2606.10366",
+      "title": "A Practical Recipe Towards Improving Sim-and-Real Correlation for VLA Evaluation",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2605.31066",
-      "published": "2026-05-29",
+      "paper_url": "https://arxiv.org/abs/2606.10366",
+      "published": "2026-06-09",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 7.5,
+      "relevance_score": 7.0,
       "authors_first3": [
-        "Tianle Zeng",
-        "Yanci Wen",
-        "Xueang Yu"
+        "Shuo Wang",
+        "Hanyuan Xu",
+        "Yingdong Hu"
       ],
-      "abstract_snippet": "Recent aerial vision-language-action (VLA) models show promising single-UAV capabilities, such as tracking moving objects and navigating to language-specified landmarks. However, it remains unclear whether these capabilities can transfer to air-ground cooperation, where a UAV and a UGV must act join..."
+      "abstract_snippet": "Simulation has become an essential tool for evaluating and improving vision-language-action (VLA) policies, offering scalable, reproducible, and controllable alternatives to costly real-world robot evaluation. Recent simulation benchmarks have made substantial progress on realism and diversity, yet ..."
     },
     {
-      "arxiv_id": "2605.30957",
-      "title": "RDGen: Demonstration Generation for High-Quality Robot Learning via Reinforcement Learning",
-      "model_name": "RDGen",
-      "paper_url": "https://arxiv.org/abs/2605.30957",
-      "published": "2026-05-29",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 7.5,
-      "authors_first3": [
-        "Zijian Zhu",
-        "Menglin Zou",
-        "Zhuang Li"
-      ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models have emerged as a promising paradigm for general-purpose robot control. However, their performance remains fundamentally constrained by the availability of high-quality robot trajectory data. In current robot learning practice, such data are primarily collected th..."
-    },
-    {
-      "arxiv_id": "2605.30877",
-      "title": "Wall-OSS-0.5 Technical Report",
+      "arxiv_id": "2606.10180",
+      "title": "Flow Control: Steering Vision-Language-Action Models with Simple Real-Time Inputs",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2605.30877",
-      "published": "2026-05-29",
+      "paper_url": "https://arxiv.org/abs/2606.10180",
+      "published": "2026-06-08",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 7.5,
+      "relevance_score": 7.0,
       "authors_first3": [
-        "Ryan Yu",
-        "Pushi Zhang",
-        "Starrick Liu"
+        "Jonathan C. Kao",
+        "Jason Chan",
+        "Andy Wang"
       ],
-      "abstract_snippet": "Large-scale Vision-Language-Action (VLA) pretraining is increasingly adopted as the foundation for robot policies, yet the evidence for pretrained VLAs is almost invariably reported after task-specific fine-tuning. This leaves a foundational question unanswered: does VLA pretraining itself yield exe..."
+      "abstract_snippet": "We introduce flow control of vision-language-action (VLA) models, a simple and effective way to steer VLA actions in real-time through generic inputs, such as a keyboard. This method can be used out-of-the-box and does not require retraining or fine-tuning VLAs. It enables relatively crude user inpu..."
     },
     {
-      "arxiv_id": "2605.29710",
-      "title": "PhAIL: A Real-Robot VLA Benchmark and Distributional Methodology",
-      "model_name": "PhAIL",
-      "paper_url": "https://arxiv.org/abs/2605.29710",
-      "published": "2026-05-28",
+      "arxiv_id": "2606.09749",
+      "title": "Your Model Already Knows: Attention-Guided Safety Filter for Vision-Language-Action Models",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.09749",
+      "published": "2026-06-08",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
-      "relevance_score": 7.5,
+      "relevance_score": 7.0,
       "authors_first3": [
-        "Sergey Arkhangelskiy"
+        "Seongbin Park",
+        "Fan Zhang",
+        "Baharan Mirzasoleiman"
       ],
-      "abstract_snippet": "Real-world evaluation of vision-language-action (VLA) policies still rests on binary success rate at a fixed timeout with $N \\le 25$ rollouts per condition, almost always without confidence intervals or paired statistical comparison; these cohort sizes struggle to resolve close comparisons reliably...."
+      "abstract_snippet": "Vision-Language-Action (VLA) models have demonstrated impressive end-to-end performance across a variety of robotic manipulation tasks. However, these policies offer no guarantees against collisions with task-irrelevant objects in the scene. Existing safety filters sidestep this problem by querying ..."
+    },
+    {
+      "arxiv_id": "2606.09416",
+      "title": "Harness Engineering for Physical AI: Robot Middleware Is the Harness Layer",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.09416",
+      "published": "2026-06-08",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 7.0,
+      "authors_first3": [
+        "Sanghoon Lee",
+        "Jiyeong Chae",
+        "Kyung-Joon Park"
+      ],
+      "abstract_snippet": "Robot middleware faces a new role in the era of Physical AI. Learned policies, planners, and vision-language-action (VLA) models now enter deployed robots as causal participants on the control path, but the layer that integrates them with timing, scheduling, and network has not been named. Recent la..."
+    },
+    {
+      "arxiv_id": "2606.08881",
+      "title": "Benchmarking Vision-Language-Action Models on SO-101: Failure and Recovery Analysis",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.08881",
+      "published": "2026-06-07",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 7.0,
+      "authors_first3": [
+        "Yi Yu",
+        "Xinchuan Qiu"
+      ],
+      "abstract_snippet": "Vision-Language-Action (VLA) models have demonstrated strong generalization in robotic manipulation, yet existing evaluations are primarily conducted in simulation or on expensive robotic platforms, leaving their robustness on affordable real-world robots largely unexplored. We present a standardize..."
     },
     {
       "arxiv_id": "2606.05979",
@@ -879,6 +1026,60 @@
       "abstract_snippet": "Test-time scaling for vision-language-action (VLA) policies, methods such as RoboMonkey, SEAL, MG-Select, and V-GPS, samples K candidate action chunks at inference and executes the verifier-best. When all K candidates are unsafe, the system executes a violating action with no warning. We propose BOK..."
     },
     {
+      "arxiv_id": "2606.10501",
+      "title": "Uncovering Vulnerability of Vision-Language-Action Models under Joint-Level Physical Faults",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.10501",
+      "published": "2026-06-09",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 6.5,
+      "authors_first3": [
+        "Minsoo Jo",
+        "Taeju Kwon",
+        "Junha Chun"
+      ],
+      "abstract_snippet": "Deploying Vision-Language-Action (VLA) models in real robotic systems requires robustness not only to semantic and perceptual variations, but also to embodiment-side faults that change how actions are physically realized. Real robots can experience joint-level changes caused by actuator degradation,..."
+    },
+    {
+      "arxiv_id": "2606.10495",
+      "title": "Act on What You See: Unlocking Safe Social Navigation in Vision-Language-Action Models",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.10495",
+      "published": "2026-06-09",
+      "venue": null,
+      "organizations": [
+        "University of Southern California",
+        "University of Maryland"
+      ],
+      "benchmarks_mentioned": [],
+      "relevance_score": 6.5,
+      "authors_first3": [
+        "Qingzi Wang",
+        "Xiyang Wu",
+        "Guangyao Shi"
+      ],
+      "abstract_snippet": "Safe social navigation requires robots to distinguish people from ordinary obstacles and to react before danger becomes imminent. We show that pretrained Vision-Language-Action (VLA) models already encode pedestrian-object distinctions and future collision signals in their internal representations, ..."
+    },
+    {
+      "arxiv_id": "2606.06556",
+      "title": "Robots Need More than VLA and World Models",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.06556",
+      "published": "2026-06-04",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 6.5,
+      "authors_first3": [
+        "Elis Karcini",
+        "Faisal Mehrban",
+        "Quang Nguyen"
+      ],
+      "abstract_snippet": "Generalist robot intelligence is often framed as a policy-scaling problem: collect more robot demonstrations, train larger Vision-Language-Action (VLA) models, and expect broader generalisation. In this position paper, we argue that this framing is incomplete. The central bottleneck is not only poli..."
+    },
+    {
       "arxiv_id": "2606.04968",
       "title": "Potential-Guided Flow Matching for Vision-Language-Action Policy Improvement",
       "model_name": "[needs manual extraction]",
@@ -913,23 +1114,6 @@
       "abstract_snippet": "Vision-language-action (VLA) models are gaining attention in robotics, yet their robustness to adversarial attacks remains largely unexplored. Existing work shows that adversarial patches can mislead VLA-based robots but assumes full access to the entire execution trajectory, an unrealistic requirem..."
     },
     {
-      "arxiv_id": "2606.02775",
-      "title": "AURA: Action-Gated Memory for Robot Policies at Constant VRAM",
-      "model_name": "AURA",
-      "paper_url": "https://arxiv.org/abs/2606.02775",
-      "published": "2026-06-01",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [
-        "libero"
-      ],
-      "relevance_score": 6.5,
-      "authors_first3": [
-        "Josef Chen"
-      ],
-      "abstract_snippet": "The KV-cache is the right memory for datacenters but the wrong memory for robots. Datacenter inference batches many short requests and resets them, amortizing an attention cache across a crowd. Embodied agents instead run one long, non-resetting episode on bandwidth-limited edge hardware, where high..."
-    },
-    {
       "arxiv_id": "2606.02486",
       "title": "Intercepting the Future: Latent-Space Predictive World Model for Dynamic VLA Manipulation",
       "model_name": "[needs manual extraction]",
@@ -945,40 +1129,6 @@
         "Haoran Hao"
       ],
       "abstract_snippet": "Vision-Language-Action (VLA) models generalize across static manipulation but fail when objects move during task execution. They map the current observation to an action and assume the scene is stationary between observation and execution, so at any non-trivial object speed the resulting latency exc..."
-    },
-    {
-      "arxiv_id": "2606.02313",
-      "title": "Towards Precise Intent-Aligned VLA Aerial Navigation via Expert-Guided GRPO",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.02313",
-      "published": "2026-06-01",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 6.5,
-      "authors_first3": [
-        "Tianyang Chen",
-        "Wenjun Li",
-        "Xin zhou"
-      ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models offer a promising end-to-end paradigm for unmanned aerial vehicles (UAVs) to accomplish complex tasks specified by fine-grained instructions. However, standard supervised fine-tuning (SFT) suffers from data scarcity, limited generalization, and weak supervision fo..."
-    },
-    {
-      "arxiv_id": "2606.02307",
-      "title": "FATE-VLA:Failue-aware test generation for vision-language-action models",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.02307",
-      "published": "2026-06-01",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 6.5,
-      "authors_first3": [
-        "Arusa Kanwal",
-        "Pablo Valle",
-        "Shaukat Ali"
-      ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models are increasingly used as generalist robot policies, yet their evaluation still relies largely on static benchmarks that randomly sample task scenes. In high-dimensional embodied spaces, failures are sparse and clustered, so static benchmarking can underestimate ro..."
     },
     {
       "arxiv_id": "2606.01951",
@@ -1032,23 +1182,6 @@
       "abstract_snippet": "Vision-Language Action (VLA) models continue to face challenges such as slow inference speed and difficulty performing fine-grained motion adjustments, limiting their widespread adoption in industry. While the Real-Time Action Chunking (RTAC) algorithm has been proposed to address these bottlenecks,..."
     },
     {
-      "arxiv_id": "2605.27759",
-      "title": "Colosseum V2: Benchmarking Generalization for Vision Language Action Models",
-      "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2605.27759",
-      "published": "2026-05-26",
-      "venue": null,
-      "organizations": [],
-      "benchmarks_mentioned": [],
-      "relevance_score": 6.5,
-      "authors_first3": [
-        "Jeremy Morgan",
-        "Prajwal Vijay",
-        "Hyeonho Oh"
-      ],
-      "abstract_snippet": "Vision-Language-Action (VLA) models demonstrate promising generalization in robotic manipulation, driven by advances in large-scale vision and language pre-training. This progress can be misleading. Despite the zero-shot perception and language capabilities of VLAs, their overall task performance of..."
-    },
-    {
       "arxiv_id": "2606.01151",
       "title": "Lagrangian Perturbation Diffusion Steering: Latent Reinforcement Learning for Generative Policies",
       "model_name": "[needs manual extraction]",
@@ -1065,6 +1198,40 @@
       "abstract_snippet": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sampl..."
     },
     {
+      "arxiv_id": "2606.08495",
+      "title": "EgoPriMo: Egocentric Motion Generation for Interactive Humanoid Control",
+      "model_name": "EgoPriMo",
+      "paper_url": "https://arxiv.org/abs/2606.08495",
+      "published": "2026-06-07",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 5.0,
+      "authors_first3": [
+        "Haoyang Ge",
+        "Peng Ren",
+        "Yukun Shi"
+      ],
+      "abstract_snippet": "Humanoid robots require whole-body motions that adapt to scene context, task requirements, and user intent. Motion tracking reproduces specified trajectories, and humanoid vision-language-action systems provide semantic interfaces, but neither offers a scalable and interactive prior for broad full-b..."
+    },
+    {
+      "arxiv_id": "2606.08107",
+      "title": "Ego-Pi: VLA Fine-Tuning for Ego-Centric Human and Robot Data",
+      "model_name": "Ego-Pi",
+      "paper_url": "https://arxiv.org/abs/2606.08107",
+      "published": "2026-06-06",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 5.0,
+      "authors_first3": [
+        "Ji Woong Kim",
+        "Ke Wang",
+        "Zipeng Fu"
+      ],
+      "abstract_snippet": "Robotics faces a fundamental challenge of data scarcity. Unlike language or vision research, there is no internet-scale dataset for robotic manipulation. A promising path forward is to leverage egocentric human data, which can be collected more easily, with greater breadth, and at a larger scale. To..."
+    },
+    {
       "arxiv_id": "2605.28527",
       "title": "What Frozen VLAs Already Know About Success: A Probing Study of Value-Like Structure in Foundation Robot Policies",
       "model_name": "[needs manual extraction]",
@@ -1072,8 +1239,8 @@
       "published": "2026-05-27",
       "venue": null,
       "organizations": [
-        "Peking University",
-        "China Agricultural University"
+        "China Agricultural University",
+        "Peking University"
       ],
       "benchmarks_mentioned": [
         "libero"
@@ -1087,6 +1254,40 @@
       "abstract_snippet": "Vision--language--action (VLA) policies are trained to imitate actions; their loss never asks them to estimate reward, progress, or future success. Their frozen representations nevertheless carry such information, and it can be read out and used to guide action choice without retraining the policy. ..."
     },
     {
+      "arxiv_id": "2606.10614",
+      "title": "Dexterous Point Policy: Learning Point-based Dexterous Hand Policies from Human Demonstrations",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.10614",
+      "published": "2026-06-09",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 4.5,
+      "authors_first3": [
+        "Beomjun Kim",
+        "Seong Hyeon Park",
+        "Seunghoon Sim"
+      ],
+      "abstract_snippet": "Robotic foundation models pre-trained on human demonstration videos have shown promise, but a significant embodiment gap remains when the resulting policies are deployed on real robots. A common remedy is to fine-tune these models on robot-specific demonstrations. However, robot data collection can ..."
+    },
+    {
+      "arxiv_id": "2606.07723",
+      "title": "VoLo: A Physical Orchestrator for Open-Vocabulary Long-Horizon Manipulation",
+      "model_name": "VoLo",
+      "paper_url": "https://arxiv.org/abs/2606.07723",
+      "published": "2026-06-05",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 4.5,
+      "authors_first3": [
+        "Siyi Chen",
+        "Hugo Hadfield",
+        "Alex Zook"
+      ],
+      "abstract_snippet": "Open-vocabulary long-horizon manipulation requires robots to reason over flexible instructions and complex multi-object scenes while adaptively planning, executing, monitoring, and recovering from failures. We address these demands with a closed agent loop in which a VLM orchestrates heterogeneous r..."
+    },
+    {
       "arxiv_id": "2606.00537",
       "title": "PACE: Phase-Aware Chunk Execution for Robot Policies with Action Chunking",
       "model_name": "PACE",
@@ -1094,8 +1295,8 @@
       "published": "2026-05-30",
       "venue": null,
       "organizations": [
-        "Peking University",
-        "JD Explore Academy"
+        "JD Explore Academy",
+        "Peking University"
       ],
       "benchmarks_mentioned": [],
       "relevance_score": 4.5,
@@ -1105,6 +1306,40 @@
         "Jiachen Zhang"
       ],
       "abstract_snippet": "Recent vision-language-action and diffusion-based robot policies often use action chunking, where each policy query predicts a sequence of future actions and the robot executes an open-loop prefix before re-querying. While this interface improves local motion continuity, deployment still requires ch..."
+    },
+    {
+      "arxiv_id": "2606.10025",
+      "title": "GHOST: Hierarchical Sub-Goal Policies for Generalizing Robot Manipulation",
+      "model_name": "GHOST",
+      "paper_url": "https://arxiv.org/abs/2606.10025",
+      "published": "2026-06-08",
+      "venue": "RSS 2026",
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 4.5,
+      "authors_first3": [
+        "Sriram Krishna",
+        "Ben Eisner",
+        "Haotian Zhan"
+      ],
+      "abstract_snippet": "We present GHOST, a framework for learning visuomotor manipulation policies that generalize beyond the training distribution. GHOST factorizes control into (i) a high-level policy that predicts the next sub-goal as a distribution over 3D end-effector poses from multi-view RGB-D observations, and (ii..."
+    },
+    {
+      "arxiv_id": "2606.09499",
+      "title": "Targeting World Models to Compromise Robot Learning Pipelines",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.09499",
+      "published": "2026-06-08",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 4.0,
+      "authors_first3": [
+        "Ethan Rathbun",
+        "Ahmed Agha",
+        "Saaduddin Mahmud"
+      ],
+      "abstract_snippet": "World models have recently seen a rapid growth in both their popularity and capability as more data efficient tools for generating robot training data or simulating real world environments, with many works proposing their integration into the robot learning pipeline. While highly practical, in this ..."
     },
     {
       "arxiv_id": "2606.03385",
@@ -1124,28 +1359,62 @@
       "abstract_snippet": "In robotic manipulation, the tight coupling between grasping and motion planning often obscures the true source of failure, leading to inefficient trial-and-error. To enable efficient long-horizon manipulation, we propose GTP-FA (Grasp-Then-Plan with Failure Attribution), a task-oriented two-stage g..."
     },
     {
-      "arxiv_id": "2606.00113",
-      "title": "World Models for Robotic Manipulation: A Survey",
+      "arxiv_id": "2606.07386",
+      "title": "Spline Policy: A Structured Representation for Robot Policies",
       "model_name": "[needs manual extraction]",
-      "paper_url": "https://arxiv.org/abs/2606.00113",
-      "published": "2026-05-27",
+      "paper_url": "https://arxiv.org/abs/2606.07386",
+      "published": "2026-06-05",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [],
       "relevance_score": 3.5,
       "authors_first3": [
-        "Fangyuan Wang",
-        "Ziyuan Wang",
-        "Guorui Pei"
+        "Mengze Tian",
+        "Yiming Li",
+        "Sichao Liu"
       ],
-      "abstract_snippet": "Robotic manipulation depends on the ability to anticipate how actions reshape objects, contacts, and scene geometry before execution. Learned world models provide this capability by predicting task-relevant future evolution under robot intervention, yet the term now spans latent dynamics models, act..."
+      "abstract_snippet": "Modern imitation-learning policies for robot manipulation often represent actions as fixed-resolution action chunks, which are simple and effective but expose limited geometric and temporal structure before execution. This paper studies Spline Policy (SP), a structured representation that replaces a..."
     },
     {
-      "arxiv_id": "2605.27947",
-      "title": "SANTS: A State-Adaptive Scheduler for World Action Models",
-      "model_name": "SANTS",
-      "paper_url": "https://arxiv.org/abs/2605.27947",
-      "published": "2026-05-27",
+      "arxiv_id": "2606.08666",
+      "title": "Language as a Sensor: Calibrated Spatial Belief Estimation in 3D Scenes from Natural Language",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.08666",
+      "published": "2026-06-07",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 3.5,
+      "authors_first3": [
+        "Aryan Naveen",
+        "Jason Xinyu Liu",
+        "Luca Carlone"
+      ],
+      "abstract_snippet": "Robots deployed in human-centric environments routinely receive natural-language descriptions of spatial information (\"I left my backpack on the table\") that reference parts of the world beyond their perceptual field of view. Traditional metric-semantic mapping ignores this signal, while off-the-she..."
+    },
+    {
+      "arxiv_id": "2606.08520",
+      "title": "Two Bridges, One Pathway: From VLMs to Generalizable VLAs with Embodied Trajectory-Coupled Data",
+      "model_name": "[needs manual extraction]",
+      "paper_url": "https://arxiv.org/abs/2606.08520",
+      "published": "2026-06-07",
+      "venue": null,
+      "organizations": [],
+      "benchmarks_mentioned": [],
+      "relevance_score": 3.5,
+      "authors_first3": [
+        "Linqi Yin",
+        "Shiduo Zhang",
+        "Shenling Qiu"
+      ],
+      "abstract_snippet": "Vision-language models (VLMs) are powerful general-purpose reasoners, yet converting them into robot control policies (VLAs) is surprisingly difficult. The root cause is a two-fold gap: VLMs are trained on internet-scale images with language-understanding objectives, while VLAs must perceive robot s..."
+    },
+    {
+      "arxiv_id": "2606.10040",
+      "title": "Efficient-WAM: A 1B-Parameter World-Action Model with Low-Cost Future Imagination",
+      "model_name": "Efficient-WAM",
+      "paper_url": "https://arxiv.org/abs/2606.10040",
+      "published": "2026-06-08",
       "venue": null,
       "organizations": [],
       "benchmarks_mentioned": [
@@ -1153,11 +1422,11 @@
       ],
       "relevance_score": 3.0,
       "authors_first3": [
-        "Yirui Sun",
-        "Guangyu Zhuge",
-        "Keliang Liu"
+        "Jiajun Li",
+        "Tiecheng Guo",
+        "Yifan Ye"
       ],
-      "abstract_snippet": "World Action Models (WAMs) improve robot manipulation by using video-based future representations to condition action generation. In pixel-space WAMs, however, the best action condition is not necessarily the fully denoised video. Controlled denoising-depth scans show that video refinement can reduc..."
+      "abstract_snippet": "World-Action Models (WAMs) have emerged as a promising paradigm for embodied control by coupling future visual prediction with action generation. However, most existing WAMs rely on photorealistic future prediction, which incurs high inference latency and makes real-time robot deployment difficult. ..."
     }
   ]
 }
