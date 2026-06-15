@@ -1,0 +1,78 @@
+name: LabVLA
+full_name: "LabVLA: Grounding Vision-Language-Action Models in Scientific Laboratories"
+organization: "Zhejiang University; Shanghai AI Laboratory; Harbin Institute of Technology"
+date: "2026-06-11"
+paper_url: https://arxiv.org/abs/2606.13578
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct (multi-view RGB + language)"
+  llm: "Qwen3-VL-4B (d_vlm=2560)"
+  action_head: "18-layer DiT action expert (width 1024, 8 heads, head_dim 128) with flow matching; cross-attention to VLM prefix; N=10 Euler sampling steps"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "4B"
+  key_innovation: >
+    First VLA explicitly targeting scientific laboratory protocol execution.
+    Pairs (1) RoboGenesis, an Isaac-Sim-based programmable workflow and data engine
+    that synthesizes LabEmbodied-Data across 16 robot platforms via atomic-skill
+    composition, agentic workflow generation, six-axis domain randomization, and
+    success-filtered structured export; with (2) a Qwen3-VL-4B + DiT-expert policy
+    trained in two stages: FAST action-token pretraining to make the VLM prefix
+    action-aware, followed by flow matching posttraining with knowledge insulation
+    (stop-gradient between VLM hidden states and the flow loss) so action learning
+    does not drift the language/visual priors. Operates under a shared cross-
+    embodiment action/observation schema covering single-arm, mobile-manipulator,
+    and dual-arm robots.
+
+training:
+  dataset: >
+    Pretraining: Robointer-VQA, AgiBot World Beta, OXE-AugE (LeRobot subset, ~572k trajectories),
+    and Droid (FAST-token next-token prediction + VQA + subtask supervision).
+    Posttraining: OXE-AugE + synthesized LabEmbodied-Data (RoboGenesis) under flow matching
+    with knowledge insulation; LabUtopia task-specific finetuning with delta-action targets.
+  method: "Two-stage: (1) FAST action-token VLM pretraining; (2) flow matching posttraining with knowledge insulation (alpha=10 weighting on flow loss); LabUtopia finetuning with delta-action flow matching"
+  optimizer: "AdamW (hyperparameters in paper Table 5 / Appendix A)"
+  steps: "see paper Appendix A (separate budgets for VLM pretraining, KI posttraining, LabUtopia finetuning)"
+  hardware: "not specified in main text"
+
+benchmarks:
+  labutopia:
+    pick_up_id: 49.2
+    press_button_id: 100.0
+    open_door_id: 65.0
+    pour_liquid_id: 43.3
+    heat_beaker_id: 83.3
+    transport_beaker_id: 85.8
+    labutopia_id_avg: 71.1
+    pick_up_ood: 48.3
+    press_button_ood: 98.3
+    open_door_ood: 65.8
+    pour_liquid_ood: 34.2
+    heat_beaker_ood: 87.5
+    transport_beaker_ood: 85.8
+    labutopia_ood_avg: 70.0
+    source: "LabVLA paper Table 2 (six LabUtopia tasks, 120 episodes per setting)"
+    date_reported: "2026-06-11"
+    eval_condition: "fine-tuned (LabUtopia delta-action finetuning); evaluated under ID and OOD splits"
+
+eval_conditions:
+  labutopia: "Fine-tuned on LabUtopia (six tasks: Pick Up, Press Button, Open Door, Pour Liquid, Heat Beaker, Transport Beaker); 120 episodes per task per setting; ID follows training distribution, OOD perturbs object placement, appearance, or scene configuration"
+  real_world: "Franka platform, 4 tasks (Shake Liquid, Pour Liquid, Magnetic Stir, Stopper Plug/Unplug) with 30-50 demos each; 50 rollouts per condition; 4-cell crossing of (in/out-of-domain) x (clean/cluttered); LabVLA averages 86.5 / 80.0 / 80.0 / 74.0 across the four conditions"
+
+tags:
+  - vla
+  - scientific-laboratory
+  - flow-matching
+  - dit-action-expert
+  - fast-tokens
+  - knowledge-insulation
+  - simulation-data
+  - cross-embodiment
+  - qwen3-vl
+  - labutopia
+  - sim-to-real
+  - 4B
