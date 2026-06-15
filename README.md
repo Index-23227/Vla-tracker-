@@ -51,11 +51,11 @@ VLA-Tracker solves this by:
 | 6 | SimpleVLA-RL | 98.83 | Sep 2025 | ICLR 2026 | AR + GRPO RL |
 | 7 | DualCoT-VLA | 98.8 | Mar 2026 | — | Flow matching + parallel CoT |
 | 8 | SnapFlow | 98.75 | Apr 2026 | — | One-step flow distillation (pi0.5 base) |
-| 9 | **3DThinkVLA** | **98.65** | Jun 2026 | arXiv | OFT regression + 3D-thinking-guided co-training |
-| 10 | IntentVLA | 98.62 | May 2026 | — | DiT flow-matching + VGGT short-horizon intent |
-| 11 | AttenA+ | 98.6 | May 2026 | arXiv | Inverse-velocity loss reweighting (plug-in) |
-| 12 | DiT4DiT | 98.55 | Mar 2026 | — | Cosmos DiT + flow-matching action |
-| 13 | G3T-AML | 98.55 | May 2026 | arXiv | 16-layer DiT on learned action manifold |
+| 9 | **GEAR-VLA** | **98.67** | Jun 2026 | arXiv | Qwen2.5-VL + VGGT + DiT geometry-aware |
+| 10 | 3DThinkVLA | 98.65 | Jun 2026 | arXiv | OFT regression + 3D-thinking-guided co-training |
+| 11 | IntentVLA | 98.62 | May 2026 | — | DiT flow-matching + VGGT short-horizon intent |
+| 12 | AttenA+ | 98.6 | May 2026 | arXiv | Inverse-velocity loss reweighting (plug-in) |
+| 13 | DiT4DiT | 98.55 | Mar 2026 | — | Cosmos DiT + flow-matching action |
 
 > Full leaderboard with 125 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
