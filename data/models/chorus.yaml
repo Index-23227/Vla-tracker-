@@ -1,0 +1,47 @@
+name: CHORUS
+full_name: "CHORUS: Decentralized Multi-Embodiment Collaboration with One VLA Policy"
+organization: "Stanford University"
+date: "2026-06-10"
+paper_url: https://arxiv.org/abs/2606.12352
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "π0.5 VLA backbone (PaliGemma-based VLM + flow-matching action expert)"
+  llm: "Gemma-based (inherited from π0.5)"
+  action_head: "flow matching (π0.5 action expert) with LoRA adapters (rank 32) on top of a frozen-ish VLM with LoRA rank 16; predicts padded 32-dim action chunks"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "3B"
+  key_innovation: "Adapts a single pretrained π0.5 VLA into ONE shared policy that controls every robot in a heterogeneous multi-robot team in a fully decentralized way at inference. Each robot runs an independent copy of CHORUS conditioned only on (1) its own local observations (top + wrist views) and (2) a robot-identifying language prompt (e.g. '<YAM> Lift the measuring tape and hold for the Kinova'). NO inter-robot communication, NO shared third-person camera, NO online alignment, NO per-robot policies, NO proprioceptive state sharing at runtime. The padded-action / variable-image-token cross-embodiment input format inherited from π0.5 absorbs differences in DoF (10/11), camera count, and control rate (15 Hz vs 30 Hz). A robot sampler builds each training batch from single-robot tuples (o_r, A_r, c_r) drawn independently from the pooled dataset D, so the model never sees a joint observation across robots — coordination emerges purely from each robot's visual perception of its teammate. The same recipe scales unchanged from 2 robots to 3 (Kinova + 2×YAM) and accommodates asymmetric per-robot demo counts (34 vs 18), which a centralized policy could not exploit. Asynchronous chunked execution (YAM chunk 40 @ 30 Hz, Kinova chunk 20 @ 15 Hz) lets each robot advance at its own network/compute latency without waiting on the slowest link."
+
+training:
+  dataset: "Real-world multi-robot teleoperation data collected via TidyBot++ phone-based interface on heterogeneous mobile manipulators (ARX 10-DoF @10 Hz, Kinova 11-DoF @10 or 15 Hz, YAM 10-DoF @30 Hz). Per task: Basket Lift 43 demos (ARX+Kinova), Tape Measure 29 demos (YAM+Kinova), Book Handover 45 demos (YAM+Kinova), 3-Robot Move 34 demos (YAMs) / 18 demos (Kinova, due to corrupted door-opening data — asymmetry is exploited because training is per-robot decentralized)."
+  method: "LoRA fine-tuning of pretrained π0.5 backbone with flow-matching loss over pooled single-robot tuples. LoRA rank 16 on VLM, rank 32 on action expert. AdamW, cosine LR schedule (peak 2.5e-5 → final 2.5e-6, 1000 warmup steps, 30k decay steps), batch 64, 20,000 training steps, training chunk size 50, on a single NVIDIA H100. In the 3-robot setting, Kinova tuples are upweighted ×2 by the robot sampler to compensate for the two YAM arms producing roughly 4× the action rate."
+  num_trajectories: 151
+  compute: "1× NVIDIA H100 (training); 1× NVIDIA RTX 5090 (deployment, can host multiple robots' queries by batching)"
+
+benchmarks:
+  real_world:
+    basket_lift_sr: 100.0
+    tape_measure_sr: 100.0
+    book_handover_sr: 83.3
+    three_robot_move_sr: 90.0
+    reactivity_perturbed_handover_sr: 85.0
+    avg_two_robot_sr: 94.4
+    source: "CHORUS paper Figures 4 & 6, Table 3 (handover 0.833), Section 4.4 (3-robot 90%), Figure 5 (reactivity 17/20=85%)"
+    date_reported: "2026-06-10"
+    eval_condition: "Real-world rollouts on TidyBot++ mobile manipulators; 10-18 rollouts per task with distractor variants; decentralized inference, no inter-robot communication, asynchronous chunked execution"
+
+tags:
+  - multi-robot
+  - multi-embodiment
+  - decentralized
+  - flow-matching
+  - pi0.5
+  - LoRA
+  - real-world
+  - collaboration
+  - heterogeneous-team
+  - mobile-manipulation
