@@ -1,27 +1,86 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: FiberTune: Preserving Action-Fiber Visual Residuals in Vision-Language-Action Fine-Tuning
 # arXiv: 2606.08653
 
 name: FiberTune
 full_name: "FiberTune: Preserving Action-Fiber Visual Residuals in Vision-Language-Action Fine-Tuning"
-organization: "TODO: check paper"
+organization: "University of Chinese Academy of Sciences; Hebei Key Laboratory of Cognitive Intelligence (Xiong'an Institute of Innovation); Hebei University of Technology; Beijing Information Science and Technology University"
 date: "2026-06-07"
 paper_url: https://arxiv.org/abs/2606.08653
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: "pi0.5 (PaliGemma-family VLA) and OpenVLA-OFT (OpenVLA-7B + flow-matching head); FiberTune is a training-time auxiliary applied on top of these existing VLA backbones"
+  llm: "PaliGemma2 (within pi0.5) / Llama-2-7B (within OpenVLA)"
+  action_head: "Inherited from each base VLA: pi0.5 uses a flow-matching action expert; OpenVLA-OFT uses optimized fine-tuned heads (parallel decoding + L1 regression). FiberTune does NOT modify the action head; it adds (a) an online linear action probe on detached pooled visual tokens, (b) a fixed randomly initialized per-token MLP adapter (hidden width 2048) into a frozen RADIO c-radio v3-l teacher feature space, and (c) two training-time auxiliary losses (probe-filtered residual cosine alignment Lalign + spectral-entropy effective-rank prior Lrank). All FiberTune machinery is removed at inference."
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_space: "inherited from base VLA (pi0.5 flow-matching / OpenVLA-OFT regression)"
+  parameters: "no inference-time parameter change vs base VLA (pi0.5 ~3B / OpenVLA-OFT ~7B). Training-only adds a linear probe + 2048-hidden MLP adapter that are discarded at deployment."
+  key_innovation: >
+    Formalizes 'residual visual collapse along local action fibers': action-supervised fine-tuning only
+    constrains directions of the visual token representation that cross fibers (change predicted actions),
+    so action-equivalent visual structure (color, category, distractors, future-relevant state) can collapse
+    without first-order penalty. FiberTune fits an online linear probe Pprobe from detached pooled visual tokens
+    to the supervised action, applies the complementary feature filter Rpf = R(I - Pprobe) to obtain the
+    action-orthogonal residual, then (i) aligns centered+normalized Rpf tokens to a frozen RADIO teacher via
+    cosine loss through a fixed random MLP adapter (directional vMF likelihood), and (ii) regularizes the
+    spectral entropy of the Rpf batch-token covariance with an effective-rank prior. Inference-free, two
+    auxiliary losses with target ratio rho_aux in [3%,6%] of task loss.
+
+training:
+  base_models: "pi0.5 (lerobot/pi05 base; lerobot/pi05_libero; RLinf/RLinf-Pi05-CALVIN-ABC-D-SFT) and OpenVLA-OFT (openvla/openvla-7b; moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10)"
+  teacher: "Frozen RADIO c-radio v3-l (Heinrich et al., 2025)"
+  method: "Fine-tuning with L = Ltask + lambda_align * Lalign + lambda_rank * Lrank. lambda_align / lambda_rank = 0.0125 / 0.00625 across CALVIN+LIBERO (0.003125 / 0.0015625 on SO-101). Probe is online ridge-regularized (eta = 1e-4) and updated only by its own action-regression loss; adapter g is randomly initialized and frozen. Visual-token source = prefix-tower layer 8 (pi0.5) / layer 16 (OpenVLA-OFT)."
+  budget: "6,000 steps for CALVIN/LIBERO pi0.5 and SO-101; 20,000 steps (general) / 15,000 steps (adapted) for OpenVLA-OFT LIBERO"
+  optimizer: "Cosine LR 2.5e-5 to 2.5e-6 (pi0.5 CALVIN/LIBERO-adapted/SO-101) or 5e-5 to 5e-6 (LIBERO general) with 1k warmup; constant 1e-4 + 1k warmup for OpenVLA-OFT. Auxiliary warmup 1k steps; aux coefficients decay to 0.5x after 3k-4.5k steps."
+  hardware: ">=48GB NVIDIA GPUs (1-2 per run)"
+  training_data: "CALVIN ABC training split; LIBERO four-suite training (Spatial/Object/Goal/LIBERO-10, 10 tasks x 50 episodes per suite); 90 SO-101 demonstrations (yellow/orange/purple ID colors, green held out)"
 
 benchmarks:
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_avg_len: 4.116
+    calvin_abc_d_sr1: 94.3
+    calvin_abc_d_sr2: 87.3
+    calvin_abc_d_sr3: 80.9
+    calvin_abc_d_sr4: 77.0
+    calvin_abc_d_sr5: 72.1
+    source: "FiberTune paper Tables 1 and C.5, adapted pi0.5 starting checkpoint (RLinf/RLinf-Pi05-CALVIN-ABC-D-SFT), seed 7 single-seed primary; three-seed mean Avg=4.088, SR5=70.9"
+    date_reported: "2026-06-07"
+    eval_condition: "fine-tuned, 1000 CALVIN ABC->D chain-evaluation trials via RLinf/OpenPI bridge, 6k-step fixed budget"
+  libero:
+    libero_spatial: 97.8
+    libero_object: 98.8
+    libero_goal: 97.8
+    libero_10: 94.0
+    libero_avg: 97.10
+    source: "FiberTune paper Tables 1 and C.6, pi0.5 adapted (lerobot/pi05_libero) seed 1000 single-seed primary; OpenVLA-OFT adapted reaches 96.15% under matched protocol"
+    date_reported: "2026-06-07"
+    eval_condition: "fine-tuned, 10 tasks x 50 episodes per suite, LeRobot LIBERO evaluation stack"
 
 eval_conditions:
-  calvin: "fine-tuned"
+  calvin: "fine-tuned from RLinf adapted pi0.5 CALVIN-ABC-D-SFT checkpoint for 6k steps; 1000 chain-evaluation trials"
+  libero: "fine-tuned from lerobot/pi05_libero adapted checkpoint for 6k steps; 10 tasks x 50 episodes per suite"
+  so101_physical:
+    setup: "Physical SO-101 arm pick-place; 90 demos; 128 trials per arm (32 per color x 4 colors: yellow/orange/purple ID + green OOD)"
+    task_success: 78.1
+    id_color_success: 83.3
+    ood_green_success: 62.5
+    baseline_task_success: 72.7
+    baseline_ood_green: 46.9
+    note: "pi0.5 + FiberTune vs pi0.5 task-loss baseline; largest gain on held-out green (+15.6 pp) despite identical training data"
 
-tags: [calvin]
+tags:
+  - vla
+  - fine-tuning
+  - representation-preservation
+  - residual-alignment
+  - frozen-teacher
+  - radio
+  - action-fiber
+  - effective-rank
+  - calvin
+  - libero
+  - so-101
+  - pi0.5
+  - openvla-oft

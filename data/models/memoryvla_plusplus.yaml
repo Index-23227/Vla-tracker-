@@ -1,0 +1,182 @@
+# Paper: MemoryVLA++: Temporal Modeling via Memory and Imagination in Vision-Language-Action Models
+# arXiv: 2606.09827
+
+name: MemoryVLA++
+full_name: "MemoryVLA++: Temporal Modeling via Memory and Imagination in Vision-Language-Action Models"
+organization: "Tsinghua University; HKU; Dexmal; StepFun"
+date: "2026-06-08"
+paper_url: https://arxiv.org/abs/2606.09827
+code_url: https://shihao1895.github.io/MemoryVLA-PP-Web
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "PrismaticVLM 7B (parallel DINOv2 + SigLIP visual encoders) — same VLM as MemoryVLA"
+  llm: "LLaMA-7B (default); ablation also uses Qwen2.5 + Dexbotic pretraining"
+  action_head: "Full temporal-aware diffusion action expert (DiT with DDIM, 10 sampling steps, CFG=1.5). Cognition-attention layer attends over [cognitive token + noisy actions], then perception-attention injects fine-grained perceptual details. Predicts continuous 7-DoF action sequence; ~300M parameters."
+  action_head_category: diffusion
+  action_space: "continuous 7-DoF (delta translation + Euler rotation + binary gripper); action chunk length 16; dual-arm = concatenation of two arm vectors"
+  parameters: "7B VLM + ~300M diffusion action expert + 1.5B SVD world model (frozen at policy training); world model used only for latent imagination, not pixel decoding"
+  key_innovation: >
+    Full temporal modeling = past memory + present perception + future imagination. Extends MemoryVLA's
+    Perceptual-Cognitive Memory Bank (PCMB) with a Stable Video Diffusion (SVD) 1.5B world model that
+    performs PARTIAL denoising to extract multi-scale latent future tokens (no pixel reconstruction).
+    An Imagination Former with learnable queries + spatial/temporal attention compresses these into
+    K imagined future steps. A memory-guided integration module uses memory-augmented perceptual
+    tokens as queries to cross-attend the imagined latents and adaptively fuse them via a sigmoid
+    gate, suppressing decision-irrelevant predictions. Full temporal tokens {memory-fused perception,
+    cognitive token} then condition a diffusion DiT action expert. PCMB retains MemoryVLA's
+    redundancy-aware consolidation (merge most-similar adjacent entries when capacity L is hit).
+
+training:
+  datasets:
+    libero: "50 demos/task across Spatial/Object/Goal/Long-10/Long-90; jointly train first 4 suites 60k steps, Long-90 separately 30k steps"
+    simpler_env: "BridgeData-v2 (~60k WidowX teleop trajectories), 50k steps; world model 40k steps"
+    mikasa_robo: "250 demos/task across 5 memory-dependent tasks, jointly 20k steps; world model 20k steps"
+    calvin: "ABC->D zero-shot, 60k steps; world model follows VPP"
+    libero_plus: "zero-shot (trained on 4 standard suites) and SFT (Libero-Plus in mixed training); 60k steps"
+    real_robot: "Franka / WidowX / Dual-ARX5; 50-150 demos for general tasks, 200-300 for long-horizon; world model 20k steps"
+  method: "Two-stage. (1) Manipulation-oriented world-model adaptation: SVD fine-tuned with denoising MSE on (current frame, instruction-via-CLIP-cross-attn) -> future video. (2) End-to-end VLA training with frozen world model; diffusion MSE on action sequence."
+  optimizer: "global batch 208-256 (26-32/GPU); LR 2e-5; PyTorch FSDP"
+  hardware: "8x NVIDIA A100 or H20 GPUs"
+  inference: "DDIM 10 steps + CFG scale 1.5; action chunk length 16; single-step world-model denoising sufficient (Tab. VIII(a) ablation)"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.8
+    libero_object: 100.0
+    libero_goal: 98.2
+    libero_long: 96.0
+    libero_long_90: 97.8
+    libero_5_suite_avg: 98.4
+    libero_avg: 98.4
+    source: "MemoryVLA++ paper Table I (all 5 suites, joint training first 4 + separate Long-90); baseline CogACT 93.2 -> +5.2"
+    date_reported: "2026-06-08"
+    eval_condition: "fine-tuned"
+  simpler_env:
+    simpler_spoon_on_towel: 83.3
+    simpler_carrot_on_plate: 66.7
+    simpler_stack_cube: 45.8
+    simpler_eggplant_in_basket: 100.0
+    simpler_bridge: 73.9
+    simpler_avg: 73.9
+    source: "MemoryVLA++ paper Table II (BridgeData-v2 -> SimplerEnv real-to-sim, 24 trials/task); LLaMA2 backbone reported 71.9, Qwen2.5+Dexbotic backbone (Tab. XI) reaches 84.4. Headline number is 73.9 (best of LLaMA2 cfg) per abstract /paper table; 74.0 mentioned in abstract is rounded."
+    date_reported: "2026-06-08"
+    eval_condition: "trained on BridgeData-v2, evaluated zero-shot in SimplerEnv"
+  calvin:
+    calvin_abc_d_1: 0.956
+    calvin_abc_d_2: 0.902
+    calvin_abc_d_3: 0.857
+    calvin_abc_d_4: 0.817
+    calvin_abc_d_5: 0.761
+    calvin_abc_d_avg_len: 4.29
+    calvin_avg: 4.29
+    source: "MemoryVLA++ paper Table IV (ABC->D zero-shot, 1000 rollouts); baseline CogACT 3.25 -> +1.04"
+    date_reported: "2026-06-08"
+    eval_condition: "fine-tuned, ABC->D zero-shot"
+  mikasa_robo:
+    shell_game_touch: 97
+    intercept_medium: 40
+    remember_color_3: 50
+    remember_color_5: 19
+    remember_color_9: 16
+    mikasa_avg: 44.4
+    source: "MemoryVLA++ paper Table III (single-frame VLA setting, 100 episodes/task); prev best single-frame VLA 29.4 (pi0) -> +15.0; SGT improves +50 over prev best"
+    date_reported: "2026-06-08"
+    eval_condition: "fine-tuned, jointly trained 20k steps on 5 tasks"
+  libero_plus:
+    libero_plus_camera: 36.4
+    libero_plus_robot: 68.9
+    libero_plus_language: 88.7
+    libero_plus_light: 93.8
+    libero_plus_background: 90.6
+    libero_plus_noise: 63.5
+    libero_plus_layout: 83.8
+    libero_plus_avg_zeroshot: 73.1
+    libero_plus_avg_sft: 82.7
+    source: "MemoryVLA++ paper Table V (7 OOD variation axes); zero-shot 73.1 (+5.2 vs OpenVLA-OFT 67.9); SFT 82.7 (+3.1 vs OpenVLA-OFT 79.6)"
+    date_reported: "2026-06-08"
+    eval_condition: "zero-shot (trained on 4 standard Libero suites) and SFT (mixed training including Libero-Plus)"
+
+real_robot:
+  general_manipulation:
+    description: "6 short-horizon tasks: Insert Circle, Egg in Pan, Egg in Oven, Stack Cups, Stack Blocks, Pick Diverse Fruits (5 trials x 5 variants for Fruits; 15 trials for others)"
+    memoryvla_avg_succ: 85
+    note: "Table VI(a). MemoryVLA++ NOT evaluated on this category — only MemoryVLA (85, +9 over CogACT 76). MemoryVLA++ evaluated only on imagination-dependent tasks."
+  long_horizon_memory:
+    description: "6 memory-dependent tasks: Push Buttons, Change Food, Guess Where, Clean Table & Count, Pick Place Order, Clean Restaurant Table"
+    memoryvla_avg_succ: 83
+    note: "Table VI(b). MemoryVLA reaches 83 (+26 over CogACT 57)."
+  long_horizon_imagination:
+    description: "5 imagination-dependent tasks: Conveyor Pick-Low/Mid/High, Conveyor Scan-Pick, Bag Pack & Zip"
+    memoryvla_plusplus_avg_succ: 77
+    note: "Table VI(c) per abstract: +28 over baseline. MemoryVLA++ is the model evaluated here because future imagination is explicitly required."
+  source: "MemoryVLA++ paper Table VI and Section IV.E"
+
+inference_efficiency:
+  rtx_4090_latency_s: 0.241
+  rtx_4090_throughput_hz: 66.4
+  h20_latency_s: 0.301
+  h20_throughput_hz: 53.2
+  gpu_memory_gb: 21.7
+  baseline_rtx_4090_latency_s: 0.187
+  memoryvla_rtx_4090_latency_s: 0.194
+  note: "Table X. 300-run avg, bfloat16, single-view, action chunk 16. World-model forward adds ~50ms vs MemoryVLA on RTX 4090."
+
+eval_conditions:
+  libero: "fine-tuned, jointly trained on first 4 suites + separate Long-90"
+  simpler_env: "trained on BridgeData-v2, evaluated zero-shot in SimplerEnv"
+  calvin: "fine-tuned, ABC->D zero-shot generalization"
+  mikasa_robo: "fine-tuned single-frame VLA setting"
+  libero_plus: "zero-shot (no Libero-Plus data) and SFT (mixed) protocols"
+  real_robot: "Franka / WidowX / Dual-ARX5; teleoperation demos; step-wise scoring for long-horizon tasks"
+
+ablation:
+  imagination_denoise_steps:
+    step_1: 44.4
+    step_3: 44.6
+    step_5: 43.6
+    note: "Table VIII(a) Mikasa-Robo avg. Single-step denoising sufficient."
+  imagination_horizon:
+    K_4: 43.4
+    K_8: 43.8
+    K_16: 44.4
+    note: "Table VIII(b). Longer imagination horizon helps."
+  world_model_update:
+    wo_freeze: 42.8
+    w_freeze: 44.4
+    note: "Table VIII(c). Freezing the adapted world model is better than co-training."
+  integration_strategy:
+    add: 41.2
+    mem_guided: 44.4
+    note: "Table VIII(d). Memory-guided cross-attention fusion beats naive add."
+  memory_length_simpler:
+    small_4: 67.7
+    default_16: 71.9
+    large_64: 67.7
+    note: "Table VII(a). Default memory length is optimal."
+  backbone_pretraining_simpler:
+    llama2_cogact: 71.9
+    qwen2_5_dexbotic: 84.4
+    note: "Table XI. Stronger VLM pretraining yields +12.5pp on SimplerEnv."
+
+tags:
+  - vla
+  - memory
+  - world-model
+  - imagination
+  - temporal-modeling
+  - diffusion
+  - long-horizon
+  - libero
+  - calvin
+  - simpler-env
+  - mikasa-robo
+  - libero-plus
+  - real-robot
+  - 7B
+  - prismatic-vlm
+  - stable-video-diffusion
+  - tsinghua
+  - hku
+  - dexmal
