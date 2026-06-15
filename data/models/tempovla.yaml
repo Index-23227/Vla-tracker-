@@ -1,0 +1,41 @@
+name: TempoVLA
+version: '1.0'
+full_name: 'TempoVLA: Learning Speed-Controllable Vision-Language-Action Policies'
+organization: RUC / FDU / UNC
+paper_url: https://arxiv.org/abs/2606.06491
+code_url: null
+date: '2026-06-04'
+venue: arXiv 2026
+architecture:
+  backbone: PaliGemma (via pi0.5)
+  llm: Gemma-based
+  action_head: flow matching
+  action_space: continuous
+  parameters: 3B+
+  key_innovation: Explicit scalar speed conditioning + Variable-Speed Trajectory Augmentation (VSTA) for bidirectional speed control of a single VLA policy
+  action_head_category: flow_matching
+training:
+  dataset: LIBERO (4 suites) + real-world Franka/UR5 teleop (50 trajectories/task)
+  compute: 32x NVIDIA H20 GPUs, batch 512, 30k iterations
+  base_model: pi0.5
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 98.2
+    libero_goal: 98.4
+    libero_long: 91.8
+    libero_5_suite_avg: 96.9
+    source: TempoVLA paper Table 3 (7-speed range, 1x)
+    date_reported: '2026-06-04'
+    eval_condition: fine-tuned (speed-conditioned, 7-speed range)
+open_source: false
+inference_hz: null
+tags:
+- flow-matching
+- speed-control
+- data-augmentation
+- manipulation
+- LIBERO
+- pi0.5-based
+- dynamic-scheduling
+- VLM-coordinated
