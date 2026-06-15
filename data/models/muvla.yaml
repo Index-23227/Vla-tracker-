@@ -1,0 +1,69 @@
+name: "μVLA"
+full_name: "μVLA: On Recurrent Memory for Partially Observable Manipulation in VLA Models"
+organization: "CogAI Lab / MIRAI (Moscow)"
+date: '2026-06-10'
+paper_url: https://arxiv.org/abs/2606.12497
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: PrismaticVLM (SigLIP + DinoV2)
+  llm: Llama-2 7B (OpenVLA-OFT inherited)
+  action_head: parallel decoding + continuous actions (OpenVLA-OFT) augmented with m learnable recurrent memory tokens carried across timesteps via self-attention
+  action_space: continuous (7-DoF) action chunks (H steps)
+  parameters: 7B (LoRA r=32 on backbone and action head + memory positions)
+  action_head_category: regression
+  key_innovation: >
+    Controlled isolation study of recurrence inside a strong pretrained VLA backbone. Inserts a
+    small bank of m learnable memory tokens between PROPRIO and action tokens that are carried
+    across environment steps through the standard self-attention forward pass; trained end-to-end
+    with truncated backpropagation through time (TBPTT) on temporally ordered episodes, with no
+    auxiliary losses and no architectural additions. A memory-action attention guard (zero
+    context-to-action block) prevents degenerate self-referential solutions that would copy the
+    predicted action chunk into memory. The family μVLA is parameterized only by (m, K, write
+    rule {TBPTT, EMA}). Receding-horizon inference (per-step memory update) aligns inference
+    cadence with training and avoids the factor-of-H mismatch that open-loop chunked execution
+    introduces.
+
+training:
+  dataset: >
+    MIKASA-Robo-VLA (5-task in-distribution mixture: ShellGamePush, InterceptMedium, TakeItBack,
+    RememberColor5, RememberShapeAndColor3x3) for partial-observability training; LIBERO 4 suites
+    (Spatial, Object, Goal, Long-10) as fully-observable control. Initialized from released
+    OpenVLA checkpoint, fine-tuned with LoRA r=32.
+  method: >
+    LoRA fine-tuning of OpenVLA + truncated backpropagation through time (TBPTT) at K=1, 2, or
+    8, OR detached EMA write (α=0.1). 100 deterministic eval episodes per environment with
+    receding-horizon inference.
+  compute: >
+    LIBERO m=64/K=8 training takes ~10d19h on listed hardware (versus ~1d for OpenVLA-OFT and
+    ~1d for m=64/EMA), reflecting the cost of TBPTT through the K-step recurrent graph.
+
+benchmarks:
+  libero:
+    libero_spatial: 93.0
+    libero_object: 99.4
+    libero_goal: 96.6
+    libero_10: 95.8
+    libero_avg: 96.2
+    libero_5_suite_avg: 96.2
+    source: "μVLA paper Table 2 (m=64, K=8 TBPTT)"
+    date_reported: '2026-06-10'
+    eval_condition: "fine-tuned (LoRA on OpenVLA + memory tokens, receding-horizon inference)"
+
+eval_conditions:
+  libero: "fine-tuned, 4 suites, receding-horizon inference (strongest TBPTT K=8 variant)"
+  mikasa_robo: "5 training tasks SR 0.42->0.84 at K=2; 11 held-out matched-semantics SR 0.07->0.23; 7 held-out novel-semantics near baseline"
+
+tags:
+  - 7B
+  - recurrent-memory
+  - TBPTT
+  - partial-observability
+  - openvla-oft
+  - LoRA
+  - memory
+  - libero
+  - mikasa-robo
+  - controlled-study
