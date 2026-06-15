@@ -1,0 +1,29 @@
+name: TacCoRL
+full_name: 'TacCoRL: Integrating Tactile Feedback into VLA via Simulation'
+organization: "UCLA; UCSD; UESTC; Peking University; University of Utah"
+date: '2026-06-10'
+paper_url: https://arxiv.org/abs/2606.11743
+code_url: https://tac-corl.github.io/
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Pi0.5-style VLM backbone (vision + language + proprioception tokens) with tactile encoder E_tau and projection W_tau producing M tactile tokens of hidden size d; cross-attention path lets tactile history modulate the base context while tactile tokens also remain as conditioning tokens for the action expert"
+  llm: PaliGemma / Gemma (Pi0.5 backbone)
+  action_head: flow-matching action expert (Pi0.5-style)
+  action_head_category: flow_matching
+  parameters: null
+  key_innovation: "Sim-to-real post-training framework that injects tactile feedback into a pretrained VLA without large-scale tactile pretraining: (1) tactile-conditioning interface with contact-aware binary gating (taxel threshold lambda_f + active-count m) and dual conditioning paths (cross-attention into VLM context + tokens to action expert); (2) sim-real co-training with MimicGen-scaled simulated demos as a warm-start; (3) sparse-reward PPO RL in a calibrated simulator with a real-data behavior-cloning anchor (beta) to prevent simulator drift. Boosts real-world avg success on 4 bimanual contact-rich tasks from 50.0% (vision-only RL post-trained) to 72.5% (visuo-tactile)."
+
+training:
+  base_model: Pi0.5 pretrained VLA backbone
+  method: "Two-stage sim-to-real post-training. Stage 1 (Sim-Real Co-Training): mixed flow-matching loss L_co = alpha*L_flow(sim) + (1-alpha)*L_flow(real), default alpha=0.5. Stage 2 (RL Post-Training): clipped PPO with sparse task-level reward + beta*L_flow(real) anchor (default beta in {0.1, 1.0}); critic and privileged state discarded at deployment."
+  dataset: "Per task: 50 real teleop demos + 20 simulated teleop trajectories, expanded to 200 trajectories via MimicGen with filtered success predicates. 128 parallel simulation envs for RL. Calibrated simulator aligned via controller SysID (Kp, Kd, T_ref per joint) and tactile-signal normalization."
+  hardware: "Bimanual platform (two arms) with matched cameras, action interfaces, and tactile sensors; 20 real-world trials per task for evaluation."
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "real-world bimanual evaluation on 4 contact-rich tasks (Test Tube Insertion, Do Puzzle, Assembly #1, Assembly #2), 20 trials each; sim-only Table 1 with 128 parallel envs"
+
+tags: [tactile, contact-rich, sim-to-real, reinforcement-learning, post-training, bimanual, pi0.5-base, flow-matching, mimicgen, ppo, real-world, manipulation]

@@ -1,0 +1,97 @@
+name: OpenEAI-VLA
+full_name: "OpenEAI-Platform: An Open-source Embodied Artificial Intelligence Hardware-Software Unified Platform (OpenEAI-VLA policy)"
+organization: "Shanghai Innovation Institute; Huazhong University of Science and Technology; Shanghai Jiao Tong University"
+date: "2026-06-02"
+paper_url: https://arxiv.org/abs/2606.03392
+code_url: https://github.com/sii-research/ORoboSoul
+venue: arXiv preprint
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-Instruct 4B"
+  llm: "Qwen3-VL-Instruct 4B (frozen during pretraining)"
+  action_head: "18-layer Diffusion Transformer (DiT) action expert with 32 attention heads per layer; conditional flow matching for continuous action chunk prediction"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "4B (Qwen3-VL backbone) + DiT action expert"
+  key_innovation: >
+    Fully open-source VLA stack designed for end-to-end reproducibility. Three key
+    components: (1) a fixed-length learnable query embedding q in R^{M x d} appended
+    to the VLM input that acts as a trainable readout bottleneck — only the final
+    hidden states corresponding to these query tokens (h_q) are forwarded to the
+    action head, decoupling action-head compute from the number of image patches
+    or text tokens; (2) dataset-specific adapters that map heterogeneous
+    state/action conventions from Open-X-Embodiment subsets into a shared
+    space (removing them collapses success to 0.0); (3) a two-stage training
+    recipe using only public datasets — VLM-frozen pretraining on a curated
+    OXE mixture with pi0-style conditional flow matching loss, followed by
+    co-training fine-tuning that jointly optimizes flow matching (L_EM) on
+    robot data and next-token prediction (L_NTP) on COCO/VQA-v2/PixMo-Points
+    to preserve multimodal grounding (removing multimodal co-training drops
+    average success from 0.82 to 0.30).
+
+training:
+  datasets:
+    - "Open-X-Embodiment (OXE) — sole pretraining source, unified-format converted"
+    - "COCO 2017 (multimodal co-training, fine-tuning stage)"
+    - "VQA-v2 (multimodal co-training, fine-tuning stage)"
+    - "PixMo-Points (multimodal co-training, fine-tuning stage)"
+    - "In-domain teleoperation demos collected on OpenEAI-Arm (fine-tuning)"
+    - "UMI community datasets (mixed in for long-horizon deformable manipulation)"
+  method: >
+    Two-stage. Stage 1 (pretraining): freeze VLM, train only learnable feature
+    query, dataset adapters, and DiT action head on OXE with pi0-style conditional
+    flow matching loss L_EM = E[||v_theta(A_t^tau, o_t, h_q, tau) - (eps - A_t)||^2],
+    tau ~ Beta(.) emphasizing noisier timesteps. Stage 2 (fine-tuning): jointly
+    optimize L = lambda_EM * L_EM(B_r) + lambda_VLM * L_NTP(B_m) on mixed
+    robot + multimodal batches; late VLM unfreezing recovers most performance
+    while early unfreezing hurts.
+
+benchmarks:
+  real_world_openeai_arm:
+    clean_table: 0.94
+    make_tea: 0.70
+    fold_towel: 0.80
+    fold_t_shirt: 0.83
+    average: 0.82
+    source: "Table 3 (model comparison on OpenEAI-Arm) and Table 5 (ablation main row)"
+    date_reported: "2026-06-02"
+    eval_condition: "Fine-tuned on in-domain OpenEAI-Arm demos; same protocol as ACT/Octo/OpenVLA-oft/pi0/pi0.5 baselines"
+  real_world_arm_comparison:
+    clean_table: 0.92
+    make_tea: 0.60
+    fold_towel: 0.73
+    fold_t_shirt: 0.75
+    average: 0.75
+    source: "Table 2 (hardware comparison; pi0 policy run on OpenEAI-Arm)"
+    eval_condition: "pi0 policy on OpenEAI-Arm — proxy hardware-suitability metric, not OpenEAI-VLA"
+
+eval_conditions:
+  real_world: >
+    Four desktop manipulation tasks on OpenEAI-Arm: Clean Table (5 in-domain
+    objects, single-arm pick-place), Make Tea (multi-step), Fold Towel
+    (long-horizon deformable), Fold T-shirt (dual-arm deformable, 5 sub-steps).
+    Step-wise and final success rates reported. Compared on the same in-domain
+    fine-tuning dataset against ACT, Octo, OpenVLA-oft, pi0, and pi0.5 — final
+    success row used for the benchmark above.
+  ablation_findings: >
+    Removing dataset adapter -> 0.00 avg; removing multimodal co-training during
+    fine-tuning -> 0.30; downgrading backbone to Qwen2.5-VL -> 0.51; adding UMI
+    data -> 0.61; relative action space -> 0.67; early VLM unfreezing -> 0.52;
+    late VLM unfreezing -> 0.72. Best (Ours) -> 0.82.
+
+tags:
+  - vla
+  - flow-matching
+  - dit-action-expert
+  - qwen3-vl
+  - open-x-embodiment
+  - multimodal-cotraining
+  - learnable-query
+  - dataset-adapters
+  - real-world-manipulation
+  - dual-arm
+  - deformable-manipulation
+  - open-source
+  - 4B

@@ -1,0 +1,44 @@
+name: VLGA
+full_name: "VLGA: Vision-Language-Geometry-Action Models for Autonomous Driving"
+organization: "Uber AV Labs; University of Virginia"
+date: "2026-06-10"
+paper_url: https://arxiv.org/abs/2606.12396
+code_url: https://yaojin17.github.io/VLGA
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Multi-view (6 cameras) at 960x544; Qwen3-VL vision-language backbone (SigLIP-2 + Qwen3) + DVGT-2 geometry backbone (60x34 per-patch grid, 12,240 geometry tokens/scene)"
+  llm: "Qwen3-VL-2B (Base) / Qwen3-VL-8B (Large)"
+  action_head: "Action Expert with flow-matching trajectory generation, conditioned on Understanding/Perception/Geometry tokens via masked joint attention in a four-expert Mixture-of-Transformers (U/P/G/A)"
+  action_head_category: flow_matching
+  parameters: "2B (Base) / 8B (Large) VLM backbone; plus frozen DVGT-2 geometry backbone, trainable geometry expert, per-patch projector, perception expert, action expert, and a 5-layer pointmap decoder used only at training time"
+  key_innovation: "First Vision-Language-Geometry-Action model: adds a dedicated, parameter-isolated geometry expert as a fourth modality in an MoT backbone alongside understanding/perception/action experts. The geometry stream is supervised by a dense per-pixel pointmap reconstruction loss against accumulated LiDAR sweeps (Pi3-style confidence-weighted L1 in the ego frame, depth gating [0.5, 80.0]m). LiDAR is required only at training; the pointmap decoder is discarded at inference. Two-stage training (geometry warm-up under L_pmap alone, then joint with action loss at lambda_pmap=0.1) yields SOTA on closed-loop Bench2Drive (DS 79.08) and the lowest collision rate among VLA methods on no-ego nuScenes (0.18% at 3s, 0.50m L2 avg)."
+
+training:
+  stage1_geometry: "10 epochs (nuScenes) / 3 epochs (Bench2Drive) — freeze action expert + all inherited streams; train only geometry expert, per-patch projector, and pointmap decoder D under L_pmap (Pi3-style confidence-weighted per-patch L1 against LiDAR pointmaps in ego frame)"
+  stage2_joint: "30 epochs (nuScenes) / 7 epochs (Bench2Drive) — unfreeze action expert; loss = L_act + 0.1 * L_pmap; vision-language backbone (UniDriveVLA init), perception expert, and geometry backbone (DVGT-2) remain frozen throughout both stages"
+  optimizer: "AdamW, base LR 5e-5, effective batch size 128, EMA (momentum 2e-4, warmup 2000) on 8x H100 GPUs"
+  datasets: "nuScenes train (28,130 keyframes; 6019 val samples on 150 urban scenes) for open-loop trajectory planning; Bench2Drive train routes on CARLA (220 closed-loop routes across 12 towns) for closed-loop driving"
+
+benchmarks: {}
+
+eval_conditions:
+  nuscenes: "fine-tuned"
+  bench2drive: "fine-tuned"
+
+tags:
+  - autonomous-driving
+  - vision-language-geometry-action
+  - mixture-of-transformers
+  - geometry-expert
+  - pointmap-supervision
+  - lidar-supervision
+  - dense-3d-grounding
+  - flow-matching
+  - qwen3-vl
+  - dvgt-2
+  - nuscenes
+  - bench2drive
+  - carla
+  - uber-av-labs

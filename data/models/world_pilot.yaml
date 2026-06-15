@@ -1,0 +1,49 @@
+# World Pilot: Steering Vision-Language-Action Models with World-Action Priors
+# arXiv: 2606.12403
+
+name: WorldPilot
+full_name: "World Pilot: Steering Vision-Language-Action Models with World-Action Priors"
+organization: "CASIA / Nanjing University / Beihang University"
+date: "2026-06-10"
+paper_url: https://arxiv.org/abs/2606.12403
+code_url: https://world-pilot.github.io/
+venue: "arXiv 2026"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL VLM + Cosmos Policy World-Action Model (frozen, 5-step DiT denoising) as prior provider"
+  llm: "Qwen3-VL"
+  action_head: "DiT-based flow-matching action generator (clean-action parameterization, à la ABot-M0) conditioned on dynamics-enhanced VLM hidden states and a single trajectory-prior prefix token"
+  action_head_category: flow_matching
+  action_space: continuous
+  key_innovation: "Two complementary steering pathways that inject WAM priors into a VLA without co-training the WAM. (1) Latent Steering: scene-evolution latent Z_w from Cosmos Policy is projected via a dynamics encoder, tagged with a future temporal embedding rho_fut, and fused into VLM hidden states H_t through a residual cross-attention update H_bar_t = H_t + CrossAttn(H_t, D_w_t). (2) Action Steering: WAM-anticipated trajectory A_e_w is horizon-aligned and compressed into a single prefix token s_w_t = f_act(Align_K(A_e_w)) fed to the flow-matching generator as soft trajectory-level guidance, rather than per-step targets or flow-matching initialization. WAM is frozen end-to-end; gradients only flow through VLA + lightweight fusion modules. Dropout 0.3 applied to both WAM conditions to prevent prior over-reliance. World prior remains effective even with a pure scene-prediction WAM (Cosmos-Predict) that has not been action-post-trained."
+
+training:
+  dataset: "LIBERO (LIBERO-Plus eval is zero-shot OOD on perturbations); RoboCasa; four real-robot manipulation tasks (Stack Blocks, Fold Towel, Fruit-to-Plate, Container-Lid Alignment) with 100 ID teleoperated demos per task."
+  method: "Fine-tune VLA + fusion modules with flow-matching clean-action objective L = E[w(tau) ||A_hat - A_star||^2], w(tau) = 1/(1-tau)^2. WAM forward pass precomputed and cached during training; runs online at inference. 8x RTX PRO 6000 GPUs. Real-robot: 10,000 fine-tune steps with matched optimizer/batch/LR across baselines, 20 trials per setting."
+
+benchmarks:
+  libero:
+    libero_avg: 98.5
+    eval_condition: fine-tuned
+  robocasa:
+    average: 65.5
+    eval_condition: fine-tuned
+  libero_plus:
+    camera: 82.8
+    robot: 60.6
+    language: 87.2
+    light: 98.6
+    background: 96.4
+    noise: 93.6
+    layout: 80.5
+    total: 84.7
+    eval_condition: zero-shot-OOD
+
+eval_conditions:
+  libero: "fine-tuned"
+  libero_plus: "zero-shot OOD (trained on LIBERO only)"
+  robocasa: "fine-tuned"
+
+tags: [libero, libero-plus, robocasa, flow-matching, world-action-model, world-model-prior, cosmos-policy, qwen3-vl, latent-steering, action-steering, real-robot]

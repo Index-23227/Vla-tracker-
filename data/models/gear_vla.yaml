@@ -1,34 +1,79 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: GEAR-VLA: Learning Geometry-Aware Action Representations for Generalizable Robotic Manipulation
-# arXiv: 2606.08530
-
 name: GEAR-VLA
 full_name: "GEAR-VLA: Learning Geometry-Aware Action Representations for Generalizable Robotic Manipulation"
-organization: "TODO: check paper"
-date: "2026-06-07"
+organization: "Anhui University; University of Science and Technology of China; iFLYTEK"
+date: "2026-06-10"
 paper_url: https://arxiv.org/abs/2606.08530
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://babynabeauty.github.io/gear-vla-p/
+venue: arXiv preprint
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen2.5-VL (2D visual encoder + LLM, semantic visual pathway frozen) + VGGT (trainable 3D spatial encoder) injected via zero-initialized connector"
+  llm: "Qwen2.5-VL LLM backbone"
+  action_head: "Gradient-decoupled DiT-based continuous action expert conditioned on FAST-style discrete action tokens + causal VQ-VAE latent action IDs; 30-step / 1-second action chunks at 30 Hz; stop-gradient between expert and VLM backbone"
+  action_head_category: diffusion
+  action_space: "continuous; embodiment-canonicalized relative end-effector action, 30-step chunk @ 30 Hz"
+  parameters: "Qwen2.5-VL backbone + VGGT 3D encoder + DiT action expert (exact total parameter count not reported)"
+  key_innovation: >
+    Unified geometry-aware action representation via three coupled designs: (1) coarse-to-fine action
+    learning where embodied VLM pretraining uses FAST discrete action tokens and causal VQ-VAE latent
+    action IDs, then connects to a gradient-decoupled DiT continuous action expert so continuous
+    losses do not backprop into the VLM; (2) semantic-aligned 3D integration where a trainable VGGT
+    spatial backbone is fused with a frozen VLM-aligned 2D visual pathway through a zero-initialized
+    connector; (3) embodiment canonicalization with embodiment-aware state projectors and an
+    embodiment-invariant relative end-effector action space, confining robot differences to the
+    low-level interface rather than the shared VLA representation.
+
+training:
+  dataset: "Multi-source embodied pretraining: vision-language understanding, spatial grounding, trajectory reasoning, pointing, affordance, robot trajectories with FAST tokens, and action-free manipulation videos with causal VQ-VAE latent action IDs; downstream LIBERO/LIBERO-Plus/RoboTwin 2.0 fine-tuning"
+  method: "Coarse-to-fine policy learning: embodied VLM pretraining then continuous policy learning with gradient-decoupled DiT expert; wrist-view and state attention dropping during training; bf16 mixed precision"
+  optimizer: "AdamW, base LR 2e-5, 3% warmup constant schedule, gradient checkpointing"
+  steps: "350K (stage 1) + 700K (stage 2) for pretraining; 12K iterations for LIBERO fine-tuning"
+  hardware: "240 H200 GPUs for coarse-to-fine pretraining (per-GPU batch 8 / 4); 56 H200 GPUs for LIBERO fine-tuning (per-GPU batch 4)"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    libero_spatial: 99.7
+    libero_object: 99.8
+    libero_goal: 98.4
+    libero_long: 96.8
+    libero_avg: 98.7
+    source: "GEAR-VLA paper Table 1 and Table 8 (LIBERO four-suite breakdown)"
+    date_reported: "2026-06-10"
+    eval_condition: "fine-tuned"
+  robotwin_v2:
+    robotwin_v2_clean_avg: 91.06
+    robotwin_v2_rand_avg: 89.92
+    robotwin_v2_avg: 90.49
+    source: "GEAR-VLA paper Table 1 and Tables 10-11 (RoboTwin 2.0 Part I + Part II averages over 50 tasks)"
+    date_reported: "2026-06-10"
+    eval_condition: "fine-tuned; clean and randomized settings"
+  real_world:
+    agilex_bimanual_avg: 85.9
+    ldt01_bimanual_avg: 81.0
+    universal_grasping_overall_avg: 90.1
+    libero_plus_zero_shot_avg: 88.7
+    source: "GEAR-VLA paper Figure 3, Table 2, Table 9; AgileX 14-DoF bimanual, LDT-01 16-DoF bimanual, 6,360-trial universal grasping with 212 unseen objects"
+    date_reported: "2026-06-10"
+    eval_condition: "real-robot (AgileX, LDT-01) and zero-shot OOD (LIBERO-Plus)"
 
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
+  libero: "fine-tuned, one policy across four suites"
+  robotwin_v2: "fine-tuned, evaluated under clean and randomized settings (same protocol as baselines)"
+  real_world: "AgileX 200 demos/task, LDT-01 lightweight adaptation 200 demos/task; universal grasping 35-object training set, 212 unseen object test set"
 
-tags: [libero, robotwin]
+tags:
+  - vla
+  - geometry-aware
+  - 3d-spatial
+  - vggt
+  - cross-embodiment
+  - flow-matching
+  - dit
+  - latent-action
+  - fast-tokenizer
+  - qwen2.5-vl
+  - libero
+  - libero-plus
+  - robotwin
+  - real-world

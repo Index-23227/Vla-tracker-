@@ -1,0 +1,69 @@
+name: Coarse-to-Control
+full_name: "Coarse-to-Control: Action-Token Planning for Vision-Language-Action Models"
+organization: "Nanjing University; Shanghai Innovation Institute; Fudan University; Tsinghua University"
+date: "2026-06-05"
+paper_url: https://arxiv.org/abs/2606.07107
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "PaliGemma-3B-based VLA (SigLIP visual encoder + PaliGemma multimodal projector); initialized from pi0-FAST checkpoint"
+  llm: "PaliGemma-3B (VLM stream hidden size 2048; proprio/action streams hidden size 1024; 18 layers, 8 attention heads, 1 KV head, head dim 256, max position 8192)"
+  action_head: "Joint plan-execute autoregressive action-token decoder over a shared residual-VQ vocabulary; predicts coarse planning tokens as internal prefix, then executable action tokens; only executable tokens decoded into 7-DoF EE actions"
+  action_head_category: discrete_tokens
+  action_space: "7-DoF end-effector; LIBERO/real-world: 20-step executable horizon, 160-step planning source compressed to K=20 coarse plan steps (chunk size 8); SimplerEnv-WidowX: 10-step executable, 80-step plan, K=10"
+  parameters: "~3B (PaliGemma-3B backbone)"
+  key_innovation: >
+    Coarse-to-Control internalizes chain-of-thought reasoning into the action-token space via a
+    joint plan-execute residual-VQ tokenizer. Two tokenizer modes (planning vs execution) share
+    one discrete action vocabulary so coarse long-horizon plan tokens lie on the same control
+    manifold as short-horizon executable tokens. The VLA autoregressively predicts plan tokens
+    as an internal prefix, then conditions executable tokens on them; only executable tokens are
+    decoded into robot actions. Unlike textual or visual CoT, the reasoning trace is itself
+    action-shaped, removing the planner-controller interface mismatch.
+
+training:
+  dataset: "Tokenizer pretrained on LIBERO+Bridge (sim) or Fractal+Kuka+Bridge+Droid-EEF+LIBERO (real); policy fine-tuned on LIBERO demos, Bridge demos, or 50 demos/task for real-world"
+  method: "Stage 1: residual-VQ joint-mode action tokenizer pretraining (3 codebooks x 4096 entries, codec latent 64, action-space L1 + codebook + 0.25 commitment); Stage 2: VLA policy training with teacher forcing over plan-then-execute action suffix; tokenizer frozen during policy training"
+  optimizer: "AdamW, LR 2.5e-5, 1k warmup steps, cosine decay, weight decay 1e-10"
+  steps: "LIBERO: 60k steps, batch 4; SimplerEnv-WidowX: 4 epochs, batch 16; Real-world: 30k steps, batch 8"
+  hardware: "Tokenizer pretrained on 8 x H200 GPUs"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.8
+    libero_object: 100.0
+    libero_goal: 97.8
+    libero_long: 95.0
+    libero_avg: 97.9
+    source: "Coarse-to-Control paper Table 1 (Action CoT row)"
+    date_reported: "2026-06-05"
+    eval_condition: "fine-tuned, 50 rollouts per task, EMA weights"
+  simpler_env:
+    put_spoon_on_towel: 100.0
+    put_carrot_on_plate: 95.8
+    stack_blocks: 79.2
+    put_eggplant_in_basket: 58.3
+    simpler_avg: 83.3
+    source: "Coarse-to-Control paper Table 2 (SimplerEnv-WidowX)"
+    date_reported: "2026-06-05"
+    eval_condition: "fine-tuned on Bridge, 24 trials per task, replan every 10 steps, EMA weights"
+
+eval_conditions:
+  libero: "fine-tuned on LIBERO demos; 50 rollouts/task; one policy across 4 suites; q99 normalization; primary+wrist 224px"
+  simpler_env: "fine-tuned on Bridge; 24 trials/task; single primary camera; image augmentation"
+  real_world: "4 manipulation tasks (carrot, carrot+button, plate->basket, cleanup); 50 demos/task; 20 trials/task; avg 62.5% over 4 tasks, best on 3/4"
+
+tags:
+  - vla
+  - reasoning
+  - chain-of-thought
+  - action-token-cot
+  - action-tokenization
+  - residual-vq
+  - planning
+  - paligemma
+  - libero
+  - simpler-env
+  - real-world
+  - 3B

@@ -1,0 +1,60 @@
+name: WIZARD
+full_name: "WIZARD: Weight-space Inference for Zero-shot Adaptation from Robotic Demonstration"
+organization: "ItalAI; Sapienza University of Rome; University of Verona"
+date: "2026-06-05"
+paper_url: https://arxiv.org/abs/2606.07217
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "Frozen π0.5 VLA (also evaluated on OpenVLA-OFT as MT-VLA baseline)"
+  llm: "Inherited from π0.5"
+  action_head: "Frozen π0.5 action expert + on-demand task-specific LoRA adapter generated in a single forward pass by a weight-space meta-network (hyper-network) from language + short demo video; LoRA injected into the frozen VLA backbone"
+  action_head_category: hypernetwork
+  action_space: "continuous 7-DoF; π0.5 native action chunks"
+  parameters: "π0.5 backbone (frozen) + meta-network that predicts LoRA tensor (L x 3 x r x H) and per-layer (mu, sigma) scale statistics"
+  key_innovation: >
+    Weight-space meta-learning for VLA adaptation: instead of fine-tuning per task,
+    a meta-network learns to map task evidence (language prompt + short demonstration
+    video, encoded by the frozen VLA encoder) directly to expert LoRA parameter updates
+    DeltaW for a frozen π0.5 backbone. Three core design choices for stable training in
+    robotics: (i) multimodal weight structuring that preserves vision/language/action
+    boundaries in a (L, 3, r, H) tensor, (ii) scale-aware parameter generation that
+    jointly predicts normalized LoRA updates and per-layer mean/std statistics, and
+    (iii) alignment-oriented supervision combining MSE, scale, and cosine losses in
+    weight space. Yields zero-shot adaptation without action labels or test-time
+    gradient updates.
+
+training:
+  dataset: "Per-task LIBERO expert LoRA adapters (rank-r) trained on LIBERO-Goal, -Object, -10 as meta-training tasks; held-out LIBERO-Spatial used as meta-test (and analogous leave-one-out for other suites). Real-world: π0.5 pre-adapted to Franka setup with 30 episodes from DROID checkpoint."
+  method: "Two-stage. Stage 1: train task-specific LoRA experts via behavior cloning on each meta-training task. Stage 2: train a meta-network f: z -> (DeltaW_tilde, S_tilde) with combined loss L = L_MSE + lambda_scale * L_scale + lambda_cos * L_cos in weight space. Task embedding z is the mean of frozen VLA encoder embeddings over a sampled subset of episodes (prompt + visual observations only)."
+  optimizer: "Standard meta-network training (specific optimizer hyperparameters not detailed in paper)"
+  hardware: "not specified in paper"
+
+benchmarks:
+  libero:
+    libero_spatial: 40.0
+    libero_object: 3.0
+    libero_goal: 22.0
+    libero_10: 9.0
+    libero_avg: 18.5
+    source: "WIZARD paper Table 1 (zero-shot, leave-one-suite-out meta-test, success rate over 50 initial states per task, averaged across 10 tasks per suite). LIBERO-10 value uses the A subtask metric (B=0.07)."
+    date_reported: "2026-06-05"
+    eval_condition: "zero-shot (no test-time fine-tuning, no action labels for held-out suite)"
+
+eval_conditions:
+  libero: "Strict leave-one-suite-out zero-shot: meta-network trained on 3 LIBERO suites, evaluated on the held-out 4th suite without any gradient updates. Backbone is frozen π0.5; pretrained π0.5 without adaptation scores 0% across all suites."
+  real_world: "Franka Emika Panda, 7-DoF + parallel gripper, 3x Intel RealSense (1x D415 eye-in-hand + 2x D405 external), 15 Hz policy upsampled to 1 kHz joint impedance. 5 tasks (pick banana/apple/marker/cup, move apple to cup), 30 trials/task. WIZARD avg 0.33 vs π0.5 real-domain adapted 0.17 baseline."
+
+tags:
+  - vla
+  - meta-learning
+  - hypernetwork
+  - weight-space-generation
+  - lora
+  - zero-shot-adaptation
+  - parameter-generation
+  - pi0.5
+  - libero
+  - franka
+  - real-world

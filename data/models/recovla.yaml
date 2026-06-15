@@ -1,0 +1,87 @@
+name: ReCoVLA
+full_name: "ReCoVLA: VLM-Guided Reward Compilation for Failure Recovery in Vision-Language-Action Policies"
+organization: "University of Southern California; Mitsubishi Electric Research Laboratories (MERL); Harvard University"
+date: "2026-06-08"
+paper_url: https://arxiv.org/abs/2606.09630
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+architecture:
+  backbone: "Frozen base VLA (pi0.5 main; OpenVLA as alternative backbone in M5/M6)"
+  llm: "External Qwen3-VL-8B-Instruct used as semantic failure analyzer (not for action generation)"
+  action_head: "Residual policy on top of frozen VLA latent h_t; PPO-trained MLP outputting additive correction a_t^r projected onto valid action set"
+  action_head_category: hybrid
+  action_space: continuous
+  parameters: "7B base VLA + 8B VLM analyzer (residual policy itself is lightweight MLP)"
+  key_innovation: >
+    Failure-conditioned residual recovery framework that keeps the pretrained
+    VLA frozen and uses an external VLM (Qwen3-VL-8B) as a semantic reward
+    selector rather than a direct action or reward generator. The VLM produces
+    a structured recovery descriptor (failure category c, recovery stage z,
+    active entities E, confidence rho, binary reward mask m over a K-component
+    reward library). A deterministic reward compiler then (1) canonicalizes
+    entities, (2) binds them to simulator object IDs and reward-component
+    argument signatures, (3) selects failure-relevant components via m, and
+    (4) inserts stage-aware gates g_{c,k}(s_t; E_c) (e.g. grasp-before-place,
+    contact-before-articulation) so that later-stage reward terms activate
+    only after preconditions are satisfied. A mixture-of-residual-experts
+    library is trained per failure category in simulation with PPO over
+    frozen VLA latents and deployed zero-shot on the physical Fetch robot,
+    dispatched by the same VLM monitoring a 5-frame sparse history
+    (Delta=15s). The residual is added as a_t = Pi_A(a_t^b + beta_t a_t^r)
+    with beta_t in {0,1} gating recovery activation.
+training:
+  dataset: >
+    Simulator rollouts from the frozen no-recovery base VLA (M1 baseline) are
+    analyzed by the VLM to construct a failure catalog C_train and per-category
+    reward descriptors. Residual policies are trained entirely in simulation
+    on three Fetch tasks (long-horizon vegetable sorting, short-horizon
+    soda-can disposal, contact-rich toolbox organization), then deployed
+    zero-shot on the physical robot.
+  method: >
+    PPO over residual policy parameters with reward R^c_M4 =
+    sum_k m_c^(k) g_{c,k}(s_t; E_c) Delta phi_k(s_t, s_{t+1}; E_c)
+    - Omega_t(a^r), where Omega_t = lambda1 ||a_t^r||^2
+    + lambda2 ||a_t^r - a_{t-1}^r||^2. Reward library R = {phi_dist,
+    phi_grasp, phi_place, phi_close} uses potential-difference shaping;
+    critic observes simulator state, actor observes only VLA latent h_t.
+  optimizer: "PPO (Schulman et al. 2017); details in Appendix A.4"
+  num_trajectories: null
+  compute: "not specified in main text (Fetch simulation + physical Fetch robot)"
+benchmarks:
+  real_world:
+    fetch_toolbox_organization_success: 50.0
+    fetch_vegetable_sorting_success: 60.0
+    fetch_soda_can_disposal_success: 75.0
+    fetch_avg_success: 61.7
+    fetch_avg_qscore: 75.0
+    source: "ReCoVLA paper, Section 4.2 / Figure 4 (physical Fetch, M4 stage-gated reward compiler, 20 trials per task)"
+    date_reported: "2026-06-08"
+    eval_condition: "zero-shot sim-to-real: residual policies trained only in simulation, deployed on physical Fetch robot with frozen pi0.5 base VLA"
+eval_conditions:
+  real_world: >
+    Physical Fetch robot, 20 trials per task across three tabletop tasks;
+    VLM (Qwen3-VL-8B-Instruct) monitors a sparse 5-frame RGB history with
+    Delta=15s; residual recovery activates only when detected failure
+    category is in the simulator-trained catalog C_train and confidence
+    rho_t >= tau_deploy. Reported here is the M4 variant (full ReCoVLA:
+    failure-relevant reward mask + stage-aware gates). M6 (same stage-gated
+    design on OpenVLA backbone) and OOD object-substitution evaluation
+    (M4 reaches 53.3% avg success) are reported in the paper.
+tags:
+  - vla
+  - failure-recovery
+  - residual-rl
+  - reward-compilation
+  - vlm-guided
+  - mixture-of-experts
+  - sim-to-real
+  - zero-shot-deployment
+  - ppo
+  - pi0.5
+  - openvla
+  - qwen3-vl
+  - frozen-backbone
+  - fetch-robot
+  - stage-gated-reward

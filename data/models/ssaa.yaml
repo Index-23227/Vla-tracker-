@@ -1,0 +1,49 @@
+# Paper: See Selectively, Act Adaptively: Dual-Level Structural Decomposition for Bimanual Robot Manipulation
+# arXiv: 2606.13279
+
+name: SSAA
+full_name: "See Selectively, Act Adaptively: Dual-Level Structural Decomposition for Bimanual Robot Manipulation"
+organization: "Dongguk University"
+date: "2026-06-11"
+paper_url: https://arxiv.org/abs/2606.13279
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "Pretrained pi0.5 VLA"
+  llm: "PaliGemma-based VLM (via pi0.5)"
+  action_head: "Interaction-Aware Action MoE (IAMoE): 3 LoRA experts (coordinated + left/right arm-wise) over conditional flow matching velocity prediction; hard one-hot routing via straight-through Gumbel-Softmax"
+  action_head_category: flow_matching
+  parameters: "3B+ (pi0.5 base + LoRA experts + lightweight routers)"
+  key_innovation: "Dual-Level Structural Decomposition framework that decouples 'what to see' from 'how to act'. (1) View-Selective Visual Router (VSR) reweights left/right wrist-view tokens via sigmoid weights from external+language routing context, inserted before the pretrained VLM. (2) Interaction-Aware Action MoE (IAMoE) extends the pi0.5 action expert with three LoRA-based experts (coordinated full-action expert vs. masked left/right arm-wise experts) and a hard one-hot action router selecting coordinated vs. independent interaction mode. Routers are supervised via KNN-based semi-automatic labels (Lvis BCE for wrist activity, Lact CE for coord/ind mode) plus auxiliary expert loss. Targets perceptual heterogeneity (time-varying wrist-view relevance) and interaction heterogeneity (independent vs. coordinated bimanual modes) jointly."
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_easy: 81.17
+    robotwin_v2_hard: 58.00
+    robotwin_v2_avg: 69.6
+    source: "SSAA paper Fig. 4 (six bimanual tasks: Stack Bowls Three, Blocks Ranking Size, Lift Pot, Place Bread Skillet, Handover Block, Put Bottles Dustbin; 100 rollouts/task)"
+    date_reported: "2026-06-11"
+    eval_condition: "fine-tuned; LoRA 30k steps, batch 16, 50 demos/task; pi0.5 base"
+
+eval_conditions:
+  robotwin_v2: "six RoboTwin 2.0 bimanual tasks under easy and hard protocols; baseline pi0.5 41.9%, w/o IAMoE 54.3%, w/o VSR 59.7%, Ours 69.6%"
+  real_world: "3 long-horizon tasks (Pack and Place, Handover and Pour, Rotate and Place); 6 stages each; Ours final-stage success Easy 90/100/80%, +43.3% avg over baseline; Hard +30/+40/+50% over baseline on R1/R2/R3"
+
+training:
+  base_model: "pi0.5"
+  fine_tuning: "LoRA, 30,000 steps, batch size 16"
+  demonstrations: "50 per task (simulation), 40 per task (real-world); easy-setting only"
+  loss: "Lmain (flow matching) + lambda_vis * Lvis (BCE) + lambda_act * Lact (CE) + lambda_aux * Laux"
+  router_labels: "KNN-based semi-automatic procedure; ytvis in {0,1}^2 for wrist activity; ytact in {[1,0],[0,1]} for coord/ind"
+
+tags:
+  - bimanual
+  - mixture-of-experts
+  - flow-matching
+  - view-routing
+  - lora
+  - robotwin_v2
+  - pi0.5-base
+  - dual-level-decomposition

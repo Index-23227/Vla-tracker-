@@ -1,30 +1,29 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: LIBERO-Occ: Evaluating and Improving Vision-Language-Action Models under Scene-Induced Occlusion via Viewpoint Imagination
-# arXiv: 2606.10862
-
 name: LIBERO-Occ
-full_name: "LIBERO-Occ: Evaluating and Improving Vision-Language-Action Models under Scene-Induced Occlusion via Viewpoint Imagination"
-organization: "TODO: check paper"
+full_name: "VIM: Viewpoint Imagination for VLA Manipulation under Scene-Induced Occlusion (LIBERO-Occ benchmark + VIM policy)"
+organization: "Fudan University"
 date: "2026-06-09"
 paper_url: https://arxiv.org/abs/2606.10862
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/litsh/Libero-Occ
+venue: arXiv
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_head: "Autoregressive transformer (Emu3-MoE backbone) with FAST action tokenizer; unified visual-token + action-token generation"
+  action_head_category: autoregressive
+  parameters: "Emu3-MoE backbone (built on UniVLA world model)"
+  key_innovation: "Proposes VIM (Viewpoint Imagination): given an occluded primary observation, the model first autoregressively generates visual tokens for a complementary view (e.g. wrist/gripper) and then predicts action tokens conditioned on both observed and imagined views. Two-stage training (Stage-1: viewpoint imagination; Stage-2: joint action + view loss). Also introduces LIBERO-Occ, a 2,000-task occlusion-oriented extension of LIBERO with three occlusion types (manipulated object / receptacle / dual) and three severity levels (light/medium/heavy)."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 94.00
+    libero_object: 98.00
+    libero_goal: 91.00
+    libero_long: 80.00
+    libero_5_suite_avg: 90.75
+    source: "Table 2 (Ours, complementary-view unavailable setting)"
+    eval_condition: "fine-tuned; primary view only at inference"
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "fine-tuned on LIBERO demonstrations; standard third-person view as primary, wrist/gripper view used only during training"
 
-tags: [libero]
+tags: [libero, libero-occ, occlusion, robustness, world-model, autoregressive, viewpoint-imagination, benchmark]

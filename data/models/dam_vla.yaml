@@ -1,0 +1,41 @@
+name: DAM-VLA
+full_name: 'DAM-VLA: Decoupled Asynchronous Multimodal Vision Language Action model'
+organization: Intuitive Robots Lab (KIT); NVIDIA; Robotics Institute of Germany
+date: '2026-06-10'
+paper_url: https://arxiv.org/abs/2606.12105
+code_url: https://intuitive-robots.github.io/DAM-VLA/
+venue: null
+open_source: false
+
+architecture:
+  backbone: X-VLA (Florence-Large visual encoder, soft-prompted transformer)
+  action_head: flow-matching action expert (X-VLA-based) with parallel gated cross-attention (GCA) pathways for visual memory and force/torque
+  action_head_category: flow_matching
+  parameters: null
+  key_innovation: "Decouples per-modality processing rates by maintaining independent latent buffers refreshed at each sensor's natural rate (vision ~25Hz, force/torque & proprioception 100Hz, language once per episode). New high-frequency modalities (force, visual memory) are injected into the X-VLA action expert via parallel Gated Cross-Attention pathways with zero-initialized residual gates (global tanh gate for memory, input-dependent sigmoid gate for force), leaving the pretrained backbone untouched. Sparse visual updates (every 4 inference steps) are compressed by a GRU + learned-query cross-attention to short-term memory tokens, and 100Hz EMA-smoothed force is encoded by a GRU into force registers. Sustains smooth, reactive 100 Hz control (and up to 17Hz replanning on a 200Hz controller)."
+
+training:
+  base_model: X-VLA backbone (finetuned)
+  method: Asynchronous multi-rate data collection with per-modality timestamps; train-time alignment to common 100Hz timeline with stride-S vision subsampling. History windows = 16 vision frames @ 25Hz (~0.64s), 96 proprio + 96 force/torque samples @ 100Hz (~0.96s). Identical data and split across all six configurations.
+  dataset: "Real-world Franka Emika Panda dataset spanning 7 contact-rich manipulation tasks: Scarf folding, Whiteboard cleaning, Button pressing, Handwash top press, Socket insertion, Sweep beads into a dustpan, and Lego piece arranging."
+  hardware: "7-DoF Franka Emika Panda; 3rd-person + wrist RGB cameras @ 25Hz; proprioception @ 100Hz; joint-torque (force/torque) sourced from Franka's internal sensor @ 100Hz (no dedicated F/T sensor)."
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "fine-tuned (7 contact-rich Franka manipulation tasks, 15 trials each)"
+
+inference_hz: 100
+
+tags:
+- async
+- multi-rate
+- force-torque
+- contact-rich
+- gated-cross-attention
+- memory-buffer
+- x-vla-base
+- flow-matching
+- real-world
+- manipulation
+- high-frequency-control

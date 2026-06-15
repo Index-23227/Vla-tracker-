@@ -1,0 +1,50 @@
+name: LARA
+full_name: Latent Action Representation Alignment for Vision-Language-Action Models
+version: '1.0'
+organization: BIGAI / Peking University
+paper_url: https://arxiv.org/abs/2606.07100
+code_url: https://github.com/lmy1001/LARA
+date: '2026-06-05'
+venue: ICML 2026
+architecture:
+  backbone: Eagle-2 VLM (frozen) + learnable self-attention adapter
+  llm: Eagle-2 (frozen)
+  action_head: Diffusion Transformer (DiT, L=16 layers, cross-attn) with flow matching + LAM representation alignment at L-2
+  action_space: continuous
+  parameters: ~2B
+  key_innovation: Joint training of Latent Action Model (LAM) and diffusion VLA via bi-directional latent action representation
+    alignment (cosine similarity at DiT L-2 layer); LAM grounded by real actions, VLA regularized by LAM forward dynamics
+  action_head_category: flow_matching
+training:
+  dataset: Open X-Embodiment (OXE) subsets (single-arm end-effector) + unlabeled video
+  method: 3-stage — (1) LAM pre-training with VQ-VAE (codebook 128), (2) LARA joint pre-training (flow matching + alignment +
+    LAM reconstruction, w1=w2=0.01), (3) joint post-training on target embodiment
+  compute: 4 NVIDIA A100 GPUs; LAM 350k steps (batch 512); DiT 200k steps (batch 384); post-train 20-50k steps
+benchmarks:
+  libero:
+    libero_spatial: 88.0
+    libero_object: 92.0
+    libero_goal: 88.5
+    libero_long: 86.0
+    source: Table 1, LARA paper (arXiv 2606.07100), OXE-Constrained setting, LARA (full)
+    date_reported: '2026-06-05'
+    eval_condition: fine-tuned
+  simpler_env:
+    pick_coke_can: 82.3
+    move_near: 83.7
+    drawer: 29.5
+    source: Table 1, LARA paper, OXE-Constrained, LARA (full)
+    date_reported: '2026-06-05'
+    eval_condition: fine-tuned
+open_source: true
+model_type: vla
+tags:
+- 2B
+- diffusion-transformer
+- flow-matching
+- latent-action-model
+- representation-alignment
+- world-model
+- manipulation
+- humanoid
+- open-source
