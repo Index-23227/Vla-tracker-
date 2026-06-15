@@ -1,0 +1,67 @@
+# TBD-VLA: Temporal Block Diffusion Vision Language Action Model
+# arXiv: 2606.07895
+
+name: TBD-VLA
+full_name: "TBD-VLA: Temporal Block Diffusion Vision Language Action Model"
+organization: "University of Virginia"
+date: "2026-06-05"
+paper_url: https://arxiv.org/abs/2606.07895
+code_url: null
+venue: "arXiv 2026"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL 2B (VLM-only, no separate action expert)"
+  llm: "Qwen3-VL 2B"
+  action_head: "block-wise masked discrete diffusion over tokenized action chunks; parallel within temporal blocks (m=4), autoregressive across blocks; expectation sampling decodes scalar values from full token distribution; KV cache + RTC inpainting at inference"
+  action_head_category: discrete_diffusion
+  action_space: discrete
+  parameters: "2B"
+  key_innovation: "Combines parallel within-block discrete diffusion with autoregressive across-block generation, unifying temporal autoregression and parallel decoding in a single VLM-only framework. Temporal-level token shift aligns with next-token VLM pretraining; doubled-layout attention mask enables parallel training across blocks; native masked-diffusion training aligns with Real-Time Chunking (RTC) inpainting for asynchronous closed-loop inference."
+
+training:
+  dataset: "Pre-training on DROID, Open-X Embodiment, RoboSet, RoboMIND, RH20T; fine-tuning on Bridge-V2 (Widow-X 20K steps), Fractal (Google Robot 40K steps), LIBERO (80K steps)"
+  method: "Block discrete diffusion with masked cross-entropy loss; temporal block size m=4, prediction horizon Hp=16, per-block diffusion steps nd=2"
+  compute: "Single NVIDIA RTX A40 for inference; ~40-60 GPU hours for SimplerEnv fine-tuning"
+
+benchmarks:
+  libero:
+    libero_spatial: 97.6
+    libero_object: 99.6
+    libero_goal: 97.4
+    libero_long: 96.6
+    libero_avg: 97.7
+    source: "TBD-VLA Table 2"
+    date_reported: "2026-06-05"
+    eval_condition: fine-tuned
+  simpler_env:
+    simpler_widowx_avg: 66.8
+    simpler_google_visual_matching: 91.0
+    simpler_google_variant_aggregation: 86.3
+    simpler_google_avg: 88.65
+    simpler_avg: 77.7
+    source: "TBD-VLA Tables 3-4"
+    date_reported: "2026-06-05"
+    eval_condition: fine-tuned
+  real_world:
+    franka_fr3_avg: 67.1
+    source: "TBD-VLA Figure 5 (3 tabletop tasks with RTC)"
+    eval_condition: fine-tuned
+
+eval_conditions:
+  libero: "fine-tuned"
+  simpler_env: "fine-tuned"
+  real_world: "fine-tuned"
+
+tags:
+  - 2B
+  - discrete-diffusion
+  - block-diffusion
+  - temporal-autoregression
+  - parallel-decoding
+  - real-time-chunking
+  - qwen3-vl
+  - libero
+  - simpler_env
+  - real-world
