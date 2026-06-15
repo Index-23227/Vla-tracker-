@@ -1,34 +1,46 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: Q-VGM: Q-Guided Value-Gradient Matching for Flow-Matching VLA Policies
 # arXiv: 2606.08015
 
 name: Q-VGM
 full_name: "Q-VGM: Q-Guided Value-Gradient Matching for Flow-Matching VLA Policies"
-organization: "TODO: check paper"
+organization: "Shanghai Jiao Tong University"
 date: "2026-06-06"
 paper_url: https://arxiv.org/abs/2606.08015
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv preprint
+open_source: false
 
 architecture:
   action_head: "flow matching"
   action_head_category: flow_matching
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "pi_0.5 (frozen VLM + flow action expert)"
+  parameters: "~3.9M per critic head (action expert from pi_0.5)"
+  key_innovation: |
+    Off-policy RL fine-tuning for flow-matching VLAs that converts action-space critic
+    gradients into denoising-time velocity-field supervision via VGG-Flow value-gradient
+    matching. Avoids both end-to-end backprop through the denoising chain and the need
+    for tractable action likelihoods, using look-forward clean-action estimation, iterative
+    Q-gradient ascent, keep-best selection, and residual velocity matching with an
+    action-sensitive Cal-QL ensemble critic over compact RLT features.
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    libero_spatial: 96.0
+    libero_object: 95.0
+    libero_goal: 95.0
+    libero_long: 84.0
+    libero_avg: 92.5
+  robotwin_v2:
+    robotwin_v2_avg: 87.2
 
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
+  libero: "fine-tuned (offline RL from few-shot SFT pi_0.5, 300 rollout episodes/suite, 50 rollouts/task)"
+  robotwin_v2: "fine-tuned (offline RL from few-shot SFT pi_0.5, 50 rollouts/task, 10 tasks)"
 
-tags: [flow-matching, RL, libero, robotwin]
+training:
+  base_policy: "pi_0.5 few-shot SFT"
+  critic: "Cal-QL ensemble with per-layer action injection over RLT readout features"
+  data: "fixed offline rollout buffer from SFT policy (300 episodes/suite LIBERO; SFT rollouts on RoboTwin 2.0)"
+  paradigm: "few-shot initialization then learn-from-experience (offline RL fine-tuning)"
+
+tags: [flow-matching, RL, offline-RL, value-gradient, libero, robotwin, pi_0.5, cal-ql]
