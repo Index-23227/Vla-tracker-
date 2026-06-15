@@ -1,0 +1,63 @@
+name: SyVLA
+full_name: "SyVLA: Scaling by Diversified Experience for Vision-Language-Action Models"
+organization: "Shanghai Jiao Tong University; Shanghai Innovation Institute; Shanghai AI Laboratory; Noematrix Intelligence; Tongji University; Southern University of Science and Technology"
+date: "2026-06-08"
+paper_url: https://arxiv.org/abs/2606.09009
+code_url: ""
+venue: "ICML 2026"
+open_source: true
+
+architecture:
+  backbone: "Qwen2.5-VL-3B (VLM) + Transformer Flow Matching Action Expert (0.69B)"
+  llm: "Qwen2.5-VL-3B"
+  action_head: "Transformer-based Flow Matching Action Expert (~0.69B params); conditioned on Feature Query Token last hidden states via MLP adapter; multi-step denoising for continuous actions"
+  action_head_category: flow-matching
+  action_space: "continuous; predicts action chunk {a_t, a_{t+1}, ..., a_{t+T}}"
+  parameters: "~3B VLM (Qwen2.5-VL-3B) + 0.69B Flow Matching Action Expert; n=20 learnable Feature Query Tokens"
+  key_innovation: >
+    Dual-system VLA (VLM + Flow Matching Action Expert) connected via 20 lightweight learnable
+    Feature Query Tokens instead of Pi0-style KV cache, enabling asynchronous inference. Two key
+    algorithmic contributions: (1) Intention Decoupling — an annotation-free gradient-based mask
+    that zeros the smallest-gradient last-hidden-states of Feature Query Tokens, decoupling control
+    intention from high-level CoT reasoning leakage; (2) Similar-Sample Guided RL — retrieves
+    semantically similar IL samples as guidance to stabilize real-world PPO updates and avoid
+    policy collapse on long-horizon sparse-reward tasks. Trained with 3-stage pipeline: pretrain
+    (with <1% CoT-annotated data + ~30% multi-modal mix) → task fine-tune → real-world RL.
+
+training:
+  dataset: "Large-scale robotic pretraining dataset (<5% of Pi0 data) mixed with multi-modal data at ~30%; task fine-tuning with several hundred trajectories per target task; real-world RL on Cobot Magic platform"
+  method: "3-stage pipeline: (1) pretraining with multi-modal mixing and <1% CoT-annotated robotic data, (2) task fine-tuning, (3) PPO-based real-world RL with Similar-Sample Guidance. Intention Decoupling mask applied throughout."
+  optimizer: "AdamW (standard); PPO for RL stage"
+  hardware: "not specified in paper"
+  notes: "Value model ~100M params with SigLIP encoder + transformer; 0-1 sparse reward for RL; mask threshold tau ~3-15%; n=20 Feature Query Tokens"
+
+benchmarks:
+  libero:
+    libero_spatial: 87.7
+    libero_object: 84.0
+    libero_goal: 87.3
+    libero_long: 65.7
+    libero_avg: 81.175
+    source: "SyVLA paper Table 8 (Appendix C.1); jointly trained on all 4 LIBERO suites following Pi0 protocol"
+    date_reported: "2026-06-08"
+    eval_condition: "fine-tuned, joint training on 4 suites"
+
+eval_conditions:
+  libero: "fine-tuned from Stage-1 pretrained SyVLA, jointly trained on all 4 task suites (Pi0 protocol)"
+  real_world: "Cobot Magic robotic platform; 3 tasks (Folding Shirts, Calculating & Wrapping, Bagging Snacks); In-Domain Avg 0.73 / OoD Avg 0.64"
+  multimodal: "DocVQA 80.01, AI2D 67.70, MMMU 35.78, MME 1795, HallBench 42.53"
+
+tags:
+  - vla
+  - flow-matching
+  - reasoning
+  - chain-of-thought
+  - think-before-act
+  - reinforcement-learning
+  - real-world-rl
+  - intention-decoupling
+  - similar-sample-guided-rl
+  - qwen2.5-vl
+  - libero
+  - dual-system
+  - 3B

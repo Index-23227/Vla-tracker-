@@ -1,0 +1,101 @@
+# Paper: ProbeAct: Probe-Guided Training-Free Failure Recovery in Vision-Language-Action Models
+# arXiv: 2606.09740
+
+name: ProbeAct
+full_name: "ProbeAct: Probe-Guided Training-Free Failure Recovery in Vision-Language-Action Models"
+organization: "University of California Los Angeles"
+date: "2026-06-08"
+paper_url: https://arxiv.org/abs/2606.09740
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "OpenVLA-OFT (7B, LLaMA-7B backbone) treated as frozen black-box policy; ProbeAct is a training-free inference-time wrapper that neither modifies VLA weights nor requires additional demonstrations"
+  llm: "LLaMA-7B (inherited from OpenVLA-OFT)"
+  action_head: "Inherits OpenVLA-OFT L1-regression action head; ProbeAct applies a hierarchical Control Barrier Function (CBF) filter as a closed-form minimal-intervention quadratic program on the nominal translational action u_vla in R^3 during PreGrasp phase only (filter bypassed during Grasping/Transporting). Filter form: u_filtered = u_vla + max(0, (-gamma*h(x) - grad_h(x)^T * u_vla) / ||grad_h(x)||^2) * grad_h(x), with h(x; c, r_safe) = ||x - c||^2 - r_safe^2 instantiated dynamically only on repeated-failure coordinates."
+  action_head_category: other
+  action_space: "Inherits OpenVLA-OFT continuous 7-DoF action; CBF filter modifies translational subspace u in R^3"
+  parameters: "Base VLA weights frozen (7B); only a 4-layer MLP probe is trained (hidden dims [2048, 1024, 512, 256], input d_pca=1024 from PCA on 4x4-pooled layer-8 spatial tokens, output K x 3 positions + K confidences with sigmoid)"
+  key_innovation: >
+    Three-component plug-and-play training-free failure recovery loop for frozen VLAs.
+    (1) Multi-Target Hidden-State Probe: a 4-layer MLP phi reads PCA-reduced 4x4 spatial pooled features
+    from VLA layer 8 and predicts up to K 3D object positions + sigmoid confidences, trained with a
+    Hungarian bipartite matching loss (L1 localization + BCE confidence with beta weight); inference-time
+    identity tracking via online Hungarian matching across timesteps with spatial gating.
+    (2) Object-Agnostic Kinematic State Machine over six phases (Approach/Monitor/Grasping/PostGrasp
+    + Placed event) using only gripper width q, end-effector pose e, and probe-tracked object positions.
+    Verifies grasp via kinematic synchronization (Delta z_e > tau_lift AND Delta z_obj > tau_track);
+    detects hard empty grasp (q <= eps_limit), soft empty grasp (lift without object motion), and
+    mid-transport drop. Placement triggered when gripper widens, end-effector retreats diverging from
+    object, and object stabilizes near target.
+    (3) Hierarchical Control Barrier Function Filter: first failure -> stateless push-back; repeated
+    failure in same region -> persistent CBF safe set H = {x : h(x) >= 0} with closed-form QP
+    projection enforcing grad_h(x)^T * u >= -gamma*h(x). Zones flushed on terminal proximity or Placed
+    event. The empirical foundation is action-output drift: on failure episodes the probe holds
+    spatial error at 10.4 cm while the action endpoint drifts to 34.9 cm, so reading the still-informative
+    hidden state and applying minimal correction outperforms retraining the drifted action head.
+
+training:
+  method: "Training-free for the VLA itself: ProbeAct wraps frozen OpenVLA-OFT weights. Only the hidden-state probe is trained: 50,000 (hidden-state, object-positions) pairs collected by rolling out the baseline VLA, object positions from the simulator's obj_of_interest list."
+  probe_training: "AdamW, batch 512, 200 epochs, cosine LR schedule, Hungarian bipartite matching loss combining L1 localization and BCE confidence (beta weighted)."
+  compute: "2x NVIDIA RTX PRO 6000 (Blackwell) GPUs for all experiments."
+  notes: "Probe input feature: average the 16x16 VLA spatial tokens at layer 8 into a 4x4 grid of 4096-dim vectors, then PCA to d_pca=1024. Predictions with confidence c_k < 0.5 are discarded. Hidden dims [2048, 1024, 512, 256] with LayerNorm + ReLU + dropout(0.1). Inference-time tracking uses spatial gating bounded by max plausible inter-frame object velocity."
+
+inference_hz: null
+
+benchmarks:
+  libero:
+    libero_plus_camera: 63.8
+    libero_plus_robot: 40.3
+    libero_plus_language: 82.0
+    libero_plus_light: 93.6
+    libero_plus_background: 93.5
+    libero_plus_noise: 76.8
+    libero_plus_layout: 80.9
+    libero_plus_total: 74.1
+    libero_avg: 74.1
+    source: "Paper Table 1 (LIBERO-plus 7 perturbation categories, ProbeAct on top of OpenVLA-OFT baseline)"
+    date_reported: "2026-06-08"
+    eval_condition: "LIBERO-plus benchmark; baseline OpenVLA-OFT 69.6% total -> ProbeAct 74.1% total (+4.5 points)"
+
+eval_conditions:
+  libero_plus_main: "ProbeAct vs 7 SOTA VLAs on LIBERO-plus: OpenVLA 15.6, NORA 39.0, WorldVLA 25.0, UniVLA 43.9, pi0 53.6, pi0-Fast 61.6, RIPT-VLA 68.4, OpenVLA-OFT 69.6, ProbeAct 74.1 (highest overall)"
+  mixdata_generalization: "OpenVLA-OFT-mixdata + ProbeAct on Robot Initial States category across LIBERO 4 suites: Spatial 30.6->32.6 (+2.0), Object 23.9->30.7 (+6.8), Goal 20.8->25.7 (+4.9), Long-10 36.6->39.7 (+3.1); avg 28.0->32.2"
+  action_drift_analysis: "On 300 LIBERO-plus Object Layout episodes, ground-truth object position error: probe 6.9 cm vs action endpoint 23.6 cm overall; on failure episodes probe 10.4 cm vs endpoint 34.9 cm — empirical evidence that hidden state retains spatial info while action head collapses"
+  probe_layer_ablation: "Layer 8 + img-spatial pooling = R^2 0.968 (best); deeper layers decay (layer 28: 0.934). Spatial pooling beats img-mean / last-token / lang-mean at every layer."
+  step_efficiency: "On 1643 tasks both succeed: ProbeAct adds only +6 steps (114->120, ~5% overhead). On 151 tasks rescued from baseline failure: 197 steps vs 600 timeout (-403 steps). Across all 2591 tasks: ProbeAct avg 255 steps vs baseline 275 (-20 net)."
+  hardware: "2x NVIDIA RTX PRO 6000 (Blackwell) GPUs"
+
+additional_benchmarks:
+  libero_plus_per_category_vs_baselines:
+    openvla_total: 15.6
+    nora_total: 39.0
+    worldvla_total: 25.0
+    univla_total: 43.9
+    pi0_total: 53.6
+    pi0_fast_total: 61.6
+    ript_vla_total: 68.4
+    openvla_oft_total: 69.6
+    probeact_total: 74.1
+    source: "Paper Table 1"
+
+tags:
+  - vla
+  - failure-recovery
+  - training-free
+  - inference-time
+  - hidden-state-probing
+  - control-barrier-function
+  - cbf
+  - safety-filter
+  - openvla-wrapper
+  - openvla-oft-base
+  - libero
+  - libero-plus
+  - kinematic-state-machine
+  - hungarian-matching
+  - probe-guided
+  - closed-loop-recovery
