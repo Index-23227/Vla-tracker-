@@ -1,0 +1,44 @@
+name: RhinoVLA
+full_name: 'RhinoVLA: Technical Report'
+organization: Huixi Intelligence
+date: '2026-06-05'
+paper_url: https://arxiv.org/abs/2606.07383
+code_url: https://github.com/HuixiAI/RhinoVLA
+venue: null
+open_source: true
+architecture:
+  backbone: Qwen3-VL-2B
+  llm: Qwen3 (28 layers, hidden 2048, MLP 6144)
+  action_head: flow matching (Action Expert, 18 layers, 1024 hidden)
+  action_space: continuous (72D unified physical slot space)
+  parameters: ~2.53B (2.13B VLM + 0.40B Action Expert)
+  key_innovation: 'Token-efficient Qwen3-VL backbone (64 vs 256 image tokens) co-designed with Huixi R1 edge SoC (500 TOPS INT8). Unified cross-robot interface combining View Registry, 72D physical state-action slot space with binary masks, and robot-instance LoRA. Hardware-aware compilation, W8A16 fused GEMM kernels, and parallel visual encoding deliver 11.69 Hz end-to-end inference on edge, meeting the 10 Hz real-time control target.'
+  action_head_category: flow_matching
+training:
+  dataset: AgiBotWorld Beta + AgiBotWorld 2026 (2,976.4 hours on G1 + hundreds on G2), Open X-Embodiment joint-space subsets
+  method: 'Masked flow-matching pre-training across heterogeneous robots; VLM LoRA + shared Action Expert + robot-instance LoRA jointly optimized with power-law dataset balancing (p_i ∝ N_i^0.43); post-training freezes VLM and updates only target-robot LoRA'
+  compute: Huixi R1 (7nm, 500 TOPS INT8, 8-core SIMT, ~200 GB/s bandwidth)
+benchmarks:
+  libero:
+    libero_spatial: 93.0
+    libero_object: 91.0
+    libero_goal: 93.4
+    libero_long: 82.4
+    libero_avg: 90.0
+    source: RhinoVLA Technical Report Table 4
+    date_reported: '2026-06-05'
+    eval_condition: fine-tuned
+inference_hz: 11.69
+eval_conditions:
+  libero: fine-tuned
+tags:
+- 2.5B
+- flow-matching
+- Qwen3-VL
+- edge-deployment
+- cross-embodiment
+- LoRA
+- real-time
+- W8A16
+- open-source
+- manipulation
