@@ -1,0 +1,27 @@
+name: CLASP
+full_name: "CLASP: Language-Driven Robot Skill Selection and Composition using Task-Parameterized Learning"
+organization: "German Aerospace Center (DLR); Technical University of Munich (TUM)"
+date: "2026-06-06"
+paper_url: https://arxiv.org/abs/2606.08169
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Qwen3-VL-32B-Instruct (pretrained VLM, used zero-shot via tool calling; no fine-tuning)"
+  llm: "Qwen3-VL-32B-Instruct"
+  action_head: "Task-Parameterized Kernelized Movement Primitives (TP-KMP) with covariance-weighted product-of-Gaussians fusion across object reference frames"
+  action_head_category: skill_composition_policy
+  parameters: "VLM ~32B (frozen); per-skill TP-KMP with N local reference distributions per frame, trained from 2-5 kinesthetic demonstrations"
+  key_innovation: "Modular framework that bridges pretrained VLMs and task-parameterized imitation learning. The VLM auto-generates JSON skill schemas (object types, preconditions, semantics) from a single workspace image at learning time, then uses tool-calling at execution time to (i) match user language to a skill, (ii) bind detected object poses to TP-KMP reference frames, or (iii) compose two existing skills via product-of-Gaussians fusion of their local KMPs. A formal compatibility constraint (Eq. 1) ensures composition is only attempted when local KMP variances partition the phase domain into non-overlapping dominant regions, preventing degenerate averaged trajectories. When no match or valid composition exists, the VLM detects the capability gap and verbally requests targeted demonstrations, enabling continuous skill library expansion while maintaining the 2-5 demo budget. No VLM fine-tuning is required."
+
+benchmarks: {}
+
+training:
+  datasets: ["2-5 kinesthetic demonstrations per skill on a 7-DoF DLR collaborative robot", "Synthetic BlenderProc renders for one-time 6D pose estimator training per object class", "5 YCB objects + bearing ring / measurement station for industrial insertion"]
+  method: "Per-skill TP-KMP training (seconds on a consumer CPU) from kinesthetic demonstrations recorded at 100 Hz, projected into per-object local frames. VLM remains frozen and is queried with workspace image + detected objects to emit JSON schemas (learning) or tool calls (execution). Composition creates a new TP-KMP by selecting one local KMP from each of two source skills and fusing them via product-of-Gaussians when Eq. (1) holds. Active acquisition reuses Algorithm 1 to add new skills triggered by VLM-detected capability gaps."
+
+eval_conditions:
+  real_robot: "7-DoF torque-controlled DLR cobot with Robotiq gripper and static RGB-D camera; Cartesian impedance control (Kp=750 N/m, 250 Nm/rad)"
+
+tags: [skill_composition, task_parameterized, kinesthetic_demonstration, tp_kmp, movement_primitives, vlm_tool_calling, active_learning, data_efficient, real_robot, industrial_manipulation, no_finetuning]
