@@ -1,0 +1,96 @@
+name: AffordanceVLA
+full_name: "AffordanceVLA: A Vision-Language-Action Model Empowering Action Generation through Affordance-Aware Understanding"
+organization: "Peking University; HKUST (Guangzhou); CUHK; Knowin AI"
+date: "2026-04-10"
+paper_url: https://arxiv.org/abs/2606.06155
+code_url: https://github.com/Skywalker-yqz/AffordanceVLA/
+venue: null
+open_source: true
+
+architecture:
+  backbone: "PaliGemma (SigLIP encoder + PaliGemma tokenizer/LLM)"
+  llm: "Gemma (within PaliGemma)"
+  action_head: "Mixture-of-Transformer (MoT) with three experts (Understanding / Affordance Generation / Action); action expert uses diffusion / flow-matching action chunks conditioned on h_und and affordance tokens A_t"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "Not explicitly reported (PaliGemma-scale backbone + dedicated affordance generation expert + action expert)"
+  key_innovation: >
+    Internalizes structured affordance forecasting as a task-oriented intermediate representation
+    inside a Mixture-of-Transformer VLA. Three parallel sub-modules decode affordance priors from
+    learnable queries: Which2Act (object-centric grounding via visual-latent reconstruction with a
+    frozen Flux-VAE target, MSE loss), Where2Act (2D affordance map via lightweight Transformer
+    decoder and pixel-wise BCE), and How2Act (3D shape via conditional diffusion + 10-DoF layout
+    via Smooth-L1 regression). A unidirectional Understanding-Affordance-Action (UAA) progressive
+    attention enforces strict causal inter-expert flow (Affordance attends only to Understanding;
+    Action attends to both), preventing action information leakage into the prediction stage while
+    keeping bidirectional intra-expert attention for joint refinement of the three affordance heads.
+
+training:
+  dataset: >
+    Stage I: AGD20K + RefSpatial (referential grounding) and PRISM (interaction-aware scene/embodied VQA).
+    Stage II: Large-scale synthetic robotic data (InternData-A1) with an automated affordance-annotation
+    pipeline yielding 100k+ affordance labels (keyframe extraction + Claude Opus 4.5 sub-instruction
+    decomposition + Qwen3-VL category/query generation + fine-tuned RexOmni/PRISM + SAM + SAM-3D).
+    Stage III: Target-task fine-tuning on LIBERO and CALVIN; real-world includes brief DROID
+    post-training before in-house fine-tuning.
+  method: >
+    Three-stage progressive training. Stage I freezes Vision Encoder, Understanding Expert, and
+    Action Expert; only Affordance Generation Expert + learnable queries + decoders are optimized
+    with L_Stage1 = 0.1*L_which + 0.1*L_where + 0.1*L_shape + 0.04*L_layout. Stage II unfreezes
+    Understanding and Action experts and fine-tunes the Vision Encoder with reduced LR; joint loss
+    L_Stage2 = 1.0*L_act + 0.5*L_afd. Stage III same form with affordance weight annealed to
+    lambda_afd = 0.15 for precise downstream control.
+  hardware: "Not specified in main paper (supplementary)"
+  optimizer: "Not specified in main paper"
+  learning_rate: "Reduced LR on Vision Encoder during Stage II; specifics in supplementary"
+  batch_size: "Not specified in main paper"
+  steps: "Three-stage curriculum; data-efficiency curves report 10%-100% of Stage III fine-tuning data"
+  precision: "Not specified in main paper"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.6
+    libero_object: 98.4
+    libero_goal: 96.2
+    libero_long: 89.8
+    libero_avg: 95.8
+    libero_5_suite_avg: 95.8
+    source: "AffordanceVLA paper Table 1 (full model), 50 rollouts per suite"
+    date_reported: "2026-04-10"
+    eval_condition: "fine-tuned (Stage III post-training on LIBERO)"
+  calvin:
+    calvin_abc_d_1: 96.8
+    calvin_abc_d_2: 92.0
+    calvin_abc_d_3: 87.5
+    calvin_abc_d_4: 80.8
+    calvin_abc_d_5: 75.9
+    calvin_abc_d_avg_len: 4.33
+    calvin_avg: 4.33
+    source: "AffordanceVLA paper Table 2 (full model), 1000 rollouts on ABC->D"
+    date_reported: "2026-04-10"
+    eval_condition: "fine-tuned (Stage III post-training on CALVIN), zero-shot OOD ABC->D protocol"
+  real_world:
+    basic_tasks_avg: 88.3
+    complex_tasks_avg: 82.9
+    source: "AffordanceVLA paper Table 5, 15 trials per task on 8 basic + 3 complex tasks"
+    date_reported: "2026-04-10"
+    eval_condition: "fine-tuned with DROID pre-training + in-house demonstrations"
+
+eval_conditions:
+  libero: "fine-tuned, three-stage progressive training (Stage I + II + III)"
+  calvin: "fine-tuned on ABC->D, zero-shot OOD on D"
+  real_world: "DROID pre-trained + in-house fine-tuned"
+
+tags:
+  - affordance
+  - mixture-of-transformer
+  - flow-matching
+  - libero
+  - calvin
+  - real-world
+  - paligemma
+  - intermediate-representation
+  - which2act
+  - where2act
+  - how2act
+  - three-stage-training
