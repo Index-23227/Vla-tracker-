@@ -1,0 +1,66 @@
+name: CT-VAM
+full_name: "CT-VAM: A Cerebello-Thalamic-Inspired Vision-Action Model for Efficient Visuomotor Control"
+organization: "AIRLab, Department of Automation, University of Science and Technology of China"
+date: "2026-06-08"
+paper_url: https://arxiv.org/abs/2606.09572
+code_url: https://embodied-ai-research.github.io/ct-vam/
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "DINOv3-S+ dual-view (primary + wrist) visual encoder with cross-view patch fusion"
+  llm: "None at inference; raw language replaced by a one-hot task identifier (compact grounded intent)"
+  action_head: "Transformer-based rectified-flow (flow-matching) action decoder operating on noised action tokens; predicts dual-view-conditioned action chunks via TARS (Thalamic Action Routing Stream) stream-separated conditional attention over self/action-query/dense-visual+proprioception/task streams; flow-consistent inpainting (FCI) enables asynchronous next-chunk inference with boundary continuity"
+  action_head_category: flow_matching
+  action_space: "Continuous joint-space + gripper actions; action chunk of length H predicted from dual-view + proprioception + one-hot task token"
+  parameters: "68M total (DINOv3-S+ visual backbone + TARS rectified-flow action decoder)"
+  key_innovation: >
+    Cerebello-thalamic-inspired separation of high-level language grounding from
+    high-frequency visuomotor control: language is reduced to a compact task condition (one-hot
+    intent) and does not re-enter the receding-horizon control loop. TARS is a stream-separated
+    conditional attention decoder that independently normalizes and gates action, action-query,
+    dense visual-proprioceptive, and task streams, preventing dense sensory tokens from drowning
+    the compact task condition under shared softmax. Flow-consistent inpainting (FCI) overlaps
+    next-chunk rectified-flow inference with current chunk execution while constraining the
+    overlap region to follow the rectified-flow noise-to-data interpolation, ensuring smooth
+    boundary transitions for high-frequency on-device control.
+  inference: "Rectified-flow with 8 NFE steps; supports asynchronous chunk execution via FCI; deployable on Jetson Orin NX with TensorRT optimization (~200 ms per chunk on Orin NX, ~57 ms on RTX 4080)"
+
+training:
+  dataset: "LIBERO (Spatial / Object / Goal / Long) for simulation; 30 teleoperated demonstrations per real-world task on OpenArm platform"
+  method: "Imitation learning with rectified-flow (flow-matching) objective over action chunks; TARS stream-separated attention; learnable stream gates for action-query and dense streams"
+  optimizer: "AdamW; batch size 32 (real-world)"
+  hardware: "Training hardware not specified; deployment validated on NVIDIA RTX 4080 and Jetson Orin NX"
+
+inference_hz: 20
+
+benchmarks:
+  libero:
+    libero_spatial: 89.0
+    libero_object: 94.6
+    libero_goal: 78.4
+    libero_long: 66.2
+    libero_avg: 82.1
+    source: "CT-VAM paper Table 1 (50 rollouts per task, one-hot task identifier, no VLM at low-level execution)"
+    date_reported: "2026-06-08"
+    eval_condition: "fine-tuned"
+
+eval_conditions:
+  libero: "fine-tuned, one policy with one-hot task identifier across four LIBERO suites; 50 rollouts/task"
+  real_world: "OpenArm tabletop manipulation (Ball Pouring, Box Opening and Placement); 20 trials/task; Jetson Orin NX and RTX 4080 deployment"
+
+tags:
+  - vla
+  - vision-action
+  - flow-matching
+  - rectified-flow
+  - dinov3
+  - stream-separated-attention
+  - tars
+  - flow-consistent-inpainting
+  - edge-deployment
+  - jetson-orin-nx
+  - small-model
+  - 68M
+  - libero
+  - real-world
