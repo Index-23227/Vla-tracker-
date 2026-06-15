@@ -1,0 +1,86 @@
+name: TTT-VLA
+full_name: "TTT-VLA: Test-Time Latent Prompt Optimization for Vision-Language-Action Models"
+organization: "ByteDance Seed; University of Adelaide; Tsinghua University; Zhejiang University; University of Hong Kong; CSIRO Data61"
+date: "2026-06-02"
+paper_url: https://arxiv.org/abs/2606.03127
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (Mixture-of-Transformers, flow-matching VLA)"
+  llm: "pi0.5 VLM backbone (inherited from Physical Intelligence pi0.5 checkpoint)"
+  action_head: "Flow-matching action expert (MoT); auxiliary state-grounding expert trained jointly; a block of n learnable latent prompt tokens z in R^{n x d} conditions the policy and is the only variable adapted at test time"
+  action_head_category: flow_matching
+  action_space: "continuous action chunks via conditional flow matching"
+  parameters: "pi0.5 backbone + lightweight learnable latent prompt z (n prompt tokens, d = backbone hidden dim) + state-grounding expert"
+  key_innovation: >
+    Latent Prompt Optimization (LPO) for test-time training of VLAs. During training, a learnable
+    latent prompt z is co-optimized with the policy under a state-grounding proxy task (predicting
+    end-effector position and gripper state via flow matching). At deployment, only z is updated
+    via self-supervised gradients of the same proxy on interaction data collected in the test
+    environment, while the policy backbone stays frozen. A hard router selects an embodiment-specific
+    prompt in the multi-embodiment setting. A two-stage random-drop schedule (latent->action
+    connection blocked with prob 1 then 0.5) and gradient routing (state grounding -> {state expert,
+    latent prompt}; action loss -> {VLM backbone, action expert}) decouple the prompt from action
+    parameters. Most gains arise from "critical decision steering" - correcting a few key actions
+    (e.g. lift after grasp success, alignment before release) rather than rewriting trajectories.
+
+training:
+  dataset: "Single-embodiment: SimplerEnv WidowX and Google Robot training data. Multi-embodiment: OXE-Aug Bridge V2 with 9 embodiments (WidowX, Panda, UR5e, Xarm7, Google Robot, Sawyer, Kinova3, IIWA, Jaco)."
+  method: "Initialize from pretrained pi0.5; joint flow-matching action loss + state-grounding proxy loss; two-stage random-drop on latent->action attention; gradient routing to decouple latent prompt from action expert"
+  optimizer: "AdamW, learning rate 1e-4, batch size 1024"
+  steps: "20,000 (single-embodiment); 40,000 (multi-embodiment)"
+  hardware: "32 NVIDIA H100 GPUs (~20 hours per run)"
+
+test_time_training:
+  procedure: "Offline buffer TTT: collect interaction data in target env, then optimize only z via gradients of the state-grounding proxy on the buffer; policy backbone frozen"
+  optimizer: "AdamW, learning rate 1e-5, batch size 128"
+  steps: "500 for WidowX, 1000 for Google Robot"
+  hardware: "8 NVIDIA H100 GPUs (~15-30 minutes wall-clock)"
+  online_variant: "Bs=1, lr=1e-7 - unstable, prompt representation collapses; offline used as main"
+
+benchmarks:
+  simpler_env:
+    # Single-embodiment SimplerEnv WidowX (Table 2), full method pi0.5 + SG-LP + TTT
+    widowx_put_carrot_on_plate: 74.5
+    widowx_put_eggplant_in_basket: 76.0
+    widowx_put_spoon_on_towel: 71.0
+    widowx_stack_blocks: 48.0
+    simpler_widowx_avg: 67.4
+    # SimplerEnv Google Robot (Table 3), visual matching, full method
+    google_pick_coke_can_vm: 85.0
+    google_move_near_vm: 71.7
+    google_open_close_drawer_vm: 60.6
+    google_robot_visual_matching_avg: 72.4
+    # SimplerEnv Google Robot variant aggregation (Table 3), full method
+    google_pick_coke_can_va: 79.3
+    google_move_near_va: 55.2
+    google_open_close_drawer_va: 45.8
+    google_robot_variant_aggregation_avg: 60.1
+    # Multi-embodiment (Table 4), train on OXE-Aug Bridge V2 (9 embodiments), eval WidowX, full method
+    multi_emb_widowx_carrot: 43.0
+    multi_emb_widowx_eggplant: 34.0
+    multi_emb_widowx_spoon: 48.5
+    multi_emb_widowx_cube: 1.0
+    multi_emb_widowx_avg: 31.6
+    # Overall average across the four SimplerEnv splits the paper reports for the full TTT-VLA
+    simpler_avg: 57.9
+    source: "TTT-VLA paper Tables 2, 3, 4 (pi0.5 + SG-LP + TTT)"
+    date_reported: "2026-06-02"
+    eval_condition: "fine-tuned with state-grounded latent prompt + test-time latent prompt optimization on a frozen pi0.5 policy"
+
+eval_conditions:
+  simpler_env: "Real-to-sim deployment gap; policy trained on real-robot data, evaluated in SimplerEnv. Each WidowX task evaluated for 200 episodes by cycling through 24 configurations with flow-matching sampling noise. Google Robot uses official default evaluation counts for visual matching and variant aggregation."
+
+tags:
+  - vla
+  - test-time-training
+  - test-time-adaptation
+  - latent-prompt
+  - prompt-optimization
+  - flow-matching
+  - pi0.5
+  - simpler_env
+  - deployment-time-improvement
+  - critical-decision-steering
