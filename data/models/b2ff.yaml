@@ -1,0 +1,48 @@
+name: B2FF
+full_name: 'Back to the Familiar Future: Failure Recovery for VLA Policies via Pre-Imagined
+  Milestone Selection'
+organization: Seoul National University / Yonsei University / Soongsil University
+paper_url: https://arxiv.org/abs/2606.09258
+code_url: null
+date: '2026-06-08'
+venue: arXiv 2026
+architecture:
+  backbone: UD-VLA (frozen foresight-driven VLA)
+  llm: Emu3 (via frozen UD-VLA)
+  action_head: action-only denoising on frozen VLA with fixed future-image subgoal
+  action_space: continuous action chunks (length-L) from frozen VLA
+  parameters: lightweight selector (Perceiver-style attention + MLP) on top of 3B
+    frozen UD-VLA
+  key_innovation: 'Inference-time recovery framework: pre-imagined familiar future
+    bank built from clean initial observation, recoverability-aware selector picks
+    a milestone, used as fixed visual condition for action-only denoising in frozen
+    VLA'
+  action_head_category: planning_recovery
+training:
+  dataset: LIBERO failure-injected counterfactual rollouts (selector training only;
+    VLA frozen)
+  method: 'Three-stage offline selector training: (1) proxy temporal initialization
+    with TCN-style contrastive loss and temporal-gap prediction, (2) supervised warm-start
+    with candidate-wise BCE and grouped ranking loss, (3) one-step actor-critic-style
+    fine-tuning with Huber critic regression, lower-entropy actor update, and positive-BC
+    regularization'
+  compute: not specified
+benchmarks:
+  libero:
+    libero_spatial: 95.8
+    libero_object: 94.8
+    libero_goal: 91.6
+    libero_long: 92.6
+    libero_avg: 93.7
+    source: Table 1, B2FF paper (arXiv 2606.09258) - Standard LIBERO
+    date_reported: '2026-06-08'
+    eval_condition: standard LIBERO, frozen UD-VLA + B2FF recovery module
+open_source: false
+tags:
+- failure-recovery
+- foresight-driven
+- frozen-vla
+- milestone-selection
+- inference-time
+- libero
+- manipulation
