@@ -1,0 +1,77 @@
+# Paper: BLUE: Toward Better Language Use in Efficient Vision-Language-Action Models for Autonomous Driving
+# arXiv: 2606.08684
+
+name: BLUE
+full_name: "BLUE: Toward Better Language Use in Efficient Vision-Language-Action Models for Autonomous Driving"
+organization: "Bosch Research"
+date: "2026-06-07"
+paper_url: https://arxiv.org/abs/2606.08684
+code_url: https://github.com/
+venue: arXiv preprint
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Frozen VLA backbone (SimLingo by default; also applied to CriticVLA) with a single front-view camera"
+  llm: "InternVL-derived LLM inside SimLingo / CriticVLA backbones (frozen)"
+  action_head: "Dual-mode output of the underlying VLA: either generate natural-language reasoning then waypoints, or skip language and directly predict waypoints. A lightweight single-hidden-layer MLP gate (hidden dim 128 with dropout, ~0.11M params) operates on the last-layer hidden state at the final token position and outputs a per-frame score p(h); if p(h) > theta=0.66 the model proceeds with language generation, otherwise it produces waypoints directly."
+  action_head_category: regression
+  parameters: "0.11M trainable gate on top of a frozen ~300M VLA backbone (SimLingo) or CriticVLA"
+  key_innovation: "Systematic closed-loop analysis (~2000 GPU-hours on full Bench2Drive) revealing that generated language is statistically helpful on only 14.5% of routes, harmful on 23.6%, and neutral on 61.8%. Shows that pretrained VLA hidden states already encode the language-utility signal (a linear probe can distinguish helpful vs non-helpful frames), while scene complexity and kinematic features alone fail. BLUE trains a 0.11M-parameter MLP gate via BCE on frozen hidden states with route-level + frame-level (critical-region) labels derived purely from routine closed-loop driving evaluation (no extra human annotation), and uses cosine-similarity-based redundant-frame downsampling. The gate generalizes across backbones (SimLingo and CriticVLA) but is not transferable between them, indicating language utility is encoded in a model-specific way."
+
+training:
+  gate_training:
+    routes: "~400 routes sampled from SimLingo's training set"
+    labels: "Two granularities mixed: (1) route-level label y_r = 1 iff mean SR_lang - SR_direct across seeds > tau=10%; (2) frame-level label refining language-beneficial routes by restricting positive labels to critical regions C_r identified from spatial patterns of behavior divergence between language and direct modes"
+    loss: "Binary cross-entropy"
+    architecture: "Single-hidden-layer MLP, hidden dim 128, with dropout"
+    inference_threshold: 0.66
+    redundancy_handling: "Group consecutive frames with cosine similarity > 0.99 into redundant segments; downsample length-L segment to max(2, ceil(sqrt(L))) samples"
+  backbone: "VLA backbone (SimLingo or CriticVLA) is fully frozen; no fine-tuning"
+  data_source: "Self-collected closed-loop rollouts on Bench2Drive training routes with both language and direct-action modes"
+
+benchmarks:
+  driving:
+    bench2drive_sr: 76.18
+    bench2drive_sr_std: 0.64
+    bench2drive_ds: 90.58
+    bench2drive_ds_std: 0.12
+    bench2drive_sr_criticvla: 76.04
+    bench2drive_ds_criticvla: 90.37
+    longest6v2_ds: 36
+    longest6v2_rc: 84
+    longest6v2_is: 0.43
+    longest6v2_gpu_hours: 56
+    multi_ability_mean: 73.89
+    multi_ability_merge: 61.44
+    multi_ability_overtake: 80.00
+    multi_ability_embrake: 93.27
+    multi_ability_giveway: 50.00
+    multi_ability_tsign: 84.74
+    speedup_vs_simlingo: 2.54
+    speedup_vs_criticvla: 4.50
+    fps: 1.82
+    latency_ms: 549.5
+    source: "BLUE paper Tables 1, 2, 3, 4 (averaged over 3 random seeds; SimLingo backbone unless noted)"
+    date_reported: "2026-06-07"
+    eval_condition: "closed-loop CARLA; Bench2Drive (220 routes, 44 scenario categories) and Longest6 v2"
+
+eval_conditions:
+  bench2drive: "closed-loop CARLA; single front-view camera; no LiDAR; language annotations only; frozen SimLingo / CriticVLA backbone with trained gate"
+  longest6v2: "long-horizon closed-loop CARLA; sustained driving quality (DS / RC / IS); A100 GPU hours reported"
+
+inference_hz: 1.82
+
+tags:
+  - autonomous-driving
+  - vla
+  - bench2drive
+  - longest6
+  - carla
+  - simlingo
+  - criticvla
+  - efficient-inference
+  - language-gating
+  - frozen-backbone
+  - mlp-gate
+  - bosch
