@@ -1,0 +1,43 @@
+name: ReactVLA
+version: '1.0'
+full_name: 'ReactVLA: Fast and Lightweight Reactive Robot Manipulation via Improved Mean Flow Action Generation'
+organization: Shanghai Jiao Tong University & Universität Hamburg (TAMS)
+date: '2026-06-12'
+paper_url: https://arxiv.org/abs/2606.14255
+code_url: https://game-loader.github.io/ReactVLA/
+venue: arXiv 2026
+model_type: vla
+inference_hz: 26
+architecture:
+  backbone: SigLip2 (frozen) + SmolVLM text transformer
+  llm: SmolVLM (text transformer layers)
+  action_head: improved Mean Flow (iMF) with Attention Residual transformer
+  action_space: continuous (7-DoF relative joint commands)
+  parameters: 390M
+  key_innovation: Improved Mean Flow (iMF) action head with JVP correction and stop-gradient for stable one-to-few-step generation, combined with Attention Residual (AttnRes) depth-wise feature routing to prevent representation dilution in low-step generative VLA policies
+  action_head_category: flow_matching
+training:
+  dataset: LIBERO multi-task (40 tasks aggregated from Spatial/Object/Goal/Long) + RoboIMI dual-arm + real-world Diana 7 teleop (50 demos/task)
+  method: Improved Mean Flow with Pseudo-Huber loss (δ=1), logit-normal time sampling (μ=-0.4, σ=1.0), JVP correction with stop-gradient
+  compute: not specified
+benchmarks:
+  libero:
+    libero_spatial: 93.0
+    libero_object: 95.0
+    libero_goal: 92.0
+    libero_long: 72.0
+    libero_avg: 88.0
+    source: ReactVLA paper Table I
+    date_reported: '2026-06-12'
+    eval_condition: fine-tuned (multi-task, 2-step iMF inference)
+open_source: true
+open_source_note: Project page with code at https://game-loader.github.io/ReactVLA/
+tags:
+- 390M
+- flow-matching
+- mean-flow
+- lightweight
+- low-latency
+- reactive-control
+- attention-residual
+- open-source
