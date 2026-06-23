@@ -1,0 +1,46 @@
+name: MFLA
+version: '1.0'
+full_name: Motion-Focused Latent Action Enables Cross-Embodiment VLA Training from Human EgoVideos
+organization: Tsinghua University / Tianfu Jiangxi Laboratory
+paper_url: https://arxiv.org/abs/2606.18955
+code_url: null
+date: '2026-06-17'
+venue: arXiv 2026
+architecture:
+  backbone: DINOv2-ViT-B/14-reg (frozen, for state perception) + Prismatic-7B (VLM)
+  llm: Prismatic-7B (LLaMA-2 based)
+  action_head: transformer-based flow matching decoder (trained from scratch)
+  action_space: continuous
+  parameters: 7B
+  key_innovation: Hybrid Disentangled VQ-VAE that decouples motion dynamics from environmental background via physical masks (SAM2/RoboEngine), producing a motion-focused cross-embodiment action codebook learned from unlabeled human EgoVideos; intention-perception decoupling via frozen DINOv2 features for the action expert
+  action_head_category: flow_matching
+training:
+  dataset: BridgeV2 (third-view, no action labels) for robot-to-robot; EgoDex (video only, no action labels) for human-to-robot; ~50 downstream trajectories per task for adaptation
+  method: Three-stage — (1) Hybrid Disentangled VQ-VAE (action codebook size 16, 4 tokens per frame pair, mask-guided reconstruction); (2) VLM autoregressive pre-training to predict latent action tokens; (3) Joint fine-tuning of LoRA-adapted VLM and flow matching action expert with intent + flow loss
+  compute: not reported
+benchmarks:
+  libero:
+    libero_spatial: 95.5
+    libero_object: 94.0
+    libero_goal: 93.5
+    libero_long: 84.0
+    libero_avg: 91.8
+    source: Table I, MFLA paper (arXiv 2606.18955)
+    date_reported: '2026-06-17'
+    eval_condition: pre-trained on BridgeV2 (no action labels) + LIBERO post-training, third-person view only, no wrist camera
+  robotwin_v2:
+    robotwin_v2_avg: 67.7
+    source: Table II, MFLA paper (arXiv 2606.18955); 10 representative tasks on Aloha-Agilex dual-arm, clean mode, 50 trajectories/task
+    date_reported: '2026-06-17'
+    eval_condition: pre-trained on EgoDex (unlabeled human ego videos) + RoboTwin 2.0 post-training, with wrist-mounted view
+open_source: false
+tags:
+- 7B
+- flow-matching
+- latent-action
+- vq-vae
+- human-video-pretraining
+- cross-embodiment
+- ego-centric
+- prismatic-vlm
+- dinov2
