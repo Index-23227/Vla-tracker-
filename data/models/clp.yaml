@@ -1,0 +1,79 @@
+name: CLP
+full_name: "CLP: CKA-guided Layer Pruning — Finetuning Vision-Language-Action Models Requires Fewer Layers Than You Think"
+organization: "VinUniversity / VinRobotics / DFKI"
+date: "2026-06-20"
+paper_url: https://arxiv.org/abs/2606.20246
+code_url: null
+venue: "arXiv preprint 2026 (project: https://clpvla.github.io)"
+open_source: false
+
+architecture:
+  backbone: "N/A (calibration-based static layer-pruning pipeline applied to existing VLA backbones — validated on pi0 (PaliGemma + flow-matching), GR00T-N1.5 (Eagle VLM + DiT action head), SmolVLA (SmolVLM2 + flow-matching))"
+  llm: "N/A (inherits LLM of host VLA)"
+  action_head: "N/A (pruning method preserves the native action head — flow matching for pi0/SmolVLA, DiT for GR00T-N1.5)"
+  action_head_category: other
+  parameters: "pi0-CLP 2.7B (-22.9%); GR00T-N1.5-CLP 2.0B (-25.9%); SmolVLA-CLP 354M (-21.3%)"
+  key_innovation: "Single-forward-pass training-free structural pruning of redundant transformer layers in modern continuous-control VLAs. Uses Centered Kernel Alignment (CKA) between consecutive layer hidden states to detect contiguous high-similarity blocks; retains anchor layer of each block and removes the rest before fine-tuning. Permanently truncates VLM backbone and action head depth by up to 50% with no auxiliary routing, distillation, or early-exit modules. Cuts trainable parameters 25.8–37.0%, training time 27.8–64.3%, GFLOPs up to 49.3%, and inference latency 27.9–31.8% while matching or exceeding full-scale base policies. Acts as an implicit regularizer in low-data regimes (e.g., +6.9%p on 10% LIBERO)."
+
+benchmarks:
+  libero:
+    libero_spatial: 95.0
+    libero_object: 99.2
+    libero_goal: 95.0
+    libero_long: 86.4
+    libero_avg: 93.9
+    source: "Table 2 (pi0-CLP, full-data fine-tuning, 1.39x speedup over pi0 baseline 94.6%)"
+    date_reported: "2026-06-20"
+    eval_condition: "fine-tuned (pi0 backbone, 60k steps)"
+  simpler_env:
+    widowx_carrot_on_plate: 34.0
+    widowx_eggplant_in_basket: 14.0
+    widowx_spoon_on_towel: 38.0
+    widowx_stack_cube: 4.0
+    eggplant_close_sink: 16.0
+    open_drawer: 24.0
+    close_drawer: 10.0
+    simpler_avg: 20.0
+    source: "Table 3 (GR00T-N1.5-CLP, SimplerEnv WidowX, fine-tuned on Bridge, 200k steps; vs GR00T-N1.5 baseline 16.57%)"
+    date_reported: "2026-06-20"
+    eval_condition: "fine-tuned (GR00T-N1.5 backbone on Bridge)"
+  robocasa:
+    pnp_cab_to_counter: 16.0
+    pnp_counter_to_cab: 16.0
+    coffee_setup_mug: 4.0
+    turn_off_stove: 4.0
+    turn_on_microwave: 50.0
+    robocasa_avg: 18.0
+    source: "Table 9 (pi0-CLP, RoboCasa 30-demo subset, 5 tasks, 100k steps; vs pi0 baseline 15.6%)"
+    date_reported: "2026-06-20"
+    eval_condition: "fine-tuned (pi0 backbone, low-data 30-demo regime)"
+
+eval_conditions:
+  libero: "Full LIBERO 4-suite fine-tuning with pi0 backbone, 60k steps, eval over 50 episodes/task with 10-step execution length"
+  simpler_env: "GR00T-N1.5 backbone fine-tuned on Bridge dataset, single H100, batch 32, 200k steps, 50 episodes/task, 8-step execution"
+  robocasa: "pi0 backbone fine-tuned on 30-demo subset of 5 RoboCasa tasks (PnPCabToCounter, PnPCounterToCab, SetUpCoffeeMug, TurnOffStove, TurnOnMicrowave), 4xH100, batch 48"
+  real_world: "10 tasks across UR10, UR5, single-arm ALOHA, bimanual ALOHA — GR00T-N1.5-CLP avg 75.9% vs GR00T-N1.5 baseline 73.5% (Table 4)"
+
+training:
+  dataset: "LIBERO (full + 10% subset), RoboCasa (30 and 100 demos from 5 tasks), SimplerEnv Bridge, plus 10 real-world tasks (UR10/UR5/ALOHA single+bimanual)"
+  method: "CKA-guided static layer pruning. (1) Calibration set Dcal sampled from training episodes; (2) single forward pass extracts hidden states H_l per layer of target module M; (3) compute CKA(H_{l-1}, H_l) for consecutive layers; (4) group layers with CKA >= tau into contiguous blocks B; (5) retain anchor (first) layer per block, pool remainder into candidate set P_M; (6) remove top-k most redundant layers (RemoveLayers). Applied independently to VLM backbone and action head. Specific configs (Table 5): pi0 prunes 12/18 layers (indices 1,2,4,6,8,9 in shared VLM+action expert); GR00T-N1.5 prunes 3/4 VL-self-attention + 8/16 DiT layers; SmolVLA prunes 10/16 (indices 1,2,5,6,14,15). Then fine-tune under native objective (flow-matching loss for pi0/SmolVLA, DiT objective for GR00T-N1.5)."
+  num_trajectories: null
+  compute: "pi0-CLP 11.2h training (-27.8%), 4 GPUs; GR00T-N1.5-CLP 7.4h (-30.8%), 1xH100; SmolVLA-CLP 8.83h (-64.3%). Real-world up to 1.94x faster training. Inference on RTX 4070: pi0-CLP 152ms (-27.9%), GR00T-N1.5-CLP 85ms (-29.8%), SmolVLA-CLP 137ms (-31.8%)"
+
+inference_hz: 12
+
+tags:
+  - layer_pruning
+  - cka
+  - training_free_compression
+  - structural_compression
+  - efficient
+  - pi0
+  - groot_n1_5
+  - smolvla
+  - flow_matching_backbone
+  - low_data_regularizer
+  - libero
+  - simpler_env
+  - robocasa
+  - real_world
