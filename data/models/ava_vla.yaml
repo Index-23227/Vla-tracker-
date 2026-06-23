@@ -1,0 +1,74 @@
+name: AVA-VLA
+full_name: "AVA-VLA: Think Less, Act Early — Reinforced Latent Reasoning with Early Exit in Vision-Language-Action Models"
+organization: "Tsinghua University"
+date: "2026-06-13"
+paper_url: https://arxiv.org/abs/2606.15099
+code_url: null
+venue: "ICML 2026"
+open_source: false
+
+architecture:
+  backbone: "Multimodal encoder (visual feature dim 768, language embedding dim 768); reasoning network with hidden size 1024, action network with hidden size 2048"
+  llm: "Pretrained vision-language backbone (unspecified family; uses shared multimodal encoder ψ producing 768-d features)"
+  action_head: "Softmax action policy π_ψ conditioned on latent reasoning state z_t and encoded observation; trained jointly with reasoning policy via PPO"
+  action_head_category: other
+  action_space: "discrete delta actions (Softmax policy head) for LIBERO/CALVIN manipulation"
+  parameters: "not explicitly reported; reasoning policy in R^64 continuous update action space, diagonal Gaussian parameterization"
+  key_innovation: >
+    Adaptive Variable Alignment VLA (AVA-VLA): models reasoning as a sequence of unobservable
+    latent variables z_t evolving under a POMDP. A reasoning policy π_ϕ produces continuous
+    latent update actions u_t ∈ R^64 (diagonal Gaussian) and updates z_{t+1} = z_t + Δz_t
+    via a gated Transformer. RL-based Denoising optimizes the latent trajectory with PPO+GAE
+    using task success reward plus entropy and smoothness (∥z_{t+1}-z_t∥²) regularizers, so
+    sparse success signals are credit-assigned to intermediate latent reasoning steps. An
+    Early-Exit gate g_ω(z_t) terminates latent reasoning when confidence exceeds τ=0.55,
+    yielding ~2.3 reasoning steps on average (vs 5.0 without exit) and 6× speedup vs explicit
+    CoT, while achieving 98.3% LIBERO average (one policy across all 4 suites).
+
+training:
+  dataset: "LIBERO (4 suites, 5,000 episodes, 100 tasks) + CALVIN (ABC→D, ~20,000 episodes across environments A/B/C, evaluated on D)"
+  method: "Three-stage training: (1) 100K behavior-cloning pretraining, (2) 50K latent-reasoning warmup, (3) joint PPO fine-tuning with GAE (λ=0.95), PPO clip 0.2, γ=0.99, entropy + smoothness regularizers"
+  optimizer: "Adam (lr=1e-4, β1=0.9, β2=0.999, ϵ=1e-8), batch size 32, gradient clipping 1.0, dropout 0.1"
+  steps: "100K BC pretrain + 50K latent warmup + ~1.2M environment interaction steps in PPO stage"
+  hardware: "8x NVIDIA A100 80GB; PPO stage takes ~18.6 hours"
+
+benchmarks:
+  libero:
+    libero_spatial: 97.8
+    libero_object: 99.4
+    libero_goal: 97.8
+    libero_long: 98.1
+    libero_avg: 98.3
+    source: "AVA-VLA paper Table 1 (one policy for all 4 suites)"
+    date_reported: "2026-06-13"
+    eval_condition: "fine-tuned, one shared policy across LIBERO-Spatial/Object/Goal/Long"
+  calvin:
+    calvin_abc_d_task_1: 99.7
+    calvin_abc_d_task_2: 96.5
+    calvin_abc_d_task_3: 94.5
+    calvin_abc_d_task_4: 91.1
+    calvin_abc_d_task_5: 84.0
+    calvin_abc_d_avg_len: 4.77
+    calvin_avg: 4.77
+    source: "AVA-VLA paper Table 3 (CALVIN ABC→D, average rollout length 4.77)"
+    date_reported: "2026-06-13"
+    eval_condition: "trained on environments A/B/C, evaluated on unseen environment D"
+
+inference_hz: 6.9
+
+eval_conditions:
+  libero: "one policy across all 4 LIBERO suites, fine-tuned; Early-Exit threshold τ=0.55 (avg 2.3 latent reasoning iterations)"
+  calvin: "ABC→D zero-shot environment transfer; same latent-reasoning + early-exit setup"
+  latency: "NVIDIA A100, batch size 1: mean 145ms / P90 189ms / throughput 6.9 Hz on LIBERO-Spatial"
+
+tags:
+  - vla
+  - latent-reasoning
+  - reinforcement-learning
+  - ppo
+  - early-exit
+  - pomdp
+  - libero
+  - calvin
+  - icml-2026
+  - tsinghua
