@@ -1,0 +1,53 @@
+name: MuseVLA
+full_name: 'MuseVLA: An Adaptive Multimodal Sensing Vision-Language-Action Model for Robotic Manipulation'
+organization: "Peking University; Microsoft Research Asia; Princeton University; Tsinghua University"
+date: '2026-06-16'
+paper_url: https://arxiv.org/abs/2606.17598
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: SigLIP vision encoder (PaliGemma-2 VLM) shared across RGB and grounded sensor images
+  llm: Gemma-2 (PaliGemma-2 backbone, initialized from VITRA pretraining)
+  action_head: Diffusion Transformer (DiT) action expert co-trained with VLM via MSE diffusion loss (λ=1e-2)
+  action_head_category: diffusion
+  parameters: null
+  key_innovation: "Adaptive multimodal sensing VLA: learnable sensor tokens (<None>/<Thermal>/<Acoustic>/<mmWave>) that the VLM emits as a 'tool call' alongside a target description, then a grounded sensor image (sensor heatmap overlaid via SAM3 mask onto the RGB-space target region) unifies heterogeneous non-RGB modalities through the same vision encoder. A data synthesis pipeline injects physical-property keywords into existing RGB datasets and color-codes segmented target regions to create multisensory training data without real sensor capture, enabling zero-shot generalization to unseen sensor-guided tasks."
+
+training:
+  base_model: VITRA (PaliGemma-2 VLM + DiT action expert weights)
+  method: "End-to-end VLM + VLA co-training with combined loss L = L_sensor + L_target + λ * L_diffusion (λ=1e-2); two-source dataset: 720 real teleoperated demos + 9.6K synthesized episodes (1.05M frames, >1000 objects) from MolmoAct + AgiBotWorld-Alpha + VITRA"
+  compute: "64x A100 (40GB), batch size 512, 20K steps (~20h), lr 1e-5, AdamW"
+  dataset: "Real-world: 720 episodes of dexterous-hand teleop over 10 sub-task instructions across thermal-, acoustic-, mmWave-guided manipulation. Synthesized: 9.6K episodes from MolmoAct, AgiBotWorld-Alpha, VITRA with color-coded grounded sensor masks."
+  hardware: "Robot arm with 12-DoF Robotera XHand dexterous hand + sensor suite: Intel RealSense RGB-D, 2x infiRay T2S thermal cameras, Calterah 4T4R 60GHz mmWave radar, Sipeed 6+1 microphone array. Teleop via MANUS gloves."
+
+benchmarks:
+  real_world:
+    musevla_avg_seen_pretrained: 80.6
+    musevla_avg_seen_no_pretrain: 76.4
+    musevla_avg_unseen_zero_shot: 66.7
+    thermal_seen: 87.5
+    acoustic_seen: 70.8
+    mmwave_seen: 83.3
+    sensor_selection_acc_unseen: 100.0
+    target_description_acc_unseen: 82.0
+    source: "Table 1 + Table 2 + Table 3 of MuseVLA paper (arXiv 2606.17598)"
+    eval_condition: "real-world dexterous hand, single model across all tasks"
+
+eval_conditions:
+  real_world: "fine-tuned + co-trained on synthesized multisensory data; single model evaluated across thermal/acoustic/mmWave tasks and zero-shot unseen tasks"
+
+tags:
+  - multimodal-sensing
+  - thermal
+  - acoustic
+  - mmwave-radar
+  - dexterous-hand
+  - paligemma2
+  - diffusion-transformer
+  - sensor-tokens
+  - grounded-sensor-image
+  - data-synthesis
+  - real-world
+  - tool-use
