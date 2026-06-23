@@ -1,33 +1,127 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: SAPS: Shared Autonomy for Policy Steering by Blending Teleoperation with a Pretrained VLA
 # arXiv: 2606.15568
 
 name: SAPS
 full_name: "SAPS: Shared Autonomy for Policy Steering by Blending Teleoperation with a Pretrained VLA"
-organization: "TODO: check paper"
+organization: "Carnegie Mellon University"
 date: "2026-06-14"
 paper_url: https://arxiv.org/abs/2606.15568
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: "arXiv preprint"
+open_source: false
+
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
+  backbone: "Inference-time shared-autonomy wrapper on top of pretrained VLAs/policies: primary is pi0.5 (LIBERO/CALVIN/DROID checkpoints); also evaluated on Diffusion Policy (DP) from DynaGuide for CALVIN single-subtask comparisons"
+  llm: "Inherits from base VLA (pi0.5 backbone)"
+  action_head: "No new action head. SAPS performs action-level arbitration between a frozen pretrained policy's action a_VLA and a real-time human teleoperation action a_expert via a_blended[1:6] = alpha*a_VLA + (1-alpha)*a_expert with three swappable arbitration policies (Takeover hard-switch, Equal Blending at alpha=0.5, dynamic Cosine-similarity sigmoid alpha=sigma(k*cos(a_H,a_VLA)) with k=6). Gripper dim is handled separately by max(a_VLA[7], a_expert[7])."
   action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_space: "continuous"
+  parameters: "Zero new parameters; no retraining, no auxiliary dynamics/intent models, no sampler modification"
+  key_innovation: >
+    SAPS is a lightweight, model-agnostic shared-autonomy framework that steers a frozen pretrained
+    VLA at the action level by linearly blending its action chunk with a real-time human teleoperation
+    command. Unlike prior inference-time policy-steering methods (ITPS, DynaGuide, VLS, FOREWARN)
+    that require auxiliary dynamics models, denoising-sampler modifications, or explicit reasoning
+    modules, SAPS operates strictly post-inference and requires no retraining or architectural change.
+    Three arbitration strategies are proposed: (1) Takeover - hard switch to human when |a_expert|>1e-3;
+    (2) Equal Blending - fixed alpha=0.5 during intervention; (3) Cosine - dynamic alpha given by a
+    logistic sigmoid on cosine similarity between human and policy actions (k=6), which scales smoothly
+    so that disagreement transfers control to the human and agreement preserves policy autonomy.
+
+training:
+  method: "No training. SAPS is a closed-loop inference-time wrapper. The underlying pi0.5 / DP checkpoints are released by their original authors and used frozen."
+  base_models: "pi0.5 LIBERO checkpoint, pi0.5 DROID checkpoint (real-world), pi0.5 CALVIN ABC checkpoint (RLinf release), Diffusion Policy from DynaGuide (CALVIN subtasks)"
+
+inference_hz: 20  # 20 Hz operational-space pose controller in both LIBERO and CALVIN simulation
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    # Standard LIBERO 4-suite breakdown is NOT reported. The paper performs a controlled perturbation
+    # study on a SINGLE pick-and-place task from the Object suite (cream cheese into basket) across
+    # 8 perturbation distances (n=20 per setup). The numbers below aggregate the high-perturbation
+    # regime (distance >= 0.15) reported in Section 4.1.
+    libero_object: 87.9     # Blending success @ distance>=0.15 (pi0.5 baseline drops to 22.9%)
+    libero_object_cosine: 90.0  # Cosine success @ distance>=0.15
+    libero_object_baseline_pi0_5: 22.9  # pi0.5 alone @ distance>=0.15
+    source: "Paper Section 4.1 and Figure 3 (n=20 per perturbation setup, 8 perturbation distances, single Object-suite task). Standard 4-suite numbers not reported."
+    date_reported: "2026-06-14"
+    eval_condition: "pi0.5 fine-tuned + SAPS shared autonomy; perturbed object placement, aggregated over distance>=0.15"
+  libero_pro:
+    # LIBERO-PRO selected 10 tasks with task and swap perturbations (large semantic + spatial shifts)
+    pi0_5_baseline_avg: 15.0
+    blending_avg: 92.6
+    takeover_avg: 93.2
+    cosine_avg: 97.4
+    teleoperation_avg: 98.8
+    blending_intervention_pct: 10.8
+    takeover_intervention_pct: 11.7
+    cosine_intervention_pct: 30.0
+    blending_completion_time_s: 11.1
+    takeover_completion_time_s: 13.2
+    cosine_completion_time_s: 13.0
+    pi0_5_completion_time_s: 30.7
+    teleoperation_completion_time_s: 46.0
+    source: "Paper Section 4.1.1 (LIBERO-PRO, 10 selected tasks, task+swap perturbations, n=20)"
+    date_reported: "2026-06-14"
+    eval_condition: "pi0.5 + SAPS arbitration; one-sided Wilcoxon p=9.77e-4 for each method vs pi0.5"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    # CALVIN ABC->D long-horizon evaluation with pi0.5 baseline (Table 1, n=30 chains, 5 subtasks each)
+    calvin_abc_d_st_sr: 94.85       # Cosine SAPS subtask success rate
+    calvin_abc_d_avg_len: 4.30      # Cosine mean tasks per chain (out of 5)
+    calvin_abc_d_st1: 96.67
+    calvin_abc_d_st2: 90.00
+    calvin_abc_d_st3: 83.33
+    calvin_abc_d_st4: 83.33
+    calvin_abc_d_st5: 76.67
+    calvin_abc_d_human_pct: 13.73
+    pi0_5_baseline_avg_len: 3.833
+    pi0_5_baseline_st_sr: 91.27
+    itps_baseline_avg_len: 3.667
+    dynaguide_baseline_avg_len: 3.167
+    teleoperation_avg_len: 0.900
+    teleoperation_3x_st_sr: 86.78
+    source: "Paper Table 1 (CALVIN ABC->D long-horizon, n=30 chains of 5 subtasks, pi0.5 backbone)"
+    date_reported: "2026-06-14"
+    eval_condition: "pi0.5 trained on CALVIN ABC, tested on D + Cosine arbitration"
+  real_world:
+    # Franka arm + pi0.5 DROID checkpoint, n=20 per task
+    pick_place_pi0_5: 50
+    pick_place_cosine: 100
+    pick_place_blending: 100
+    close_drawer_pi0_5: 25
+    close_drawer_cosine: 100
+    close_drawer_blending: 80
+    open_cabinet_pi0_5: 5
+    open_cabinet_cosine: 95
+    open_cabinet_blending: 100
+    cosine_avg: 98.33
+    blending_avg: 93.33
+    pi0_5_avg: 26.67
+    teleoperation_avg: 100
+    source: "Paper Table 2 (Franka real-world, n=20, three tabletop tasks)"
+    date_reported: "2026-06-14"
+    eval_condition: "pi0.5 DROID checkpoint + SAPS shared autonomy on real Franka arm"
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero: "pi0.5 backbone fine-tuned; only Object-suite single task with perturbation sweep evaluated. Standard 4-suite numbers NOT reported."
+  libero_pro: "pi0.5 backbone + SAPS arbitration on 10 LIBERO-PRO tasks with task+swap perturbations"
+  calvin: "pi0.5 trained on CALVIN ABC, tested on D, long-horizon 5-task chains; Cosine arbitration only (selected as best from LIBERO-PRO)"
+  real_world: "Franka arm with pi0.5 DROID checkpoint; teleop via keyboard (Blending) or gamepad (Cosine); 20 Hz control"
+  hardware: "Franka Panda arm with operational-space pose controller; RGB third-person + wrist cameras; gamepad / keyboard teleop interfaces"
 
-tags: [libero, calvin]
+tags:
+  - libero
+  - libero-pro
+  - calvin
+  - real-world
+  - shared-autonomy
+  - inference-time-steering
+  - policy-steering
+  - teleoperation
+  - human-in-the-loop
+  - pi0.5
+  - training-free
+  - action-level-blending
+  - cosine-similarity
