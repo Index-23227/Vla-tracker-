@@ -1,0 +1,70 @@
+# LaWAM: Latent World Action Models for Efficient Dynamics-Aware Robot Policies
+# arXiv: 2606.15768
+
+name: LaWAM
+full_name: "LaWAM: Latent World Action Models for Efficient Dynamics-Aware Robot Policies"
+organization: "Tsinghua University / Jilin University / Nankai University / Peking University / Striding.AI / Infinigence AI"
+date: "2026-06-14"
+paper_url: https://arxiv.org/abs/2606.15768
+code_url: null
+venue: "arXiv 2026"
+open_source: false
+model_type: vla
+inference_hz: 5.3
+
+architecture:
+  backbone: "Qwen3-VL-2B (first 16 layers) + DINOv3 frozen visual encoder"
+  llm: "Qwen3-VL-2B (first 16 layers used)"
+  action_head: "Alternate-DiT action expert with conditional flow matching over action chunk; one stream carries semantic VLM context, the other carries latent dynamics (current feature u and predicted latent visual subgoal u_T) via Inverse Dynamics Attention + Semantic Attention alternating blocks. Knowledge Insulation (KI) protects pretrained LaWM weights from action-expert gradients."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "2.3B"
+  key_innovation: "Latent World Action Model: repurposes the forward decoder of a latent action model (LAM) trained in the frozen DINOv3 latent space as a Latent World Model (LaWM, 230M params) that, given the current latent observation and a policy-predicted latent action, decodes a compact latent visual subgoal in a single forward pass. Action generation is then conditioned on this predicted future feature instead of pixel-space video, yielding 187 ms per action-chunk inference (~24x lower latency than pixel-space WAMs like LingBot-VA) while preserving dynamics-aware control. Two-stage training: (1) IDM encoder + LaWM decoder over (u, u_T) feature pairs with KL regularization and an auxiliary state predictor that maps (s, z) -> s_T to ground latent actions in embodied motion; (2) latent-action distillation that teaches the VLA policy prior to predict z, with subgoal supervision and flow-matching action loss under Knowledge Insulation. About 95% fewer world-modeling parameters than the 5B WAN backbone used by pixel-space WAMs."
+
+training:
+  dataset: "~3,000 hours of robot videos + ~1,500 hours of egocentric human videos (human videos contribute only through LaWM dynamics prior; policy stage uses only language-annotated robot trajectories). Open-source sources include OXE, DROID, AgiBot-World, Ego4D, and related embodied/egocentric corpora."
+  method: "Two-stage pretraining. Stage 1 trains a latent action model in the frozen DINOv3 latent space: posterior q_phi(z | u, u_T) (IDM) + decoder LaWM_omega(u, z) -> u_T, with loss L_LAM = ||u_T_hat - u_T||^2 + ||g(s, z) - s_T||^2 + beta * KL(q_phi || N(0, I)). Stage 2 freezes LaWM and trains the LaWAM policy: L_LaWAM = lambda_distill * ||z_hat - z||^2 + lambda_wm * ||u_T_hat - u_T||^2 + L_act (flow matching), with Knowledge Insulation preventing action-expert gradients from overwriting LaWM dynamics. Physical-time encoding handles mixed control frequencies. Benchmark-specific post-training on top of the pretrained checkpoint."
+  compute: "A100 GPU at inference (paper reports 187 ms per action-chunk, 10 denoising steps); pretraining compute not specified explicitly"
+
+benchmarks:
+  libero:
+    libero_long: 97.0
+    libero_goal: 98.4
+    libero_object: 99.6
+    libero_spatial: 99.4
+    libero_avg: 98.6
+    source: "LaWAM paper Table 1 (50 trials per task; model-only wall-clock latency 187 ms per action chunk on A100)"
+    date_reported: "2026-06-14"
+    eval_condition: "fine-tuned"
+  robotwin_v2:
+    robotwin_v2_clean: 92.64
+    robotwin_v2_random: 89.80
+    source: "LaWAM paper Table 2 (RoboTwin 2.0, 50 tasks, 100 trials per task; clean vs randomized scenes)"
+    date_reported: "2026-06-14"
+    eval_condition: "fine-tuned"
+  real_world:
+    pick_and_place: 93.3
+    open_drawer: 86.7
+    fold_towel: 90.0
+    real_world_avg: 90.0
+    source: "LaWAM paper Table 3 (30 trials per task; two robot platforms; in-distribution + OOD spatial configs)"
+    date_reported: "2026-06-14"
+    eval_condition: "fine-tuned"
+
+eval_conditions:
+  libero: "fine-tuned (50 trials per task on 4 standard LIBERO suites: Spatial, Object, Goal, Long)"
+  robotwin_v2: "fine-tuned (RoboTwin 2.0, 50 bimanual tasks, 100 trials per task; clean and randomized scenes)"
+  real_world: "fine-tuned (30 trials per task; pick-and-place, drawer opening, towel folding; ID + OOD initial configurations)"
+
+tags:
+  - vla
+  - world-action-model
+  - latent-world-model
+  - latent-action-model
+  - flow-matching
+  - dinov3
+  - qwen3-vl
+  - alternate-dit
+  - knowledge-insulation
+  - low-latency
+  - 2.3B
