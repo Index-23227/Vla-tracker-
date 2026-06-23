@@ -11,7 +11,7 @@ architecture:
   backbone: "Qwen3-VL-32B-Instruct (pretrained VLM, used zero-shot via tool calling; no fine-tuning)"
   llm: "Qwen3-VL-32B-Instruct"
   action_head: "Task-Parameterized Kernelized Movement Primitives (TP-KMP) with covariance-weighted product-of-Gaussians fusion across object reference frames"
-  action_head_category: skill_composition_policy
+  action_head_category: other
   parameters: "VLM ~32B (frozen); per-skill TP-KMP with N local reference distributions per frame, trained from 2-5 kinesthetic demonstrations"
   key_innovation: "Modular framework that bridges pretrained VLMs and task-parameterized imitation learning. The VLM auto-generates JSON skill schemas (object types, preconditions, semantics) from a single workspace image at learning time, then uses tool-calling at execution time to (i) match user language to a skill, (ii) bind detected object poses to TP-KMP reference frames, or (iii) compose two existing skills via product-of-Gaussians fusion of their local KMPs. A formal compatibility constraint (Eq. 1) ensures composition is only attempted when local KMP variances partition the phase domain into non-overlapping dominant regions, preventing degenerate averaged trajectories. When no match or valid composition exists, the VLM detects the capability gap and verbally requests targeted demonstrations, enabling continuous skill library expansion while maintaining the 2-5 demo budget. No VLM fine-tuning is required."
 

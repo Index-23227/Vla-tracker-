@@ -11,7 +11,7 @@ architecture:
   backbone: "Qwen2.5-VL-3B (VLM) + Transformer Flow Matching Action Expert (0.69B)"
   llm: "Qwen2.5-VL-3B"
   action_head: "Transformer-based Flow Matching Action Expert (~0.69B params); conditioned on Feature Query Token last hidden states via MLP adapter; multi-step denoising for continuous actions"
-  action_head_category: flow-matching
+  action_head_category: flow_matching
   action_space: "continuous; predicts action chunk {a_t, a_{t+1}, ..., a_{t+T}}"
   parameters: "~3B VLM (Qwen2.5-VL-3B) + 0.69B Flow Matching Action Expert; n=20 learnable Feature Query Tokens"
   key_innovation: >
