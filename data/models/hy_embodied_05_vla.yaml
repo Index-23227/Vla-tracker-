@@ -1,0 +1,56 @@
+name: Hy-Embodied-0.5-VLA
+full_name: "Hy-Embodied-0.5-VLA: From Vision-Language-Action Models to a Real-World Robot Learning Stack"
+organization: Tencent Robotics X / Tencent Hy Team
+date: "2026-06-12"
+paper_url: https://arxiv.org/abs/2606.14409
+code_url: https://github.com/Tencent-Hunyuan/Hy-Embodied-0.5-VLA
+venue: null
+open_source: true
+
+architecture:
+  backbone: HY-ViT 2.0 (native-resolution Vision Transformer, distilled from internal teacher)
+  llm: Hy-Embodied-0.5-MoT (4B Mixture-of-Transformers VLM, embodied-pretrained)
+  action_head: "Dual-tower flow-matching action expert (370M independent Transformer, hidden 1024 / FFN 2048) coupled to MoT backbone via shared joint-attention, block-wise causal attention across [vision+language] / [state] / [noisy action] blocks; 10-step forward-Euler integration at inference"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "4B + 370M"
+  key_innovation: "End-to-end VLA stack: (1) Hy-UMI-10K (>10K hours fingertip-UMI human demos with sub-millimetre mocap labels) for pre-training; (2) MoT VLM + flow-matching action expert with compact temporal-spatial memory encoder (token-count-preserving, parameter-free, K=6 frames); (3) delta-chunk rel-EE action representation (10-D per arm: 3-D xyz + 6-D rotation + 1-D gripper) decoupling policy from kinematics; (4) two-track SFT (intra- and cross-embodiment) including UMI-only deployment to JAKA K1 / Astribot S1; (5) FlowPRO — critic-free, reward-free PRO-based offline RL with RPRO loss, proximal regularizer and contrastive gradient cancellation; (6) asynchronous inference with C1-continuous cubic-Bézier chunk stitching."
+
+training:
+  dataset: "Hy-UMI-10K (10K+ hours, 1M+ episodes, 70 tasks across 6 scene families, RGB-D with motion-capture ground-truth poses); SFT data per platform: Dobot X-Trainer (4 tasks, 300 tele-op demos each, 18h total), JAKA K1 (1 task, 300 UMI demos, 1.2h), Astribot S1 (1 task, 200 UMI demos, 1.5h), Unitree G1 (1 task, 400 UMI demos, 2.2h, force-modality); RoboTwin 2.0 (50 tasks, 2.75K episodes, 6M+ frames)"
+  method: "(1) Continued pre-training on Hy-UMI-10K under flow-matching objective (200K steps, batch 1024, lr 5e-5, K=1, 3 views @ 224x320, H=50, 10 Hz); (2) Supervised fine-tuning with K=6 memory frames at 50 Hz, H=50 (real) / H=20 (sim), 60K steps; (3) FlowPRO offline RL post-training with intervention-and-rollback data pipeline and Smooth Interpolation producing dense (s, aw, al) tuples, RPRO loss L_PRO + lambda_SFT * L_SFT with batch mix 80/20 then 70/15/15."
+  compute: "bfloat16 mixed precision, AdamW optimizer"
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_clean: 90.9
+    robotwin_v2_randomized: 90.1
+    source: "Hy-Embodied-0.5-VLA paper (Table 1)"
+    date_reported: "2026-06-12"
+    eval_condition: fine-tuned
+  real_world:
+    dobot_xtrainer_flowpro_bottle: 99.0
+    dobot_xtrainer_flowpro_cap: 99.0
+    dobot_xtrainer_flowpro_usb: 98.0
+    dobot_xtrainer_flowpro_zip: 94.0
+    source: "Hy-Embodied-0.5-VLA paper (Table 2, RPRO, K=3 rounds)"
+    date_reported: "2026-06-12"
+    eval_condition: fine-tuned + FlowPRO
+
+eval_conditions:
+  robotwin_v2: fine-tuned
+  real_world: fine-tuned + FlowPRO RL post-training
+
+inference_hz: 50
+
+tags:
+  - tencent
+  - flow-matching
+  - mixture-of-transformers
+  - umi
+  - cross-embodiment
+  - real-world
+  - offline-rl
+  - preference-optimization
+  - robotwin
+  - open-source
