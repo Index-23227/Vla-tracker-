@@ -1,0 +1,76 @@
+name: ReCAP
+full_name: "ReCAP: Retrieve, Don't Retrain — Extending Vision-Language-Action Models to New Tasks at Test Time"
+organization: "NAVER AI Lab, Korea University"
+date: "2026-06-14"
+paper_url: https://arxiv.org/abs/2606.15631
+code_url: https://recap-robot.github.io
+venue: arXiv 2026
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Cosmos Policy (video-generation-based world-action model, WAM)"
+  llm: "Cross-attention text encoder (from Cosmos Policy backbone)"
+  action_head: "flow matching (residual action latents over retrieved pool action chunk)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "Cosmos Policy backbone (frozen after one-time training)"
+  key_innovation: "Retrieval-Conditioned Action Policy (ReCAP): trains a world-action model (Cosmos Policy) once on paired (target, pool=cheap human-hand/UR5) demonstrations, then freezes it. New tasks are added at test time by simply appending pool-embodiment demonstrations to a retrieval pool — no parameter updates. Action latents are parameterized as a residual over the retrieved pool action chunk (â=a_pool+Δa), so the policy only learns the embodiment-specific correction. WAM's future-image prediction objective provides a visual consistency signal that becomes informative only when paired with retrieval. Retrieval uses a composite descriptor (language embedding + SAM 3 object positions + proprioception) with DINOv3 cosine + L2 distance. 18x cheaper data collection (human-hand vs teleop) and zero per-task fine-tuning."
+
+training:
+  dataset: "PushT cross-embodiment (triangle target + disc pool at ±45°, 100 demos) / RoboTwin 2.0 (Aloha-Agilex target + UR5 pool, 5 paired tasks) / Real-robot (target robot + human-hand video pool, single open-cabinet task)"
+  method: "Joint flow-matching loss on action and future-image latents (L = λ·L_act + L_state); residual action parameterization; retrieved pool chunk prepended along temporal axis as clean latent conditioning"
+  compute: "One-time training only (~24 GPU-hours per task on baseline Cosmos Policy fine-tuning is eliminated for new tasks)"
+
+benchmarks:
+  pusht:
+    cross_embodiment_unseen_angles_avg: 34.9
+    baseline_cosmos_policy: 6.0
+    pi05_with_retrieval: 25.1
+    pi05_no_retrieval: 6.6
+    source: "Paper §5.2, Fig. 5a, Table 2 (seven unseen goal angles, %)"
+    date_reported: "2026-06-14"
+    eval_condition: "cross-embodiment, frozen policy, full retrieval pool"
+  robotwin_v2:
+    seen_tasks_avg: 43.5
+    unseen_tasks_avg: 31.5
+    place_cans_plasticbox: 60.0
+    open_microwave: 12.5
+    pick_dual_bottles: 40.0
+    move_can_pot: 35.0
+    grab_roller: 70.0
+    move_pillbottle_pad: 5.0
+    place_bread_skillet: 12.5
+    click_bell: 47.5
+    hand_over_mic: 47.5
+    lift_pot: 45.0
+    robotwin_v2_avg: 37.5
+    source: "Paper Table 1 (Aloha-Agilex target, UR5 pool, %)"
+    date_reported: "2026-06-14"
+    eval_condition: "5 seen + 5 unseen tasks, frozen policy after one-time training"
+  real_world:
+    close_cabinet: 30.0
+    place_bottle_plastic_box: 80.0
+    open_cabinet_trained: 90.0
+    baseline_close_cabinet: 0.0
+    baseline_place_bottle: 10.0
+    source: "Paper §5.4 Fig. 8b (10 rollouts/task, human-hand pool → robot target)"
+    eval_condition: "real-robot, frozen policy, test-time pool extension with human-hand demos"
+
+eval_conditions:
+  pusht: "frozen policy, test-time pool progression on 7 unseen goal angles"
+  robotwin_v2: "Aloha-Agilex target + UR5 pool; 5 seen + 5 unseen tasks; pool grows 11→17→23→29→35 tasks"
+  real_world: "human-hand video pool with VR wrist tracking, fine-tuned on single open-cabinet task only"
+
+tags:
+  - retrieval-augmented
+  - cross-embodiment
+  - world-action-model
+  - cosmos-policy
+  - flow-matching
+  - test-time-adaptation
+  - frozen-policy
+  - residual-action
+  - human-hand-demos
+  - robotwin
