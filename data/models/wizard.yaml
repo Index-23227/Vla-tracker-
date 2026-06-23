@@ -10,7 +10,7 @@ architecture:
   backbone: "Frozen π0.5 VLA (also evaluated on OpenVLA-OFT as MT-VLA baseline)"
   llm: "Inherited from π0.5"
   action_head: "Frozen π0.5 action expert + on-demand task-specific LoRA adapter generated in a single forward pass by a weight-space meta-network (hyper-network) from language + short demo video; LoRA injected into the frozen VLA backbone"
-  action_head_category: hypernetwork
+  action_head_category: other
   action_space: "continuous 7-DoF; π0.5 native action chunks"
   parameters: "π0.5 backbone (frozen) + meta-network that predicts LoRA tensor (L x 3 x r x H) and per-layer (mu, sigma) scale statistics"
   key_innovation: >

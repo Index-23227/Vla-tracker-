@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T18:07:14.288521",
+  "generated_at": "2026-06-23T01:49:42.696179",
   "num_models": 246,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -1625,7 +1625,7 @@
         "backbone": "PaliGemma-3B-based VLA (SigLIP visual encoder + PaliGemma multimodal projector); initialized from pi0-FAST checkpoint",
         "llm": "PaliGemma-3B (VLM stream hidden size 2048; proprio/action streams hidden size 1024; 18 layers, 8 attention heads, 1 KV head, head dim 256, max position 8192)",
         "action_head": "Joint plan-execute autoregressive action-token decoder over a shared residual-VQ vocabulary; predicts coarse planning tokens as internal prefix, then executable action tokens; only executable tokens decoded into 7-DoF EE actions",
-        "action_head_category": "discrete_tokens",
+        "action_head_category": "autoregressive",
         "parameters": "~3B (PaliGemma-3B backbone)"
       },
       "model_type": null,
@@ -4404,7 +4404,7 @@
         "backbone": "UD-VLA (frozen foresight-driven VLA)",
         "llm": "Emu3 (via frozen UD-VLA)",
         "action_head": "action-only denoising on frozen VLA with fixed future-image subgoal",
-        "action_head_category": "planning_recovery",
+        "action_head_category": "other",
         "parameters": "lightweight selector (Perceiver-style attention + MLP) on top of 3B frozen UD-VLA"
       },
       "model_type": null,
@@ -5834,7 +5834,7 @@
         "backbone": "Qwen2.5-VL-3B (VLM) + Transformer Flow Matching Action Expert (0.69B)",
         "llm": "Qwen2.5-VL-3B",
         "action_head": "Transformer-based Flow Matching Action Expert (~0.69B params); conditioned on Feature Query Token last hidden states via MLP adapter; multi-step denoising for continuous actions",
-        "action_head_category": "flow-matching",
+        "action_head_category": "flow_matching",
         "parameters": "~3B VLM (Qwen2.5-VL-3B) + 0.69B Flow Matching Action Expert; n=20 learnable Feature Query Tokens"
       },
       "model_type": null,
@@ -6407,7 +6407,7 @@
         "backbone": "Frozen π0.5 VLA (also evaluated on OpenVLA-OFT as MT-VLA baseline)",
         "llm": "Inherited from π0.5",
         "action_head": "Frozen π0.5 action expert + on-demand task-specific LoRA adapter generated in a single forward pass by a weight-space meta-network (hyper-network) from language + short demo video; LoRA injected into the frozen VLA backbone",
-        "action_head_category": "hypernetwork",
+        "action_head_category": "other",
         "parameters": "π0.5 backbone (frozen) + meta-network that predicts LoRA tensor (L x 3 x r x H) and per-layer (mu, sigma) scale statistics"
       },
       "model_type": null,
@@ -6835,7 +6835,7 @@
         "backbone": "Qwen3-VL-32B-Instruct (pretrained VLM, used zero-shot via tool calling; no fine-tuning)",
         "llm": "Qwen3-VL-32B-Instruct",
         "action_head": "Task-Parameterized Kernelized Movement Primitives (TP-KMP) with covariance-weighted product-of-Gaussians fusion across object reference frames",
-        "action_head_category": "skill_composition_policy",
+        "action_head_category": "other",
         "parameters": "VLM ~32B (frozen); per-skill TP-KMP with N local reference distributions per frame, trained from 2-5 kinesthetic demonstrations"
       },
       "model_type": null,
