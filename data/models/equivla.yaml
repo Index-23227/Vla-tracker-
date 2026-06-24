@@ -1,33 +1,38 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: EquiVLA: A General Framework for Rotationally Equivariant Vision-Language-Action Models
 # arXiv: 2606.19784
 
 name: EquiVLA
 full_name: "EquiVLA: A General Framework for Rotationally Equivariant Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "VinRobotics / VinUniversity / DFKI"
 date: "2026-06-18"
 paper_url: https://arxiv.org/abs/2606.19784
-code_url: null  # TODO: check for GitHub repo
+code_url: https://equivla.github.io/
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_head: "SO(2)-equivariant flow-matching Diffusion Transformer (EquiActor)"
+  action_head_category: flow_matching
+  parameters: "~3B (GR00T N1.5 backbone)"
+  key_innovation: "End-to-end SO(2)-equivariant VLA via two modules: EquiPerceptor (token-level Frame Averaging on frozen ViT patch tokens for approximate equivariance) and EquiActor (exactly SO(2)-equivariant flow-matching DiT action head with steerable layers). Establishes equivariance chain from camera observations to actions without modifying pretrained VLM weights."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_10: 87.6
+    libero_goal: 89.4
+    libero_object: 98.0
+    libero_spatial: 95.4
+    libero_avg: 92.6
+    eval_condition: "fine-tuned, relative control"
+    source: "Table 1 (paper)"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_avg_len: 4.03
+    calvin_avg: 4.03
+    eval_condition: "fine-tuned, ABCD->D, single-frame"
+    source: "Table 2 (paper)"
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero: "fine-tuned, relative control"
+  calvin: "fine-tuned, ABCD->D, single-frame"
 
-tags: [libero, calvin]
+tags: [libero, calvin, equivariant, flow-matching, so2, gr00t]

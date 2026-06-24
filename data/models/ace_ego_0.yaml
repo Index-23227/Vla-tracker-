@@ -1,31 +1,34 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: ACE-Ego-0: Unifying Egocentric Human and Robotic Data for VLA Pretraining
 # arXiv: 2606.17200
 
 name: ACE-Ego-0
 full_name: "ACE-Ego-0: Unifying Egocentric Human and Robotic Data for VLA Pretraining"
-organization: "TODO: check paper"
+organization: "ACE Robotics / CUHK MMLab"
 date: "2026-06-15"
 paper_url: https://arxiv.org/abs/2606.17200
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/ACERobotics-VLA/ACE-Ego
+venue: arXiv
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_head: "Flow-matching Diffusion Transformer (DiT, 36 layers, 1024 hidden, 16 heads) conditioned on Qwen3-VL-4B-Instruct backbone and morphology tokens; 4 inference flow-matching steps"
+  action_head_category: flow_matching
+  parameters: "~4.6B (Qwen3-VL-4B VLM + ~600M action expert)"
+  key_innovation: "Unified VLA pretraining over 6.0K+ hours of heterogeneous data (4.53K robot/sim + 1.48K pseudo-action-labeled egocentric human video). Aligns sources via (1) canonical camera-space action representation, (2) cross-embodiment morphology conditioning (URDF graph encoder + learned human surrogates), and (3) time-aligned action chunking by physical timestamps. Introduces a reliability-aware training objective with a human auxiliary loss on position channels, modulated by dataset/step-level quality, so noisy pseudo-actions complement (not corrupt) the primary flow-matching robot loss."
 
 benchmarks:
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+  robotwin_v2:
+    robotwin_v2_easy: 91.12
+    robotwin_v2_hard: 90.62
+    robotwin_v2_avg: 90.87
+    source: "Table 4 (paper)"
   robocasa:
-    robocasa_avg: TODO
+    robocasa_gr1_tabletop_avg: 72.8
+    robocasa_avg: 72.8
+    source: "Table 3 (paper, 24 tasks, 50 rollouts each)"
 
 eval_conditions:
-  robotwin: "fine-tuned"
-  robocasa: "fine-tuned"
+  robotwin_v2: "fine-tuned (2,500 clean + 25,000 randomized demos)"
+  robocasa: "fine-tuned (24 tasks, 1,000 episodes each, GR1 humanoid)"
 
-tags: [robotwin, robocasa]
+tags: [flow_matching, robotwin, robocasa, egocentric_human_video, morphology_conditioning, qwen3_vl, dit]

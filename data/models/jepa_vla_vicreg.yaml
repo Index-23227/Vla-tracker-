@@ -1,0 +1,90 @@
+# Paper: Output-Level Regularization Eliminates the Seed Lottery in Single-GPU VLA Fine-Tuning
+# arXiv: 2606.13856
+
+name: JEPA-VLA-VICReg
+full_name: "Output-Level Regularization Eliminates the Seed Lottery in Single-GPU VLA Fine-Tuning (VICReg-regularized JEPA-VLA)"
+organization: "Skolkovo Institute of Science and Technology (Skoltech)"
+date: "2026-06-11"
+paper_url: https://arxiv.org/abs/2606.13856
+code_url: null
+venue: "CoRL 2026"
+open_source: false
+
+architecture:
+  backbone: "V-JEPA2 ViT-L/16 video encoder (frozen, T=4-8 frames, P=256 patches, D=2048) + Qwen3-VL-2B as VLM (frozen, eager attention). Both backbones are kept frozen on single-RTX-5090 hardware -- the structural condition that makes the seed lottery emergent."
+  llm: "Qwen3-VL-2B (frozen)"
+  action_head: "16-layer Diffusion Transformer (DiT) action head trained via straight-path flow matching, H=7 action chunk horizon, 7-DoF (delta-EE position + rotation + gripper). Companion ACPredictor (12-layer Transformer, RoPE, dmodel=1024) predicts future V-JEPA2 patch embeddings z_T as a world-model loss (Lwm = L1 to stop-gradient targets). Patch-level VICReg variance + covariance regularization is applied on the predicted latents z_hat (N=768 spatial-temporal patches treated as the sample axis), allowing B=1 stable training. Dropout p=0.1 is applied to ACPredictor and FlowMatchingActionHead in the Dropout variant; LowLR variant halves both learning rates (5e-6, 1.5e-5) with no other changes."
+  action_head_category: flow_matching
+  action_space: "7-DoF end-effector action chunk, horizon H=7, straight-path flow matching"
+  parameters: "Trainable: ACPredictor (12-layer Transformer, dmodel=1024) + FlowMatching ActionHead (16-layer DiT) only. Frozen: V-JEPA2 ViT-L/16 + Qwen3-VL-2B. Total frozen-backbone footprint dominates parameter count; trainable portion remains in the small-VLA regime suitable for single-GPU fine-tuning."
+  key_innovation: >
+    Identifies, quantifies (n=13 seeds, 3 LIBERO suites), and *mechanistically explains* the "seed lottery" in
+    single-GPU VLA fine-tuning: unregularized baseline produces a 29 pp bimodal Object SR spread
+    (65.2%-94.2%, one seed in thirteen silently collapses) because under a frozen encoder the trainable
+    action-predictor Jacobian J = d g_theta / d theta is rank-deficient, leaving an output-inert null-space
+    where weight-level penalties (L2, EWC) spend their budget without affecting behavior. Proposes the
+    Output-vs-Weight regularizer taxonomy and three output-level recipes that each eliminate every
+    catastrophic seed: (1) patch-level VICReg variance + covariance on predicted z_hat (B=1 safe via
+    spatial-temporal patches as samples), (2) Dropout p=0.1 on the trainable modules, (3) LowLR
+    (halve learning rates). The EWC paradox -- smallest weight drift (7.8) yet 65.8% Object SR vs.
+    VICReg drift 40.2 / 92.7% SR -- demonstrates parameter-space proximity is structurally blind to
+    output-space collapse. Headline VICReg variant achieves tightest cross-seed std (1.4%, n=12) on
+    LIBERO-Object with a theoretical variance floor.
+
+training:
+  base_model: "VLA-JEPA (He et al., 2026) pretrained on LIBERO at 8xA100 (~30k steps, 96.4% Spatial SR)"
+  method: "Single-GPU fine-tuning with frozen V-JEPA2 + Qwen3-VL-2B. Total loss L = L_act (flow matching) + lambda_wm (L_wm + lambda_var * L_var + lambda_cov * L_cov). lambda_var=1.0, lambda_cov=0.04, gamma=1.0; VICReg invariance term omitted because predictions should vary with observations. Patch-level VICReg reshapes z_hat to (N=768, D=2048) and applies variance + covariance across N -- the spatial-temporal patch dimension serves as the sample axis, enabling B=1 stable fine-tuning."
+  optimizer: "AdamW. Default LR (Baseline / VICReg / Dropout / weight-level): 1e-5 (ACPredictor) and 3e-5 (ActionHead). LowLR variant: 5e-6 and 1.5e-5 (halved). VICReg: 4k steps; other methods: 5k steps. Gradient checkpointing enabled."
+  batch_size: "B=1 (single-GPU constraint; B=1 stability validated empirically -- cross-seed std 1.4% n=12, drift 40.23+/-0.005 n=3)"
+  hardware: "1x NVIDIA RTX 5090 32 GB (single-GPU academic-lab budget; gradient checkpointing required)"
+  training_data: "All 4 LIBERO suites jointly (~1693 episodes, LeRobot v2.1 format, AV1 256x256 video)"
+  seeds: "Baseline n=9-13 per suite; VICReg n=9-12 (12 on Object); Dropout n=3-4; LowLR n=5 on Object; EWC n=1 per suite (n=4 on Object); L2 n=1"
+  budget: "4k-5k optimizer steps"
+
+benchmarks:
+  libero:
+    libero_spatial: 94.9
+    libero_object: 92.7
+    libero_goal: 93.6
+    libero_10: 10.0
+    libero_avg: 72.80
+    libero_spatial_best_recipe: 95.4
+    libero_spatial_best_recipe_method: "Dropout p=0.1 (n=3-4)"
+    libero_object_best_recipe: 94.5
+    libero_object_best_recipe_method: "LowLR (halved LRs, n=5)"
+    libero_goal_best_recipe: 93.6
+    libero_goal_best_recipe_method: "VICReg patch-level (n=12)"
+    baseline_object_std: 7.5
+    vicreg_object_std: 1.4
+    baseline_object_collapsed_seed_sr: 65.2
+    vla_jepa_pretrained_spatial: 96.4
+    vla_jepa_pretrained_object: 78.0
+    vla_jepa_pretrained_goal: 82.0
+    source: "Paper Table 1 (multi-seed block; VICReg row, n=9-12). libero_avg averages Spatial 94.9 + Object 92.7 + Goal 93.6 + libero_10 marker 10.0 (paper does not run LIBERO-Long/10; user-supplied placeholder). Best-recipe rows from Table 3 ablation."
+    date_reported: "2026-06-11"
+    eval_condition: "single-GPU fine-tuned from VLA-JEPA pretrained checkpoint; closed-loop LIBERO (500 episodes per suite, 10 tasks x 50 trials); LeRobot v2.1 evaluation; mean +/- population std across multi-seed runs"
+
+eval_conditions:
+  libero: "Closed-loop evaluation, 500 episodes per suite (10 tasks x 50 trials per suite) on Spatial / Object / Goal. Multi-seed primary numbers reported as mean +/- population std. Joint 4-suite training (~1693 LIBERO episodes) on a single RTX 5090 32 GB; gradient checkpointing required. Frozen V-JEPA2 ViT-L/16 + Qwen3-VL-2B backbones."
+
+tags:
+  - vla
+  - fine-tuning
+  - regularization
+  - vicreg
+  - dropout
+  - low-learning-rate
+  - jepa
+  - v-jepa2
+  - qwen3-vl
+  - flow-matching
+  - action-head
+  - seed-lottery
+  - reproducibility
+  - single-gpu
+  - frozen-encoder
+  - jacobian-null-space
+  - output-level-regularization
+  - libero
+  - corl-2026
+  - skoltech

@@ -1,0 +1,100 @@
+name: Qwen-RobotManip
+full_name: "Qwen-RobotManip Technical Report: Alignment Unlocks Scale for Robotic Manipulation Foundation Models"
+organization: "Qwen Team, Alibaba Inc."
+date: "2026-06-18"
+paper_url: https://arxiv.org/abs/2606.17846
+code_url: https://github.com/QwenLM/Qwen-RobotManip
+venue: null
+open_source: true
+
+architecture:
+  backbone: "Qwen3.5-4B (vision-language)"
+  llm: "Qwen3.5-4B"
+  action_head: "Diffusion Transformer (DiT) flow-matching action expert (10 blocks, hidden=768, 12 heads)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~4B+"
+  key_innovation: >
+    Alignment-first VLA foundation model: (1) 80-D canonical cross-embodiment state-action representation
+    with per-dimension binary masking, (2) camera-frame delta-pose action representation grounding actions
+    in the visual domain via Camera Positional Encoding (CaPE) for cross-embodiment transfer, and (3)
+    in-context policy adaptation using intra-episode execution history (observation-action chunks) as an
+    implicit embodiment identifier. Dual-stream VLA + VL co-training preserves the VLM backbone's perception
+    and reasoning. Decoupled Qwen-VL backbone + flow-matching DiT action expert with alternating
+    vision/language cross-attention; trained with flow-matching loss on Beta(1, 1.5) timesteps and 4-step
+    Euler integration at inference.
+
+training:
+  dataset: >
+    ~38,100 hours of manipulation data: robot demonstrations (OXE, RoboMIND, DROID, RH20T,
+    AgibotWorld-Beta, RoboCOIN, RDT-1B, InternData-A1, Galaxea Open-World ~11,420h), egocentric human
+    videos (EgoDex, VITRA, EgoVerse ~1,933h), and human-to-robot synthesized data rendered across 15
+    bimanual robot platforms (~24,808h). Five-stage signal curation (sudden change, trend alignment,
+    extreme values, FK consistency, base/orientation alignment) plus three cross-modal checks
+    (instruction consistency, video-state consistency, video quality). Co-trained with ~28M vision-language
+    samples including embodied chain-of-thought (ECoT), egocentric video understanding, and 2D trajectory
+    prediction.
+  method: "Multi-source cross-embodiment pretraining with dual-stream VLA + VL co-training, flow-matching action head, in-context policy adaptation"
+
+benchmarks:
+  libero:
+    libero_avg: 99.2
+    source: "Qwen-RobotManip paper Table 3 (Qwen-RobotManip-Context)"
+    date_reported: "2026-06-18"
+    eval_condition: "fine-tuned"
+  robotwin_v1:
+    robotwin_easy: 93.7
+    robotwin_hard: 94.0
+    robotwin_v1_avg: 93.85
+    source: "Qwen-RobotManip paper Table 3 (Qwen-RobotManip-Context)"
+    date_reported: "2026-06-18"
+    eval_condition: "fine-tuned"
+  robocasa:
+    robocasa365_atomic: 68.6
+    robocasa365_composite_seen: 20.1
+    robocasa365_composite_unseen: 14.9
+    robocasa_avg: 35.9
+    source: "Qwen-RobotManip paper Table 6 (RoboCasa365)"
+    date_reported: "2026-06-18"
+    eval_condition: "fine-tuned"
+  real_world:
+    robotwin_xe_eef_avg: 23.9
+    robotwin_xe_arx_x5: 42.9
+    robotwin_xe_ur5_wsg: 22.8
+    robotwin_xe_franka: 5.9
+    libero_plus_total: 91.4
+    robotwin_c2r_hard_joint: 69.4
+    ebench_overall_sr: 45.6
+    robotwin_if_avg: 72.2
+    source: "Qwen-RobotManip paper Tables 4, 5, 7, 8, 9 (Context/non-Context as applicable)"
+    date_reported: "2026-06-18"
+    eval_condition: "fine-tuned + OOD / zero-shot cross-embodiment"
+
+eval_conditions:
+  libero: "fine-tuned"
+  robotwin_v1: "fine-tuned"
+  robocasa: "fine-tuned (RoboCasa365)"
+  libero_plus: "OOD (LIBERO-Plus, 7 perturbations)"
+  robotwin_c2r: "OOD (RoboTwin-Clean2Rand)"
+  ebench: "fine-tuned (Isaac Sim dual-arm mobile)"
+  robotwin_if: "instruction-following with held-out templates"
+  robotwin_xe: "zero-shot cross-embodiment transfer"
+  real_world: "ALOHA / Franka / UR / ARX in-domain + OOD + few-shot"
+
+tags:
+  - flow-matching
+  - DiT
+  - cross-embodiment
+  - alignment
+  - camera-frame-action
+  - in-context-adaptation
+  - qwen
+  - manipulation
+  - libero
+  - robotwin
+  - robocasa
+  - ebench
+  - libero-plus
+  - ood-generalization
+  - real-world
+  - open-source

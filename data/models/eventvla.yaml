@@ -1,0 +1,38 @@
+name: EventVLA
+full_name: 'EventVLA: Event-Driven Visual Evidence Memory for Long-Horizon Vision-Language-Action Policies'
+organization: USTC / Shanghai AI Lab / SJTU / HKU / Tsinghua / PKU / Huawei
+date: '2026-06-18'
+paper_url: https://arxiv.org/abs/2606.20092
+venue: arXiv 2026
+open_source: false
+architecture:
+  backbone: QwenOFT (Qwen-based StarVLA OFT backbone)
+  llm: Qwen3-VL family
+  action_head: continuous action regression/flow-matching head with parallel Keyframe Evidence Memory (KEM) prediction head
+  action_head_category: regression
+key_innovation: 'End-to-end sparse visual evidence memory combining foundational visual anchors (initial frame + short-term window)
+  with a Keyframe Evidence Memory (KEM) module. KEM is a lightweight prediction head on the VLA''s final-layer hidden states that
+  forecasts chunk-wise future keyframe probabilities, proactively committing transient task-critical observations to a bounded FIFO
+  event buffer via thresholding, 1D NMS and temporal cooldown. Trained with raised-cosine soft labels + BCE loss + teacher-to-student
+  curriculum and supervised by an offline Qwen3-VL-235B automated keyframe annotation pipeline.
+
+  '
+benchmarks:
+  robotwin_v2:
+    robotwin_mem_avg: 75.2
+    robotwin_2_easy: 83.8
+    robotwin_2_hard: 81.6
+    source: paper Tables 2-3
+    eval_condition: trained from QwenOFT backbone
+eval_conditions:
+  robotwin_v2: fine-tuned
+tags:
+- memory
+- event-driven
+- keyframe
+- long-horizon
+- non-Markovian
+- RoboTwin-MeM
+- bimanual
+- real-world
+- arXiv-2026

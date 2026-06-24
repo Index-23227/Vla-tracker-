@@ -1,0 +1,34 @@
+name: FrozenGraft
+full_name: "Encoder Winners Do Not Reliably Transfer Across VLA Backbone Scale: A Frozen-Backbone Grafting Diagnostic"
+organization: "Tsinghua University"
+date: "2026-06-12"
+paper_url: https://arxiv.org/abs/2606.14153
+code_url: null
+venue: null
+open_source: true
+
+architecture:
+  backbone: "Grafted vision tower (SigLIP base/16, DINOv2-small, FastViT-SA12, or RepViT-M1; native towers are SmolVLM SigLIP-base and PaliGemma SigLIP-So400m)"
+  llm: "SmolVLM-500M LM (in SmolVLA-450M backbone) or PaliGemma Gemma-3B expert (in pi0.5-3.3B backbone), both frozen"
+  action_head: "Frozen native action expert of the host backbone (SmolVLA SO-100 head or pi0.5 flow-matching expert); only a 0.37M-1.58M LayerNorm + linear projector after deterministic 8x8 / 16x16 AdaptiveAvgPool is trained for 2,000 steps"
+  action_head_category: flow_matching
+  parameters: "450M (SmolVLA host) or 3.3B (pi0.5 host); trainable parameters per graft: 0.37M-1.58M projector only"
+  key_innovation: "Frozen-backbone grafting harness that swaps the vision tower of a released VLA in-place via a monkey-patched single visual entry point. Uses AdaptiveAvgPool to a fixed token grid (8x8 = 64 tokens for SmolVLA, 16x16 = 256 tokens for pi0.5), LayerNorm, and a single trainable linear projector to the backbone hidden size (960 or 2048). Language model, action expert and original vision tower remain frozen, isolating the encoder-quality axis from LM-encoder co-adaptation. The 40-cell main grid (4 encoders x 2 LIBERO suites x 2 backbones x 2-3 seeds) plus native, LoRA, pooling and zero/shuffled-image controls demonstrate that small-backbone encoder winners (SigLIP on SmolVLA-450M) do not reliably transfer to a larger backbone (DINOv2-small wins pi0.5-3.3B spatial; pi0.5-object is a 2.7%-relative near-tie band)."
+
+benchmarks:
+  libero:
+    note: "Closed-loop LIBERO success rate is not reported. The released SmolVLA and pi0.5 checkpoints were trained on SO-100 demonstrations, which disagree with the LIBERO Franka action space, so native closed-loop success is approximately 0 for both native and grafted variants. The paper reports offline action MSE only on libero_spatial and libero_object."
+    libero_spatial_val_mse_best: "SmolVLA+SigLIP 0.0706 (n=3); pi0.5+DINOv2 0.0256 (n=3)"
+    libero_object_val_mse_best: "SmolVLA+SigLIP 0.0628 (n=3); pi0.5+SigLIP 0.0215 (n=3, near-tie with DINOv2 0.0217 and FastViT 0.0221)"
+    source: "Table 1"
+    eval_condition: "offline action MSE on LeRobot libero_{spatial,object}_image held-out episode split (24,913 train / 6,457 val windows per suite); no closed-loop rollout"
+
+training:
+  datasets: ["LeRobot lerobot/libero_spatial_image", "LeRobot lerobot/libero_object_image"]
+  method: "Projector-only supervised training (P1 protocol): AdamW (lr 1e-4, weight decay 1e-4, beta=(0.9,0.999)), no LR schedule, BF16, 2,000 optimizer steps per cell. SmolVLA uses batch size 8 on a single GPU; pi0.5 uses micro-batch 2 with 4-step gradient accumulation (effective batch 8). Episode-split validation. Each (encoder, suite) is repeated with 3 seeds {42,43,44} for SigLIP/DINOv2 cells or 2 seeds {42,43} for FastViT/RepViT cells (40 runs total). Additional P2 LoRA ablation (rank-8 inside encoder), pooling sensitivity (AvgPool vs AttnPool vs Perceiver), native anchor and zero-/shuffled-image controls."
+  compute: "Single NVIDIA DGX Spark GB10 workstation, 128 GB unified memory, one Blackwell GPU per process. ~9 minutes per SmolVLA cell (peak 1.85 GB), ~5 hours per pi0.5 cell (peak 14.7 GB); full 40-cell main matrix ~103 GPU-hours."
+
+eval_conditions:
+  libero: "offline action MSE (no closed-loop success)"
+
+tags: [diagnostic, grafting, encoder_ablation, frozen_backbone, libero, smolvla, pi0_5, siglip, dinov2, fastvit, repvit, projector_only, offline_mse, open_source]

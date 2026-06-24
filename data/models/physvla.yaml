@@ -1,0 +1,33 @@
+name: PhysVLA
+full_name: "PhysVLA: Towards Physically-Grounded VLA for Embodied Robotic Manipulation"
+organization: "IIT Madras; EmPACT Lab, Nanyang Technological University"
+date: "2026-06-11"
+paper_url: https://arxiv.org/abs/2606.13886
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Plug-and-play wrapper around any frozen VLA backbone (validated on OpenVLA, OpenVLA-OFT, Force-VLA, Generalist-VLA)"
+  llm: "N/A (inference-time corrector; uses backbone's own LLM/VLM)"
+  action_head: "Inference-time two-branch corrector applied to the backbone's 7-DoF action vector: (A) phase-aware finite-state machine (approach/grasp/transport/place) and (B) selective Euler-Lagrange dynamics gate (fires only when ||r_EL|| > epsilon)"
+  action_head_category: other
+  parameters: "0 trainable parameters (training-free); <1 ms per control step overhead"
+  key_innovation: "Physics-grounded plug-and-play inference-time correction layer that wraps any frozen VLA without retraining, fine-tuning, or weight access. Combines a phase-aware FSM (approach/grasp/transport/place rules) with a selective Euler-Lagrange residual gate that only fires when the proposed action is kinodynamically inconsistent. A global 5% capped blender ensures physics refines rather than replaces the policy. Achieves up to +17pp absolute success on LIBERO-Spatial and ~10x jerk robustness on Robosuite Lift across four heterogeneous VLA backbones with no per-task hyperparameter tuning."
+
+benchmarks:
+  libero:
+    libero_spatial: 53.0
+    libero_avg: 53.0
+    source: "Table 3 (PhysVLA on OpenVLA backbone, LIBERO-Spatial aggregate, 5 trials per task at seed 7)"
+    eval_condition: "inference-time correction on frozen OpenVLA (no retraining); OpenVLA-OFT variant reaches 95.0 LIBERO-Spatial"
+    notes: "Score 10.0 keyword in scan refers to ~10x jerk robustness ratio (Sec. 4.2.1) and up to 10x smoother executions on real Agilex Piper hardware; LIBERO-Spatial absolute success rate for OpenVLA+PhysVLA is 53%, OpenVLA-OFT+PhysVLA is 95%, Force-VLA+PhysVLA is 53%, Generalist-VLA+PhysVLA is 50%."
+
+training:
+  datasets: []
+  method: "Training-free. No weight updates; PhysVLA operates purely at inference time by reading MuJoCo simulator state and applying phase-rule + Euler-Lagrange corrections to the backbone's predicted 7-DoF action."
+
+eval_conditions:
+  libero: "frozen backbone + inference-time PhysVLA corrector"
+
+tags: [physics_informed, training_free, inference_time, plug_and_play, libero, libero_spatial, finite_state_machine, euler_lagrange, real_world]

@@ -1,0 +1,105 @@
+name: Mix-QVLA
+full_name: "Mix-QVLA: Task-Evidence-Aware Mixed-Precision Quantization of Vision-Language-Action Models"
+organization: "Rochester Institute of Technology"
+date: '2026-06-17'
+paper_url: https://arxiv.org/abs/2606.19565
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "OpenVLA (7B) and OpenVLA-OFT (autoregressive VLA), quantized via mixed-precision PTQ"
+  llm: "Llama-2-7B (within OpenVLA), quantized layer-wise to 2/4/8/16 bits"
+  action_head: >-
+    Autoregressive discrete action-token decoder (inherited from OpenVLA / OpenVLA-OFT).
+    The action head is one of the four functional boundaries that Mix-QVLA evaluates
+    for task-evidence preservation when assigning per-layer bit-widths.
+  action_head_category: autoregressive
+  action_space: "discrete autoregressive action tokens (mapped to continuous translation/rotation/gripper via Da)"
+  parameters: "~7B (OpenVLA-style backbone, quantized; static memory 4.0-4.1 GB at W4A4)"
+  key_innovation: >-
+    Task-Evidence-Aware mixed-precision PTQ. Instead of relying only on final
+    action deviation (QVLA) or kinematic proxies (DyQ-VLA), Mix-QVLA anchors
+    each quantized variant to the full-precision action-token reference decision
+    and measures evidence preservation at four functional VLA boundaries (vision
+    encoder, vision-language projector, language-policy / LLM module, pre-action
+    head). It builds normalized gradient-weighted task-evidence maps E = Z * dJ/dZ
+    at each boundary, then compares full-precision vs. quantized maps with
+    (i) evidence-mass distortion (log-ratio of mean evidence) and (ii)
+    attribution distortion (Jensen-Shannon divergence over normalized evidence
+    profiles). A soft-bottleneck log-sum-exp (kappa=0.1) aggregates boundary
+    losses into a layer sensitivity score Omega(m,b). A complementary temporal
+    score Omega_tau(m,b) takes the max over Q phase-wise bins of normalized
+    trajectory progress, capturing phase-dependent layer fragility. Bit-widths
+    over B={2,4,8,16} are then assigned by a binary linear program (solved with
+    CVXPY ECOS_BB) that minimises alpha*Omega + beta*Omega_tau subject to
+    model-size and BitOps budgets. Best mix is alpha=0.75, beta=0.25.
+
+training:
+  base_model: "OpenVLA and OpenVLA-OFT (BF16 pretrained checkpoints, frozen)"
+  method: "Post-training quantization (PTQ); no fine-tuning. Calibration from LIBERO training demonstrations with RGB, robot state, instruction, trajectory timestep."
+  hardware: "Single NVIDIA A100 GPU"
+  bit_candidates: "{2, 4, 8, 16}"
+  allocation_solver: "CVXPY ECOS_BB branch-and-bound (binary linear program)"
+  hyperparameters:
+    soft_bottleneck_kappa: 0.1
+    evidence_mass_attribution_lambda: 1.0
+    alpha_task_evidence: 0.75
+    beta_temporal: 0.25
+
+benchmarks:
+  libero:
+    libero_spatial: 96.8
+    libero_object: 97.8
+    libero_goal: 96.4
+    libero_long: 94.0
+    libero_avg: 96.3
+    source: "Table 1, Mix-QVLA paper (OpenVLA-OFT, W4A4)"
+    date_reported: '2026-06-17'
+    eval_condition: "OpenVLA-OFT backbone, W4A4 mixed precision; BF16 baseline 97.1%"
+
+efficiency:
+  openvla_oft_w4a4:
+    memory_gb: 4.1
+    speedup: 1.52
+    bf16_memory_gb: 15.4
+    libero_avg: 96.3
+    bf16_libero_avg: 97.1
+  openvla_w4a4:
+    memory_gb: 4.0
+    speedup: 1.52
+    bf16_memory_gb: 15.2
+    libero_avg: 76.3
+    bf16_libero_avg: 76.5
+  openvla_oft_w8a8:
+    memory_gb: 6.7
+    speedup: 1.39
+    libero_avg: 96.6
+  openvla_w4a16_weight_only:
+    memory_gb: 4.1
+    libero_avg: 76.6
+  openvla_oft_w4a16_weight_only:
+    memory_gb: 4.2
+    libero_avg: 96.9
+
+ablation:
+  bf16_baseline_avg: 76.5
+  action_only_avg: 76.0
+  evidence_only_avg: 75.9
+  temporal_only_avg: 75.6
+  evidence_plus_temporal_avg: 76.3
+  source: "Table 3, Mix-QVLA paper (OpenVLA, ~4 bit average precision)"
+
+eval_conditions:
+  libero: "OpenVLA-style policy (OpenVLA and OpenVLA-OFT), single A100, PTQ with LIBERO calibration"
+
+tags:
+- libero
+- quantization
+- mixed-precision
+- ptq
+- w4a4
+- openvla
+- openvla-oft
+- task-evidence
+- autoregressive

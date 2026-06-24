@@ -1,0 +1,49 @@
+# Paper: X-Tokenizer: A Multimodal Action Tokenizer for Vision-Language-Action Pretraining
+# arXiv: 2606.14752
+
+name: X-Tokenizer
+full_name: "X-Tokenizer: A Multimodal Action Tokenizer for Vision-Language-Action Pretraining (Wall-OSS + X-Tokenizer)"
+organization: "X Square Robot / Tsinghua University / CityU HK"
+date: "2026-06-07"
+paper_url: https://arxiv.org/abs/2606.14752
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "Qwen2.5-VL (3B / 7B depending on setting)"
+  llm: "Qwen2.5-VL backbone"
+  action_head: "Mixed discrete-continuous VLA: frozen X-Tokenizer (Encoder-SRQ-Decoder, 4-level Residual VQ with Masked Action Modeling on top level) provides autoregressive discrete supervision; a continuous Flow Matching expert (inherited from Wall-OSS) regresses executable action chunks from the shared VLM hidden states"
+  action_space: continuous
+  parameters: "~3B (Wall-OSS Qwen2.5-VL-3B backbone + Flow Matching expert; X-Tokenizer is a lightweight frozen offline encoder, removed at inference)"
+  key_innovation: "Reformulates action tokenization as *semantic interface learning* between VLM reasoning and continuous control. Semantic Residual Quantization (SRQ) imposes asymmetric supervision on RVQ: top-level codebook is trained with Masked Action Modeling (BERT-style) to form a discrete action language for coarse motion intent, while deeper RVQ levels remain reconstruction-oriented residuals. Two extra pretraining heads inject multimodal semantics: contrastive alignment to frozen Qwen2.5-VL-7B features, and next-frame VL feature prediction. Pretrained on 2.4M trajectories / 2.0B frames across 17 arm families; auxiliary heads are removed at deployment so the policy uses only the encoder-SRQ-decoder core (and at inference, X-Tokenizer is dropped entirely - it only supervised pretraining)."
+  action_head_category: hybrid
+
+training:
+  dataset: "X-Tokenizer pretrain corpus: 2.4M trajectories / 2.0B action frames across 17 robotic arm families (Open X-Embodiment, DROID, RoboTwin 2.0 sim, internal X Square data). Downstream RoboTwin 2.0 fine-tune: 50 Clean + 500 Randomized demos per task across 50 dual-arm tasks (~27.5k trajectories). Real-world: ~3.5k teleoperated trajectories on 7 tabletop tasks + ~480k multimodal grounding samples (25% of each batch)."
+  method: "Two-stage. Stage 1 (X-Tokenizer pretraining): joint loss L_rec + lambda_mam*L_mam + lambda_align*L_align + lambda_pred*L_pred. Stage 2 (downstream): attach frozen X-Tokenizer to released Wall-OSS checkpoint, fine-tune full system 70k steps, batch 128, AdamW lr 5e-5, cosine schedule."
+  compute: "Proprietary (X Square Robot)"
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_easy: 84.7
+    robotwin_v2_hard: 80.88
+    robotwin_v2_avg: 82.79
+    source: "Appendix Table 6 (per-task averages over 50 dual-arm tasks, 100 rollouts each; Wall-OSS + X-Tokenizer)"
+    date_reported: "2026-06-07"
+    eval_condition: "fine-tuned (50 Clean + 500 Randomized demos per task, 70k fine-tune steps from released Wall-OSS checkpoint)"
+
+eval_conditions:
+  robotwin_v2: "fine-tuned on RoboTwin 2.0 (50 tasks x [50 Clean + 500 Randomized] demos), evaluated with 100 rollouts per task per protocol (Easy = Clean, Hard = Randomized with strong domain randomization)"
+
+tags:
+  - hybrid
+  - action_tokenizer
+  - residual_vq
+  - masked_action_modeling
+  - flow_matching
+  - wall_oss
+  - qwen2_5_vl
+  - robotwin
+  - cross_embodiment
+  - semantic_interface

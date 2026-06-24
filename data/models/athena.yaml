@@ -1,0 +1,38 @@
+# Paper: ATHENA: Accelerated Multi-Task Heterogeneous Influence Functions for Robot Data Curation
+# arXiv: 2606.16208
+
+name: ATHENA
+full_name: "ATHENA: Accelerated Multi-Task Heterogeneous Influence Functions for Robot Data Curation"
+organization: "Tongji University / Shanghai Innovation Institute / Xi'an Jiaotong University / Shanghai Jiao Tong University"
+date: "2026-06-15"
+paper_url: https://arxiv.org/abs/2606.16208
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "PaliGemma (via pi0 base VLA)"
+  llm: "Gemma 2B (via pi0)"
+  action_head: "Flow-matching action expert (pi0) trained on ATHENA-curated demonstrations selected via Kronecker-compressed gradient influence + Random Truncated Approximation (RTA) + Multitask Influence Interaction (MII)"
+  action_head_category: flow_matching
+  parameters: "~3.3B (pi0 base; ATHENA itself is a data curation framework, not new policy params)"
+  key_innovation: "Influence-function data curation framework for billion-parameter multitask VLA fine-tuning. (1) Kronecker-compressed per-sample gradient featurization reduces projection cost from O(DP) to O(sqrt(DP)) by exploiting linear-layer outer-product gradient structure. (2) Rank-r Random Truncated Approximation (RTA) of the projected Gauss-Newton matrix lowers cost from O(NP^2 + P^3) to O(NPr), yielding a 313.4x total speedup (8054.6 -> 25.7 GPU-hours). (3) Multitask Influence Interaction (MII) combines normalized local (task-c) and cross-task (all-c) influence ranks via product score f_i^MII = u_i^c * u_i^{all-c}, preventing greedy task imbalance across 50 jointly trained tasks."
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_clean: 43.36
+    robotwin_v2_randomized: 17.30
+    robotwin_v2_avg: 30.33
+    source: "Section 5.2.1 (paper, ATHENA 50%-data joint fine-tune on RoboTwin 2.0 demo_clean, 50 tasks)"
+    date_reported: "2026-06-15"
+    eval_condition: "joint fine-tune from pi0 on ATHENA-curated 50% subset of 2500 demos across 50 RoboTwin 2.0 tasks; evaluated under clean and randomized generalization settings"
+
+eval_conditions:
+  robotwin_v2: "ATHENA-curated 50% subset of RoboTwin 2.0 demo_clean (2500 demos, 50 tasks, 9.34h at 16.67Hz); pi0 joint fine-tuning, 50K steps; mean of 50-task success rate; matches full-data joint training (43.42% clean / 15.44% randomized) while halving data"
+
+tags:
+  - flow_matching
+  - robotwin
+  - data_curation
+  - influence_functions
+  - pi0
+  - multitask

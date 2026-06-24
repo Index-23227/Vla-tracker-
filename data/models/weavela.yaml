@@ -1,0 +1,44 @@
+name: WeaveLA
+full_name: 'WeaveLA: Event Driven Cross-Subtask Latent Memory Weaving for Repetition-Aware
+  Robot Manipulation'
+organization: Fudan University / CUHK Shenzhen / Shanghai Innovation Institute
+date: '2026-06-16'
+paper_url: https://arxiv.org/abs/2606.17463
+code_url: null
+venue: arXiv preprint 2026
+open_source: false
+architecture:
+  backbone: PaliGemma (frozen, π0.5)
+  llm: Gemma (action expert, frozen + LoRA)
+  action_head: flow matching (π0.5 action expert with memory-conditioned AdaRMS modulation)
+  parameters: 3.4B (frozen) + 46M trainable (~1.4%)
+  action_head_category: flow_matching
+key_innovation: 'Sub-goal completion event is identified as the natural temporal unit
+  for cross-subtask memory hand-off. Query-driven Memory Weaver compresses each completed
+  segment into 8 latent tokens (d=2048) via single-step attention pooling and routes
+  them directly into the action-generation path of the next sub-task through a third
+  memory-conditioned AdaRMS module in each Gemma action-expert block. Pretrained π0.5
+  backbone remains frozen; only ~46M params (LoRA + Weaver + action-side projection)
+  are trained. Action-side injection (rather than language/visual prompt) preserves
+  short-window VLA interface while adding a lightweight cross-subtask channel for
+  repetition-aware manipulation.
+
+  '
+benchmarks: {}
+eval_conditions:
+  robomme: 'Evaluated on RoboMME (Dai et al. 2026): 6-task and 16-task π0.5 +AP training.
+    Headline result: SwingXtimes N=3 0% → 47.8% (6-task) and 4% → 30% (16-task). 6-task
+    aggregate 19.0% → 24.7%; 16-task aggregate 17.3% → 23.3%. StopCube 8% → 22%. N=1
+    episodes unchanged at ~100%, confirming mechanism-localised gains. Real-robot
+    PickXtimes (N=3, n=20): Weaver-off 9/20 vs Weaver-on 14/20.'
+tags:
+- memory
+- cross-subtask
+- repetition-aware
+- pi0.5
+- flow-matching
+- attention-pooling
+- adarms
+- frozen-backbone
+- lora
+- robomme

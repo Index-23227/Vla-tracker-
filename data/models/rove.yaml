@@ -1,0 +1,114 @@
+# Paper: ROVE: Unlocking Human Interventions for Humanoid Manipulation via Reinforcement Learning
+# arXiv: 2606.17011
+
+name: ROVE
+full_name: "ROVE: Unlocking Human Interventions for Humanoid Manipulation via Reinforcement Learning"
+organization: "XPENG Robotics, Fudan University, CUHK, Shanghai Jiao Tong University"
+date: "2026-06-15"
+paper_url: https://arxiv.org/abs/2606.17011
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct VLM (frozen) + flow-matching DiT action decoder; ego-view RGB + language + 50-dim proprioceptive state on IRON-R01-1.11 humanoid"
+  llm: "Qwen3-VL-4B-Instruct (frozen during fine-tuning; only action head + value head are trained)"
+  action_head: "Flow-matching diffusion-transformer (DiT) action decoder consumes Qwen3-VL final-layer features (hidden dim 2560) and predicts continuous action chunks at:t+H-1 over a 50-dim joint+dexterous-hand action space. Training chunk length 50, inference/critic chunk H=16 (executes first 16 steps before replanning). Actor fine-tuned with advantage-conditioned CFGRL-style classifier-free guidance: text condition appended to instruction, decoding combines positive/negative action velocities vcfg = vneg + β(vpos − vneg). A separate state-value critic Vϕ(st) is initialized from a VLAC checkpoint (layer-23 hidden dim 2048) with a lightweight transformer value head."
+  action_head_category: flow_matching
+  action_space: "50-dim humanoid proprioceptive action space covering body joints and dexterous hands (IRON-R01-1.11). Action chunks of length 16 (executed) / 50 (training); state regularization (dropout 0.3, Gaussian noise 0.01) applied to proprioceptive inputs only."
+  parameters: "Qwen3-VL-4B-Instruct backbone (frozen) + DiT action head + transformer value head (counts not reported)"
+  key_innovation: >
+    Humanoid VLA post-training framework that treats human interventions as mixed-quality
+    rather than expert supervision. Three-stage decomposition of each rollout-intervention
+    episode (autonomous rollout, intervention adaptation, intervention recovery+completion),
+    with reward penalty placed at the END of the adaptation stage (tr) instead of intervention
+    onset to avoid mixing hesitant takeover behavior into recovery labels. Trains a state
+    value V(s) (not Q(s,a)) via Optimistic Value Estimation (OVE): H-step TD bootstrapping
+    plus expectile regression (τ = 0.7) to recover the high-value recoverable behavior from
+    mixed-quality data. Critic additionally ingests cross-embodiment egocentric human
+    experience videos (180 videos per task, half success / half failure) — feasible because
+    V(s) does not depend on a shared action space. Iterative loop alternates critic training,
+    binary advantage labeling at the 70th percentile, and advantage-conditioned classifier-free
+    guidance fine-tuning of the VLA actor.
+
+training:
+  dataset: >
+    Per task: ~220-225 teleoperation demo episodes + 3 iterations of rollout-intervention data
+    (~70-100 episodes per iteration). Erase the whiteboard intervention fraction 25.50%,
+    Put the bread into the toaster 4.53%. Plus 180 ego-centric human experience videos per
+    task (half success / half failure, head-mounted capture) used ONLY for critic training,
+    not for policy learning.
+  method: >
+    (i) Critic pretraining on large-scale robot + egocentric human demonstrations [EgoDex]
+    with MC return regression (LMC); (ii) per-task critic fine-tuning with OVE objective
+    (H-step TD bootstrap + expectile loss, τ = 0.7, TD targets normalized to [-1, 0]);
+    (iii) advantage-conditioned actor fine-tuning with binary improvement labels It at the
+    70th percentile, trained with CFGRL-style classifier-free guidance. Reward design: 0 at
+    success, Cfail = -500 at failure terminal (or -mean episode length at pretraining),
+    Cfail at end of adaptation stage tr, -1 otherwise; γ = 1 so cumulative return encodes
+    time-to-completion.
+  optimizer: "AdamW (implied); LR 1e-4 first iteration, 1e-5 subsequent iterations; 8000 steps each for critic and actor"
+  steps: "8000 critic steps + 8000 actor steps per iteration, K = 3 iterations"
+  hardware: "8 GPUs x 140 GB RAM; per-device batch 64 (critic), 16 (actor)"
+
+inference_hz: null
+
+benchmarks:
+  humanoid_manipulation:
+    erase_whiteboard_sft_demo_only: 45.0
+    erase_whiteboard_rove_demo_only: null
+    erase_whiteboard_iter1: 45.0
+    erase_whiteboard_iter2: null
+    erase_whiteboard_iter3: 80.0
+    bread_into_toaster_sft_demo_only: 56.7
+    bread_into_toaster_iter1: 56.7
+    bread_into_toaster_iter3: 86.7
+    erase_whiteboard_ablation_H50: 65.0
+    erase_whiteboard_ablation_tr_at_onset: 50.0
+    source: "Paper Fig. 4 and Table 1"
+    date_reported: "2026-06-15"
+    eval_condition: >
+      Real IRON-R01-1.11 humanoid robot. Erase the whiteboard: 20 trials, one per
+      handwriting mark; success if all assigned marks removed. Put the bread into the
+      toaster: 30 independent trials per policy; success if bread fully inserted and stable.
+      All baselines (HG-DAgger, Filtered BC, RECAP) use the same backbone, rollout-
+      intervention episodes, and reward-label construction pipeline.
+    notes: >
+      ROVE improves Erase the whiteboard from 45.0% (SFT demo-only / iter 0) to 80.0% (iter 3),
+      and Put the bread into the toaster from 56.7% to 86.7%. Outperforms HG-DAgger (which
+      can drop below the SFT baseline due to indiscriminate imitation of hesitant takeover
+      data), Filtered BC, and RECAP. Ablation: shrinking critic horizon from H=50 to H=16
+      gains +15%; placing tr at intervention onset (instead of after adaptation) loses 30%.
+
+additional_benchmarks:
+  d4rl_antmaze:
+    method: "OVE vs IQL with CFGRL policy extraction"
+    tasks: "antmaze-medium-diverse-v2, antmaze-medium-play-v2, antmaze-large-diverse-v2, antmaze-large-play-v2"
+    result: "Competitive normalized return across medium and large maze variants (Fig. 7), supporting that state-value optimistic estimation is a practical alternative to Q-based expectile learning in non-humanoid settings."
+    source: "Paper Appendix C, Fig. 7"
+    date_reported: "2026-06-15"
+
+eval_conditions:
+  real_robot: "IRON-R01-1.11 humanoid robot with dexterous hands; ego-view RGB + language + 50-dim proprio; whole-body and dexterous-hand teleoperation via VR + motion-capture; human takeover triggered when supervisor detects near-failure."
+
+tags:
+  - vla
+  - humanoid
+  - dexterous-manipulation
+  - flow-matching
+  - dit-action-head
+  - qwen3-vl
+  - human-in-the-loop
+  - reinforcement-learning
+  - post-training
+  - state-value-critic
+  - optimistic-value-estimation
+  - expectile-regression
+  - advantage-conditioning
+  - cfgrl
+  - cross-embodiment
+  - mixed-quality-data
+  - real-world
+  - xpeng

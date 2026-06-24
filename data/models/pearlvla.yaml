@@ -1,0 +1,37 @@
+name: PearlVLA
+full_name: "PearlVLA: Progressive Embodied Action-Plan Refinement in Latent Space"
+organization: "Imperial College London; Tsinghua University"
+date: "2026-06-16"
+paper_url: https://arxiv.org/abs/2606.17924
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "PrismaticVLM (fused SigLIP + DINOv2)"
+  llm: "LLaMA-2 7B (OpenVLA-7B initialization, LoRA fine-tuning)"
+  action_head: "Query-transformer regression head with AdaLN conditioning; learnable per-horizon queries read the refined latent plan z_K and regress an H=8 continuous action chunk in parallel"
+  action_head_category: regression
+  parameters: "7B (OpenVLA-7B backbone) + 300M frozen UWM latent world model"
+  key_innovation: "PearlVLA moves deliberation into the VLM latent space. It splits 12 learnable meta-query tokens into 4 fixed visual grounding tokens (anchor) and 8 writable latent plan tokens, then runs K=4 closed-loop refinement rounds. At each round, a plan-conditioned world query q_k = q_anchor + beta_k * P_plan(z_k) probes a frozen UWM latent world model for an action-free future observation latent; a Future-Guided RefineNet (4-layer weight-shared transformer with AdaLN self-attention, gated cross-attention to future summary, gated MLP) writes a scheduled residual back into the plan tokens (z_{k+1} = z_k + w_k * delta_k with decreasing write-back coefficients [0.169, 0.138, 0.106, 0.072]). The refined plan is decoded in parallel into an action chunk, preserving low-latency execution. A second-stage Causal Refinement-Grouped Process-Reward RL (CRG-PRL) ranks same-state latent edits using group-relative advantages over imagined-future scores from a frozen Robometer-4B reward model, with PPO-clipped objective and KL/edit-magnitude/BC guardrails."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.4
+    libero_object: 99.8
+    libero_goal: 98.4
+    libero_long: 97.2
+    libero_avg: 98.7
+    source: "Table 1, PearlVLA paper (PearlVLA + CRG-PRL row)"
+    date_reported: "2026-06-16"
+    eval_condition: "fine-tuned; suite-specific protocol (one policy per LIBERO suite, four success rates averaged); K=4 refinement rounds with CRG-PRL tuning"
+
+training:
+  datasets: ["RLDS-formatted modified LIBERO (4 suites x 10 tasks, 500 expert demos in total); UWM post-trained 50K steps on LIBERO-90 action-free video; auxiliary RoboCasa run uses 24 RoboCasa kitchen tasks"]
+  method: "Two-stage training. Stage 1 (supervised): LoRA fine-tuning of OpenVLA-7B with action-MSE (linear warmup), DCT frequency-domain auxiliary loss, and input-side teacher-alignment loss MSE(q_k, q_wm*) to keep world queries near the frozen UWM condition manifold. Stage 2 (CRG-PRL): RefineNet (lr 1e-5) and FutureEncoder (lr 5e-6) updated via PPO-clipped objective on group-relative advantages from M=8 same-state branches (sigma_k exploration noise); VLM backbone, latent WM, projectors, composer, write-back schedule, and action head stay frozen."
+  compute: "Not specified in main paper"
+
+eval_conditions:
+  libero: "fine-tuned"
+
+tags: [openvla_backbone, latent_refinement, world_model, closed_loop, rl_finetuning, libero, regression_head, system2, sota_libero]

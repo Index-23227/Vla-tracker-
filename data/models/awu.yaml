@@ -1,0 +1,55 @@
+name: AWU
+version: '1.0'
+full_name: 'Acting While Understanding: Asynchronous Semantic-Action Decoupling for Real-Time Vision-Language-Action Models'
+organization: Northeastern University / Ising AI / CUHK-Shenzhen
+paper_url: https://arxiv.org/abs/2606.15285
+code_url: null
+date: '2026-06-13'
+venue: arXiv 2026
+open_source: false
+model_type: vla
+inference_hz: 35.6
+tags:
+- asynchronous-inference
+- semantic-action-decoupling
+- real-time-control
+- kv-cache-reuse
+- delay-aware-training
+- historical-action-conditioning
+- libero
+architecture:
+  backbone: inherits from base VLA (UniVLA / pi0.5)
+  llm: inherits from base VLA
+  action_head: hybrid (flow matching for pi0.5-Async; autoregressive projection for UniVLA-Async; with historical action conditioning)
+  action_space: continuous
+  parameters: 7B
+  key_innovation: Decouples a pretrained VLA at its internal semantic-action interface into a low-frequency understanding module (KV-cache / last-layer hidden state) and a high-frequency action module; adds historical action conditioning + time-misalignment training to remain stable under stale semantics.
+  action_head_category: hybrid
+training:
+  dataset: LIBERO fine-tuning splits (official configurations of UniVLA and pi0.5 backbones)
+  method: Time-misalignment training with stale semantic delta sampled from {0..H-1}; historical actions injected via lightweight projection (UniVLA) or as flow-matching condition (pi0.5); Gaussian-perturbed historical actions during training
+  compute: A100 GPUs (server-side inference benchmarked on A100; pi0.5-15k variants trained on two GPUs under reduced budget)
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 98.0
+    libero_goal: 99.0
+    libero_long: 96.0
+    libero_avg: 98.1
+    source: 'Table 1, AWU paper (arXiv 2606.15285), pi0.5-Async-15k row'
+    date_reported: '2026-06-13'
+    eval_condition: fine-tuned
+  real_world:
+    so100_pick_cube_move: 100.0
+    so100_stack_cube: 90.0
+    so100_open_drawer: 90.0
+    kinova_pick_banana: 90.0
+    kinova_stack_cube: 100.0
+    kinova_pour_water: 90.0
+    real_world_avg: 93.3
+    source: 'Table 2, AWU paper (UniVLA-Async row), 10 trials per task'
+    date_reported: '2026-06-13'
+    eval_condition: fine-tuned
+eval_conditions:
+  libero: fine-tuned
+  real_world: fine-tuned
