@@ -1,0 +1,42 @@
+name: signvla
+version: '1.0'
+full_name: 'SignVLA: Real-Time Sign Language-Guided Robotic Manipulation via Attention LSTM and Vision-Language-Action Models'
+organization: University College London
+paper_url: https://arxiv.org/abs/2606.20857
+code_url: null
+date: '2026-06-18'
+venue: null
+architecture:
+  backbone: MediaPipe Hands (544-dim landmark features) + GR00T N1 Eagle-2 VLM
+  llm: LLM template-based gloss-to-instruction converter + GR00T N1 SmolLM2
+  action_head: diffusion transformer (GR00T N1 downstream policy)
+  action_space: continuous
+  parameters: 2.2B
+  key_innovation: Sign-language front-end (Attention-LSTM over MediaPipe hand landmarks + temporal stability buffer) that converts ASL gestures into natural-language instructions for a pretrained GR00T N1 VLA policy, enabling accessibility for deaf and hard-of-hearing users
+  action_head_category: diffusion
+training:
+  dataset: ASL Citizen (33-sign LIBERO-Object vocabulary, train 921 / val 224 / test 288) for sign recognition; LIBERO demonstrations for GR00T fine-tuning (20,000 steps, batch 640)
+  method: Attention-LSTM with additive attention + label-smoothed weighted cross-entropy for sign recognition; supervised fine-tuning of GR00T N1 on LIBERO demos
+  compute: not specified
+benchmarks:
+  libero:
+    libero_spatial: 97.5
+    libero_object: 98.5
+    libero_goal: 97.5
+    libero_long: 94.5
+    libero_avg: 97.0
+    source: SignVLA paper Table III (GR00T N1 fine-tuned on LIBERO, conditioned on sign-derived language instructions; 200 episodes per suite)
+    date_reported: '2026-06-18'
+    eval_condition: fine-tuned
+open_source: false
+model_type: vla
+inference_hz: null
+tags:
+- accessibility
+- sign-language
+- attention-lstm
+- mediapipe
+- groot-n1
+- diffusion-transformer
+- libero
+- human-robot-interaction
