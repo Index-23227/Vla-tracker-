@@ -1,0 +1,54 @@
+name: G3VLA
+version: '1.0'
+full_name: 'G3VLA: Geometric inductive bias for Vision-Language-Action Models'
+organization: NYU Shanghai / DTU / MBZUAI / NYU Abu Dhabi
+paper_url: https://arxiv.org/abs/2606.24472
+code_url: null
+date: '2026-06-23'
+venue: CoRL 2026
+architecture:
+  backbone: pretrained VLA vision encoder (instantiated on pi0 / pi0.5 / GR00T 1.5)
+  llm: PaliGemma-class VLM (inherited from pi0)
+  action_head: flow matching (inherited from pi0; unchanged action space and imitation objective)
+  action_space: continuous
+  parameters: 3B
+  key_innovation: Camera-aware geometric module injects calibrated structure (intrinsic-conditioned
+    ray embeddings + PRoPE projective positional encoding + bidirectional cross-view fusion)
+    into the visual-token stream of a pretrained VLA, supervised by confidence-gated pi^3X
+    point-map distillation, without modifying the backbone or action objective.
+  action_head_category: flow_matching
+training:
+  dataset: LIBERO + RoboCasa24 + RoboTwin2.0 + bimanual UR5 real-robot data; geometry distilled from pi^3X
+  method: two-stage curriculum (Stage 1 geometry-dominant pretraining with frozen backbone;
+    Stage 2 full policy finetuning with action loss dominant and distillation as regularizer)
+  compute: not disclosed
+benchmarks:
+  libero:
+    libero_spatial: 89.2
+    libero_object: 94.4
+    libero_goal: 88.4
+    libero_long: 80.4
+    libero_avg: 88.1
+    source: G3VLA paper Table 1 (G3VLA-GT on pi0)
+    date_reported: '2026-06-23'
+    eval_condition: fine-tuned
+  robocasa:
+    robocasa_avg: 37.1
+    source: G3VLA paper Table 2 (G3VLA-GT on pi0)
+    date_reported: '2026-06-23'
+    eval_condition: fine-tuned
+  robotwin_v2:
+    handover_block: 49.0
+    source: G3VLA paper Table 2 (G3VLA-GT on pi0, handover-block task)
+    date_reported: '2026-06-23'
+    eval_condition: fine-tuned
+open_source: false
+tags:
+- 3B
+- flow-matching
+- geometric-inductive-bias
+- multi-camera
+- pi0
+- ray-embedding
+- prope
+- point-map-distillation

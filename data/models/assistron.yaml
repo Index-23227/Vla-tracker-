@@ -1,0 +1,33 @@
+name: Assistron
+full_name: 'Assistron: Bayesian Shared Autonomy with Off-the-shelf Vision-Language-Action Models'
+organization: KU Leuven / Flanders Make@KU Leuven
+date: '2026-06-22'
+paper_url: https://arxiv.org/abs/2606.23147
+code_url: https://github.com/mousecpn/Assistron.git
+venue: CoRL 2026
+open_source: true
+model_type: shared-autonomy VLA
+benchmarks: {}
+tags:
+- shared-autonomy
+- assistive-robotics
+- flow-matching
+- pi0.5
+- bayesian
+- frozen-vla
+- human-in-the-loop
+- whisper
+- joystick-guidance
+architecture:
+  backbone: pi0.5 (frozen, off-the-shelf VLA)
+  llm: pi0.5 VLM backbone (PaliGemma-class)
+  action_head: flow matching with analytical posterior guidance g(a_t, u) for user-joystick conditioning
+  action_space: continuous
+  parameters: 3B (pi0.5)
+  action_head_category: flow_matching
+  key_innovation: "Frozen VLA + phase-aware interaction detection (ResNet-18 wrist-cam) that triggers human intervention only during contact-rich phases; user's low-level joystick command u is fused into pi0.5's flow-matching denoising as an analytical Tweedie-derived guidance term, avoiding fine-tuning and catastrophic forgetting of the foundation policy"
+training:
+  dataset: "No VLA fine-tuning. ResNet-18 interaction detector trained on 12k wrist-camera frames with 2s gripper-state-change labels"
+  method: "Zero-shot VLA (frozen pi0.5) + lightweight task-agnostic interaction detector + analytical flow-matching guidance (no learned conditional flow)"
+eval_conditions:
+  real_world: zero-shot (frozen pi0.5)

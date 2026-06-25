@@ -1,0 +1,96 @@
+name: SemiVLA
+full_name: "Semi-Supervised Vision-Language-Action Model"
+organization: "University of Warwick; University of Cambridge; Manifolda.Ai"
+date: "2026-06-19"
+paper_url: https://arxiv.org/abs/2606.21493
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "OpenVLA (PrismaticVLM: SigLIP + DINOv2 visual encoders + Llama-2 7B); compatible with OpenVLA-OFT, pi0-FAST, GR00T-N1.6"
+  llm: "Llama-2 7B (via OpenVLA)"
+  action_head: "Inherited from OpenVLA — autoregressive discrete action token prediction (256 bins/dim, 7-DoF). SemiVLA adds a lightweight transition predictor F_psi in visual representation space for temporal-consistency reliability scoring (not part of inference)."
+  action_head_category: autoregressive
+  action_space: "continuous 7-DoF, tokenized (256 bins/dim)"
+  parameters: "7B backbone (OpenVLA) frozen; only PEFT modules trained — Selective LoRA 31.6M (0.45%), LoRA/QLoRA 79.4M (1.13%), Adapter 42.7M (0.61%)"
+  key_innovation: >
+    Semi-supervised VLA adaptation framework. Given 10% action-labeled trajectories Dl and 90%
+    action-unlabeled vision-language trajectories Du, SemiVLA trains a student-teacher pair on top
+    of any pretrained VLA via three components: (1) Self-distilled pseudo-action learning where a
+    teacher predicts on weakly-augmented views and the student matches on strongly-augmented views;
+    (2) VLA-specific reliability controller r_t = r_vl * r_act * r_temp combining vision-language
+    alignment (cosine sim of language/visual token embeddings), action feasibility (action magnitude,
+    temporal variation, gripper stability or token entropy), and temporal transition consistency
+    (lightweight F_psi predicting h(o_{t+1}) from h(o_t), z_q, a_hat) — multiplicative form is
+    deliberately strict; (3) Bottleneck-Projected Alignment Update (BPA) that replaces scalar EMA
+    teacher update with two-group displacement filtering: semantic group (visual projector + VL PEFT)
+    is gated by bottleneck stability r_ib from weak/strong feature covariance, action precision group
+    (action head + late PEFT) is scaled by action+temporal reliability; group-wise adaptive update
+    strength rho_g = rho_max * sigma(w1*omega_g - w2*e_g - w3*v_g) suppresses noisy/volatile updates.
+
+training:
+  dataset: >
+    LIBERO and CALVIN target trajectories under limited-supervision protocol: 10% trajectories
+    contain action labels (Dl), remaining 90% are action-unlabeled vision-language trajectories
+    (Du). Few-shot evaluation also performed at 1/5/10/20-shot.
+  method: >
+    Three-stage schedule. Stage 1: supervised warm-up on Dl only with L_sup (cross-entropy for
+    action tokens). Stage 2: enable self-distillation L_sd, VLA alignment loss L_align, transition
+    loss L_trans, with frozen teacher to calibrate reliability controller. Stage 3: enable BPA
+    teacher update. Final student objective: L = L_sup + lambda_sd * R_u(e) * L_sd + lambda_align *
+    L_align + lambda_trans * L_trans, with unsupervised ramp-up R_u(e). Optimizer updates only
+    student PEFT parameters, student action head, and transition predictor F_psi; teacher receives
+    only BPA-filtered displacement (no gradient).
+  hardware: "Single-GPU PEFT adaptation; Selective LoRA uses 24.8GB GPU memory"
+  optimizer: "Standard PEFT optimization (paper does not specify; inherits OpenVLA recipe)"
+  learning_rate: "Not explicitly reported"
+  batch_size: "Mini-batches Bl (labeled) and Bu (unlabeled) sampled jointly"
+  steps: "SemiVLA + Selective LoRA: 4.2h training (vs 3.0h supervised Selective LoRA)"
+  precision: "Not specified"
+
+benchmarks:
+  libero:
+    libero_spatial: 92.4
+    libero_object: 89.5
+    libero_goal: 91.8
+    libero_long: 82.3
+    libero_avg: 89.0
+    libero_5_suite_avg: 89.0
+    source: "SemiVLA paper Table 1 and Table 2, SemiVLA + Selective LoRA on OpenVLA backbone, 10% labeled trajectories"
+    date_reported: "2026-06-19"
+    eval_condition: "semi-supervised fine-tuned (10% action labels + 90% unlabeled vision-language trajectories)"
+  calvin:
+    calvin_abc_d_avg_len: 2.58
+    calvin_avg: 2.58
+    source: "SemiVLA paper Table 2, SemiVLA + Selective LoRA on OpenVLA backbone, 10% labeled trajectories (average completed tasks)"
+    date_reported: "2026-06-19"
+    eval_condition: "semi-supervised fine-tuned, average completed tasks on CALVIN"
+  simpler_env:
+    google_robot_pick_coke_can: 66.0
+    google_robot_move_near: 78.2
+    google_robot_open_drawer: 43.0
+    simpler_avg: 62.4
+    source: "SemiVLA paper Table 3, SemiVLA-OpenVLA under 10% labeled / 90% unlabeled protocol"
+    date_reported: "2026-06-19"
+    eval_condition: "semi-supervised fine-tuned"
+
+eval_conditions:
+  libero: "10% labeled + 90% unlabeled trajectories; Selective LoRA PEFT on frozen OpenVLA backbone"
+  calvin: "Cross-benchmark evaluation under same limited-supervision protocol; metric is average completed tasks"
+  simpler_env: "Same semi-supervised protocol; reported alongside LIBERO as cross-benchmark generalization"
+
+tags:
+  - semi-supervised
+  - teacher-student
+  - self-distillation
+  - pseudo-action
+  - reliability-controller
+  - bottleneck-projection
+  - openvla
+  - libero
+  - calvin
+  - simpler-env
+  - peft
+  - selective-lora
+  - autoregressive

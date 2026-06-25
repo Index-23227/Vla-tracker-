@@ -1,0 +1,90 @@
+# Paper: Decoupling the Declarative from the Procedural in Vision-Language-Action Models
+# arXiv: 2606.21496
+
+name: w2VLA
+full_name: "w2VLA: where-what-VLA — Decoupling the Declarative from the Procedural in Vision-Language-Action Models"
+organization: "University of Edinburgh, UCL, Samsung AI Center Cambridge"
+date: "2026-06-19"
+paper_url: https://arxiv.org/abs/2606.21496
+code_url: https://tsagkas.github.io/w2vla
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Two-tower VLM MetaCLIP2 (ViT-L/16) — frozen throughout training; additional frozen Vision Foundation Model (VFM) for dense patch tokens; text-aligned visual feature extraction follows ClearCLIP-style attention map from last self-attention block."
+  llm: "MetaCLIP2 text encoder (frozen); raw language instruction is parsed by a language pre-processor into isolated `object` and `skill` strings, each independently embedded by the VLM text encoder to produce e_obj and e_skill."
+  action_head: "MLP action head (4-layer, hidden 512) on top of a conditioning-block transformer that sequentially modulates a history of proprioceptive hidden states with Visual / Spatial(where) / Skill(what) tokens via FiLM (γ⊙h + β) + Pre-LayerNorm Causal Self-Attention with residual; predicts continuous end-effector pose deltas (action chunk length L=10)."
+  action_head_category: regression
+  action_space: "Continuous end-effector pose deltas; action chunk size 10; observation history length 8."
+  parameters: "55.17M"
+  key_innovation: >
+    Restructured information flow that decouples declarative (where — object spatial grounding via
+    VLM-derived localization heatmaps) from procedural (what — skill embedding) knowledge.
+    Instead of concatenating all multimodal tokens into one opaque action expert (π0.5 / OTTER style),
+    w2VLA sequentially FiLM-modulates proprioceptive hidden states with: (1) Visual Modulation
+    — VFM patch tokens compressed by Attentive Feature Aggregation (AFA) with trainable queries +
+    Causal Self-Attention; (2) Spatial (where) conditioning — temperature-scaled (ζ=0.05) Softmax
+    heatmaps from V·e_obj per camera, flattened/MLP-projected per timestep; (3) Skill (what)
+    conditioning — single MLP-projected skill vector broadcast across time. Random VFM patch
+    masking with q=0.5 during training (inspired by MAE) further breaks skill–object spurious
+    correlations. First VLA to demonstrate reliable zero-shot skill transfer between distinct
+    objects in a low-data IL regime (16 demos per skill–object pair).
+
+training:
+  dataset: >
+    Four real-world skill-transfer scenarios collected on an SO-101 leader/follower arm with a
+    ZED2i top-down camera (left lens only, 256×256 center-crop). Each scenario contains exactly
+    two (skill, object) pairs with 16 expert teleoperated demonstrations per pair (32 demos /
+    scenario, 128 demos total). Scenarios: (S1) rotate 90° carrot + place-back 5cm banana;
+    (S2) place-on-plate corn + place-in-bowl eggplant; (S3) poke sponge + nudge toy car;
+    (S4) drop-on-plate toothpaste + place-forward 5cm cucumber.
+  method: >
+    Behavior cloning with L1 loss on action chunks. VFM and VLM backbones frozen end-to-end;
+    only the conditioning-block transformer, AFA queries, MLP projectors, and action head are
+    trained. Random VFM patch masking (q=0.5) applied during training. 15,000 steps, batch size
+    32, AdamW (peak LR 1e-4, weight decay 1e-4, cosine decay to 1e-5, 200-step warmup).
+  num_trajectories: 128
+  compute: "Single NVIDIA RTX 4090"
+  hardware: "SO-101 leader/follower arm; ZED2i stereo camera (top-down, left lens only); 256×256 RGB input."
+
+inference_hz: null
+
+benchmarks:
+  real_world:
+    s1_seen_back_rotate: 94.4
+    s1_transfer_back_rotate: 91.7
+    s2_seen_plate_bowl: 94.4
+    s2_transfer_plate_bowl: 94.4
+    s3_seen_poke_nudge: 97.2
+    s3_transfer_poke_nudge: 91.7
+    s4_seen_drop_forward: 94.4
+    s4_transfer_drop_forward: 88.9
+    avg_seen_success: 95.1
+    avg_skill_transfer_success: 91.7
+    robustness_s1_distractors_seen: 83.3
+    robustness_s1_distractors_transfer: 77.8
+    robustness_s2_unseen_objects_transfer: 83.3
+    source: "Paper Table 1, Figs. 5a/5b (6 rollouts per (skill, object) combination, varied initial poses)"
+    date_reported: "2026-06-19"
+    eval_condition: "Real-world SO-101 (LeRobot framework); 6 rollouts per condition; success counted only if robot interacts with correct object AND executes correct skill AND completes task. Baselines OTTER and π0.5 average only 30.6% and 38.2% on skill transfer respectively."
+
+eval_conditions:
+  real_world: "Real-world SO-101 leader/follower with ZED2i camera. Skill transfer = applying a skill from one trained (skill, object) pair to the other object in the same scenario (zero-shot). Robustness experiments add 3-5 distractor objects (S1) or replace target objects with completely unseen ones (S2, e.g. Coca Cola can, Fanta can, tomato, strawberry)."
+
+tags:
+  - vla
+  - skill-transfer
+  - compositional-generalization
+  - frozen-backbone
+  - metaclip2
+  - film-conditioning
+  - two-tower-vlm
+  - heatmap-conditioning
+  - imitation-learning
+  - low-data
+  - so-101
+  - lerobot
+  - real-world
+  - where-what

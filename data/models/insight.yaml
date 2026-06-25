@@ -1,0 +1,135 @@
+# Paper: InSight — Self-Guided Skill Acquisition via Steerable VLAs
+# arXiv: 2606.24884
+
+name: InSight
+full_name: "InSight: Self-Guided Skill Acquisition via Steerable VLAs"
+organization: "Stanford University, Princeton University"
+date: "2026-06-23"
+paper_url: https://arxiv.org/abs/2606.24884
+code_url: https://insight-vla.github.io/
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "π0.5 VLA fine-tuned with LoRA; primitive-steerable action policy. Framework is reported to be agnostic to the underlying VLA, but all experiments use π0.5."
+  llm: "Gemma-2B (inside π0.5 VLM); Gemma-300M action expert; all other π0.5 weights frozen during LoRA fine-tuning. Gemini 3 Flash is used as the external VLM for offline demonstration segmentation, plan/primitive-gap proposal, and oracle success checks."
+  action_head: "π0.5 flow-matching action expert (Gemma-300M) fine-tuned with LoRA on primitive-labeled trajectories; outputs end-effector deltas, an absolute gripper command, and a learned per-primitive progress channel in [0,1). A primitive terminates when the progress channel crosses ~0.95, when EE motion falls below an auto-advance threshold, or when a VLM completion check fires (for OOD `move to` primitives)."
+  action_head_category: flow_matching
+  action_space: "End-effector deltas + absolute gripper command + learned per-primitive progress scalar in [0,1); progress is supervised with the normalized timestep within each primitive segment and resets at each primitive boundary."
+  parameters: "~2.3 B (Gemma-2B VLM + Gemma-300M action expert from π0.5); only LoRA adapters are trained."
+  key_innovation: >
+    InSight turns a VLA into a primitive-steerable policy and uses a VLM-guided data flywheel to
+    autonomously acquire missing manipulation primitives without any new human demonstrations.
+    Two stages:
+    (1) Automatic primitive segmentation — a VLM produces an ordered primitive plan from a task
+    instruction; gripper open/close transitions, end-effector translation/rotation magnitudes
+    (xy / z / rxy / rz dominant-axis tag), and per-frame motion captions are aligned to that plan
+    to label each frame, and each contiguous segment becomes one training episode conditioned on
+    its primitive language label. The π0.5 VLA is LoRA-fine-tuned on these primitive-labeled
+    trajectories with an added per-primitive progress channel for primitive-level termination.
+    (2) VLM-guided skill acquisition — given a novel task, a VLM planner returns the full primitive
+    sequence and flags any primitive not in the current vocabulary as a primitive gap (constrained
+    to a single-axis motion). A pre-execution VLM call proposes the gap's axis ({dx,dy,dz} or
+    {drx,dry,drz}) and signed magnitude; chained gaps reuse prior parameters for axis consistency.
+    The robot rolls out known primitives via the steerable VLA and primitive gaps via a low-level
+    controller. A post-plan VLM oracle compares before/after scene images to judge success;
+    successful gap rollouts are added back into the VLA training set, the VLA is retrained, and
+    the vocabulary V grows. Acquired primitives can be composed into long-horizon skills (e.g.
+    a 14-primitive twist-then-pour) with the VLM acting only as a high-level planner.
+
+training:
+  dataset: >
+    LIBERO simulation (7-DoF Franka Panda) and a 6-DoF UFactory xArm in the real world.
+    Block flipping: 150 human teleoperated pick-and-place demos → ~700 primitive episodes across
+    seven primitive types. Drawer closing: 50 human teleoperated drawer-opening demos, segmented
+    into three primitives (move-to-handle, close gripper, pull drawer open). Real-world xArm
+    twist/pour/composition: 50 human pick-and-place demos (top- and side-grasps of the bottle),
+    plus 20 successful VLM-acquired primitive episodes per new skill (e.g. 20 twist primitives in
+    23 trials, 20 pour primitives in 31 trials). Sweeping: scooping demonstrations only, plus
+    autonomously acquired lateral-push primitives.
+  method: >
+    Stage 1: VLM (Gemini 3 Flash) does offline demonstration segmentation in three passes — task
+    plan, frame-to-primitive assignment from images + per-frame EE motion captions, then localized
+    boundary refinement; each primitive segment is one LoRA training episode for π0.5 conditioned
+    on its primitive label. A progress channel ∈ [0,1) is added to the action space.
+    Stage 2: For a novel task, the VLM proposes the primitive sequence and flags single-axis
+    primitive gaps; per-gap axis and signed magnitude are proposed by a pre-execution VLM call;
+    rollouts mix steerable-VLA execution of known primitives with low-level execution of gap
+    primitives; a VLM oracle classifies task success from before/after scene images; successful
+    rollouts of each new primitive are added to the VLA dataset and the policy is retrained on
+    V ∪ {new primitives}. No human demonstrations of target skills are used.
+  num_trajectories: 850  # ~700 primitive episodes (block flip) + 150 (drawer + xArm pick-place) + ~tens autonomously acquired
+  hardware: "Simulation: 7-DoF Franka Panda in LIBERO. Real world: 6-DoF UFactory xArm with two 224x224 RGB cameras (scene view + wrist view) and EE pose / gripper state proprioception."
+
+inference_hz: null  # not reported
+
+benchmarks:
+  real_world:
+    twist_cap_open_success_overall: 92
+    twist_cap_open_capx_overall: 32
+    twist_cap_open_pi0_5_baseline_overall: 0
+    pour_beans_into_bowl_success_overall: 96
+    pour_beans_into_bowl_capx_overall: 0
+    pour_beans_into_bowl_pi0_5_baseline_overall: 0
+    twist_then_pour_composition_overall: 80
+    twist_then_pour_composition_capx: 4
+    twist_then_pour_composition_pi0_5_baseline: 0
+    sweeping_from_scooping_success: 100  # 5/5 trials
+    base_skill_retention_top_pickplace: 100
+    base_skill_retention_side_pickplace: 100
+    base_skill_retention_top_pickplace_pi0_5_baseline: 100
+    base_skill_retention_side_pickplace_pi0_5_baseline: 86
+    source: "Paper Figs. 6, 8, 9 and §4.3-4.4 (25 trials per method for twist/pour/composition; 15 trials for base-skill retention; 5 trials for sweeping)"
+    date_reported: "2026-06-23"
+    eval_condition: "Real-world 6-DoF UFactory xArm; π0.5 baseline is LoRA-fine-tuned on the same 50 human pick-and-place demos but receives no autonomously acquired primitives; CaP-X is the Code-as-Policies-style zero-shot VLM-composition baseline."
+  simulation:
+    libero_block_flip_success: 75   # 246 acquired primitive rollouts; upper bound 80%
+    libero_block_flip_rl_sac_baseline: 0
+    libero_drawer_close_success: 100  # 25 evaluation trials after retraining on 70 acquired close-drawer primitives from 82 episodes
+    source: "Paper Figs. 3, 4 and §4.1-4.2"
+    date_reported: "2026-06-23"
+    eval_condition: "LIBERO with 7-DoF Franka Panda. Block flip: trained only on side pick-and-place demos; success measured after acquiring rotate-block primitives autonomously. Drawer close: trained only on drawer-open demos; success measured after acquiring push-drawer-closed primitive from an OOD already-open initial state."
+
+additional_benchmarks:
+  acquisition_cost:
+    twist_trials_to_20_successful_primitives: 23
+    pour_trials_to_20_successful_primitives: 31
+    twist_robot_minutes: 23.8
+    twist_vlm_minutes: 8.4
+    twist_wall_minutes: 39.7
+    pour_robot_minutes: 49.6
+    pour_vlm_minutes: 26.9
+    pour_wall_minutes: 85.3
+    source: "Paper Table 1"
+    date_reported: "2026-06-23"
+    notes: "Cumulative robot-motion, VLM-call, and wall-clock time in minutes to autonomously reach 20 successful acquired primitives on the xArm."
+  per_trial_time_vs_capx:
+    insight_twist_total_seconds: 55.1
+    capx_twist_total_seconds: 109.1
+    insight_pour_total_seconds: 124.1
+    capx_pour_total_seconds: 206.9
+    source: "Paper Fig. 7"
+    date_reported: "2026-06-23"
+    notes: "Mean wall-clock per trial decomposed into VLM-call latency (thinking) and robot motion (execution); N=25 trials per method."
+
+eval_conditions:
+  real_world: "UFactory xArm (6-DoF). 25 evaluation trials per method per primitive (Fig. 6); 15 trials for base-skill retention (Fig. 8); 5 trials for sweeping. Each rollout requires a manual environment reset by a human; failure analysis is not incorporated, only successful rollouts are kept."
+  simulation: "LIBERO + Franka Panda (7-DoF). Block flip: 0% RL-SAC baseline given the same total rollout budget. Drawer close: VLM completion check is used to terminate the OOD approach primitive and trigger the new push-drawer-closed primitive."
+
+tags:
+  - vla
+  - steerable-policy
+  - primitive-segmentation
+  - skill-acquisition
+  - lifelong-learning
+  - vlm-guided
+  - pi0.5
+  - flow-matching
+  - lora
+  - libero
+  - real-world
+  - xarm
+  - gemini-3-flash
+  - data-flywheel

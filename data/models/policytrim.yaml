@@ -1,0 +1,43 @@
+name: PolicyTrim
+full_name: 'PolicyTrim: Boosting Intrinsic Policy Efficiency of Vision-Language-Action Models'
+organization: Sichuan University / Adelaide University / Beijing Institute of Technology
+date: '2026-06-24'
+paper_url: https://arxiv.org/abs/2606.22540
+code_url: https://inceptionwang.github.io/PolicyTrim/
+venue: ECCV 2026
+open_source: false
+architecture:
+  base_model: pi0.5 / OpenVLA-OFT / GR00T (post-training framework)
+  backbone: Multiple (cross-architecture RL framework)
+  llm: Inherits from base VLA
+  action_head: GRPO-based RL post-training (chunk extension + step reduction)
+  parameters: Varies (post-training)
+  action_head_category: other
+key_innovation: 'Two-stage GRPO RL post-training framework that boosts intrinsic policy efficiency of VLAs by
+  (1) Reliable Action Chunk Extension via Dynamic Execution Horizon Exploration (per-trajectory acceptance
+  ratios as reliability sweep) with a horizon-scaled reward gated by group success, and (2) Redundancy-Aware
+  Step Reduction with a step-saving reward plus group-anchored tanh stability penalty to prevent fragile
+  shortcut collapse. Triples action chunk utilization and halves physical steps without architectural
+  changes or extra demonstrations, delivering up to 5.83x end-to-end deployment speedup while preserving
+  task success rate. Orthogonal to compute-centric methods (composes with VLA-Cache for compounded gains).
+
+  '
+benchmarks:
+  libero:
+    libero_spatial: 97.8
+    libero_object: 98.5
+    libero_goal: 98.8
+    libero_long: 93.3
+    libero_avg: 97.1
+eval_conditions:
+  libero: PolicyTrim applied to pi0.5 (LIBERO-Spatial/Object/Goal hchunk=15, Long hchunk=10); up to 5.83x
+    end-to-end speedup on LIBERO-Object; also validated on OpenVLA-OFT/GR00T, ManiSkill (89.8 / 2.36x),
+    Meta-World (65.4 / 2.52x), and real-world Agilex Piper (1.86x avg)
+tags:
+- RL
+- GRPO
+- post-training
+- policy-efficiency
+- action-chunking
+- inference-acceleration
+- ECCV-2026

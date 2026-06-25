@@ -1,0 +1,58 @@
+name: dVLA-RL
+full_name: 'dVLA-RL: Reinforcement Learning over Denoising Trajectories for Discrete Diffusion Vision-Language-Action Models'
+organization: Shanghai Jiao Tong University / Tsinghua SIGS / Baidu AI Cloud / D-Robotics / Shanghai AI Lab
+date: '2026-06-22'
+paper_url: https://arxiv.org/abs/2606.23623
+code_url: null
+venue: arXiv preprint 2026
+open_source: false
+model_type: vla
+architecture:
+  backbone: MM-ACT (unified discrete diffusion VLA)
+  llm: MM-ACT VLM backbone
+  action_head: discrete diffusion (masked denoising) + PPO trajectory-level RL
+  action_space: discrete
+  parameters: not specified
+  action_head_category: discrete_diffusion
+  key_innovation: 'First RL framework for native discrete diffusion VLA policies. Reformulates the intractable marginal action probability as the joint probability of the sampled K-step denoising trajectory, factorized as a product of step-wise Markov transitions. The Gumbel-TopK unmasking scheduler is treated as a non-differentiable system dynamic; gradients flow only through newly unmasked tokens, yielding a stable PPO surrogate. A Hybrid denoising-step strategy assigns 1/2/4-step denoising per task based on SFT capability to balance success rate, sample efficiency, and compute.'
+training:
+  dataset: LIBERO (500 demos per suite) + RoboTwin 2.0 (1,000 demos per task), multi-task joint SFT
+  method: SFT initialization (MM-ACT*) + online PPO RL via RLinf with sparse outcome reward (1/0)
+  compute: not specified (Baidu AIHC platform)
+benchmarks:
+  libero:
+    libero_spatial: 99.8
+    libero_object: 100.0
+    libero_goal: 99.6
+    libero_long: 99.2
+    libero_avg: 99.7
+    source: dVLA-RL paper Table 1
+    date_reported: '2026-06-22'
+    eval_condition: RL fine-tuned (best online rollout SR, 512 episodes/task)
+  robotwin_v2:
+    beat_block_hammer: 95.3
+    place_phone_stand: 96.9
+    pick_dual_bottles: 95.3
+    lift_pot: 89.1
+    move_can_pot: 87.5
+    place_a2b_left: 79.7
+    place_empty_cup: 95.3
+    handover_mic: 96.9
+    average: 92.0
+    source: dVLA-RL paper Table 2
+    date_reported: '2026-06-22'
+    eval_condition: RL fine-tuned (best online rollout SR, 64 episodes/task)
+eval_conditions:
+  libero: RL fine-tuned (PPO over denoising trajectories)
+  robotwin_v2: RL fine-tuned (PPO over denoising trajectories)
+inference_hz: null
+tags:
+- discrete-diffusion
+- RL
+- PPO
+- reinforcement-learning
+- trajectory-level
+- masked-denoising
+- LIBERO-SOTA
+- bimanual
+- MM-ACT

@@ -1,0 +1,143 @@
+# Paper: OpenHLM: An Empirical Recipe for Whole-Body Humanoid Loco-Manipulation
+# arXiv: 2606.22174
+
+name: OpenHLM
+full_name: "OpenHLM: An Empirical Recipe for Whole-Body Humanoid Loco-Manipulation"
+organization: "Tsinghua University, Shanghai Qi Zhi Institute, Spirit AI"
+date: "2026-06-20"
+paper_url: https://arxiv.org/abs/2606.22174
+code_url: https://openhlm-project.github.io/
+venue: arXiv preprint
+open_source: true
+
+model_type: vla
+
+architecture:
+  backbone: "π0.5-initialized VLA (PaliGemma-based VLM + flow-matching action expert); pretrained on static and wheeled dual-arm robot data, then humanoid-adapted via weight-surgery action projection"
+  llm: "PaliGemma (Gemma-2B) inside π0.5; VLM kept; only the action projection layers are resized via weight surgery to admit humanoid action vectors"
+  action_head: "Multi-step flow matching (10 integration steps at inference); ~90 ms per inference call on RTX 5080; one-step alternatives (one-step flow matching, drifting model) were tested but underperformed by ~20 task-progress points despite lower validation action MSE"
+  action_head_category: flow_matching
+  action_space: "34-D continuous whole-body command: 32 joint-level dims from joint-based whole-body teleop (dual-arm joints 14 + dual-leg joints 12 + waist joints 3 + root roll/pitch + yaw angular velocity 3) + 2 parallel-jaw gripper dims; absolute joint position targets predicted as short action chunks"
+  parameters: "~3B (π0.5 backbone scale)"
+  key_innovation: >
+    An open-source recipe for whole-body humanoid loco-manipulation, derived from a
+    controlled one-variable-at-a-time empirical roadmap in three phases:
+    (I) Low-level controller & teleoperation — a joint-based whole-body teleop interface
+    (PICO VR headset + body trackers retargeted online to robot joint space via GMR, tracked
+    by the SONIC general motion tracker with 0.2 s future-frame preview latency) beats both
+    decoupled control and VR 3-point control, and beats SMPL-based recording (88% vs 75%
+    average task progress on the 4-task subset, attributed to 32-D vs 81-D action space).
+    (II) VLA design — a π0.5-initialized backbone with weight-surgery action projection,
+    pretrained bimanual ordering, absolute joint targets, proprioception input, and multi-step
+    flow matching. Robot pretraining on non-humanoid (static + wheeled dual-arm) data transfers
+    surprisingly well: π0.5 init reaches 91% average task progress vs PaliGemma init 60% and
+    from-scratch 42%, even though validation action MSE is nearly identical between π0.5 and
+    PaliGemma — action MSE is shown to be a poor proxy for on-robot performance.
+    (III) Heterogeneous co-training — extends the policy to new objects/instructions without
+    additional whole-body teleop, by mixing stationary same-embodiment manipulation (feet planted)
+    or HuMI robot-free demonstrations (handheld UMI grippers + body trackers + IK retargeting).
+    Stationary co-training delivers new semantic understanding AND new motions; HuMI co-training
+    delivers new semantic understanding only (no new motions), at ~half the operator-time cost.
+
+training:
+  dataset: >
+    HLM-12 benchmark on Unitree G1 humanoid: 12 language-conditioned real-world loco-manipulation
+    tasks in 4 capability families (pick-and-place with locomotion; whole-body workspace extension;
+    using body parts as manipulators; loco-manipulation under environmental constraint).
+    40 joint-based whole-body teleop demos per task (scaling sweep: 10→20 demos is largest jump,
+    plateaus near 40 reaching ~90% on the 4-task subset). For the 4 held-out tasks, co-training
+    with 40 stationary teleop demos (~13 min each) or 40 HuMI demos (~7 min each) per task. The
+    long-horizon system-level task uses 6 demos per ordered fruit pair (3 fruits via whole-body
+    teleop = 36 demos; remaining 14 pairs via HuMI = 84 demos).
+  method: "Supervised finetuning of a π0.5 backbone on joint-based whole-body teleop with the weight-surgery action projection; multi-step (10-step) flow matching action head; absolute joint-position targets predicted as action chunks; proprioception (full joint-position vector) fed as input; heterogeneous co-training mixes whole-body teleop with stationary or HuMI demonstrations without any architectural change."
+  num_trajectories: 480  # 12 tasks x 40 demos for HLM-12 main training/co-training
+  hardware: "Unitree G1 humanoid; head- and wrist-mounted cameras; PICO VR headset + body trackers for teleop; HuMI rig (two hand-held UMI grippers + 3 body-pose trackers on pelvis and feet); SONIC general motion tracker as low-level controller (50 Hz, PD); high-level VLA at 10 Hz; RTX 5080 GPU at deployment."
+
+inference_hz: 10  # High-level VLA emits whole-body reference commands at 10 Hz; low-level controller runs at 50 Hz
+
+benchmarks:
+  real_world:
+    hlm12_8_training_tasks_avg_progress: 89
+    hlm12_4_holdout_stationary_cotrain_progress: 87
+    hlm12_4_holdout_humi_cotrain_progress: 80
+    hlm12_4_holdout_baseline_no_cotrain_progress: 33
+    hlm12_12_task_oracle_progress: 94
+    long_horizon_openhlm_humi_cotrain_progress: 87.5
+    long_horizon_openhlm_teleop_oracle_progress: 97.5
+    long_horizon_gr00t_n1_6_progress: 57.5
+    long_horizon_psi0_progress: 48.8
+    long_horizon_openhlm_humi_demo_hours: 1.14
+    long_horizon_baseline_demo_hours: 2.70
+    long_horizon_teleop_oracle_demo_hours: 2.73
+    source: "Paper §4 Table 2 and Fig. 7 (HLM-12 results)"
+    date_reported: "2026-06-20"
+    eval_condition: "Real Unitree G1 humanoid; HLM-12 task-progress fraction in [0,1] averaged over 5 independent rollouts per (policy, task) pair with shared scene configurations; long-horizon task evaluated on 10 of 20 sampled ordered fruit pairs, one rollout each."
+    notes: "HLM-12 = 12-task whole-body humanoid loco-manipulation benchmark introduced in this paper. Long-horizon language-conditioned task spans the humanoid's wide vertical workspace (low coffee table → mid table → tall shelf). Both GR00T N1.6 and Ψ0 baselines include Unitree G1 data in pretraining; OpenHLM's π0.5 init does not."
+
+additional_benchmarks:
+  teleop_interface_ablation:
+    cola_placement_decoupled_progress: 66.7
+    cola_placement_decoupled_footsteps: 42.3
+    cola_placement_vr_3point_progress: 40.0
+    cola_placement_vr_3point_footsteps: 12.3
+    cola_placement_joint_based_progress: 86.7
+    cola_placement_joint_based_footsteps: 12.0
+    shelf_cup_transfer_decoupled_progress: 93.3
+    shelf_cup_transfer_joint_based_progress: 80.0
+    bottle_disposal_joint_based_progress: 85.0
+    source: "Paper Table 1 (teleop method comparison; 40 demos per task per method)"
+    date_reported: "2026-06-20"
+    notes: "Decoupled control cannot perform Bottle Disposal (foot-pedal task) by construction. VR 3-point cannot perform Shelf Cup Transfer or Bottle Disposal by construction."
+  joint_vs_smpl:
+    joint_based_4task_avg_progress: 88
+    smpl_based_4task_avg_progress: 75
+    source: "Paper Fig. 3"
+    date_reported: "2026-06-20"
+    notes: "32-D joint-space action beats 81-D SMPL-based on the 4-task subset; gap attributed to redundant SMPL dimensions making the VLA learning problem harder."
+  preview_latency_sweep:
+    preview_0s_progress: 60
+    preview_0_2s_progress: 67
+    preview_0_4s_progress: 60
+    preview_0_6s_progress: 13
+    source: "Paper Fig. 4 (Cola Placement, 40 demos per setting)"
+    date_reported: "2026-06-20"
+    notes: "0.2 s future-frame preview latency is the chosen default; 0.6 s causes operator-side delay buildup and demo duration grows to 41 s."
+  vla_init_ablation:
+    pi0_5_init_4task_avg_progress: 91
+    paligemma_init_4task_avg_progress: 60
+    from_scratch_4task_avg_progress: 42
+    source: "Paper Fig. 5 (pretraining ablation)"
+    date_reported: "2026-06-20"
+    notes: "Validation action MSE is nearly identical between π0.5 and PaliGemma initializations, yet on-robot performance diverges sharply — action MSE is a poor proxy for the value of robot pretraining."
+  action_generation_ablation:
+    ten_step_flow_matching_progress: 91
+    one_step_flow_matching_progress: 71
+    drifting_model_one_step_progress: 73
+    source: "Paper Fig. 5 (sage group)"
+    date_reported: "2026-06-20"
+    notes: "Both one-step alternatives have lower validation MSE (~0.007 vs ~0.009) yet underperform on-robot by ~20 progress points; multi-step flow matching retained."
+  data_scaling:
+    five_demos_progress: 52
+    ten_demos_progress: 60
+    twenty_demos_progress: 85
+    forty_demos_progress: 91
+    source: "Paper Fig. 6 (whole-body teleop scaling on 4-task subset)"
+    date_reported: "2026-06-20"
+
+eval_conditions:
+  real_world: "Unitree G1 humanoid in real-world scenes; task progress fraction in [0,1] averaged over 5 rollouts per (policy, task) pair with shared scene configurations and matched distractors; full pipeline includes SONIC low-level controller + joint-based whole-body teleop data + π0.5-initialized humanoid-adapted VLA."
+
+tags:
+  - vla
+  - humanoid
+  - loco-manipulation
+  - whole-body-control
+  - flow-matching
+  - pi0.5
+  - joint-based-teleop
+  - heterogeneous-co-training
+  - humi
+  - unitree-g1
+  - open-source
+  - hlm-12
+  - long-horizon
