@@ -1,33 +1,71 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: FOCA: Future-Oriented Conditioning for Data-Efficient Vision-Language-Action Adaptation
-# arXiv: 2606.20867
-
 name: FOCA
 full_name: "FOCA: Future-Oriented Conditioning for Data-Efficient Vision-Language-Action Adaptation"
-organization: "TODO: check paper"
+organization: "VinRobotics / VinUniversity / DFKI / TU Denmark / University of Stuttgart / IMPRS-IS"
 date: "2026-06-18"
 paper_url: https://arxiv.org/abs/2606.20867
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: "ICML 2026"
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Plug-and-play wrapper validated on pi0 (PaliGemma VLM + flow-matching action head) and GR00T-N1.5 (Eagle VLM + diffusion-transformer action head)"
+  llm: "Inherits host VLA's LLM (PaliGemma for pi0, Eagle for GR00T-N1.5)"
+  action_head: "Native diffusion / flow-matching action head of host VLA (conditioned via cross-attention on FOCA-augmented future-aware VLM embeddings ht, r_exp, r_imp)"
+  action_head_category: flow_matching
+  parameters: "Host VLA (pi0 ~3.3B or GR00T-N1.5 ~2.7B) + small FOCA heads: explicit predictor P_exp (small Transformer), implicit projector P_imp (MLP), learnable explicit tokens r_exp (n_e=8 default per view) and implicit tokens r_imp (N pooled tokens)"
+  key_innovation: "Future-oriented conditioning framework that injects two auxiliary token streams into the VLM during fine-tuning: (1) explicit tokens r_exp that predict latent patch embeddings of language-grounded gripper-object interaction regions B_{t+} at future timesteps via an MSE loss on object-centric patch features, and (2) implicit tokens r_imp that perform InfoNCE alignment with pooled future goal embeddings (geometric future sampling, task-mismatched negatives) — provably estimating goal-conditioned discounted occupancy / log-occupancy-ratio. Structured token-isolation masks block direct attention between r_exp and r_imp inside the VLM so they learn complementary roles. Operates entirely in latent space (no pixel reconstruction), supports action-free co-training on synthetic DreamGen rollouts (omit L_fm, keep L_exp + L_imp), and yields large few-shot gains while remaining a drop-in module for diffusion VLAs."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 97.0
+    libero_object: 99.8
+    libero_goal: 97.4
+    libero_long: 92.4
+    libero_avg: 96.6
+    source: "Table 1a + Fig 2 (FOCA on pi0 backbone, 100% LIBERO data, 4 suites x 50 trials)"
+    date_reported: "2026-06-18"
+    eval_condition: "fine-tuned (pi0 backbone, full LIBERO, batch 18)"
   robocasa:
-    robocasa_avg: TODO
+    pnp_cab_to_counter: 30.0
+    pnp_counter_to_cab: 36.0
+    coffee_setup_mug: 10.0
+    turn_off_stove: 24.0
+    turn_on_microwave: 72.0
+    robocasa_avg: 34.4
+    source: "Table 7 (Gr00t-N1.5 + FOCA, RoboCasa 100 demos, 5 challenge tasks, 50 eval trials each; vs Gr00t-N1.5 baseline 26.0 and Gr00t-N1.5+FLARE 28.4)"
+    date_reported: "2026-06-18"
+    eval_condition: "fine-tuned (GR00T-N1.5 backbone, 100-demo subset of 5 RoboCasa tasks)"
 
 eval_conditions:
-  libero: "fine-tuned"
-  robocasa: "fine-tuned"
+  libero: "Standard 4-suite LIBERO fine-tuning with pi0 backbone, batch 18, single H100. Few-shot stress test also reported at 10% (~5 demos/task) and 40% (~20 demos/task) — FOCA reaches 85.3 / 94.0 avg respectively, with FOCA+DreamGen synthetic-video pretraining hitting 95.7 at 40% data (surpassing pi0 with 100% data)."
+  robocasa: "RoboCasa Kitchen 5 challenge tasks (PnPCabToCounter, PnPCounterToCab, CoffeeSetupMug, TurnOffStove, TurnOnMicrowave), 30-demo and 100-demo regimes. GR00T-N1.5 batch 32, 1e-4 lr; pi0 batch 12. 50 eval episodes/task."
+  real_world: "Bimanual ALOHA (Place Parts, Open Bag, Set Table, Tie Shoelaces) + simulated humanoid VinR-H3. FOCA on GR00T-N1.5 boosts VinR-H3 Place Parts from 58% to 84%; on Aloha Open Bag (pi0) doubles success 20->40 (limited data) and 10->45 (full); Tie Shoelaces reaches 95%. Up to 26% absolute gains reported."
+  action_free_videos: "DreamGen video-world-model rollouts used purely for L_imp pretraining (no action labels, no pseudo-actions, no inverse dynamics). Two-stage curriculum: (i) pretrain L_imp on synthetic videos, (ii) co-train L_total = L_fm + L_exp + L_imp on real demos."
 
-tags: [libero, robocasa, ICML-2026]
+training:
+  dataset: "LIBERO (10/40/100% splits of 4 suites), RoboCasa Kitchen (30- and 100-demo splits of 5 challenge tasks), DreamGen synthetic rollouts conditioned on task prompts, plus real-robot data: bimanual ALOHA (Place Parts, Open Bag, Set Table, Tie Shoelaces) and simulated humanoid VinR-H3 Place Parts task."
+  method: "Three co-trained objectives. (1) Flow-matching loss L_fm on action chunks (rho ~ U[0,1], noised action ã = rho*a + (1-rho)*eps, target velocity a-eps). (2) Explicit future latent prediction L_exp: an off-the-shelf grounding model G(I_{t+}, l) produces per-object bounding boxes whose union B_{t+} defines the interaction region; learnable tokens r_exp passed through VLM + small Transformer predictor P_exp regress to frozen-vision-encoder patch features inside B_{t+} (MSE on R^{N_p x d_e}). (3) Implicit future alignment L_imp: pooled-vision-initialized tokens r_imp projected to contrastive space align via InfoNCE with pooled future goal embeddings y_{t+} = Pool(V(I_{t+}) | B_{t+}); negatives drawn from task-mismatched episodes in the minibatch; future offset k ~ Geom(1-gamma) (geometric sampling = discounted occupancy). Structured token-isolation mask zeros attention r_exp <-> r_imp inside the VLM. Action-free synthetic videos: omit L_fm, keep L_exp + L_imp."
+  num_trajectories: null
+  compute: "Single NVIDIA H100. pi0 baseline 18h vs FOCA 21h on LIBERO; 20h vs 23h on RoboCasa for 100k steps. GR00T-N1.5 + FOCA training time comparable to baseline; all baselines converge within 20h (vs EO-1 reimplementation 40h, hence reimplemented)."
+
+inference_hz: null
+
+tags:
+  - libero
+  - robocasa
+  - ICML-2026
+  - few_shot_adaptation
+  - data_efficient
+  - future_conditioning
+  - latent_prediction
+  - contrastive_alignment
+  - infonce
+  - action_free
+  - synthetic_video
+  - dreamgen
+  - pi0
+  - groot_n1_5
+  - flow_matching_backbone
+  - real_world
+  - aloha
+  - humanoid
