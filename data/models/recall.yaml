@@ -1,0 +1,55 @@
+name: RECALL
+full_name: 'RECALL: Recovery Experience Collection for Active Lifelong Learning in Vision-Language-Action Models'
+version: '1.0'
+organization: Yale University
+paper_url: https://arxiv.org/abs/2606.23617
+code_url: null
+date: '2026-06-22'
+venue: null
+architecture:
+  backbone: pi0-FAST (PaliGemma-based VLM)
+  llm: Gemma-based
+  action_head: FAST discrete action tokenizer (next-token prediction)
+  action_space: discrete tokens to continuous actions
+  parameters: 3B
+  key_innovation: Active continual learning paradigm using INSIGHT uncertainty signals to collect recovery demonstrations from high-uncertainty states, combined with replay-based continual learning to mitigate catastrophic forgetting
+  action_head_category: autoregressive
+training:
+  dataset: LIBERO-10 (initial pi0-FAST policy at 30k steps) + uncertainty-guided recovery demonstrations
+  compute: not reported
+  initial_policy: pi0-FAST trained on LIBERO via the authors' recipe for 30k steps
+  uncertainty_module: INSIGHT (Strong INSIGHT trained with step-wise help labels; Weak INSIGHT from episode-level success labels)
+  continual_learning_methods:
+  - full replay (D_old + D_new)
+  - LIBERO-10 replay
+  - targeted replay
+  - new-only fine-tuning
+  - EWC regularization
+  - low constant learning rate (alpha=2.5e-8)
+benchmarks:
+  libero:
+    libero_long: 72.4
+    libero_avg: 72.4
+    source: RECALL paper (Strong INSIGHT online recovery + full replay, best checkpoint)
+    date_reported: '2026-06-22'
+    eval_condition: fine-tuned (active continual learning on LIBERO-10; 500 rollouts per checkpoint)
+    notes: Baseline pi0-FAST 59.8%. Strong INSIGHT online + full replay 72.4% overall (collected-task 49.2%, retained-task 95.6%). Offline collection 68.4%. New-only fine-tuning 28.4% (catastrophic forgetting).
+open_source: false
+open_source_note: Code/data release not announced in paper
+inference_hz: null
+tags:
+- 3B
+- autoregressive
+- active-learning
+- continual-learning
+- uncertainty-guided
+- recovery
+- replay
+- EWC
+- pi0-FAST
+- LIBERO-10
+model_type: VLA fine-tuning / active continual learning framework
+eval_conditions:
+  benchmark_only: LIBERO-10 (10 long-horizon tasks)
+  rollouts_per_task: 50
+  total_rollouts_per_checkpoint: 500
