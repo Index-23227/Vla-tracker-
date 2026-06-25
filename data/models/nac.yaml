@@ -1,0 +1,50 @@
+# Paper: NAC: Neural Action Codec for Vision-Language-Action Models
+# arXiv: 2606.21372
+
+name: NAC
+full_name: "NAC: Neural Action Codec for Vision-Language-Action Models"
+organization: "The University of Texas at Dallas"
+date: "2026-06-19"
+paper_url: https://arxiv.org/abs/2606.21372
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "SEANet-style fully convolutional 1D encoder (~63M params total for NAC tokenizer)"
+  llm: "Causal Transformer policy (d=256, 4 layers, 4 heads) — NACPolicy autoregressive BC head trained from scratch with observation/language conditioning"
+  action_head: "NACPolicy: autoregressive next-token prediction over NAC's structured discrete code sequence with offset codebooks. The frozen NAC tokenizer maps a continuous action chunk a ∈ R^{B×Ha×Da} to a flattened 1D pseudo-waveform, then a SEANet encoder + Multi-Scale RVQ (2-scale, 1024-entry codebooks, nq quantization stages with per-stage temporal pooling) produces 12 ordered discrete tokens per chunk. The policy predicts these tokens flat with scale-s tokens in [s·Vbins, (s+1)·Vbins); a Vocos-style decoder with ISTFT head recovers continuous actions; first 16 of 32 predicted steps executed in receding horizon."
+  action_space: "discrete tokens (12 tokens/chunk, Vbins=1024 per scale) decoded to continuous 7-14 dim joint/end-effector actions via Vocos+ISTFT detokenizer"
+  parameters: "~63M (NAC tokenizer); policy is a small 4-layer causal Transformer (d=256)"
+  key_innovation: "Repurposes neural audio codecs (SoundStream/DAC/SNAC lineage of multi-scale RVQGAN) as an action tokenizer by treating short robot action chunks as multi-channel 1D pseudo-waveforms. Three audio-to-action adaptations are shown to be load-bearing: (1) **drop mel-spectrogram losses entirely** — mel objectives are tied to human auditory perception and *collapse downstream policy success to 0%* on LIBERO-10; simple time-domain MSE/L1 or non-mel spectrogram loss is required. (2) **Keep adversarial training** — removing the discriminator also drops success to 0%; the DAC discriminator outperforms MPD/MRD for kinematic signals. (3) **Use a Vocos-style ISTFT decoder head** instead of a linear head (48.3% vs 42.1% on LIBERO-10). Multi-scale RVQ with per-stage temporal pooling forces earlier stages to capture coarse global trajectory structure and later stages to capture high-frequency residuals; offset codebooks (token IDs for scale s in [s·Vbins, (s+1)·Vbins)) give the autoregressive policy a structured, causal vocabulary. First reported application of adversarial loss to action tokenization."
+  action_head_category: autoregressive
+
+training:
+  dataset: "LIBERO-10 [Liu et al. 2023] subset and RoboMimic [Mandlekar et al. 2022] for simulation; 8 real-world tabletop tasks (Weighing, Grapes, Marker, Two/Three Blocks, Chess, Place Stone, Fold Towel). 500 training demonstrations per setting; action horizon 32; observation history 2; 16 executed action steps per receding-horizon step."
+  method: "Two-stage. (1) NAC tokenizer pretraining: 50k steps with generator loss L_gen = L_reconst + 1000·L_commit + L_adv (MSE reconstruction + DAC discriminator adversarial loss), k-means codebook init on first batch then EMA updates, 2-scale RVQ with 1024 codes each, learning rate 2e-4 cosine. (2) Policy training: frozen NAC tokenizer, autoregressive Transformer (d=256, 4 layers, 4 heads, dropout 0.1) with cross-entropy over the flat offset-code sequence [BOS, scale-0 tokens, scale-1 tokens, ...], 50k steps, batch 256, policy lr 5e-5, vision encoder lr 1e-5, top-k=10 sampling at T=1.0 inference."
+  compute: "Latency benchmarked on single NVIDIA RTX 4090 (encode 1.27 ms, decode 2.18 ms, total recon 3.54 ms per chunk)"
+
+benchmarks:
+  libero:
+    libero_long: 49.73
+    libero_avg: 49.73
+    source: "Table 2 (LIBERO-10 row, NAC column): 49.73 ± 1.0 success rate over 8 seeds × 50 trials per task; downstream NACPolicy with frozen NAC tokenizer"
+    date_reported: "2026-06-19"
+    eval_condition: "LIBERO-10 (LIBERO-Long suite) only; 500 demos, action horizon 32, autoregressive policy with top-k=10 sampling, T=1.0; receding horizon executing 16 of 32 predicted steps"
+
+eval_conditions:
+  libero: "Evaluated only on LIBERO-10 (the LIBERO-Long suite) — the paper does not report LIBERO-Spatial/Object/Goal. Average over 8 seeds with 50 trials per task. Outperforms FAST (38.02), OAT (44.17), VQ-VLA (10.85), Bin (3.95), Diffusion Policy (25.48) on the same protocol."
+
+tags:
+  - autoregressive
+  - action_tokenizer
+  - residual_vq
+  - rvqgan
+  - neural_audio_codec
+  - seanet
+  - vocos
+  - istft
+  - adversarial
+  - multi_scale_rvq
+  - libero
+  - real_world
