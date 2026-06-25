@@ -1,30 +1,30 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: UniFS: Unified Fast-to-Slow Hierarchical Architecture for Vision-Language-Action Models
-# arXiv: 2606.22794
-
 name: UniFS
 full_name: "UniFS: Unified Fast-to-Slow Hierarchical Architecture for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "JD.com"
 date: "2026-06-22"
 paper_url: https://arxiv.org/abs/2606.22794
-code_url: null  # TODO: check for GitHub repo
+code_url: https://github.com/linsun449/UniFS
 venue: null
-open_source: false  # TODO: verify
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_head: "Transformer-based action expert with cross-attention to multi-timescale VLM latents and lightweight MLP head decoding action chunks from noisy action priors"
+  action_head_category: diffusion
+  parameters: "Qwen2.5-0.5B LLM backbone + DINOv2 & SigLIP vision encoders + transformer action expert"
+  key_innovation: "Unified fast-to-slow hierarchical architecture that stratifies VLM layers into K groups with progressively decreasing update frequencies (1, 2, 4, 8, 16), uses latent vector inversion to route fast-varying shallow features to fine-grained action decoding and slow-varying deep features to coarse planning, and multi-level supervision to enforce coarse-to-fine learning across temporal scales. Achieves 98.3% LIBERO avg with 17.8 ms latency (2.1x speedup over VLA-Adapter)."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.6
+    libero_object: 99.6
+    libero_goal: 98.2
+    libero_long: 95.6
+    libero_avg: 98.3
+    source: "Table 1, arXiv:2606.22794"
 
 eval_conditions:
   libero: "fine-tuned"
 
-tags: [libero]
+inference_hz: 56.2  # 1000ms / 17.8ms mean latency
+
+tags: [libero, fast-slow, hierarchical, multi-timescale, jd]
