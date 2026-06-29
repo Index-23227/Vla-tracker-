@@ -1,0 +1,46 @@
+name: FORCE
+full_name: "FORCE: Efficient VLA Reinforcement Fine-Tuning via Value-Calibrated Warm-up and Self-Distillation"
+organization: "Beijing Academy of Artificial Intelligence / Peking University / Institute of Automation, Chinese Academy of Sciences"
+date: "2026-06-24"
+paper_url: https://arxiv.org/abs/2606.26006
+code_url: null
+venue: "arXiv preprint"
+open_source: false
+
+architecture:
+  backbone: "N/A (RL fine-tuning framework; backbone-agnostic, validated on Octo and pi0 as host VLAs)"
+  llm: "N/A (inherits LLM of host VLA)"
+  action_head: "Consistency policy (one-step distilled diffusion/flow actor) used during fine-tuning; replaces the iterative diffusion/flow-matching denoiser of the host VLA to enable fast inference and stable Q-gradient propagation"
+  action_head_category: flow_matching
+  parameters: "Inherits host VLA (Octo ~93M-class, pi0 ~3B)"
+  key_innovation: "Three-stage intervention-free offline-to-online RL fine-tuning pipeline. (1) Offline Cal-QL pretraining for a conservative critic + behavior-regularized actor. (2) Distributional (Value-Calibrated) Warm-up: collects on-policy rollouts, merges with offline demos, and re-applies the Cal-QL constraint on the mixed buffer to expand Q-function support onto the policy's visitation distribution, mitigating 'initial unlearning'/covariate shift. (3) Value-Guided Policy Self-Distillation (VGPD): an online actor that samples K candidate actions, applies a Dynamic Advantage Filter (Positive Advantage Truncation around qmean baseline) and exponential energy weighting, distilling only high-value actions. Theoretically grounded as a regularized policy improvement operator with Monotonic Value Improvement guarantee (Proposition 1)."
+
+benchmarks: {}
+
+eval_conditions:
+  simulation: "ManiSkill (Tao et al., 2025): StackCube, PullCube, PushCube, PullCubeTool, PlaceSphere, PickCube; 3 random seeds; Octo and pi0 backbones"
+  real_world: "Single-arm Franka Emika Panda with two RealSense cameras (wrist + side view): Pick Cup, Open Drawer, Insert USB, Pick Corn, Stack Cube, Clean Whiteboard"
+
+training:
+  dataset: "Expert demonstrations + on-policy online rollouts (ManiSkill simulation; real-world Franka tasks)"
+  method: "Offline-to-online RL. Stage 1 Cal-QL offline RFT with BC + Q-guided actor. Stage 2 Distributional Warm-up on mixed offline+on-policy buffer. Stage 3 intervention-free online fine-tuning with dual replay buffers (expert + policy, equal sampling), TD critic update, and VGPD actor distillation."
+  num_trajectories: null
+  compute: null
+
+tags:
+  - reinforcement_learning
+  - rl_fine_tuning
+  - offline_to_online
+  - cal_ql
+  - consistency_policy
+  - value_guided_distillation
+  - self_distillation
+  - intervention_free
+  - sample_efficiency
+  - maniskill
+  - real_world
+  - franka
+  - octo
+  - pi0
+  - beijing_academy_of_ai
+  - peking_university
