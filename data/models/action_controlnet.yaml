@@ -1,0 +1,37 @@
+name: action_controlnet
+full_name: 'Action ControlNet: A Lightweight Delay-Aware Adapter for Smooth Asynchronous Control in Vision-Language-Action Models'
+version: '1.0'
+organization: Peking University
+paper_url: https://arxiv.org/abs/2606.25985
+code_url: null
+date: '2026-06-24'
+venue: null
+model_type: adapter
+architecture:
+  backbone: Evo-1 (perception-language backbone, frozen)
+  llm: Evo-1 vision-language backbone
+  action_head: flow matching (8-layer DiT-style action expert) + ACNet residual side branch
+  action_space: continuous (action chunks)
+  parameters: ~20% of base model trainable (ACNet side branch only)
+  key_innovation: Lightweight delay-aware ControlNet-style residual adapter that conditions
+    a mostly frozen generative action head on the executed motion suffix (delay action) as a
+    boundary condition, reducing handoff jitter in asynchronous chunked VLA execution without
+    full-policy retraining; compatible with diffusion and flow-matching heads.
+  action_head_category: flow_matching
+training:
+  dataset: Kinetix (RTC protocol), Meta-World MT50, SO-ARM101 real-world (50 rollouts)
+  method: Frozen backbone + ACNet residual branch trained with flow-matching loss and a
+    boundary-consistency term; cached visual-language latent reused across sampled delays
+  compute: single RTX 4080 SUPER (Meta-World experiments)
+benchmarks: {}
+open_source: false
+tags:
+- adapter
+- flow-matching
+- asynchronous-inference
+- delay-aware
+- parameter-efficient
+- evo-1
+- controlnet
+eval_conditions: 'Kinetix delays d in {0,1,2,3,4}; Meta-World MT50 delays d in {0,5,10,15}
+  with H=50, e=25; SO-ARM101 real-world 10 trials/task. Not evaluated on LIBERO/CALVIN/SimplerEnv.'
