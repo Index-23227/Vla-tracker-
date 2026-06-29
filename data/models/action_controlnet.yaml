@@ -1,4 +1,4 @@
-name: action_controlnet
+name: Action-ControlNet
 full_name: 'Action ControlNet: A Lightweight Delay-Aware Adapter for Smooth Asynchronous Control in Vision-Language-Action Models'
 version: '1.0'
 organization: Peking University
@@ -33,5 +33,7 @@ tags:
 - parameter-efficient
 - evo-1
 - controlnet
-eval_conditions: 'Kinetix delays d in {0,1,2,3,4}; Meta-World MT50 delays d in {0,5,10,15}
-  with H=50, e=25; SO-ARM101 real-world 10 trials/task. Not evaluated on LIBERO/CALVIN/SimplerEnv.'
+eval_conditions:
+  kinetix: "delays d in {0,1,2,3,4}"
+  metaworld_mt50: "delays d in {0,5,10,15} with H=50, e=25"
+  real_world: "SO-ARM101 real-world 10 trials/task. Not evaluated on LIBERO/CALVIN/SimplerEnv."
