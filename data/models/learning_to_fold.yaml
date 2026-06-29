@@ -1,0 +1,28 @@
+name: LeHome-Fold
+full_name: "Learning to Fold: prizewinning solution at LeHome Challenge 2026 (1st place online, 2nd offline)"
+organization: "Independent Researcher (Ilia Larchenko)"
+date: "2026-06-25"
+paper_url: https://arxiv.org/abs/2606.27163
+code_url: https://huggingface.co/IliaLarchenko/lehome_real
+venue: "ICRA 2026 (LeHome Challenge)"
+open_source: true
+model_type: bimanual_manipulation
+
+architecture:
+  backbone: "Frozen SigLIP-So400m/14 vision encoder"
+  llm: "Gemma-2B prefix transformer"
+  action_head: "Gemma-300M flow-matching action expert emitting 30-step (1s @ 30Hz), 12-dim joint-delta action chunks; correlated FM noise, correlation-aware soft inpainting, cross-layer KV-cache mixing, 5 multi-sample flow candidates"
+  action_head_category: flow_matching
+  parameters: "~2.3B (Gemma-2B prefix + Gemma-300M action expert) on a frozen SigLIP encoder; π0.5-based"
+  key_innovation: "An RL-improved flow-matching VLA (π0.5-based, carried from the BEHAVIOR-1K 2025 winning solution) where the policy is its own value function: one query token feeds cheap linear heads predicting success, completion/progress, garment type, current and 30-frame-ahead keypoint distances, plus an action-conditional success residual acting as a Q-function. These drive GAE advantage estimation, live failure detection and best-of-N candidate selection. Training combines AWR (advantage-weighted regression applied through the data sampler, not the loss) with RECAP-style advantage conditioning (enabling classifier-free guidance), run in an asynchronous training/rollout/DAgger flywheel that communicates only through HuggingFace Hub. Inference-time hyperparameters (execution length, playback speed, inpainting onset, guidance scale, noise temperature, best-of-N per garment type) are tuned online via a Thompson-sampling bandit."
+
+benchmarks: {}
+
+training:
+  datasets: ["Organizer scripted-policy BC dataset (Isaac Sim)", "Self-collected sim rollouts (success/failure replays, hard-mining)", "Manual DAgger/teleop episodes", "Real-robot teleop + augmented sim replays"]
+  method: "BC pretraining then RL fine-tuning via AWR (sampler reweighting) + RECAP advantage conditioning in an asynchronous distributed flywheel; dense rewards engineered from the challenge keypoint conditions; heavy domain randomization; sim-to-real fine-tune with camera-overlay calibration, motion-velocity alignment and DAgger-like HIL data collection"
+
+eval_conditions:
+  lehome: "LeHome Challenge 2026 (Isaac Sim online round + ICRA Vienna real-world final); garment type not given at eval time"
+
+tags: [flow_matching, reinforcement_learning, awr, recap, bimanual, garment_folding, deformable, sim_to_real, dagger, competition, lehome_challenge, icra2026, pi05, open_source]
