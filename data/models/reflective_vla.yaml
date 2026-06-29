@@ -1,0 +1,51 @@
+name: Reflective-VLA
+organization: Futian Laboratory / IDEA / Visincept
+paper_url: https://arxiv.org/abs/2606.25215
+code_url: null
+date: '2026-06-23'
+venue: arXiv preprint
+open_source: false
+model_type: dual-system VLA
+architecture:
+  backbone: PaliGemma-3B or Qwen3-VL-2B (native visual pathway)
+  llm: PaliGemma-3B / Qwen3-VL-2B
+  action_head: flow-matching continuous action expert (hidden dim 1024) under shared attention (Mixture-of-Transformers)
+  action_space: continuous (absolute end-effector control); chunk size C=10 (sim), C=30 (real)
+  parameters: ~2B-3B (VLM) + action expert
+  key_innovation: In-context learning over observation-action-consequence (O,A,O') triplets; block-causal mask enables parallel multi-frame training and KV-cached real-time inference; conditions decisions on past interaction evidence to infer deployment-specific factors (camera geometry, calibration, actuation bias) without test-time fine-tuning
+  action_head_category: flow_matching
+training:
+  dataset: LIBERO demonstrations + BridgeData V2 + LIBERO-Plus / LIBERO-Plus-Hard replays (43,546 trajectories merged)
+  method: Block-causal in-context training over causal triplets; context length K=8 (LIBERO), K=4 (SimplerEnv); AdamW, bf16, DeepSpeed ZeRO-2
+  compute: 8x H20 GPUs
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 99.0
+    libero_goal: 98.2
+    libero_long: 94.6
+    libero_avg: 97.6
+    source: "arXiv:2606.25215 Table 1"
+    date_reported: '2026-06-23'
+    eval_condition: "fine-tuned; 50 rollouts/task; absolute end-effector control; +0.7pp over matched reactive pi0.5 baseline (SOTA)"
+  simpler_env:
+    widowx_spoon_on_towel: 95.8
+    widowx_carrot_on_plate: 83.3
+    widowx_stack_cube: 79.2
+    widowx_eggplant_in_basket: 54.2
+    simpler_avg: 78.2
+    source: "arXiv:2606.25215 Table 1 (SimplerEnv-Bridge)"
+    date_reported: '2026-06-23'
+    eval_condition: "fine-tuned; BridgeData V2 -> ManiSkill2; 24 rollouts/task; +5.3pp over reactive baseline (SOTA)"
+eval_conditions:
+  libero: "fine-tuned; in-distribution; LIBERO-Plus avg 87.7%, LIBERO-Plus-Hard avg 68.8% under distribution shift"
+  simpler_env: "real-to-sim transfer; WidowX 4 tasks"
+tags:
+- flow-matching
+- dual-system
+- in-context-learning
+- mixture-of-transformers
+- generalization
+- libero
+- simpler-env
+- manipulation

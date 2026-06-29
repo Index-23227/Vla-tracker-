@@ -1,0 +1,28 @@
+name: ROAD-VLA
+full_name: 'ROAD-VLA: Robust Online Adaptation via Self-Distillation for Vision-Language-Action Models'
+organization: UNSW Sydney / Deakin University / Air Force Research Laboratory
+date: '2026-06-24'
+paper_url: https://arxiv.org/abs/2606.25800
+venue: Preprint
+open_source: false
+architecture:
+  backbone: OpenVLA-7B (SigLIP + DINOv2 vision encoder, Prismatic VLM)
+  llm: Llama 2 7B
+  action_head: Autoregressive discrete action tokens (256-bin, 7 tokens/action)
+  parameters: 7B
+  action_head_category: autoregressive
+key_innovation: 'Advantage-guided self-distillation for online VLA adaptation. Constructs
+  a proximal teacher directly in action-token space by perturbing action logits with
+  calibrated advantage estimates (closed-form solution of a KL-regularized improvement
+  problem), converting sparse scalar rewards into dense token-level supervision without
+  any external teacher or demonstration data. Outperforms PPO across in- and out-of-distribution
+  manipulation settings.
+
+  '
+benchmarks: {}
+tags:
+- online-adaptation
+- reinforcement-learning
+- self-distillation
+- OpenVLA
+- preprint

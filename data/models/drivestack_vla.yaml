@@ -1,0 +1,40 @@
+# Paper: DriveStack-VLA: Render-Teacher Alignment for BEV-Based DeepStack Vision-Language-Action Model
+# arXiv: 2606.24051
+
+name: DriveStack-VLA
+full_name: "DriveStack-VLA: Render-Teacher Alignment for BEV-Based DeepStack Vision-Language-Action Model"
+organization: "Zhejiang University / Huawei (2012 Labs)"
+date: "2026-06-23"
+paper_url: https://arxiv.org/abs/2606.24051
+code_url: null
+venue: arXiv preprint (submitted to IEEE)
+open_source: false
+
+architecture:
+  backbone: "Qwen3-VL-4B (perspective vision encoder + additional BEVFormer-based BEV encoder)"
+  llm: "Qwen3-VL-4B decoder"
+  action_head: "Action-token codebook: LLM decoder emits a fixed-length action tail of vector-quantized scale/code tokens (one scale token + one code token per 1s segment, 4s horizon at 2Hz), which a frozen VQ-VAE-style action codebook decodes into continuous trajectories. BEV features injected into LLM decoder via DeepStack-style per-layer connection."
+  action_head_category: discrete_diffusion
+  parameters: "4B (Qwen3-VL-4B backbone)"
+  key_innovation: "Three-stage actor-critic VLA driving framework. (1) BEV DeepStack injection: BEVFormer top-down features injected into the LLM decoder via DeepStack-style per-layer visual memory for geometric grounding. (2) Render-Teacher Alignment: rasterized (RAP-style) images act as a teacher to align real-image perceptual focus via masked camera-token MSE alignment + action-to-vision attention distillation (KL). (3) Self-critic: lightweight scoring head ranks best-of-K candidate trajectories and a refinement head conditionally predicts a tanh-bounded residual when the top score is below threshold. Stage-2 GRPO RFT with driving (NC/TTC/DAC) + format-consistency reward applied directly to the actor."
+
+benchmarks:
+  driving:
+    navsimv1_pdms_sft: 89.8
+    navsimv1_pdms_rft: 91.6
+    navsimv1_nc: 99.4
+    navsimv1_dac: 98.4
+    navsimv2_epdms_filter_true: 91.0
+    navsimv2_epdms_filter_false: 87.3
+    navhard_epdms: 34.9
+    bench2drive_driving_score: 79.49
+    bench2drive_success_rate: 56.36
+    bench2drive_efficiency: 164.52
+    source: "Tables I-IV in DriveStack-VLA paper (NAVSIMv1 navtest, NAVSIMv2 navtest, Navhard, Bench2Drive closed-loop)"
+    date_reported: "2026-06-23"
+    eval_condition: "open-loop NAVSIMv1/v2 + Navhard (real-log) and closed-loop Bench2Drive (CARLA simulation)"
+
+eval_conditions:
+  driving: "fine-tuned, end-to-end (NAVSIMv1/v2, Navhard, Bench2Drive)"
+
+tags: [autonomous_driving, bev, deepstack, render_teacher_alignment, navsim, bench2drive, action_codebook, grpo, rl, self_critic, qwen3_vl]
