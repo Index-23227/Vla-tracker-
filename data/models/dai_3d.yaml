@@ -1,0 +1,44 @@
+name: DAI-3D
+full_name: "Direct Action-Head Injection of A Grounded 3D Point Unlocks Spatial and Task Generalization"
+organization: "National Tsing Hua University; National Yang Ming Chiao Tung University"
+date: "2026-06-26"
+paper_url: https://arxiv.org/abs/2606.27663
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Backbone-agnostic module applied on top of pretrained VLAs (GR00T-N1.6 and pi-0.5); off-the-shelf 2D grounding source (oracle segmentation masks in sim, zero-shot Qwen3-VL-4B in real world) supplies the target point"
+  llm: "Inherited from base VLA (GR00T-N1.6 / pi-0.5 VLM backbone, unchanged)"
+  action_head: "Base VLA's DiT flow-matching/diffusion action head, conditioned on a 3D spatial embedding via AdaLN: a 2D target point is lifted to 3D with depth + camera intrinsics/extrinsics, the gripper-to-target displacement d = p_t - p_g is encoded by a two-layer MLP (hidden/output dim 1024, second layer zero-initialized), and z_spatial is added element-wise to the timestep embedding before the existing AdaLN scale/shift projection"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: null
+  key_innovation: "Shows that HOW a grounding signal is represented and injected is the real bottleneck for VLA generalization: given the identical oracle 2D point, text-prompt and visual-prompt injection give only modest gains, whereas lifting the point to 3D and injecting the gripper-relative displacement directly into the action head via AdaLN yields dramatic gains. The module is a single two-layer MLP (no backbone or objective changes); zero-init of its second layer exactly preserves pretrained AdaLN behavior at step 0. On LIBERO-PRO it lifts GR00T-N1.6 from 31.2 to 77.5 (Task Perturbation) and 28.1 to 60.2 (Position Perturbation), with comparable gains on pi-0.5 (37.3 to 75.9 / 47.0 to 72.2), and trained on only 20 tasks it already beats all 2D/text variants trained on 69 tasks. Note: the paper gives the method no acronym (referred to as 'Ours' / '3D via AdaLN'); DAI-3D is a tracker-assigned identifier derived from the title."
+
+training:
+  dataset: "Simulation: LIBERO-Object + LIBERO-Spatial + 49 pick-and-place tasks from LIBERO-90 (69 tasks total; 2D oracle points sampled from simulator segmentation masks via distance transform, lifted to 3D through depth). Real world: 8 pick-and-place tasks x 40 demos on Franka Emika Panda with two RealSense D435 (front RGB-D + wrist RGB), Qwen3-VL-4B zero-shot grounding"
+  method: "Fine-tuning of the full VLA with the spatial-embedding MLP following each backbone's official recipe. GR00T-N1.6: batch 384, 20k steps, AdamW lr 1e-4 cosine, 16-step action chunk. pi-0.5: batch 256, 30k steps, AdamW lr 5e-5, 10-step action chunk. Sub-goal switching: target switches from object to placement region once the object rises >1 cm"
+
+benchmarks:
+  libero:
+    libero_object: 99.6
+    libero_spatial: 92.4
+    libero_avg: 96.0
+    libero_pro_task_perturbation_avg: 77.5
+    libero_pro_position_perturbation_avg: 60.2
+    source: "Table 1 (GR00T-N1.6 + Ours, best variant; 50 rollouts/task)"
+    eval_condition: "fine-tuned on 69-task suite (LIBERO-Object/Spatial + 49 LIBERO-90 tasks); libero_avg is the 2-suite Object/Spatial mean; LIBERO-PRO perturbation averages listed separately. pi-0.5 + Ours: Object 97.0 / Spatial 98.2 / Avg 97.6"
+  real_world:
+    in_distribution_avg: 92.5
+    task_perturbation_avg: 63.8
+    position_perturbation_avg: 66.3
+    source: "Tables 8-10 (GR00T-N1.6 + Ours, 8 Franka pick-and-place tasks, 10 rollouts/condition)"
+    eval_condition: "fine-tuned; Qwen3-VL-4B zero-shot 2D grounding + RealSense D435 depth"
+
+eval_conditions:
+  libero: "fine-tuned"
+  real_world: "fine-tuned"
+
+tags: [3d_grounding, adaln_injection, spatial_generalization, task_generalization, libero, libero_pro, backbone_agnostic, gr00t, pi0_5, flow_matching, real_robot, depth]
