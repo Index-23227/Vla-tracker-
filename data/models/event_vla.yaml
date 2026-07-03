@@ -1,0 +1,67 @@
+name: Event-VLA
+full_name: 'Event-VLA: Action-Conditioned Event Fusion for Robust Vision-Language-Action Model'
+organization: ShanghaiTech University / HKUST (Guangzhou) / University of Michigan / Shanghai Jiao Tong University
+date: '2026-06-28'
+paper_url: https://arxiv.org/abs/2606.29384
+code_url: null
+venue: arXiv 2026
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: Prismatic-7B VLM initialized from OpenVLA (OXE-pretrained), plus a separate event encoder distilled from a frozen DINO visual teacher
+  llm: Llama-2-7B (via Prismatic-7B / OpenVLA)
+  action_head: MLP action head regressing continuous action chunks (chunk size 8) with L1 loss; event tokens injected post-backbone via gated cross-attention and query-guided routing; auxiliary deconvolutional event head predicts future PREI maps (training-only regularizer)
+  action_head_category: regression
+  action_space: continuous
+  parameters: 7B
+  key_innovation: >
+    Action-conditioned event-to-VLA interface: event streams are compressed into PREI
+    (Physical Residual Event Integration) 3-channel residual maps (instantaneous / salient /
+    persistent), encoded outside the pretrained semantic backbone, and injected only into the
+    action pathway through gated cross-attention plus common/action/event query-guided token
+    routing. Preserves RGB-language semantic priors while adding illumination-robust event
+    cues; auxiliary future-PREI prediction loss regularizes training. Introduces LIBERO-Cross,
+    a progressive low-light degradation benchmark (LL-Mild/Dark/Severe) with an RGB-to-event
+    simulator.
+
+training:
+  dataset: LIBERO demonstrations per sub-benchmark (event side via v2e pseudo-events and a learned RGB-to-event simulator); event encoder distilled on N-ImageNet native RGB-event pairs + v2e-synthesized LIBERO pairs; 80 real-world Franka demonstrations (4 tasks x 20 demos)
+  method: LoRA fine-tuning (rank 32) of OpenVLA backbone; AdamW lr 5e-5 (decay 0.1 at 50k steps), batch size 64, action chunk 8, event history 8; auxiliary event losses (lambda_evt 0.1, lambda_deriv 0.3) warmed up 5k steps
+  compute: 8x H100 GPUs, ~140k steps per LIBERO sub-benchmark
+
+benchmarks:
+  libero:
+    libero_spatial: 94.2
+    libero_object: 99.4
+    libero_goal: 97.4
+    libero_long: 94.8
+    libero_avg: 96.5
+    source: paper Table 1 (normal visibility, with event pathway)
+    date_reported: '2026-06-28'
+    eval_condition: fine-tuned per sub-benchmark, 500 trials each
+  real_world:
+    franka_normal: 72.5
+    franka_low_light: 70.0
+    franka_near_dark: 52.5
+    franka_avg: 65.0
+    source: paper Table 4 (Franka Research 3, 4 tasks x 10 trials per condition)
+    date_reported: '2026-06-28'
+    eval_condition: fine-tuned, DAVIS event camera
+
+eval_conditions:
+  libero: fine-tuned per sub-benchmark; also evaluated on LIBERO-Cross low-light extension (LL-Severe avg 95.6 vs MM-ACT 69.6)
+  real_world: Franka Research 3 with wrist ZED + external Orbbec + DAVIS event camera; normal / low-light / near-dark lighting
+
+tags:
+- event-camera
+- low-light-robustness
+- multimodal-fusion
+- gated-cross-attention
+- query-routing
+- openvla-backbone
+- libero
+- libero-cross
+- real-world
+- franka
+- arXiv-2026
