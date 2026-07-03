@@ -1,0 +1,49 @@
+name: S2-VLA
+full_name: 'S$^2$-VLA: State-Space Guided Vision-Language-Action Models for Long-Horizon Manipulation'
+organization: East China Normal University / Shanghai Jiao Tong University
+date: '2026-06-26'
+paper_url: https://arxiv.org/abs/2606.27872
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+inference_hz: 80.8
+architecture:
+  backbone: Qwen3-VL (2B)
+  llm: Qwen3-VL 2B
+  action_head: 24-layer SSGAA (State-Space Guided Adaptive Attention) parallel decoding head; L2 regression over K-step action chunks
+  action_space: continuous
+  parameters: 2B
+  action_head_category: regression
+  key_innovation: 'GRU-based belief state tracks task progression from action history + proprioception, and drives a softmax gating network (single gate at layer 12) that dynamically fuses three attention pathways: low-level visual cross-attention, high-level intent cross-attention, and action-sequence self-attention. Phase-aware fusion mitigates cumulative error in long-horizon tasks; 2B model beats 7B-scale VLAs.'
+training:
+  method: End-to-end fine-tuning of Qwen3-VL backbone, GRU belief update module, and SSGAA action head with pure action MSE loss (no action-sequence pretraining)
+  compute: 4x H100 GPUs (training); 7GB VRAM at inference
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 99.6
+    libero_goal: 98.4
+    libero_long: 96.4
+    source: Table 1, S2-VLA paper (arXiv 2606.27872)
+    date_reported: '2026-06-26'
+    eval_condition: fine-tuned
+  simpler_env:
+    simpler_bridge: 78.1
+    source: Table 2, S2-VLA paper (SimplerEnv-Bridge, WidowX)
+    date_reported: '2026-06-26'
+    eval_condition: fine-tuned
+eval_conditions:
+  libero: fine-tuned
+  simpler_env: fine-tuned
+tags:
+- 2B
+- long-horizon
+- state-space
+- belief-state
+- adaptive-attention
+- dynamic-gating
+- GRU
+- parallel-decoding
+- ALOHA
+- real-world
