@@ -1,0 +1,34 @@
+name: OpenSPM
+full_name: "OpenSPM: An Environment-Transferable Robotic Key Spatial Pose Memory and Closed-Loop High-Frequency Flow-Matching Action Generation Model"
+organization: "Tsinghua University"
+date: "2026-06-29"
+paper_url: https://arxiv.org/abs/2606.29936
+code_url: null
+venue: null
+open_source: false
+model_type: modular_policy
+inference_hz: 1033.3
+
+architecture:
+  backbone: "SAM 3 + SAM 3D (open-vocabulary segmentation + object-level 3D reconstruction) with Kalman-filtered 6D pose state estimation; Qwen3-VL for phase-semantic keyframe judgment and instruction parsing"
+  llm: "Qwen3-VL (perception/retrieval side only; action model consumes no image/language tokens)"
+  action_head: "Lightweight conditional flow-matching MLP (~240K params) generating H=5 action chunks between transferred SE(3) key spatial poses, with inter-segment closed-loop proprioceptive feedback and terminal residual correction"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "0.24M"
+  key_innovation: "Decompositional alternative to end-to-end VLA: semantically conditioned 3D perception + Kalman state estimation tracks continuous 6D poses; demonstrations are compressed into a retrieval-based key spatial pose memory bank of phase-labeled, object-centric SE(3) relative poses that transfer to new scenes via SE(3) transformations; a tiny 240K-parameter conditional flow-matching model fills in high-frequency action chunks (4.8 ms latency, 1033.3 Hz equivalent). Closed-loop state feedback + terminal residual correction lift LIBERO-GOAL success from 3.0% (open-loop) to 85.6%."
+
+benchmarks:
+  libero:
+    libero_goal: 85.6
+    source: "Table 1 (LIBERO-GOAL only; 10 tasks x 50 initial states = 500 episodes)"
+    eval_condition: "few-shot: key spatial pose memory built from demonstrations; only LIBERO-GOAL suite evaluated"
+
+training:
+  dataset: "LIBERO-GOAL demonstrations (key spatial poses extracted offline; flow-matching model trained on adjacent key-pose segments, chunk length H=5)"
+  method: "Offline memory construction (keyframe extraction via gripper transitions, velocity/orientation changes, Qwen3-VL phase judgment) + conditional flow matching on low-dimensional pose/progress conditions; converges within ~200 epochs"
+
+eval_conditions:
+  libero: "few-shot (demonstration-derived memory, LIBERO-GOAL suite only)"
+
+tags: [flow_matching, libero, spatial_memory, 3d_perception, keyframe, se3_transfer, high_frequency, few_shot, closed_loop, lightweight]
