@@ -1,0 +1,92 @@
+# Paper: SPARK: Sequential Planning via Anchored Robotic Keypoints
+# arXiv: 2606.30613 (auto-track relevance score 8.0)
+
+name: SPARK
+full_name: "SPARK: Sequential Planning via Anchored Robotic Keypoints"
+organization: "Case Western Reserve University"
+date: "2026-06-29"
+paper_url: https://arxiv.org/abs/2606.30613
+code_url: null
+venue: null
+open_source: true
+model_type: neurosymbolic-agent
+
+architecture:
+  backbone: "Training-free modular pipeline: SAM3 open-vocabulary detection/segmentation (perception) + Gemini planner (Gemini 3.1 Pro in simulation, Gemini 3.5 Flash on hardware, temperature 0.3) + Pyroki constrained IK / Robosuite OSC controller (execution)"
+  llm: "Gemini 3.1 Pro (simulation) / Gemini 3.5 Flash (physical), single BT-generation call per trial"
+  action_head: "No learned action head: one Gemini call emits a typed YAML behavior tree over a grammar of 5 base primitives (move_to_keypoint, move_relative, grasp, release, wait) composing into 30+ typed skills; keypoint labels resolve to live SAM3 3D detections at execution time, and an IK/OSC controller executes each primitive under boolean post-condition checks"
+  action_head_category: other
+  action_space: continuous
+  parameters: "training-free (no trained parameters; off-the-shelf SAM3 checkpoint + Gemini API)"
+  key_innovation: >-
+    Training-free neurosymbolic manipulation that reallocates test-time compute
+    from plan regeneration to perception. A single Gemini call commits a typed
+    behavior tree whose spatial arguments are keypoint LABELS resolved against
+    live SAM3 detections at act time, so position/language perturbations change
+    only perception, not the plan. Adaptive perception self-consistency (a
+    second Gemini call proposes 3 alternative SAM3 text prompts per object;
+    the most confidently detected prompt is kept) adds +27.7 points on the
+    LIBERO-PRO spatial suite and +10.0 on the object suite. A 3-tier recovery
+    layer (wiggle/grasp-perturb, retract + re-detect + retry same plan, replan)
+    handles failures with no new LLM call in tiers 1-2 (+~5 points). Reaches
+    43.7% on six LIBERO-PRO position-and-task cells (vs CaP-Agent0 18.2%,
+    MolmoAct2 18.6%, pi0.5 12.8%; matching RATS 43.8% without its offline play
+    phase) at ~$0.048/trial (~20x cheaper than CaP-Agent0), and runs unchanged
+    on three robot families. Every trial logs a labeled BT trace usable as
+    teleoperation-free training data.
+
+training:
+  dataset: "None (training-free; no demonstrations, no fine-tuning). Successful BTs are passively cached as optional in-context examples"
+  method: "No training. Per-trial LLM calls only: 2 Gemini calls in simulation (prompt synthesis + BT generation), 1 on hardware"
+  hardware: "n/a (inference: Gemini API + public SAM3 checkpoint)"
+
+benchmarks:
+  libero_pro:
+    object_pos: 43.4
+    object_task: 36.4
+    goal_pos: 40.0
+    goal_task: 14.0
+    spatial_pos: 56.0
+    spatial_task: 72.4
+    libero_pro_avg: 43.7
+    source: "SPARK paper Table 1, Adaptive configuration (six LIBERO-PRO position-and-task cells, 10 tasks/cell, 50 trials/task, CaP-Agent0 S2 protocol: vision-only, no ground-truth lookup)"
+    date_reported: "2026-06-29"
+    eval_condition: "training-free, zero-shot; LIBERO-PRO perturbation benchmark, NOT standard LIBERO"
+  real_world:
+    ur10e_utensils_in_bowl: 55.0
+    ur10e_utensils_in_tray: 90.0
+    ur10e_plushie_in_bowl: 100.0
+    ur10e_stack_blocks: 65.0
+    fr3_utensils_in_tray: 80.0
+    fr3_sponge_wash_plate: 100.0
+    fr3_mug_pour: 65.0
+    fr3_sweep_to_dustpan: 55.0
+    fr3_tshirt_fold: 50.0
+    bimanual_tshirt_fold: 30.0
+    bimanual_silverware_sort: 60.0
+    physical_mean: 68.0
+    source: "SPARK paper Table 2 (11 task-embodiment cells, 9 unique tasks, 20 trials each; objects and placements randomized per trial)"
+    date_reported: "2026-06-29"
+    eval_condition: "training-free; UR10e + Robotiq 2F-85, Franka FR3, bimanual Panda+FR3; single-prompt SAM3 detection, hardware structured-light depth"
+
+eval_conditions:
+  libero_pro: "Adaptive configuration (3 alternative SAM3 prompts/object), 2 Gemini 3.1 Pro calls per trial, simulator depth, CaP-Agent0 S2 protocol; goal-task cell (14.0) is where adaptive prompts backfire vs fair baseline (22.4)"
+  real_world: "1 Gemini 3.5 Flash call per trial, single-prompt SAM3, same BT grammar across all three embodiments with per-platform IK/gripper/workspace tuning"
+  cap_bench: "CaP-Bench (robosuite, 100 trials/task): Lift 100, Stack 97, CubeRestack 100, Wipe 60, NutAssemblySquare 0 (shared OSC z-bound kinematic ceiling), TwoArmLift 63, TwoArmHandover 24"
+
+tags:
+  - training-free
+  - neurosymbolic
+  - behavior-tree
+  - keypoints
+  - SAM3
+  - gemini
+  - libero-pro
+  - cap-bench
+  - test-time-compute
+  - recovery
+  - cross-embodiment
+  - bimanual
+  - real-robot
+  - ur10e
+  - franka
