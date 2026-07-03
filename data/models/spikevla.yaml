@@ -1,0 +1,42 @@
+# Paper: SpikeVLA: Vision-Language-Action Models with Spiking Neural Networks
+# arXiv: 2606.27807 (ICML 2026)
+# Auto-track score: 9.5
+
+name: SpikeVLA
+full_name: "SpikeVLA: Vision-Language-Action Models with Spiking Neural Networks"
+organization: "Tongji University / Institute of Automation, Chinese Academy of Sciences / Waytous"
+date: "2026-06-26"
+paper_url: https://arxiv.org/abs/2606.27807
+code_url: null
+venue: ICML 2026
+open_source: false
+model_type: navigation
+
+architecture:
+  backbone: "SpikeSigLIP — SigLIPv2 ViT (27 transformer blocks) converted to a spiking vision encoder via training-free ANN-to-SNN differential coding; differential spiking neurons for linear layers and differential graded units for nonlinear ops (LayerNorm, GELU, Softmax, attention products)"
+  llm: "Spike-L — LLaMA-8B-based multimodal spiking LLM (SFT on real video + simulated navigation + auxiliary nav + VQA data), spike encoding with Integrate-and-Fire neurons, multi-level spike tokens (L-step merge), and differential temporal sparsity allocation (informative channels get longer spiking horizons)"
+  action_head: "Hierarchical: Spike-L generates discrete navigation commands; Spike-A, a fully spiking MLP action policy (Laplacian-kernel population coding + soft-reset IF neurons, spike-rate decoding to continuous actions), executes low-level quadruped control, trained with PPO via surrogate-gradient spatiotemporal backpropagation"
+  action_space: continuous
+  parameters: 8B
+  key_innovation: "First VLA architecture built entirely on spiking neural networks (Spike-V / Spike-L / Spike-A). Event-driven sparse computation cuts energy to ~34% of NaVILA (49.09 J vs 141.25 J), GPU memory from 16.1 GB to 6.2 GB, and ACEs from 3930 to 1196 (x10^12) while matching RGB-only VLN-CE baselines (R2R-CE Val-Unseen SR 53.3 / SPL 47.9 / OS 63.4 vs NaVILA SR 53.9 / SPL 49.3 / OS 61.5). Outperforms INT4-quantized NaVILA on both accuracy and energy."
+  action_head_category: other
+
+training:
+  dataset: "Real video, simulated navigation data, auxiliary navigation and VQA datasets (Spike-L SFT); ImageNet calibration for Spike-V ANN-to-SNN conversion; Isaac simulation for Spike-A quadruped locomotion RL (Unitree Go2)"
+  method: "Spike-V: training-free ANN-to-SNN conversion with differential coding (T=16); Spike-L: SFT + spike encoding with second-order optimization; Spike-A: PPO (actor-critic) with surrogate-gradient spatiotemporal backpropagation, T=5, population size P=5, Laplacian-kernel population encoding"
+  compute: "GPU platform deployment validated; neuromorphic-chip validation left as future work"
+
+benchmarks: {}
+
+tags:
+  - spiking-neural-network
+  - neuromorphic
+  - energy-efficient
+  - navigation
+  - vln-ce
+  - legged-robot
+  - hierarchical
+  - ann-to-snn
+  - population-coding
+  - 8B
+  - icml-2026
