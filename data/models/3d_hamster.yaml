@@ -1,0 +1,66 @@
+name: 3D HAMSTER
+full_name: "3D HAMSTER: Bridging Planning and Control in Hierarchical Vision Language Action Models through 3D Trajectory Guidance"
+organization: "KAIST; POSTECH; Holiday Robotics; KRAFTON AI"
+date: "2026-06-30"
+paper_url: https://arxiv.org/abs/2606.31329
+code_url: https://davian-robotics.github.io/3D_HAMSTER/
+venue: "IROS 2026"
+open_source: true
+model_type: hierarchical-vla
+
+architecture:
+  backbone: "Qwen3-VL-8B-Instruct high-level 3D trajectory planner augmented with a dedicated depth encoder/decoder (initialized from LingBot-Depth); 3D FlowMatch Actor (3DFA) pointcloud-based low-level policy"
+  llm: "Qwen3-VL-8B-Instruct"
+  action_head: "Trajectory-conditioned 3DFA low-level policy: planner's (u, v, d) waypoints are unprojected to world coordinates, appended to the scene point cloud with temporal color-coding and learnable trajectory/scene modality embeddings, and a rectified flow matching head predicts action chunks (Ta=20) plus a BCE-supervised gripper open/close action"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~8B planner (LoRA rank 64 on LLM; depth projector/decoder fully trained) + 3DFA policy"
+  key_innovation: >
+    Closes the 2D-3D representational misalignment in hierarchical VLAs: instead of 2D waypoints
+    that must be depth-lifted from the scene surface (the "graffiti effect" of HAMSTER), the VLM
+    planner directly outputs metrically reliable 3D trajectories in (u, v, d) form. Three
+    components enable this: (1) a curated mixture of 3D capability data (RLBench/DROID/
+    InternData-M1 trajectories in 2D / 3D / 2D-to-3D chain-of-thought variants + RefSpatial) and
+    2D preservation data; (2) a dedicated depth encoder whose tokens are fused element-wise with
+    RGB visual tokens; (3) a dense depth reconstruction loss (L = L_LM + 0.1 * L_depth) that
+    anchors the LLM's hidden states to faithful scene geometry. Predicted trajectories are
+    unprojected into the same metric space as the pointcloud policy, yielding a unified 3D
+    interface from planning to execution.
+
+training:
+  dataset: "Planner: 3D capability data (RLBench 606K, DROID 123K, InternData-M1 1.5M, RefSpatial 2.2M; MoGe-2-generated depth for InternData-M1/RefSpatial) + preservation data (RoboPoint 666K, PixMo 171K, LVIS 138K, Honey-1M 749K). Policy: 100 demos/task (Colosseum sim); 300/144/108 real episodes for pick-and-place/pouring/button pressing"
+  method: "Two-stage planner training: Stage 1 (depth alignment) trains only depth projector + depth decoder with dense L1 depth reconstruction loss; Stage 2 (task fine-tuning) freezes both encoders, applies LoRA (rank 64) to the LLM and fully trains projectors/decoder. 3DFA policy trained with rectified flow matching (sim 500k steps, real 300k steps, batch 64)"
+  optimizer: "lr 1e-4, warmup 0.03, batch 256, 1 epoch per stage (planner)"
+  hardware: "8x H100 (planner); 4x H100 (real-world policy)"
+
+benchmarks:
+  rlbench:
+    colosseum_unperturbed: 62.9
+    colosseum_all_variations_avg: 44.8
+    source: "3D HAMSTER paper Table III (Colosseum benchmark, 11 front-camera-visible RLBench tasks, 14 perturbation axes, 25 episodes per perturbation; 3DFA + 3D HAMSTER row)"
+    date_reported: "2026-06-30"
+    eval_condition: "Colosseum (RLBench extension); policy trained on 100 demos/task"
+  real_world:
+    button_pressing_avg: 80.0
+    pouring_avg: 68.0
+    pick_and_place_avg: 62.0
+    source: "3D HAMSTER paper Table IV (Franka Panda, continuous [0,1] staged scoring, avg over in-distribution + language/spatial/visual/multiple generalization axes, 25 rollouts total)"
+    date_reported: "2026-06-30"
+    eval_condition: "real robot, external RGB-D camera, staged continuous scoring"
+
+eval_conditions:
+  rlbench: "Colosseum perturbation benchmark, 100 demos/task, 25 episodes per perturbation"
+  real_world: "Franka Panda, 4 generalization axes (language/spatial/visual/multiple), continuous staged scoring"
+
+tags:
+  - hierarchical
+  - 3d-trajectory
+  - depth-encoder
+  - flow_matching
+  - pointcloud
+  - qwen3-vl
+  - colosseum
+  - rlbench
+  - real-robot
+  - franka
+  - 8B
