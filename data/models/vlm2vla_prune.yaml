@@ -1,0 +1,53 @@
+name: VLM2VLA-Prune
+full_name: "Revisiting Parameter Redundancy in Vision-Language-Action Models: Insights from VLM-to-VLA Adaptation"
+organization: "CNIC Chinese Academy of Sciences / Shanghai Jiao Tong University / University of Sydney"
+date: "2026-06-30"
+paper_url: https://arxiv.org/abs/2606.31382
+code_url: https://github.com/Niannnnnn/VLA_Parameter_Redundancy_VLM2VLA
+venue: "ECCV 2026"
+open_source: true
+model_type: "compression method (recovery-free structured pruning of existing VLAs)"
+
+architecture:
+  backbone: "N/A (multi-module joint pruning scheme applied to existing VLA backbones — validated on OpenVLA (Prismatic: DINOv2+SigLIP+Llama-2) and pi0.5 (PaLI-Gemma: SigLIP+Gemma))"
+  llm: "N/A (inherits LLM of host VLA — Llama-2 7B for OpenVLA, Gemma 2B for pi0.5)"
+  action_head: "N/A (pruning preserves the native action head — autoregressive token decoding for OpenVLA, flow matching for pi0.5)"
+  action_head_category: other
+  parameters: "OpenVLA 7.5B -> 6.6B (Light) / 6.2B (Moderate) / 5.7B (Aggressive); pi0.5 3.6B -> 3.0B / 2.8B / 2.5B (12-30% reduction)"
+  key_innovation: "Recovery-free VLA pruning driven by VLM-to-VLA adaptation signals. Computes relative parameter divergence dW_rel = ||W_VLA - W_VLM||_2 / ||W_VLM||_2 per attention head / FFN channel, uses controlled pruning (Highest-diff vs Lowest-diff masks, Algorithm 1) as a causal diagnostic probe, and discovers strong module heterogeneity: Llama-2 low-diff heads/channels are vital (pruning -> 0% SR), DINOv2 shows a sensitivity reversal between Attn (high-diff vital) and FFN (low-diff vital), SigLIP is extremely redundant (survives 100% removal at 70% SR), and the projector is a fragile non-selective bottleneck that must be protected. The resulting multi-module joint pruning (Light/Moderate/Aggressive configs) cuts 12-30% of parameters while keeping ~90% of original performance with zero fine-tuning, whereas LLM-Pruner/FLAP/Wanda collapse (0.2-31% SR) under the same recovery-free constraint."
+
+benchmarks:
+  libero:
+    libero_spatial: 95.5
+    libero_object: 94.0
+    libero_goal: 95.0
+    libero_long: 88.5
+    libero_avg: 93.3
+    source: "Table 6 (pi0.5 Ours-Light: 3.6B->3.0B, memory 7.3->6.1GB, no post-pruning recovery; baseline pi0.5 = 96.9 avg; OpenVLA Ours-Light in Table 5 = 70.4 avg vs baseline 76.5)"
+    date_reported: "2026-06-30"
+    eval_condition: "recovery-free (direct inference after pruning, no fine-tuning or low-rank correction)"
+
+eval_conditions:
+  libero: "LIBERO 4-suite (Spatial/Object/Goal/Long) success rate, direct inference immediately after pruning without any fine-tuning or post-hoc correction; NVIDIA A100. Headline entry = pi0.5 Ours-Light (Table 6). OpenVLA variants (Table 5): Light 70.4 / Moderate 62.3 / Aggressive 52.5 vs baseline 76.5; matched-capacity 12.4GB comparison: Ours-Moderate 62.3 vs LLM-Pruner 1.0 (Spatial 23.4->collapse), FLAP 0.2, Wanda full-sparse 7.1"
+  robotwin_v2: "Appendix D generalization probe only (not the joint scheme): pi0 on 5 RoboTwin2.0 tasks, pruning 10% highest- vs lowest-dW LLM FFN channels — original 56.0, high-dW-pruned 47.4, low-dW-pruned 10.6 avg SR"
+
+training:
+  dataset: "No training — recovery-free pruning. Diagnostic control experiments in Sec 4.2 use LoRA fine-tuning (FSDP, 10k steps, LR 1e-4) only to demonstrate that recovery masks bad pruning decisions (even 0.0% SR configs recover to ~baseline)"
+  method: "Module-aware mask construction (Algorithm 1): compute dW = W_VLA - W_VLM per sub-module, aggregate L2 divergence along input/output dims to FFN-channel or attention-head granularity, globally rank, and apply differentiated per-module criteria (Table 12). OpenVLA: LLM-Attn 12.5% H, LLM-FFN 10-30% H, SigLIP-FFN 10% L, DINOv2-Attn 6.25% L, DINOv2-FFN 10% H; projector strictly protected. pi0.5: LLM-Attn/FFN 20-50% H, SigLIP 20-40% H"
+  num_trajectories: null
+  compute: "NVIDIA A100 GPUs (evaluation); memory footprint OpenVLA 14.9->11.3-13.0GB, pi0.5 7.3->5.0-6.1GB"
+
+tags:
+  - parameter_pruning
+  - recovery_free_compression
+  - vlm_to_vla_adaptation
+  - parameter_divergence
+  - module_heterogeneity
+  - diagnostic_probe
+  - structural_compression
+  - efficient
+  - openvla
+  - pi0_5
+  - libero
+  - robotwin_v2
+  - eccv_2026

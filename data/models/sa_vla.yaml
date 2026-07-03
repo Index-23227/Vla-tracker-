@@ -1,0 +1,54 @@
+# Paper: SA-VLA: State-aware tokenizer for improving Vision-Language-Action Models' performance
+# arXiv: 2606.30113
+
+name: SA-VLA
+full_name: "SA-VLA: State-aware tokenizer for improving Vision-Language-Action Models' performance"
+organization: "Shanghai Jiao Tong University / East China University of Science and Technology / Hong Kong Polytechnic University / Xi'an University of Electronic Science and Technology"
+date: "2026-06-29"
+paper_url: https://arxiv.org/abs/2606.30113
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "SigLIP-SO400M-patch14-224 image tokenizer (224x224, 16x16 patch grid = 256 image tokens/frame)"
+  llm: "Qwen2.5-based VLM"
+  action_head: "Autoregressive (or parallel) discrete action-token prediction decoded by a state-aware VQ-VAE action tokenizer. Method B (best): a lightweight MLP+sigmoid state adapter predicts per-dimension scaling factors w, transforming actions (a_trans = a / w) before VQ quantization and rescaling after decoding, so each discrete code represents a family of state-dependent continuous actions. Method A alternative: state-action cross-attention inside the encoder/decoder Transformers. States discretized into 256 bins (FAST-style); modalities delimited by special bos/eos tokens."
+  action_space: discrete
+  parameters: null
+  key_innovation: "State-aware action tokenization: conditions VQ-VAE action decoding on robot proprioceptive state, expanding a finite codebook to an effectively continuous action space via state-predicted per-dimension modulation factors (regression reformulation). Same discrete token can decode to different continuous actions under different joint configurations. Supports both autoregressive and parallel action-token decoding with minimal interface changes. On 12 RoboTwin tasks improves average success from 0.29 (VQ-BET, strongest tokenizer baseline) to 0.56; zero-shot sim-to-real from 0.15 to 0.33."
+  action_head_category: autoregressive
+
+training:
+  dataset: "RoboTwin simulator (clean mode), 12 bimanual manipulation tasks x 1,600 trajectories = 19,200 trajectories, dual AgileX Piper arms"
+  method: "Two-stage: Stage 1 trains the state-aware action tokenizer (VQ-VAE losses: reconstruction + codebook + commitment; batch 1024, 200 epochs, AdamW lr 5e-5 cosine); Stage 2 trains the VLA (batch 64, 10 epochs, AdamW lr 1e-4 cosine) with next-token prediction (AR) or bidirectional placeholder-token prediction (parallel decoding)"
+  num_trajectories: 19200
+  compute: "Evaluation on a single RTX 4090 GPU"
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_avg: 56.0
+    source: "Table 4.1 (Method B, autoregressive decoding; 12 tasks, 100 rollouts each, clean mode; parallel decoding also 0.56)"
+    date_reported: "2026-06-29"
+    eval_condition: "trained and evaluated on the same 12 RoboTwin tasks (clean mode)"
+  real_world:
+    real_world_avg: 33.0
+    source: "Table 4.3 (Method B AR, zero-shot sim-to-real, 3 tasks x 20 trials: Click Bell 10/20, Place Container Plate 7/20, Pick Diverse Bottles 3/20)"
+    date_reported: "2026-06-29"
+    eval_condition: "zero-shot sim-to-real (trained only on RoboTwin sim RGB)"
+
+eval_conditions:
+  robotwin_v2: "RoboTwin platform, clean mode, 12 tasks (1,600 demos/task for training), 100 rollouts per task; same tasks used for training and evaluation"
+  real_world: "zero-shot sim-to-real on AgileX Cobot Magic (Aloha setup, Piper arms, RealSense D435), 3 tasks x 20 trials, no real-world fine-tuning"
+
+tags:
+  - autoregressive
+  - action_tokenizer
+  - vq_vae
+  - state_aware
+  - parallel_decoding
+  - robotwin
+  - sim_to_real
+  - qwen2_5
+  - bimanual

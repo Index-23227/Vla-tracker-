@@ -1,30 +1,59 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: MIRTH: Mutual-Information Reasoning with Temporal Hubs for Vision-Language-Action Agents
-# arXiv: 2606.31167
-
 name: MIRTH
 full_name: "MIRTH: Mutual-Information Reasoning with Temporal Hubs for Vision-Language-Action Agents"
-organization: "TODO: check paper"
+organization: "Ritsumeikan University; Zhejiang University"
 date: "2026-06-30"
 paper_url: https://arxiv.org/abs/2606.31167
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://github.com/kiva12138/mirth
+venue: arXiv preprint
+open_source: true
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "OpenVLA (DINOv2 + SigLIP vision encoder, LLM backbone; vision encoder 730.91M frozen)"
+  llm: "OpenVLA LLM backbone (LoRA rank 32 fine-tuning)"
+  action_head: "Parallel (non-autoregressive) vector-wise action decoding: one token per action timestep, lightweight two-layer projection head regressing continuous action chunks (chunk size 10) with element-wise L1 loss"
+  action_head_category: regression
+  action_space: "continuous action chunks (10 timesteps @ 10 Hz)"
+  parameters: "8.02B total, 482.34M trainable (~6.01%; LoRA 79.95M + action decoder 285.74M + memory hubs 46.86M + reasoning tokens 52.96M)"
+  key_innovation: >
+    Augments a pretrained single-frame OpenVLA backbone with (1) dual-scale temporal memory hubs
+    — a workspace hub of K=4 multi-rate EMA memory maps plus motion statistics for long-term
+    scene layout, and a short-horizon attention hub over the last w=4 frames — compressed into
+    fixed-length prompts (prefix or infusion integration); (2) learnable latent reasoning tokens
+    trained with an InfoNCE mutual-information objective to be jointly predictive of multimodal
+    context and action trajectories, replacing costly text CoT supervision; (3) parallel
+    vector-wise action decoding that removes scalar autoregression, reaching 64.4 Hz throughput
+    while achieving 98.1% LIBERO average and emergent error-recovery behavior (12.1% recovery
+    rate vs 5.2% for OpenVLA).
+
+training:
+  dataset: "LIBERO demonstrations (static idle frames filtered, 224x224, vertical-flip augmentation); 1000 teleoperated LeRobot trajectories (20 tasks x 50 demos, 5 task groups) for real-world experiments"
+  method: "LoRA (rank 32) on LLM backbone, frozen vision encoder; L1 action regression + InfoNCE mutual-information reasoning loss (lambda_mi=0.001, lambda_ra=lambda_rx=1.0)"
+  hardware: "2x NVIDIA RTX Pro 6000, global batch size 64, ~5 days per model"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.2
+    libero_object: 100.0
+    libero_goal: 98.8
+    libero_long: 95.3
+    libero_avg: 98.1
+    source: "MIRTH paper Table 1 (500 episodes per suite, averaged over seeds)"
+    date_reported: "2026-06-30"
+    eval_condition: "fine-tuned"
 
 eval_conditions:
-  libero: "fine-tuned"
+  libero: "fine-tuned; 500 episodes per suite with different seeds; prefix memory-integration variant"
 
-tags: [reasoning, libero]
+tags:
+  - vla
+  - reasoning
+  - latent-reasoning
+  - mutual-information
+  - temporal-memory
+  - multi-frame
+  - parallel-decoding
+  - openvla-backbone
+  - lerobot
+  - libero
+  - open-source
+  - 8B

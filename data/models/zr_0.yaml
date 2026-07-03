@@ -1,0 +1,49 @@
+# Paper: Training Vision-Language-Action Models with Dense Embodied Chain-of-Thought Supervision
+# arXiv: 2606.30552
+
+name: ZR-0
+full_name: "ZR-0: Training Vision-Language-Action Models with Dense Embodied Chain-of-Thought Supervision"
+organization: "Renmin University of China / Zhipu AI"
+date: "2026-06-29"
+paper_url: https://arxiv.org/abs/2606.30552
+code_url: https://github.com/RUCKBReasoning/ZR-0
+venue: arXiv
+open_source: true
+
+architecture:
+  backbone: "Qwen3-VL-2B-Instruct (System 2 VLM)"
+  action_head: "Diffusion Transformer (DiT) action expert (~500M) trained via flow matching; 1 self-attention : 3 cross-attention layer ratio; cross-attention mask restricts action expert to input-prompt features only, so ECoT generation is entirely skipped at inference"
+  action_head_category: flow_matching
+  parameters: "2.6B (2.1B VLM + 500M DiT action expert)"
+  key_innovation: "Dense Embodied Chain-of-Thought (ECoT) supervision as a training-only signal to align cross-embodiment representations in the VLM. Pre-trained on ProcCorpus-60M (~60M frames, ~1,000 hours, 400K+ trajectories, 96.8% ECoT annotation coverage) with 6-component structured ECoT (scene description, progress assessment, future plan, to-do actions, target-object bounding boxes, FAST discrete action tokens). A cross-attention mask lets the action expert attend only to input-prompt features, so autoregressive ECoT decoding is bypassed at inference (~90 ms/action chunk on A6000) with no performance loss."
+
+training:
+  dataset: "ProcCorpus-60M (~60M frames / ~1,000 h / 400K+ trajectories from DROID, Bridge, Fractal, RH20T, OXE subsets) + general VL data (CapsFusion, Pixmo) co-training; post-training on each benchmark's demos only"
+  compute: "DeepSpeed ZeRO + Flash-Attention 2, bfloat16; pre-training batch 1,024, action chunk H=32"
+
+inference_hz: 11
+
+benchmarks:
+  libero:
+    libero_spatial: 97.4
+    libero_object: 99.4
+    libero_goal: 98.0
+    libero_long: 96.4
+    libero_avg: 97.8
+    source: "Table 1 (paper, 50 episodes/task)"
+  robotwin_v2:
+    robotwin_v2_easy: 88.70
+    robotwin_v2_hard: 87.98
+    robotwin_v2_avg: 88.34
+    source: "Table 3/6 (paper, ALOHA embodiment, 50 tasks, 100 episodes/task, Clean/Randomized)"
+  robocasa:
+    robocasa_gr1_tabletop_avg: 69.3
+    robocasa_avg: 69.3
+    source: "Table 2 (paper, GR-1 Tabletop, 24 tasks, 100 episodes/task)"
+
+eval_conditions:
+  libero: "fine-tuned (all 1,693 trajectories, 40 tasks, single model, H=10)"
+  robotwin_v2: "fine-tuned (27,500 demos: 50 clean + 500 randomized per task, single model, H=16)"
+  robocasa: "fine-tuned (24 tasks, GR-1 humanoid, single model, H=16)"
+
+tags: [flow_matching, embodied_cot, cross_embodiment, dual_system, dit, qwen3_vl, libero, robotwin, robocasa, open-source]
