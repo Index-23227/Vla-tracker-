@@ -1,0 +1,93 @@
+# Paper: Trust Your Instincts: Confidence-Driven Test-Time RL for Vision-Language-Action Models
+# arXiv: 2606.29892
+
+name: T2VLA
+full_name: "T2VLA (Test-time VLA): Trust Your Instincts - Confidence-Driven Test-Time RL for Vision-Language-Action Models"
+organization: "Fudan University; Shanghai Innovation Institute; MoShen Intelligence"
+date: "2026-06-29"
+paper_url: https://arxiv.org/abs/2606.29892
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Architecture-agnostic test-time RL framework applied on top of base VLAs: OpenVLA-OFT (discrete, SimpleVLA-RL SFT weights), pi0 / pi0.5 (flow matching, piRL SFT weights), StarVLA, GR00T"
+  llm: "Inherited from base VLA (e.g., LLaMA-2 7B for OpenVLA-OFT)"
+  action_head: "Inherits base VLA action head (OpenVLA-OFT action tokens or pi0/pi0.5/GR00T flow-matching action expert); T2VLA does not modify the architecture - it updates policy weights at test time via GRPO with an intrinsic DTW-based similarity reward"
+  action_head_category: other
+  action_space: "Inherits base VLA action space (discrete action tokens or continuous action chunks)"
+  parameters: "No architectural additions; full policy weights updated via test-time GRPO without external rewards"
+  key_innovation: >
+    Self-bootstrapping test-time reinforcement learning for VLAs without any external reward.
+    Empirically shows that trajectory-level generation confidence (length-normalized mean action
+    log-probability for discrete VLAs; Gaussian denoising likelihood for flow-based VLAs) strongly
+    correlates with task success. A Confidence-Driven Dual Expert Bootstrapping mechanism elects
+    the most confident rollout per task as a Local Pseudo-Expert and maintains a top-K (K=5)
+    Global Expert Pool of historical experts. Each exploratory rollout is rewarded by DTW-based
+    trajectory similarity to these experts, adaptively fused with a Min-Max confidence-scaled
+    weight w, regularized by a KL penalty (beta=0.02) to the SFT reference, and optimized with
+    GRPO. Approaches oracle RL (SimpleVLA-RL, 99.1%) on LIBERO with zero environmental reward.
+
+training:
+  method: "Test-time RL via GRPO with intrinsic DTW-similarity rewards; no external success signals, human annotation, or external LLM/critic"
+  base_models: "OpenVLA-OFT (SimpleVLA-RL SFT weights), pi0, pi0.5 (piRL SFT weights and MDP), StarVLA, GR00T"
+  hyperparameters:
+    advantage_estimator: "GRPO"
+    group_size: 8
+    rollout_temperature: "1.6 (OpenVLA-OFT), 1.0 (pi0/pi0.5)"
+    learning_rate: "5e-6 peak (cosine for OpenVLA-OFT, constant for pi0/pi0.5)"
+    kl_coefficient_initial: 0.02
+    ppo_clip: "[0.2, 0.28] (OpenVLA-OFT), 0.2 (pi0/pi0.5)"
+    expert_pool_capacity: 5
+    max_env_steps: "500 (OpenVLA-OFT), 480 (pi0/pi0.5)"
+    total_epochs: 300
+
+benchmarks:
+  libero:
+    libero_spatial: 97.7
+    libero_object: 99.6
+    libero_goal: 96.1
+    libero_long: 95.3
+    libero_avg: 97.2
+    source: "Paper Table 1 (Ours OpenVLA-OFT, self-reward; baseline SFT 91.0%, +6.2 avg)"
+    date_reported: "2026-06-29"
+    eval_condition: "OpenVLA-OFT + T2VLA test-time RL with intrinsic self-reward only (no environmental reward)"
+  robotwin_v2:
+    lift_pot: 39.8
+    beat_hammer: 68.0
+    place_empty_cup: 84.8
+    handover_block: 44.1
+    stack_bowls: 59.0
+    robotwin_v2_avg: 59.1
+    source: "Paper Table 2 (RoboTwin 2.0, OpenVLA-OFT + T2VLA; SFT baseline avg 37.8%, +21.3)"
+    date_reported: "2026-06-29"
+    eval_condition: "OpenVLA-OFT + T2VLA on 5 bimanual RoboTwin 2.0 tasks (horizons 100-650 steps), no external reward"
+
+eval_conditions:
+  libero: "Headline row is OpenVLA-OFT + T2VLA (97.2% avg). Also architecture-agnostic: pi0 57.7 -> 81.9 (+24.2), pi0.5 77.1 -> 85.1 (+8.0) on the same four suites with few-shot piRL SFT initialization"
+  robotwin_v2: "RoboTwin 2.0 with domain randomization; group-level seed synchronization (duplicate seeds within each GRPO group) for unbiased relative advantages"
+  additional_results: "GR00T LIBERO-Spatial 41.4 -> 60.9, LIBERO-Object 58.6 -> 98.8; pi0 RoboCasa Close Drawer 75.0 -> 87.5; OpenSora world-model rollouts LIBERO-Spatial 61.2 -> 63.3 (Appendix Table 6, Table 5)"
+  one_shot_limits: "Under 1-shot SFT, ~+20 points on Spatial/Object/Goal but Long degrades 17.3 -> 11.0, revealing a minimum-competence bootstrapping threshold"
+  ablations: "Dual expert 95.3% vs local-only 94.5% / global-only 93.0% on LIBERO-Long; K=5 optimal; Min-Max fusion 95.3% vs sigmoid gate 92.6%; static w=0.5 and max routing collapse (<100 epochs)"
+
+tags:
+  - vla
+  - test-time-rl
+  - test-time-training
+  - self-bootstrapping
+  - intrinsic-reward
+  - reward-free
+  - confidence-estimation
+  - dtw
+  - grpo
+  - dual-expert
+  - openvla-oft-base
+  - pi0-base
+  - pi0.5-base
+  - gr00t-base
+  - libero
+  - robotwin
+  - robocasa
+  - architecture-agnostic
