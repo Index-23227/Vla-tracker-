@@ -1,0 +1,53 @@
+name: X-Mind
+full_name: "X-Mind: Efficient Visual Chain-of-Thought via Predictive World Model for End-to-End Driving"
+organization: "XPeng Inc. (PWM Team)"
+date: "2026-06-27"
+paper_url: https://arxiv.org/abs/2606.28758
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Large drive model (multimodal LLM over text / ego-status / multi-view tokens) + domain-specific Deep Compression Autoencoder (DC-AE) that compresses a 12-frame abstract-sketch future rollout into 96 tokens"
+  llm: "Custom large drive model LLM (undisclosed size; transformer layers partitioned into 5 blocks for Recurrent Block Diffusion)"
+  action_head: "inverse dynamics planner head conditioned on an internally generated future sketch; Recurrent Block Diffusion / Layer Flow Matching unrolls 5 denoising steps (t = 0, 0.1, 0.2, 0.4, 0.7, 1.0) across LLM blocks in a single forward pass, then derives the ego trajectory (L1 on longitudinal acceleration and yaw rate)"
+  action_head_category: inverse_dynamics
+  action_space: continuous
+  parameters: null
+  key_innovation: >-
+    Internalizes a Predictive World Model as a Visual Chain-of-Thought inside the LLM backbone of a
+    driving VLA: before acting, the model imagines a 12-frame future as a compact abstract sketch
+    (BEV layout fused with driving priors — traffic light states, adaptive navigation intents,
+    velocity compliance bars) compressed by a DC-AE to only 96 tokens. A Recurrent Block Diffusion
+    scheme distributes flow-matching denoising steps across the hierarchical layers of the LLM,
+    folding iterative generation into one forward pass (1.1x inference cost vs. 22x for dense image
+    rollout), and an inverse dynamics planner conditions trajectory prediction on the anticipated
+    future, cutting lateral/longitudinal ADE from 0.2399/1.2979 to 0.1765/1.1849.
+
+training:
+  dataset: "XPeng internal fleet data: 280,000 hours of driving, 34M video clips, 13.8T tokens, 7-camera surround view (86.8% urban / 13.2% highway); all experiments use a 1/8 subset"
+  method: "End-to-end joint optimization: layer-wise latent flow-matching loss on velocity predictions from 5 internal LLM blocks + randomized single-layer decoded sketch reconstruction (MSE + LPIPS) + kinematic planning loss (L1 on longitudinal acceleration and yaw rate)"
+
+benchmarks:
+  real_world:
+    ade_lateral_6s_m: "0.1765"
+    ade_longitudinal_6s_m: "1.1849"
+    sketch_fid: "9.59"
+    relative_inference_cost: "1.1 (base VLA without world model = 1.0; dense image rollout = 22.0)"
+    source: "X-Mind technical report Tables 1-3; base VLA 0.2399/1.2979 ADE, single-step denoising FID 67.30 vs. RBD 9.59"
+    date_reported: "2026-06-27"
+    eval_condition: "open-loop trajectory prediction on XPeng internal real-world driving dataset (1/8 subset of 280K hours)"
+
+eval_conditions:
+  real_world: "XPeng proprietary real-world driving dataset, open-loop ADE @6s; no public benchmark or closed-loop simulation reported"
+
+tags:
+  - autonomous-driving
+  - world-model
+  - visual-chain-of-thought
+  - bev
+  - flow-matching
+  - diffusion
+  - efficient-inference
+  - real-world
