@@ -1,0 +1,40 @@
+# Paper: Z-1: Efficient Reinforcement Learning for Vision-Language-Action Models
+# arXiv: 2606.31846
+
+name: Z-1
+full_name: "Z-1: Efficient Reinforcement Learning for Vision-Language-Action Models"
+organization: "Zioneer Robot Team"
+date: "2026-06-30"
+paper_url: https://arxiv.org/abs/2606.31846
+code_url: null
+venue: arXiv
+open_source: false
+model_type: "RL post-training framework for flow-based VLA"
+
+architecture:
+  backbone: "PaliGemma vision-language backbone (inherited from pi0.5)"
+  action_head: "Flow-based action expert of pi0.5 generating action chunks; RL fine-tuned with task-wise GRPO using a flow-SDE formulation (stochastic Markov transitions with tractable likelihoods) for likelihood-ratio computation"
+  action_head_category: flow_matching
+  parameters: "Same as pi0.5 base model (PaliGemma VLM + flow action expert; exact count not restated in paper)"
+  key_innovation: "Modular GRPO post-training for flow-based VLA policies built on pi0.5, using only public RoboCasa demonstrations: (1) Shared-Prefix GRPO clones the simulator state after a leader rollout's prefix so group members branch from the same state, masking prefix chunks from the loss; (2) Tree-Structured Prefix Branching replaces one-shot branching with progressive hierarchical branching to reduce over-masking; (3) Success-Aware Reward Decay (r*gamma^d, gamma=0.998) with a non-negative min-baseline advantage for all-success groups orders successful rollouts by completion time without penalizing slower successes; (4) Selective VLM-Action Expert joint training unfreezes the PaliGemma backbone only for perception-limited tasks chosen by training-stage diagnostics."
+
+benchmarks:
+  robocasa:
+    robocasa_avg: 80.6
+    robocasa_sft_avg: 67.4
+    robocasa_door_avg: 97.0
+    robocasa_drawer_avg: 96.1
+    robocasa_pnp_avg: 70.9
+    robocasa_microwave_avg: 94.8
+    robocasa_sink_avg: 94.3
+    source: "Table 1 / Figure 1 (24 standard RoboCasa tasks; Z-1 RL evaluated with 8 seeds x 8 rollouts = 64 rollouts per task)"
+    eval_condition: "SFT on 1,199 public RoboCasa demos then task-wise GRPO post-training in the RoboCasa simulator"
+
+eval_conditions:
+  robocasa: "per-scene SFT on 1,199 publicly released RoboCasa demonstrations (OpenPI JAX), then task-wise GRPO post-training (RLinf); 24 standard tasks, success rate averaged over 64 independent evaluation rollouts per task"
+
+training:
+  datasets: ["RoboCasa public demonstrations (1,199 total, per-scene SFT)", "Online GRPO rollouts in the RoboCasa simulator (64 parallel environments)"]
+  method: "Two-stage pipeline: Stage 1 per-scene SFT from pretrained pi0.5 (two-stage all-data warm-up then scene-specific fine-tuning for door/drawer/microwave scenes; checkpoints selected at held-out validation loss ~0.01). Stage 2 task-wise GRPO (RLinf-based): AdamW lr 5e-6, weight decay 0.01, grad clip 1.0, group size 8 (tree variant 4), global batch 1024, micro-batch 16, 4 rollout epochs, clip ratio 0.2, no KL regularizer/critic/reward model, reward filtering bounds [0.1, 0.99]. Default AE-only updates; per-task module subset (Shared-Prefix GRPO, Prefix Tree, Success-Aware Reward Decay, Sel-JT) fixed before final evaluation via training-stage diagnostics."
+
+tags: [flow_matching, reinforcement_learning, grpo, robocasa, pi0.5, post_training, rlinf, shared_prefix]
