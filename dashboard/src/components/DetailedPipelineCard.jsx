@@ -162,6 +162,13 @@ export default function DetailedPipelineCard({ model }) {
           )}
         </div>
         <div className="flex flex-shrink-0 items-center gap-1.5">
+          {model.paper_url && (
+            <a href={model.paper_url} target="_blank" rel="noopener noreferrer"
+               title={model.paper_url}
+               className="rounded bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-medium text-rose-400 transition-colors hover:bg-rose-500/20">
+              arXiv ↗
+            </a>
+          )}
           {model.inference_hz && (
             <span className="font-mono text-[9px] text-zinc-500">{model.inference_hz}Hz</span>
           )}

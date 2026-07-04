@@ -164,6 +164,13 @@ export default function LeaderboardTable({ models, onModelClick }) {
                       {m.open_source && (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">OSS</span>
                       )}
+                      {m.paper_url && (
+                        <a href={m.paper_url} target="_blank" rel="noopener noreferrer"
+                           title={m.paper_url}
+                           className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 font-medium hover:bg-rose-500/20 transition-colors">
+                          arXiv
+                        </a>
+                      )}
                       {m.code_url && (
                         <a href={m.code_url} target="_blank" rel="noopener noreferrer" className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-medium hover:bg-blue-500/20 transition-colors">Code</a>
                       )}
