@@ -2,106 +2,181 @@ import { useMemo, useState, useRef, useCallback } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Html } from '@react-three/drei'
 
-// ── Taxonomy ────────────────────────────────────────────────────────────────
-// Decoding scheme (action_head_category) → cluster position + color.
-// Fixed slot assignment (never cycled) — validated 8-slot dark palette.
-const CATEGORIES = [
-  { key: 'flow_matching',      label: 'Flow Matching',      color: '#3987e5' },
-  { key: 'autoregressive',     label: 'Autoregressive',     color: '#199e70' },
-  { key: 'diffusion',          label: 'Diffusion',          color: '#c98500' },
-  { key: 'regression',         label: 'Regression',         color: '#008300' },
-  { key: 'hybrid',             label: 'Hybrid (semi-AR)',   color: '#9085e9' },
-  { key: 'discrete_diffusion', label: 'Discrete Diffusion', color: '#e66767' },
-  { key: 'inverse_dynamics',   label: 'Inverse Dynamics',   color: '#d55181' },
-  { key: 'other',              label: 'Other',              color: '#d95926' },
-]
-const CAT_INDEX = Object.fromEntries(CATEGORIES.map((c, i) => [c.key, i]))
+// ── Validated 8-slot dark palette (fixed order, never cycled) ───────────────
+const PALETTE = ['#3987e5', '#199e70', '#c98500', '#008300', '#9085e9', '#e66767', '#d55181', '#d95926']
+const SHAPES = ['sphere', 'cube', 'cone', 'octa']
 
-// System paradigm (how the pieces connect) → node shape.
-const PARADIGMS = [
-  { key: 'e2e',     label: 'End-to-End',            desc: 'Backbone decodes actions directly',        shape: 'sphere' },
-  { key: 'modular', label: 'VLM + Action Expert',   desc: 'Separate action module (DiT/expert head)', shape: 'cube' },
-  { key: 'dual',    label: 'Dual-System',           desc: 'Fast/slow or hierarchical planner+actor',  shape: 'cone' },
-  { key: 'wrapper', label: 'Wrapper / Test-time',   desc: 'Plug-in over a frozen base VLA',           shape: 'octa' },
-]
+// ── Derivation helpers ──────────────────────────────────────────────────────
+const archText = (m) => {
+  const a = m.architecture || {}
+  return [a.action_head, a.key_innovation, a.backbone, a.llm, (m.tags || []).join(' ')]
+    .filter(Boolean).join(' | ')
+}
 
 const WRAPPER_RE = /wrapper|plug-?in|test-?time|steer|shield|recovery|routing|shared.?autonomy|corrector|frozen (base|vla|backbone)|post-?hoc|adapter genera|on top of/i
 const DUAL_RE = /dual-?system|fast-?to-?slow|slow-?to-?fast|system ?[12]|hierarch|planner.{0,20}(controller|executor|actor)|high-?level.{0,25}low-?level/i
 const MODULAR_RE = /action (expert|module|dit)|dit (action|expert|head)|flow.?matching (expert|head|dit|action)|expert (head|module)|separate (action|head)|diffusion (head|expert|transformer.{0,12}action)|\bdit\b/i
 
-function deriveParadigm(m) {
-  const arch = m.architecture || {}
-  const text = [arch.action_head, arch.key_innovation, arch.backbone, (m.tags || []).join(' ')]
-    .filter(Boolean).join(' | ')
-  if (WRAPPER_RE.test(text)) return 'wrapper'
-  if (DUAL_RE.test(text)) return 'dual'
-  if (MODULAR_RE.test(text)) return 'modular'
-  const cat = arch.action_head_category
-  // Flow/diffusion families are, in practice, VLM + separate generative action module
-  if (cat === 'flow_matching' || cat === 'diffusion' || cat === 'discrete_diffusion') return 'modular'
-  return 'e2e'
+function deriveSystem(m) {
+  const t = archText(m)
+  if (WRAPPER_RE.test(t)) return 'Wrapper / Test-time'
+  if (DUAL_RE.test(t)) return 'Dual-System'
+  if (MODULAR_RE.test(t)) return 'VLM + Action Expert'
+  const cat = m.architecture?.action_head_category
+  if (cat === 'flow_matching' || cat === 'diffusion' || cat === 'discrete_diffusion') return 'VLM + Action Expert'
+  return 'End-to-End'
+}
+
+const BACKBONE_RULES = [
+  [/pi0[._-]?5|π0\.5|pi-?0\.5/i, 'π0.5'],
+  [/pi0|π0|pi-?0\b/i, 'π0'],
+  [/openvla/i, 'OpenVLA'],
+  [/gr00t|groot/i, 'GR00T'],
+  [/qwen/i, 'Qwen-VL'],
+  [/paligemma/i, 'PaliGemma'],
+  [/siglip|dinov?|vit\b|clip/i, 'ViT / custom'],
+]
+function deriveBackbone(m) {
+  const a = m.architecture || {}
+  const t = `${a.backbone || ''} ${a.llm || ''}`
+  for (const [re, name] of BACKBONE_RULES) if (re.test(t)) return name
+  return 'Other'
+}
+
+function deriveTraining(m) {
+  const t = archText(m) + ' ' + ((m.training && JSON.stringify(m.training)) || '')
+  if (/training-?free|test-?time|zero-?shot adapt/i.test(t)) return 'Test-time / Training-free'
+  if (/grpo|\bppo\b|\brl\b|reinforcement|q-?learning|residual rl/i.test(t)) return 'RL post-training'
+  if (/distill|quantiz|prun|compress|ptq|w4a4/i.test(t)) return 'Efficiency (distill/quant/prune)'
+  return 'SFT / Imitation'
+}
+
+function parseParamsB(m) {
+  const s = String(m.architecture?.parameters || '')
+  const match = s.match(/(\d+(?:\.\d+)?)\s*([BM])/i)
+  if (!match) return null
+  const v = parseFloat(match[1])
+  return match[2].toUpperCase() === 'B' ? v : v / 1000
+}
+
+function dateToMonths(m) {
+  if (!m.date) return null
+  const [y, mo] = m.date.split('-').map(Number)
+  if (!y || !mo) return null
+  return (y - 2022) * 12 + (mo - 1)
+}
+
+// ── Dimension registry ──────────────────────────────────────────────────────
+// Categorical dims: drive cluster position/color OR node shape.
+const CAT_DIMS = {
+  decoding: {
+    label: 'Decoding scheme',
+    values: ['Flow Matching', 'Autoregressive', 'Diffusion', 'Regression', 'Hybrid (semi-AR)', 'Discrete Diffusion', 'Inverse Dynamics', 'Other'],
+    of: (m) => ({
+      flow_matching: 'Flow Matching', autoregressive: 'Autoregressive', diffusion: 'Diffusion',
+      regression: 'Regression', hybrid: 'Hybrid (semi-AR)', discrete_diffusion: 'Discrete Diffusion',
+      inverse_dynamics: 'Inverse Dynamics',
+    }[m.architecture?.action_head_category] || 'Other'),
+  },
+  system: {
+    label: 'System design',
+    values: ['End-to-End', 'VLM + Action Expert', 'Dual-System', 'Wrapper / Test-time'],
+    of: deriveSystem,
+  },
+  backbone: {
+    label: 'Backbone family',
+    values: ['π0.5', 'π0', 'OpenVLA', 'GR00T', 'Qwen-VL', 'PaliGemma', 'ViT / custom', 'Other'],
+    of: deriveBackbone,
+  },
+  training: {
+    label: 'Training paradigm',
+    values: ['SFT / Imitation', 'RL post-training', 'Test-time / Training-free', 'Efficiency (distill/quant/prune)'],
+    of: deriveTraining,
+  },
+  openSource: {
+    label: 'Open source',
+    values: ['Open source', 'Closed'],
+    of: (m) => (m.open_source ? 'Open source' : 'Closed'),
+  },
+}
+// Shape can encode at most 4 distinct values.
+const SHAPE_DIM_KEYS = Object.keys(CAT_DIMS).filter(k => CAT_DIMS[k].values.length <= 4)
+
+// Numeric dims: drive height.
+const HEIGHT_DIMS = {
+  libero: { label: 'LIBERO avg', of: m => m.libero_avg, domain: [40, 100], fmt: v => v.toFixed(1) },
+  calvin: { label: 'CALVIN avg len', of: m => m.calvin_avg, domain: [0, 5], fmt: v => v.toFixed(2) },
+  simpler: { label: 'SimplerEnv avg', of: m => m.simpler_avg, domain: [30, 90], fmt: v => v.toFixed(1) },
+  robotwin_v2: { label: 'RoboTwin v2 avg', of: m => m.robotwin_v2_avg, domain: [0, 100], fmt: v => v.toFixed(1) },
+  robocasa: { label: 'RoboCasa avg', of: m => m.robocasa_avg, domain: [0, 85], fmt: v => v.toFixed(1) },
+  hz: { label: 'Inference Hz (log)', of: m => m.inference_hz, domain: [0, 3.1], log: true, fmt: v => `${v} Hz` },
+  params: { label: 'Parameters (log B)', of: parseParamsB, domain: [-1.5, 1.3], log: true, fmt: v => `${v}B` },
+  date: { label: 'Release date', of: dateToMonths, domain: [24, 55], fmt: (v, m) => m.date },
 }
 
 // ── Layout ──────────────────────────────────────────────────────────────────
-const CLUSTER_R = 17          // ring radius for the 8 clusters
+const CLUSTER_R = 17
 const GOLDEN = Math.PI * (3 - Math.sqrt(5))
-const Y_MIN = 40, Y_MAX = 100 // libero_avg → height 0..9
 
-function liberoToY(avg) {
-  if (avg == null) return 0.25
-  const t = Math.min(1, Math.max(0, (avg - Y_MIN) / (Y_MAX - Y_MIN)))
-  return 0.6 + t * 8.4
-}
-
-function buildNodes(models) {
-  const byCat = new Map(CATEGORIES.map(c => [c.key, []]))
+function buildNodes(models, clusterKey, shapeKey, heightKey) {
+  const cdim = CAT_DIMS[clusterKey]
+  const sdim = CAT_DIMS[shapeKey]
+  const hdim = HEIGHT_DIMS[heightKey]
+  const byVal = new Map(cdim.values.map(v => [v, []]))
   for (const m of models) {
-    const cat = m.architecture?.action_head_category || 'other'
-    ;(byCat.get(cat) || byCat.get('other')).push(m)
+    const v = cdim.of(m)
+    ;(byVal.get(v) || byVal.get(cdim.values[cdim.values.length - 1])).push(m)
   }
+  const present = cdim.values.filter(v => byVal.get(v)?.length)
   const nodes = []
-  for (const [cat, list] of byCat) {
-    const ci = CAT_INDEX[cat]
-    const angle = (ci / CATEGORIES.length) * Math.PI * 2
+  present.forEach((val, pi) => {
+    const list = byVal.get(val)
+    const angle = (pi / present.length) * Math.PI * 2
     const cx = Math.cos(angle) * CLUSTER_R
     const cz = Math.sin(angle) * CLUSTER_R
+    const color = PALETTE[cdim.values.indexOf(val) % 8]
     list.sort((a, b) => (a.date || '').localeCompare(b.date || ''))
     list.forEach((m, i) => {
       const r = 0.5 * Math.sqrt(i + 0.6)
       const th = i * GOLDEN
+      let raw = hdim.of(m)
+      if (raw != null && hdim.log) raw = Math.log10(Math.max(raw, 1e-6))
+      let y = 0.25, hasScore = false
+      if (raw != null) {
+        hasScore = true
+        const t = Math.min(1, Math.max(0, (raw - hdim.domain[0]) / (hdim.domain[1] - hdim.domain[0])))
+        y = 0.6 + t * 8.4
+      }
       nodes.push({
         model: m,
-        cat,
-        paradigm: deriveParadigm(m),
-        color: CATEGORIES[ci].color,
+        clusterVal: val,
+        shapeVal: sdim.of(m),
+        shape: SHAPES[sdim.values.indexOf(sdim.of(m)) % 4],
+        color, hasScore, y,
+        heightRaw: hdim.of(m),
         x: cx + Math.cos(th) * r,
         z: cz + Math.sin(th) * r,
-        y: liberoToY(m.libero_avg),
-        hasScore: m.libero_avg != null,
+        clusterAngle: angle,
       })
     })
-  }
-  return nodes
+  })
+  return { nodes, present }
 }
 
 // ── 3D pieces ───────────────────────────────────────────────────────────────
 function NodeMesh({ node, selected, dimmed, onHover, onClick }) {
   const ref = useRef()
-  const scale = selected ? 1.6 : 1
-  useFrame(() => {
-    if (ref.current && selected) ref.current.rotation.y += 0.02
-  })
+  useFrame(() => { if (ref.current && selected) ref.current.rotation.y += 0.02 })
   const common = {
     position: [node.x, node.y, node.z],
-    scale,
+    scale: selected ? 1.6 : 1,
     onPointerOver: (e) => { e.stopPropagation(); onHover(node) },
     onPointerOut: () => onHover(null),
     onClick: (e) => { e.stopPropagation(); onClick(node) },
   }
   const mat = (
     <meshStandardMaterial
-      color={node.color}
-      transparent
+      color={node.color} transparent
       opacity={dimmed ? 0.12 : node.hasScore ? 0.95 : 0.45}
       emissive={selected ? node.color : '#000000'}
       emissiveIntensity={selected ? 0.6 : 0}
@@ -109,7 +184,7 @@ function NodeMesh({ node, selected, dimmed, onHover, onClick }) {
     />
   )
   const s = node.hasScore ? 0.34 : 0.24
-  switch (PARADIGMS.find(p => p.key === node.paradigm)?.shape) {
+  switch (node.shape) {
     case 'cube': return <mesh ref={ref} {...common}><boxGeometry args={[s * 1.5, s * 1.5, s * 1.5]} />{mat}</mesh>
     case 'cone': return <mesh ref={ref} {...common}><coneGeometry args={[s, s * 2.1, 12]} />{mat}</mesh>
     case 'octa': return <mesh ref={ref} {...common}><octahedronGeometry args={[s * 1.15]} />{mat}</mesh>
@@ -127,31 +202,18 @@ function DropLine({ node, dimmed }) {
   )
 }
 
-function ClusterLabel({ cat, count }) {
-  const ci = CAT_INDEX[cat.key]
-  const angle = (ci / CATEGORIES.length) * Math.PI * 2
-  const x = Math.cos(angle) * (CLUSTER_R + 3.2)
-  const z = Math.sin(angle) * (CLUSTER_R + 3.2)
-  return (
-    <Html position={[x, 0.2, z]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
-      <div className="pointer-events-none select-none text-center whitespace-nowrap">
-        <div className="text-[11px] font-semibold" style={{ color: cat.color }}>{cat.label}</div>
-        <div className="text-[10px] text-zinc-500">{count} models</div>
-      </div>
-    </Html>
-  )
-}
-
-function Scene({ nodes, filters, hovered, setHovered, selected, onSelect }) {
+function Scene({ nodes, present, clusterKey, heightKey, filters, hovered, setHovered, selected, onSelect }) {
+  const cdim = CAT_DIMS[clusterKey]
+  const hdim = HEIGHT_DIMS[heightKey]
   const counts = useMemo(() => {
     const c = {}
-    nodes.forEach(n => { c[n.cat] = (c[n.cat] || 0) + 1 })
+    nodes.forEach(n => { c[n.clusterVal] = (c[n.clusterVal] || 0) + 1 })
     return c
   }, [nodes])
 
   const isDimmed = useCallback((n) => {
-    if (filters.cats.size && !filters.cats.has(n.cat)) return true
-    if (filters.paradigms.size && !filters.paradigms.has(n.paradigm)) return true
+    if (filters.cluster.size && !filters.cluster.has(n.clusterVal)) return true
+    if (filters.shape.size && !filters.shape.has(n.shapeVal)) return true
     if (filters.scoredOnly && !n.hasScore) return true
     return false
   }, [filters])
@@ -166,45 +228,44 @@ function Scene({ nodes, filters, hovered, setHovered, selected, onSelect }) {
       {nodes.map((n, i) => (
         <group key={n.model.name + i}>
           <DropLine node={n} dimmed={isDimmed(n)} />
-          <NodeMesh
-            node={n}
-            selected={selected?.model.name === n.model.name}
-            dimmed={isDimmed(n)}
-            onHover={setHovered}
-            onClick={onSelect}
-          />
+          <NodeMesh node={n} selected={selected?.model.name === n.model.name}
+                    dimmed={isDimmed(n)} onHover={setHovered} onClick={onSelect} />
         </group>
       ))}
-      {CATEGORIES.filter(c => counts[c.key]).map(c => (
-        <ClusterLabel key={c.key} cat={c} count={counts[c.key]} />
-      ))}
+      {present.map((val, pi) => {
+        const angle = (pi / present.length) * Math.PI * 2
+        const x = Math.cos(angle) * (CLUSTER_R + 3.2)
+        const z = Math.sin(angle) * (CLUSTER_R + 3.2)
+        const color = PALETTE[cdim.values.indexOf(val) % 8]
+        return (
+          <Html key={val} position={[x, 0.2, z]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+            <div className="pointer-events-none select-none text-center whitespace-nowrap">
+              <div className="text-[11px] font-semibold" style={{ color }}>{val}</div>
+              <div className="text-[10px] text-zinc-500">{counts[val]} models</div>
+            </div>
+          </Html>
+        )
+      })}
       {hovered && !isDimmed(hovered) && (
         <Html position={[hovered.x, hovered.y + 0.9, hovered.z]} center zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
           <div className="pointer-events-none whitespace-nowrap rounded-lg border border-zinc-700 bg-zinc-900/95 px-2.5 py-1.5 text-left shadow-xl">
             <div className="text-xs font-semibold text-white">{hovered.model.name}</div>
-            <div className="text-[10px] text-zinc-400">
-              {CATEGORIES[CAT_INDEX[hovered.cat]].label} · {PARADIGMS.find(p => p.key === hovered.paradigm)?.label}
-            </div>
+            <div className="text-[10px] text-zinc-400">{hovered.clusterVal} · {hovered.shapeVal}</div>
             <div className="text-[10px] text-zinc-300">
-              {hovered.hasScore ? `LIBERO ${hovered.model.libero_avg.toFixed(1)}` : 'no LIBERO score'}
+              {hovered.heightRaw != null
+                ? `${hdim.label.replace(/ \(.*\)/, '')}: ${hdim.fmt(hovered.heightRaw, hovered.model)}`
+                : `no ${hdim.label.replace(/ \(.*\)/, '')} value`}
             </div>
           </div>
         </Html>
       )}
-      <OrbitControls
-        makeDefault
-        enableDamping
-        dampingFactor={0.08}
-        minDistance={6}
-        maxDistance={55}
-        maxPolarAngle={Math.PI / 2.05}
-        target={[0, 2.5, 0]}
-      />
+      <OrbitControls makeDefault enableDamping dampingFactor={0.08}
+                     minDistance={6} maxDistance={55} maxPolarAngle={Math.PI / 2.05} target={[0, 2.5, 0]} />
     </>
   )
 }
 
-// ── Shape glyphs for the legend (SVG, text stays in text tokens) ────────────
+// ── DOM pieces ──────────────────────────────────────────────────────────────
 function ShapeGlyph({ shape, className = '' }) {
   const c = 'currentColor'
   switch (shape) {
@@ -217,17 +278,25 @@ function ShapeGlyph({ shape, className = '' }) {
 
 function Chip({ active, onClick, children, dotColor }) {
   return (
-    <button
-      onClick={onClick}
+    <button onClick={onClick}
       className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] transition-all ${
-        active
-          ? 'border-zinc-500 bg-zinc-800 text-white'
-          : 'border-zinc-800 bg-transparent text-zinc-500 hover:text-zinc-300'
-      }`}
-    >
+        active ? 'border-zinc-500 bg-zinc-800 text-white' : 'border-zinc-800 bg-transparent text-zinc-500 hover:text-zinc-300'
+      }`}>
       {dotColor && <span className="h-2 w-2 rounded-full" style={{ background: dotColor }} />}
       {children}
     </button>
+  )
+}
+
+function DimSelect({ label, value, onChange, options }) {
+  return (
+    <label className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+      {label}
+      <select value={value} onChange={e => onChange(e.target.value)}
+              className="rounded-md border border-zinc-700 bg-zinc-800 px-2 py-1 text-[11px] text-zinc-200 outline-none hover:border-zinc-600">
+        {options.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+      </select>
+    </label>
   )
 }
 
@@ -241,13 +310,30 @@ function DetailRow({ label, value }) {
   )
 }
 
-// ── Main component ──────────────────────────────────────────────────────────
+// ── Main ────────────────────────────────────────────────────────────────────
 export default function ArchitectureGalaxy({ models }) {
-  const nodes = useMemo(() => buildNodes(models), [models])
+  const [clusterKey, setClusterKey] = useState('decoding')
+  const [shapeKey, setShapeKey] = useState('system')
+  const [heightKey, setHeightKey] = useState('libero')
   const [hovered, setHovered] = useState(null)
   const [selected, setSelected] = useState(null)
   const [compare, setCompare] = useState([])
-  const [filters, setFilters] = useState({ cats: new Set(), paradigms: new Set(), scoredOnly: false })
+  const [filters, setFilters] = useState({ cluster: new Set(), shape: new Set(), scoredOnly: false })
+
+  const { nodes, present } = useMemo(
+    () => buildNodes(models, clusterKey, shapeKey, heightKey),
+    [models, clusterKey, shapeKey, heightKey]
+  )
+
+  const cdim = CAT_DIMS[clusterKey]
+  const sdim = CAT_DIMS[shapeKey]
+  const hdim = HEIGHT_DIMS[heightKey]
+
+  const changeDim = (setter) => (v) => {
+    setter(v)
+    setFilters({ cluster: new Set(), shape: new Set(), scoredOnly: false })
+    setSelected(null); setHovered(null)
+  }
 
   const toggle = (kind, key) => setFilters(f => {
     const next = new Set(f[kind])
@@ -256,81 +342,89 @@ export default function ArchitectureGalaxy({ models }) {
   })
 
   const addCompare = (node) => setCompare(prev =>
-    prev.find(n => n.model.name === node.model.name)
-      ? prev
-      : [...prev.slice(-2), node]
-  )
+    prev.find(n => n.model.name === node.model.name) ? prev : [...prev.slice(-2), node])
 
-  const paradigmCounts = useMemo(() => {
+  const shapeCounts = useMemo(() => {
     const c = {}
-    nodes.forEach(n => { c[n.paradigm] = (c[n.paradigm] || 0) + 1 })
+    nodes.forEach(n => { c[n.shapeVal] = (c[n.shapeVal] || 0) + 1 })
     return c
   }, [nodes])
 
+  const scoredCount = nodes.filter(n => n.hasScore).length
+
   return (
     <div>
-      {/* Filters — one row above the chart */}
+      {/* Dimension mapper */}
+      <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+        <DimSelect label="Cluster / color" value={clusterKey} onChange={changeDim(setClusterKey)}
+                   options={Object.entries(CAT_DIMS).map(([k, d]) => [k, d.label])} />
+        <DimSelect label="Shape" value={shapeKey} onChange={changeDim(setShapeKey)}
+                   options={SHAPE_DIM_KEYS.map(k => [k, CAT_DIMS[k].label])} />
+        <DimSelect label="Height" value={heightKey} onChange={changeDim(setHeightKey)}
+                   options={Object.entries(HEIGHT_DIMS).map(([k, d]) => [k, d.label])} />
+        <span className="text-[10px] text-zinc-600">{scoredCount}/{nodes.length} models have a {hdim.label.replace(/ \(.*\)/, '')} value</span>
+      </div>
+
+      {/* Filter chips for active dims */}
       <div className="mb-2 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[11px] text-zinc-500">Decoding</span>
-        {CATEGORIES.map(c => (
-          <Chip key={c.key} dotColor={c.color} active={!filters.cats.size || filters.cats.has(c.key)} onClick={() => toggle('cats', c.key)}>
-            {c.label}
+        <span className="mr-1 text-[11px] text-zinc-500">{cdim.label}</span>
+        {present.map(v => (
+          <Chip key={v} dotColor={PALETTE[cdim.values.indexOf(v) % 8]}
+                active={!filters.cluster.size || filters.cluster.has(v)}
+                onClick={() => toggle('cluster', v)}>
+            {v}
           </Chip>
         ))}
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[11px] text-zinc-500">System</span>
-        {PARADIGMS.map(p => (
-          <Chip key={p.key} active={!filters.paradigms.size || filters.paradigms.has(p.key)} onClick={() => toggle('paradigms', p.key)}>
-            <ShapeGlyph shape={p.shape} className="text-zinc-300" />
-            {p.label} <span className="text-zinc-600">{paradigmCounts[p.key] || 0}</span>
+        <span className="mr-1 text-[11px] text-zinc-500">{sdim.label}</span>
+        {sdim.values.map((v, i) => (
+          <Chip key={v} active={!filters.shape.size || filters.shape.has(v)} onClick={() => toggle('shape', v)}>
+            <ShapeGlyph shape={SHAPES[i % 4]} className="text-zinc-300" />
+            {v} <span className="text-zinc-600">{shapeCounts[v] || 0}</span>
           </Chip>
         ))}
         <Chip active={filters.scoredOnly} onClick={() => setFilters(f => ({ ...f, scoredOnly: !f.scoredOnly }))}>
-          LIBERO scored only
+          has {hdim.label.replace(/ \(.*\)/, '')}
         </Chip>
       </div>
 
-      {/* Canvas + detail panel */}
+      {/* Canvas */}
       <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
         <Canvas camera={{ position: [0, 26, 38], fov: 45 }} style={{ height: 560 }} dpr={[1, 2]}>
-          <Scene
-            nodes={nodes}
-            filters={filters}
-            hovered={hovered}
-            setHovered={setHovered}
-            selected={selected}
-            onSelect={setSelected}
-          />
+          <Scene nodes={nodes} present={present} clusterKey={clusterKey} heightKey={heightKey}
+                 filters={filters} hovered={hovered} setHovered={setHovered}
+                 selected={selected} onSelect={setSelected} />
         </Canvas>
 
-        {/* Height axis note */}
         <div className="pointer-events-none absolute left-3 top-3 text-[10px] leading-4 text-zinc-500">
-          height = LIBERO avg ({Y_MIN}–{Y_MAX})<br />
-          faded low nodes = no LIBERO score<br />
+          height = {hdim.label}<br />
+          faded low nodes = no value<br />
           drag to orbit · scroll to zoom
         </div>
 
-        {/* Selected model panel */}
         {selected && (
           <div className="absolute right-3 top-3 w-72 max-h-[520px] overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 shadow-2xl backdrop-blur">
             <div className="mb-1 flex items-start justify-between gap-2">
               <div className="text-sm font-bold text-white">{selected.model.name}</div>
               <button onClick={() => setSelected(null)} className="text-zinc-500 hover:text-white">✕</button>
             </div>
-            <div className="mb-2 flex items-center gap-2 text-[11px]">
+            <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
               <span className="flex items-center gap-1" style={{ color: selected.color }}>
                 <span className="h-2 w-2 rounded-full" style={{ background: selected.color }} />
-                {CATEGORIES[CAT_INDEX[selected.cat]].label}
+                {selected.clusterVal}
               </span>
               <span className="flex items-center gap-1 text-zinc-300">
-                <ShapeGlyph shape={PARADIGMS.find(p => p.key === selected.paradigm)?.shape} />
-                {PARADIGMS.find(p => p.key === selected.paradigm)?.label}
+                <ShapeGlyph shape={selected.shape} />
+                {selected.shapeVal}
               </span>
             </div>
-            <DetailRow label="LIBERO avg" value={selected.model.libero_avg != null ? selected.model.libero_avg.toFixed(2) : '—'} />
+            <DetailRow label={hdim.label} value={selected.heightRaw != null ? hdim.fmt(selected.heightRaw, selected.model) : '—'} />
+            <DetailRow label="Decoding" value={CAT_DIMS.decoding.of(selected.model)} />
+            <DetailRow label="System" value={CAT_DIMS.system.of(selected.model)} />
+            <DetailRow label="Backbone family" value={CAT_DIMS.backbone.of(selected.model)} />
+            <DetailRow label="Training" value={CAT_DIMS.training.of(selected.model)} />
             <DetailRow label="Backbone" value={selected.model.architecture?.backbone} />
-            <DetailRow label="LLM" value={selected.model.architecture?.llm} />
             <DetailRow label="Action head" value={selected.model.architecture?.action_head} />
             <DetailRow label="Organization" value={selected.model.organization} />
             <DetailRow label="Date" value={selected.model.date} />
@@ -373,12 +467,15 @@ export default function ArchitectureGalaxy({ models }) {
             </thead>
             <tbody className="align-top text-zinc-300">
               {[
-                ['Decoding', n => CATEGORIES[CAT_INDEX[n.cat]].label],
-                ['System', n => PARADIGMS.find(p => p.key === n.paradigm)?.label],
+                ['Decoding', n => CAT_DIMS.decoding.of(n.model)],
+                ['System', n => CAT_DIMS.system.of(n.model)],
+                ['Backbone family', n => CAT_DIMS.backbone.of(n.model)],
+                ['Training', n => CAT_DIMS.training.of(n.model)],
                 ['LIBERO avg', n => n.model.libero_avg != null ? n.model.libero_avg.toFixed(2) : '—'],
                 ['Backbone', n => n.model.architecture?.backbone || '—'],
                 ['Action head', n => n.model.architecture?.action_head || '—'],
                 ['Params', n => n.model.architecture?.parameters || '—'],
+                ['Open source', n => n.model.open_source ? 'Yes' : 'No'],
                 ['Date', n => n.model.date || '—'],
               ].map(([label, fn]) => (
                 <tr key={label} className="border-t border-zinc-800">
