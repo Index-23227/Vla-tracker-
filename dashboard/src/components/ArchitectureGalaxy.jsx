@@ -51,6 +51,27 @@ function deriveTraining(m) {
   return 'SFT / Imitation'
 }
 
+const EXISTING_VLA_RE = /pi0|π0|openvla|gr00t|groot|smolvla|\bocto\b|cogact|x-vla|evo-1|robovlm/i
+function deriveContribution(m) {
+  const a = m.architecture || {}
+  const t = `${a.backbone || ''} ${a.action_head || ''} ${a.key_innovation || ''}`
+  if (/wrapper|plug-?in|test-?time|frozen (base|vla)|steering/i.test(t)) return 'Wrapper / Test-time'
+  if (EXISTING_VLA_RE.test(t)) return 'Built on existing VLA'
+  return 'New architecture'
+}
+
+function liberoPlusAvg(m) {
+  const lib = (m.benchmarks || {}).libero
+  if (!lib || typeof lib !== 'object') return null
+  const agg = ['libero_plus_avg', 'libero_plus', 'libero_plus_overall', 'libero_plus_overall_zero_shot']
+    .map(k => lib[k]).find(v => typeof v === 'number')
+  if (agg != null) return agg
+  const vals = Object.entries(lib)
+    .filter(([k, v]) => k.startsWith('libero_plus') && typeof v === 'number')
+    .map(([, v]) => v)
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+}
+
 function parseParamsB(m) {
   const s = String(m.architecture?.parameters || '')
   const match = s.match(/(\d+(?:\.\d+)?)\s*([BM])/i)
@@ -98,6 +119,11 @@ const CAT_DIMS = {
     values: ['Open source', 'Closed'],
     of: (m) => (m.open_source ? 'Open source' : 'Closed'),
   },
+  contribution: {
+    label: 'Contribution type',
+    values: ['New architecture', 'Built on existing VLA', 'Wrapper / Test-time'],
+    of: deriveContribution,
+  },
 }
 // Shape can encode at most 4 distinct values.
 const SHAPE_DIM_KEYS = Object.keys(CAT_DIMS).filter(k => CAT_DIMS[k].values.length <= 4)
@@ -105,6 +131,7 @@ const SHAPE_DIM_KEYS = Object.keys(CAT_DIMS).filter(k => CAT_DIMS[k].values.leng
 // Numeric dims: drive height.
 const HEIGHT_DIMS = {
   libero: { label: 'LIBERO avg', of: m => m.libero_avg, domain: [40, 100], fmt: v => v.toFixed(1) },
+  libero_plus: { label: 'LIBERO-Plus avg', of: liberoPlusAvg, domain: [40, 100], fmt: v => v.toFixed(1) },
   calvin: { label: 'CALVIN avg len', of: m => m.calvin_avg, domain: [0, 5], fmt: v => v.toFixed(2) },
   simpler: { label: 'SimplerEnv avg', of: m => m.simpler_avg, domain: [30, 90], fmt: v => v.toFixed(1) },
   robotwin_v2: { label: 'RoboTwin v2 avg', of: m => m.robotwin_v2_avg, domain: [0, 100], fmt: v => v.toFixed(1) },
@@ -424,6 +451,7 @@ export default function ArchitectureGalaxy({ models }) {
             <DetailRow label="System" value={CAT_DIMS.system.of(selected.model)} />
             <DetailRow label="Backbone family" value={CAT_DIMS.backbone.of(selected.model)} />
             <DetailRow label="Training" value={CAT_DIMS.training.of(selected.model)} />
+            <DetailRow label="Contribution" value={CAT_DIMS.contribution.of(selected.model)} />
             <DetailRow label="Backbone" value={selected.model.architecture?.backbone} />
             <DetailRow label="Action head" value={selected.model.architecture?.action_head} />
             <DetailRow label="Organization" value={selected.model.organization} />
@@ -471,6 +499,7 @@ export default function ArchitectureGalaxy({ models }) {
                 ['System', n => CAT_DIMS.system.of(n.model)],
                 ['Backbone family', n => CAT_DIMS.backbone.of(n.model)],
                 ['Training', n => CAT_DIMS.training.of(n.model)],
+                ['Contribution', n => CAT_DIMS.contribution.of(n.model)],
                 ['LIBERO avg', n => n.model.libero_avg != null ? n.model.libero_avg.toFixed(2) : '—'],
                 ['Backbone', n => n.model.architecture?.backbone || '—'],
                 ['Action head', n => n.model.architecture?.action_head || '—'],
