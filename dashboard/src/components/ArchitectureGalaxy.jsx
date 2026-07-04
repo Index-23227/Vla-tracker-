@@ -1,6 +1,7 @@
 import { useMemo, useState, useRef, useCallback } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Html } from '@react-three/drei'
+import DetailedPipelineCard from './DetailedPipelineCard'
 
 // ── Validated 8-slot dark palette (fixed order, never cycled) ───────────────
 const PALETTE = ['#3987e5', '#199e70', '#c98500', '#008300', '#9085e9', '#e66767', '#d55181', '#d95926']
@@ -472,6 +473,20 @@ export default function ArchitectureGalaxy({ models }) {
         )}
       </div>
 
+      {/* Architecture flow diagram for selected model */}
+      {selected && (
+        <div className="mt-3">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-xs font-semibold text-white">Architecture flow</span>
+            <span className="flex items-center gap-1 text-[11px]" style={{ color: selected.color }}>
+              <span className="h-2 w-2 rounded-full" style={{ background: selected.color }} />
+              {selected.model.name}
+            </span>
+          </div>
+          <DetailedPipelineCard model={selected.model} />
+        </div>
+      )}
+
       {/* Compare tray */}
       {compare.length > 0 && (
         <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900 p-3">
@@ -514,6 +529,18 @@ export default function ArchitectureGalaxy({ models }) {
               ))}
             </tbody>
           </table>
+          {/* Side-by-side architecture flows */}
+          <div className={`mt-3 grid gap-3 grid-cols-1 ${compare.length === 2 ? 'md:grid-cols-2' : compare.length >= 3 ? 'md:grid-cols-3' : ''}`}>
+            {compare.map(n => (
+              <div key={n.model.name}>
+                <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-white">
+                  <span className="h-2 w-2 rounded-full" style={{ background: n.color }} />
+                  {n.model.name}
+                </div>
+                <DetailedPipelineCard model={n.model} />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
