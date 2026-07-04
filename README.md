@@ -141,6 +141,7 @@ The interactive dashboard provides:
 - **Efficiency** — Performance vs. parameters / inference speed
 - **Coverage** — Heatmap of which models report which benchmarks
 - **Architecture** — Breakdown by action head type, VLM backbone
+- **3D Galaxy** — Interactive 3D map of all models clustered by decoding scheme (AR / flow matching / diffusion / hybrid …), node shape = system design (E2E vs VLM+action-expert vs dual-system vs wrapper), height = LIBERO score
 
 ```bash
 # Run locally

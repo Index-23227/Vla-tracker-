@@ -15,6 +15,7 @@ const EfficiencyRanking = lazy(() => import('./components/EfficiencyRanking'))
 const RealWorldBenchmark = lazy(() => import('./components/RealWorldBenchmark'))
 const CoverageHeatmap = lazy(() => import('./components/CoverageHeatmap'))
 const ArchitectureExplorer = lazy(() => import('./components/ArchitectureExplorer'))
+const ArchitectureGalaxy = lazy(() => import('./components/ArchitectureGalaxy'))
 const PaperReviews = lazy(() => import('./components/PaperReviews'))
 const EvolutionTimeline = lazy(() => import('./components/EvolutionTimeline'))
 
@@ -33,6 +34,7 @@ const TABS = [
   { id: 'efficiency', label: 'Efficiency' },
   { id: 'realworld', label: 'Real-World' },
   { id: 'architecture', label: 'Architecture' },
+  { id: 'galaxy', label: '3D Galaxy' },
   { id: 'coverage', label: 'Coverage' },
   { id: 'evolution', label: 'Evolution' },
   { id: 'reviews', label: 'Reviews' },
@@ -108,6 +110,9 @@ function AppContent() {
           )}
           {activeTab === 'architecture' && (
             <ArchitectureExplorer models={filteredModels} />
+          )}
+          {activeTab === 'galaxy' && (
+            <ArchitectureGalaxy models={filteredModels} />
           )}
           {activeTab === 'coverage' && (
             <CoverageHeatmap models={filteredModels} />
