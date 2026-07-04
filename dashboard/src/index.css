@@ -10,3 +10,15 @@ body {
   background-color: #0a0a0a;
   color: #e5e5e5;
 }
+
+/* Pipeline card: data-flow pulse traveling down the spine */
+@keyframes pipeline-pulse {
+  0%   { top: 0%;  opacity: 0; }
+  8%   { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: calc(100% - 16px); opacity: 0; }
+}
+.pipeline-pulse { animation: pipeline-pulse 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-pulse { animation: none; opacity: 0; }
+}

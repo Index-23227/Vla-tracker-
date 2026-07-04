@@ -494,6 +494,18 @@ export default function ArchitectureGalaxy({ models }) {
             <div className="text-xs font-semibold text-white">Architecture comparison</div>
             <button onClick={() => setCompare([])} className="text-[11px] text-zinc-500 hover:text-white">clear</button>
           </div>
+          {/* Side-by-side architecture flows (visual comparison first) */}
+          <div className={`mb-3 grid gap-3 grid-cols-1 ${compare.length === 2 ? 'md:grid-cols-2' : compare.length >= 3 ? 'md:grid-cols-3' : ''}`}>
+            {compare.map(n => (
+              <div key={n.model.name}>
+                <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-white">
+                  <span className="h-2 w-2 rounded-full" style={{ background: n.color }} />
+                  {n.model.name}
+                </div>
+                <DetailedPipelineCard model={n.model} />
+              </div>
+            ))}
+          </div>
           <table className="w-full min-w-[560px] text-left text-[11px]">
             <thead>
               <tr className="text-zinc-500">
@@ -529,18 +541,6 @@ export default function ArchitectureGalaxy({ models }) {
               ))}
             </tbody>
           </table>
-          {/* Side-by-side architecture flows */}
-          <div className={`mt-3 grid gap-3 grid-cols-1 ${compare.length === 2 ? 'md:grid-cols-2' : compare.length >= 3 ? 'md:grid-cols-3' : ''}`}>
-            {compare.map(n => (
-              <div key={n.model.name}>
-                <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-white">
-                  <span className="h-2 w-2 rounded-full" style={{ background: n.color }} />
-                  {n.model.name}
-                </div>
-                <DetailedPipelineCard model={n.model} />
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>
