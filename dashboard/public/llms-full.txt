@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-07-03T15:15:27.189630
+# Generated: 2026-07-07T02:38:36.711667
 # Models: 304
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -587,7 +587,7 @@ MODEL: PearlVLA
     Parameters: 7B (OpenVLA-7B backbone) + 300M frozen UWM latent world model
   Tags: openvla_backbone, latent_refinement, world_model, closed_loop, rl_finetuning, libero, regression_head, system2, sota_libero
   Benchmarks:
-    libero (avg=98.7): libero_spatial=99.4, libero_object=99.8, libero_goal=98.4, libero_long=97.2, libero_avg=98.7
+    libero (avg=98.7): libero_spatial=99.4, libero_object=99.8, libero_goal=98.4, libero_long=97.2, libero_avg=98.7, libero_plus_avg=76.3, libero_plus_camera=65.9, libero_plus_robot=40.9, libero_plus_language=81.2, libero_plus_light=93.8, libero_plus_background=93.9, libero_plus_noise=79.9, libero_plus_layout=78.9
   Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: OpenVLA-7B 위에 12개 meta-query 토큰을 4개 visual anchor + 8개 latent plan 토큰으로 분리하고, frozen UWM 잠재 world model을 K=4회 닫힌 루프로 질의하여 plan 토큰을 잔차 갱신(coarse-to-fine) → parallel regression head로 H=8 행동 청크 디코딩. 위에 CRG-PRL(group-relative process-reward RL)을 얹어 LIBERO 98.7%로 SOTA 달성.
   AI Review: PDF-verified
@@ -736,7 +736,7 @@ MODEL: G3T-AML
     Parameters: 4B (Qwen3-VL VLM) + 6B (LongCat view-synthesis) + 16-layer DiT action expert
   Tags: multi_view, diffusion, libero, libero_plus, robotwin_v2, real_world, qwen3_vl, vggt, action_manifold, novel_view_synthesis, geometry_guided
   Benchmarks:
-    libero (avg=98.55): libero_spatial=98.8, libero_object=99.8, libero_goal=99.0, libero_long=96.6, libero_avg=98.6
+    libero (avg=98.55): libero_spatial=98.8, libero_object=99.8, libero_goal=99.0, libero_long=96.6, libero_avg=98.6, libero_plus_avg=85.7, libero_plus_camera=89.6, libero_plus_robot=60.1, libero_plus_language=86.9, libero_plus_light=98.0, libero_plus_background=95.7, libero_plus_noise=97.2, libero_plus_layout=78.2
     robotwin_v2 (avg=85.62): avg_clean=85.18, avg_randomized=86.06
   Eval Conditions: {'libero': 'fine-tuned on LIBERO; also evaluated zero-shot on LIBERO-Plus (85.7% avg across 7 perturbation types)', 'robotwin_v2': 'fine-tuned on RoboTwin 2.0 (Clean and Randomized splits)', 'real_world': 'fine-tuned on Franka Panda real-robot demonstrations'}
   AI Review Summary: 단안 입력의 깊이 모호성을 해소하기 위해 LongCat-Image-Edit(6B) 잠재공간 multi-view diffusion으로 합성 novel view를 만들고, VGGT의 단안 geometric prior와 함께 **Geometry-Guided Gated Transformer (G3T)** 가 occlusion noise를 게이팅하며 정렬한다. Action head는 noise/velocity 회귀 대신 **Action Manifold Learning (AML)** 로 valid action manifold 위에서 직접 ac
@@ -757,7 +757,7 @@ MODEL: WorldPilot
     Parameters: unknown
   Tags: libero, libero-plus, robocasa, flow-matching, world-action-model, world-model-prior, cosmos-policy, qwen3-vl, latent-steering, action-steering, real-robot
   Benchmarks:
-    libero (avg=98.5): libero_avg=98.5
+    libero (avg=98.5): libero_avg=98.5, libero_plus_avg=84.7, libero_plus_camera=82.8, libero_plus_robot=60.6, libero_plus_language=87.2, libero_plus_light=98.6, libero_plus_background=96.4, libero_plus_noise=93.6, libero_plus_layout=80.5
     robocasa (avg=65.5): average=65.5
   Eval Conditions: {'libero': 'fine-tuned', 'robocasa': 'fine-tuned', 'libero_plus': 'zero-shot OOD (trained on LIBERO only)'}
   AI Review Summary: 사전학습된 World-Action Model(Cosmos Policy)을 동결한 채 두 개의 상보적 경로(Latent Steering: scene-evolution latent를 cross-attention residual로 VLM hidden state에 주입 / Action Steering: 예측 궤적을 단일 prefix 토큰으로 압축해 flow-matching action generator에 조건화)로 VLA에 dynamics prior를 주입하여, LIBERO-Plus zero-shot OOD에서 84.7% Total (AB
@@ -842,7 +842,7 @@ MODEL: PRTS
     Parameters: ~4.7B (4B VLM + 675M DiT action expert)
   Tags: flow-matching, contrastive-rl, goal-conditioned, pretraining, libero, simpler-env, qwen-vl, manipulation
   Benchmarks:
-    libero (avg=98.4): libero_spatial=98.8, libero_object=99.8, libero_goal=98.4, libero_long=96.6, libero_avg=98.4
+    libero (avg=98.4): libero_spatial=98.8, libero_object=99.8, libero_goal=98.4, libero_long=96.6, libero_avg=98.4, libero_plus_avg=81.4, libero_pro_avg=58.8
     simpler_env: widowx_avg=77.1, simpler_avg=77.1
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'libero_plus': 'zero-shot', 'libero_pro': 'zero-shot'}
   AI Review Summary: Qwen3-VL-4B + 675M flow-matching DiT 액션 전문가에 **Contrastive RL(CRL) auxiliary head**를 추가하여, state-action 임베딩과 goal 임베딩의 inner product가 **log-discounted goal occupancy**에 근사하도록 대규모 사전학습. 404M 샘플로 학습하여 LIBERO 98.4%, LIBERO-Plus 81.4%, LIBERO-Pro 58.8%, SimplerEnv WidowX 77.1%, 실로봇 95.9%를 기록.
@@ -863,7 +863,7 @@ MODEL: LaMP
     Parameters: None
   Tags: flow-matching, 3d-flow, motion-prior, dual-expert, libero, simpler_env
   Benchmarks:
-    libero (avg=98.33): libero_spatial=99.4, libero_object=99.8, libero_goal=97.4, libero_long=96.7, libero_avg=98.3
+    libero (avg=98.33): libero_spatial=99.4, libero_object=99.8, libero_goal=97.4, libero_long=96.7, libero_avg=98.3, libero_plus_avg=79.3, libero_plus_camera=64.5, libero_plus_robot=69.6, libero_plus_language=88.2, libero_plus_light=95.3, libero_plus_background=97.4, libero_plus_noise=76.9, libero_plus_layout=73.8
     simpler_env: simpler_widowx_stack=75.0, simpler_widowx_carrot=66.7, simpler_widowx_spoon=79.1, simpler_widowx_eggplant=95.8, simpler_avg=79.2
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'zero-shot'}
   AI Review: PDF-verified
@@ -1239,7 +1239,7 @@ MODEL: TAG
     Parameters: None
   Tags: test-time-guidance, classifier-free-guidance, pi0.5-base, libero, inference-time, robustness
   Benchmarks:
-    libero (avg=97.85): libero_spatial=97.8, libero_object=99.2, libero_goal=97.4, libero_long=97.0, libero_avg=97.9
+    libero (avg=97.85): libero_spatial=97.8, libero_object=99.2, libero_goal=97.4, libero_long=97.0, libero_avg=97.9, libero_plus_avg=86.1, libero_plus_camera=75.8, libero_plus_robot=80.0, libero_plus_language=79.8, libero_plus_light=97.5, libero_plus_background=96.8, libero_plus_noise=88.0, libero_plus_layout=85.0
   Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: Pi0/Pi0.5 위에 "foreground-erased counterfactual observation"을 unconditional branch로 두고 **classifier-free guidance 스타일로 predicted velocity field를 residual extrapolation**하는 inference-time guidance. 학습은 counterfactual calibration(p_cf=0.1) 30K step만 필요하며 LIBERO Avg 97.9%(π0.5 baseline 95.2 대비 **+2.7%p*
   AI Review: PDF-verified
@@ -1280,7 +1280,7 @@ MODEL: OA-WAM
     Parameters: 7B
   Tags: libero, simpler_env, libero-plus, flow-matching, world-model, slot-attention, object-addressable, robust-manipulation
   Benchmarks:
-    libero (avg=97.8): libero_spatial=98.9, libero_object=99.0, libero_goal=97.4, libero_long=95.9, libero_avg=97.8
+    libero (avg=97.8): libero_spatial=98.9, libero_object=99.0, libero_goal=97.4, libero_long=95.9, libero_avg=97.8, libero_plus_avg=83.9, libero_plus_camera=80.5, libero_plus_robot_init=89.6, libero_plus_layout=82.8, libero_plus_lighting=96.5, libero_plus_background=95.9, libero_plus_language=85.3, libero_plus_sensor_noise=75.6
     simpler_env: simpler_widowx_visual_matching=79.3, simpler_avg=79.3
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
   AI Review Summary: Chameleon-7B 위에 per-slot vector를 frozen 32-dim 식별 주소(address)와 256-dim 시간변화 콘텐츠(content)로 분리하고, 모든 transformer layer의 cross-slot attention key를 address 부분에만 의존하도록 마스킹·재주입함으로써, "어떤 물체를 조작할지"의 결정을 "그 물체가 지금 어떻게 보이는지"와 아키텍처 수준에서 분리한 flow-matching VLA. LIBERO 97.8%로 in-distribution SOTA에 근접하면서 LIBERO-Pl
@@ -1301,7 +1301,7 @@ MODEL: TBD-VLA
     Parameters: 2B
   Tags: 2B, discrete-diffusion, block-diffusion, temporal-autoregression, parallel-decoding, real-time-chunking, qwen3-vl, libero, simpler_env, real-world
   Benchmarks:
-    libero (avg=97.8): libero_spatial=97.6, libero_object=99.6, libero_goal=97.4, libero_long=96.6, libero_avg=97.7
+    libero (avg=97.8): libero_spatial=97.6, libero_object=99.6, libero_goal=97.4, libero_long=96.6, libero_avg=97.7, libero_plus_avg=83.49, libero_plus_camera=87.81, libero_plus_robot=60.38, libero_plus_language=77.36, libero_plus_light=95.77, libero_plus_background=88.77, libero_plus_noise=89.94, libero_plus_layout=84.39
     simpler_env: simpler_widowx_avg=66.8, simpler_google_visual_matching=91.0, simpler_google_variant_aggregation=86.3, simpler_google_avg=88.65, simpler_avg=77.7
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'real_world': 'fine-tuned'}
   AI Review Summary: Qwen3-VL 2B 백본 위에 **temporal block(m=4) 단위 masked discrete diffusion**을 도입해, block 내부는 parallel, block 사이는 autoregressive로 액션을 생성. LIBERO 97.7%, SimplerEnv-WidowX 66.8%, SimplerEnv-Google 91.0% / 86.3%, 실세계 67.1%를 달성하면서도 0.086s latency로 RTC와 자연스럽게 호환.
@@ -1413,7 +1413,7 @@ MODEL: OneStepVLA
     Parameters: 1.4B VLM (full-encoder variant) + ~30M action head; tiny variant much smaller (4-layer Gemma-tiny + 4-layer SigLIP slice)
   Tags: vla, flow-matching, one-step, inference-acceleration, paligemma, siglip, openpi, simvla, libero, libero-plus, libero-pro, real-robot, pi0.5, high-noise-schedule
   Benchmarks:
-    libero (avg=97.75): libero_spatial=98.4, libero_object=100.0, libero_goal=97.0, libero_long=95.6, libero_avg=97.75
+    libero (avg=97.75): libero_spatial=98.4, libero_object=100.0, libero_goal=97.0, libero_long=95.6, libero_avg=97.75, libero_pro_avg=44.2
   Eval Conditions: {'libero': 'fine-tuned per suite, OpenPI-style 32-dim action interface (full32 supervision), action horizon H10, one-step Euler decoding, replanning interval = action horizon', 'libero_plus': 'tiny-model recipe; 2000 episodes/suite distribution-shift evaluation', 'libero_pro': 'full-encoder standard-LIBERO checkpoint applied zero-shot to LIBERO-Pro perturbations (500 episodes/cell); 1-step 44.2% vs 10-step 43.5% mean success', 'rss_yam_bimanual': 'fine-tuned pi0.5 policy, real-robot, 5 trials/task; one-step decoding matches/exceeds the 10-step baseline (Insert mouse battery 80%/80%, Seal water bottle cap 60%/35%, Tower of Hanoi 100%/50%)'}
   AI Review Summary: VLA의 action 생성은 image generation과 condition-target 구조가 다르기 때문에(rich condition + 저차원 compact target), consistency distillation / shortcut / mean-flow / teacher 같은 복잡한 few-step diffusion machinery 없이도 **표준 flow-matching velocity 학습 + 학습-시간 분포를 high-noise로 단순 편향(Beta(1,1.5) 또는 shifted u/(1+(alpha-1)(1-
   AI Review: PDF-verified
@@ -1516,7 +1516,7 @@ MODEL: Reflective-VLA
     Parameters: ~2B-3B (VLM) + action expert
   Tags: flow-matching, dual-system, in-context-learning, mixture-of-transformers, generalization, libero, simpler-env, manipulation
   Benchmarks:
-    libero (avg=97.55): libero_spatial=98.4, libero_object=99.0, libero_goal=98.2, libero_long=94.6, libero_avg=97.6
+    libero (avg=97.55): libero_spatial=98.4, libero_object=99.0, libero_goal=98.2, libero_long=94.6, libero_avg=97.6, libero_plus_avg=87.7, libero_plus_hard=68.8
     simpler_env: widowx_spoon_on_towel=95.8, widowx_carrot_on_plate=83.3, widowx_stack_cube=79.2, widowx_eggplant_in_basket=54.2, simpler_avg=78.2
   Eval Conditions: {'libero': 'fine-tuned; in-distribution; LIBERO-Plus avg 87.7%, LIBERO-Plus-Hard avg 68.8% under distribution shift', 'simpler_env': 'real-to-sim transfer; WidowX 4 tasks'}
   AI Review: PDF-verified
@@ -1680,7 +1680,7 @@ MODEL: Libra-VLA
     Parameters: ~3B
   Tags: dual-system, system1-system2, coarse-to-fine, asynchronous
   Benchmarks:
-    libero (avg=97.2): libero_spatial=98.6, libero_object=99.4, libero_goal=98.0, libero_long=92.8, libero_avg=97.2
+    libero (avg=97.2): libero_spatial=98.6, libero_object=99.4, libero_goal=98.0, libero_long=92.8, libero_avg=97.2, libero_plus_avg=82.3, libero_plus_zero_shot=79.5
   Eval Conditions: {'libero': 'fine-tuned'}
   AI Review: PDF-verified
 
@@ -1782,7 +1782,7 @@ MODEL: DeepThinkVLA
     Parameters: 2.9B
   Tags: reasoning, chain-of-thought, RL, GRPO, open-source
   Benchmarks:
-    libero (avg=97.05): libero_spatial=96.6, libero_object=99.0, libero_goal=96.4, libero_long=96.2
+    libero (avg=97.05): libero_spatial=96.6, libero_object=99.0, libero_goal=96.4, libero_long=96.2, libero_plus_avg=79.0
   Eval Conditions: {'libero': 'SFT + RL fine-tuned (GRPO)'}
   Peer Review:
     Venue: ICLR 2026, Decision: poster
@@ -1805,7 +1805,7 @@ MODEL: ELAN4D
     Parameters: ~3B (PaliGemma 3B backbone + action expert, plug-and-play 4D branch is lightweight)
   Tags: libero, robotwin, flow_matching, 4D_supervision, pi_0, plug_and_play, controlnet
   Benchmarks:
-    libero (avg=97.0): libero_spatial=97.4, libero_object=99.0, libero_goal=96.4, libero_long=95.2, libero_avg=97.0
+    libero (avg=97.0): libero_spatial=97.4, libero_object=99.0, libero_goal=96.4, libero_long=95.2, libero_avg=97.0, libero_plus_avg=78.2
     robotwin_v2 (avg=37.0): robotwin_v2_avg=37.0
   Eval Conditions: {'libero': 'fine-tuned', 'robotwin_v2': 'fine-tuned, bimanual'}
   AI Review Summary: 외부 트래커 없이 로봇 자체의 proprioception(joint angle)과 forward kinematics만으로 **로봇 keypoint의 미래 변위(4D track)** 를 생성하고, 이를 ControlNet 스타일의 **gradient-isolated 보조 branch** 로 pi_0 / pi_0.5 backbone에 plug-and-play 주입하여 LIBERO 97.0% / LIBERO-Plus +14.0% / 실제 환경 spatial generalization +50%p를 달성한 embodiment-centric 
@@ -1928,7 +1928,7 @@ MODEL: OFlow
     Parameters: ~3B (1.6B VLM + 1.2B action head + 0.2B foresight)
   Tags: flow-matching, foresight, object-aware, dinov2, controlnet, libero, simpler_env, metaworld, libero_plus
   Benchmarks:
-    libero (avg=96.62): libero_spatial=98.0, libero_object=99.0, libero_goal=95.0, libero_long=94.5, libero_avg=96.6
+    libero (avg=96.62): libero_spatial=98.0, libero_object=99.0, libero_goal=95.0, libero_long=94.5, libero_avg=96.6, libero_plus_avg=72.3
     simpler_env: simpler_widowx_spoon=76.8, simpler_widowx_carrot=62.7, simpler_widowx_eggplant=56.6, simpler_widowx_stack=72.4, simpler_avg=67.1
   Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned', 'metaworld': 'fine-tuned', 'libero_plus': 'zero-shot'}
   AI Review: PDF-verified
@@ -1968,7 +1968,7 @@ MODEL: A1
     Parameters: ~7.4B total (Molmo-7B VLM: vision encoder + 28-layer Qwen2-7B) + ~400M Qwen3 flow-matching action expert
   Tags: flow_matching, libero, vlabench, robochallenge, open_source, efficient_inference, early_exit
   Benchmarks:
-    libero (avg=96.55): libero_spatial=97.4, libero_object=99.8, libero_goal=97.6, libero_long=91.4, libero_avg=96.6
+    libero (avg=96.55): libero_spatial=97.4, libero_object=99.8, libero_goal=97.6, libero_long=91.4, libero_avg=96.6, libero_plus_avg=75.3
   Eval Conditions: {'libero': 'fine-tuned'}
   AI Review Summary: VLM 백본과 flow-matching action head를 "layer별 warm-start denoising + action-consistency 조기 종료"로 동시에 가속화하여, LIBERO 96.6%와 RoboChallenge 29.0%를 유지하면서 에피소드당 latency를 37.8s → 10.5s로 줄인 완전 오픈소스 VLA.
   AI Review: PDF-verified
@@ -2260,7 +2260,7 @@ MODEL: LoopVLA
     Parameters: LoopOFT*: 1.2B (vs 2.2B Qwen3OFT baseline, -45%); LoopFM: 1.3B (vs 2.3B Qwen3FM, -43%)
   Tags: libero, libero-plus, vla-arena, recurrent, sufficiency, early-exit, efficiency, qwen3-vl
   Benchmarks:
-    libero (avg=95.85): libero_spatial=95.0, libero_object=100.0, libero_goal=97.4, libero_long=91.0, libero_avg=95.85
+    libero (avg=95.85): libero_spatial=95.0, libero_object=100.0, libero_goal=97.4, libero_long=91.0, libero_avg=95.85, libero_plus_avg=65.8, libero_plus_camera=58.3, libero_plus_robot=41.7, libero_plus_language=66.7, libero_plus_light=88.9, libero_plus_background=88.3
   Eval Conditions: {'libero': 'fine-tuned', 'libero_plus': 'zero-shot generalization (camera/robot/language/light/background factors)', 'vla_arena': 'fine-tuned; L0 (safety/distractor/extrapolation/long-horizon)'}
   AI Review Summary: "VLA backbone의 가장 깊은 표현이 항상 최적"이라는 통념을 정면 반박. 4 frozen Perceptual Anchor Layer 위에 3-layer shared Loop Block을 최대 8회 반복 적용하면서, 매 iteration마다 후보 action + sufficiency score를 산출. Remaining Mass Allocation(RMA)과 self-supervised distribution alignment로 "언제 멈출지"를 학습. Qwen3VL-2B에서 파라미터 -45%(2.2B→1.2B) + 처리량 
   AI Review: PDF-verified
@@ -2344,7 +2344,7 @@ MODEL: Evo-Depth
     Parameters: 0.9B
   Tags: flow-matching, depth, lightweight, multi-view, real-world
   Benchmarks:
-    libero (avg=95.4): libero_avg=95.4
+    libero (avg=95.4): libero_avg=95.4, libero_plus_avg=69.6
     metaworld: metaworld_avg=84.4
   Eval Conditions: {'libero': 'fine-tuned', 'metaworld': 'fine-tuned', 'real_world': 'fine-tuned (4 task suites, average across tasks)'}
   AI Review Summary: InternVL3-1B + Qwen2.5-0.5B 기반 0.9B 경량 VLA에 **Implicit Depth Encoding Module (IDEM)**과 **Spatial Enhancement Module (SEM)**을 결합하고 **Progressive Alignment Training**으로 학습하여, LIBERO 95.4%, MetaWorld 84.4%, real-world 90% 평균 성공률을 가장 작은 모델로 달성한 depth-enhanced flow-matching VLA.
@@ -3261,7 +3261,7 @@ MODEL: VLA-GSE
     Parameters: 4B
   Tags: libero, libero-plus, peft, lora, moe, parameter-efficient, qwen3-vl, openvla-oft
   Benchmarks:
-    libero (avg=81.2): libero_spatial=90.3, libero_object=86.2, libero_goal=74.2, libero_long=74.1, libero_avg=81.2
+    libero (avg=81.2): libero_spatial=90.3, libero_object=86.2, libero_goal=74.2, libero_long=74.1, libero_avg=81.2, libero_plus_avg=81.2
   Eval Conditions: {'libero': 'fine-tuned (evaluated zero-shot on LIBERO-Plus perturbation axes)', 'real_world': 'four manipulation tasks under distribution shifts'}
   AI Review Summary: Qwen3-VL-4B 기반 OpenVLA-OFT 스타일 VLA에서 LoRA 대신 **SVD 분해 기반 두 전문가 체계**(항상 활성인 Generalized Experts + 라우팅되는 Specialized Experts)와 expert-wise gradient scale balancing + backbone weight adjustment를 결합하여, 단 2.51% trainable parameter로 full fine-tuning을 LIBERO-Plus에서 능가하고 multimodal understanding(MMMU/OCRBen
   AI Review: PDF-verified
@@ -3301,7 +3301,7 @@ MODEL: SmoothVLA
     Parameters: ~7B
   Tags: smoothness, GRPO, RL, OpenVLA-based, jerk-penalty, physics-informed, libero
   Benchmarks:
-    libero (avg=80.5): libero_avg=80.5, libero_spatial_robustness_avg=54.1
+    libero (avg=80.5): libero_avg=80.5, libero_spatial_robustness_avg=54.1, libero_plus_avg=46.2, libero_plus_language=43.3, libero_plus_light=16.1, libero_plus_background=61.2, libero_plus_layout=64.4
   Eval Conditions: {'libero': 'rl'}
   AI Review Summary: OpenVLA에 physics-informed hybrid reward (binary task reward + jerk-based smoothness penalty, λ=0.2)를 적용한 GRPO RL로, 기존 RL 대비 **13.8% smoothness 향상** + LIBERO-Plus robustness **46.2%** (SFT 22.0% 대비 +24.2%p) 달성.
   AI Review: PDF-verified
