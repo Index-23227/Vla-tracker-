@@ -1,0 +1,50 @@
+# Auto-track score: 10.5
+# Paper: Domain Arithmetic: One-Shot VLA Adaptation under Environmental Shifts
+# arXiv: 2607.00666
+
+name: DART
+full_name: "Domain Arithmetic: One-Shot VLA Adaptation under Environmental Shifts"
+organization: "Seoul National University"
+date: "2026-07-01"
+paper_url: https://arxiv.org/abs/2607.00666
+code_url: https://github.com/snumprlab/dart
+venue: "ECCV 2026"
+open_source: true
+model_type: "adaptation_method"
+
+architecture:
+  backbone: "Inherited from base VLA (openpi models): primary experiments on pi0.5, generality check on pi0-FAST; no architectural modification"
+  llm: "PaliGemma-based VLM (inherited from pi0.5 / pi0-FAST)"
+  action_head: "Inherits base VLA action head (pi0.5 flow matching; pi0-FAST autoregressive FAST tokens). DART itself is an architecture-agnostic weight-space adaptation: it fine-tunes one-shot source/target update-vectors, extracts a domain vector via analogy subtraction with SVD subspace filtering and scaling, and adds it to the base policy (theta* = theta0 + alpha * domain_vector, alpha=0.8)."
+  action_head_category: flow_matching
+  parameters: null
+  key_innovation: "Analogy-based one-shot VLA adaptation via weight arithmetic (Domain ARiThmetic). Observes that one-shot fine-tuned update-vectors decompose additively into task-specific and domain-specific directions. Extracts a reusable domain vector by subtracting the source-domain update-vector from the target-domain update-vector (same task, one demo each), with (1) subspace filtering that keeps only source SVD basis vectors whose overlap energy with the target subspace passes a dynamic cutoff based on the subspace alignment score gamma, and (2) subspace scaling that down-weights the domain vector by gamma per layer. Adapting pi0.5 with a single target demo yields LIBERO novel-viewpoint avg 79.1% vs zero-shot 54.5%, FLA 74.3%, RETAIN 69.6%; also works for cross-embodiment (Panda to UR5e on MimicGen) and real-world UR10e viewpoint shift (81.7% vs zero-shot 43.3%)."
+
+training:
+  dataset: "One-shot: a single target-domain demonstration per environment (LIBERO: 1 demo from 1 task per scene x 5 scenes; MimicGen: 1 Stack demo per robot; real-world: 1 Stack Cube demo) + the corresponding same-task source-domain demonstration"
+  method: "One-shot BC fine-tuning of source/target update-vectors for 1,000 steps (AdamW, peak LR 5e-5, batch 64, openpi JAX codebase), then training-free weight arithmetic; full-SVD variant takes ~15m35s on CPU, randomized SVD ~6m33s with comparable accuracy"
+
+benchmarks:
+  libero:
+    novel_viewpoint_small: 92.0
+    novel_viewpoint_medium: 80.8
+    novel_viewpoint_large: 64.4
+    view_plus_noise: 69.2
+    view_plus_noise_plus_light: 75.0
+    pi0_fast_novel_viewpoint_avg: 79.4
+    eval_condition: "NOT standard LIBERO protocol: 40 tasks evaluated under camera viewpoint shifts / visual perturbations after one-shot adaptation of pi0.5; novel-viewpoint avg 79.1 vs zero-shot 54.5, One-shot FT 31.5, RETAIN 69.6, FLA 74.3; 3 trials x 50 rollouts per task"
+    source: "Tables 1-3"
+  real_world:
+    eggplant_pick_place: 91.7
+    lemon_pick_place: 91.7
+    carrot_pick_place: 83.3
+    stack_cube: 41.7
+    press_stapler: 100.0
+    eval_condition: "UR10e + Robotiq 2F-85 gripper, novel third-person viewpoint; pi0.5 adapted with a single Stack Cube demo; average 81.7 vs zero-shot 43.3, FLA 55.0, RETAIN 48.3; 12 rollouts per task"
+    source: "Table 5"
+
+eval_conditions:
+  libero: "one-shot adaptation under viewpoint/visual shifts (non-standard LIBERO conditions)"
+  real_world: "one-shot novel-viewpoint adaptation on UR10e"
+
+tags: [ECCV-2026, adaptation, one-shot, weight-arithmetic, task-arithmetic, domain-shift, viewpoint-shift, cross-embodiment, model-merging, pi0.5, pi0-FAST]
