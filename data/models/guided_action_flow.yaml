@@ -1,0 +1,84 @@
+# Paper: Guided Action Flow: Q-Guided Inference for Flow-Matching Vision-Language-Action Policies
+# arXiv: 2607.02092
+
+name: Guided-Action-Flow
+full_name: "Guided Action Flow: Q-Guided Inference for Flow-Matching Vision-Language-Action Policies"
+organization: "University College London"
+date: "2026-07-03"
+paper_url: https://arxiv.org/abs/2607.02092
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Inference-time Q-guided flow sampling wrapper around a frozen SmolVLA policy (official lerobot/smolvla_libero checkpoint via the LeRobot evaluation stack). No new VLA backbone; the base denoiser and language-vision pathway are never updated."
+  llm: "Inherits frozen SmolVLA VLM; its text-pathway hidden states (mean-pooled over non-padding task tokens) are reused as task-description features for the critic"
+  action_head: "Frozen SmolVLA reverse-time flow-matching sampler (x_t = t*eps + (1-t)*a, integrate t=1 -> t=0) with a QGF-style value-gradient velocity update. At each denoising step the clean action is estimated as a_hat = x_t - t*v_t, a K=3 MLP critic ensemble is differentiated w.r.t. a_hat, the gradient is norm-clipped (c=1.0) and gated by ensemble disagreement m = max(m_min, exp(-alpha*sigma_Q)), then v_guided = v_t - m*clip(g,c)/beta. Subtraction (not addition) follows from the reverse-time SmolVLA convention. Critic gradients apply only to physical LIBERO action dimensions; padded dimensions are untouched."
+  action_head_category: other
+  action_space: continuous
+  parameters: "SmolVLA base fully frozen; adds only a K=3 ensemble of MLP critics (hidden dim 768, depth 4) over flattened observation features, action chunks, and optional VLM hidden-state task features"
+  key_innovation: >
+    Instantiates Q-guided test-time flow sampling (QGF, Zhou et al. 2606.11087) for a frozen VLA:
+    instead of fine-tuning SmolVLA or reranking sampled chunks, a lightweight action-chunk critic
+    trained from real success/failure LIBERO rollouts steers the continuous flow trajectory through
+    action gradients only. Key details: (1) the guidance sign must be derived from the pinned
+    reverse-time SmolVLA sampler (a forward-time update would move the clean-action estimate the
+    wrong way); (2) sparse success-to-go targets y_i = gamma^(j*-i) from episode-level splits
+    (chunk-level splits leak trajectory context); (3) task-description conditioning via frozen
+    SmolVLA VLM hidden states transfers across LIBERO families where task ids cannot; (4) an
+    ensemble-disagreement gate reduces guidance when critics disagree, mitigating harmful
+    out-of-distribution gradients. Explicitly framed as an early-stage feasibility study; critic
+    generalization is identified as the central bottleneck.
+
+training:
+  method: >
+    Base policy frozen throughout. Critics trained with MSE regression to sparse success-to-go on
+    overlapping horizon-H action chunks extracted from real rollouts of the frozen SmolVLA policy
+    in LIBERO (no privileged simulator state as critic input; success signals used only for targets).
+    Strongest multi-family variant: 500 training episodes (LIBERO spatial tasks 0-4 + 250 LIBERO
+    object episodes from tasks 0-4; 332/500 successes), K=3 ensemble, 30 epochs, hidden dim 768,
+    depth 4, VLM hidden-state task features. Hyperparameters selected on validation tasks only;
+    held-out test locked (single evaluation).
+  notes: "Best validation guidance config: beta=2, gradient clip norm 1.0, uncertainty scale alpha=10, minimum gate m_min=0.1. Three task-conditioning variants compared: task-id (no cross-family transfer), hashed bag-of-tokens (too weak), frozen VLM hidden states (strongest)."
+
+inference_hz: null
+
+benchmarks:
+  libero:
+    single_task_spatial_seed3000_qgf: 82.0
+    single_task_spatial_seed3000_baseline: 68.0
+    single_task_spatial_seed4000_qgf: 86.0
+    single_task_spatial_seed4000_baseline: 82.0
+    multi_family_validation_qgf: 56.0
+    multi_family_validation_baseline: 46.0
+    multi_family_held_out_qgf: 67.5
+    multi_family_held_out_baseline: 65.0
+    source: "Paper Tables III/IV/VI: single-task LIBERO spatial (50 episodes/seed) 68.0->82.0 (seed 3000) and 82.0->86.0 (seed 4000); multi-family task-description critic: validation (spatial [5,7,8] + object [6,7], 50 episodes) 46.0->56.0, locked held-out (spatial [6,9] + object [8,9], 40 episodes) 65.0->67.5. Negative result: spatial-only transfer critic <=51.7 vs 53.3 baseline (Table III)."
+    date_reported: "2026-07-03"
+    eval_condition: "Frozen official lerobot/smolvla_libero checkpoint + QGF guidance (K=3 critic ensemble, beta=2, clip 1.0, disagreement gate), real closed-loop LIBERO rollouts via LeRobot stack; hyperparameters chosen on validation, held-out test evaluated once"
+    notes: "Not evaluated on the standard LIBERO-4 suite averages; no libero_avg. Frozen SmolVLA baseline anchors (Table II, no QGF): vanilla LIBERO 65.0 (100 ep), LIBERO-Plus spatial subset 78.0 (50 ep), LIBERO-PRO zero-shot 1.0 (100 ep)."
+
+eval_conditions:
+  libero: "Vanilla LIBERO only for QGF claims; LIBERO-Plus and LIBERO-PRO reported solely as frozen-baseline anchors (78.0% spatial subset / 1.0% zero-shot) and named as future expansion targets"
+  protocol: "Single-task: 1 LIBERO spatial task, 50 episodes/seed (seeds 3000/4000). Spatial-only transfer: 60 validation episodes. Multi-family: validation 50 episodes (spatial 5/7/8, object 6/7), locked held-out 40 episodes (spatial 6/9, object 8/9)"
+  critic_targets: "Sparse success-to-go y_i = gamma^(j*-i) (0 if no future success; 1 after first success); episode-level train/validation splits to avoid chunk-level trajectory leakage"
+  sensitivity: "Earlier sweeps showed sensitivity to beta, critic checkpoint selection, and gating; the same mechanism can produce per-episode gains and regressions"
+  negative_result: "Spatial-only multi-task critic failed to transfer: baseline 32/60 vs QGF at most 31/60 on validation; motivated task-description features + multi-family data + disagreement gating"
+
+tags:
+  - vla
+  - test-time-steering
+  - inference-time
+  - flow-matching
+  - q-learning
+  - critic-guided
+  - guidance
+  - smolvla-base
+  - frozen-base-policy
+  - ensemble-uncertainty
+  - libero
+  - offline-rl
+  - action-chunking
+  - feasibility-study
