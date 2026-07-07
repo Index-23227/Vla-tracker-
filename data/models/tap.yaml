@@ -1,0 +1,74 @@
+# Auto-track score: 9.0
+name: TAP
+full_name: "Learning to Move Before Learning to Do: Task-Agnostic Pretraining for VLAs"
+organization: "Fudan University, Shanghai Innovation Institute"
+date: "2026-07-02"
+paper_url: https://arxiv.org/abs/2607.02466
+code_url: https://github.com/sjh0354/Task-Agnostic-Pretrain
+venue: "ICML 2026"
+open_source: true
+
+architecture:
+  backbone: Qwen2.5-VL (3B) with ViT-based SigLIP visual encoder (400M, 224x224 input)
+  llm: Qwen2.5-VL 3B
+  action_head: "Lightweight 2-layer MLP projecting the VLM last hidden state to a 7-D delta-pose end-effector action (dx, dy, dz, 3D axis-angle, gripper), trained with MSE"
+  action_head_category: regression
+  action_space: "continuous delta-pose EEF, 7-DoF"
+  parameters: "3B VLM backbone + 400M SigLIP + MLP head"
+  key_innovation: >
+    Task-Agnostic Pretraining (TAP): a two-stage framework built on the Decomposition
+    Hypothesis that action generation factorizes into physical competence ("how to move")
+    and semantic alignment ("what to do"), where only the latter needs language. Stage 1
+    pretrains the VLM+action head with a self-supervised Inverse Dynamics objective
+    p(a_t | o_t, o_t+1) on cheap task-agnostic data (discarded off-task Bridge trajectories
+    or 30h of autonomous random robot play generated via a constrained procedural pipeline:
+    voxel-grid-downsampled safe pose library, contact-forcing heuristic, cosine interpolation,
+    boundary-aware Gaussian noise; downsampled to 5Hz). Stage 2 aligns the learned motor
+    priors with language via standard behavior cloning on minimal expert data (5k sim / 200
+    real trajectories). Yields +10% absolute Avg-All over Standard BC on SIMPLER and retains
+    15-25% success under viewpoint shifts where OXE-pretrained NORA collapses to 0%.
+
+training:
+  dataset: >
+    Stage 1 (task-agnostic, no labels): 20k task-irrelevant Bridge episodes (sim) or 30 hours
+    of autonomous random play on WidowX 250s (real), downsampled to 5Hz. Stage 2 (expert BC):
+    5k trajectories (sim) / 200 trajectories per task (real).
+  method: >
+    Stage 1 Inverse Dynamics pretraining (visual-only input, o_t+1 as implicit visual goal,
+    MSE on actions; visual encoder frozen, VLM backbone + action head trained). Stage 2
+    behavior cloning with language-instruction conditioning; all parameters jointly finetuned.
+  hardware: "Single node, 8x NVIDIA H100 (~24 GPU hours total)"
+  optimizer: "AdamW (beta1=0.9, beta2=0.999, weight decay 0.05), grad clip 1.0"
+  learning_rate: "5e-5, cosine decay, warmup ratio 0.05 (5k steps)"
+  batch_size: "Global 128 (16 per GPU)"
+  steps: "100k steps"
+  precision: bfloat16
+
+benchmarks:
+  simpler_env:
+    simpler_widowx_spoon: 58.3
+    simpler_widowx_carrot: 0.0
+    simpler_widowx_stack: 16.7
+    simpler_widowx_eggplant: 8.3
+    simpler_avg: 20.8
+    source: "TAP paper Table 2 (TAP-20k episodes, Entire success; Avg-Entire 20.82%, Avg-Partial 45.82%, Avg-All 33.32%)"
+    date_reported: "2026-07-02"
+    eval_condition: "Stage 1 ID pretraining on 20k task-irrelevant Bridge episodes + Stage 2 BC on 5k expert trajectories; 50 episodes per checkpoint"
+
+eval_conditions:
+  simpler_env: "SIMPLER WidowX environment; TAP-20k checkpoint; Entire (full task completion) success rates; baselines OpenVLA/NORA/pi0 finetuned on the same 5k Stage-2 subset"
+  real_world: "WidowX 250s, 2 tasks (put carrot on plate, push pumpkin left), 5 scenarios x 20 trials; TAP avg 28%/61% vs NORA 36%/56%, from-scratch 9%/21%"
+
+tags:
+  - task-agnostic-pretraining
+  - inverse-dynamics
+  - self-supervised
+  - random-play
+  - data-efficiency
+  - qwen2.5-vl
+  - siglip
+  - simpler_env
+  - widowx
+  - robustness
+  - regression
+  - ICML-2026
