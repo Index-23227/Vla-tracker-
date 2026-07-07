@@ -1,0 +1,47 @@
+# Paper: Teaching Vision-Language-Action Models What to See and Where to Look (DriveTeach-VLA)
+# arXiv: 2607.01658
+
+name: DriveTeach-VLA
+full_name: "Teaching Vision-Language-Action Models What to See and Where to Look"
+organization: "Beihang University / Tsinghua AIR / DiDi / Communication University of China"
+date: "2026-07-02"
+paper_url: https://arxiv.org/abs/2607.01658
+code_url: https://github.com/ShivaTeam/DriveTeach-VLA
+venue: ECCV 2026
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Qwen2.5-VL-3B ViT encoder (student ViT distilled from bbox-augmented image teacher via DVD)"
+  llm: "Qwen2.5-VL-3B (dual models: TGP-Prompter + TGP-Planner)"
+  action_head: "Autoregressive text-waypoint decoding: TGP-Prompter first generates a 2D image-plane Trajectory-Guided Prompt (2D-TGP, projected via pinhole camera model), which conditions the TGP-Planner to autoregressively decode the 4-second BEV trajectory as step-wise normalized text waypoints after step-by-step CoT reasoning"
+  action_head_category: autoregressive
+  parameters: "2x3B"
+  key_innovation: "Vision-guided learning pipeline that teaches AD-VLAs 'what to see and where to look'. (1) Driving-aware Vision Distillation (DVD): Grounding DINO detects traffic-critical objects, boxes are overlaid on images, and a teacher ViT (bbox-augmented) distills into a student ViT (raw image) via block-wise Smooth-L1 alignment (2x4 blocks, EMA teacher), replacing text-centric VQA pretraining. (2) 2D Trajectory-Guided Prompts (2D-TGP): expert BEV trajectories projected onto the image plane provide spatial conditioning; dual-model design (Prompter predicts 2D-TGP, Planner predicts trajectory) with teacher forcing during CoT-SFT and GRPO-RL. Train-test gap of predicted vs. ground-truth 2D-TGP is only ~0.4 PDMS."
+
+training:
+  method: "3-stage: (i) DVD pretraining (1 epoch, block size 2x4, lambda_TGP=0.1, EMA 0.996); (ii) CoT-SFT (6 epochs, CoT pseudo-labeled by Qwen2.5-VL-72B following Poutine tasks); (iii) GRPO-RL (180 update steps, group size 8, PDMS reward, CuriousVLA-style data filtering)"
+  dataset: "NAVSIM (navtrain) and nuScenes; CoT annotations from Qwen2.5-VL-72B; Grounding DINO bbox pseudo-labels"
+  compute: "8x H100 GPUs, batch size 16, AdamW lr 4e-5, weight decay 0.05, cosine schedule"
+
+benchmarks:
+  driving:
+    navsim_navtest_pdms: 90.4
+    navsim_navtest_nc: 98.5
+    navsim_navtest_dac: 96.9
+    navsim_navtest_ttc: 97.9
+    navsim_navtest_comfort: 98.2
+    navsim_navtest_ep: 88.5
+    navsim_pdms_oracle_gt_tgp: 90.8
+    nuscenes_l2_m_stp3: 0.30
+    nuscenes_collision_pct_stp3: 0.12
+    nuscenes_l2_m_uniad: 0.60
+    nuscenes_collision_pct_uniad: 0.31
+    source: "Tables 1-2 and 9 of arXiv:2607.01658 (NAVSIM navtest PDMS; nuScenes open-loop L2/collision under ST-P3 and UniAD metrics)"
+    date_reported: "2026-07-02"
+    eval_condition: "NAVSIM non-reactive closed-loop navtest (full pipeline: DVD + TGP + CoT-SFT + GRPO); nuScenes open-loop without CoT/GRPO for fair comparison"
+
+eval_conditions:
+  driving: "fine-tuned, end-to-end (NAVSIM navtest closed-loop; nuScenes open-loop 3s horizon)"
+
+tags: [autonomous_driving, navsim, nuscenes, vision_distillation, grounding_dino, trajectory_guided_prompt, 2d_tgp, dual_model, cot, grpo, rl, teacher_forcing, qwen2_5_vl, text_waypoint]
