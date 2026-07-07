@@ -26,20 +26,19 @@ training:
 benchmarks:
   libero:
     libero_avg: 98.5
+    libero_plus_avg: 84.7
+    libero_plus_camera: 82.8
+    libero_plus_robot: 60.6
+    libero_plus_language: 87.2
+    libero_plus_light: 98.6
+    libero_plus_background: 96.4
+    libero_plus_noise: 93.6
+    libero_plus_layout: 80.5
+    source: "LIBERO-Plus: Table 1 (zero-shot OOD; per-axis breakdown inline)"
     eval_condition: fine-tuned
   robocasa:
     average: 65.5
     eval_condition: fine-tuned
-  libero_plus:
-    camera: 82.8
-    robot: 60.6
-    language: 87.2
-    light: 98.6
-    background: 96.4
-    noise: 93.6
-    layout: 80.5
-    total: 84.7
-    eval_condition: zero-shot-OOD
 
 eval_conditions:
   libero: "fine-tuned"

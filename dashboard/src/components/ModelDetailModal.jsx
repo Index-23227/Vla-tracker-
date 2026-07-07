@@ -306,6 +306,11 @@ export default function ModelDetailModal({ model, onClose }) {
                           Eval: {model.eval_conditions[key]}
                         </div>
                       )}
+                      {scores.source && (
+                        <div className="mt-0.5 text-[10px] text-zinc-600">
+                          Source: <span className="text-zinc-500">{scores.source}</span>
+                        </div>
+                      )}
                     </div>
                   )
                 })}

@@ -62,15 +62,27 @@ function deriveContribution(m) {
 }
 
 function liberoPlusAvg(m) {
-  const lib = (m.benchmarks || {}).libero
-  if (!lib || typeof lib !== 'object') return null
-  const agg = ['libero_plus_avg', 'libero_plus', 'libero_plus_overall', 'libero_plus_overall_zero_shot']
-    .map(k => lib[k]).find(v => typeof v === 'number')
-  if (agg != null) return agg
-  const vals = Object.entries(lib)
-    .filter(([k, v]) => k.startsWith('libero_plus') && typeof v === 'number')
-    .map(([, v]) => v)
-  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+  const b = m.benchmarks || {}
+  // Preferred: nested inside benchmarks.libero as libero_plus_* keys
+  const lib = b.libero
+  if (lib && typeof lib === 'object') {
+    const agg = ['libero_plus_avg', 'libero_plus', 'libero_plus_overall', 'libero_plus_overall_zero_shot']
+      .map(k => lib[k]).find(v => typeof v === 'number')
+    if (agg != null) return agg
+    const vals = Object.entries(lib)
+      .filter(([k, v]) => k.startsWith('libero_plus') && typeof v === 'number')
+      .map(([, v]) => v)
+    if (vals.length) return vals.reduce((a, b2) => a + b2, 0) / vals.length
+  }
+  // Legacy: dedicated top-level benchmarks.libero_plus block (e.g. QuoVLA, GuidedVLA)
+  const blk = b.libero_plus
+  if (blk && typeof blk === 'object') {
+    const agg = ['avg', 'average', 'total', 'overall'].map(k => blk[k]).find(v => typeof v === 'number')
+    if (agg != null) return agg
+    const vals = Object.values(blk).filter(v => typeof v === 'number')
+    if (vals.length) return vals.reduce((a, b2) => a + b2, 0) / vals.length
+  }
+  return null
 }
 
 function parseParamsB(m) {
