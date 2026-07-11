@@ -1,0 +1,70 @@
+# Paper: LaMem-VLA: Dual Latent Memory in Vision-Language-Action Models for Robotic Manipulation
+# arXiv: 2607.07608 — verified against PDF (2026-07-11)
+# Auto-track relevance score: 10.0
+
+name: LaMem-VLA
+full_name: "LaMem-VLA: Dual Latent Memory in Vision-Language-Action Models for Robotic Manipulation"
+organization: "Nanjing University of Science and Technology / Zhejiang University / National University of Singapore"
+date: "2026-07-08"
+paper_url: https://arxiv.org/abs/2607.07608
+venue: null
+open_source: false  # project page announced ("will be available"), no code released yet
+model_type: "latent-memory-native VLA (dual short/long-term memory vaults woven into VLA reasoning)"
+
+architecture:
+  backbone: "Prismatic VLM 7B (DINOv2 + SigLIP vision encoders), pretrained on Open X-Embodiment"
+  llm: "LLaMA-7B"
+  action_head: "diffusion-based action expert (DiT, ~300M params, DDIM 10 steps), conditioned on memory-grounded action tokens"
+  action_head_category: diffusion
+  action_space: continuous
+  parameters: "7B (VLM backbone) + ~300M (diffusion action expert)"
+  key_innovation: >-
+    Latent-memory-native framework that stores, retrieves, and consumes historical experience
+    entirely in the VLA's continuous embedding space instead of an external policy-side memory bank.
+    Four coordinated modules: a curator organizing history into a short-term visual vault (key-value,
+    SE-bottleneck compressed visual tokens) and a long-term semantic vault (action hidden states,
+    capacity L=16 with adjacent-pair merging); a seeker retrieving top-K=8 units per vault via a
+    context-aware query built from the current multimodal cognition; a condenser reconstructing
+    retrieved evidence into fixed-length latent memory tokens (Ls=8 short-term, Ll=4 long-term);
+    and a weaver prepending them to the VLA input sequence before action queries are resolved,
+    so memory participates in the same self-attention reasoning as observation and instruction.
+
+training:
+  data: "LIBERO (50 demos/task, OpenVLA protocol); SimplerEnv-Bridge trained on Bridge v2 for 50k steps"
+  compute: "8x NVIDIA H800, PyTorch FSDP, global batch 256, lr 2e-5; action chunk 16, single 224x224 third-person RGB"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.8
+    libero_object: 99.0
+    libero_goal: 97.2
+    libero_long: 95.8
+    libero_90: 97.0
+    libero_5_suite_avg: 97.6
+    source: "Table 2 (5-suite avg incl. Long-90; beats MemoryVLA 96.5 by +1.1, CogACT baseline 93.2 by +4.4; first-4-suite avg 97.7 vs pi0 94.2, no proprio/wrist camera)"
+    date_reported: "2026-07-08"
+    eval_condition: "fine-tuned (50 demos/task; separate models for Spatial/Object/Goal 20k steps, joint Long-10+Long-90 40k steps; 50 rollouts/task)"
+  simpler_env:
+    simpler_widowx_spoon: 83.3
+    simpler_widowx_carrot: 75.0
+    simpler_widowx_stack: 41.7
+    simpler_widowx_eggplant: 95.8
+    simpler_avg: 73.9
+    source: "Table 1 (SimplerEnv-Bridge, WidowX; +16.6 over CogACT baseline 57.3, +4.7 over pi0 69.2, +2.0 over MemoryVLA 71.9)"
+    date_reported: "2026-07-08"
+    eval_condition: "trained on Bridge v2 50k steps, best-validation checkpoint, 24 trials/task"
+
+eval_conditions:
+  libero: "fine-tuned (OpenVLA protocol, 50 demos/task)"
+  simpler_env: "trained on Bridge v2 (real-to-sim evaluation)"
+
+tags:
+  - 7B
+  - memory
+  - latent-memory
+  - long-horizon
+  - temporal-context
+  - diffusion-transformer
+  - libero
+  - simpler_env
+  - simulation-only
