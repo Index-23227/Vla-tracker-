@@ -1,0 +1,77 @@
+name: CAC-VLA
+full_name: "CAC-VLA: Context-Gated Action Conditioning for Vision-Language-Action Models"
+organization: "University of Science and Technology of China (USTC); Institute of Artificial Intelligence, Hefei Comprehensive National Science Center"
+date: "2026-07-06"
+paper_url: https://arxiv.org/abs/2607.04816
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "pi0.5 architecture (VLM + flow-matching action expert), extended with VLM-side latent query tokens"
+  llm: "pi0.5 VLM backbone"
+  action_head: "flow-matching action expert with context-gated cross-attention conditioning on VLM-predicted latent actions (OAT raw latents)"
+  action_head_category: flow_matching
+  action_space: "continuous action chunks (expert horizon He=10)"
+  parameters: "pi0.5-scale (not explicitly reported)"
+  key_innovation: >
+    Trains dedicated VLM query tokens (Nq=8) to predict coarse-to-fine latent actions
+    (raw latents from a frozen Ordered Action Tokenizer encoding future action segments,
+    Hl=20 for LIBERO / Hl=10 for LIBERO-Plus, Dz=4) with a Smooth-L1 alignment loss.
+    A context gate module (cross-attention retrieval + channel-wise sigmoid gate over
+    tanh-fused pooled states) adaptively calibrates the residual injection of latent-action
+    guidance into each action expert layer, after self-attention and before the FFN.
+    Training conditions on encoded OAT targets; inference is VLM-native, using only
+    VLM-predicted latent actions (tokenizer removed).
+
+training:
+  dataset: "LIBERO (40K steps) and LIBERO-Plus training set (30K steps SFT); 50 real-world demos per task for UR7e pick-and-place / block stacking"
+  method: "Flow-matching action expert loss + latent alignment Smooth-L1 loss (lambda_align=0.1); latent-action conditioning dropout 0.1; frozen OAT tokenizer as supervision"
+  optimizer: "AdamW, peak LR 1.25e-5 (cosine, 10K warmup), gradient clip 1.0, EMA 0.999, global batch 64"
+  hardware: "4x NVIDIA A100 GPUs"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 99.8
+    libero_goal: 99.6
+    libero_long: 95.4
+    libero_avg: 98.3
+    source: "CAC-VLA paper Table 1 (LIBERO, SFT)"
+    date_reported: "2026-07-06"
+    eval_condition: "fine-tuned"
+  libero_plus:
+    libero_plus_avg: 89.5
+    libero_plus_camera: 91.2
+    libero_plus_robot: 78.4
+    libero_plus_language: 83.3
+    libero_plus_light: 97.5
+    libero_plus_background: 97.1
+    libero_plus_noise: 95.4
+    libero_plus_layout: 87.8
+    source: "CAC-VLA paper Table 2 (LIBERO-Plus, supervised fine-tuning setting)"
+    date_reported: "2026-07-06"
+    eval_condition: "fine-tuned on LIBERO-Plus training set"
+  real_world:
+    pick_and_place_task_score: 72.0
+    pick_and_place_full_sr: 64.0
+    stack_block_sr: 52.0
+    source: "CAC-VLA paper Fig. 2 / App. C (UR7e, 25 trials per task)"
+    date_reported: "2026-07-06"
+    eval_condition: "fine-tuned per task, 50 demos each"
+
+eval_conditions:
+  libero: "fine-tuned, standard 4-suite protocol (ACoT-VLA baseline collection)"
+  libero_plus: "supervised fine-tuning on LIBERO-Plus training set; zero-shot transfer avg 83.8 also reported"
+  real_world: "UR7e tabletop pick-and-place and block stacking, 25 trials each"
+
+tags:
+  - vla
+  - latent-actions
+  - action-conditioning
+  - context-gating
+  - flow-matching
+  - pi0.5-based
+  - libero
+  - libero-plus
+  - real-robot
