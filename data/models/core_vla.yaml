@@ -1,33 +1,57 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: CoRE-VLA: Towards Scalable and Robust Vision-Language-Action Modeling via Conditional Routing of Experts
 # arXiv: 2607.03693
 
 name: CoRE-VLA
 full_name: "CoRE-VLA: Towards Scalable and Robust Vision-Language-Action Modeling via Conditional Routing of Experts"
-organization: "TODO: check paper"
+organization: "Zhejiang University / Shanghai Innovation Institute / Fudan University"
 date: "2026-07-04"
 paper_url: https://arxiv.org/abs/2607.03693
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-VL-4B-Instruct (VLM) + Conv Projector depth encoder (kernel 28x28, stride 28) for auxiliary DA-V2 pseudo-depth"
+  llm: "Qwen3-VL-4B-Instruct"
+  action_head: "Flow-matching Action Diffusion Transformer (DiT-B) with Conditional Routing of Experts (CoRE): intent-conditioned Top-K action-token selection + top-1 token-choice MoE routing over general and modality-specialized experts, with availability-based expert masking"
+  action_head_category: flow_matching
+  parameters: "~4B VLM backbone + Action DiT (LIBERO: 16 layers, hidden 1024, 12 general + 4 modality experts; RoboCasa: 32 layers, hidden 2560, 32 general + 8 modality experts)"
+  key_innovation: "Reformulates VLA action generation as context-conditioned sparse computation. A task-intent embedding (avg-pooled VLM text tokens) sparsely selects the most task-relevant action-side DiT tokens (capacity ratio 0.5) and routes them to general or modality-specialized experts, while a sensor-availability indicator masks modality experts and drops the auxiliary branch (modality dropout p=0.2) so the policy exploits auxiliary depth when present yet degrades gracefully when depth is missing at deployment, without retraining."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.0
+    libero_object: 99.2
+    libero_goal: 98.8
+    libero_long: 97.6
+    source: "arXiv:2607.03693 Table 1 (50 rollouts per task; average 98.7)"
+    eval_condition: "single multi-task policy trained jointly on all 4 suites with DA-V2 pseudo-depth as auxiliary input; Qwen3-VL-4B backbone"
   robocasa:
-    robocasa_avg: TODO
+    robocasa_avg: 56.5
+    source: "arXiv:2607.03693 Table 2 (GR1 Tabletop, 24 tasks, mean of 5 groups of 100 rollouts; std 0.4; vs GR00T-N1.5 48.0, GR00T-N1.6 47.6, Diffusion Policy 40.4)"
+    eval_condition: "single policy trained on 1000 demos per task with DA-V2 pseudo-depth auxiliary input"
 
 eval_conditions:
-  libero: "fine-tuned"
-  robocasa: "fine-tuned"
+  libero: "fine-tuned (joint multi-task training on all 4 LIBERO suites, 100K steps, 8xH200)"
+  robocasa: "fine-tuned (GR1 Tabletop, 1000 demos/task, 200K steps, 8xH200)"
 
-tags: [libero, robocasa]
+training:
+  dataset: "LIBERO 4 suites; RoboCasa GR1 Tabletop (GR00T-X Embodiment Sim, 1000 demos/task); real-world: 44 Vegetables-Picking + 1.3K Clothes-Folding teleop demos on AgileX ALOHA"
+  method: "Two-stage: dense Action DiT trained from scratch on RGB-language-proprioception, then converted to CoRE-VLA by duplicating FFNs as general experts, inserting modality-specialized experts and a depth encoder, followed by continued training with flow matching + selection regularizer + MoE load-balancing loss (both weights 0.01)"
+  num_trajectories: null
+  compute: "8x NVIDIA H200 GPUs (100K steps LIBERO, 200K steps RoboCasa)"
+
+tags:
+  - mixture_of_experts
+  - conditional_routing
+  - flow_matching
+  - diffusion_transformer
+  - depth
+  - modality_robustness
+  - sparse_computation
+  - qwen3_vl
+  - long_horizon
+  - bimanual
+  - libero
+  - robocasa
+  - real_world
