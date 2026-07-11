@@ -1,0 +1,37 @@
+name: FabriVLA
+full_name: "FabriVLA: A Lightweight Vision-Language-Action Model for Precise Multi-Task Manipulation"
+organization: "University of Macau, Mese Technology, Youibot Robotics (FabriX team)"
+date: "2026-07-09"
+paper_url: https://arxiv.org/abs/2607.08575
+venue: arXiv 2026
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "InternVL3.5-1B vision-language backbone (14 retained transformer layers)"
+  llm: "InternVL3.5-1B language model (14 layers)"
+  action_head: "flow matching transformer (8 blocks, gated self-attention + cross-attention)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "0.89B"
+  key_innovation: "Lightweight VLA combining an InternVL3.5-1B backbone with a flow-matching action head featuring zero-initialized gated self-attention across 50 action tokens and shallow VLM layer fusion (layer 6 + layer 14 concat_proj) for enriched spatial context; trained in a single stage with the entire model jointly optimized from a pretrained VLM and randomly initialized action head."
+
+training:
+  method: "Single-stage joint optimization (VLM unfrozen), flow matching loss, 100k steps (93k checkpoint selected), DeepSpeed ZeRO-2 with FP32 master weights, BF16 mixed precision"
+  dataset: "Evo-1 Meta-World demonstration dataset (50 trajectories per MT50 task, 2,500 total); no robotic data pretraining"
+
+benchmarks:
+  metaworld:
+    metaworld_avg: 90.0
+    metaworld_overall_episode: 92.0
+    metaworld_easy: 95.0
+    metaworld_medium: 88.2
+    metaworld_hard: 86.7
+    metaworld_very_hard: 90.0
+    source: "Paper Table 1 (Meta-World MT50, 93k-step checkpoint, 10 episodes per task, seed 4042)"
+
+eval_conditions:
+  metaworld: "fine-tuned on Evo-1 MT50 demos; 10 episodes/task, 400-step horizon, environment seed 4042, corner RGB view only"
+
+tags: [flow-matching, lightweight, metaworld, multi-task, gated-self-attention, layer-fusion]
