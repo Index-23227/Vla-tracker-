@@ -1,0 +1,81 @@
+# Paper: Harness VLA: Steering Frozen VLAs into Reliable Manipulation Primitives via Memory-Guided Agents
+# arXiv: 2607.08448
+
+name: Harness VLA
+full_name: "Harness VLA: Steering Frozen VLAs into Reliable Manipulation Primitives via Memory-Guided Agents"
+organization: "Tsinghua University; Striding AI; Purdue University; Institute of Automation, CAS; Infinigence AI; Zhongguancun Academy; HKUST"
+date: "2026-07-09"
+paper_url: https://arxiv.org/abs/2607.08448
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Agentic wrapper over benchmark-specific frozen VLAs: RLinf pi0.5-SFT (LIBERO / LIBERO-Pro), RLDX-1 (RoboCasa365), post-trained LingBot-VLA (RoboTwin C2R); planner backbone is Codex or Claude Code"
+  llm: "LLM planner (Codex / Claude Code) on top; base VLA LLMs inherited (PaliGemma-class for pi0.5, Qwen3-VL 8B for RLDX-1, Qwen2.5-VL for LingBot-VLA)"
+  action_head: "Inherits frozen base VLA action head via the single learned primitive VLA_ACT (flow-matching action chunks); the planner itself emits JSON calls over a fixed library of 6 analytic primitives (MOVE_TO, MOVE_POSE, ROTATE_WRIST, ROTATE_PITCH, SET_GRIPPER, RELEASE) plus mobile-base primitives (NAVIGATE_TO, MOVE_BASE) on RoboCasa365 - no new action decoder is trained"
+  action_head_category: other
+  action_space: continuous
+  parameters: "frozen VLA"
+  key_innovation: >
+    Memory-augmented agentic harness that steers a frozen VLA as a retryable
+    contact-rich primitive (VLA_ACT) composed with a small fixed library of
+    analytic primitives. A REPL-style planner (Codex / Claude Code) reads RGB-D
+    observations and robot state, emits structured JSON primitive invocations,
+    and reserves the frozen VLA only for local contact-rich phases (grasping,
+    fixture actuation, insertion), while semantic re-grounding, staging,
+    transport, navigation, and release are handled analytically. Two memory
+    modules learn the operating range of the fixed primitives: Task Specific
+    Memory stores parameterized JSONL traces of successful primitive
+    compositions from one reference-seed exploratory bootstrapping run (RESET
+    allowed) for few-shot re-grounding at deployment (RESET disabled), and
+    Global Memory distills reusable success rules and failure models (empty
+    grasps, false success detections). Extends pretrained VLAs beyond their
+    trajectory distribution without any finetuning or deployment-time
+    primitive expansion.
+
+training:
+  method: "Training-free for the base VLA (fully frozen); harness performs exploratory bootstrapping on one reference seed per task to populate Task Specific Memory (JSONL command traces with symbolic perception queries) and Global Memory (success rules + failure models). LingBot-VLA backend is SFT post-trained on RoboTwin trajectories before freezing (AdamW, lr 1e-4, chunk size 50, L1 flow matching, FSDP2)."
+  base_models: "RLinf pi05_libero130_fullshot pi0.5-SFT (LIBERO/LIBERO-Pro); RLDX-1 RoboCasa checkpoint (RoboCasa365); RoboTwin-post-trained LingBot-VLA (RoboTwin C2R)"
+  notes: "Fixed primitive vocabulary; planner cannot invent new primitives at deployment time. Few-shot protocol on LIBERO/LIBERO-Pro/RoboCasa365 (seed s0 bootstraps memory, held-out seeds reported); zero-shot clean-to-randomized transfer on RoboTwin."
+
+benchmarks:
+  libero:
+    libero_spatial: 97.0
+    libero_object: 100.0
+    libero_goal: 94.0
+    libero_long: 93.0
+    libero_avg: 96.0
+    source: "Paper Table 2 (Harness VLA (CC), 100 trials per suite = 10 tasks x 10 seeds; overall 384/400). Frozen RLinf baseline 95.3%"
+    date_reported: "2026-07-09"
+    eval_condition: "Few-shot with Task Specific Memory; frozen RLinf pi0.5-SFT checkpoint inside VLA_ACT; Claude Code planner"
+  robotwin_v2:
+    robotwin_v2_c2r: 58.4
+    source: "Paper Table 6 (Harness VLA (CC), RoboTwin C2R, 50 tasks x 5 randomized seeds = 250 rollouts). Codex variant 58.0; direct frozen LingBot-VLA baseline 50.4"
+    date_reported: "2026-07-09"
+    eval_condition: "Zero-shot clean-to-randomized transfer; memory trace from one clean seed, evaluated on official demo randomized seeds; frozen LingBot-VLA backend"
+
+eval_conditions:
+  libero: "Few-shot: seed s0 used only for exploratory bootstrapping of Task Specific Memory; reported on held-out seeds s1-s10 per task (400 rollouts total); RESET disabled at evaluation"
+  libero_pro: "Overall 82.4% (CC) / 72.1% (Codex) across 8 perturbation cells (Spatial/Object/Goal/LIBERO-10 x T/S), vs RATS 43.8% (+38.6pp headline) and direct RLinf 50.0%; zero-shot LIBERO-Pro Goal without memory: 79.0% Task-T / 31.0% Pos-S vs Cap-X 16.8% / 25.6%"
+  robocasa365: "Atomic-Seen 79.4 / Composite-Seen 47.5 / Composite-Unseen 15.0 (CC); Codex 91.6 / 56.3 / 13.8, task-weighted overall 55.4% vs RLDX-1 30.0% (+25.4pp)"
+  robotwin_v2: "RoboTwin C2R: zero-shot clean-to-randomized, 50 tasks x 5 expert-verified randomized seeds; no randomized-setting bootstrapping, exploration, or VLA finetuning"
+
+tags:
+  - vla
+  - frozen-vla-wrapper
+  - agentic-framework
+  - llm-planner
+  - memory-augmented
+  - primitive-composition
+  - training-free
+  - test-time-steering
+  - code-as-policies
+  - libero
+  - libero-pro
+  - robocasa
+  - robotwin
+  - bimanual
+  - claude-code-planner
