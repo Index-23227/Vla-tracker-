@@ -1,30 +1,42 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: Lift3D-VLA: Lifting VLA Models to 3D Geometry and Dynamics-Aware Manipulation
 # arXiv: 2607.06564
 
 name: Lift3D-VLA
 full_name: "Lift3D-VLA: Lifting VLA Models to 3D Geometry and Dynamics-Aware Manipulation"
-organization: "TODO: check paper"
+organization: "Peking University"
 date: "2026-07-07"
 paper_url: https://arxiv.org/abs/2607.06564
-code_url: null  # TODO: check for GitHub repo
+code_url: https://lift3dvla.github.io/
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_head: "Layer-wise temporal action modeling: H action layers attached to intermediate-to-deep LLM layers (e.g., layers 20/24/28/32 of 32-layer LLaMA2-7B), each denoising one step of the action chunk via DDPM (DDIM 4-step inference)"
+  action_head_category: diffusion
+  backbone: "Prismatic VLM (SigLIP + DINOv2 dual vision encoder, LLaMA2-7B LLM)"
+  parameters: "7B (LLM backbone)"
+  key_innovation: >-
+    Extends Lift3D's 2D model-lifting strategy (aligning 3D point tokens with pretrained
+    2D positional embeddings via camera-anchored virtual-plane projection) to a full VLA.
+    Introduces Geometry-Centric MAE (GC-MAE), a dual-objective self-supervised scheme that
+    reconstructs the current point cloud while forecasting its future geometric evolution
+    (using VGGT-synthesized pseudo point clouds on 140K trajectories), and layer-wise
+    temporal action modeling that assigns each action-chunk step to a different deep LLM
+    layer for temporally coherent diffusion-based action generation.
+
+training:
+  pretraining_data: "400K trajectories (28M frames) from Open X-Embodiment, DROID, RoboMIND; GC-MAE self-supervised on 140K trajectories with VGGT-synthesized point clouds"
 
 benchmarks:
   rlbench:
-    rlbench_avg: TODO
+    rlbench_avg: 82.8
+    source: "Table III, arXiv:2607.06564 (9 tasks, multi-task, 20 rollouts x 3 seeds)"
   metaworld:
-    metaworld_avg: TODO
+    metaworld_avg: 87.7
+    source: "Table II, arXiv:2607.06564 (13 tasks, multi-task setting, 25 rollouts)"
 
 eval_conditions:
-  rlbench: "fine-tuned"
-  metaworld: "fine-tuned"
+  rlbench: "fine-tuned (multi-task, 100 demos/task, front-view camera, Franka Panda)"
+  metaworld: "fine-tuned (multi-task, 100 demos/task, single corner camera, Sawyer)"
 
-tags: [reasoning, rlbench, metaworld]
+tags: [3d, point-cloud, reasoning, rlbench, metaworld]
