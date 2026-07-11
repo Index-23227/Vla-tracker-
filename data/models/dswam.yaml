@@ -1,0 +1,71 @@
+# Paper: DSWAM: A Dual-System World Action Foundation Model for Fine-Grained Robot Manipulation
+# arXiv: 2607.04927 — verified against PDF (2026-07-11)
+
+name: DSWAM
+full_name: "DSWAM: A Dual-System World Action Foundation Model for Fine-Grained Robot Manipulation"
+organization: "AIRC, Midea Group / Tongji University"
+date: "2026-07-06"
+paper_url: https://arxiv.org/abs/2607.04927
+code_url: https://ds-wam.github.io  # project page; no code repo found in paper
+venue: arXiv preprint
+open_source: false
+model_type: "dual-system world action model (System 1 WAM executor + optional System 2 VLM subtask planner)"
+
+architecture:
+  backbone: "System 1: pretrained video model Wan2.2-TI2V-5B + action expert; System 2: Rynnbrain4B-style vision-language planner (optional)"
+  llm: "Rynnbrain4B-style VLM (System 2 planner only; System 1 conditions on text via vision/text encoder)"
+  action_head: "flow-matching action expert conditioned on latent world features, proprioception, and instruction/subtask; predicts continuous action chunks without test-time future-video generation"
+  action_head_category: flow_matching
+  action_space: "continuous dual-arm control, action chunks (horizon H)"
+  parameters: "~5B video backbone (Wan2.2-TI2V-5B) + action expert + 4B-class System 2 planner"
+  key_innovation: >-
+    Dual-system world action foundation model that decouples semantic task decomposition
+    from world-aware physical execution: System 1 is the default WAM executor trained with
+    action prediction + video co-training under a shared flow-matching objective
+    (L = L_act + lambda_vid * L_vid), but at inference predicts action chunks directly with
+    no future-video generation; System 2 is an optional VLM subtask planner with
+    transition-aware boundary supervision (emit next subtask near boundaries, 'done' at end),
+    queried every 2 s from 5-frame visual history. Deployment combines real-time chunking
+    (RTC), asynchronous execution, and dual-engine BF16 TensorRT compilation
+    (198.2 ms -> 73.8 ms, 2.69x speedup on RTX 5090). Provides a matched WAM-vs-VLA
+    real-robot comparison under the DeMaVLA folding protocol (same robot, data, criteria).
+
+training:
+  dataset: "5,000+ hours real-world dual-arm humanoid manipulation data (DeMaVLA-matched pretraining); post-training on DeMaVLA folding data; System 2 subtask data auto-segmented from trajectory videos via pretrained VLM annotator (1 FPS, 5-frame sliding windows)"
+  method: "Action prediction + video co-training with shared flow-matching loss; action tokens blocked from attending future visual tokens; System 2 trained with autoregressive LM loss on transition-aware subtask targets"
+  num_trajectories: null
+  compute: "inference: NVIDIA GeForce RTX 5090, CUDA 12.9, TensorRT 10.16.1 (BF16, 73.8 ms warmed end-to-end policy latency)"
+
+benchmarks:
+  robotwin_v2:
+    avg_clean: 92.38
+    avg_randomized: 91.90
+    source: "Table 1 (RoboTwin 2.0, 50 bimanual tasks; best avg in both settings; vs Fast-WAM 91.88/91.78, DeMaVLA 88.42/86.78, pi0.5 82.74/76.76, pi0 65.92/58.40)"
+    date_reported: "2026-07-06"
+    eval_condition: "clean and randomized settings, 50-task suite"
+  real_world:
+    folding_shirt: 95.0
+    folding_skirt: 100.0
+    folding_pant: 90.0
+    folding_towel: 100.0
+    folding_avg: 96.3
+    source: "Table 2 (matched DeMaVLA household folding benchmark; avg completion time 1'44'' vs DeMaVLA 92.5% / 2'18'' and pi0 76.3% / 2'26'')"
+    date_reported: "2026-07-06"
+    eval_condition: "WAM-only mode (System 2 disabled); ALOHA-style dual-arm; 2 garment instances x 10 trials per category (easy + hard)"
+
+eval_conditions:
+  robotwin_v2: "fine-tuned; RoboTwin 2.0 clean and randomized protocols"
+  real_world: "matched DeMaVLA folding protocol: same robot platform, pretraining data, post-training data, task definitions, success criteria; System 2 planner disabled"
+
+tags:
+  - world-action-model
+  - dual-system
+  - flow-matching
+  - video-co-training
+  - robotwin
+  - deformable-manipulation
+  - real-robot
+  - tensorrt
+  - real-time-chunking
+  - wan2.2
+  - bimanual
