@@ -1,0 +1,45 @@
+# Paper: PixelPilot: Scalable Vision-Language-Action Models for End-to-End Autonomous Driving
+# arXiv: 2607.04637
+
+name: PixelPilot
+full_name: "PixelPilot: Scalable Vision-Language-Action Models for End-to-End Autonomous Driving"
+organization: "Shanghai Jiao Tong University / Huawei (Central Research Institute)"
+date: "2026-07-06"
+paper_url: https://arxiv.org/abs/2607.04637
+code_url: null
+venue: ECCV 2026
+open_source: false
+model_type: "driving VLA (decoupled 2D planning + deterministic 3D lifting)"
+inference_hz: 3.0
+
+architecture:
+  backbone: "Qwen2.5-VL-7B (multi-view images stitched with back-view 180-degree rotation for ego-centric consistency)"
+  llm: "Qwen2.5-VL-7B decoder"
+  action_head: "Autoregressive text-token decoding of 2D pixel-space waypoints: the VLM sequentially generates 2D bounding boxes -> reasoning with bounding boxes (CoT) -> meta-action (lateral/longitudinal) -> 3s trajectory as pixel coordinates at 2Hz; deterministic homography/ray-casting lifting to 3D ego coordinates using camera parameters at inference only"
+  action_head_category: autoregressive
+  parameters: "7B (Qwen2.5-VL-7B backbone)"
+  key_innovation: "Decoupled planning and lifting paradigm: scene understanding and trajectory prediction are reformulated as sensor-agnostic 2D-to-2D tasks in the image plane (scalable across heterogeneous datasets such as nuScenes + Waymo), while the sensor-specific 2D-to-3D lifting is a deterministic local-plane projection performed only at inference. Knowledge-instilled policy learning: multi-task SFT (perception, meta-action, planning, integrated control, reasoning-with-bounding-boxes) followed by GRPO RL with dense intermediate rewards (format, IoU perception, F1 meta-action, L1/sigmoid-L2 trajectory, PDMS) instead of sparse final-trajectory rewards, enforcing a causal chain from perception to planning and preventing trivial ego-status extrapolation."
+
+training:
+  strategy: "Stage 1: multi-task SFT (2 epochs) on nuScenes (28.1k) + Waymo (23.8k) samples; Stage 2: GRPO RL with 8 completions and dense verifiable rewards. Bench2Drive closed-loop: SFT only on 274.5k samples, PID controller for vehicle control. 8x 80GB GPUs."
+  data: "nuScenes, Waymo Open Dataset (open-loop); Bench2Drive (closed-loop, CARLA); reasoning data synthesized with Qwen-VL-Max on SFT failure cases"
+
+benchmarks:
+  driving:
+    nuscenes_open_loop_l2_avg_m: 0.30
+    nuscenes_collision_avg_pct: 0.25
+    nuscenes_intersection_avg_pct: 1.77
+    nuscenes_2d_detection_map: 54.2
+    bench2drive_driving_score: 79.14
+    bench2drive_success_rate: 58.87
+    bench2drive_efficiency: 153.26
+    bench2drive_comfortness: 38.01
+    waymo_zero_shot_l2_avg_m: 0.40
+    source: "Tables 1, 3, 4, 8 in PixelPilot paper (arXiv 2607.04637): nuScenes open-loop planning + 2D detection, Bench2Drive closed-loop (CARLA), Waymo zero-shot trajectory prediction"
+    date_reported: "2026-07-06"
+    eval_condition: "open-loop nuScenes (L2/collision/intersection), closed-loop Bench2Drive at 2Hz with PID controller, zero-shot Waymo transfer without dataset-specific fine-tuning"
+
+eval_conditions:
+  driving: "SFT+GRPO on nuScenes+Waymo for open-loop; SFT-only on Bench2Drive for closed-loop; Waymo evaluated zero-shot"
+
+tags: [autonomous_driving, 2d_planning, decoupled_lifting, grpo, rl, chain_of_thought, reasoning_with_bounding_boxes, nuscenes, waymo, bench2drive, data_scaling, qwen2_5_vl, sensor_agnostic]
