@@ -1,34 +1,63 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: Cortex: A Bidirectionally Aligned Embodied Agent Framework for Long-horizon Manipulation
-# arXiv: 2607.05377
+# arXiv: 2607.05377 — verified against PDF (2026-07-11)
 
 name: Cortex
 full_name: "Cortex: A Bidirectionally Aligned Embodied Agent Framework for Long-horizon Manipulation"
-organization: "TODO: check paper"
+organization: "Tsinghua University / Shanghai AI Laboratory"
 date: "2026-07-06"
 paper_url: https://arxiv.org/abs/2607.05377
-code_url: null  # TODO: check for GitHub repo
+code_url: https://steinate.github.io/cortex.github.io  # project page; no code repo found in paper
 venue: null
-open_source: false  # TODO: verify
+open_source: false
+model_type: "dual-system agentic VLA (System-2 VLM planner + System-1 VLA executor)"
+inference_hz: 10  # System-1 VLA at ~10 Hz; System-2 VLM at ~2 Hz (asynchronous)
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "System-2: Qwen3-VL-8B-Instruct (fully unfrozen fine-tune); System-1: PaliGemma-based pi-0.5 (width 2048, depth 18)"
+  llm: "Qwen3-VL-8B-Instruct (cognitive orchestrator)"
+  action_head: "flow matching (pi-0.5 action expert, width 1024, depth 18), conditioned on VLM-planned subtasks"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "8B (System-2 VLM) + 3.62B (System-1 pi-0.5 executor)"
+  key_innovation: >-
+    Bidirectionally aligned dual-system agent: a customized subtask planning interface conveys
+    executable and tractable plans from the high-level VLM to the low-level VLA, standardized
+    into 32 canonical skill primitives with textual semantic memory. Auto-annotates 4k+ hours of
+    open-source video and generates 30 hours of procedural simulation data; event-balanced sampling
+    (asymmetric temporal margins around subtask boundaries) resolves planning ambiguity at subtask
+    transitions, plus inference-time harness engineering (skill constraints, command mapping,
+    timeout-driven kinematic reset) for closed-loop error recovery.
+
+training:
+  system_2: "Qwen3-VL-8B fully unfrozen, 32x A800, DeepSpeed ZeRO-3, ~14.2M multimodal samples (Table 4)"
+  system_1: "pi-0.5 full-parameter fine-tuning, 30k steps, global batch 64 (Table 7)"
+  data: "4,000+ hours auto-annotated open-source video (AgibotWorld, Galaxea, BEHAVIOR-1K, RoboCerebra) + 30 hours procedural sim data (RoboTwin, RMBench)"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    libero_long: 95.5
+    source: "Table 2 (zero-shot on LIBERO-Long; all agentic baselines share pi-0.5 as System-1 executor; pi-0.5 alone 92.4, +3.1)"
+    date_reported: "2026-07-06"
+    eval_condition: "zero-shot closed-loop from raw global instructions; pi-0.5 executor fine-tuned"
+  robotwin_v2:
+    robotwin_v2_short_horizon: 86.0
+    robotwin_v2_long_horizon: 88.0
+    robotwin_v2_avg: 86.8
+    source: "Table 8 (RoboTwin 2.0, data-scaling setting: 50 clean + 500 randomized demos; pi-0.5 baseline 82.74, +4.1)"
+    date_reported: "2026-07-06"
+    eval_condition: "fine-tuned; no ground-truth subtask list (System-2 infers subtasks online)"
 
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
+  libero: "zero-shot long-horizon (agentic System-2 + fine-tuned pi-0.5 System-1)"
+  robotwin_v2: "fine-tuned (RoboTwin 2.0 data-scaling protocol, 50 clean + 500 randomized demos)"
 
-tags: [libero, robotwin]
+tags:
+  - libero
+  - robotwin
+  - dual-system
+  - agentic
+  - long-horizon
+  - memory
+  - hierarchical-planning
+  - pi0.5-executor
+  - skill-primitives

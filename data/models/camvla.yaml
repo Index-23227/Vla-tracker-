@@ -1,0 +1,57 @@
+# Paper: From Fixed to Free Cameras: Calibration-Free View-Robust Vision-Language-Action Model
+# arXiv: 2607.05396
+# Auto-track relevance score: 8.0
+
+name: CamVLA
+full_name: "From Fixed to Free Cameras: Calibration-Free View-Robust Vision-Language-Action Model"
+organization: "Nanyang Technological University / DAMO Academy, Alibaba Group / HuPan Lab"
+date: "2026-07-06"
+paper_url: https://arxiv.org/abs/2607.05396
+code_url: https://alibaba-damo-academy.github.io/CamVLA/
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Base VLA backbones: instantiated on pi0 (PaliGemma VLM + flow-matching action expert) and GR00T N1.7; single third-person monocular RGB (224x224), no wrist camera, no depth"
+  action_head: "Two parallel heads on top of the base VLA: (1) Action Head (base VLA's action expert, e.g. pi0 flow matching) predicting camera-centric delta 6-DoF end-effector actions (axis-angle rotation) in the local camera frame; (2) auxiliary Geometric Head (3-layer MLP, GELU, hidden dim 1024, +6.30M params) regressing the 6-DoF hand-eye matrix (translation + axis-angle rotation) from mean-pooled image-encoder visual tokens. A deterministic geometric transformation composes them into base-frame actions (delta actions depend only on the rotation Rt)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "3244.4M (pi0-based; +6.30M / 0.19% overhead over pi0's 3238.1M)"
+  key_innovation: "Calibration-free, depth-free, single-view viewpoint-robust VLA. Decouples the policy into camera-centric action generation ('how should I move?') and camera-perspective geometric grounding ('where am I looking from?'): the policy self-predicts the hand-eye matrix from monocular RGB instead of requiring known extrinsics (unlike OC-VLA, 4D-VLA, AnyCamVLA). Delta actions transform as free vectors (dp_b = R*dp_c), so execution is mathematically independent of the predicted translation, confining viewpoint errors to rotation only (1.41 deg mean error in sim). On RLBench unseen viewpoints: pi0 33.2 -> 51.4% (+18.2), GR00T N1.7 28.4 -> 38.4% (+10.0); real-world 15-deg camera offset: pi0 16.0 -> 29.3%, GR00T 14.7 -> 33.0%. Only +1 ms inference latency (62 vs 61 ms on RTX 4090)"
+
+benchmarks:
+  rlbench:
+    slide_block: 44.5
+    push_buttons: 72.3
+    take_umbrella: 39.2
+    close_laptop: 69.0
+    lamp_off: 58.0
+    put_knife: 25.3
+    rlbench_avg: 51.4
+    source: "CamVLA paper Table 1 (pi0 + CamVLA), zero-shot viewpoint generalization protocol"
+    date_reported: "2026-07-06"
+    eval_condition: "zero-shot unseen camera viewpoints (trained at 15-deg intervals from -90 to +90 deg, evaluated on unseen 5-deg-grid viewpoints; 6 tasks, 100 demos/task/viewpoint, 50 eval episodes); NOT the standard fixed-view RLBench multi-task protocol"
+
+training:
+  dataset: "RLBench (CoppeliaSim, OMPL expert demos): 6 tasks x 13 training viewpoints (15-deg intervals) x 100 demos. Real-world: Franka Research 3 + RealSense D435i, 5 tasks x 5 training camera views x 100 demos"
+  method: "End-to-end joint objective L = L_act + 0.1 * L_ext; L_act inherits base VLA action loss (flow matching for pi0), L_ext is MSE on hand-eye translation and axis-angle rotation. Ground-truth hand-eye matrices used only as training supervision; no extrinsics at deployment"
+  hardware: "8x NVIDIA H100 80GB"
+
+eval_conditions:
+  rlbench: "zero-shot unseen viewpoints (custom view-robustness protocol)"
+
+inference_hz: 16
+
+tags:
+- viewpoint-robustness
+- calibration-free
+- camera-centric-action
+- hand-eye-estimation
+- flow-matching
+- rlbench
+- pi0
+- groot
+- franka
+- real-robot
+- manipulation

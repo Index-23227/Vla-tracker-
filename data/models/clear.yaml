@@ -1,0 +1,57 @@
+# Auto-track score: 8.0
+name: CLEAR
+version: '1.0'
+full_name: "CLEAR: Closed-Loop Reinforcement Learning at Scale for End-to-End Autonomous Driving"
+organization: "Qualcomm AI Research"
+date: '2026-07-03'
+paper_url: https://arxiv.org/abs/2607.02841
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+architecture:
+  backbone: "InternVL3-1B (InternViT-300M-448px vision encoder), SimLingo-style driving VLA; also an InternVL2-1B variant"
+  llm: "Qwen2.5-0.5B (inside InternVL3-1B); LoRA fine-tuned during pretraining, frozen during RL"
+  action_head: "MLP waypoint decoders (path + speed waypoints) from action queries; RL stage adds a residual waypoint policy head: MLP over [driving feature, base waypoint plan] samples clipped residual lateral offsets at m=4 longitudinal anchors plus a speed residual, converted to low-level CARLA control by a deterministic controller"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "1B"
+  key_innovation: >-
+    System for closed-loop RL finetuning of VLA driving policies at scale.
+    (1) Residual waypoint policy: instead of direct low-level control, PPO
+    learns bounded residual corrections around the waypoint prior of an
+    IL-pretrained VLA, preserving pretrained knowledge (waypoint space beats
+    direct control 39.89 vs 33.91 DS). (2) Heterogeneous pipeline: CARLA
+    simulators run on 32 V100 GPUs (2 per GPU, 64 parallel envs) while the
+    VLA learner sits on 8 H100s, connected via autossh tunnels, resolving
+    resource contention and enabling scaling to 100M samples with DD-PPO
+    (total/mini-batch 16384/4096). Sets SotA on CARLA longest6 v2
+    (DS 39.89, SR 25%, vs 0% SR for all IL baselines) and Bench2Drive
+    (DS 86.8, SR 69.5%).
+training:
+  dataset: "SimLingo-curated CARLA expert dataset, ~3.1M samples at 4 fps (open-loop IL pretraining); procedurally generated CARLA routes from CaRL for closed-loop RL"
+  method: "Stage 1: open-loop IL pretraining (smooth L1 on path/speed waypoints + VQA language supervision), 14 epochs on 8x H100, global batch 96, AdamW lr 3e-5 cosine, LoRA on LLM. Stage 2: closed-loop PPO (DD-PPO) on residual waypoint policy with vision encoder and LLM frozen, language head disabled; reward = discounted route completion with soft/hard infraction penalties (from CaRL); 100M samples, total-batch/mini-batch 16384/4096, ~6 days"
+  algorithm: "PPO (DD-PPO)"
+  hardware: "8x NVIDIA H100 (learner) + 32x Tesla V100 32GB (64 parallel CARLA servers)"
+  longest6_v2_results: "CLEAR (InternVL3-1B): DS 39.89, SR 25.00%, RC 47.24% vs IL-only InternVL3-1B DS 18.43, SR 0%, RC 21.17%; CLEAR (InternVL2-1B): DS 37.44, SR 25.00%, RC 41.91%"
+  bench2drive_results: "CLEAR (InternVL3-1B): DS 86.8, SR 69.5%, Efficiency 275.4, Comfort 25.7; Multi-Ability mean 69.8% (Merging 57.5, Overtaking 66.7, E-Brake 85.0, Give Way 70.0, T.Sign 69.8) vs SimLingo DS 85.1 / SR 67.3%"
+  nuscenes_results: "Zero-shot on nuScenes val (no real-world training data): avg L2 0.49 m (best among compared), avg collision rate 0.30%"
+benchmarks: {}
+eval_conditions:
+  carla_longest6_v2: "closed-loop CARLA, 36 routes Town01-06, 1-2 km routes, 5-21 safety-critical scenarios; non-privileged (vision-only)"
+  bench2drive: "closed-loop CARLA, 220 routes Town01-15, ~150 m each with distinct safety-critical scenario"
+  nuscenes: "zero-shot open-loop evaluation on validation set (trained only in simulation)"
+tags:
+- autonomous-driving
+- vla
+- reinforcement-learning
+- ppo
+- closed-loop
+- residual-policy
+- waypoint-prediction
+- carla
+- bench2drive
+- nuscenes
+- internvl
+- simlingo
+- scaling

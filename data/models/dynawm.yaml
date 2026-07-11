@@ -1,0 +1,60 @@
+# Paper: DynaWM: A Base-VLA-Guided World Foundation Model for Moving-Object Manipulation
+# arXiv: 2607.02604 — verified against PDF (2026-07-11)
+# Note: evaluated only on the authors' own DynaGrasp-32 benchmark (Isaac Sim, moving-object
+# manipulation); no scores on tracked benchmarks (LIBERO/CALVIN/etc.), hence benchmarks: {}.
+# Key results (Table 2, 32-task avg SR, 50 episodes/task): fine-tuned base VLAs
+# SmolVLA 62.50->69.69 (+7.19), X-VLA 36.56->81.88 (+45.31), pi0 72.56->74.44 (+1.88),
+# pi0.5 64.63->75.56 (+10.94); coarse-tuned: +35.13/+44.06/+35.69/+26.13.
+
+name: DynaWM
+full_name: "DynaWM: A Base-VLA-Guided World Foundation Model for Moving-Object Manipulation"
+organization: "Tsinghua University (THUAI)"
+date: "2026-07-01"
+paper_url: https://arxiv.org/abs/2607.02604
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: "base-VLA-guided world foundation model (frozen-VLA action-chunk regeneration module for moving-object manipulation)"
+
+architecture:
+  backbone: "V-JEPA 2.1 ViT-L (300M) shared video encoder over 5-frame x 3-view observation history (dense spatiotemporal motion tokens, no future rollout)"
+  llm: "none (no language processing; language handled by the frozen base VLA: SmolVLA / X-VLA / pi0 / pi0.5)"
+  action_head: "flow-matching DiT (8 blocks, 512-dim, 8 heads) that regenerates a 10x7 action chunk from Gaussian noise (10 Euler steps), conditioned via AdaLN on Mamba-3-encoded base action chunk + MLP proprioceptive state, and via cross-attention on V-JEPA 2.1 visual motion tokens"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "300M+"
+  key_innovation: >-
+    A single world-foundation-model architecture that augments heterogeneous frozen
+    base-VLA checkpoints for moving-object interception without touching their internals:
+    the base VLA's emitted 10-step action chunk (not its tokens, hidden states, or
+    gradients) is encoded by a Mamba-3 sequence encoder (128-dim state -> 256-dim
+    representation) and fused with V-JEPA 2.1 multi-view motion history and a 9D
+    proprioceptive state to condition a flow-matching DiT that regenerates the executed
+    action chunk from noise (trajectory regeneration, not residual correction).
+    Same architecture/recipe across SmolVLA, X-VLA, pi0, pi0.5 (separate weights per
+    base VLA); improves all 8 base-VLA x checkpoint combinations on DynaGrasp-32,
+    narrowing the 8 systems to a 69.69-81.88% success range. Also introduces the
+    DynaGrasp-32 benchmark (32 Isaac Sim tasks, 6 dynamic task families, Franka Panda,
+    30 Hz) and DynaGrasp-1600 dataset (1,600 teleop demos, ~510K steps, 1.53M images).
+
+training:
+  dataset: "DynaGrasp-1600: 1,600 human-teleoperated demonstrations in Isaac Sim (50 per task x 32 tasks), ~510K control steps, ~1.53M RGB images from 3 views (256x256)"
+  method: "Frozen base VLA run once over demonstrations to cache 10-step base action chunks; DynaWM trained with conditional flow matching (linear probability path, velocity-field MSE) on cached base chunks + 5-frame x 3-view history + 9D state -> demonstrated action chunks; no base VLA in the training graph; V-JEPA encoder trainable"
+  num_trajectories: 1600
+  compute: "NVIDIA RTX PRO 6000 GPU (96 GB)"
+
+benchmarks: {}
+
+tags:
+  - world-foundation-model
+  - flow-matching
+  - dit
+  - mamba
+  - v-jepa
+  - frozen-base-vla
+  - action-regeneration
+  - moving-object-manipulation
+  - dynamic-manipulation
+  - benchmark-release
+  - isaac-sim
+  - simulation-only

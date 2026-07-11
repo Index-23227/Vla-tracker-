@@ -1,0 +1,29 @@
+name: ResTacVLA
+full_name: 'Feeling the Unexpected: ResTacVLA for Contact-Rich Manipulation via Residual Tactile Representation'
+organization: "University of Chinese Academy of Sciences; Institute of Automation, CAS; Zhongguancun Academy; Dexmal"
+date: '2026-07-07'
+paper_url: https://arxiv.org/abs/2607.03387
+code_url: https://awilekong.github.io/ResTacVLA/
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Pi0.5 VLA backbone (PaliGemma VLM encoding base/side/wrist RGB + language + proprioception) augmented with a Cross-Modal Predictor (learnable ResNet-18 on wrist camera predicting tactile latent mean mu_t and scalar std sigma_t) and a UniT-based tactile encoder; residual r_t = z_t - z_hat_t is discretized into Latent Contact Primitives via a VQ bottleneck and injected into the action expert through a Surprise-Aware Gate"
+  llm: PaliGemma (Pi0.5 backbone)
+  action_head: conditional flow-matching action expert (Pi0.5-style), tactile token concatenated with noise tokens
+  action_head_category: flow_matching
+  parameters: null
+  key_innovation: "Predictive-coding-inspired Residual Tactile Representation: instead of fusing raw tactile frames (which causes modality collapse under high-bandwidth vision), a Cross-Modal Predictor (CMP) estimates the expected tactile latent from the wrist camera and the residual (actual - predicted) is vector-quantized into Latent Contact Primitives capturing visually unpredictable contact events. The CMP's prediction uncertainty sigma_t acts as a surprise signal driving a Surprise-Aware Gate g_t = Sigmoid(MLP(sigma_t)) that interpolates between a learnable no-contact token and the contact primitive, suppressing tactile noise in free space and amplifying it in contact phases. Achieves 62.8% avg success on 5 real contact-rich tasks vs 28.2% for vision-only Pi0.5 (+34.6%), up to 86.7% on Peg alignment."
+
+training:
+  base_model: Pi0.5 pretrained VLA
+  method: "Two-step training. Step 1: CMP pre-trained independently on multi-task interaction data with L_CMP = L_rec (MSE tactile reconstruction) + lambda_p * L_pred (weighted NLL with variance penalty lambda_sigma to prevent uncertainty collapse) + L_vq (commitment loss); codebook collapse mitigated via reduced codebook dim, cosine similarity, EMA updates, and reinitialization of inactive entries; reconstruction via FiLM conditioning of predicted prior with quantized primitive. Step 2: CMP frozen, full tactile-augmented policy fine-tuned end-to-end with standard conditional flow-matching objective."
+  dataset: "~100 expert teleoperated demonstrations per task across 5 contact-rich tasks (Lightbulb Screwing, Plug Insertion, Peg Transfer, Plate Wiping, Peg-in-Hole), with real-time tactile deformation imagery shown to the operator"
+  hardware: "Franka Research 3 arm + Robotiq 2F-85 gripper with GelSight Mini tactile sensor on one fingertip; 3 Intel RealSense D435 cameras (front, side, wrist); Intel i9-10900K + single NVIDIA RTX 4090 for data collection and evaluation"
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "5 real-world contact-rich tasks; 25 trials each for Lightbulb Screwing and Plug Insertion, 15 trials each for Peg-in-Hole, Peg Transfer, Plate Wiping; two-phase metrics (Alignment / Interaction) for 3 tasks; robustness tests with grasp perturbation (+-5 mm, +-10 deg), dynamic target displacement (3-5 cm), and surface height variation (+-2 cm)"
+
+tags: [tactile, contact-rich, predictive-coding, residual-representation, vector-quantization, surprise-gating, pi0.5-base, flow-matching, gelsight, franka, real-world, manipulation]

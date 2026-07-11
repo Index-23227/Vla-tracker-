@@ -1,0 +1,57 @@
+# Paper: AnchorVLA: Bridging Discrete Decisions and Continuous Trajectories for Vision-Language-Action Planning
+# arXiv: 2607.03182
+
+name: AnchorVLA
+full_name: "AnchorVLA: Bridging Discrete Decisions and Continuous Trajectories for Vision-Language-Action Planning"
+organization: "Tsinghua University / Southeast University / Meituan / Dongfeng Motor"
+date: "2026-07-03"
+paper_url: https://arxiv.org/abs/2607.03182
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "SimLingo VLA backbone: InternVL2-1B (InternViT-300M vision encoder); GPS target points projected to token embeddings via MLP"
+  llm: "Qwen2-0.5B-Instruct"
+  action_head: "Hierarchical decision-anchored planning: DAAR (Decision-as-Anchor Representation) predicts a distribution over K=100 trajectory-pattern anchor tokens (k-means codebook, autoregressive anchor-token prediction in LLM vocabulary with soft anchor targets), then DARF (Decision-Anchored Residual Flow) performs flow matching in the anchor-defined residual space over top-M=6 candidates and selects the final trajectory via a confidence branch"
+  action_head_category: hybrid
+  action_space: continuous
+  parameters: "1B"
+  key_innovation: "Raises the action representation from low-level coordinate/waypoint tokens to behavior-level trajectory-pattern anchors: each anchor token encodes an entire local motion pattern (lane keeping, braking, yielding, turning, overtaking), giving the LLM a compact discrete decision interface, while DARF generates multi-modal continuous residuals (tau = anchor + residual) via flow matching in the anchor-defined residual space. Autoregressive anchor decision adds only ~64 ms extra latency vs. 361 ms for full-trajectory autoregression (LinkVLA-AR), while achieving SOTA Bench2Drive Success Rate 77.28 and DS 89.92"
+
+training:
+  dataset: "SimLingo training data setting: expert trajectories, instruction-conditioned dream trajectories, and mixed language supervision (VQA, driving commentary, no-language samples)"
+  method: "Two-stage: (1) train anchor-decision model under DAAR with soft anchor classification targets, 15 epochs on 8x A100, batch size 16; (2) freeze VLA backbone and train DARF for residual flow-matching trajectory generation, 15 epochs on 4x A100, batch size 32"
+  compute: "8x NVIDIA A100 (stage 1) + 4x NVIDIA A100 (stage 2)"
+
+benchmarks:
+  driving:
+    bench2drive_driving_score: 89.92
+    bench2drive_success_rate: 77.28
+    bench2drive_comfort: 28.94
+    bench2drive_multi_ability_mean: 74.22
+    bench2drive_merging: 65.00
+    bench2drive_overtake: 81.11
+    bench2drive_brake: 90.00
+    bench2drive_give_way: 50.00
+    bench2drive_traffic_sign: 85.00
+    source: "Tables 1-2 in AnchorVLA paper (arXiv:2607.03182), Bench2Drive closed-loop benchmark on CARLA, PDM-Lite expert; Efficiency 251.14 omitted from numeric fields (exceeds 0-100 range)"
+    date_reported: "2026-07-03"
+    eval_condition: "closed-loop Bench2Drive (CARLA), GPS target-point navigation input"
+
+eval_conditions:
+  driving: "fine-tuned, closed-loop CARLA simulation (Bench2Drive, PDM-Lite expert data)"
+
+tags:
+  - autonomous_driving
+  - bench2drive
+  - flow_matching
+  - trajectory_pattern_anchors
+  - residual_flow
+  - anchor_tokens
+  - hierarchical_planning
+  - internvl2
+  - qwen2
+  - simlingo_backbone
+  - closed_loop

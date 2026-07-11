@@ -1,0 +1,83 @@
+# Paper: WorldBagel: Uncovering the Power of Unified Multimodal Models for Vision-Language-Action-World Modeling
+# arXiv: 2607.03461
+# Auto-track relevance score: 9.5
+
+name: WorldBagel
+full_name: "WorldBagel: Uncovering the Power of Unified Multimodal Models for Vision-Language-Action-World Modeling"
+organization: "Georgia Institute of Technology"
+date: "2026-07-03"
+paper_url: https://arxiv.org/abs/2607.03461
+code_url: null
+venue: ECCV 2026
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "BAGEL two-tower Mixture-of-Transformer: shared multimodal self-attention layers with expert-specific QKV projections routed to an Understanding (UND) expert (VLA branch) or a Generation (GEN) expert (world modeling branch); ViT encoder for visual states, VAE encoder/decoder for generative latents, shared token embedding space"
+  llm: "BAGEL unified multimodal LLM (pretrained checkpoint, SFT on VLAW trajectories)"
+  action_head: "Fourier Feature Action Decoder (FFAD): 33M-parameter adapter on top of the UND expert. <|action_pred|> anchor tokens are appended to the autoregressive sequence (H tokens for horizon H); each hidden state is projected to d_r=1024, refined by a 2-layer Transformer encoder (4 heads, FFN 4*d_r), then a 2-block residual MLP head predicts actions as Fourier features (K=32 bands, l2 regression), reconstructed deterministically via phase-consistent atan2 averaging. A matching Fourier Feature Action Tokenizer (FFAT) encodes actions as conditioning tokens for the GEN-expert world model"
+  action_head_category: regression
+  action_space: "continuous; multi-step action rollout (horizon H) predicted autoregressively, executed open-loop"
+  key_innovation: >
+    First systematic study of unified multimodal models (BAGEL) as
+    Vision-Language-Action-World (VLAW) models. Three contributions: (1)
+    Fourier feature action tokenizer (FFAT) and decoder (FFAD) mapping
+    continuous actions to multi-frequency sin/cos tokens in the shared
+    multimodal token space, with provable Lipschitz stability, injectivity,
+    and bounded reconstruction error; (2) interleaved VLAW modeling via
+    sequence plans that order visual observations, language, action tokens,
+    and predicted future frames in one autoregressive sequence (policy-focused
+    and joint plans sampled with priority weights w_joint=2 > w_policy=1);
+    (3) LLM-inspired smoothed dataset mixture sampling (p_i proportional to
+    n_i^alpha) for heterogeneous VLAW training. Achieves 98.0% LIBERO average,
+    beating RynnVLA-002 (97.4) and OpenVLA-OFT (97.1), while improving world
+    modeling fidelity (LIBERO action-conditioned FVD 373.1 vs 389.5) and
+    stability under action-dynamics distribution shifts.
+
+training:
+  dataset: "VLAW trajectories from LIBERO (4 suites), Language Table (real-world tabletop pushing), and Franka (NVIDIA IsaacSim Franka Emika Panda pick-and-place/rearrangement); multi-task training with one checkpoint across all tasks"
+  method: "SFT from pretrained BAGEL checkpoint; all UND and GEN expert parameters, action head, Fourier tokenizer projections, and generative vision decoder updated; vision/language tokenizers frozen; loss L = L_action + 0.1 * L_vision (l2 Fourier-space action regression + flow matching for future visual tokens); smoothed dataset mixture sampling and priority sequence-plan sampling (w_joint=2, w_policy=1)"
+  optimizer: "AdamW, lr 2e-5, weight decay 0.01, cosine decay, global batch size 32"
+  steps: "80K"
+  hardware: "8x H200 GPUs; results averaged over five seeds"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 99.9
+    libero_goal: 97.5
+    libero_long: 95.3
+    libero_avg: 98.0
+    source: "WorldBagel paper Table 2 (success rate %, four LIBERO suites, multi-task training; baselines same table: RynnVLA-002 97.4, OpenVLA-OFT 97.1, SmolVLA 88.8, pi0.5 86.8)"
+    date_reported: "2026-07-03"
+    eval_condition: "multi-task (single checkpoint across all tasks); continuous action representation; averaged over five seeds"
+  world_modeling:
+    libero_fvd_action_conditioned: 373.1
+    libero_psnr_action_conditioned: 23.88
+    libero_ssim_action_conditioned: 82.41
+    libero_lpips_action_conditioned: 16.33
+    language_table_fvd_action_conditioned: 392.2
+    franka_fvd_action_conditioned: 421.9
+    source: "WorldBagel paper Table 3 (action-conditioned world modeling; RynnVLA-002 baseline: LIBERO FVD 389.5, PSNR 21.74, SSIM 76.92, LPIPS 21.02; Language Table FVD 418.7; Franka FVD 462.4)"
+    date_reported: "2026-07-03"
+    eval_condition: "action-conditioned future-frame prediction, averaged across tasks per benchmark; action-free variants also reported (LIBERO FVD 405.4)"
+
+eval_conditions:
+  libero: "four suites (Spatial/Object/Goal/Long), multi-task single checkpoint, success rate averaged over five seeds; open-loop execution of H-step autoregressive action rollouts"
+  world_modeling: "FVD/PSNR/SSIM/LPIPS on LIBERO, Language Table, Franka; stability tests under Gaussian action noise (sigma=0.05), action scaling [0.8,1.2], and +/-1 timestep temporal perturbation (PSNR 23.64/23.57/23.41 vs RynnVLA-002 21.38/21.91/20.94)"
+
+tags:
+  - vla
+  - world-model
+  - vlaw
+  - unified-multimodal
+  - bagel
+  - fourier-features
+  - action-tokenizer
+  - sequence-plans
+  - flow-matching-vision
+  - libero
+  - language-table
+  - franka
+  - multi-task

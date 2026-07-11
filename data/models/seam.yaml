@@ -1,0 +1,74 @@
+# Paper: SEAM: Smooth Execution of Action-Chunked Motion for Vision-Language-Action Policies
+# arXiv: 2607.04609
+
+name: SEAM
+full_name: "SEAM: Smooth Execution of Action-Chunked Motion for Vision-Language-Action Policies"
+organization: "South China University of Technology"
+date: "2026-07-06"
+paper_url: https://arxiv.org/abs/2607.04609
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Training-free inference-time wrapper around a frozen flow-matching VLA; evaluated on pi0.5 (PaliGemma-2B VLM with SigLIP vision encoder + Gemma-300M action expert), fine-tuned on LIBERO-10. No new backbone; the base policy is never updated."
+  llm: "Inherits frozen pi0.5 PaliGemma-2B vision-language model"
+  action_head: "Frozen pi0.5 flow-matching action expert (H=50 chunk, N=10 Euler ODE steps, K=10 executed actions, overlap L=40) with Velocity-guided Loss Steering (VLS): after each Euler step, the previous chunk's unexecuted tail is extended by repeating its last action into an aligned prior a_al; a time-interpolated target r_{i+1} = (1-t_{i+1}) * a_al[1:M] defines a closed-form quadratic-loss gradient g = -2(x_tilde[1:M] - r), applied as x[1:M] = x_tilde[1:M] + lambda*(1-t_{i+1})*g on the guided overlap window M=20 only, without backpropagating through the policy network."
+  action_head_category: other
+  action_space: continuous
+  parameters: "pi0.5 base fully frozen (PaliGemma-2B + Gemma-300M action expert); SEAM adds no parameters, no auxiliary networks, no retraining"
+  key_innovation: >
+    Casts cross-chunk consistency in synchronous chunked execution as an analytic
+    overlap-alignment objective: after the robot consumes the executed prefix (K actions),
+    the previous chunk's unexecuted tail (L=H-K actions) is already available as an analytic
+    consistency reference. VLS derives a time-dependent target from this tail and applies a
+    closed-form correction after each Euler step of the flow-matching ODE, scaled by
+    lambda*(1-t) so guidance is weak at noisy early states and stronger near the action
+    manifold. Unlike RTC (PiGDM guidance requiring one backward pass per ODE step, 1.22x
+    denoising cost), BID (rejection sampling), or Legato (retraining), SEAM adds only
+    O(N*M*Dg) scalar operations (+3.8 ms per 10-step chunk, 1.01x denoising-loop cost),
+    mitigating multimodal bifurcation - adjacent chunks converging to incompatible
+    trajectory modes from independent Gaussian latents.
+
+training:
+  method: "Training-free: no retraining, no auxiliary networks, no gradient backpropagation through the policy at inference. Base pi0.5 fine-tuned on the LIBERO-10 training set (standard, unchanged by SEAM)."
+  notes: "Main setting: guidance strength lambda=0.1 with linear (1-t) decay, guided window M=20 of the L=40 overlap, all physical action dimensions, standard Gaussian chunk initialization; aligned prior repeats the final tail action to fill H-L positions."
+
+inference_hz: null
+
+benchmarks:
+  libero:
+    libero_long: 95.7
+    libero_long_baseline_pi05: 94.8
+    boundary_jerk: 0.141
+    boundary_jerk_baseline: 0.195
+    interior_jerk: 0.074
+    chunk_discontinuity: 0.126
+    chunk_discontinuity_baseline: 0.172
+    denoising_cost_relative: 1.01
+    source: "Paper Table 2 (cost-aware main results, LIBERO-10, 130 episodes per task): pi0.5 baseline 94.8% -> +SEAM 95.7%; boundary jerk 0.195 -> 0.141 (-27.7%), chunk transition discontinuity 0.172 -> 0.126 (-26.7%), boundary acceleration variance 0.165 -> 0.094 (-43.0%); denoising loop 282.2 -> 286.0 ms/chunk (1.01x). Comparisons: +RTC 95.1% at 1.22x cost, +ACT-TE 82.7%."
+    date_reported: "2026-07-06"
+    eval_condition: "pi0.5 fine-tuned on LIBERO-10 + SEAM VLS guidance (lambda=0.1, M=20, all action dims), 130 episodes/task, H=50, K=10, N=10 Euler steps"
+    notes: "LIBERO-10 (long-horizon suite) only; the standard 4-suite LIBERO average is not evaluated, so no libero_avg. Motion-quality metrics computed on executed post-processed action sequences; timing on RTX 3090 (cached-prefix denoising loop)."
+
+eval_conditions:
+  libero: "LIBERO-10 (10 long-horizon tabletop tasks), 130 episodes per task for all rows; success rate plus four motion metrics (boundary jerk, interior jerk, chunk transition discontinuity, boundary acceleration variance) on executed action sequences"
+  baselines: "All comparison methods use official/author-recommended settings: ACT temporal ensembling k=0.01 queried every step; RTC with PiGDM guidance, max weight beta=5, exponential prefix-attention decay"
+  ablations: "Lambda sweep (Table 4): 0.05/0.1/0.15/0.2 give 94.8/95.7/92.8/89.5% success (all dims, M=20) - stronger guidance erodes reliability; pos-only guidance is weaker (BJ 0.162 vs 0.141). Window sweep (Table 5): every M in {2..20} reduces BJ/CD, success stable 94.7-96.3%, M=20 strongest smoothing"
+  timing: "Local RTX 3090; cached-prefix ODE loop for one chunk (N=10 Euler steps): baseline 28.225 ms/step (282.2 ms/chunk), SEAM 28.595 ms/step (286.0 ms/chunk, +0.371 ms extra), RTC 34.460 ms/step (344.6 ms/chunk)"
+
+tags:
+  - vla
+  - inference-time
+  - training-free
+  - flow-matching
+  - action-chunking
+  - chunk-boundary-smoothing
+  - guidance
+  - test-time-steering
+  - pi0.5-base
+  - frozen-base-policy
+  - motion-smoothness
+  - libero

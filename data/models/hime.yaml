@@ -1,0 +1,53 @@
+# Paper: HiMe: Hierarchical Embodied Memory for Long-Horizon Vision-Language-Action Control
+# arXiv: 2607.03449 (auto-track relevance score 8.0)
+
+name: HiMe
+full_name: "HiMe: Hierarchical Embodied Memory for Long-Horizon Vision-Language-Action Control"
+organization: "Fudan University; Shanghai Innovation Institute; East China Normal University"
+date: "2026-07-03"
+paper_url: https://arxiv.org/abs/2607.03449
+code_url: https://github.com/HappyWaterXP/HiMe
+venue: arXiv 2026
+open_source: true
+model_type: hierarchical memory framework (memory-augmented hierarchical VLA system)
+
+architecture:
+  backbone: "Three-tier hierarchy: Executor = fine-tuned pi0.5 VLA (initialized from public DROID-trained checkpoint); Sentry = Qwen3-VL-8B (local, vLLM, 1x H100) for subtask-completion monitoring; Planner = GPT-4o (main) / Qwen3-VL-30B (open-source supplementary, 2x H100) for memory update and replanning"
+  action_head: "pi0.5 flow-matching action expert in the Executor; predicts 10-action chunks at 2 Hz (10 Hz control), 5 executed open-loop; Sentry/Planner emit language subgoals, not actions"
+  action_head_category: flow_matching
+  action_space: continuous
+  key_innovation: "Hierarchical Embodied Memory that decouples control into transient memory (Executor, immediate observation), working memory (Sentry, sliding window of 8 recent frames checked every n_m=5 intervals), and episodic memory (Planner: multimodal contextual key-value store + procedural plan with done/active/pending status). Two pillars: (1) cross-modal semantic schemata anchoring visual entries with dense text (ownership, rules, preferences) retrieved via text-embedding-3 cosine similarity; (2) active memory management with explicit Add/Update/Delete CRUD operations for knowledge plasticity. Sentry gating cuts Planner API calls ~3x (5.4 to 1.8 per subtask in Object Search) and lifts average task progress from 65% (Flat/MemER-style FIFO memory) to 90%, near the 94% human high-level oracle."
+
+benchmarks:
+  real_world:
+    object_search_progress: 92.0
+    counting_progress: 92.0
+    rearrangement_progress: 87.0
+    average_progress: 90.0
+    source: "HiMe paper Fig. 4 and Table 2 (WidowX-250s, 20 trials per task per method)"
+    date_reported: "2026-07-03"
+    eval_condition: "three long-horizon tabletop tasks (6-7 subtasks, ~1035-1450 action steps each); pi0.5 Executor fixed across all baselines"
+    notes: "Baselines (avg): Transient Memory 14%, Transient+Sentry 26%, Flat Memory (MemER-style FIFO) 65%, HiMe w/o Sentry 68%, Human High-level oracle 94%. Memory hit rate 92-98% vs 61-76% for Flat Memory; Planner API calls per subtask 1.4-2.6 vs 4.8-6.2."
+
+eval_conditions:
+  real_world: "WidowX-250s arm, parallel gripper, third-person RealSense D435 + wrist camera; Executor at 2 Hz predicting 10-action chunks (10 Hz control loop); Sentry queried every 10 execution steps; 20 trials per task per method; metrics: Task Progress, Planner API Calls, Memory Hit Rate"
+
+training:
+  method: "Only the Executor is trained: pi0.5 fine-tuned on 60 task-specific WidowX-250 teleop demos (50 regular + 10 corner cases) with the standard OpenPI recipe (AdamW, peak LR 5e-5, batch 256, 30k steps, EMA 0.999, action horizon 10). Sentry and Planner run zero/few-shot with prompt-based XML CRUD memory protocol"
+  data: "60 leader-follower teleoperation demonstrations, dual-camera RGB at 25 Hz subsampled to 10 Hz, 224x224, LeRobot format"
+  memory_backend: "vector database with OpenAI text-embedding-3 caption embeddings; multimodal entries (image + text) retrieved by cosine similarity via tag-based queries"
+
+tags:
+- hierarchical
+- memory
+- episodic-memory
+- working-memory
+- memory-management
+- long-horizon
+- planner-sentry-executor
+- pi0.5-backbone
+- gpt-4o-planner
+- qwen3-vl
+- real-robot
+- widowx
+- open-source

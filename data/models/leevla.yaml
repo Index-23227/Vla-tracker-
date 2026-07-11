@@ -1,0 +1,68 @@
+name: LEEVLA
+full_name: "LEEVLA: Seeing What Matters in Latent Environment Evolution for Vision-Language-Action"
+organization: "Shenyang Institute of Automation, Chinese Academy of Sciences; University of Chinese Academy of Sciences; MBZUAI"
+date: "2026-07-09"
+paper_url: https://arxiv.org/abs/2607.08182
+code_url: https://github.com/LyuQi127/LEEVLA
+venue: arXiv preprint
+open_source: true
+model_type: vision-language-action
+
+architecture:
+  backbone: "LEEVLA-large: OpenVLA-7B (DINOv2 + SigLIP vision encoders, Llama-2-7B); LEEVLA-mini: miniVLA (0.5B)"
+  llm: "Llama-2-7B (large) / miniVLA 0.5B backbone (mini)"
+  action_head: "Parallel continuous action predictor — MLP head regressing continuous action chunks from LLM last-layer hidden states with L1 loss (OpenVLA-OFT style parallel decoding)"
+  action_head_category: regression
+  action_space: "continuous action chunk a_{1:T} (chunked parallel decoding)"
+  parameters: "7B (LEEVLA-large) / 0.5B (LEEVLA-mini)"
+  key_innovation: >
+    Training-only "where-how" framework: Drift-Guided Dynamic Prioritization (DGDP =
+    Dynamic Position Prioritization + Semantic Drift Guidance) weights supervision toward
+    dynamically active, instruction-relevant patches, while Structured Feature Flow
+    Generation (SFFG = prototype-to-periphery future-feature forecasting + mutual-neighborhood
+    contrastive loss) models structured latent environment evolution. No extra inference cost.
+
+training:
+  dataset: "LEEVLA-large: Open X-Embodiment mixture pretraining then LIBERO/CALVIN; LEEVLA-mini: LIBERO-90 pretrained miniVLA init"
+  method: "L1 action regression + P2P forecasting loss + mutual-neighborhood contrastive loss; DGDP/SFFG used only during training"
+  optimizer: "AdamW; LR 5e-4 (large), 2e-5 (mini)"
+  steps: "50k-150k (large), 20k-50k (mini)"
+  hardware: "8x NVIDIA A100 80GB"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.8
+    libero_object: 99.0
+    libero_goal: 98.6
+    libero_long: 96.4
+    libero_avg: 98.2
+    source: "LEEVLA paper Table 2 (LEEVLA-large, 7B)"
+    date_reported: "2026-07-09"
+    eval_condition: "fine-tuned, 3 random seeds"
+  calvin:
+    calvin_abc_d_avg_len: 4.34
+    calvin_abc_d_task1: 98.8
+    calvin_abc_d_task2: 94.5
+    calvin_abc_d_task3: 87.3
+    calvin_abc_d_task4: 80.6
+    calvin_abc_d_task5: 72.7
+    source: "LEEVLA paper Table 1 (LEEVLA-large, CALVIN ABC-D)"
+    date_reported: "2026-07-09"
+    eval_condition: "CALVIN ABC-D"
+
+eval_conditions:
+  libero: "standard 4-suite LIBERO; 10 instructions x 50 episodes x 3 seeds; LEEVLA-mini (0.5B) reaches 97.5 avg"
+  calvin: "ABC-D split, average successful sequence length"
+
+tags:
+  - vla
+  - latent-world-model
+  - future-feature-prediction
+  - token-prioritization
+  - contrastive-learning
+  - openvla
+  - libero
+  - calvin
+  - real-robot
+  - 7B
+  - open-source
