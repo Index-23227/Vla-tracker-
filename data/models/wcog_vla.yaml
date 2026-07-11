@@ -1,0 +1,48 @@
+# Paper: WCog-VLA: A Dual-Level World-Cognitive Vision-Language-Action Model for End-to-End Autonomous Driving
+# arXiv: 2607.08375
+# Auto-track relevance score: 8.0
+
+name: WCog-VLA
+full_name: "WCog-VLA: A Dual-Level World-Cognitive Vision-Language-Action Model for End-to-End Autonomous Driving"
+organization: "Tongji University / Nanyang Technological University"
+date: "2026-07-09"
+paper_url: https://arxiv.org/abs/2607.08375
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "InternVL3-2B (300M InternViT vision encoder) + BEVFormer-based BEV encoder + TrackFormer producing sparse agent tokens for 3D spatial perception"
+  llm: "Qwen2.5 (InternVL3-2B decoder)"
+  action_head: "ADDT (Aligned Decoupled Diffusion Transformer): decoupled 16-block DiT (8-block condition encoder + 8-block generation decoder) generating joint multi-agent trajectories. Condition encoder aligns its 6th-block latent with a GenAD-style VAE scene representation (cosine loss); decoder injects timestep t and self-condition feature z_t via AdaLN, VLM tokens via cross-attention. 5 denoising steps at inference (0.106 s)."
+  action_head_category: diffusion
+  action_space: continuous
+  parameters: "2B (InternVL3-2B backbone)"
+  key_innovation: "Dual-level world-cognitive VLA for proactive end-to-end driving. Semantic level: 3D spatial perception (BEV + TrackFormer agent tokens injected into the LLM) with decoupled hidden-state roles - agent tokens routed to a world head for current 3D detection + future trajectory prediction of surrounding agents, while vision/text tokens drive 4-step game-theoretic Game-CoT reasoning (Stackelberg leader-follower 'if-what' imagination; 85k-sample dataset auto-annotated with Qwen3-VL-Plus using GT-action hints). Generative level: ADDT generative world model synthesizing physically-plausible joint multi-agent trajectories; representation alignment to a pre-trained trajectory VAE latent reduces required denoising steps (5-step ADDT beats 20-step standard DiT by 0.8 PDMS, 3.7x faster; 10.7x speedup over VLM text generation). Four-stage training ends with DiffGRPO RFT using joint reward r = r_PDMS - lambda_surr * L1(surrounding trajectories)."
+
+training:
+  dataset: "NAVSIM navtrain (1,192 scenes); 158k open-source driving VQA (DriveLM, CODA-LM, LingoQA, nuScenes-QA, NuInstruct, DriveGPT4) + 170k NAVSIM-tailored samples (85k trajectory-specific VQA + 85k Game-CoT reasoning)"
+  method: "Four stages: (1) 3D perception pre-training (BEV encoder + TrackFormer, focal + L1 detection loss, 1 epoch); (2) VLM SFT (1 epoch on 158k VQA, then 3 epochs joint fine-tuning with world head on 170k NAVSIM-tailored data); (3) ADDT SFT via DDPM for 200 epochs with VLM frozen (L2 denoising + alignment loss, ego-weighted mask); (4) RFT with DiffGRPO (10 epochs, group size 6, RL + behavior-cloning loss)"
+  compute: "4x NVIDIA A100 40GB"
+
+benchmarks:
+  driving:
+    navsimv1_pdms: 92.9
+    navsimv1_nc: 99.4
+    navsimv1_dac: 98.8
+    navsimv1_ttc: 98.5
+    navsimv1_comfort: 100.0
+    navsimv1_ep: 87.1
+    navsimv2_epdms: 85.9
+    navsimv2_nc: 98.8
+    navsimv2_dac: 96.6
+    navsimv2_ttc: 98.2
+    source: "Tables 1-2 in WCog-VLA paper (arXiv 2607.08375), NAVSIM v1/v2 navtest"
+    date_reported: "2026-07-09"
+    eval_condition: "open-loop NAVSIM v1 navtest (after full four-stage training incl. DiffGRPO RFT) and NAVSIM v2 navtest (after three-stage SFT only); camera-only input"
+
+eval_conditions:
+  driving: "fine-tuned, camera-only, end-to-end (NAVSIM v1/v2 navtest)"
+
+tags: [autonomous_driving, navsim, world_model, diffusion_transformer, game_theoretic_reasoning, chain_of_thought, 3d_perception, bev, grpo, rl, internvl3, multi_agent_trajectory]
