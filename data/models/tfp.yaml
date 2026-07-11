@@ -1,0 +1,77 @@
+name: TFP
+full_name: 'TFP: Temporally Conditioned Memory-Fusion Policies for Visuomotor Learning'
+organization: NYU Shanghai / UESTC / Beijing Institute of Technology
+date: '2026-07-09'
+paper_url: https://arxiv.org/abs/2607.08283
+code_url: https://github.com/Mirage415/TFP-Temporally-conditioned-Memory-Fusion-Policies-for-Visuomotor-Learning
+venue: arXiv 2026
+open_source: true
+model_type: memory-augmented VLA
+architecture:
+  backbone: "π0.5 VLA backbone (3.3B), vision encoder + proprioceptive state embedding"
+  action_head: flow matching decoder conditioned on LTC belief via AdaLN modulation
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: 3.3B
+  key_innovation: 'Episode-local task-progress belief maintained with Liquid Time-Constant
+    (LTC) dynamics: retention gate k_t = exp(-dt/tau_t) with input-dependent vector
+    time constants calibrates memory updates to physical elapsed time between policy
+    queries. Updated belief is injected into the flow-matching action decoder through
+    AdaLN-style modulation, so temporal context directly shapes generated action chunks.
+    Episode-Aware Temporal Batching (EATB) trains recurrent belief states over contiguous
+    chunks with episode-local hidden-state write-back and gradient truncation.
+
+    '
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.0
+    libero_goal: 99.4
+    libero_long: 97.0
+    libero_avg: 98.75
+    source: "TFP paper Table I / Table VI (500 rollouts per suite, Wilson 95% CI)"
+    date_reported: '2026-07-09'
+    eval_condition: 'fine-tuned, adaptive receding-horizon execution'
+  libero_plus:
+    libero_plus_noise: 88.5
+    libero_plus_light: 96.1
+    libero_plus_background: 96.7
+    libero_plus_avg: 93.77
+    source: "TFP paper Table I (Noise/Light/Background perturbation subsets)"
+    date_reported: '2026-07-09'
+    eval_condition: 'zero-shot robustness evaluation under visual perturbations'
+  mikasa_robo:
+    shell_game_touch: 75.0
+    source: "TFP paper Table I; diagnostic, not SOTA claim (MemoryVLA reports 88.0)"
+    date_reported: '2026-07-09'
+    eval_condition: 'memory diagnostic under occlusion'
+  real_world:
+    object_swap: 75.0
+    counting_pick_place: 90.0
+    source: "TFP paper Table II / Table VII (Galaxea A1, 20 trials per task; pi0.5 baseline 15% / 40%)"
+    date_reported: '2026-07-09'
+    eval_condition: 'single-arm Galaxea A1, wrist fisheye + static RealSense D435, joint-angle commands via ROS1 Noetic'
+eval_conditions:
+  libero: 'fine-tuned; same-backbone controlled comparison vs pi0.5 under adaptive receding-horizon executor'
+  libero_plus: 'robustness evaluation under noise, lighting, and background perturbations'
+  mikasa_robo: 'ShellGameTouch occlusion-memory diagnostic'
+  real_world: 'memory-dependent tabletop manipulation (object swapping, counting pick-and-place), 20 trials per method'
+training:
+  method: 'Flow-matching imitation learning with Episode-Aware Temporal Batching (EATB): B active episodes unrolled K=8 contiguous chunks, episode-local hidden states written back with stopgrad at segment boundaries'
+  data: 'LIBERO / LIBERO-plus / MIKASA-Robo demonstrations; real-world Galaxea A1 teleop demos'
+  hardware: '4x H200 GPUs, batch size 128, over 100GB GPU memory, about 80 hours for largest LIBERO runs'
+  memory_state: '256-dimensional episode-local LTC belief state, reset only at episode boundaries'
+tags:
+- 3.3B
+- memory
+- liquid-time-constant
+- continuous-time
+- temporal-context
+- flow-matching
+- adaln-conditioning
+- long-horizon
+- libero-plus
+- mikasa-robo
+- real-robot
+- pi0.5-backbone
+- open-source
