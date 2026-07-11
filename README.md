@@ -53,9 +53,9 @@ VLA-Tracker solves this by:
 | 8 | SimpleVLA-RL | 98.83 | Sep 2025 | ICLR 2026 | AR + GRPO RL |
 | 9 | DualCoT-VLA | 98.8 | Mar 2026 | — | Flow matching + parallel CoT |
 | 10 | SnapFlow | 98.75 | Apr 2026 | — | One-step flow distillation (pi0.5 base) |
-| 11 | **PearlVLA** | **98.70** | Jun 2026 | arXiv | Pearl-style action representation |
-| 12 | **GEAR-VLA** | **98.67** | Jun 2026 | arXiv | Qwen2.5-VL + VGGT + DiT geometry-aware |
-| 13 | 3DThinkVLA | 98.65 | Jun 2026 | arXiv | OFT regression + 3D-thinking-guided co-training |
+| 11 | **TFP** | **98.75** | Jul 2026 | arXiv | π0.5 + temporally conditioned memory-fusion |
+| 12 | **PearlVLA** | **98.70** | Jun 2026 | arXiv | Pearl-style action representation |
+| 13 | **GEAR-VLA** | **98.67** | Jun 2026 | arXiv | Qwen2.5-VL + VGGT + DiT geometry-aware |
 
 > Full leaderboard with 163 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
