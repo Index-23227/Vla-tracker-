@@ -218,5 +218,101 @@
     "method": "Generalist policy",
     "robot": "WidowX / Franka",
     "verified": true
+  },
+  {
+    "name": "WALL-WM",
+    "source": "arXiv:2606.01955",
+    "tasks": [
+      {
+        "task": "Diverse Manipulation (7 tasks)",
+        "metric": "task_progress",
+        "value": "75.9 (vs π0.5 55.6)",
+        "setting": "Tabletop bimanual"
+      },
+      {
+        "task": "Reasoning Manipulation (5 tasks)",
+        "metric": "task_progress",
+        "value": "71.6 (vs π0.5 56.4)",
+        "setting": "Tabletop bimanual"
+      }
+    ]
+  },
+  {
+    "name": "DSWAM",
+    "source": "arXiv:2607.04927",
+    "tasks": [
+      {
+        "task": "Garment Folding (shirt/skirt/pant/towel)",
+        "metric": "success_rate",
+        "value": "96.3% avg",
+        "setting": "Real dual-arm"
+      }
+    ]
+  },
+  {
+    "name": "OpenHLM",
+    "source": "arXiv:2606.22174",
+    "tasks": [
+      {
+        "task": "HLM-12 training tasks",
+        "metric": "avg_progress",
+        "value": "89%",
+        "setting": "Humanoid whole-body"
+      },
+      {
+        "task": "HLM-12 holdout (co-trained)",
+        "metric": "avg_progress",
+        "value": "87%",
+        "setting": "Humanoid whole-body"
+      }
+    ]
+  },
+  {
+    "name": "HiMe",
+    "source": "arXiv:2607.03449",
+    "tasks": [
+      {
+        "task": "Object Search / Counting / Rearrangement",
+        "metric": "avg_progress",
+        "value": "90% (92/92/87)",
+        "setting": "Long-horizon mobile"
+      }
+    ]
+  },
+  {
+    "name": "PaCo-VLA",
+    "source": "arXiv:2606.00515",
+    "tasks": [
+      {
+        "task": "Connector Insertion",
+        "metric": "success_rate",
+        "value": "90% (0 F/T violations)",
+        "setting": "AUBO-i5, 4.5mm depth"
+      },
+      {
+        "task": "EV Charging-Gun Insertion",
+        "metric": "success_rate",
+        "value": "53.3%",
+        "setting": "Transfer, 15 trials"
+      }
+    ]
+  },
+  {
+    "name": "FurnitureVLA",
+    "source": "arXiv:2607.01212",
+    "tasks": [
+      {
+        "task": "IVAR Furniture Assembly (per-part)",
+        "metric": "success_rate",
+        "value": "78.1%",
+        "setting": "Long-horizon bimanual"
+      },
+      {
+        "task": "IVAR Full Assembly",
+        "metric": "success_rate",
+        "value": "40.0%",
+        "setting": "Long-horizon bimanual"
+      }
+    ]
   }
 ]

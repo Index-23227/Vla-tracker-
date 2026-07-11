@@ -1,24 +1,24 @@
 {
-  "week": "2026-W17",
-  "week_display": "Week 17, April 2026",
-  "headline": "Training-free inference techniques (VLA-IAP, DA-PTQ) emerge as parallel scaling track",
+  "week": "2026-W28",
+  "week_display": "Week 28, July 2026",
+  "headline": "Memory-augmented VLAs sweep the July scans — TFP cracks the LIBERO top tier with temporal fusion",
   "insights": [
     {
-      "title": "Inference efficiency becomes a first-class axis",
-      "body": "Two new papers (VLA-IAP, DA-PTQ) deliver meaningful runtime wins without retraining: VLA-IAP prunes visual tokens via interaction-first geometric priors and gets 1.25× speedup at 97.8% LIBERO (matching the unpruned backbone), while DA-PTQ's W4A8 drift-aware quantization of CogACT yields 42.5% memory reduction and 54.8% speedup with only ~2pp SimplerEnv drop. Together they signal that optimization of deployed VLAs is maturing beyond architectural tweaks.",
-      "delta": "1.25-1.54× speedup",
+      "title": "Temporal memory becomes the dominant design axis",
+      "body": "Five of this cycle's twenty accepted models center on memory: TFP's temporally conditioned memory-fusion on π0.5 reaches LIBERO 98.75 (entering the visible top-13 at #11) with LIBERO-Plus 93.77 — the strongest robustness score on record — while LaMem-VLA (dual latent memory, 97.6), HiMe (hierarchical embodied memory, real-world progress 90), LEEVLA (latent environment attention, 98.2 / CALVIN 4.34) and Harness-VLA (memory-guided frozen-VLA agent) attack long-horizon drift from complementary angles.",
+      "delta": "5/20 memory-centric",
       "direction": "up"
     },
     {
-      "title": "Humanoid whole-body VLAs start landing on real robots",
-      "body": "HEX (BICHR / XJTU / Nankai / PKU) delivers 79.8% seen-scenario avg and 61.8% generalization avg on Tienkung 2.0/3.0 bipedal humanoids at 13.6 Hz with 2.4B params. UniT (XPeng / Tsinghua / HKU) demonstrates 78% Pick&Place / 75% Pouring on IRON-R01-1.11 with just 10% of the baseline's training data via a hybrid discrete-token + flow-matching head. Real-world humanoid results are no longer a lone-outlier category.",
-      "delta": "+17.5pp on Tienkung",
+      "title": "Meta-World finally joins the scoreboard",
+      "body": "After tracking 300+ models with an empty Meta-World column, two entries landed in one week: Lift3D-VLA (PKU, 3D-lifted Prismatic + layer-wise diffusion) posts 87.7 alongside RLBench 82.8, and FabriVLA (lightweight InternVL3.5-1B + flow matching) reaches tier-avg 90.0. All eight tracked benchmarks now have data.",
+      "delta": "0 → 2 models",
       "direction": "up"
     },
     {
-      "title": "LIBERO top-5 now has 3 flow-matching entries",
-      "body": "Top-5 LIBERO as of April 2026: PLD (99.0 residual RL), SimpleVLA-RL (98.8 AR+GRPO), VLA-IAP (97.8 token pruner on π0.5), X-VLA (97.8 flow matching), Fast-WAM (97.6 flow+video DiT). OmniVLA-RL (97.6 Flow-GSPO) ties for #6. Flow-matching action heads now underpin 3/5 top models, confirming the paradigm shift observed since late 2025.",
-      "delta": "3/5 flow-matching",
+      "title": "Driving VLAs converge on hybrid decoding",
+      "body": "Three autonomous-driving entries arrived with distinct heads: AnchorVLA's AR anchor tokens + flow-matching residual takes Bench2Drive closed-loop SR to 77.28 (SOTA), WCog-VLA's InternVL3-2B + ADDT diffusion hits NAVSIM v1 PDMS 92.9, and PixelPilot (ECCV) decodes 2D pixel trajectories autoregressively. The AR-plans-flow-refines recipe is emerging as the driving default.",
+      "delta": "Bench2Drive SR 77.28 SOTA",
       "direction": "up"
     }
   ]
