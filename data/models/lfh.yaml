@@ -1,0 +1,53 @@
+name: LfH
+full_name: "Learning More from Less: Reinforcement Learning from Hindsight"
+organization: "MIT; MIT-IBM Computing Research Lab; Stanford University; UC San Diego"
+date: "2026-07-10"
+paper_url: https://arxiv.org/abs/2607.09042
+venue: "arXiv preprint"
+open_source: false
+model_type: rl-post-training-method
+
+architecture:
+  backbone: "Method is backbone-agnostic; applied to pi0.5 (RLinf-Pi05-LIBERO-SFT checkpoint), GR00T, and OpenVLA-OFT. VLM relabeler: Qwen3-VL-235B-A22B-Thinking-FP8"
+  llm: "Qwen3-VL-235B (relabeler); policy LLM varies with backbone"
+  action_head: "Inherited from underlying VLA policy (pi0.5 flow-matching action expert in the primary experiments); LfH does not modify the action head, only the RL post-training objective"
+  action_head_category: flow_matching
+  action_space: continuous
+  key_innovation: >
+    Learning from Hindsight (LfH) brings hindsight relabeling to GRPO-based RL post-training of
+    VLAs. In sparse-reward manipulation a weak policy fails nearly every rollout, leaving GRPO
+    groups all-zero (zero advantage variance) and thus discarded. LfH activates only on low-signal
+    groups (mean reward < eta): a single VLM samples a failed anchor trajectory, proposes a
+    hindsight instruction g' describing what the robot actually did, then scores every trajectory
+    in the group against g' with rewards in {0, 0.5, 1}. The relabeled group is consumed by GRPO
+    with a hindsight-policy-gradient importance correction (ratio evaluates the action under g'
+    while correcting for sampling under g). The total loss L_LfH = L_GRPO + lambda * L_H-GRPO trains
+    jointly on commanded and hindsight groups, recovering signal from rollouts standard RL ignores.
+
+training:
+  method: "GRPO with hindsight relabeling (H-GRPO). VLM (Qwen3-VL-235B) relabels both instruction and reward on low-reward groups; trajectories represented as global-camera video frames. Implemented in RLinf."
+  hardware: "Not specified in detail"
+
+benchmarks:
+  real_world:
+    franka_fr3_success_rate: 56.0
+    grpo_baseline_success_rate: 22.0
+    source: "LfH paper Section 5.4 / Figure 4b (real Franka FR3, held-out task 'put the green container into the bowl', at 160 rollouts; LfH 56% vs GRPO 22%)"
+    date_reported: "2026-07-10"
+    eval_condition: "real robot, binary human reward, 160 collected rollouts, initial SFT policy at zero success"
+
+eval_conditions:
+  libero_pro: "Out-of-distribution LIBERO-PRO tasks (task perturbation over LIBERO-90 scenes); reported as normalized gain over initial policy, ~5x sample-efficiency improvement over GRPO; transfers across pi0.5, GR00T, OpenVLA-OFT backbones"
+  real_world: "Franka FR3, 10 SFT tasks (20 SpaceMouse demos each) then RL fine-tune on held-out task with binary human reward"
+
+tags:
+  - reinforcement-learning
+  - rl-post-training
+  - hindsight-relabeling
+  - grpo
+  - vlm-reward
+  - sample-efficiency
+  - libero-pro
+  - real-robot
+  - franka
+  - sparse-reward
