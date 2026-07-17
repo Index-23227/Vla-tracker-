@@ -1,0 +1,67 @@
+name: TS-Mask VLA
+full_name: "TS-Mask VLA: 2D Temporal-Spatial Masking for Vision-Language-Action Model with Effective Bridging"
+organization: "Zhejiang University; Tongji University"
+date: "2026-07-10"
+paper_url: https://arxiv.org/abs/2607.09818
+code_url: null
+venue: IROS 2026
+open_source: false
+
+architecture:
+  backbone: "DINOv2 + SigLIP visual encoders (third-view + wrist), fused MLP projector into language space"
+  llm: "Qwen2.5-0.5B"
+  action_head: "Discrete Diffusion Action Expert with Bridge Attention; layer-aligned multi-layer VLM conditioning; masked-denoising over a 2D (time x action-dim) discrete action-token grid with iterative ReMask refinement"
+  action_head_category: discrete_diffusion
+  action_space: "discrete; 256-bin uniform quantized action tokens over 8-step chunks (T x D 2D grid)"
+  parameters: "0.5B"
+  key_innovation: >
+    A tiny (0.5B) discrete VLA that bridges vision-language features into a dedicated
+    Discrete Diffusion Action Expert via a Bridge Attention block (fusing self, Action-Query,
+    and task streams with layer-aligned multi-layer VLM conditioning). Continuous actions are
+    uniformly quantized into 256-bin tokens organized on a 2D temporal-spatial grid, and a
+    two-stage Temporal-Spatial 2D masking strategy (mask whole frames, then per-frame token
+    subsets) with a step-unroll loss trains masked denoising. Inference refines a fully masked
+    grid coarse-to-fine via confidence-based ReMask, yielding structurally consistent actions
+    while outperforming much larger baselines.
+
+training:
+  dataset: "LIBERO (Spatial/Object/Goal/Long) and CALVIN ABC->D"
+  method: "Masked denoising cross-entropy over 2D action-token grid (cosine masking schedule) plus a step-unroll loss (lambda=0.5); LoRA fine-tuning of the VLM backbone; action chunk length 8"
+  compute: "single NVIDIA RTX 4090 GPU"
+
+benchmarks:
+  libero:
+    libero_spatial: 95.4
+    libero_object: 99.4
+    libero_goal: 96.2
+    libero_long: 91.6
+    libero_avg: 95.7
+    source: "TS-Mask VLA paper Table I"
+    date_reported: "2026-07-10"
+    eval_condition: "fine-tuned"
+  calvin:
+    calvin_abc_d_1: 0.974
+    calvin_abc_d_2: 0.925
+    calvin_abc_d_3: 0.852
+    calvin_abc_d_4: 0.770
+    calvin_abc_d_5: 0.669
+    calvin_abc_d_avg_len: 4.19
+    source: "TS-Mask VLA paper Table II (ABC->D)"
+    date_reported: "2026-07-10"
+    eval_condition: "fine-tuned"
+
+eval_conditions:
+  libero: "fine-tuned, four suites"
+  calvin: "ABC->D long-horizon protocol, fine-tuned"
+
+tags:
+  - vla
+  - discrete-diffusion
+  - masked-denoising
+  - action-tokenization
+  - bridge-attention
+  - qwen2.5
+  - tiny-vla
+  - libero
+  - calvin
+  - real-world
