@@ -1,24 +1,24 @@
 {
-  "week": "2026-W28",
-  "week_display": "Week 28, July 2026",
-  "headline": "Memory-augmented VLAs sweep the July scans — TFP cracks the LIBERO top tier with temporal fusion",
+  "week": "2026-W29",
+  "week_display": "Week 29, July 2026",
+  "headline": "Inference-time wrappers proliferate — TrustVLA, SEAM and friends steer frozen VLAs without retraining",
   "insights": [
     {
-      "title": "Temporal memory becomes the dominant design axis",
-      "body": "Five of this cycle's twenty accepted models center on memory: TFP's temporally conditioned memory-fusion on π0.5 reaches LIBERO 98.75 (entering the visible top-13 at #11) with LIBERO-Plus 93.77 — the strongest robustness score on record — while LaMem-VLA (dual latent memory, 97.6), HiMe (hierarchical embodied memory, real-world progress 90), LEEVLA (latent environment attention, 98.2 / CALVIN 4.34) and Harness-VLA (memory-guided frozen-VLA agent) attack long-horizon drift from complementary angles.",
-      "delta": "5/20 memory-centric",
+      "title": "The frozen-VLA wrapper is now a design pattern of its own",
+      "body": "This scan added three inference-time methods that leave the base policy untouched and intervene at rollout: TrustVLA (mechanism-guided backdoor defense, recovering LIBERO SR to 97.6/90.6/88.6/84.0 under BadVLA attacks), SEAM (training-free smooth execution, jerk -28%), and VIA (Stanford visual-interface agent, LIBERO-Goal 96.7 zero-shot). Together with the earlier CTRL-STEER / PaCo-VLA / Harness-VLA lineage, wrappers now form a distinct tracked category — reliability and safety bolted onto models you don't have to retrain.",
+      "delta": "3 new wrappers",
       "direction": "up"
     },
     {
-      "title": "Meta-World finally joins the scoreboard",
-      "body": "After tracking 300+ models with an empty Meta-World column, two entries landed in one week: Lift3D-VLA (PKU, 3D-lifted Prismatic + layer-wise diffusion) posts 87.7 alongside RLBench 82.8, and FabriVLA (lightweight InternVL3.5-1B + flow matching) reaches tier-avg 90.0. All eight tracked benchmarks now have data.",
-      "delta": "0 → 2 models",
+      "title": "Efficiency work shifts from quantization to temporal redundancy",
+      "body": "Two accepted models attack compute by pruning the time axis rather than the weights: TR-VLA reduces temporal redundancy for a π0.5 2-step policy (LIBERO 93.8, RoboTwin v2 81.5), and ChunkFlow enforces continuity-consistent chunk learning (LIBERO-Long 93.4, CALVIN 4.30). Meanwhile Jetson-PI — a pure llama.cpp-style edge runtime — was rejected as a deployment system, keeping the tracker to policy contributions.",
+      "delta": "2 temporal-efficiency",
       "direction": "up"
     },
     {
-      "title": "Driving VLAs converge on hybrid decoding",
-      "body": "Three autonomous-driving entries arrived with distinct heads: AnchorVLA's AR anchor tokens + flow-matching residual takes Bench2Drive closed-loop SR to 77.28 (SOTA), WCog-VLA's InternVL3-2B + ADDT diffusion hits NAVSIM v1 PDMS 92.9, and PixelPilot (ECCV) decodes 2D pixel trajectories autoregressively. The AR-plans-flow-refines recipe is emerging as the driving default.",
-      "delta": "Bench2Drive SR 77.28 SOTA",
+      "title": "339 models, all eight benchmarks live, LIBERO top tier frozen",
+      "body": "The tracker crossed 339 PDF-verified models this week. Vanilla LIBERO remains saturated — the visible top-13 was unchanged again (cutoff 98.67), reinforcing why LIBERO-Plus (now 24+ models) and RoboTwin v2 are becoming the discriminating axes. The strongest newcomer, TS-Mask VLA (IROS 2026, discrete diffusion), lands at 95.7 — competitive but well outside the compressed leaderboard head.",
+      "delta": "331 → 339",
       "direction": "up"
     }
   ]

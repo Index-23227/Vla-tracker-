@@ -1,0 +1,50 @@
+name: SeeLikeARobot
+version: '1.0'
+organization: KAIST AI / Holiday Robotics
+paper_url: https://arxiv.org/abs/2607.11498
+code_url: null
+date: '2026-07-13'
+venue: null
+architecture:
+  backbone: PaliGemma (SigLIP + Gemma); pi0.5 and SmolVLA backbones
+  llm: Gemma / SmolLM2
+  action_head: flow matching (inherited from pi0.5 / SmolVLA action expert)
+  action_space: continuous (end-effector delta action chunks)
+  parameters: varies by backbone (pi0.5, SmolVLA 450M)
+  key_innovation: Robot-centric pointmap input - an image whose pixels store per-pixel
+    3D scene coordinates expressed in the robot (end-effector-centered) frame; encoded
+    by a separate SigLIP tower initialized from the RGB encoder and fused element-wise
+    (added) onto RGB tokens, injecting robot-frame 3D geometry into pretrained 2D VLAs
+    with no point-cloud encoder and no extra tokens.
+  action_head_category: flow_matching
+training:
+  dataset: RoboCasa (24 atomic tasks, 50 demos/task); real-world Franka FR3 (4 tasks,
+    180 demos across 3 camera placements)
+  method: Fine-tuning pretrained VLAs with RGB + robot-centric pointmap fused input;
+    AdamW, peak LR 1e-4, cosine schedule, bf16, effective batch 64 (pi0.5 20k steps,
+    SmolVLA 60k steps)
+  compute: null
+benchmarks:
+  robocasa:
+    robocasa_avg: 62.9
+    robocasa_doors: 90.0
+    robocasa_drawers: 90.0
+    robocasa_coffee: 58.0
+    robocasa_pick_and_place: 52.8
+    robocasa_turn_objects: 53.4
+    source: "arXiv:2607.11498 Table 4 (pi0.5 + pointmap, fixed viewpoint, 24 tasks; RGB-only pi0.5 baseline 55.3; SmolVLA+pointmap 41.4)"
+    date_reported: '2026-07-13'
+    eval_condition: fine-tuned
+eval_conditions:
+  robocasa: "fine-tuned; pi0.5 backbone; RoboCasa 24 atomic tasks, 50 demos/task, 50 eval episodes/task, fixed reference viewpoint (training viewpoints randomized)"
+open_source: false
+model_type: policy
+tags:
+- robocasa
+- pointmap
+- 3D-geometry
+- flow-matching
+- pi0.5
+- smolvla
+- viewpoint-robust
+- manipulation
