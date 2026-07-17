@@ -1,0 +1,45 @@
+# Paper: CLAP: Direct VLM-to-VLA Adaptation via Language-Action Grounding
+# arXiv: 2607.08974
+
+name: CLAP
+full_name: "CLAP: Direct VLM-to-VLA Adaptation via Language-Action Grounding (Causal Language-Action Prediction)"
+organization: "OMRON SINIC X Corp. (with Ochanomizu University, University of Tokyo)"
+date: "2026-07-09"
+paper_url: https://arxiv.org/abs/2607.08974
+code_url: null
+venue: null
+open_source: true
+model_type: vla
+inference_hz: 1.86
+
+architecture:
+  action_head: "Autoregressive discrete action tokens with a language-action prefix (Causal Language-Action Prediction). Each 7-DoF action dimension is discretized into K=1000 integer bins and emitted as text tokens using the VLM's existing vocabulary. Before the numeric action tokens, the model autoregressively generates a natural-language action description (e.g. 'move forward 3 cm, tilt right 1 degree, close gripper') wrapped in <think>...</think>, deterministically produced during training from the ground-truth action chunk via a fixed template. Causal attention conditions the numeric tokens on the preceding language prefix. No action expert, no vocabulary extension, no architectural change; standard next-token cross-entropy loss for both language and action tokens."
+  action_head_category: autoregressive
+  backbone: "Qwen3.5 VLM"
+  llm: "Qwen3.5 (0.8B / 2B / 4B)"
+  action_space: discrete
+  parameters: "0.8B/2B/4B"
+  key_innovation: "Addresses output-distribution mismatch in VLM-to-VLA adaptation by prepending a template-derived natural-language action description to numeric action tokens in a single autoregressive sequence. With single-epoch fine-tuning (no robot pretraining), 2B CLAP reaches 90.8% on LIBERO, +14.9pp over size-matched VLA-0, and improves LIBERO-PRO OOD robustness. Released as an open-weight multi-scale family (0.8B/2B/4B) from one VLM lineage."
+
+training:
+  dataset: "LIBERO demonstrations (Spatial, Object, Goal, Long; 4 suites). Also a 120-demo UR5e real-robot set for preliminary deployment."
+  method: "Full-parameter fine-tuning, single epoch (~17,000 gradient steps, ~2.18M samples), AdamW, lr 5e-6, effective batch 128, bf16, Flash Attention 2. Optional random action masking augmentation (pmax=0.4)."
+  compute: "8 x NVIDIA H200 GPUs; ~6.5 hours for all model sizes"
+
+benchmarks:
+  libero:
+    libero_spatial: 93.0
+    libero_object: 97.4
+    libero_goal: 90.8
+    libero_long: 82.0
+    libero_avg: 90.8
+    source: "arXiv:2607.08974 Table 2 (CLAP 2B, h=8, 1 epoch)"
+    date_reported: "2026-07-09"
+    eval_condition: "fine-tuned (1 epoch, identical protocol to VLA-0); Qwen3.5-2B backbone; unmasked config"
+    notes: "2B is the best CLAP size (+14.9pp over VLA-0 2B). Other sizes: 0.8B avg 89.6 (Spatial 92.6/Object 97.8/Goal 88.4/Long 79.6); 4B avg 84.9 (Spatial 88.0/Object 97.4/Goal 86.6/Long 67.6). Non-monotonic: 2B > 4B."
+
+eval_conditions:
+  libero: "fine-tuned (single epoch, full-parameter, h=8); matched-protocol reproduction vs VLA-0; Qwen3.5-2B, unmasked"
+  real_world: "UR5e pick-and-place, 120 demos, 20 trials/condition; 2B ID/OOD 60%, 0.8B ID 35%/OOD 10%"
+
+tags: [libero, libero-pro, vlabench, autoregressive, compact-vla, vlm-to-vla, language-grounding, qwen3.5, open-source, real-world]
