@@ -1,33 +1,32 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: ChunkFlow: Towards Continuity-Consistent Chunked Policy Learning
-# arXiv: 2607.12992
-
 name: ChunkFlow
 full_name: "ChunkFlow: Towards Continuity-Consistent Chunked Policy Learning"
-organization: "TODO: check paper"
+organization: "Xi'an Jiaotong University & Jiangsu Cytoderm Intelligent Technology"
 date: "2026-07-14"
 paper_url: https://arxiv.org/abs/2607.12992
-code_url: null  # TODO: check for GitHub repo
+code_url: https://cytoderm-ai.github.io/chunkflow
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  action_head: "Chunked action head with deterministic parameter-free overlap blending (frozen/editable/future zones)"
+  action_head_category: regression
+  parameters: "not reported"
+  key_innovation: "Seam-aware training-and-execution framework for chunked policies. Partitions each chunk into frozen/editable/future zones, applies deterministic overlap blending at execution, and trains raw predictions with seam plus first- and second-order continuity losses. A structure-preserving AWAC fine-tuning stage adapts the policy while retaining the regularizers, reducing boundary jitter without extra inference-time cost."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_long: 93.4
+    source: "Table II (LIBERO-Long SR, fine-tuned)"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_avg_len: 4.30
+    source: "Table I (CALVIN ABC-D avg sequence length)"
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero:
+    condition: "fine-tuned"
+    note: "LIBERO-Long success rate only"
+  calvin:
+    condition: "fine-tuned"
+    note: "ABC-D, 5-step average episode length"
 
-tags: [libero, calvin]
+tags: [libero, calvin, action-chunking, continuity, awac]
