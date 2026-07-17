@@ -1,0 +1,30 @@
+name: VIA
+full_name: 'VIA: Visual Interface Agent for Robot Control'
+version: '1.0'
+organization: Stanford University
+paper_url: https://arxiv.org/abs/2607.11119
+date: '2026-07-13'
+architecture:
+  backbone: Off-the-shelf frontier agents (Claude Code, Codex); no robot-specific fine-tuning
+  llm: Frontier FMs (Opus 4.8, Fable 5, GPT-5.5, GPT-5.6-Sol)
+  action_head: agentic MCP tool-use (waypoint via visual 3D interface)
+  action_space: 6-DoF end-effector waypoints + binary gripper
+  action_head_category: other
+model_type: agentic framework
+open_source: false
+benchmarks:
+  libero:
+    libero_goal: 96.7
+    source: 'Table 2 / Abstract, CC-Fable minimal prompt (3 LIBERO-Goal tasks: Turn on stove, Open drawer, Put bowl on plate)'
+    date_reported: '2026-07-13'
+    eval_condition: zero-shot (no fine-tuning)
+eval_conditions:
+  libero: 'zero-shot; off-the-shelf agent (Claude Code + Fable 5); minimal prompt; 3 LIBERO-Goal tasks in robosuite; 10 seeds each'
+tags:
+- agentic
+- computer-use
+- zero-shot
+- foundation-model
+- mcp
+- no-finetuning
+- manipulation
