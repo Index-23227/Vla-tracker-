@@ -1,0 +1,54 @@
+# Paper: TrustVLA: Mechanism-Guided Inference-Time Defense Against Vision-Language-Action Backdoors
+# arXiv: 2607.12571
+
+name: TrustVLA
+full_name: "TrustVLA: Mechanism-Guided Inference-Time Defense Against Vision-Language-Action Backdoors"
+organization: "Wuhan University / D-Robotics / HUST / Institute of Automation, CAS"
+date: "2026-07-14"
+paper_url: https://arxiv.org/abs/2607.12571
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Wraps a frozen open-source VLA checkpoint at inference time (evaluated on OpenVLA; SigLIP/DINOv2 vision + LLaMA-2 backbone) and cross-architecture on pi0.5 (PaliGemma) transfer; no retraining of the underlying policy"
+  llm: "Inherited from the wrapped VLA (LLaMA-2 for OpenVLA; Gemma for pi0.5)"
+  action_head: "Inference-time backdoor defense wrapper (not a new action head). Three separated modules over the frozen VLA: (1) trusted-evidence uncertainty monitor that adapts the Dirichlet evidence framework to per-token, per-layer epistemic-uncertainty trajectories via the LM head, flagging observations that leave the clean-calibrated evidence-evolution region; (2) counterfactual support localization that seeds candidate compact supports from decision-layer attention rank-promotion and validates them by a mechanism-score drop under temporary masking (compact causal footprint, |S| <= B = 16 image tokens ~6% of the visual grid); (3) localized inpainting recovery that erases the validated support and inpaints before the next action query, with fail-safe when no support validates"
+  action_head_category: other
+  action_space: continuous
+  parameters: "0 added trainable params (frozen checkpoint; only a small clean calibration set is used to freeze thresholds)"
+  key_innovation: "Reframes VLA backdoor defense as trusted-prediction monitoring: identifies a recurring internal mechanism (a compact causal footprint marked by Epistemic Homogenization + Attention Reallocation) shared across two independently designed attacks (BadVLA, INFUSE), then uses it for retraining-free detect-localize-recover. Requires no poisoned calibration, no trigger metadata, and no trigger size/coordinate. On OpenVLA/LIBERO it reduces average VLA-ASR from 100% to 7.0% (BadVLA) and 2.2% (INFUSE) while preserving clean success and recovering triggered rollouts"
+
+training:
+  dataset: "No policy training. Small clean calibration set of trigger-free rollouts per LIBERO suite used only to freeze the evidence-evolution detection threshold"
+  method: "Inference-time, retraining-free defense over a frozen VLA checkpoint; clean-calibrated frozen thresholds; area budget B = 16 image tokens"
+  compute: "Inference-time only; per-frame detection cost, with candidate search / counterfactual masking / inpainting run only after the detection gate fires"
+
+benchmarks:
+  libero:
+    libero_spatial: 97.6
+    libero_object: 90.6
+    libero_goal: 88.6
+    libero_long: 84.0
+    source: "Table 1 (OpenVLA/LIBERO defense results) in TrustVLA paper (arXiv:2607.12571). Values are TrustVLA-defended triggered-recovery success rates SR(w) under the BadVLA attack across the four LIBERO suites (paired 500-episode clean/trigger logs, 10 tasks x 50 rollouts per suite). Corresponding defended clean SR(w/o) = 98.2/99.0/97.8/92.8; residual VLA-ASR = 0.6/8.5/9.4/9.5 (avg 7.0%, down from 100% no-defense). Under INFUSE, recovered SR(w) = 97.4/97.4/93.4/86.6 (avg VLA-ASR 2.2%)"
+    date_reported: "2026-07-14"
+    eval_condition: "inference-time defense over frozen OpenVLA under BadVLA visual-trigger backdoor; triggered-recovery success rate"
+
+eval_conditions:
+  libero: "inference-time defense wrapper over frozen OpenVLA, evaluated under visual-triggered backdoor attack (BadVLA)"
+
+tags:
+  - inference_time
+  - backdoor_defense
+  - security
+  - retraining_free
+  - dirichlet_evidence
+  - epistemic_uncertainty
+  - attention_analysis
+  - counterfactual_localization
+  - inpainting
+  - openvla
+  - pi0.5
+  - libero
+  - wrapper
