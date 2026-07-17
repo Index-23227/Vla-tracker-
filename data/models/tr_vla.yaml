@@ -1,0 +1,38 @@
+# Paper: Reducing Temporal Redundancy for Efficient Vision-Language-Action Inference
+# arXiv: 2607.12287
+
+name: TR-VLA
+full_name: "Reducing Temporal Redundancy for Efficient Vision-Language-Action Inference"
+organization: "Tianji KernalMind / Tsinghua Shenzhen / Shanghai Jiao Tong University"
+date: "2026-07-14"
+paper_url: https://arxiv.org/abs/2607.12287
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "SigLIP / ViT (inherited from pi0 and pi0.5 backbones)"
+  llm: "PaliGemma / Gemma-based VLM (pi0.5 core)"
+  action_head: "Flow-matching policy compressed from a 10-step to a 2-step solver via low-rank velocity approximation; applied on top of pi0 / pi0.5"
+  action_head_category: flow_matching
+  key_innovation: "System-level acceleration for flow-based VLA that removes temporal redundancy in both perception and policy. Perception: temporal token reuse via cosine-similarity odd/even chunking, recomputing only the top-rho dynamic tokens (~40%) and inheriting cached KV for the rest, with index selection done once in the first layer. Policy: exploits the low-rank, linearly correlated structure of flow-matching velocities (energy in top-2 singular components) to reconstruct the full trajectory from anchor velocities v0 and v7, distilling the 10-step ODE solver into a 2-step schedule through a lightweight adaptor g_phi that predicts the (alpha, beta, b) coefficients. Yields >2x end-to-end speedup (2.6x sim, 1.6x real) with negligible accuracy loss and no backbone changes."
+
+benchmarks:
+  libero:
+    libero_spatial: 97.8
+    libero_object: 98.0
+    libero_goal: 91.2
+    libero_long: 88.2
+    libero_avg: 93.8
+    source: "Table I (pi0.5 + Ours Method, 2-step)"
+    eval_condition: "fine-tuned"
+  robotwin_v2:
+    robotwin_v2_top10_sr: 81.5
+    robotwin_v2_avg: 81.5
+    source: "Table II - RoboTwin 2.0 TOP10 SR (Ours, pi0 backbone)"
+    eval_condition: "fine-tuned"
+
+eval_conditions:
+  libero: "fine-tuned (pi0.5 backbone, 2-step compressed flow policy)"
+  robotwin_v2: "fine-tuned (pi0 backbone, RoboTwin 2.0 TOP10 SR)"
+
+tags: [flow_matching, efficient_inference, temporal_token_reuse, step_compression, libero, robotwin, pi0, real_time]
