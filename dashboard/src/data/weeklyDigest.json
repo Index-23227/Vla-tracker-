@@ -1,24 +1,24 @@
 {
-  "week": "2026-W29",
-  "week_display": "Week 29, July 2026",
-  "headline": "Inference-time wrappers proliferate — TrustVLA, SEAM and friends steer frozen VLAs without retraining",
+  "week": "2026-W30",
+  "week_display": "Week 30, July 2026",
+  "headline": "Vendor-scale reports arrive — Xiaomi-Robotics-1 and FoMoVLA push MoT + foresight designs",
   "insights": [
     {
-      "title": "The frozen-VLA wrapper is now a design pattern of its own",
-      "body": "This scan added three inference-time methods that leave the base policy untouched and intervene at rollout: TrustVLA (mechanism-guided backdoor defense, recovering LIBERO SR to 97.6/90.6/88.6/84.0 under BadVLA attacks), SEAM (training-free smooth execution, jerk -28%), and VIA (Stanford visual-interface agent, LIBERO-Goal 96.7 zero-shot). Together with the earlier CTRL-STEER / PaCo-VLA / Harness-VLA lineage, wrappers now form a distinct tracked category — reliability and safety bolted onto models you don't have to retrain.",
-      "delta": "3 new wrappers",
+      "title": "Industry labs ship scaling reports alongside academia",
+      "body": "Xiaomi-Robotics-1 (2.6–10.5B Mixture-of-Transformers, Qwen3-VL VLM + flow-matching DiT) posts RoboCasa 74.5 / RoboCasa365 57.4 with a full deployment stack, while FoMoVLA (LiAuto/UCAS/Tsinghua) enters the LIBERO top-13 at #10 (98.75) by attaching a foresight world-model and point-tracking as TRAINING-ONLY auxiliary branches — removed at inference so the flow-matching DiT ships lean. Vendor-scale tech reports are now a regular fixture of the twice-weekly scan.",
+      "delta": "2 vendor-scale",
       "direction": "up"
     },
     {
-      "title": "Efficiency work shifts from quantization to temporal redundancy",
-      "body": "Two accepted models attack compute by pruning the time axis rather than the weights: TR-VLA reduces temporal redundancy for a π0.5 2-step policy (LIBERO 93.8, RoboTwin v2 81.5), and ChunkFlow enforces continuity-consistent chunk learning (LIBERO-Long 93.4, CALVIN 4.30). Meanwhile Jetson-PI — a pure llama.cpp-style edge runtime — was rejected as a deployment system, keeping the tracker to policy contributions.",
-      "delta": "2 temporal-efficiency",
+      "title": "Robustness & recovery become explicit design targets",
+      "body": "Four of nine accepted models center on reliability rather than raw success: AC-VLA (CoRL, OOD action correction), Agentic-RL-Execution (a PPO meta-policy choosing EXECUTE/RETRY/REPAIR/RESET over a frozen VLA), DiMaS (optimal-transport inference-time steering), and LIFT (force-aware post-training). Together with last week's TrustVLA/SEAM, the inference-time-wrapper category keeps compounding — reliability layered onto policies you don't retrain.",
+      "delta": "4/9 reliability",
       "direction": "up"
     },
     {
-      "title": "339 models, all eight benchmarks live, LIBERO top tier frozen",
-      "body": "The tracker crossed 339 PDF-verified models this week. Vanilla LIBERO remains saturated — the visible top-13 was unchanged again (cutoff 98.67), reinforcing why LIBERO-Plus (now 24+ models) and RoboTwin v2 are becoming the discriminating axes. The strongest newcomer, TS-Mask VLA (IROS 2026, discrete diffusion), lands at 95.7 — competitive but well outside the compressed leaderboard head.",
-      "delta": "331 → 339",
+      "title": "348 models; two more framework/analysis papers filtered",
+      "body": "The tracker reached 348 PDF-verified models. Curation stayed strict: PhyAgentOS (an embodied-agent OS that treats VLAs as swappable backends) and a reasoning-robustness analysis paper were both rejected as non-policy, and re-entering prior rejects (Jetson-PI runtime, ActiveFly-Bench) were skipped — keeping the count to genuine policy contributions.",
+      "delta": "339 → 348",
       "direction": "up"
     }
   ]

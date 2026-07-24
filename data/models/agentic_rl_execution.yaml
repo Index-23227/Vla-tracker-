@@ -1,0 +1,53 @@
+name: Agentic-RL-Execution
+full_name: "Learning Robust Execution in Robotic Manipulation with Agentic Reinforcement Learning"
+organization: "Harbin Institute of Technology Shenzhen; Northeastern University (Shenyang)"
+date: '2026-07-15'
+paper_url: https://arxiv.org/abs/2607.13818
+code_url: null
+venue: null
+open_source: false
+model_type: framework
+architecture:
+  backbone: "Frozen low-level VLA / policy (OpenVLA, pi0, pi0.5, or Diffusion Policy) kept unchanged"
+  llm: "None; agentic policy and critic are lightweight multi-layer perceptrons (MLPs)"
+  action_head: "Discrete categorical policy over four execution modes {EXECUTE, RETRY, REPAIR, RESET}; does not emit low-level control commands"
+  action_head_category: other
+  action_space: discrete
+  parameters: small MLP
+  key_innovation: >-
+    Agentic reinforcement learning framework that separates execution management
+    from action generation. A frozen low-level VLA continuously produces actions,
+    while a high-level agentic policy (trained with PPO) observes an execution
+    history (proprioception, low-level actions, and two proposed execution-quality
+    signals) every K=5 steps and selects among EXECUTE, RETRY, REPAIR, RESET.
+    Two complementary runtime metrics -- local execution quality (motion
+    effectiveness + smoothness) and global execution quality (kNN distance to a
+    stage-aware library of successful reference trajectories) -- drive recovery.
+    RETRY/REPAIR roll the robot back (via an OSC) to a high-quality historical
+    state; RESET restarts the episode. Improves robustness without modifying or
+    retraining the low-level policy.
+training:
+  dataset: "LIBERO (4 suites); N=50 successful reference trajectories collected per task with the frozen policy"
+  method: "PPO (agentic high-level policy), asymmetric actor-critic with privileged critic; low-level policy frozen"
+  hyperparameters: "lr 1e-4, discount 0.99, PPO clip 0.2, value coef 0.1, entropy coef 0.01, decision interval K=5, history length L=20, up to 1M decision steps per task"
+benchmarks:
+  libero:
+    libero_spatial: 96.6
+    libero_object: 98.2
+    libero_goal: 97.4
+    libero_long: 95.2
+    libero_avg: 96.85
+    source: "Table II (Standard Evaluation), pi0.5 (FT) w/ Agentic; arXiv 2607.13818. Framework also lifts OpenVLA-Long 54.0->74.5 and Diffusion Policy-Long 50.5->72.4"
+    date_reported: '2026-07-15'
+    eval_condition: "agentic RL wrapper on frozen pi0.5 (FT), nominal standard setting"
+eval_conditions:
+  libero: "high-level agentic RL policy (PPO) wrapping a frozen low-level VLA; scores shown for pi0.5 base under standard nominal conditions"
+tags:
+- libero
+- agentic-rl
+- execution-recovery
+- failure-recovery
+- PPO
+- frozen-policy
+- hierarchical
+- robustness

@@ -1,0 +1,82 @@
+name: Xiaomi-Robotics-1
+full_name: "Xiaomi-Robotics-1: Scaling Vision-Language-Action Models with over 100K Hours of Real-World Trajectories"
+organization: "Xiaomi Robotics"
+date: "2026-07-22"
+paper_url: https://arxiv.org/abs/2607.15330
+code_url: null
+venue: null
+open_source: false
+
+architecture:
+  backbone: "Qwen3-VL (pre-trained VLM)"
+  llm: "Qwen3-VL"
+  action_head: "Diffusion Transformer (DiT) action expert generating action chunks via flow matching, coupled with the VLM in a Mixture-of-Transformers (MoT) architecture; auxiliary VLM Choice-Policy action supervision"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "2.6-10.5B"
+  key_innovation: >
+    Foundational VLA trained on over 100k hours of real-world UMI trajectories with a two-stage
+    pre-training / post-training recipe. Pre-training uses a scalable auto-labeling pipeline (Qwen3.5-27B)
+    that captions fixed-length trajectory clips with scene state-transition language, providing semantic
+    supervision without manual segmentation. Mixture-of-Transformers architecture couples a Qwen3-VL VLM
+    with a DiT: the VLM encodes observation + instruction and additionally predicts action chunks via
+    Choice Policies (winner-takes-all over K candidates) to accelerate convergence, while the DiT generates
+    the action chunk via flow matching conditioned on robot state and the VLM KV cache (action-related VLM
+    tokens are excluded from DiT attention to prevent copy shortcuts). 5-step Euler integration at inference.
+    Post-training on ~10k hours of cross-embodiment data aligns state-transition prompts to imperative
+    instructions and UMI grippers to robot embodiments. Demonstrates strong data- and model-scaling behavior
+    across 2.6B / 5.1B / 10.5B variants.
+
+training:
+  dataset: >
+    Pre-training: over 100,000 hours of real-world manipulation trajectories collected with UMI handheld
+    grippers and egocentric cameras across households, commercial, industrial, office, and outdoor
+    environments, auto-labeled with scene state-transition captions via Qwen3.5-27B. Post-training: about
+    10,000 hours of cross-embodiment data, including over 7,200 hours of in-house mobile-manipulator and
+    dual-arm robot data, over 1,000 hours of instruction-labeled UMI data, and open-source datasets
+    (Bridge V2, RT-1, DROID). Co-trained with high-quality vision-language data under next-token prediction.
+  method: "Two-stage pre-training (flow-matching + VLM Choice-Policy regression + VL next-token, loss L = L_Flow + L_Regression + 0.1*L_NTP) then cross-embodiment post-training with relative delta EE-pose actions and a unified masked action vector"
+
+benchmarks:
+  robocasa:
+    robocasa_avg: 74.5
+    robocasa365_avg: 57.4
+    robocasa365_atomic: 80.2
+    robocasa365_composite_seen: 57.1
+    robocasa365_composite_unseen: 32.1
+    source: "Xiaomi-Robotics-1 paper Tables 2 and 3 (RoboCasa 24-task avg 74.5%; RoboCasa365 avg 57.4%)"
+    date_reported: "2026-07-22"
+    eval_condition: "fine-tuned"
+  real_world:
+    vlabench_avg_sr: 59.1
+    vlabench_avg_ps: 70.3
+    vlabench_avg_is: 69.9
+    robodojo_avg_score: 20.07
+    robodojo_avg_sr: 13.93
+    downstream_finetune_avg_sr: 75.0
+    downstream_finetune_avg_progress: 90.0
+    ootb_unseen_env_sr: 79.0
+    source: "Xiaomi-Robotics-1 paper Tables 4, 5 and Sec. 3.2-3.3 (VLABench avg; RoboDojo avg score/SR; low-data downstream fine-tuning; 10B out-of-the-box success)"
+    date_reported: "2026-07-22"
+    eval_condition: "fine-tuned / out-of-the-box in unseen environments"
+
+eval_conditions:
+  robocasa: "fine-tuned (RoboCasa 300 demos, RoboCasa365 100 demos/task)"
+  vlabench: "trained on In-distribution track, evaluated across 5 tracks with CoT labeling"
+  robodojo: "official protocol, no history observation used"
+  real_world: "out-of-the-box in unseen environments + low-data downstream fine-tuning (<10h/task)"
+
+tags:
+  - flow-matching
+  - DiT
+  - mixture-of-transformers
+  - scaling
+  - cross-embodiment
+  - UMI
+  - qwen
+  - mobile-manipulation
+  - foundation-model
+  - robocasa
+  - vlabench
+  - robodojo
+  - real-world

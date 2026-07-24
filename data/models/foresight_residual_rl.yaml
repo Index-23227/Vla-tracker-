@@ -1,0 +1,57 @@
+name: Foresight Residual RL
+full_name: "Foresight Residual RL for Long-Horizon Robot Manipulation with Vision-Language-Action Models"
+organization: "Rutgers University"
+date: "2026-07-17"
+paper_url: https://arxiv.org/abs/2607.16506
+code_url: https://jaysparrow.github.io/foresight-residual-rl
+venue: "IROS 2026"
+open_source: false
+model_type: vla-residual-rl
+
+architecture:
+  backbone: "Frozen per-sub-task pi0 base VLA policies (fine-tuned separately per phase). Residual policy: frozen DINOv2-S/14 wrist-view backbone -> CNN (384->12 ch) -> 2-layer LSTM (256 hidden) -> MLP (512->256->128) with separate actor/critic heads (zero-init actor output). Foresight predictor: DINOv2-S/14 CLS tokens from both camera views, fused via self-attention + linear layer + sigmoid head, LoRA (rank 8)."
+  llm: "PaliGemma-based VLM (inherited from pi0 base policy)"
+  action_head: "Residual correction on flow-matching pi0 base: at = pi0(ot) + alpha * residual(ot), alpha=0.1; residual actor is a regression MLP (7D OSC deltas) trained with PPO. Base action generation remains pi0 flow matching with action chunking H=20."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "pi0 base + small residual net"
+  key_innovation: >
+    Foresight Residual RL fixes a sub-task coupling failure in long-horizon residual RL over
+    frozen VLA policies: constant sparse success rewards improve each sub-task in isolation but do
+    not compose, because terminal (handoff) state quality is uncontrolled. The method augments each
+    sub-task's sparse success reward with an offline-estimated "foresight value" -- the probability
+    of downstream sub-task success conditioned on the current sub-task's terminal image. Two stages:
+    (1) train a visual foresight predictor from terminal states of the base policy, labeled by
+    Monte-Carlo downstream rollout success counts (N=2560 terminal states, Krep=5 rollouts each),
+    optimized with a binomial NLL; (2) train residual policies via backward foresight induction
+    (reverse phase order), using the predictor output as a reward multiplier rt = beta_k(s_{t+1}) *
+    p_phi(o_{t+1}). Evaluated on a three-phase contact-rich wrench-screw nut-tightening assembly
+    (Grasp / Move-Insert / Rotate) in NVIDIA Isaac Gym with a 7-DoF Kuka IIWA + 11-DoF Robotiq
+    3-finger gripper, sub-millimeter clearance, 20 Hz, 560-step episodes.
+    Results (source "Foresight Residual RL paper, Table II, 512 episodes x 4 seeds"):
+    full-task success 85.6% (ours) vs 54.5% standard residual RL vs 54.9% end-to-end pi0 vs 41.4%
+    chained pi0; gains concentrate at the Grasp->Insert boundary (consecutive 55.5% -> 87.3%).
+    Predictor held-out accuracy: Grasp->Insert 86.2%, Insert->Rotate 93.9% (Table I). Foresight
+    correction shapes handoff states (mean predictor score at Grasp terminal 0.32 -> 0.73) without
+    changing per-sub-task oracle-init success. Simulation-only.
+
+training:
+  dataset: "2,560 state-machine expert demonstrations per sub-task (grasp / move-insert / rotate) with privileged info; insertion expert is a pre-trained state-based RL policy. Wrench-screw assembly in Isaac Gym, 5 discrete wrench-nut size variants (<2mm clearance)."
+  method: "Fine-tune generalist pi0 separately per sub-task -> 3 frozen base policies. Train residual policies with PPO (rl_games, 128 parallel envs): 10-iter critic-only warmup + 300-iter joint actor-critic. Foresight predictor distilled offline via binomial NLL (80/10/10 split, 20 epochs, LoRA rank 8). Backward foresight induction over phases."
+  compute: "NVIDIA Isaac Gym GPU-accelerated PhysX contact simulation"
+
+benchmarks: {}
+
+tags:
+  - residual-rl
+  - pi0
+  - flow_matching
+  - foresight-value
+  - long-horizon
+  - contact-rich-assembly
+  - isaac-gym
+  - ppo
+  - dinov2
+  - skill-chaining
+  - simulation
+  - rutgers

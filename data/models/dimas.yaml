@@ -1,0 +1,49 @@
+# Paper: DiMaS: Distribution Matching for Steering Vision-Language-Action Models
+# arXiv: 2607.14280
+
+name: DiMaS
+full_name: "DiMaS: Distribution Matching for Steering Vision-Language-Action Models"
+organization: "ISIR, Sorbonne Université, Paris / Valeo.ai (Pegah Khayatan, Sara Meziane, Jayneel Parekh, Matthieu Cord)"
+date: "2026-07-15"
+paper_url: https://arxiv.org/abs/2607.14280
+code_url: https://github.com/pegah-kh/dimas
+venue: null
+open_source: true
+model_type: "steering / inference-time intervention wrapper"
+
+architecture:
+  action_head: "Distribution-Matching Steering (DiMaS): an inference-time representation-steering wrapper for flow-matching VLAs. Extracts residual-stream representations h_{l,p,m} from the action expert at a chosen layer (second-to-last) and all flow-matching denoising steps, pairs each with a continuous behavioral feature (e.g. end-effector speed, vertical displacement). Representations are thresholded by feature quantiles into source D- (feature absent) and target D+ (feature present) distributions. Steering is learned as an optimal-transport map T (Kantorovich W2, solved via low-rank Sinkhorn from the POT package) transporting D- to D+, rather than an additive shift along a fixed linear direction. At test time, a representation is nearest-neighbor projected onto D-, gated by a linear-probe binary classifier g, and interpolated toward the transported point via a knob alpha in [0,1] (default 0.5) to trade off control strength vs. task success."
+  action_head_category: flow_matching
+  backbone: "Model-agnostic wrapper; validated on SmolVLM (SmolVLA, 256M) and PaliGemma-3B (pi0.5) backbones"
+  llm: "Inherited from the steered base VLA (SmolVLA / pi0.5)"
+  parameters: "wrapper"
+  key_innovation: "Steers behavior of flow-matching VLAs by transporting between representation DISTRIBUTIONS via optimal transport instead of shifting along a fixed linear direction. Shows behavioral features in the action expert are linearly decodable but NOT linearly steerable, motivating distribution matching. Intervenes in the action expert (deeper layers >93% separable even at FM step 0, vs VLM max 87%) rather than the VLM, preserves task success without pausing the intervention, and uses an interpolation knob alpha as a normalized control-strength dial."
+
+training:
+  method: "No base-model training. Steering map learned post-hoc: quantile split (q-=0.25, q+=0.75), linear-SVM gate (C=0.1), low-rank Sinkhorn OT (eps=1e-4, max 5000 iters), interpolation alpha=0.5, second-to-last action-expert layer, all FM steps."
+  dataset: "Rollouts from the base VLA on LIBERO suites; representations grouped by behavioral feature value"
+
+benchmarks:
+  libero:
+    libero_object: 96.0
+    libero_spatial: 91.0
+    libero_10: 96.0
+    source: "arXiv:2607.14280 Figures 4-5 (pi0.5 unsteered baseline success rates)"
+    date_reported: "2026-07-15"
+    eval_condition: "unsteered base pi0.5 (lerobot/pi05-libero) baseline SR; DiMaS steering at alpha=0.5 largely preserves SR while modulating speed (e.g. LIBERO-10 96%->90% when decreasing speed)"
+    notes: "DiMaS is a steering wrapper, not a standalone policy; these are the base pi0.5 success rates it operates on. Evaluated on LIBERO-Object, -Spatial, -Goal, and -10 (Long) for speed and vertical-displacement control on both pi0.5 and SmolVLA (lerobot/smolvla_libero)."
+
+eval_conditions:
+  libero: "Inference-time steering of a fine-tuned base VLA (pi0.5 / SmolVLA); closed-loop, axis-isolated LIBERO evaluation; 10 tasks x 50 initializations per suite"
+
+tags:
+- steering
+- representation-steering
+- optimal-transport
+- flow-matching
+- inference-time
+- interpretability
+- behavioral-control
+- libero
+- wrapper
+- open-source

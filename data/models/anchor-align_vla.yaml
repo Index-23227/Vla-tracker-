@@ -1,0 +1,63 @@
+# Paper: Generalizable VLA Finetuning via Representation Anchoring and Language-Action Alignment
+# arXiv: 2607.13429
+
+name: Anchor-Align VLA
+full_name: "Generalizable VLA Finetuning via Representation Anchoring and Language-Action Alignment"
+organization: "University of Illinois Urbana-Champaign / Texas A&M University / University of California, Irvine"
+date: "2026-07-15"
+paper_url: https://arxiv.org/abs/2607.13429
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Prismatic-Qwen2.5-0.5B VLM finetuned with LoRA (rank r=64, all layers); 512-patch vision prefix from concatenated DINOv2 + SigLIP features (256 patches per image, two images); input is vision + text + proprioceptive state. Built on VLA-Adapter (default) and StarVLA base architectures"
+  llm: "Qwen2.5-0.5B (Prismatic-Qwen2.5-0.5B)"
+  action_head: "Default: regression action head with bridge attention that layer-wise conditions action latents on VLM features (VLA-Adapter). Also validated on a flow-matching GR00T FM-DiT head (StarVLA, Qwen2.5-VL backbone) in real-world experiments"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "0.5B"
+  key_innovation: "Anchor-Align finetuning recipe augments standard behavior cloning with two objectives: (1) Vision-Language Anchoring distills layer-wise hidden states from a frozen copy of the pretrained VLM into the trainable VLA (MSE distillation Anchor loss at every decoder layer) to prevent catastrophic forgetting; (2) Language-Action Alignment programmatically converts each continuous action target into one of six discrete motion-direction labels {up, down, left, right, forward, backward} and jointly supervises the language and action heads on the same robot observation. Requires no extra data or architectural change; recovers OOD generalization and fixes language-action misalignment"
+
+training:
+  dataset: "LIBERO, LIBERO-PRO, LIBERO-Plus, and CALVIN ABC->D demonstrations; real-world xArm7 robot demonstrations"
+  method: "Behavior cloning finetuning (LoRA r=64) combined with Vision-Language Anchoring distillation loss and Language-Action Alignment loss on programmatically derived discrete direction labels"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 100.0
+    libero_goal: 97.2
+    libero_long: 90.8
+    source: "Table 7 (App. C.1) in Anchor-Align paper (arXiv:2607.13429), standard unperturbed LIBERO four-suite success rates"
+    date_reported: "2026-07-15"
+    eval_condition: "fine-tuned, in-distribution standard LIBERO suites"
+  calvin:
+    calvin_abc_d_1: 99.1
+    calvin_abc_d_2: 95.8
+    calvin_abc_d_3: 90.6
+    calvin_abc_d_4: 84.7
+    calvin_abc_d_5: 77.9
+    calvin_abc_d_avg_len: 4.5
+    source: "Table 2 in Anchor-Align paper (arXiv:2607.13429), CALVIN ABC->D long-horizon zero-shot on held-out environment D"
+    date_reported: "2026-07-15"
+    eval_condition: "trained on environments A,B,C; evaluated zero-shot on D; chain of five language instructions"
+
+eval_conditions:
+  libero: "fine-tuned, standard in-distribution LIBERO suites (App. C.1)"
+  calvin: "ABC->D generalization, zero-shot on held-out environment D, long-horizon 5-instruction chains"
+
+tags:
+  - libero
+  - calvin
+  - finetuning_method
+  - catastrophic_forgetting
+  - representation_anchoring
+  - language_action_alignment
+  - ood_generalization
+  - vla_adapter
+  - starvla
+  - prismatic_qwen
+  - lora
+  - regression

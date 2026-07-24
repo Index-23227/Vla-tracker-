@@ -1,0 +1,36 @@
+name: AC-VLA
+full_name: "AC-VLA: Robust Out-of-Distribution Action Execution via Compositional Learning"
+organization: "Shenzhen Technology University; Shenzhen University of Advanced Technology; Tongji University; Great Bay University"
+date: "2026-07-17"
+paper_url: https://arxiv.org/abs/2607.15714
+code_url: null
+venue: "CoRL 2026"
+open_source: false
+model_type: manipulation
+
+architecture:
+  backbone: "pi_0.5 (VLM + Diffusion Transformer action head); also instantiated on GR00T-N1"
+  llm: "pi_0.5 VLM backbone; Qwen-3.5-Flash used offline for instruction decomposition"
+  action_head: "Flow-matching Diffusion Transformer (DiT) action head from pi_0.5, trained with a flow-matching objective and K-step Euler integration at inference"
+  action_head_category: flow_matching
+  parameters: "Inherits pi_0.5 backbone parameters (no architectural modification)"
+  key_innovation: "Plug-and-play Action Compositional learning framework, architecture-agnostic and integrable into any VLA backbone. Two components: (1) a compositional learning module with an LLM-driven instruction decomposer and a proprioceptive trajectory aligner that produces dense sub-task supervision, trained via a mixed strategy on complete demonstrations plus decomposed sub-task data to resolve the stability-plasticity dilemma; (2) a state-conditioned asymmetric masking strategy that suppresses wrist-view inputs during closed-gripper (place) phases to break perceptual shortcuts and enforce global spatial grounding. Targets two failure modes: trajectory overfitting and perceptual shortcut."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.0
+    libero_object: 98.4
+    libero_goal: 97.7
+    libero_long: 92.4
+    libero_avg: 96.6
+    source: "Table 2 (AC-VLA on pi_0.5 backbone); in-distribution suites. OOD suites: Spatial-OOD 64.2, Goal-OOD 73.3; paper overall AVG (incl. OOD) 87.3"
+    eval_condition: "fine-tuned on LIBERO; OOD via LIBERO-OOD benchmark"
+
+training:
+  datasets: ["LIBERO", "LIBERO-OOD", "real-world PIPER-arm tasks"]
+  method: "Mixed training on full demonstrations and offline-decomposed sub-task data, plus state-conditioned asymmetric wrist-view masking during place phases; no architectural modification"
+
+eval_conditions:
+  libero: "fine-tuned"
+
+tags: [flow_matching, libero, libero_ood, compositional_generalization, ood, pi_0.5, groot, plug_and_play]
