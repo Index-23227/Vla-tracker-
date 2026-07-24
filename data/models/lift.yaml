@@ -1,0 +1,44 @@
+name: LIFT
+full_name: "LIFT: Never Too Late for Force — Accelerating VLA Post-Training with Reactive Force Injection"
+organization: "Shanghai Jiao Tong University / Shanghai Innovation Institute / Southern University of Science and Technology / Noematrix Ltd."
+date: "2026-07-15"
+paper_url: https://arxiv.org/abs/2607.14236
+code_url: https://lift-policy.github.io
+venue: "arXiv preprint"
+open_source: false
+
+architecture:
+  backbone: "pi0.5 with PaliGemma vision-language tower and action expert (openpi-based)"
+  llm: "Gemma (PaliGemma VLM), frozen slow vision-language context via cached KV prefix"
+  action_head: "Dual flow-matching action experts: original base action expert plus a grafted reactive action expert (copied weights, shifted causal attention) that injects 6D end-effector force memory through a causal GRU encoder and zero-initialized cross attention for within-chunk action refresh"
+  action_head_category: flow_matching
+  parameters: "Inherits pi0.5 backbone; adds a copied reactive action expert + single-layer causal GRU force encoder (hidden 512, output dm=1024)"
+  key_innovation: "LIFT (Late reactive Injection of Force for VLA post-Training) adds contact reactivity to a pretrained vision-only VLA while preserving its manipulation prior. Three ideas: (O1) Reactive force injection — recent 6D wrench is encoded as causal force memory and injected only into a reactive action expert via latency-aligned causal cross attention, with a cached vision-language slow context so actions can be refreshed action-by-action within a chunk. (O2) Prior preservation at init — the reactive expert is copied from the base expert with shifted causal attention (output-equivalent) and the cross-attention output projection is zero-initialized, so the augmented policy is exactly output-equivalent to base pi0.5 before force training. (O3) Heterogeneous training — an online DAgger loop mixes abundant vision-only offline task-alignment data with scarce force-enabled human corrections (RLPD-style 1:1 / adaptive SOP sampling) using selective force masking, mitigating policy-dependent force distribution shift."
+
+benchmarks: {}
+
+eval_conditions:
+  real_world: "fine-tuned (online post-training)"
+
+training:
+  dataset: "Stage 1: vision-only task-alignment data collected with a handheld iPhone gripper (ARKit SLAM pose) at 10 Hz. Stage 2: force-enabled online corrective data collected via Flexiv TDK bilateral teleoperation on a Flexiv Rizon 4S with 6D F/T sensor (human-intervention corrections only)"
+  method: "Two-stage force-aware post-training. Stage 1 warms up on vision-only data with force masked. Stage 2 online DAgger closes a robot-cloud loop: additive flow-matching objective jointly trains base and reactive streams, selective force masking, adaptive 1:1 offline/online mixing, checkpoint sync every 100 steps"
+  num_trajectories: null
+  compute: "Single 8-GPU node of NVIDIA A800; 30,000 training steps, batch size 32, AdamW lr 5e-5"
+
+tags:
+  - force_aware
+  - tactile
+  - reactive_control
+  - force_injection
+  - online_post_training
+  - dagger
+  - flow_matching
+  - pi0_5
+  - openpi
+  - contact_rich_manipulation
+  - real_world
+  - flexiv
+  - zero_initialized_cross_attention
+  - causal_force_memory
+  - shanghai_jiao_tong_university
