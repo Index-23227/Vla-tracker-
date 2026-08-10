@@ -1,0 +1,47 @@
+name: ParaVLA
+version: '1.0'
+full_name: 'ParaVLA: Natively Decoupled VLA from Grounded Semantic Re-Binding'
+organization: Shanghai Jiao Tong University (AutoLab, SAI)
+paper_url: https://arxiv.org/abs/2608.02497
+code_url: https://github.com/AutoLab-SAI-SJTU/GSR-ParaVLA
+date: '2026-08-03'
+venue: null
+model_type: manipulation
+architecture:
+  backbone: DINOv2-Large (shared, agent view + wrist view, 224 res)
+  llm: frozen T5-large encoder (token-level states, up to 64 tokens, cached once per task)
+  action_head: flow matching action expert (8 blocks, 16 heads, 1024-dim)
+  action_space: continuous
+  parameters: 0.33B
+  key_innovation: 'Natively decoupled architecture: language and vision are encoded entirely separately (frozen T5 + DINOv2)
+    and fused only inside the flow-matching action expert, removing joint vision-language encoding as the source of paraphrase
+    brittleness. Companion method GSR (Grounded Semantic Re-binding) retrofits the same principle onto existing VLAs.'
+  action_head_category: flow_matching
+  action_chunk_size: 16
+training:
+  dataset: LIBERO-Goal canonical demonstrations (LeRobot slice, episodes 379-806, 428 episodes / 52,042 transitions)
+  method: masked flow-matching velocity loss; no paraphrase pairs or LIBERO-Para instructions used in training
+  compute: 8x NVIDIA RTX 4090, batch 8/GPU (64 global), 50,000 steps, AdamW peak LR 1e-4
+benchmarks:
+  libero:
+    libero_goal: 92.0
+    source: 'ParaVLA paper (arXiv 2608.02497) Table 4: LIBERO-Goal canonical success rate'
+    date_reported: '2026-08-03'
+    eval_condition: fine-tuned on LIBERO-Goal canonical demonstrations only
+eval_conditions:
+  libero_goal_canonical: "92.0% success with canonical instructions (Table 4); only the LIBERO-Goal suite is evaluated, no Spatial/Object/Long results are reported"
+  libero_goal_paraphrase: "91.0% success under paraphrased instructions, a drop of only 1 point (best canonical-vs-paraphrase stability among compared models)"
+  libero_para: "72.51% on the full 4,092-episode LIBERO-Para benchmark, PRIDE score 66.9"
+  ablation_t5_replaced: "replacing frozen T5 with a SmolVLM decoder in the same architecture keeps canonical success at 85.0% but collapses paraphrase success to 41.0%"
+  inference: "T5 runs once per task and its output is cached, so it adds no per-step inference cost; 20 flow-integration steps, 16-step action chunk with 8 actions executed before replanning, temporal ensembling coefficient 0.9"
+open_source: true
+tags:
+- flow-matching
+- decoupled
+- language-generalization
+- paraphrase-robustness
+- libero
+- dinov2
+- t5
+- lightweight
+- open-source
