@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useReview } from '../lib/reviews'
 import { BENCHMARKS } from '../constants/benchmarks'
 
 // Keys that are metadata, not numeric scores
@@ -138,12 +139,16 @@ export default function ModelDetailModal({ model, onClose }) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
+  // Review markdown lives outside the bundle; fetch it only once the tab opens.
+  const { content: reviewText, loading: reviewLoading, error: reviewError } =
+    useReview(modalTab === 'review' ? model?.name : null)
+
   if (!model) return null
 
   const benchEntries = Object.entries(model.benchmarks || {})
   const benchCount = benchEntries.length
   const totalBenchmarks = Object.keys(BENCHMARKS).length
-  const hasReview = !!model.ai_review?.content
+  const hasReview = !!model.ai_review
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -202,7 +207,13 @@ export default function ModelDetailModal({ model, onClose }) {
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Abstract-based</span>
               )}
             </div>
-            <SimpleMarkdown text={model.ai_review.content} />
+            {reviewText ? (
+              <SimpleMarkdown text={reviewText} />
+            ) : (
+              <div className="text-xs text-zinc-600">
+                {reviewLoading ? 'Loading review…' : reviewError ? 'Review unavailable.' : null}
+              </div>
+            )}
           </div>
         )}
 

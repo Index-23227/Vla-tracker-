@@ -61,7 +61,11 @@ export default function LeaderboardTable({ models, onModelClick }) {
       {/* Benchmark selector */}
       <div className="flex gap-2 mb-3 flex-wrap">
         {Object.entries(BENCHMARKS).map(([key, b]) => {
-          const count = models.filter(m => m.benchmarks?.[key]).length
+          // Count models this benchmark can actually rank, not every model that
+          // mentions it — a partial report (one suite, or LIBERO-Plus only)
+          // yields no average and shows a blank row. Counting reports instead
+          // made the chip disagree with both the table and the README.
+          const count = models.filter(m => m[b.key] != null).length
           return (
             <button
               key={key}

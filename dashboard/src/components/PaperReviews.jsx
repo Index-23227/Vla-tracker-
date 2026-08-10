@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useAllReviews } from '../lib/reviews'
 
 function renderInline(text) {
   if (!text) return text
@@ -102,15 +103,21 @@ export default function PaperReviews({ models }) {
   const [filter, setFilter] = useState('all') // all, verified, abstract
   const [expandedModel, setExpandedModel] = useState(null)
 
+  const { reviews, loading: reviewsLoading, error: reviewsError } = useAllReviews()
+
   const reviewModels = useMemo(() => {
     return models
-      .filter(m => m.ai_review?.content)
-      .map(m => ({
-        ...m,
-        summary: extractSummary(m.ai_review.content),
-        ratings: extractRating(m.ai_review.content),
-      }))
-  }, [models])
+      .filter(m => m.ai_review)
+      .map(m => {
+        const content = reviews[m.name] ?? ''
+        return {
+          ...m,
+          content,
+          summary: extractSummary(content),
+          ratings: extractRating(content),
+        }
+      })
+  }, [models, reviews])
 
   const filtered = useMemo(() => {
     let result = reviewModels
@@ -121,7 +128,7 @@ export default function PaperReviews({ models }) {
       result = result.filter(m =>
         m.name.toLowerCase().includes(q) ||
         m.organization?.toLowerCase().includes(q) ||
-        m.ai_review.content.toLowerCase().includes(q)
+        m.content.toLowerCase().includes(q)
       )
     }
     return result
@@ -137,6 +144,8 @@ export default function PaperReviews({ models }) {
           <h2 className="text-lg font-bold text-white">Paper Reviews</h2>
           <p className="text-xs text-zinc-500 mt-0.5">
             {reviewModels.length} reviews ({verifiedCount} PDF-verified)
+            {reviewsLoading && <span className="text-zinc-600"> · loading full text…</span>}
+            {reviewsError && <span className="text-rose-400"> · full text unavailable</span>}
           </p>
         </div>
       </div>
@@ -216,7 +225,13 @@ export default function PaperReviews({ models }) {
               {/* Expanded Review Content */}
               {isExpanded && (
                 <div className="border-t border-zinc-800 px-4 py-4 bg-zinc-900/50">
-                  <SimpleMarkdownCompact text={model.ai_review.content} />
+                  {model.content ? (
+                    <SimpleMarkdownCompact text={model.content} />
+                  ) : (
+                    <div className="text-xs text-zinc-600">
+                      {reviewsLoading ? 'Loading review…' : 'Review unavailable.'}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

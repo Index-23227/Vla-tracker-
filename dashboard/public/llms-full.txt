@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-08-10T02:29:30.994999
+# Generated: 2026-08-10T03:30:01.628497
 # Models: 373
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -2490,6 +2490,7 @@ MODEL: Anchor-Align VLA
     libero (avg=96.6): libero_spatial=98.4, libero_object=100.0, libero_goal=97.2, libero_long=90.8
     calvin (avg=4.5): calvin_abc_d_1=99.1, calvin_abc_d_2=95.8, calvin_abc_d_3=90.6, calvin_abc_d_4=84.7, calvin_abc_d_5=77.9, calvin_abc_d_avg_len=4.5
   Eval Conditions: {'libero': 'fine-tuned, standard in-distribution LIBERO suites (App. C.1)', 'calvin': 'ABC->D generalization, zero-shot on held-out environment D, long-horizon 5-instruction chains'}
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: AtomicVLA
@@ -2946,6 +2947,8 @@ MODEL: TS-Mask VLA
     libero (avg=95.65): libero_spatial=95.4, libero_object=99.4, libero_goal=96.2, libero_long=91.6, libero_avg=95.7
     calvin (avg=4.19): calvin_abc_d_1=0.974, calvin_abc_d_2=0.925, calvin_abc_d_3=0.852, calvin_abc_d_4=0.77, calvin_abc_d_5=0.669, calvin_abc_d_avg_len=4.19
   Eval Conditions: {'libero': 'fine-tuned, four suites', 'calvin': 'ABC->D long-horizon protocol, fine-tuned'}
+  AI Review Summary: Qwen2.5-0.5B라는 초경량 백본 위에 Bridge Attention으로 다층 vision-language 특징을 주입하는 Discrete Diffusion Action Expert를 얹고, 연속 액션을 256-bin 이산 토큰으로 양자화해 (시간 x 액션차원) 2D 격자에 배치한 뒤 temporal-spatial 2D 마스킹으로 masked-denoising 학습하는 discrete VLA. LIBERO 평균 95.7%, CALVIN ABC->D avg-len 4.19를 단 0.5B로 달성해 7B급 모델들을 능가.
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: Evo-Depth
@@ -4445,6 +4448,8 @@ MODEL: 3D HAMSTER
   Benchmarks:
     rlbench (avg=53.85): colosseum_unperturbed=62.9, colosseum_all_variations_avg=44.8
   Eval Conditions: {'rlbench': 'Colosseum perturbation benchmark, 100 demos/task, 25 episodes per perturbation', 'real_world': 'Franka Panda, 4 generalization axes (language/spatial/visual/multiple), continuous staged scoring'}
+  AI Review Summary: 계층형 VLA에서 상위 플래너(VLM)가 2D 궤적 대신 **메트릭 3D 궤적 (u, v, d)** 를 직접 출력하도록 만들어, 포인트클라우드 기반 하위 정책(3DFA)과 **동일한 3D 메트릭 공간**에서 계획-실행을 정렬. 전용 depth encoder + dense depth reconstruction loss + 2D/3D/2D→3D 혼합 데이터로 Qwen3-VL-8B를 학습해 DroidSpatial-Bench에서 Gemini-3.0-Pro·RoboBrain-2.5를 능가하고, Colosseum 평균 44.8%(2D 가이던스
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: ACE-Ego-0
@@ -5391,6 +5396,8 @@ MODEL: Foresight Residual RL
     LLM: PaliGemma-based VLM (inherited from pi0 base policy)
     Parameters: pi0 base + small residual net
   Tags: residual-rl, pi0, flow_matching, foresight-value, long-horizon, contact-rich-assembly, isaac-gym, ppo, dinov2, skill-chaining, simulation, rutgers
+  AI Review Summary: 냉동(frozen) VLA(π0) 위에 얹는 잔차(residual) RL이 각 서브태스크의 성공률은 올려도 **연결(composition)** 시에는 이득이 사라지는 실패 모드를 규명하고, 그 원인이 **핸드오프(terminal) 상태 품질의 방치**임을 지적. 각 서브태스크의 희소 성공 보상에 **오프라인 추정 foresight value**(다음 서브태스크 성공 확률)를 곱해 핸드오프 상태를 성형(shaping)하는 **Foresight Residual RL** 제안. Isaac Gym 렌치-너트 조임 3단계(Grasp/Move
+  AI Review: PDF-verified
 
 ------------------------------------------------------------
 MODEL: FrozenGraft
