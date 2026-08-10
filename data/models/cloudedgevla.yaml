@@ -1,0 +1,73 @@
+# Paper: Latency-Tolerant Cloud-Edge Collaborative Vision-Language-Action Models via Emergent Representational Specialization
+# arXiv: 2608.00569
+
+name: CloudEdgeVLA
+full_name: "CloudEdgeVLA: Latency-Tolerant Cloud-Edge Collaborative Vision-Language-Action Models via Emergent Representational Specialization"
+organization: "HKUST(GZ) / Shandong University / RoboScience"
+date: "2026-08-01"
+paper_url: https://arxiv.org/abs/2608.00569
+code_url: null
+venue: arXiv preprint (AAAI 2027 format)
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Cloud-side System 2: OpenVLA-OFT 7B backbone (Prismatic VLM, SigLIP + DINOv2 vision, LoRA-adapted) producing planning features h = f(o, l) in R^{LxD} with L = T x A action-token positions. Edge-side System 1 perception: frozen SigLIP-Base local vision encoder computing z_t from the current observation"
+  llm: "Llama-2 7B (inherited from OpenVLA / OpenVLA-OFT), LoRA-adapted, runs exclusively on the cloud server"
+  action_head: "Vision-Augmented Action Head (edge-side, lightweight, replaces the original OFT L1 regression head). Mean-pools the possibly stale cloud planning features over the action-dimension axis to get per-timestep planning embeddings, projects the current edge vision features into the same latent space, concatenates them, and passes the result through a residual MLP to predict a continuous action chunk of shape T x A. Trained with paired-frame dual-path L1 loss: L = (1-lambda)*||a_fresh - a_t||_1 + lambda*||a_stale - a_t||_1, where the stale path uses a randomly delayed frame o_{t-d}, d ~ Uniform(1, W-1), fused with the same current vision features z_t; lambda is curriculum-warmed from 0 to lambda_max. Gradients flow through both paths into the backbone, inducing emergent representational specialization rather than an explicit invariance loss"
+  action_head_category: regression
+  action_space: "continuous (7-DoF: x, y, z, roll, pitch, yaw, gripper), action chunk horizon of 8 steps"
+  parameters: "7B cloud backbone (LoRA-adapted) + lightweight edge stack (frozen SigLIP-Base encoder + residual-MLP action head)"
+  key_innovation: "Treats cloud-edge temporal misalignment as a representation-learning problem instead of an inference-scheduling problem. A non-blocking interface sends a learned task-level representation (not an action plan) across the network; the edge always consumes the most recently received cloud feature, never waits for a specific update, and requires no clock alignment, frequency ratio, or delay metadata at inference. Paired-frame dual-path training supervises fresh and randomly delayed cloud features against the same current action target, pressuring the cloud path to retain slowly varying task context (what to do) while current local vision supplies state-sensitive corrections (how to do it now)"
+
+training:
+  dataset: "LIBERO demonstrations (4 suites x 10 tasks x 50 demonstration episodes), loaded via an extended RLDS pipeline that extracts paired current/delayed frames from a window of W consecutive observations in the same episode"
+  method: "LoRA fine-tuning of the OpenVLA-OFT backbone with a dual forward pass (fresh + stale frames), dual L1 regression loss, and curriculum warmup of the stale-loss weight lambda over the first n_warmup steps. Edge vision encoder frozen. Aligned checkpoint analyzed at 120k training steps"
+  compute: "Two backbone forward passes per training sample (paired-frame cost). Real-robot pilot serves the 7B backbone on an RTX 4090 while an RTX 5080 workstation runs the edge vision encoder, action head, and control loop"
+
+benchmarks:
+  libero:
+    libero_spatial: 97.9
+    libero_object: 97.8
+    libero_goal: 96.5
+    libero_long: 91.7
+    libero_avg: 95.98
+    libero_spatial_delay10: 93.6
+    libero_object_delay10: 94.4
+    libero_goal_delay10: 92.9
+    libero_long_delay10: 83.2
+    libero_spatial_delay20: 89.6
+    libero_object_delay20: 92.1
+    libero_goal_delay20: 90.9
+    libero_long_delay20: 78.1
+    libero_spatial_delay40: 76.4
+    libero_object_delay40: 75.6
+    libero_goal_delay40: 78.0
+    libero_long_delay40: 63.8
+    macro_avg_delay40: 73.5
+    normalized_delay_auc: 90.8
+    retention_at_delay40: 76.5
+    source: "Table 1 of the CloudEdgeVLA paper (arXiv:2608.00569). 50 trials per task; CloudEdgeVLA entries are means over seeds 7, 8, 9 (std 0.20-1.51). libero_avg = mean of the four suites at d_max=0 (synchronous reference, 97.9 / 97.8 / 96.5 / 91.7). Delayed entries use uniformly sampled observation delay k ~ Uniform{1..d_max}. Macro-average at d_max=40 is 73.5% vs 1.7% for VLASH; normalized delay AUC 90.8% vs 32.4% (VLASH), 25.0% (UniVLA), 18.4% (OpenVLA-OFT), 12.5% (OpenVLA); synchronous success retained at d_max=40 is 76.5% vs 1.8% (VLASH). Baseline point estimates at d_max=40: OpenVLA 0.0 all suites, OpenVLA-OFT 0.0 all suites, UniVLA at most 3.0, VLASH at most 6.4"
+    date_reported: "2026-08-01"
+    eval_condition: "LoRA fine-tuned per LIBERO suite; asynchronous cloud-edge inference with the cloud backbone receiving delayed frames and the edge receiving current frames; d_max in {0, 5, 10, 15, 20, 25, 30, 40} steps; d_max > 20 lies beyond the training delay window"
+
+eval_conditions:
+  libero: "Four LIBERO suites (Spatial, Object, Goal, Long), 10 tasks each, 50 trials per task, three random seeds (7, 8, 9). Synchronous reference (d_max=0) plus a uniform-delay sweep up to 40 steps"
+  baselines: "Single-path OpenVLA, OpenVLA-OFT and UniVLA (delayed frames fed without changing their inference paths), plus future-state-aware asynchronous VLASH on the same uniform-delay grid"
+  ablation: "Aggregate success at d_max=10: no vision encoder (stale h only) 31.6, SigLIP-Base frozen (default) 95.1, SigLIP-SO400M frozen 95.8, L_fresh only 54.8, L_stale only 89.2, L_fresh + L_stale 95.1"
+  real_robot: "Franka pick-and-place pilot (place a toy bear in a box), static and dynamic variants (target displaced within 10 cm during reaching), 10 trials per cell, emulated added RTT of 0 / 400 / 1000 ms on top of native serving latency. CloudEdgeVLA 100/90, 90/90, 80/70 vs VLASH 100/90, 60/30, 0/0"
+  mechanism_diagnostic: "Offline fixed-offset diagnostics on LIBERO-Spatial over 80 shared demonstration states vs the original OpenVLA-OFT checkpoint. At d=20 CloudEdgeVLA reduces backbone hidden-state drift D_h by 59.2% (0.391 -> 0.160), staleness transfer gain kappa by 72.7% (1.082 -> 0.295), action drift D_a by 88.9% (0.423 -> 0.047) and demonstration MAE by 88.5% (0.421 -> 0.048). Counterfactual audit: switching the edge input from equally stale to current at d_h=20 changes mean action drift only from 0.047104 to 0.047097 (edge-rescue fraction 0.03%), so this checkpoint's gain is attributed mainly to backbone stability and head attenuation rather than direct edge correction"
+
+tags:
+  - 7B
+  - cloud-edge
+  - latency-tolerant
+  - asynchronous-inference
+  - dual-system
+  - delay-robustness
+  - action-chunking
+  - LoRA
+  - openvla-oft
+  - siglip
+  - libero
+  - manipulation

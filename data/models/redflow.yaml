@@ -1,0 +1,103 @@
+name: RedFlow
+full_name: "RedFlow: Redirect Failure into Action-Level Corrections for Flow-matching VLA Policy"
+organization: "The Hong Kong University of Science and Technology (HKUST)"
+date: "2026-07-30"
+paper_url: https://arxiv.org/abs/2607.27782
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+inference_hz: null
+architecture:
+  backbone: "pi0 (PaliGemma-based flow-matching VLA); LIBERO base policy initialized from piRL SFT checkpoints (RLinf-Pi0-SFT-Spatial-Object-Goal / RLinf-SFT-Pi0-LIBERO-Long); real-robot base from official OpenPi pi0_base"
+  llm: "PaliGemma VLM backbone inherited from pi0 (no separate reasoning LLM; a pretrained General Reward Model (GRM) is used offline only for task-progress estimation)"
+  action_head: "Conditional flow-matching velocity field v_theta(x_n, n, o_t, l) predicting action chunks of length K=5, post-trained with the Adaptive Redirection Objective (quality-weighted attraction + failure suppression + target-guided correction)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~3B (pi0 backbone; RedFlow adds no new parameters — it is a post-training objective)"
+  key_innovation: >
+    Fine-grained offline RL framework that redirects failed deployment rollouts into
+    action-level corrective supervision for flow-matching VLA policies, instead of
+    discarding failures (classical offline RL) or using them only as coarse
+    trajectory-level preferences (DPO-style methods).
+    Two components:
+    (1) Context-Aware Corrective Matching — a pretrained General Reward Model (GRM)
+    R(o_t, l) in [0,1] produces per-chunk task-progress estimates, box-filter smoothed
+    over half-window W to give p_bar_t. A signed proxy advantage
+    A_hat_t = p_bar_{t+W} - p_bar_{t-W} + b*(2*1[y_tau=1] - 1) combines local progress
+    change with a trajectory-outcome bias. An execution context is defined by the
+    normalized proprioceptive state and smoothed progress, f_t = [q_tilde_t ; beta*p_bar_t]
+    (beta=5.0, state_dim=7 excluding gripper), and HDBSCAN (min_cluster_size=15,
+    min_samples=5) clusters chunks per task. For each negative chunk in a cluster whose
+    positive subset is non-empty, a corrective target a*_t is built as an
+    advantage-softmax-weighted centroid of positive chunks (temperature kappa=1.0).
+    Negative chunks that are HDBSCAN outliers or lie in clusters without positives are
+    labeled uncorrectable and only suppressed.
+    (2) Adaptive Redirection Objective — asymmetric flow matching with three terms:
+    L_att = w_t * ||v_theta - u_n||^2 with soft weight w_t = sigmoid(A_hat_t / T_w);
+    L_sup = lambda_sup*(1-w_t)*max(0, m - e_t) a repulsive hinge on the reconstruction
+    error e_t = ||x_hat_0 - a_t||^2 with adaptive stop-gradient running-average margin m;
+    L_cor = c_t*lambda_cor*(1-w_t)*||x_hat_0 - a*_t||^2 pulling correctable failures
+    toward retrieved targets. Theorem 1 (bounded endpoint redirection) shows the
+    minimizer is the projection of the corrective target onto the complement of the
+    margin ball around the failure action, i.e. a local Wasserstein push-pull transport.
+    Strictly offline, single-iteration, no extra human demonstrations or online rollouts.
+training:
+  dataset: >
+    LIBERO: pruned expert set D_exp (58 demos for Spatial/Object/Goal, 208 for Long)
+    plus D_roll = 1,536 mixed-quality rollout trajectories per suite collected from the
+    base policy; offline buffer D = D_exp union D_roll.
+    Real robot (dual-arm Agilex Cobot Magic, 3 cameras): 600 / 200 / 100 expert demos
+    for clothes folding / object sweeping / table cleaning, plus 200 / 100 / 100 base-policy
+    rollouts respectively as mixed-quality offline buffers.
+  method: >
+    Single-iteration offline post-training. Freeze the rollout buffer, estimate
+    chunk-level proxy advantages from GRM progress + outcome bias, assign corrective
+    targets via HDBSCAN clustering in progress-state space, then optimize
+    L = E[L_att + L_sup + L_cor] on the frozen buffer.
+  optimizer: "AdamW, lr 5e-5, betas (0.9, 0.95), weight decay 0.01, grad clip 1.0, micro/global batch 128/2048, 30 policy update epochs"
+  hyperparameters: >
+    Spatial/Object/Goal: W=10, b=0.15, T_w=3.0, attraction coeff=1, lambda_sup=0.3,
+    lambda_cor=0.3, kappa=1.0, max episode length 240.
+    Long: W=20, b=0.25, lambda_sup=0.1, lambda_cor=0.1, max episode length 480.
+    Action chunk length K=5, 64 training environments.
+  num_trajectories: 1536
+  compute: "8x H20 GPUs for pi0 base-policy fine-tuning; real-robot base policies fine-tuned 50,000 steps per task"
+benchmarks:
+  libero:
+    libero_spatial: 75.8
+    libero_object: 70.4
+    libero_goal: 71.2
+    libero_long: 55.2
+    libero_avg: 68.2
+    source: "RedFlow paper (arXiv:2607.27782) Table 1, Success rates (%) on the LIBERO benchmark across four task suites"
+    date_reported: "2026-07-30"
+    eval_condition: "offline RL post-training of a pi0 base policy (piRL SFT init); 500 evaluation episodes per suite. Base policy: 63.6 / 61.6 / 48.6 / 50.8 / 56.2 avg; AWR 62.3 avg; DPO 59.7 avg"
+  real_world:
+    clothes_folding_success: 67.0
+    object_sweeping_success: 73.0
+    table_cleaning_success: 84.0
+    real_avg_success: 74.7
+    source: "RedFlow paper (arXiv:2607.27782) Figure 6, real-robot success rates"
+    date_reported: "2026-07-30"
+    eval_condition: "dual-arm Agilex Cobot Magic, 100 evaluation episodes per task; base policy avg 56.7%, AWR 62.0%, DPO 64.0%"
+eval_conditions:
+  libero: "strictly offline post-training on 1,536 mixed-quality rollouts per suite; 500 eval episodes per suite; pi0 base policy shared across all compared methods"
+  real_world: "dual-arm Agilex Cobot Magic robot with 1 front + 2 wrist cameras; 100 eval episodes per task; zero additional online interaction"
+  sample_efficiency: "on LIBERO-Spatial RedFlow reaches 75.8% with 1,536 offline trajectories; PPO / GRPO / DDPO need ~13 / 16 / 24 update steps at 1,024 fresh rollouts each (~13K / 16K / 24K trajectories) to match"
+tags:
+  - vla
+  - flow-matching
+  - offline-rl
+  - failure-recovery
+  - post-training
+  - action-level-correction
+  - pi0
+  - libero
+  - real-robot
+  - bimanual
+  - hdbscan
+  - reward-model
+  - sample-efficiency
+  - dpo-baseline
+  - awr-baseline
