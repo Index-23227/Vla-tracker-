@@ -1,0 +1,63 @@
+# Paper: Look Where It Matters: Adaptive Visual Refinement for Vision-Language-Action Models
+# arXiv: 2608.02197
+
+name: AtVLA
+full_name: "AtVLA: Look Where It Matters — Adaptive Visual Refinement for Vision-Language-Action Models"
+organization: "Xi'an Jiaotong University"
+date: "2026-08-03"
+paper_url: https://arxiv.org/abs/2608.02197
+code_url: null
+venue: null
+open_source: false
+model_type: policy
+inference_hz: null
+
+architecture:
+  backbone: "PaliGemma 3B (SigLIP-So400m visual encoder + Gemma-2B language backbone), initialized from a pretrained pi0 checkpoint. Inputs are 224x224 images with patch size 14, giving 256 patch tokens per view; four learnable 1152-dim register embeddings are inserted immediately after the CLS token (only 4,608 extra parameters). Register outputs are NOT discarded but projected through the PaliGemma visual projector and exposed to the policy as multi-slot global embodied context, while the full 16x16 patch grid stays available for spatial grounding."
+  llm: "Gemma-2B (inside PaliGemma); base weights frozen, rank-32 LoRA adapters trainable in the final stage"
+  action_head: "300M-parameter flow-matching action expert inherited unchanged from pi0 (10-step Euler ODE solver). At each replanning step the expert samples K=4 action chunks from independent Gaussian initializations over a shared prefix KV cache; uncertainty U_t is the mean per-step standard deviation across samples over the translational dimensions {dx, dy, dz} of the first h executed actions. If U_t <= tau the mean chunk is executed; otherwise attention-guided cropping runs and the expert is re-run once on the extended prefix."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "3.3B (3B PaliGemma + 300M action expert; +4,608 register params, crop-position MLP 4->256->d_LLM, rank-32 LoRA)"
+  key_innovation: "Two coupled fixes to VLA visual perception. (1) Attention rectification via registers: the authors show VLA vision encoders inherit the high-norm token artifacts of generic ViTs (Darcet et al.), and that embodied post-training makes it worse — spatial information (object location, depth ordering, local geometry) learned from robot data exceeds the capacity of the original global token and spills into background patch tokens, corrupting dense attention. Four learnable registers, trained end-to-end with only embodied data and the original pi0 action loss, absorb that overflow; linear probes give registers >0.70 on object-location/depth/surface-normal probing versus 0.60 for CLS. (2) Uncertainty-gated local refinement: only when K-sample action disagreement exceeds a per-embodiment threshold does action-conditioned attention rollout (all 18 joint-attention layers, denoising steps {3,6,9}) produce a 16x16 saliency map; a contrastive window search over {84,112,140}px windows at 14px stride picks the region whose internal attention most exceeds a 1.25x context ring, crops it, re-encodes at 224x224 with a crop-position MLP embedding, and appends the 256 crop tokens to the cached prefix without recomputing base/language KV. Cropping fires on ~30% of replanning steps, so total compute is only 1.4-1.6x pi0."
+
+training:
+  dataset: "Robot demonstrations only, no vision-only pretraining. LIBERO: a single unified policy on the mixture of all four standard suites (Spatial, Object, Goal, Long-10) = 40 tasks x 50 expert demos = 2,000 trajectories. Each observation additionally carries an annotated task-relevant region used to build ground-truth crops and to supervise action-conditioned attention. An episode-disjoint subset is held out for uncertainty-threshold calibration. The authors explicitly tried mixing ImageNet and CC3M for separate visual adaptation and report it disrupted capabilities acquired from robot demonstrations."
+  method: "Three-stage post-training on a frozen-then-LoRA pi0 backbone, 70K gradient updates total. Stage 0 (20K steps, register adaptation): first 4K steps update only the four register embeddings, then 16K steps also unfreeze the last four SigLIP blocks; lr 1e-4 then 2e-5; crop branch disabled. Stage 1 (10K steps, ground-truth crop alignment): SigLIP, registers, projector and backbone frozen; only the crop-position encoder and rank-32 LoRA adapters train on the pi0 action loss; lr 1e-4. Stage 2 (40K steps, joint refinement): L = L_pi0 + lambda_ag * L_ag with lambda_ag = 1.0 (an attention-grounding log-ratio loss pushing near-term action-token attention into the annotated region); a three-phase crop curriculum moves from 100% ground-truth crops (first 40%) through a linear ramp of rollout-derived crops and crop dropout 0->0.3 (40-90%) to fully attention-derived crops with p_drop=0.3 (last 10%), so training matches deployment including invalid-rollout fallback. AdamW, batch size 4, constant lr 1e-4. The full objective in the main text is L = L_pi0 + 0.1*L_cp + 1.0*L_ag."
+  compute: "Eight NVIDIA RTX 6000 Ada GPUs for training. Real-world deployment on a single RTX 4090 (24 GB) with a Franka Research 3 and one third-person Intel RealSense D435i."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.3
+    libero_object: 99.4
+    libero_goal: 98.3
+    libero_long: 96.5
+    source: "Table 1, AtVLA paper (arXiv 2608.02197), AtVLA (Full) row; standard four LIBERO suites, standard training/evaluation splits, mean success rate with std (0.7 / 0.8 / 1.2 / 2.6)"
+    date_reported: "2026-08-03"
+    eval_condition: fine-tuned
+  simpler_env:
+    google_robot_pick_coke_can: 91.3
+    google_robot_move_near: 81.6
+    google_robot_open_close_drawer: 57.5
+    source: "Table 1, AtVLA paper (arXiv 2608.02197), AtVLA (Full) row; SimplerEnv Google Robot suite under the official protocol (Pick Coke Can / Move Near / Open-Close Drawer). WidowX suite deliberately omitted by the authors because it requires BridgeData-specific training and embodiment adaptation."
+    date_reported: "2026-08-03"
+    eval_condition: fine-tuned
+
+eval_conditions:
+  libero:
+    setting: "fine-tuned"
+    base_model: "pi0 (PaliGemma 3B + 300M flow-matching action expert), post-trained with registers + uncertainty-gated cropping"
+    note: "A single unified policy is trained on the mixture of all four suites (2,000 trajectories). AtVLA lifts the pi0 baseline average from 94.2% to 98.4% and beats every listed baseline on all four suites, including VLANeXt (99.0/99.2/96.6/94.8) and pi0.5. Controlled ablations from the same initialization and data: pi0+Registers 98.8/99.0/98.0/93.1, pi0+Cropping (crops from an external VLM without embodied pre-training) 96.5/98.2/96.7/93.3. Removing the learned registers from pi0+Registers drops all four suites to 93.2/92.1/92.2/81.3, i.e. -4.45 average task-level change, showing the registers store embodied knowledge rather than merely suppressing artifacts. Register capacity saturates at four; fewer registers can fall below the pi0 baseline due to incomplete artifact absorption."
+  simpler_env:
+    setting: "fine-tuned"
+    base_model: "pi0 checkpoint, Google Robot embodiment with its own calibrated uncertainty threshold"
+    note: "AtVLA leads on Pick Coke Can (91.3 vs pi0 88.0) and Move Near (81.6 vs 80.3) but is only competitive on Open/Close Drawer (57.5 vs pi0 56.0, RT-1-X 59.7). The authors explain the drawer case: the cabinet occupies most of the scene, so nearly every crop preserves the whole image instead of resolving the handle or contact point, which is exactly the regime where adaptive refinement has nothing to add."
+  real_world:
+    setting: "fine-tuned"
+    base_model: "pi0, Franka Research 3 with a single third-person RealSense D435i"
+    note: "Not a tracked benchmark here. Custom single-view benchmark with two suites — Kitchen (Move/Grab/Pick/Long/Spatial) and Building Blocks (Stack/Edge/Spatial/Long/Grab), 20 independent experiments per cell. AtVLA scores 80/65/80/40/75 and 80/50/70/35/70 versus pi0 at 50/35/55/15/75 and 55/25/55/15/35, raising average real-world success from 46.5% to 69.0%. Largest gains are on grasping and small-object stacking, where single-view depth ambiguity hurts most."
+  inference_cost:
+    setting: "deployment"
+    note: "C_AtVLA = N(C_base + K*C_A + r*(C_crop + C_A)) versus C_pi0 = N(C_base + C_A). With K=4 and trigger rate r ~ 0.3, and one expert pass / crop refinement costing ~10-15% / ~20-25% of a full pi0 replanning pass, total computation is ~1.4-1.6x pi0. Attention rollout itself is nearly free because it reuses attention already computed during action sampling, and the base prefix KV cache is reused when crop tokens are appended. The gate is evaluated once per action-chunk replanning step, not per low-level control step. The threshold is calibrated per embodiment (shared across the four LIBERO suites; separate for Google Robot and Franka), initialized at the 70th percentile of the validation uncertainty distribution under a 30% trigger-rate budget."
+
+tags: [libero, simpler-env, real-world, pi0, flow-matching, register-tokens, attention-artifacts, attention-rollout, uncertainty-gating, adaptive-cropping, visual-refinement, siglip, paligemma, lora, franka]
