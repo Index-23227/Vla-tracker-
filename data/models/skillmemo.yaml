@@ -1,0 +1,95 @@
+# Paper: SkillMemo: Expert-guided Skill Memory Framework for Compositional Embodied Manipulation
+# arXiv: 2608.05970v1 (6 Aug 2026) — verified against PDF (2026-08-10)
+# Auto-track relevance score: 8.0
+# Project page: https://changyuanwang17.github.io/SkillMemo/ (no code release stated in paper)
+
+name: SkillMemo
+full_name: "SkillMemo: Expert-guided Skill Memory Framework for Compositional Embodied Manipulation"
+organization: "Tsinghua University (Shenzhen International Graduate School; Dept. of Automation); Nanyang Technological University; Beijing Normal University"
+date: "2026-08-06"
+paper_url: https://arxiv.org/abs/2608.05970
+venue: arXiv 2026
+open_source: false
+model_type: "skill-memory framework (backbone-agnostic; applied to Diffusion Policy, UniAct-0.5B, UniVLA-7B/8.5B, pi0.5)"
+
+architecture:
+  backbone: "Backbone-agnostic wrapper. Reported backbones: Diffusion Policy (low-level visuomotor control), UniAct-0.5B, UniVLA-8.5B, and pi0.5-3.3B. SkillMemo adds ~0.1-0.4B parameters (e.g. UniAct 0.5B -> 0.6B, UniVLA 8.5B -> 8.9B, pi0.5 3.3B -> 3.6B)."
+  action_head: "Inherited from the host backbone (DP denoising head / pi0.5 flow-matching action expert / UniAct universal-action head), but the head's Mixture-of-Experts gating distribution g(h_t) is refined at inference by fusion with retrieved memory gating profiles: g'(q_t) = lambda*g(q_t) + (1-lambda)*mean_n(v_n[t'])"
+  action_head_category: hybrid
+  action_space: continuous
+  parameters: "backbone-dependent; best configuration pi0.5-SkillMemo = 3.6B (vs 3.3B pi0.5 baseline)"
+  key_innovation: >-
+    Two coupled modules. (1) Expert-Guided Trajectory Segmentation (EGTS): instead of explicit
+    fixed-chunk segmentation, a Mixture-of-Experts layer y_t = sum_i g_i(h_t) * E_i(h_t) implicitly
+    partitions long-horizon demonstrations into latent atomic skills, where the gating network defines
+    temporal skill boundaries. Experts are specialized via a synergy-based Partial Information
+    Decomposition loss L_PID = -(I({A,B};G) - I(A;G) - I(B;G)), plus load-balancing losses and top-k
+    routing to prevent expert collapse. (2) Skill-Level Memory Architecture (SLMA): an episodic
+    key-value memory bank M = {(k_m, v_m)} where the key k_m = (1/L) * sum_t h_t is the temporally
+    aggregated centroid feature of a skill segment and the value v_m = {g(h_t)} is the full sequence
+    of gating weights over that segment. At inference, cosine similarity s(q_t, k_m) retrieves the
+    top-N entries; a reliability check against threshold delta gates the fusion, and retrieved gating
+    profiles are averaged into the current gating distribution. A dynamic pruning policy (oldest
+    timestamps, never-retrieved entries, entries repeatedly below delta) keeps the bank within M_max.
+
+training:
+  data: "LIBERO (Goal / Spatial / Object / Long, 10 tasks per suite); Push-T, UR3 Block Push, Franka Kitchen for the DP backbone; 50 expert demonstrations per task collected by kinesthetic teaching for real-world UR5e tasks"
+  compute: "8x NVIDIA A6000 GPUs, PyTorch; 32 samples per GPU (global batch 256); AdamW, learning rate 2e-5; single unified policy across all LIBERO tasks trained for 30k steps following the pi0.5 protocol"
+  inputs_outputs: "Single RGB image observation + language instruction -> 7-dimensional continuous action (6-DoF end-effector pose + gripper command)"
+  hyperparameters: "N=5 MoE experts by default (chosen over N=1/2/3/8/10 for the accuracy/latency trade-off); memory bank capacity M_max=1000 skill entries"
+
+benchmarks:
+  libero:
+    libero_goal: 99.0
+    libero_spatial: 99.4
+    libero_object: 98.2
+    libero_long: 95.4
+    libero_avg: 98.0
+    source: "Table 5 — pi0.5-SkillMemo (3.6B), best configuration. Baseline pi0.5 (3.3B) = 98.0/98.8/98.2/92.4, avg 96.8 (+1.2); surpasses MemoryVLA 96.5 (+1.5)"
+    date_reported: "2026-08-06"
+    eval_condition: "single unified policy trained across all tasks for 30k steps (pi0.5 protocol); 7-DoF Franka Panda; average success rate over 50 rollouts per task"
+    notes: "Other backbones in Table 5 — UniAct-SkillMemo (0.6B): 73.4 Goal / 80.2 Spatial / 79.8 Object / 57.2 Long, avg 72.7 (UniAct baseline avg 67.2). UniVLA-SkillMemo (8.9B): 94.5 / 98.1 / 97.8 / 93.2, avg 95.9 (UniVLA baseline avg 93.9)."
+  diffusion_policy_suite:
+    push_t: 55.2
+    block_push: 78.1
+    franka_kitchen: 60.6
+    dp_suite_avg: 64.6
+    source: "Table 3 — SkillMemo on the Diffusion Policy backbone vs DP 61.2, SDP 60.9, CP 60.8, IMLE Policy 62.8, STEP 61.6 (+3.4 over DP, +1.8 over IMLE Policy)"
+    date_reported: "2026-08-06"
+    eval_condition: "standard continuous-control simulation benchmarks (Push-T, UR3 Block Push, Franka Kitchen) following the Diffusion Policy protocol"
+  real_world_ur5e:
+    strawberry_in_bowl: 82.5
+    lemon_on_plate: 80.0
+    corn_in_pot: 90.0
+    butter_in_pot: 75.0
+    chip_bucket_on_table: 77.5
+    real_world_avg: 81.0
+    source: "Table 6 — SkillMemo vs Diffusion Policy (77.5 / 77.5 / 82.5 / 62.5 / 67.5); largest gains on Butter in Pot (+12.5) and Corn in Pot (+7.5)"
+    date_reported: "2026-08-06"
+    eval_condition: "real-world UR5e manipulator with Weiss WSG-50 parallel-jaw gripper and ORBBEC Femto Bolt RGB-D side-view camera; 50 demos per task, 40 independent rollouts per task"
+    notes: "real_world_avg is the unweighted mean of the five reported task success rates (not stated as an aggregate in the paper)."
+
+eval_conditions:
+  libero: "single unified policy over all suites, 30k steps, 50 rollouts per task (pi0.5 protocol)"
+  diffusion_policy_suite: "Diffusion Policy backbone on Push-T / UR3 Block Push / Franka Kitchen"
+  real_world_ur5e: "UR5e + WSG-50 gripper, 50 demonstrations per task, 40 rollouts per task"
+  zero_shot_cross_suite: "models trained on one LIBERO suite (Goal / Spatial / Object) evaluated directly on the others; e.g. trained on Goal, SkillMemo reaches 75.6 on unseen Spatial vs 72.1 in-distribution UniAct baseline"
+
+tags:
+  - memory
+  - episodic-memory
+  - skill-learning
+  - mixture-of-experts
+  - moe
+  - compositional-generalization
+  - long-horizon
+  - backbone-agnostic
+  - pi0.5-backbone
+  - univla-backbone
+  - uniact-backbone
+  - diffusion-policy
+  - libero
+  - push-t
+  - franka-kitchen
+  - real-robot
+  - ur5e
