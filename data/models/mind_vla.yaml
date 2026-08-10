@@ -1,33 +1,63 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: Mind-VLA: Instruction-Aware Spatial Representation Alignment for Vision-Language-Action Models
 # arXiv: 2608.04633
 
 name: Mind-VLA
 full_name: "Mind-VLA: Instruction-Aware Spatial Representation Alignment for Vision-Language-Action Models"
-organization: "TODO: check paper"
+organization: "Nanjing University / Institute of Automation, Chinese Academy of Sciences / University of Chinese Academy of Sciences"
 date: "2026-08-05"
 paper_url: https://arxiv.org/abs/2608.04633
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Causal transformer over a context window of K timesteps. Inputs at each step: two 224x224x3 RGB images (primary + wrist camera) encoded by a frozen vision encoder, an 8-D proprioceptive state via linear projection, and the language instruction via a frozen CLIP text encoder. Three groups of learnable queries are appended to the sequence (scene-level, object-level, action-level) and separated by a query-group attention mask that also enforces temporal causality"
+  llm: "None (frozen CLIP text encoder used for language conditioning; no autoregressive LLM)"
+  action_head: "Diffusion transformer (DiT) action head conditioned on the final-layer action-query outputs; trained with epsilon-prediction MSE over a chunk of Ta future 7-D actions (paper reports predicting the next three actions), sampled with DDIM at inference"
+  action_head_category: diffusion
+  action_space: continuous
+  parameters: "345M"
+  key_innovation: "Identifies that existing 3D-aware VLAs are instruction-agnostic: their 3D input or alignment target is built from the whole scene regardless of which object the instruction names. Mind-VLA instead aligns the VLA latent with the 3D features of the instruction-specified target object. For each task an offline target-object tri-view (top/front/side; mesh-rendered orthographic in sim, handheld photos on the real robot) is encoded once by a frozen Stable Diffusion VAE into a stacked latent 48x smaller than raw RGB; object queries regress that latent (L_tri, MSE), and four intermediate backbone layers are cosine-aligned to the matching frozen VGGT layer features of the same tri-view (L_geo). Scene queries keep per-patch RGB reconstruction and dense 2D motion prediction as scene-level auxiliaries. All VAE/VGGT/auxiliary decoders are dropped at inference, so the deployed model keeps the vanilla RGB + language + state interface with negligible overhead"
+
+training:
+  dataset: "Simulation: LIBERO-90 pre-training then per-suite fine-tuning on LIBERO Spatial/Object/Goal/Long (10 tasks x 50 demos each); CALVIN ABC-D. Real robot: DROID pre-training then fine-tuning on 50 task-specific demonstrations per task"
+  method: "Behavior cloning with a diffusion action loss L_act plus auxiliary objectives: L_MindVLA = L_VLA + lambda_tri * L_tri + lambda_geo * L_geo, where L_VLA = L_act + lambda_aux * (per-patch RGB reconstruction + dense 2D motion prediction). L_tri is latent-space MSE against the frozen Stable Diffusion VAE encoding of the target-object tri-view; L_geo is cosine alignment of four mean-pooled intermediate image-token features to the corresponding frozen VGGT layer features of the same tri-view via learned projection heads. Optimizer AdamW"
+  compute: "8x NVIDIA H20 GPUs for training; real-robot inference on a single NVIDIA RTX 5090"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.0
+    libero_object: 98.0
+    libero_goal: 92.0
+    libero_long: 87.5
+    libero_avg: 93.9
+    source: "Table 1(a) in Mind-VLA paper (arXiv:2608.04633), comparison against 7B-class large VLAs; success rate (%) over 20 rollouts per task"
+    date_reported: "2026-08-05"
+    eval_condition: "pre-trained on LIBERO-90, fine-tuned per suite; 20 rollouts per task"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_5: 79.4
+    calvin_abc_d_avg_len: 4.47
+    source: "Table 1(b) in Mind-VLA paper (arXiv:2608.04633), CALVIN ABC-D over 1000 rollouts; T5 success rate and average completed length"
+    date_reported: "2026-08-05"
+    eval_condition: "trained on environments A,B,C and evaluated on held-out environment D; standard CALVIN long-horizon protocol, 1000 rollouts"
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero: "fine-tuned per suite after LIBERO-90 pre-training; 20 rollouts per task"
+  calvin: "ABC->D generalization on held-out environment D; 1000 rollouts, average completed length over 5 chained instructions"
 
-tags: [libero, calvin]
+tags:
+  - libero
+  - calvin
+  - diffusion
+  - instruction_aware
+  - spatial_alignment
+  - representation_alignment
+  - 3d_aware
+  - vggt
+  - vae_latent_prediction
+  - tri_view
+  - auxiliary_supervision
+  - compact_backbone
+  - occlusion_robustness
+  - real_robot
