@@ -1,0 +1,71 @@
+# Paper: WAM-Diff2: Hierarchical AR-to-Diffusion Distillation for Highly Efficient Autonomous Driving VLA
+# arXiv: 2608.01035
+
+name: WAM-Diff2
+full_name: "WAM-Diff2: Hierarchical AR-to-Diffusion Distillation for Highly Efficient Autonomous Driving VLA"
+organization: "Fudan University / Yinwang Intelligent Technology"
+date: "2026-08-01"
+paper_url: https://arxiv.org/abs/2608.01035
+code_url: null
+venue: "arXiv preprint (AAAI 2027 format)"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL framework; 8B variant uses SigLIP2-SO-400M visual encoder (27 blocks, 4096 hidden) + 36 Transformer blocks, 2B variant uses SigLIP2-Large (24 blocks, 2048 hidden) + 28 Transformer blocks; dynamic resolution with 2D RoPE, multi-view inputs at 1920x1080"
+  llm: "Qwen3-VL decoder-only Transformer (2B student, 8B teacher)"
+  action_head: "No task-specific head: all outputs (text answers, 2D boxes, future BEV waypoints) are emitted through a unified text tokenizer under an absorbing-state masked discrete diffusion decoder with block-causal attention (bidirectional inside a block of size B=32, causal across blocks); parallel confidence-based remasking over T denoising steps"
+  action_head_category: discrete_diffusion
+  action_space: "discrete tokens decoded into T future BEV waypoints (x, y)"
+  parameters: "2B (student) and 8B (teacher) variants"
+  key_innovation: "Three-stage hierarchical AR-to-diffusion distillation that converts a pre-trained autoregressive driving generalist into a parallel discrete diffusion VLA without training from scratch: (I) progressive block-wise adaptation with curriculum block expansion B=1->4->8->16->32 and bootstrap initialization theta_B <- theta_{B/2}; (II) on-policy block-wise distillation where the stable small-block diffusion model teaches the larger-block student over its own noisy states via symmetric Jensen-Shannon divergence, removing exposure bias; (III) model-wise cross-scale distillation from an 8B block-32 diffusion teacher into the 2B student, motivated by the finding that same-paradigm models share much higher top-K token overlap (rho_5 58.2% diffusion teacher vs 51.2% AR teacher)"
+
+benchmarks:
+  driving:
+    navsim_v1_pdms: 88.3
+    navsim_v1_pdms_with_selection: 91.1
+    navsim_v2_epdms: 88.6
+    navsim_v2_epdms_with_selection: 90.7
+    navsim_v1_pdms_unified_multitask: 87.44
+    navsim_v2_epdms_unified_multitask: 87.50
+    bench2drive_driving_score: 78.93
+    bench2drive_success_rate: 49.55
+    bench2drive_multi_ability_mean: 60.58
+    drivebench_gpt_score: 48.80
+    lingoqa_lingo_judge: 65.80
+    coco_map: 36.30
+    decode_tps: 124.8
+    decode_tps_optimized: 673.4
+    source: "WAM-Diff2 paper Tables 1, 2, 3 (2B model, decoding block size B=32; AR baseline B=1 scores: 88.1 PDMS / 88.32 EPDMS / 80.51 DS / 51.23 DriveBench / 68.40 LingoQA / 39.20 COCO / 44.5 TPS)"
+    date_reported: "2026-08-07"
+    eval_condition: "fine-tuned; task-specific protocol for NAVSIM/Bench2Drive planning, unified multi-task protocol (single frozen checkpoint) for DriveBench/LingoQA/COCO and the *_unified_multitask entries"
+
+training:
+  phase_1: "Optional multi-task autoregressive pretraining, 5 epochs of causal next-token prediction (skippable if a pre-trained AR VLA generalist is available)"
+  phase_2: "Progressive block-causal adaptation + block-wise JSD distillation over B in {4, 8, 16, 32}, 5 epochs per adaptation step"
+  phase_3: "Model-wise cross-scale distillation of the 2B (B=32) student against the 8B (B=32) diffusion teacher, 5 epochs"
+  datasets: "DriveLM and LingoQA (scene reasoning), COCO (object detection), NAVSIM and Bench2Drive (motion planning)"
+  optimizer: "AdamW, weight decay 0.05, cosine schedule with 10% linear warmup, global batch size 128"
+  learning_rate: "4e-5 backbone (AR pretraining and block adaptation/distillation), 2e-6 decoupled visual encoder, 2e-6 unified for model-wise distillation"
+  hardware: "32 x Ascend 910C NPUs"
+  inference_optimizations: "FlashInfer block-causal attention kernels (1.7x) + CUDA Graphs (3.1x); decoding latency 22.7 ms/token (AR) -> 8.1 (diffusion) -> 4.6 -> 1.5 ms/token, 15.1x cumulative"
+
+eval_conditions:
+  navsim: "fine-tuned, open-loop planning on NAVSIM v1/v2 (PDMS / EPDMS, original v2 protocol)"
+  bench2drive: "fine-tuned, closed-loop CARLA evaluation (Driving Score, Success Rate, multi-ability tests)"
+  drivebench: "unified multi-task protocol, single frozen checkpoint, GPT Score"
+  lingoqa: "unified multi-task protocol, Lingo-Judge metric"
+  coco: "unified multi-task protocol, mAP for spatial grounding"
+
+tags:
+- autonomous_driving
+- discrete_diffusion
+- masked_diffusion
+- distillation
+- ar_to_diffusion
+- block_causal_attention
+- exposure_bias
+- efficient_inference
+- navsim
+- bench2drive
+- qwen3_vl
