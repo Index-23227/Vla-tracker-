@@ -1,37 +1,73 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: DyPES-VLA: Learning Shared Dynamics Priors and Embodiment-Specific Control for Cross-Embodiment Manipulation
 # arXiv: 2608.06374
 
 name: DyPES-VLA
 full_name: "DyPES-VLA: Learning Shared Dynamics Priors and Embodiment-Specific Control for Cross-Embodiment Manipulation"
-organization: "TODO: check paper"
+organization: "The Hong Kong University of Science and Technology (Guangzhou) / COCO Matrix"
 date: "2026-08-06"
 paper_url: https://arxiv.org/abs/2608.06374
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3-VL-2B (VLM) encoding two-to-three 256x256 camera views, instruction, verbalized embodiment metadata, and 96 learnable query tokens; SANA-600M future generation head (frozen autoencoder latents) used only during training"
+  llm: "Qwen3-VL-2B"
+  action_head: "Embodiment-specific Mixture-of-Experts flow-matching Diffusion Transformer (16 layers, K=3 statically routed FFN experts with shared cross/self-attention, per-embodiment encoder-decoder pairs mapping to native action spaces, 4 Euler steps at inference)"
+  action_head_category: flow_matching
+  parameters: "~2B VLM (Qwen3-VL-2B) + 600M SANA future head (training only) + 16-layer MoE DiT action head trained from scratch with K=3 experts"
+  key_innovation: "Separates what is shared across embodiments from what is embodiment-specific by moving the shared interface upstream of the action space. A set of 96 query tokens is supervised by a rectified-flow future-frame generation objective on action-free human (EgoDex) and simulation video, forcing the query states to encode object motion, contact, and interaction-induced scene change as shared dynamics priors. An MoE DiT action head then decodes those same query states directly into each robot's native action space via statically routed per-embodiment experts, eliminating the manual coordinate transforms, inverse kinematics, and common-action-format alignment that prior cross-embodiment VLAs require. The future generation head is discarded at inference, so prediction shapes the representation without paying inference cost."
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    libero_spatial: 98.8
+    libero_object: 99.4
+    libero_goal: 97.0
+    libero_long: 96.8
+    libero_avg: 98.0
+    source: "arXiv:2608.06374 Table 3 (per-suite success rates; vs X-VLA 98.1, Fast-WAM 97.6, OpenVLA-OFT 97.1, Qwen-VLA 97.9)"
+    eval_condition: "single-checkpoint generalist co-trained on LIBERO + RoboTwin 2.0 + RoboCasa-GR1; no per-benchmark finetuning; simulated 7-DoF Franka Emika Panda"
+  robotwin_v2:
+    robotwin_v2_clean: 88.78
+    robotwin_v2_randomized: 89.26
+    robotwin_v2_avg: 89.02
+    source: "arXiv:2608.06374 Table 1 and Tables S2/S3 (50 tasks, 100 rollouts per task per setting; Clean = Easy, Randomized = Hard; vs Qwen-VLA 86.65, ABot-M0 85.50, pi0.5 79.75)"
+    eval_condition: "single-checkpoint generalist, 14-DoF ALOHA-AgileX dual-arm, action horizon 50; average is arithmetic mean of clean and randomized settings"
   robocasa:
-    robocasa_avg: TODO
+    robocasa_avg: 59.25
+    robocasa_pnp_articulated_receptacle_avg: 55.3
+    robocasa_container_to_container_avg: 60.6
+    source: "arXiv:2608.06374 Table 2 and Table S1 (RoboCasa-GR1, 24 tabletop tasks, 50 rollouts per task = 1200 rollouts; vs ABot-M0 58.3, Qwen-VLA 56.7, LDA-1B 55.4, GR00T-N1.5 48.2)"
+    eval_condition: "single-checkpoint generalist, 29-DoF Fourier GR-1 humanoid, single egocentric view, action horizon 16"
 
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
-  robocasa: "fine-tuned"
+  libero: "single co-trained checkpoint (no per-benchmark finetuning); Stage-2 data mix 20% LIBERO; no proprioceptive input; third-person + wrist views at 256x256"
+  robotwin_v2: "single co-trained checkpoint evaluated on RoboTwin 2.0 clean and randomized settings; Stage-2 data mix 40% RoboTwin 2.0; egocentric + two wrist views"
+  robocasa: "single co-trained checkpoint on RoboCasa-GR1 tabletop; Stage-2 data mix 40% RoboCasa-GR1; single egocentric view"
+  real_world: "same checkpoint jointly finetuned for 5,000 steps on 1,800 demonstrations (200 per task per embodiment) across FR3 single-arm, COBOT Magic dual-arm, and Unitree G1 humanoid; 25 rollouts per task per embodiment; 75.6% average vs GR00T-N1.6 59.6% and ACT 32.4%"
 
-tags: [libero, robotwin, robocasa]
+training:
+  dataset: "Stage 1 (action-free video): full EgoDex egocentric human manipulation corpus plus simulation video, sampled 50% EgoDex / 20% RoboTwin 2.0 / 20% RoboCasa-GR1 / 10% LIBERO. Stage 2 (action-labeled demonstrations): 40% RoboTwin 2.0 / 40% RoboCasa-GR1 / 20% LIBERO. Real-world finetuning: 1,800 teleoperated demonstrations over 3 tasks (kiwi-to-basket, pour water, book-to-shelf) on FR3, COBOT Magic, and Unitree G1 with Inspire RH56DFQ hands."
+  method: "Two-stage training. Stage 1 optimizes the VLM, query tokens, and SANA future generation head with a rectified-flow future-frame objective on action-free video; the generator is conditioned only on projected query states (no current observation), forcing dynamics information through the 96 query tokens. Stage 2 jointly optimizes L = L_action + 0.05 * L_future on action-labeled demonstrations, with the MoE DiT action head trained by rectified flow in each embodiment's native action space and timesteps drawn from a Beta(1.5, 1.0) schedule (s=0.999) biased toward high noise. Embodiment metadata (data_source, robot_type, robot_model, camera_views, control_freq, action_dim, action_horizon, action_space) is verbalized into the prompt and deterministically sets the static routing index. Actions are min-max normalized per dimension; no proprioceptive state is used. The future generation head is removed at inference."
+  num_trajectories: null
+  compute: "16x NVIDIA H100 GPUs, AdamW, effective batch size 512; Stage 1 100,000 steps, Stage 2 200,000 steps; real-world joint finetuning 5,000 steps"
+
+tags:
+  - cross-embodiment
+  - generalist
+  - single-checkpoint
+  - mixture_of_experts
+  - flow_matching
+  - diffusion_transformer
+  - future-prediction
+  - world-model
+  - query-tokens
+  - qwen3_vl
+  - sana
+  - egodex
+  - humanoid
+  - bimanual
+  - libero
+  - robotwin
+  - robocasa
+  - real_world

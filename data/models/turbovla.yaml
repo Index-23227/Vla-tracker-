@@ -1,0 +1,54 @@
+# Paper: TurboVLA: Real-Time Vision-Language-Action Model at 32 Hz on an RTX 4090 with <1 GB VRAM
+# arXiv: 2607.27205
+
+name: TurboVLA
+full_name: "TurboVLA: Real-Time Vision-Language-Action Model at 32 Hz on an RTX 4090 with <1 GB VRAM"
+organization: "Huazhong University of Science and Technology / Huawei Technologies"
+date: "2026-07-29"
+paper_url: https://arxiv.org/abs/2607.27205
+code_url: https://github.com/H-EmbodVis/TurboVLA
+venue: null
+open_source: true
+model_type: policy
+inference_hz: 32
+
+architecture:
+  backbone: "DINOv3 ViT-B (LIBERO) / DINOv3 ViT-L (RoboTwin 2.0) vision encoder; multi-view features with positional and camera-view embeddings"
+  llm: "None (no LLM in the execution pathway); BERT-base used only as a lightweight frozen-scale instruction encoder"
+  action_head: "ACT-style lightweight transformer decoder with H learnable action queries; predicts the full continuous action chunk in a single parallel forward pass, trained with L1 behavior-cloning loss (no action tokenization, no autoregressive decoding). Robot state is injected directly at the decoder."
+  action_head_category: regression
+  parameters: "0.2B (DINOv3 ViT-B, LIBERO) / 0.4B (DINOv3 ViT-L, RoboTwin 2.0)"
+  key_innovation: "Replaces the prevailing LLM-centric V->L->A pathway with a direct V+L->A mapping. Vision and language are encoded independently (DINOv3 + BERT) and fused by N=6 stacked bidirectional cross-attention layers (visual-to-instruction and instruction-to-visual), initialized from Grounding-DINO feature-enhancement weights, producing action-ready features that an ACT-style decoder turns into continuous action chunks. Removing the billion-parameter language core cuts policy latency to 31.2 ms (32 Hz) and inference VRAM to 0.9 GB on a consumer RTX 4090 while still reaching 97.7% LIBERO average."
+
+training:
+  dataset: "LIBERO no_noops RLDS (OpenVLA release), 4 suites trained jointly as one mixed-suite model; RoboTwin 2.0 official clean demonstrations (50 bimanual tasks, multi-task); real-world AgileX Piper 4x65 teleoperated demos"
+  method: "Behavior cloning with L1 loss, no auxiliary language-modeling objective. LIBERO: 12-step chunks of 7-DoF continuous actions, 80k steps, 10k warm-up, effective batch size 256. RoboTwin 2.0: 50-step chunks of 14-dim absolute joint positions, 55k steps, 1k warm-up, batch size 192. Real-world: fine-tuned from the LIBERO checkpoint for 12.5k steps."
+  compute: "Four RTX 4090 GPUs, learning rate 5e-5"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 99.8
+    libero_goal: 97.4
+    libero_long: 94.2
+    libero_avg: 97.7
+    source: "Table 1, TurboVLA paper (arXiv:2607.27205), DINOv3 ViT-B, VLA-Adapter rollout protocol, 50 rollouts/task over 2000 trials"
+    date_reported: "2026-07-29"
+    eval_condition: fine-tuned
+  robotwin_v2:
+    robotwin_v2_avg: 60.2
+    source: "Table 2, TurboVLA paper (arXiv:2607.27205), DINOv3 ViT-L, multi-task, clean setting, 100 rollouts per task across 50 tasks"
+    date_reported: "2026-07-29"
+    eval_condition: fine-tuned
+
+eval_conditions:
+  libero:
+    setting: "fine-tuned"
+    base_model: "TurboVLA (DINOv3 ViT-B + BERT), 0.2B, trained from scratch on LIBERO without embodied pretraining"
+    note: "Single mixed-suite model, VLA-Adapter rollout protocol, 50 rollouts per task (2000 trials). 31.2 ms latency, 0.9 GB inference VRAM on RTX 4090."
+  robotwin_v2:
+    setting: "fine-tuned"
+    base_model: "TurboVLA (DINOv3 ViT-L), 0.4B, multi-task"
+    note: "Clean setting only, no randomized-scene data; StarVLA training/evaluation framework; 43.4 ms latency."
+
+tags: [libero, robotwin, efficient-vla, lightweight, real-time, action-chunking, cross-attention, dinov3, bert, no-llm, edge-deployment]

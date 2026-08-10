@@ -1,0 +1,77 @@
+# Paper: ReferTrack: Referring Then Tracking for Embodied Visual Tracking
+# arXiv: 2607.20061v1 (22 Jul 2026) — verified against PDF (2026-08-10)
+
+name: ReferTrack
+full_name: "ReferTrack: Referring Then Tracking for Embodied Visual Tracking"
+organization: "RCV Laboratory, SUSTech; Tencent Robotics X; Peking University; Futian Laboratory"
+date: "2026-07-22"
+paper_url: https://arxiv.org/abs/2607.20061
+code_url: https://github.com/MedlarTea/referTrack
+venue: arXiv 2026
+open_source: true
+model_type: navigation
+inference_hz: 10.6
+
+architecture:
+  backbone: "Dual vision encoder — SigLIP + DINOv2 features concatenated, then grid pooling into 64 fine tokens for the current frame and 4 coarse tokens per historical frame; two-layer MLP vision projector; shared two-layer MLP bbox projector P_bbox reused for both TVBI tokens and the candidate catalog"
+  llm: "Qwen3-4B"
+  action_head: "MLP head decoding M egocentric waypoints (x, y, theta) from a single action token, conditioned on the Refer-CoT prefix; trained with MSE on expert waypoints"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "4B"
+  key_innovation: >-
+    Referring-then-tracking: instead of reasoning in an abstract spatial latent (TrackVLA++'s polar
+    token), target identification is cast as a constrained multiple-choice problem over an indexed
+    catalog of image-space pedestrian bboxes produced by an off-the-shelf detector
+    (YOLO11 + ByteTrack). The LLM emits a single Refer-CoT token from the vocabulary
+    {<ped_1>, ..., <ped_K>, <NO_EXIST>}, which then conditions waypoint decoding. The selected bbox
+    is pushed into a FIFO queue of capacity H-1 and injected into the visual history through
+    temporal-viewpoint-bbox indicator (TVBI) tokens, E_TVBI(t) = E_TVI(t) + P_bbox(b_t), with
+    [0,0,0,0] as a deterministic absence sentinel. The current frame is deliberately kept TVI-only so
+    the model must ground the target from history plus raw pixels. Co-training on a synthetic
+    Refer-QA dataset reuses the identical catalog interface, transferring static grounding skill to
+    online tracking.
+
+training:
+  dataset: "1.3M expert tracking trajectories curated from the EVT-Bench training split in Habitat 3.0 (330K STT + 330K AT + 640K DT) via a custom oracle controller (geodesic shortest-path lookahead at 1.2 m preferred following distance, PD velocity controller); 1.3M Refer-QA samples synthesized from SYNTH-PEDES by compositing 2-3 captioned pedestrian crops on 384x384 backgrounds with one absent negative caption"
+  method: "Two-stage SFT. Stage 1: freeze LLM and vision encoders, train only the vision projector for 1 epoch on general multimodal QA (LLaVA-style + MVBench), LR 1e-4. Stage 2: joint navigation + Refer-QA training at 1:1 ratio for 20K steps, global batch 256, all parameters updated except the frozen vision encoders. Loss L = alpha * L_traj + L_refer + L_text with alpha = 10 (MSE waypoint loss, cross-entropy on the Refer-CoT index, cross-entropy on Refer-QA text). Training-time queue noise injects incorrect target indices to simulate historical tracking errors."
+  compute: "AdamW, cosine decay with linear warm-up; LR 2e-5 for the LLM and 1e-4 for projectors and action head. Total GPU budget not reported."
+
+benchmarks:
+  evt_bench:
+    stt_success_rate: 89.4
+    stt_tracking_rate: 92.5
+    stt_collision_rate: 1.6
+    dt_success_rate: 73.3
+    dt_tracking_rate: 81.8
+    dt_collision_rate: 7.6
+    at_success_rate: 74.1
+    at_tracking_rate: 85.7
+    at_collision_rate: 7.7
+    source: "Paper Table 1 — EVT-Bench (Habitat 3.0), single forward-view setting; SR / TR / CR on Single-Target Tracking (STT), Distracted Tracking (DT) and Ambiguity Tracking (AT)"
+    date_reported: "2026-07-22"
+    eval_condition: "single forward-facing RGB camera only, SFT without RL, 4B backbone; baselines quoted from their original publications"
+    notes: "Best single-view baseline TrackVLA++ (7B) reports 86.0/81.0/2.10 STT, 66.5/68.8/4.71 DT, 51.2/63.4/15.9 AT, so ReferTrack gains +6.8 SR / +13.0 TR on DT and +22.9 SR / +22.3 TR on AT. It also matches or exceeds reported multi-camera references (CoMaTrack 3B+RL: 92.1/90.3/0.9 STT, 74.2/80.5/2.1 DT, 57.5/73.4/12.0 AT; TrackVLA++ 7B multi-cam: 55.9 SR on AT) on the identification-heavy DT and AT splits."
+
+eval_conditions:
+  evt_bench: "EVT-Bench standard suite in Habitat 3.0; metrics are Success Rate (SR), Tracking Rate (TR) and Collision Rate (CR). An episode succeeds if the agent keeps a 1-3 m following distance with the target in view. Main protocol uses the front RGB camera only."
+  ablation_dt: "Ablations on the DT split (single forward view). Oracle TVBI built from ground-truth target bboxes without Refer-CoT: 81.5 SR / 84.7 TR / 3.6 CR. Removing TVBI only: 70.4 / 80.8 / 7.5. Removing both Refer-CoT and TVBI: 55.7 / 71.4 / 9.4. The oracle expert policy with full simulator state reaches 85.1 SR, indicating identification rather than motion planning is the DT bottleneck."
+  real_world: "Qualitative deployment on a Unitree Go2 quadruped and a Unitree G1 humanoid, each with a single forward-facing Intel RealSense D455 camera streaming JPEG frames over Wi-Fi to a remote GPU server running a WebSocket inference service. Full perception-and-control loop averages 10.6 Hz with 12 ms per-step detection; DINOv2 and SigLIP features are extracted in parallel CUDA streams and the LLM is optionally compiled with torch.compile."
+
+tags:
+  - embodied-visual-tracking
+  - navigation
+  - person-following
+  - chain-of-thought
+  - referring-expression
+  - grounding
+  - evt-bench
+  - habitat
+  - qwen3
+  - siglip
+  - dinov2
+  - legged-robot
+  - humanoid
+  - sim2real
+  - real-robot
+  - open-source

@@ -1,0 +1,52 @@
+name: Hermite-VLA
+full_name: "Hermite Curves as Trajectory Priors for Vision-Language-Action Models"
+organization: "Harbin Institute of Technology (Shenzhen); Jiangsu Cytoderm Intelligent Technology; Show Lab, National University of Singapore"
+date: "2026-08-02"
+paper_url: https://arxiv.org/abs/2608.01265
+code_url: https://aopolin-lv.github.io/Hermite/
+venue: "arXiv preprint (submitted to IEEE TPAMI)"
+open_source: false
+model_type: vla
+inference_hz: 20.6
+
+architecture:
+  backbone: "PaliGemma vision-language tower (pi-series backbone, shared with pi0.5 / pi0-FAST)"
+  llm: "PaliGemma VLM (Gemma-based)"
+  action_head: "Flow-matching action expert (pi0.5 head) with an auxiliary two-layer MLP (hidden width 512) that predicts piecewise cubic Hermite boundary coordinates (endpoint positions and velocities); the auxiliary head is discarded at inference in the best variant (Hermite-VLA_Reg). Two other variants exist: Hermite-VLA_DH (segment-level autoregressive prediction of 256-bin quantized Hermite tokens) and Hermite-VLA_CH (flow-matching clean-action estimate decomposed into Hermite scaffold + per-timestep residual)."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~3.3B"
+  key_innovation: "Hermite-VLA reparameterizes the action chunk as a piecewise cubic Hermite curve defined by endpoint positions and velocities, applied through a fixed, differentiable basis matrix H. This makes intra-chunk smoothness (C1 continuity by construction) and inter-chunk boundary continuity explicit properties of the action representation instead of behaviors that must be learned implicitly. The same operator is instantiated at three integration levels (discrete tokens, continuous scaffold+residual, auxiliary regularization). The central empirical finding is that the trajectory prior works best as a learning-stage inductive bias rather than a runtime constraint: the training-only Hermite-VLA_Reg variant is the strongest while leaving the deployed action head and sampling procedure completely unchanged, i.e. zero inference overhead."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.2
+    libero_goal: 99.0
+    libero_long: 96.8
+    libero_avg: 98.7
+    source: "arXiv:2608.01265 Table 2 (Hermite-VLA_Reg)"
+    date_reported: "2026-08-02"
+    eval_condition: "fine-tuned from pi0.5 checkpoint; 50 rollouts per task, 500 episodes per suite; lambda=10, K=2, T=10, N=10 denoising steps"
+    notes: "pi0.5 baseline 95.9 avg (98.4/96.0/97.8/91.4). Hermite-VLA_CH 97.7 avg (99.2/99.2/96.4/96.0). Hermite-VLA_DH 95.4 avg (96.0/98.6/96.4/90.4) vs pi0-FAST baseline 85.5. LIBERO-plus (10,030 perturbed instances, not a standard LIBERO suite): Hermite-VLA_Reg 90.9 avg vs pi0.5 85.7; Hermite-VLA_CH 85.0; Hermite-VLA_DH 69.4 vs pi0-FAST 61.6."
+  real_world:
+    real_task1_open_pot_franka: 100.0
+    real_task2_open_pot_cybopal: 66.7
+    real_task3_dual_arm_pot: 93.3
+    real_task4_towel_fold_arx: 100.0
+    real_avg: 90.0
+    source: "arXiv:2608.01265 Table 4 (Hermite-VLA_Reg)"
+    date_reported: "2026-08-02"
+    eval_condition: "15 rollouts per task with randomized object placement; 3 hardware platforms (Franka single-arm, Cybopal single/dual-arm, ARX dual-arm); 30 Hz end-effector control"
+    notes: "pi0.5 baseline 63.4 avg; Hermite-VLA_CH 81.7; Hermite-VLA_DH 61.7; pi0-FAST 50.0."
+
+training:
+  datasets: ["LIBERO (4 official suites)", "LIBERO-plus (7 perturbation categories, 10,030 instances)", "real-robot teleoperation: 832 demos (Franka, 6.3 h), 1,006 demos (Cybopal single-arm, 4.1 h), 805 demos (Cybopal dual-arm, 4.6 h), 723 demos (ARX dual-arm, 3.2 h)"]
+  method: "All variants initialized from open-source pi-series checkpoints (Hermite-VLA_DH from pi0-FAST, continuous variants from pi0.5) with the new Hermite/auxiliary heads randomly initialized. Fine-tuned with AdamW under a cosine schedule, 1k warmup steps to a peak LR of 5e-5 decaying to 3e-5, batch size 256, quantile action normalization, 30k steps. Hermite-VLA_Reg adds the auxiliary loss lambda * ||H*theta_aux - a_gt||^2 with lambda=10 on top of the standard flow-matching loss."
+  compute: "8 x NVIDIA H100 GPUs; inference benchmarked on a single H100 80GB"
+
+eval_conditions:
+  libero: "fine-tuned"
+  real_world: "fine-tuned"
+
+tags: [flow_matching, trajectory_prior, hermite_curve, action_chunking, smoothness, regularization, libero, libero_plus, real_robot, pi0_5, dual_arm]

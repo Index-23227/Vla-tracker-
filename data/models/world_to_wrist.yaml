@@ -1,0 +1,68 @@
+# Paper: World-to-Wrist: Task-Conditioned Future Wrist Modeling for Fine-Grained Robot Manipulation
+# arXiv: 2608.05369 (2026-08-05)
+# Project page: https://yyyyu120.github.io/W2-VLA/
+
+name: World-to-Wrist
+full_name: "World-to-Wrist VLA (W2-VLA): Task-Conditioned Future Wrist Modeling for Fine-Grained Robot Manipulation"
+organization: "HKUST; NUS; NTU; Wuhan University; Sun Yat-sen University; Xidian University; Southeast University"
+date: "2026-08-05"
+paper_url: https://arxiv.org/abs/2608.05369
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+inference_hz: 87.43
+
+architecture:
+  action_head: "DiT-based flow-matching action head. Conditioned on the concatenation of the VLM action-conditioning context H_act (visual + instruction + latent modeling token states) and a future-aware wrist context C_w produced by a Q-Former-style adapter with M learnable queries over predicted future wrist latents. Flow time tau sampled from a transformed Beta distribution; interpolated state X_tau = (1-tau)*eps + tau*A*, target velocity V* = A* - eps, MSE velocity regression loss."
+  action_head_category: flow_matching
+  backbone: "Qwen3-VL-4B-Instruct (VLM) + frozen V-JEPA 2.1 ViT-L/384 wrist encoder"
+  llm: "Qwen3-VL-4B-Instruct"
+  action_space: continuous
+  parameters: "4.97B"
+  key_innovation: "Treats wrist views as action-proximal rather than just another parallel camera stream. K=16 dedicated latent modeling tokens appended to the instruction prompt are contextualized by the VLM; their final-layer hidden states S_t form a fixed-length task-conditioned interface between the VLM and a 4-layer bidirectional wrist predictor. Conditioned on S_t plus V-JEPA-encoded wrist history, the predictor forecasts future wrist latents supervised by an L1 loss against stop-gradient future clip embeddings (no pixel reconstruction). A Q-Former adapter compresses predictions into 32 action-context tokens. W2-CoT — a verified annotation synthesis pipeline emitting Subtask / Reasoning / Wrist fields — supplies auxiliary next-token supervision that shapes the interface. Neither future wrist frames nor autoregressive CoT decoding are needed at inference, giving 110.58 ms per 16-step chunk (87.43 Hz) versus >1.5 s for explicit CoT decoding variants."
+
+training:
+  dataset: "LIBERO: 1,693 trajectories across 40 tasks (4 suites), single multi-task policy. RoboTwin 2.0: clean training set of 2,500 demonstrations (50 per task), single multi-task policy. Real-world: 300 teleoperated trajectories (100 per task) on the CoBoT Magic (Mobile ALOHA-style) platform."
+  method: "Joint objective L = L_act + 0.1*L_cot + 0.2*L_wrist. Qwen3-VL backbone, JEPA predictor, wrist-context adapter, and action head trainable; V-JEPA 2.1 frozen. AdamW (beta1 0.9, beta2 0.95, eps 1e-8, weight decay 1e-8), gradient clipping 1.0, cosine schedule with 5000 warmup steps and min LR 1e-6. LRs: 1e-5 Qwen3-VL, 5e-5 JEPA predictor, 5e-5 wrist adapter, 1e-4 action head. Images resized to 224x224. Action chunk 8 (LIBERO) / 16 (RoboTwin 2.0, real-world)."
+  num_trajectories: 1693
+  compute: "LIBERO: 60K steps on 4x A100, per-device batch size 16, wrist prediction horizon h=8. RoboTwin 2.0: 100K steps on 8x B200, per-device batch size 16, h=16 with every-other-frame sampling (8 input / 8 predicted frames)."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.8
+    libero_goal: 99.2
+    libero_long: 95.2
+    libero_avg: 98.5
+    source: "arXiv:2608.05369 Table 1"
+    date_reported: "2026-08-05"
+    eval_condition: "single multi-task policy trained on 1,693 trajectories over 40 tasks; 50 episodes per task, 500 trials per suite, 2,000 trials total"
+    notes: "Best average reported in Table 1, +1.3pp over the strongest baseline VLA-JEPA (97.2). Best on Spatial, Object, and Goal; second on Long behind DeepThinkVLA (96.2). Ablations: w/o wrist predictor 97.5, w/o W2-CoT 98.0; 4/8/32 latent tokens give 98.0/98.1/98.4 versus 98.5 at 16 tokens."
+  robotwin_v2:
+    robotwin_v2_easy: 60.71
+    robotwin_v2_hard: 18.21
+    source: "arXiv:2608.05369 Table 2"
+    date_reported: "2026-08-05"
+    eval_condition: "single multi-task policy trained on the 2,500-demo clean set; 100 trials per evaluated task in each setting"
+    notes: "Easy (clean) 60.71 beats UP-VLA 52.92 by 7.79pp, StarVLA-OFT 50.38 by 10.33pp, StarVLA-GR00T 48.80 by 11.91pp. Hard (domain-randomized) 18.21 beats pi0 16.34 by 1.87pp and UP-VLA 15.16 by 3.05pp."
+  real_world:
+    table_cleaning_standard: 63.3
+    occluded_placement_standard: 86.7
+    bimanual_plug_insertion_standard: 60.0
+    real_world_standard_avg: 70.0
+    table_cleaning_ood: 50.0
+    occluded_placement_ood: 73.3
+    bimanual_plug_insertion_ood: 33.3
+    real_world_ood_avg: 52.22
+    source: "arXiv:2608.05369 Fig. 3"
+    date_reported: "2026-08-05"
+    eval_condition: "CoBoT Magic bimanual platform; 30 standard trials and 30 OOD trials per task (OOD split across table clutter, lighting perturbation, background variation)"
+    notes: "Standard average 70.00 exceeds VLA-JEPA by 15.56pp and pi0 by 28.89pp; OOD average 52.22 exceeds VLA-JEPA by 14.44pp. Progress score on Bimanual Plug Insertion improves 1.86 -> 2.60 (standard) and 1.53 -> 2.27 (OOD) over VLA-JEPA."
+
+eval_conditions:
+  libero: "fine-tuned; single multi-task policy over 4 suites, 50 episodes per task"
+  robotwin_v2: "fine-tuned; clean (Easy) and domain-randomized (Hard) settings, 100 trials per task"
+  real_world: "fine-tuned on 100 demos per task; 30 standard + 30 OOD trials per task on CoBoT Magic"
+
+tags: [flow-matching, libero, robotwin, world-model, chain-of-thought, wrist-camera, latent-prediction, bimanual, real-world, v-jepa, qwen3-vl]

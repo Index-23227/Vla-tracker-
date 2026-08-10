@@ -1,0 +1,47 @@
+# Paper: CoTinyVLA: Chain-of-Thought Distillation for a Sub-Billion-Parameter Vision-Language-Action Model
+# arXiv: 2607.25487
+
+name: CoTinyVLA
+full_name: "CoTinyVLA: Chain-of-Thought Distillation for a Sub-Billion-Parameter Vision-Language-Action Model"
+organization: "Chung-Ang University"
+date: "2026-07-28"
+paper_url: https://arxiv.org/abs/2607.25487
+code_url: https://github.com/BrainJellyPie/CoTinyVLA
+venue: null
+open_source: true
+model_type: policy
+inference_hz: null
+
+architecture:
+  backbone: "Qwen3.5-0.8B vision-language backbone; images encoded at 224x224, 8 third-person plus 8 wrist frames per control step, each preceded by an explicit textual marker ([Third frame i] / [Wrist frame i]) so temporal and camera indices live in the token stream instead of extra positional embeddings"
+  llm: "Qwen3.5-0.8B (same backbone serves as the language model; four added control tokens <plan>, </plan>, <think>, </think>)"
+  action_head: "Action head reads the final hidden state at a fixed query position, after the generated reasoning span, and regresses an 8-step 7-DoF action chunk (6 end-effector deltas plus gripper) in one forward pass, trained with an L1 loss. A ~1M-parameter two-layer MLP projects the 8-dim proprioception vector into a single soft token. Reasoning tokens are produced autoregressively, but the actions themselves are regressed, not tokenized."
+  action_head_category: regression
+  action_space: continuous
+  parameters: "0.9B"
+  key_innovation: "Buys LIBERO-Plus robustness by structuring supervision rather than enlarging the model. Three separable components: (1) dual-view temporal input of 16 frames per step (8 third-person + 8 wrist) with textual camera/time markers; (2) hierarchical chain-of-thought distillation from a 35B Qwen3.5-35B-A3B teacher into an episode-level Plan (ordered subgoals, emitted once and cached) and a chunk-level Think with a fixed three-slot schema (Phase / Gripper / Next); (3) paraphrase augmentation expanding 40 base instructions into 800 variants, swapped in with probability 0.8. Actions are supervised by demonstration, reasoning by the teacher, so the CoT span costs no inference-time parameters. Result: a 0.9B model beats every 3-7B LIBERO-Plus baseline on all four suites within a 2.25 GiB inference footprint."
+
+training:
+  dataset: "Union of the four LIBERO-Plus training suites (Spatial, Object, Goal, Long), approximately 2.4M action-chunk samples. Plan and Think labels generated offline by a 35B MoE vision-language teacher (Qwen3.5-35B-A3B, 4-bit quantized) with 1 Plan and 10 Think labels per demonstration; the Think prompt reads proprioception and supplies a derived gripper hint so the Gripper slot is tied to physical state. Instructions expanded from 40 base commands to 800 paraphrases (verb swaps, object synonyms, politeness variation)."
+  method: "Supervised fine-tuning from the pretrained Qwen3.5-0.8B backbone for two epochs. Weighted objective L = alpha * L_act + beta * L_lm with alpha 1.0 and beta 0.1, where L_act is an L1 loss over the 8-step 7-DoF chunk and L_lm is cross entropy over Plan/Think tokens. AdamW, backbone lr 2e-5, head lr 1e-4, 3% linear warmup, gradient checkpointing, FlashAttention-2, train seed 42 / eval seed 7."
+  compute: "Single node with 8x NVIDIA H100; roughly 40 hours wall time per two-epoch run. Ablation sweep (9 runs) trained for one epoch each. Inference measured on a single NVIDIA L40S."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.4
+    libero_object: 100.0
+    libero_goal: 98.6
+    libero_long: 92.0
+    libero_avg: 97.5
+    source: "Table 3, CoTinyVLA paper (arXiv 2607.25487); standard unperturbed LIBERO, canonical protocol of 50 trials per task across 10 tasks per suite (500 trials per suite)"
+    date_reported: "2026-07-28"
+    eval_condition: fine-tuned
+
+eval_conditions:
+  libero:
+    setting: "fine-tuned"
+    base_model: "CoTinyVLA (Qwen3.5-0.8B backbone), 0.9B, fine-tuned for two epochs on the union of the four LIBERO-Plus suites"
+    note: "Standard LIBERO numbers use 50 trials per task over 10 tasks per suite. Rollout caps follow the OpenVLA-OFT family: 220 steps on Spatial, 280 on Object, 300 on Goal, 520 on Long. The 97.5% average matches the strongest 7B baseline (RIPT-VLA 97.5%) and is 2.7 points above the strongest sub-1B baseline (Evo-1 94.8%). Closed-loop inference on an L40S: 1.37 s median steady-state step per 8-step chunk, 2.25 GiB peak allocated memory, greedy decoding with a 120-token reasoning budget."
+    libero_plus_note: "The paper's headline result is on LIBERO-Plus (10,030 perturbed tasks, seven perturbation dimensions, one rollout per task), which is not a tracked benchmark here. CoTinyVLA scores 90.8 Spatial / 87.3 Object / 86.6 Goal / 80.7 Long, leading the strongest 7B baseline (OpenVLA-OFT+) by 4.7 / 2.8 / 15.9 / 3.0 points with all four margin intervals excluding zero."
+
+tags: [libero, libero-plus, chain-of-thought, distillation, sub-1b, lightweight, efficient, robustness, action-chunking, qwen3.5, dual-view, temporal-history, paraphrase-augmentation, open-source]

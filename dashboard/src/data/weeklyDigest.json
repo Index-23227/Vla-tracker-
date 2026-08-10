@@ -1,25 +1,31 @@
 {
-  "week": "2026-W30",
-  "week_display": "Week 30, July 2026",
-  "headline": "Vendor-scale reports arrive — Xiaomi-Robotics-1 and FoMoVLA push MoT + foresight designs",
-  "insights": [
-    {
-      "title": "Industry labs ship scaling reports alongside academia",
-      "body": "Xiaomi-Robotics-1 (2.6–10.5B Mixture-of-Transformers, Qwen3-VL VLM + flow-matching DiT) posts RoboCasa 74.5 / RoboCasa365 57.4 with a full deployment stack, while FoMoVLA (LiAuto/UCAS/Tsinghua) enters the LIBERO top-13 at #10 (98.75) by attaching a foresight world-model and point-tracking as TRAINING-ONLY auxiliary branches — removed at inference so the flow-matching DiT ships lean. Vendor-scale tech reports are now a regular fixture of the twice-weekly scan.",
-      "delta": "2 vendor-scale",
-      "direction": "up"
-    },
-    {
-      "title": "Robustness & recovery become explicit design targets",
-      "body": "Four of nine accepted models center on reliability rather than raw success: AC-VLA (CoRL, OOD action correction), Agentic-RL-Execution (a PPO meta-policy choosing EXECUTE/RETRY/REPAIR/RESET over a frozen VLA), DiMaS (optimal-transport inference-time steering), and LIFT (force-aware post-training). Together with last week's TrustVLA/SEAM, the inference-time-wrapper category keeps compounding — reliability layered onto policies you don't retrain.",
-      "delta": "4/9 reliability",
-      "direction": "up"
-    },
-    {
-      "title": "348 models; two more framework/analysis papers filtered",
-      "body": "The tracker reached 348 PDF-verified models. Curation stayed strict: PhyAgentOS (an embodied-agent OS that treats VLAs as swappable backends) and a reasoning-robustness analysis paper were both rejected as non-policy, and re-entering prior rejects (Jetson-PI runtime, ActiveFly-Bench) were skipped — keeping the count to genuine policy contributions.",
-      "delta": "339 → 348",
-      "direction": "up"
-    }
-  ]
+ "week": "2026-W32",
+ "week_display": "Week 32, August 2026",
+ "headline": "LIBERO tops out near 99 — SAM3D-VLA and DLAM enter the top-7 while the trajectory prior moves into training",
+ "insights": [
+  {
+   "title": "The LIBERO ceiling is now a 0.8-point band",
+   "body": "SAM3D-VLA (99.1, SAM-3D promptable grounding + flow matching) lands at #5 and DLAM (99.03, discrete latent action modeling) at #7, joined by MVUCF (98.92) and ChainVLA (98.8). Four new entrants pushed PearlVLA, FoMoVLA, SnapFlow and TFP out of the top 13 in a single cycle — the entire top-13 now spans 99.8 down to 98.8. Ranking on LIBERO alone has stopped being informative; LIBERO-Plus and RoboTwin v2 are where the separation lives.",
+   "delta": "4 new top-13",
+   "direction": "up"
+  },
+  {
+   "title": "Trajectory priors work best as training-time bias, not runtime constraint",
+   "body": "Hermite-VLA reparameterizes the action chunk as a piecewise cubic Hermite curve and tests it at three integration levels. The winner is the variant that uses the curve only as an auxiliary training loss and discards the head at inference — LIBERO 98.7, LIBERO-Plus 90.9 (vs π0.5's 85.7), real-robot 90.0 (vs 63.4) at zero inference overhead. The runtime-constrained variants score lower. Same lesson as FoMoVLA's train-only foresight branch, arrived at independently.",
+   "delta": "+26.6pp real",
+   "direction": "up"
+  },
+  {
+   "title": "Memory and critics get separated from policies",
+   "body": "SkillMemo stores skill-level MoE gating signatures rather than observations and lifts π0.5 to LIBERO 98.0, but its real result is compositional: a model trained on Goal beats the in-distribution baseline on unseen Spatial. ValueFormer (Chef Robotics) and WCM go further and ship as pure critics with no action head — ValueFormer's causal-transformer value function only reweights π0.5's post-training loss. Its on-robot 70%→85% is honestly flagged as within noise (n=20, Fisher p=0.45).",
+   "delta": "3 critic/memory",
+   "direction": "up"
+  },
+  {
+   "title": "373 models; 10 of 33 candidates rejected as non-policy",
+   "body": "The strictest cycle yet: the two highest-scored candidates were both rejected — RoboBRIDGE (orchestration framework) and GUARD (test-time failure detection) — alongside Pigey (frontier-VLM orchestrator over frozen π0/π0.5), RTCF (training-free test-time correction), a task-vector locality audit, an adversarial-attack paper and a red-team security framework. A paper improving a frozen policy's LIBERO score is a result about the wrapper, not a model for the leaderboard.",
+   "delta": "348 → 373",
+   "direction": "up"
+  }
+ ]
 }

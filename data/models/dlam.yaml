@@ -1,0 +1,64 @@
+# Paper: DLAM: Distributional Latent Actions with Temporal Constraints
+# arXiv: 2607.27138
+
+name: DLAM
+full_name: "DLAM: Distributional Latent Actions with Temporal Constraints"
+organization: "Zhejiang University; Amap, Alibaba Group; Nanjing University; Shanghai Jiaotong University; Shenzhen University of Advanced Technology; Xi'an Jiaotong University; Embodied Intelligence General Platform Laboratory, Chery Auto"
+date: "2026-07-29"
+paper_url: https://arxiv.org/abs/2607.27138
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0 (PaliGemma-2B vision-language backbone + Gemma-300M action expert), SigLIP visual encoder"
+  llm: "PaliGemma-2B / Gemma-300M action expert"
+  action_head: "Joint flow matching over robot actions and per-view latent transition means"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "3B"
+  key_innovation: "Represents each visual transition as a diagonal Gaussian (mean + dimension-wise variance) instead of a deterministic point. Source-conditioned reconstruction grounds the mean in observed change, while equal-gap triplets impose normalized composition (mu_ac = (mu_ab + mu_bc)/sqrt(2)) and reversal (mu_ba = -mu_ab, sigma preserved) on both mean and variance. Variance composition uses a learned shared correlation coefficient rho = rho_max * tanh(r) to account for dependence between adjacent transitions sharing an intermediate frame. Downstream, the encoder is frozen and only its posterior means are used as auxiliary flow-matching targets alongside robot actions; no latent-to-action decoder or new VLA backbone is needed."
+
+training:
+  base_model: "pi0"
+  pretrain_data: "11 action-free robot-video sources (Open X-Embodiment subset + CALVIN), 6.27M training samples; Fractal 50.7%, CALVIN 28.6%, BridgeData V2 9.2%"
+  method: "Stage 1 action-free distributional latent-action pretraining (L_rec + L_prior + L_comp + L_rev); Stage 2 frozen-encoder transfer with joint flow matching on pi0"
+  pretrain_hardware: "64 x AMD MI308X GPUs, 57 epochs, AdamW, peak LR 1e-4, weight decay 1e-4, per-device batch 64"
+  transfer_hyperparameters: "AdamW, LR 5e-5, weight decay 1e-4, per-device batch 32; loss weights lambda_rec=1, lambda_prior=0.005, lambda_comp=lambda_rev=0.05, lambda_l=0.1"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.8
+    libero_goal: 99.6
+    libero_long: 97.1
+    libero_avg: 99.0
+    source: "Paper Table 2 (pi0 + DLAM)"
+    date_reported: "2026-07-29"
+    eval_condition: "fine-tuned; controlled pi0 transfer with frozen DLAM encoder"
+  metaworld:
+    metaworld_easy: 90.3
+    metaworld_medium: 84.8
+    metaworld_hard: 84.0
+    metaworld_very_hard: 91.3
+    metaworld_avg: 87.6
+    source: "Paper Table 1 (MetaWorld MT50, pi0 + DLAM)"
+    date_reported: "2026-07-29"
+    eval_condition: "fine-tuned; single policy across 50 tasks, macro-average over 4 difficulty tiers"
+
+eval_conditions:
+  libero: "fine-tuned; pi0 backbone, frozen distributional transition encoder, latent means as auxiliary flow-matching targets"
+  metaworld: "fine-tuned; MT50 single multi-task policy, Easy/Medium/Hard/Very-Hard tiers"
+  real_world: "Piper 6-DoF arm, 4 tasks (insert cylinder, insert cube, arrange flowers, hang cup): 73.8% avg vs 63.8% for pi0+ALAM, 53.8% for pi0.5, 40.0% for pi0"
+
+tags:
+  - latent-action
+  - flow-matching
+  - pi0-base
+  - action-free-pretraining
+  - distributional-latent-action
+  - temporal-constraints
+  - libero
+  - metaworld
+  - real-world

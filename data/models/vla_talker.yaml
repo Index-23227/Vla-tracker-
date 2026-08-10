@@ -1,0 +1,85 @@
+name: VLA-Talker
+full_name: "In-Context VLA: Endowing Vision-Language-Action Models with Language via In-Context Post-Training and Agentic Tool Use"
+organization: "Nankai University; Tsinghua University; EPFL"
+date: "2026-08-06"
+paper_url: https://arxiv.org/abs/2608.05738
+code_url: null
+venue: arXiv preprint (AAAI 2027 format)
+open_source: false
+model_type: manipulation
+inference_hz: 12.8
+
+architecture:
+  backbone: "OpenVLA-OFT (Prismatic VLM: SigLIP + DINOv2), single third-person RGB view, no wrist camera"
+  llm: "Llama-2 7B (OpenVLA-OFT); Qwen2.5-VL-7B used only as an external VLM locator tool"
+  action_head: "OFT-style parallel-decoding regression head with action chunking (7-DoF end-effector chunks), unchanged from the backbone"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "7B"
+  key_innovation: >
+    Argues a VLA does not need to generate language but to consume grounded language. Two components:
+    (1) in-context post-training, where structured perceptual evidence is injected into the prompt inside
+    <spatial>...</spatial> tags on keyframes and the loss is masked so that ONLY action tokens are supervised;
+    (2) an agentic tool-use loop (GroundingDINO open-vocabulary detector, DepthAnything monocular depth,
+    analytic gripper projection from proprioception + camera intrinsics/extrinsics, Qwen2.5-VL-7B locator fallback)
+    that acquires the evidence tuple. A data engine renders each evidence tuple into ~24 diverse paraphrased
+    surface forms so the policy learns to interpret unseen phrasings. A final trajectory-level GRPO stage with a
+    sparse success reward plus a format term aligns when the policy invokes tools with actual task success.
+
+training:
+  dataset: "LIBERO (1,640 episodes / 9,830 annotated keyframes), RoboCasa-GR1 (3,120 / 27,960), SimplerEnv (960 / 5,230); real-robot AgiBot G1 desktop dataset (8 subtasks, teleoperated)"
+  method: "Two stages: in-context supervised cold-start (action-only supervision on injected evidence) then trajectory-level GRPO (sparse success reward, format term, KL anchor beta=0.01, group size M=16)"
+  optimizer: "AdamW; batch 64 (in-context SFT) and 128 (RL); LR 1e-5 (SFT) and 2e-6 (RL)"
+  hardware: "8x NVIDIA A100-80GB; 17.1 h SFT (137 GPU-h) + 8.7 h GRPO (70 GPU-h)"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.2
+    libero_object: 99.2
+    libero_goal: 98.4
+    libero_long: 93.6
+    libero_avg: 97.4
+    source: "VLA-Talker paper Table 1 (arXiv 2608.05738)"
+    date_reported: "2026-08-06"
+    eval_condition: "fine-tuned (in-context SFT + GRPO), 50 randomized initial conditions per task"
+  simpler_env:
+    simpler_widowx_put_spoon_on_towel: 91.7
+    simpler_widowx_put_carrot_on_plate: 56.3
+    simpler_widowx_stack_block: 47.9
+    simpler_widowx_put_eggplant_in_basket: 93.8
+    simpler_avg: 72.4
+    source: "VLA-Talker paper Table 5 (SimplerEnv WidowX, four held-out tasks)"
+    date_reported: "2026-08-06"
+    eval_condition: "fine-tuned, held-out tabletop configurations"
+  robocasa:
+    robocasa_pnp_bottle: 76.0
+    robocasa_pnp_can: 78.0
+    robocasa_pnp_cup: 48.0
+    robocasa_pnp_milk: 58.0
+    robocasa_pnp_to_close_avg: 61.8
+    robocasa_novel_cuttingboard_avg: 64.1
+    robocasa_novel_placemat_avg: 51.3
+    robocasa_novel_tray_avg: 50.5
+    robocasa_novel_plate_avg: 69.8
+    robocasa_avg: 59.5
+    source: "VLA-Talker paper Tables 2 and 13 (RoboCasa-GR1, GR1 humanoid, average over all 24 tabletop tasks)"
+    date_reported: "2026-08-06"
+    eval_condition: "fine-tuned, 24-task GR1-tabletop suite"
+
+eval_conditions:
+  libero: "fine-tuned (in-context SFT + GRPO), standard 4-suite protocol"
+  simpler_env: "fine-tuned, four held-out WidowX tasks"
+  robocasa: "fine-tuned, RoboCasa-GR1 24 tabletop tasks on GR1 humanoid"
+
+tags:
+  - vla
+  - in-context-learning
+  - agentic-tool-use
+  - grounded-evidence
+  - grpo
+  - reinforcement-learning
+  - openvla-oft
+  - libero
+  - simpler-env
+  - robocasa
+  - real-robot

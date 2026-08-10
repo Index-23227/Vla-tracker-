@@ -1,34 +1,63 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: Track4Action: Distilling World-Centric 3D Tracker into Vision-Language-Action Policies
 # arXiv: 2608.03727
 
 name: Track4Action
 full_name: "Track4Action: Distilling World-Centric 3D Tracker into Vision-Language-Action Policies"
-organization: "TODO: check paper"
+organization: "Zhejiang University / Shanghai Jiao Tong University / Shanghai Innovation Institute / Noematrix"
 date: "2026-08-04"
 paper_url: https://arxiv.org/abs/2608.03727
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://wing0night.github.io/track4action-project-page/
+venue: arXiv
+open_source: false
+model_type: vla
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3.5-2B vision-language backbone; frozen Track4World world-centric dense 3D tracker used as a training-only teacher"
+  llm: "Qwen3.5-2B"
+  action_head: "DiT-B flow-matching action expert conditioned on learnable track queries fused into the VLA sequence through a feature-wise gate"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "3.3B"
+  key_innovation: "Distills a frozen world-centric 3D tracker (Track4World) into a current-observation VLA as privileged supervision. For an action chunk of K commands, the temporally aligned K+1 frame clip V_{t:t+K} is encoded by the frozen tracker and pooled into a stop-gradient tracker feature f_trk capturing scene geometry, 3D motion, visibility and camera change. Learnable track queries read the VLA hidden states via cross-attention, are pooled, and matched to f_trk with an L2 alignment loss in a shared space; the same queries are gated back into the VLA sequence to condition the flow-matching action head. Because the teacher feature only defines the alignment target and never enters the action condition, neither the demonstration clip nor Track4World is needed at deployment (tracker-free execution)."
+
+training:
+  dataset: "LIBERO (4 suites, single policy across all suites); RoboTwin 2.0 (50 bimanual tasks, clean and randomized); real-world AgileX ALOHA-style bimanual data (50 demos per task, 4 tasks)"
+  method: "Imitation learning with a joint objective L = lambda_act * L_act (flow-matching conditional velocity) + lambda_align * L_align (L2 match between pooled track queries and the pooled frozen tracker feature). Track4World is frozen with stop-gradient."
+  compute: "Not reported in the paper"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    libero_spatial: 95.0
+    libero_object: 99.6
+    libero_goal: 97.6
+    libero_long: 95.8
+    libero_avg: 97.0
+    source: "Paper Table 1 (LIBERO success rate, single policy trained across all four suites)"
+    date_reported: "2026-08-04"
+    eval_condition: "in-distribution; one policy across Spatial/Object/Goal/Long; agent-view + wrist-view RGB, 8-D state, 7-D delta EEF actions, K=8"
+  robotwin_v2:
+    robotwin_v2_clean: 80.44
+    robotwin_v2_randomized: 81.48
+    robotwin_v2_avg: 80.96
+    source: "Paper Table 3 (RoboTwin 2.0 success rate over all 50 tasks, clean and randomized settings)"
+    date_reported: "2026-08-04"
+    eval_condition: "fine-tuned on RoboTwin 2.0; one external + two wrist views, no robot state, 14-D bimanual joint/gripper actions, K=16; averaged over 50 tasks"
 
 eval_conditions:
-  libero: "fine-tuned"
-  robotwin: "fine-tuned"
+  libero: "Single policy trained on the four original LIBERO suites; mean over the four suite scores. Alignment-free control (same backbone, head, scale, data, optimizer) reaches 94.2 avg, so tracker distillation adds +2.8 points, concentrated on LIBERO-Long (86.2 -> 95.8, +9.6)."
+  libero_plus: "Zero-shot OOD, no adaptation to the seven perturbation dimensions; 82.3% on the official benchmark-provided Avg (Table 2), +7.6 over the alignment-free variant (74.7) and +3.0 over LaMP (79.3). Per-dimension: Camera 76.6, Robot 60.7, Language 87.1, Light 96.3, Background 96.1, Noise 88.4, Layout 78.7."
+  robotwin_v2: "50-task RoboTwin 2.0 under clean and domain-randomized conditions; alignment-free variant reaches 41.32 / 39.90, so the distillation pathway adds +39.12 / +41.58 points. Best reported baseline Motus w/o Pretrain is 77.56 / 77.00."
+  real_world: "AgileX ALOHA-style bimanual platform (two 6-DoF Piper arms, one front + two wrist cameras), 4 tasks x 10 trials, 50 demos per task, tracker-free execution. 67.5% average success vs 65.0% for pi0.5 and 42.5% for the alignment-free variant; average process score 75.0 (equal to pi0.5, +14.4 over alignment-free 60.6). OOD (new layout / unseen towel color / textured desk) average 50.0% vs 23.3% alignment-free."
 
-tags: [libero, robotwin]
+tags:
+  - flow_matching
+  - libero
+  - libero-plus
+  - robotwin
+  - 3d-tracking
+  - distillation
+  - privileged-supervision
+  - world-model
+  - bimanual
+  - real-world
+  - qwen

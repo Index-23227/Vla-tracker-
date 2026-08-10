@@ -1,0 +1,76 @@
+name: MVUCF
+full_name: "Multi-View Unified Camera Fields: Geometry-Shaped Action-Facing Representations for RGB-Only Multi-Camera VLA Policies"
+organization: "HKUST (Guangzhou), Zhejiang University, Simon Fraser University, AgiBot, Xi'an Jiaotong University"
+date: "2026-08-03"
+paper_url: https://arxiv.org/abs/2608.01826
+code_url: null
+venue: arXiv 2026
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "GR00T-N1.6-3B (Cosmos-Reason-2B VLM front-end, Eagle/SigLIP visual encoder); geometry injection updates upper blocks 8-15, visual encoder and lower blocks frozen"
+  llm: "Cosmos-Reason-2B (GR00T-N1.6 VLM)"
+  action_head: "diffusion transformer (DiT) action module inherited from GR00T-N1.6, trained on frozen geometry-injected hidden states"
+  action_head_category: diffusion
+  action_space: continuous
+  parameters: "3B"
+  key_innovation: "Training-only geometry injection that forms a shared action-facing latent field across multiple cameras: a coordinate-query depth objective makes metric surface distance recoverable at continuous grid locations, and a preprocessing-aware cross-view correspondence objective reprojects calibrated points through the exact backbone preprocessing transform to align tokens observing the same physical point. Both losses are read from the layer-15 hidden grid consumed by the action module. After injection, depth inputs, camera calibration and auxiliary heads are removed, so deployment keeps the native RGB-only inference graph with zero extra parameters or inference FLOPs."
+
+training:
+  method: "Two-stage: (1) geometry injection for 50k steps (~18 h) with coordinate-query depth + preprocessing-aware cross-view correspondence losses on layers 8-15; (2) VLM frozen, native GR00T action module trained on the geometry-shaped representations (60k steps on LIBERO, 180k joint steps on the six RoboTwin tasks). Global batch size 128; 2x H100 for LIBERO, 4x H100 for RoboTwin."
+  dataset: "Official LIBERO demonstrations and RoboTwin clean50 splits (50 demos per task, 300 trajectories over six tasks), replayed to record synchronized depth plus camera intrinsics/extrinsics for geometry targets; 100 teleoperated demos per task for the real-robot pilot (AgiBot Expedition A2)"
+
+benchmarks:
+  libero:
+    libero_spatial: 100.0
+    libero_object: 99.2
+    libero_goal: 99.5
+    libero_long: 97.0
+    libero_avg: 98.9
+    libero_plus_avg: 65.2
+    libero_plus_camera: 24.1
+    libero_plus_robot: 54.1
+    libero_plus_language: 72.9
+    libero_plus_light: 95.1
+    libero_plus_background: 91.8
+    libero_plus_noise: 61.3
+    libero_plus_layout: 74.9
+    source: "Table 1 (LIBERO, mean over 3 training seeds, 100 episodes/suite) and Table 2 (LIBERO-Plus, seed-0 terminal checkpoint, zero-shot), MVUCF paper"
+    date_reported: "2026-08-03"
+    eval_condition: "fine-tuned (matched GR00T-N1.6 recipe); LIBERO-Plus evaluated zero-shot"
+  robotwin_v2:
+    click_alarmclock: 99.5
+    click_bell: 100.0
+    move_pillbottle_pad: 40.5
+    place_phone_stand: 27.0
+    press_stapler: 93.5
+    turn_switch: 11.0
+    robotwin_v2_avg: 61.9
+    source: "Table 3, MVUCF paper — six-task diagnostic suite, 200 rollouts per task over two rollout-seeded rounds (Base 38.6)"
+    date_reported: "2026-08-03"
+    eval_condition: "fine-tuned, jointly trained six-task policy (180k steps)"
+  real_world:
+    success_avg: 81.7
+    source: "Figure 8, MVUCF paper — AgiBot Expedition A2 humanoid, two tasks (two-cake placement, cup nesting), 30 trials per task per policy; 49/60 vs 40/60 for GR00T-N1.6 Base"
+    date_reported: "2026-08-03"
+    eval_condition: "fine-tuned, RGB-only deployment, 100 demos per task"
+
+eval_conditions:
+  libero: "fine-tuned, matched GR00T-N1.6 setting, 3 training seeds"
+  libero_plus: "zero-shot from the LIBERO seed-0 checkpoint, 7 perturbation families"
+  robotwin_v2: "fine-tuned, six-task taxonomy suite (Touch / Move-and-Place / Contact)"
+  real_world: "fine-tuned, AgiBot Expedition A2 humanoid, 30 trials per task"
+
+tags:
+  - vla
+  - multi-view
+  - multi-camera
+  - geometry-injection
+  - depth-supervision
+  - cross-view-correspondence
+  - rgb-only
+  - groot-based
+  - diffusion-transformer
+  - humanoid

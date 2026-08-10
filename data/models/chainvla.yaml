@@ -1,0 +1,63 @@
+name: ChainVLA
+full_name: 'ChainVLA: Chaining Vision-Language-Action Queries through a Unified Execution State for Long-Horizon Manipulation'
+organization: Tsinghua University (Shenzhen International Graduate School) / China University of Mining and Technology
+  / Shenzhen Technology University
+date: '2026-08-04'
+paper_url: https://arxiv.org/abs/2608.02326
+code_url: https://muqy1818.github.io/chainvla-web/
+venue: arXiv 2026
+open_source: false
+model_type: vla
+architecture:
+  backbone: Florence-2-large
+  llm: Florence-2-large (unified vision-language encoder-decoder)
+  action_head: conditional-flow DiT decoder with tail-aligned initialization
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: 1.2B
+  key_innovation: 'Chains successive receding-horizon queries through a joint, revisable execution state s_k = (g_k, u_k).
+    Progress Context (g_k) fuses a recurrent Working State (8 live tokens + 3-slot FIFO cache) with evidence retrieved from
+    a Sparse Event Memory (capacity 16, age-aware cosine retrieval over 32 clipped age buckets). Motion Tail (u_k) carries
+    the preceding prediction unexecuted six-step suffix into both Working State construction (tail tokens) and action generation
+    (tail-aligned decoder initialization). The decoder regenerates every horizon position under the latest observation, so
+    the carried state is a revisable prior rather than a fixed plan.
+
+    '
+training:
+  dataset: RMBench (5 memory-dependent bimanual tasks, task-adapted models) and LIBERO (Spatial/Object/Goal/Long, one model
+    finetuned per suite); 50 demonstrations per task
+  method: Ordered per-episode unroll of the query transition with detached Motion Tail (applied with probability 0.5), conditional-flow
+    action loss, stage supervision where annotations exist, and an overlap-consistency regularizer (weight 0.2). Horizon H=30,
+    executed prefix h_exec=24, batch size 4, 20,000 steps, cosine annealing, seed 42.
+  compute: 4x NVIDIA L20 GPUs (PyTorch)
+benchmarks:
+  libero:
+    libero_spatial: 98.4
+    libero_object: 99.4
+    libero_goal: 99.2
+    libero_long: 98.2
+    libero_avg: 98.8
+    source: 'Table 1, ChainVLA paper (arXiv:2608.02326)'
+    eval_condition: fine-tuned per suite, 50 episodes per task
+  real_world:
+    rmbench_obs: 11.0
+    rmbench_rearrange_blocks: 93.0
+    rmbench_put_back_block: 96.0
+    rmbench_swap_blocks: 74.0
+    rmbench_swap_towers: 40.0
+    rmbench_avg: 62.8
+    source: 'Table 1, ChainVLA paper (arXiv:2608.02326)'
+    eval_condition: task-adapted, 100 rollout episodes per task
+eval_conditions:
+  libero: fine-tuned
+  real_world: fine-tuned (RMBench simulation, task-adapted)
+tags:
+- 1.2B
+- flow-matching
+- memory
+- long-horizon
+- action-chunking
+- execution-state
+- rmbench
+- libero
+- florence-2

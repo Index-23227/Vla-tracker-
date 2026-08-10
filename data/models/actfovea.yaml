@@ -1,0 +1,65 @@
+# Paper: ActFovea: Runtime Safeguarding for VLA Policies via Spatiotemporal Visual-Action Consistency
+# arXiv: 2607.29169
+
+name: ActFovea
+full_name: "ActFovea: Runtime Safeguarding for VLA Policies via Spatiotemporal Visual-Action Consistency"
+organization: "Tongji University / MBZUAI / Shanghai AI Laboratory / UESTC"
+date: "2026-07-31"
+paper_url: https://arxiv.org/abs/2607.29169
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Wraps a frozen VLA policy through its observation-action interface; evaluated on the LIBERO checkpoint of pi0 (PaliGemma-based VLM + flow-matching action expert). No retraining or parameter modification of the underlying policy"
+  llm: "Inherited from the wrapped VLA (Gemma / PaliGemma for pi0)"
+  action_head: "Plug-and-play runtime safeguarding loop (not a new action head). Four stages over the frozen policy: (1) action-conditioned foveation that builds an interaction-centered preserve mask from forward kinematics, proprioception and previous actions (contact disk + projected motion corridor, dilated by a safety margin) and desensitizes the editable background; (2) a spatiotemporal consistency monitor fusing geometric, dynamic, temporal (timestamp health, lag, replay similarity) and action-proprioception agreement into a risk score R_t, with a deterministic router that infers disturbance type and recoverability; (3) a disturbance-conditioned candidate observation bank (raw, foveated, temporally stabilized, overlay-deblended via estimated pattern/alpha) whose induced action chunks are verified by a fixed weighted score over first-action direction, endpoint direction, magnitude, smoothness, horizon and chunk drift; (4) risk-adaptive execution with two-stage arbitration (motion scale, shortened horizon, servo recovery) and a bounded safe-failure / hold-latch path when observations are stale or replayed"
+  action_head_category: other
+  action_space: continuous
+  parameters: "0 added trainable parameters (frozen pi0 checkpoint; all router/verifier weights and thresholds are fixed implementation constants)"
+  key_innovation: "Unifies spatial corruption, temporal misalignment, action-trajectory drift and observation replay under a single observable structure — spatiotemporal visual-action consistency — instead of one detector per disturbance family. Unlike image-centered foveation, the high-fidelity region follows the anticipated interaction (projected contact center plus predicted motion corridor) rather than the image center, and unlike pure monitors it actively intervenes: it reconstructs candidate observations, verifies the action chunk each candidate induces, and only then executes a scaled/shortened chunk. Crucially it also decides whether recovery is justified at all — persistent frozen-observation replay bypasses recovery and latches a bounded motion-suppression safe failure, which no baseline achieves"
+
+training:
+  dataset: "No policy training. The frozen pi0 LIBERO checkpoint is used as-is"
+  method: "Inference-time only; no training objective and no parameter optimization. All selection rules, router thresholds and verifier weights are fixed at inference time"
+  compute: "Inference-time overhead only; extra policy calls occur solely when candidate expansion is justified (suppressed for clean-like, low-risk ambiguous and unrecoverable evidence)"
+
+benchmarks:
+  libero:
+    libero_avg: 93.8
+    undisturbed_sr: 93.8
+    base_vla_undisturbed_sr: 93.0
+    visual_overlay_sr: 90.3
+    visual_overlay_base_sr: 49.3
+    visual_overlay_nrr: 93.7
+    visual_delay_sr: 86.0
+    visual_delay_base_sr: 76.2
+    visual_delay_nrr: 59.8
+    action_drift_sr: 90.1
+    action_drift_base_sr: 83.1
+    action_drift_nrr: 73.1
+    frozen_replay_timely_safe_failure_pct: 100.0
+    frozen_replay_unprotected_failure_pct: 0.0
+    source: "Tables 1-3 of the ActFovea paper (arXiv:2607.29169). Averages over four ten-task LIBERO suites (Spatial, Object, Goal, LIBERO-10), 50 episodes per task = 2,000 episodes per method-scenario cell, frozen pi0 checkpoint. libero_avg = ActFovea undisturbed success (Table 2, 93.8 vs Base VLA 93.0). Table 1 disturbed results: visual overlay 49.3 -> 90.3 (gain +41.0 pts, NRR 93.7%), visual delay 76.2 -> 86.0 (+9.8, NRR 59.8%), action drift 83.1 -> 90.1 (+7.0, NRR 73.1%). Table 3 frozen-observation replay: 100% timely safe failure, 0% unprotected failure (Base VLA 96.95% unprotected). Per-suite breakdowns are not reported"
+    date_reported: "2026-07-31"
+    eval_condition: "training-free runtime safeguard wrapping a frozen pi0 LIBERO checkpoint; success rates reported both undisturbed and under injected runtime disturbances"
+
+eval_conditions:
+  libero: "Plug-and-play inference-time safeguard over frozen pi0 on four LIBERO suites (40 tasks, 50 episodes each); disturbance labels and generator parameters are not exposed to ActFovea"
+  disturbances: "Persistent localized visual overlay (alpha-blended checker pattern after a clean warm-up), multi-view visual feedback delay (exterior + wrist held 3 frames behind proprioception), smooth action-chunk drift (phase-conditioned perturbation of chunk motion dimensions before verification), and frozen-observation replay (trigger frame reused in both views until termination)"
+  baselines: "Training-free runtime comparisons: Action Clip/Smoothing, Fixed Short Horizon, Timestamp-Only Hold; ActFovea is the only method preserving undisturbed performance while improving all three recoverable disturbances"
+
+tags:
+  - inference_time
+  - runtime_safeguard
+  - safety
+  - robustness
+  - training_free
+  - wrapper
+  - foveation
+  - action_chunk_verification
+  - consistency_monitoring
+  - safe_failure
+  - pi0
+  - libero
