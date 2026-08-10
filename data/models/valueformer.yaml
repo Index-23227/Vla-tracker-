@@ -10,7 +10,7 @@ code_url: null
 venue: arXiv preprint
 open_source: false
 
-model_type: vla
+model_type: value_model
 
 architecture:
   backbone: "Frozen DINOv3 ViT-L/16 at 518x518, applied independently to six views per frame (cam_high, cam_left_wrist, cam_right_wrist plus a cam_high gripper ROI crop and two wrist-gripper ROI crops). Only the CLS token per view is kept, so one frame yields a 6 x 1024 = 6144-dim descriptor. A ViT-B/16 224px variant and a legacy four-view (4096-dim) build are also supported; the four-view build is the substrate for the label-shape ablation."
