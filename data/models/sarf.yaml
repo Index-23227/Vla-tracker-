@@ -1,0 +1,55 @@
+# Paper: Structure-Aware Robust Fine-Tuning: Defending Vision-Language-Action Robots Against Physical Attention Hijacking
+# arXiv: 2608.03231 (2026-08-04), IROS 2026
+
+name: SARF
+full_name: "Structure-Aware Robust Fine-Tuning (SARF): Defending Vision-Language-Action Robots Against Physical Attention Hijacking"
+organization: "Guangdong Laboratory of Artificial Intelligence and Digital Economy (SZ); Shenzhen University; Carleton University"
+date: "2026-08-04"
+paper_url: https://arxiv.org/abs/2608.03231
+code_url: null
+venue: "IROS 2026"
+open_source: false
+model_type: vla
+inference_hz: null
+
+architecture:
+  action_head: "Unchanged from the base policy: OpenVLA's autoregressive discrete action-token decoder. SARF is a defensive fine-tuning procedure, not a new action head. During fine-tuning only the student visual encoder E_v^S is updated; the multimodal backbone pi and the action head stay frozen, so the deployed architecture, policy interface, and inference latency are identical to stock OpenVLA (zero inference overhead)."
+  action_head_category: autoregressive
+  backbone: "OpenVLA visual encoder (SigLIP + DINOv2), fine-tuned in a teacher-student setup; teacher is the frozen clean-pretrained encoder"
+  llm: "Llama-2-7B (inherited from OpenVLA)"
+  action_space: discrete
+  parameters: "7B"
+  key_innovation: "Identifies policy-critical action-to-vision attention hijacking as the mechanism by which printable adversarial patches break VLA manipulation: action-query tokens Q_act that drive the action head have their cross-attention mass captured by the patch, suppressing attention on the end-effector and target object. The paired attack AGSD (Attention-Guided Semantic Disruption) weaponizes this with an EOT-optimized printable patch minimizing L_AGSD = lambda_attn*L_attn - lambda_disp*L_disp - lambda_misalign*L_misalign (0.8 / 0.2 / 0.5), combining attention capture with InfoNCE feature dispersion and image-text misalignment. The defense SARF minimizes L_SARF = lambda_feat*L_feat + lambda_pcad*L_pcad + lambda_geo*L_geo (0.5 / 1.0 / 0.3): (i) L_feat anchors student patch-token features to the teacher by cosine distance to prevent catastrophic forgetting; (ii) L_pcad distills attention only for action tokens, aligning teacher/student temperature-softmaxed attention distributions over visual tokens with a symmetric Jensen-Shannon divergence averaged over heads and action queries; (iii) L_geo enforces Gram-matrix (pairwise cosine feature relation) consistency weighted by a language-guided mask M_ij = (m_i*m_j)^2 built from teacher text-to-vision attention m_i = max_{q in Q_txt} A^T_{q,i}, so structure is denoised only on task-relevant regions while background perturbations are down-weighted. Because the mask comes from the clean teacher stream rather than the perturbed student stream, it stays a stable reference under attack."
+
+training:
+  dataset: "LIBERO (Spatial, Object, Goal, Long suites) for simulation fine-tuning and evaluation; PiPER tabletop demonstrations for real-robot validation (pick & place, open drawer, stack)."
+  method: "Teacher-student robust fine-tuning of the visual encoder only. The teacher is the clean-pretrained OpenVLA encoder (frozen); the student sees AGSD-patched observations pushed through the same EOT pipeline. Same data budget as the AF (EDPA adversarial fine-tuning) baseline. EOT distribution: in-plane rotation theta ~ U(-30, 30) degrees, translation up to 10% of image dimensions, scaling s ~ U(0.9, 1.1), uniformly random patch placement, plus mild perspective and illumination jitter. Adversarial patch covers 5% of image area in LIBERO; printed physical patches of 20x20, 15x15, 8x8 and 5x5 cm on the real robot. Attention distillation aggregates the last three cross-attention layers."
+  num_trajectories: null
+  compute: "Not reported."
+
+benchmarks:
+  libero:
+    libero_spatial: 85.6
+    libero_object: 88.2
+    libero_goal: 79.0
+    libero_long: 53.4
+    libero_avg: 76.55
+    source: "arXiv:2608.03231 Table II (SARF column, Clean rows)"
+    date_reported: "2026-08-04"
+    eval_condition: "clean inputs (no patch) after SARF defensive fine-tuning of OpenVLA; converted from the paper's Failure Rate to Success Rate as SR = 100 - FR"
+    notes: "The paper reports Failure Rate (FR, %), lower is better; scores here are 100 - FR. SARF clean FR is 14.4 / 11.8 / 21.0 / 46.6 (avg 23.5) versus undefended OpenVLA 14.2 / 11.6 / 20.8 / 46.2 (avg 23.2), i.e. clean performance is essentially preserved (0.3pp average cost). Under the AGSD attack the undefended policy fails at FR 100 on all four suites (SR 0.0), while SARF holds FR 17.0 / 14.2 / 26.5 / 56.8 (SR 83.0 / 85.8 / 73.5 / 43.2, avg SR 71.4) - a 71.4-point average FR reduction, and this is under an ADAPTIVE attacker that re-optimizes the patch against the frozen SARF-tuned model. The EDPA adversarial-fine-tuning baseline AF averages FR 96.6 under AGSD (SR 3.4) and also degrades clean performance (FR 17.9 / 17.3 / 22.8 / 49.0). Average FR under other patch attacks drops from 97.3 to 26.8 (UADA), 97.4 to 26.0 (UPA), and 100.0 to 27.4 (EDPA). Attack-side reference (Table I): AGSD drives OpenVLA to FR 100 on all suites, OpenVLA-oft to 97.2 / 93.6 / 100 / 100, and pi0 to 48.8 / 50.4 / 70.8 / 80.2, versus Random-patch baselines of 35.8-75.6 / 10.0-32.0 / 5.2-48.6."
+  real_world:
+    piper_pick_and_place: 74.0
+    piper_open_drawer: 63.0
+    piper_stack: 58.0
+    real_world_avg: 65.0
+    source: "arXiv:2608.03231 Table III (SARF column)"
+    date_reported: "2026-08-04"
+    eval_condition: "PiPER tabletop manipulator under a printed physical AGSD patch; 100 physical trials per task per condition with randomized initial object poses, camera viewpoints and distances"
+    notes: "Success Rate (%), higher is better. Under the printed AGSD patch: undefended Original 32.0 / 23.0 / 14.0 (avg 23.0), AF 51.0 / 42.0 / 29.0 (avg 40.7), SARF 74.0 / 63.0 / 58.0 (avg 65.0) - a 42.0-point average gain over the attacked baseline. Clean undefended performance is 79.0 / 71.0 / 66.0 (avg 72.0), so SARF under attack recovers to within 7pp of the clean average; pick & place nearly closes the gap (74.0 vs 79.0) while the precision-heavy stack task retains an 8pp gap."
+
+eval_conditions:
+  libero: "fine-tuned; visual encoder only, four LIBERO suites, reported as Failure Rate in the paper and converted to Success Rate here"
+  real_world: "fine-tuned; PiPER tabletop, 100 physical trials per task per condition under a printed AGSD patch"
+
+tags: [adversarial-robustness, patch-attack, defense, robust-fine-tuning, attention-distillation, teacher-student, openvla, libero, real-world, security, iros2026]

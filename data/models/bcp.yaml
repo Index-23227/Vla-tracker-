@@ -1,0 +1,54 @@
+# Paper: Continue or Replan? Bernoulli-Continuation Policy Learning for Adaptive Horizon Execution
+# arXiv: 2608.03483
+
+name: BCP
+full_name: "Continue or Replan? Bernoulli-Continuation Policy Learning for Adaptive Horizon Execution"
+organization: "Peking University, Microsoft Research Asia"
+date: "2026-08-04"
+paper_url: https://arxiv.org/abs/2608.03483
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  action_head: "Bernoulli-Continuation Head: a lightweight 2-layer Transformer encoder attached to a frozen chunk-based VLA. It consumes VLA-derived visual-language tokens F_t, the denoised action a_t^j and the final-step action-velocity feature u_t^j for each action step, projects them into a shared d-dim space with a prepended [CLS] token, and outputs M-1 logits mapped by sigmoid to continue probabilities p_t^i. Execution-horizon selection is factorized as an ordered chain of continue-or-replan Bernoulli decisions: pi(E_t = e_k) = (prod_{i<k} p_t^i)(1 - p_t^k). The base VLA still generates all actions; BCP only decides how many actions of the chunk to execute before replanning. Candidate horizons E = (15, 20, 25, ..., 50)."
+  action_head_category: other
+  backbone: "Frozen base VLA (LingBot-VLA w/o depth, ABot-M0, ACT on RoboTwin 2.0; pi0.5 on LIBERO); BCP adds only a 2-layer Transformer encoder head"
+  parameters: "16.393M trainable (continuation head only; base VLA frozen)"
+  key_innovation: "Identifies replanning-timing misalignment (not horizon length) as a key failure mode of fixed-horizon chunk execution: a phase-shift experiment on 50 RoboTwin 2.0 tasks shows an 11.30% success gap (82.50% - 93.65%) purely from where replanning boundaries fall. BCP replaces the fixed execution horizon with a per-chunk decision, imposing an ordinal, prefix-sharing inductive bias via chained Bernoulli continue decisions instead of a flat softmax classifier. Trained with GRPO from trajectory-level outcomes (per-chunk labels are unidentifiable) using a Replanning-Efficiency Reward R_i = S_i(1 + delta+ max(eta,0) + delta- min(eta,0)) with eta = tanh(log(C_ref/C_i)), which prevents collapse to unnecessarily short horizons. Plug-and-play: base VLA stays frozen, adds only 2.03 ms per query (938.10 -> 940.13 ms) and lowers overall runtime (10.43 s -> 10.24 s)."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.8
+    libero_goal: 99.2
+    libero_long: 96.2
+    libero_avg: 98.7
+    source: "arXiv:2608.03483 Table 3 (pi0.5 + BCP)"
+    date_reported: "2026-08-04"
+    eval_condition: "pi0.5 base policy frozen, BCP head trained with GRPO on LIBERO; prediction horizon 10"
+    notes: "Baselines: pi0.5 97.0 avg (98.5/98.7/98.1/92.5), pi0.5+AAC 97.9, pi0.5+AutoHorizon 96.9. On LIBERO-PRO (Object suite position perturbations) pi0.5+BCP 37.7 avg (x0.2 57.0 / x0.3 39.4 / x0.4 16.8) vs pi0.5 30.9 and AAC 34.8."
+  robotwin_v2:
+    robotwin_v2_avg: 93.94
+    robotwin_v2_50task_clean: 93.94
+    robotwin_v2_50task_randomized: 92.84
+    robotwin_v2_13_lowsuccess_clean: 86.23
+    robotwin_v2_13_lowsuccess_randomized: 83.46
+    source: "arXiv:2608.03483 Table 2 (LingBot-VLA + BCP)"
+    date_reported: "2026-08-04"
+    eval_condition: "LingBot-VLA (w/o depth) frozen as base policy; BCP trained under Clean setting only and tested on both Clean and Randomized; 50 ALOHA-AgileX tasks"
+    notes: "LingBot-VLA base: 89.88 Clean / 88.78 Randomized (50 tasks), so BCP gives +4.06 on both. On the 13 tasks where LingBot-VLA is below 90% Clean, 75.15 -> 86.23 (+11.08) and 73.54 -> 83.46 (+9.92). BCP also improves ACT on the 13-task subset (16.08 -> 21.46 Clean) and ABot-M0 on 50 tasks (82.74 -> 85.96 Clean, 76.76 -> 85.40 Randomized)."
+
+training:
+  method: "Two-part setup: base VLA is pretrained/SFT and kept frozen; the Bernoulli-Continuation Head is trained with GRPO (Group Relative Policy Optimization) on trajectory-level rewards. For each task instance, G-1=7 adaptive rollouts plus one fixed-horizon reference trajectory anchor the group advantage. Replanning-Efficiency Reward with delta+ = 0.7, delta- = 0.3."
+  dataset: "RoboTwin 2.0 (Clean setting, 50 tasks) for simulation training; LIBERO for the pi0.5 transfer; 128 real-world trajectories on AGIBOT G1 for real-robot BCP training (base SFT policy trained on 250 teleoperated task trajectories + 2,000 general grasping trajectories for 40,000 steps)."
+  compute: "8x NVIDIA A100 40GB, 300 GRPO steps, group size G=8, 256 parallel rollout environments, 4 rollout epochs, global batch size 512, 2 update epochs; implemented on RLinf."
+
+eval_conditions:
+  libero: "pi0.5 base (prediction horizon 10, candidate execution horizons {2,4,5,6,8,10}), 4 suites, BCP head trained with GRPO; LIBERO-PRO evaluated on Object suite with position perturbation magnitudes x0.2/x0.3/x0.4 following the AAC protocol"
+  robotwin_v2: "LingBot-VLA w/o depth base, prediction and execution horizon 50 by default, candidate horizons (15,20,...,50); trained on Clean, evaluated on Clean and Randomized"
+  real_world: "AGIBOT G1, 50 seeds x 3 trials per task. Grasping Bottle 74% -> 92%; Hanging Mug 44% (AAC 48%) -> 84%"
+  runtime: "ALOHA-AgileX at 50 Hz control; per-query VLA inference 938.10 ms -> 940.13 ms (+2.03 ms), VLA calls 5.382 -> 5.614, executed steps 269.075 -> 248.102, estimated runtime 10.43 s -> 10.24 s"
+
+tags: [adaptive-horizon, action-chunking, replanning, reinforcement-learning, GRPO, plug-and-play, frozen-backbone, libero, robotwin, libero-pro, real-robot]
