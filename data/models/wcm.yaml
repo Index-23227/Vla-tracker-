@@ -1,0 +1,94 @@
+name: WCM
+full_name: 'WCM: A World Critic Model for Vision-Language-Action Reinforcement Learning'
+organization: Tongji University / Shanghai Innovation Institute / Fudan University (OpenMOSS)
+date: '2026-07-31'
+paper_url: https://arxiv.org/abs/2607.29613
+code_url: https://github.com/sylvestf/WCM
+venue: arXiv preprint 2026
+open_source: true
+model_type: vla
+architecture:
+  backbone: 'VLM backbone of the underlying VLA policy (or a ViT) as observation encoder; critic built on lightweight LeJEPA'
+  llm: CLIP text encoder + learned adapter for language conditioning; policy backbones are pi0 / pi0.5 / OpenVLA-OFT
+  action_head: 'policy-dependent (flow matching for pi0 / pi0.5, autoregressive for OpenVLA-OFT); WCM replaces the RL critic'
+  action_space: continuous
+  parameters: 107.2M learnable critic parameters (real-world setting)
+  action_head_category: hybrid
+  key_innovation: 'World Critic Model (WCM) unifies world modeling and value estimation in a single end-to-end critic
+    for VLA-RL. Observation history of K frames is encoded per-frame, cross-attended to a CLIP-encoded instruction token,
+    and processed by a causal Transformer "world predictor". Two heads branch off the shared hidden state: a value decoder
+    that regresses the discounted return, and an action-conditioned latent dynamics decoder (action encoder + gated FiLM
+    residual blocks) that predicts the next latent state. Training combines L2 value loss, L2 next-latent prediction loss,
+    and SIGReg (Sketched-Isotropic Gaussian Regularization) to prevent latent collapse. The world-prediction objective
+    supplies dense supervision that scalar return regression alone cannot provide, letting the critic approximate a
+    predictive state under partial observability (POMDP). WCM drops into on-policy pipelines (PPO for AR policies,
+    Flow-SDE for flow-matching policies) and off-policy pipelines (AWR for AR, RECAP for flow-matching).'
+training:
+  dataset: 'ManiSkill (RL4VLA setup), MetaWorld, CALVIN, LIBERO-Plus — 149 tasks across four simulation benchmarks;
+    real world: 7 WidowX-250S tasks with 100 teleop trajectories per task'
+  method: 'Few-shot SFT initialization, then RL with sparse 0/1 rewards. On-policy: PPO (OpenVLA-OFT) / Flow-SDE
+    (pi0, pi0.5) with WCM as critic. Off-policy: AWR (OpenVLA-OFT) / RECAP (pi0.5) with WCM as critic, using a unified
+    buffer of SFT teleop data plus success/failure rollouts. Observation history length 3 works best (1-5 ablated).'
+  compute: 'not specified; real-world RL runs 8 iterations with 50 rollouts per task per iteration, under one hour of
+    critic training'
+benchmarks:
+  maniskill:
+    ind_avg_pi0: 84.4
+    ind_avg_pi0_5: 91.9
+    ind_avg_openvla_oft: 99.0
+    ood_avg_pi0: 51.5
+    ood_avg_pi0_5: 64.4
+    ood_avg_openvla_oft: 77.9
+    source: 'WCM paper Table 1 (IND/OOD success rate, RL on top of SFT init; OOD averaged over vision, semantic, execution axes)'
+    date_reported: '2026-07-31'
+    eval_condition: RL fine-tuned with WCM critic; OpenVLA-OFT from zero-shot init reaches 98.7 IND / 73.5 OOD
+  calvin:
+    calvin_avg: 4.748
+    source: 'WCM paper Figure 4 (average task completion length, pi0.5 + WCM; pi0 + WCM reaches 3.918)'
+    date_reported: '2026-07-31'
+    eval_condition: RL fine-tuned with WCM critic on top of SFT initialization
+  metaworld:
+    metaworld_avg: 83.4
+    source: 'WCM paper Figure 4 (success rate, pi0 + WCM; pi0.5 + WCM reaches 75.2)'
+    date_reported: '2026-07-31'
+    eval_condition: RL fine-tuned with WCM critic on top of SFT initialization
+  libero_plus:
+    total_pi0: 72.8
+    total_pi0_5: 73.7
+    total_openvla_oft: 74.0
+    source: 'WCM paper Table 2 (LIBERO-Plus total score; +WCM initialized from One-SFT, i.e. one demo per task)'
+    date_reported: '2026-07-31'
+    eval_condition: 'one-shot SFT init + ~250 RL steps; surpasses Full-SFT (50 demos per task) totals of 71.2 / 72.9 / 71.7'
+  real_world:
+    carrot_pick_place: 88.0
+    banana_pick_place: 76.0
+    pepper_pick_place: 86.0
+    cloth_folding: 76.0
+    towel_folding: 70.0
+    stovetop_cleaning: 66.0
+    conveyor_sushi_picking: 48.0
+    source: 'WCM paper Table 3 (pi0.5 + WCM, successes out of 50 trials converted to percent; first 50 trajectories after test start)'
+    date_reported: '2026-07-31'
+    eval_condition: WidowX-250S, off-policy RL (RECAP pipeline) with WCM critic, 100 SFT trajectories per task
+eval_conditions:
+  maniskill: RL fine-tuned from few-shot SFT, sparse 0/1 reward, WCM critic
+  calvin: RL fine-tuned, average task completion length over 5 sequential subtasks
+  metaworld: RL fine-tuned, final success rate
+  libero_plus: one-shot SFT initialization plus ~250 RL steps, robustness perturbation suites
+  real_world: WidowX-250S, off-policy RL, 50 trials per task
+inference_hz: null
+tags:
+- RL
+- critic-model
+- world-model
+- POMDP
+- LeJEPA
+- PPO
+- Flow-SDE
+- AWR
+- RECAP
+- pi0
+- pi0.5
+- OpenVLA-OFT
+- real-world
+- OOD-generalization
