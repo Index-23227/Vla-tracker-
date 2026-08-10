@@ -1,0 +1,179 @@
+# Paper: ValueFormer: A Causal Transformer Value Function with Stage-Aware Labels for Semi-Autonomous Vision-Language-Action Policies
+# arXiv: 2608.02958
+
+name: ValueFormer
+full_name: "ValueFormer: A Causal Transformer Value Function with Stage-Aware Labels for Semi-Autonomous Vision-Language-Action Policies"
+organization: "Chef Robotics"
+date: "2026-08-03"
+paper_url: https://arxiv.org/abs/2608.02958
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+model_type: vla
+
+architecture:
+  backbone: "Frozen DINOv3 ViT-L/16 at 518x518, applied independently to six views per frame (cam_high, cam_left_wrist, cam_right_wrist plus a cam_high gripper ROI crop and two wrist-gripper ROI crops). Only the CLS token per view is kept, so one frame yields a 6 x 1024 = 6144-dim descriptor. A ViT-B/16 224px variant and a legacy four-view (4096-dim) build are also supported; the four-view build is the substrate for the label-shape ablation."
+  llm: "None. ValueFormer is a policy-agnostic critic and contains no language model; the supervised policy is a pi0.5-family VLA that remains unchanged."
+  action_head: "No action head. ValueFormer emits two per-frame scalars from one forward pass: a smooth Monte Carlo value V_mc (3-layer MLP 256->512->256->1, sigmoid) for advantage estimation, and a sharp binary value V_bin (2-layer MLP 256->128->1, sigmoid) for online mistake detection. Actions are produced by the underlying pi0.5 flow-matching policy, which ValueFormer never modifies at inference; the critic influences the policy only through per-frame post-training loss weights."
+  action_head_category: other
+  action_space: continuous
+  parameters: "3,459,586 trainable (vision projection 1,573,120; state projection 3,840; time projection 768; positional embedding 4,096; 2-layer 4-head causal transformer 1,579,520; final LayerNorm 512; V_mc head 264,705; V_bin head 33,025). DINOv3 ViT-L/16 encoder frozen. Roughly 0.1% of the ~3.3B pi0-family policy it supervises."
+  key_innovation: >
+    Argues that for a behavior-cloned VLA the per-frame label, not the architecture, is the hard part, and
+    supplies a stage-aware "success-then-decay" Monte Carlo return. Successful episodes are labeled
+    v_k = gamma^(N-1-k) with gamma = 0.99; failed episodes reuse that same success curve up to the failure
+    frame k_fail = floor((s_fail / N_s) * N) and only then decay at rate gamma from v_{k_fail}, so a late
+    failure keeps more partial credit than an early one. This avoids both the outcome leakage at t=0 that an
+    outcome-scaled label introduces and the discontinuity a cliff label introduces; the naive flat-zero
+    alternative teaches the network that ordinary good observations predict failure and produces oscillatory,
+    zero-collapsing predictions on clean successes. A second per-frame binary target V_bin is built from
+    annotated mistake intervals (t_start, t_end) rather than a single failure time, so transient mistakes that
+    the policy recovers from inside otherwise-successful rollouts also carry supervision. The two targets pull
+    in opposite directions (smooth for the critic, sharp for the safety filter) but share one causal
+    transformer backbone and one forward pass. Human-in-the-loop teleoperation takeover flags supply the same
+    (t_start, t_end) intervals for free at fleet scale, with a lambda = 1.5 s lead shift for operator reaction
+    lag and an ignore mask over the ambiguous 5 s run-up. Downstream, V_bin and the horizon-differenced
+    advantage A_t = V_mc(t + 50) - V_mc(t) become per-frame weights on the policy's own flow-matching
+    post-training loss.
+
+training:
+  method: >
+    Both heads trained jointly with BCE (L = L_mc + beta * L_bin, beta = 1.0); BCE-on-value is preferred to
+    MSE-after-sigmoid because the composed loss saturates exactly at the {0,1} endpoints where success and
+    failure diverge. The binary term uses a batch-wise pos-weight alpha+ = clip(n_0/n_1, 0.1, 10) against the
+    ~95%/5% good/mistake frame imbalance. Frozen-encoder features are cached to disk (~6.5 GB; ~90 min to
+    rebuild on an RTX-5090-class GPU), so training itself runs in under three minutes. AdamW, lr 1e-4, weight
+    decay 0.05, five warm-up epochs then cosine annealing, batch size 256, max 100 epochs with early stopping
+    on validation MSE (patience 15); best checkpoint at ~80 epochs. A 4-group balanced sampler over
+    {expert-success, expert-fail, rollout-success, rollout-fail} up-weights the ~88 failure rollouts; the
+    expert-fail group is empty in practice. Dropout 0.2 in the transformer body and 0.4 on the CLS path
+    feeding the binary head. Intervention-derived labels augment (never replace) manual annotations, capped at
+    ~20% of sampler mass, with the manual set kept as the sole validation and model-selection signal;
+    human-takeover frames get their V_mc regression target down-weighted to 0.5 because they describe the
+    corrective mixture rather than the policy.
+  data: >
+    1,427 real-robot bimanual sandwich-assembly episodes recorded in LeRobot v2 format on one station:
+    1,249 teleoperated expert successes plus 178 autonomous policy rollouts (90 success / 88 failure).
+    Episodes run ~2,200 frames at 30 fps, subsampled every 15 frames (0.5 s stride) to ~150 samples each,
+    213,102 samples total, split by episode into 181,421 train / 31,681 validation. Failure timing is
+    annotated by hand: a single-point table with one t_fail per failed episode (88 episodes, ~1 min each) and
+    a multi-interval table with up to three (t_start, t_end) mistake segments plus an optional severity
+    weight (196 mistake intervals total, including ~70 otherwise-successful rollouts containing a recovered
+    3-8 s retry). A separate human-in-the-loop set of 134 rollouts (362k frames) carries per-frame
+    intervention flags with 333 takeover segments across 129 episodes, split 105 train / 24 held out.
+  compute: "Single RTX-5090-class GPU. Feature extraction ~90 min dominates; training <3 min. Deployment on one RTX 5090 (32 GB) shared with the pi0.5 policy server."
+  notes: "gamma = 0.99 fixed (0.95 too steep, 0.999 too flat). Context window is the most impactful hyperparameter: swept over seq_len in {8, 16, 32, 64}; the dual-head main configuration uses 16 samples (8 s at 2 Hz), shortened from the 32-sample (16 s) window of the earlier single-head runs because a longer window masks the moment a mistake begins. Modalities are combined by element-wise sum rather than concatenation so vision cannot dominate via its larger raw dimensionality. A Gemma-4-26B VLM tried as an automated stage-completion labeler reached only ~0.21 per-episode MAE on the failure fraction against manual annotation, above the ~0.10 usability threshold, so manual annotation remains the sole source of s_fail."
+
+inference_hz: 2.0
+
+benchmarks:
+  real_robot_sandwich_assembly:
+    iwr_control_completion_pct: 70.0
+    vf_mask_completion_pct: 85.0
+    vf_awr_completion_pct: 85.0
+    iwr_control_second_sandwich_pct: 60.0
+    vf_mask_second_sandwich_pct: 90.0
+    vf_awr_second_sandwich_pct: 80.0
+    iwr_control_mean_subtask: 0.91
+    vf_mask_mean_subtask: 0.94
+    vf_awr_mean_subtask: 0.96
+    iwr_control_clean_cells_pct: 88.0
+    vf_mask_clean_cells_pct: 88.0
+    vf_awr_clean_cells_pct: 92.0
+    iwr_control_catastrophic_cells: 7
+    vf_mask_catastrophic_cells: 2
+    vf_awr_catastrophic_cells: 2
+    iwr_control_repeat_picks: 4
+    vf_mask_repeat_picks: 0
+    vf_awr_repeat_picks: 0
+    source: "Paper Table VI (on-robot A/B, 10 trials of two consecutive sandwiches = 20 sandwiches per variant, 120 graded cells each). Completion 14/20 (70%) for the flag-only IWR control vs 17/20 (85%) for both critic-derived weights; Wilson 95% CI [48,85] vs [64,95]. Median sandwich duration 1:15 (IWR) / 1:21 (vf-mask) / 1:22 (vf-awr)."
+    date_reported: "2026-08-03"
+    eval_condition: "Bimanual station with two 7-DoF Trossen WidowX arms and six ingredient bins; pi0.5-family VLA prompted 'make a sandwich'; six ordered stages (bottom_bun, patty, cheese, tomato, lettuce, top_bun). All three variants train on the same 985k-frame merged set (134-episode HIL corrections with no-motion operator-pause frames excised, merged 2:1 with replayed base autonomous data) and keep the same w=9 floor on human-takeover frames; only the weight on autonomous frames of takeover episodes differs. vf-mask zeroes the 9.6% of autonomous frames V_bin flags as failing; vf-awr scales them by clip(exp(A_t / 0.3), 0.1, 9) with A_t = V_mc(t+50) - V_mc(t) (median weight 1.03, range 0.13-7.61, effective intervention gradient share 0.459 matched to the control's ~0.46). ValueFormer supplies only the per-frame training weight and is not part of the policy at inference."
+    notes: "Authors explicitly call these results suggestive, not established: at n=20 the completion difference is within noise (Fisher exact p=0.45 vs control), the catastrophic-cell drop largely tracks the completion count, and on completed sandwiches per-subtask means converge (0.97 vf-mask / 0.98 vf-awr / 0.99 control). Variants were run one to two weeks after the control, so ingredient staging is uncontrolled across sessions. The corroborating channels are the repeat-pick elimination (4 -> 0, a reflex that survived every flag-only lever) and the agreement of two different critic weights. Per-subtask: vf-mask lifts tomato 0.82->0.97 and lettuce 0.82->0.95 while giving back cheese 0.93->0.89 and bottom bun 1.00->0.94; vf-awr reaches a perfect 1.00/1.00 on tomato/lettuce at the cost of cheese 0.84."
+  value_prediction:
+    validation_mse: 0.0003
+    validation_mae: 0.015
+    mean_v_success: 0.537
+    mean_v_fail: 0.0
+    separation_delta_v: 0.537
+    source: "Paper Table II (held-out value-prediction metrics for the main six-view dual-head ViT-L/16 configuration with MC-smooth stage-aware labels). Best checkpoint at ~80 epochs, wall-clock training <3 min. Validation MSE falls from ~1.4e-3 at initialization to ~3e-4; MAE from 0.026 to 0.015."
+    date_reported: "2026-08-03"
+    eval_condition: "By-episode train/val split (181,421 / 31,681 samples, no frame leakage). MSE reported as a measurement only; training uses BCE throughout."
+  label_shape_ablation:
+    mc_smooth_val_loss: 0.00051
+    mc_smooth_rollout_mae: 0.024
+    mc_smooth_delta_v: 0.143
+    outcome_scaled_val_loss: 0.00192
+    outcome_scaled_rollout_mae: 0.058
+    outcome_scaled_delta_v: 0.309
+    cliff_val_loss: 0.00202
+    cliff_rollout_mae: 0.047
+    cliff_delta_v: 0.254
+    c_linear_val_loss: 0.0019
+    c_linear_rollout_mae: 0.058
+    c_linear_delta_v: 0.249
+    c_late_val_loss: 0.00178
+    c_late_rollout_mae: 0.048
+    c_late_delta_v: 0.25
+    source: "Paper Table III (five fail-episode label shapes trained under an identical recipe; only the label differs). MC-smooth wins by ~3x on validation BCE loss and ~2x on rollout MAE. Mean predicted V on success/fail: MC-smooth 0.533/0.390, A 0.504/0.195, B 0.529/0.275, C-linear 0.515/0.266, C-late 0.516/0.267."
+    date_reported: "2026-08-03"
+    eval_condition: "Legacy four-view single-head configuration (ViT-L/16 backbone, 32-frame/16 s window) so that only the V_mc label shape varies; evaluated on a held-out rollout set of 12 successes and 9 failures. Rollout MAE here is not comparable to the validation MAE of Table II."
+    notes: "Outcome-scaled (A) posts the largest separation (0.309) but the authors argue this is a label artifact: scaling the whole pre-failure curve by c = s_fail/N_s makes the t=0 label depend on the eventual outcome, which is not learnable from the observation, and hard-zeroing the post-failure tail makes a collapse after four correct ingredients indistinguishable from a bottom-bun failure. The spread in validation BCE loss across shapes is roughly 4x, while no architectural change the authors tried moved the result comparably."
+  failure_detection:
+    manual_only_average_precision: 0.38
+    manual_plus_intervention_average_precision: 0.82
+    manual_only_auroc: 0.69
+    manual_plus_intervention_auroc: 0.94
+    manual_only_detected_before_takeover_pct: 35.0
+    manual_plus_intervention_detected_before_takeover_pct: 95.0
+    manual_only_median_lead_s: 1.2
+    manual_plus_intervention_median_lead_s: 2.4
+    source: "Paper Table IV (24 held-out HIL episodes, matched 5% per-frame false-positive rate). Single manual+intervention model: AP 0.79, AUROC 0.93, 95% detected before takeover, 2.4 s median lead; the deployed 2-seed ensemble reaches AP 0.82 / AUROC 0.94. Across a 54-run sweep all 48 manual+intervention configurations outscored all 6 manual-only ones on held-out AP."
+    date_reported: "2026-08-03"
+    eval_condition: "Best configuration is seq_len=16 with intervention share 0.2, deployed as a 2-seed ensemble. Lead is measured from the raw takeover flag onset, not the shifted target. Caveat stated by the authors: the held-out ground truth is itself intervention-derived (with the lambda=1.5 s reaction-lag correction), so it measures agreement with where the operator intervened rather than an independent notion of failure."
+  serving_cost:
+    pi0_5_isolated_ms: 58.6
+    pi0_5_concurrent_ms: 84.3
+    pi0_5_concurrent_p90_ms: 100.6
+    value_tick_fp32_ms: 266.0
+    value_tick_batched_tf32_ms: 88.0
+    value_tick_batched_bf16_ms: 52.0
+    encode_original_ms: 349.8
+    encode_batched_fp32_ms: 172.0
+    encode_batched_tf32_ms: 129.9
+    encode_batched_bf16_ms: 85.1
+    encode_bf16_speedup_x: 4.1
+    source: "Paper Tables VII and VIII (single RTX 5090, 32 GB, policy and critic in separate servers). pi0.5 inference is 58.6 ms isolated but 84.3 ms mean (p90 100.6, max 102.8) under concurrent 2 Hz critic load, against a ~100 ms prefetch budget for the 30 Hz control loop. Encode-path duty cycle at 2 Hz drops 70% -> 34% (batched FP32) -> 26% (TF32) -> 17% (bf16). Measured on the real serving step, the per-tick cost drops from 266 ms to ~88 ms (batched+TF32) and ~52 ms (+bf16), a 3-5x reduction."
+    date_reported: "2026-08-03"
+    eval_condition: "Cost is dominated by six frozen DINOv3 ViT-L/16 forward passes at 518 px; the causal transformer head is sub-millisecond. Batched FP32 output is numerically identical to the per-view path (max |delta| = 3.5e-5); bf16 shifts the value output by <1e-3 with V_bin unchanged to four decimals. bf16 re-validation on the 24-episode held-out HIL set: cosine similarity to FP32 embeddings mean 0.99994 / min 0.99969, AUROC 0.943 -> 0.942, AP 0.818 -> 0.816, median lead 2.4 s unchanged; only a more sensitive trigger loses one of twenty onset episodes (95% -> 90%) at +0.2 false alarms per minute. Absolute times in Table VIII are inflated ~1.3x because the policy server was resident."
+
+eval_conditions:
+  task: "Real-robot bimanual sandwich assembly on a live restaurant-style station; success requires all six ingredients placed correctly and the sandwich closed. Common failure modes: retry (failed grasp then recovery), double-placement (two patties), wrong-stage (scratching the cheese bin without grasping), and stall."
+  ab_protocol: "10 trials of two consecutive sandwiches with no scene reset between them, deliberately chosen because a single sandwich from a freshly staged station is already reliably achievable and discriminates poorly; the second-sandwich rate acts as hard-example mining and is the most sensitive column."
+  no_simulation_benchmarks: "No LIBERO, CALVIN, SimplerEnv, RoboTwin, RLBench, or RoboCasa results. Deformable and granular food (folding lettuce, sticking cheese, tipping patties) is precisely what current simulators reproduce least faithfully, so all evaluation is on real hardware."
+  statistical_caveat: "Completion difference at n=20 is within noise (Fisher exact p=0.45). A paired re-evaluation with shared initial conditions and a McNemar test is named as the power fix. The 'soft' weight variant (w = 0.1 + 0.9 V_bin) is implemented but not yet trained or evaluated."
+  untested_paths: "Three closed-loop uses of V(s) remain untested end-to-end: abort/retry gating on value drops, advantage conditioning (supplying A_t as a conditioning token rather than a loss weight), and offline filtering of low-value rollouts from the post-training set."
+  causal_window_lag: "Failures register in V_mc several seconds after the MC-label transition; the authors' visual estimate is 5-10 s for the 16 s window and roughly half that for the 8 s dual-head window. No precise measurement is reported."
+
+tags:
+  - vla
+  - value-function
+  - critic
+  - policy-agnostic
+  - causal-transformer
+  - dinov3
+  - frozen-backbone
+  - monte-carlo-return
+  - stage-aware-labeling
+  - failure-detection
+  - runtime-monitoring
+  - human-in-the-loop
+  - intervention-weighted-regression
+  - advantage-weighted-regression
+  - post-training-reweighting
+  - real-robot
+  - bimanual-manipulation
+  - pi0.5-base
+  - semi-autonomous
+  - deployment-optimization
