@@ -64,7 +64,7 @@ VLA-Tracker solves this by:
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
 | **CALVIN** (avg len) | MPCoT (4.92) | MMaDA-VLA (4.78) | AVA-VLA (4.77) |
-| **SimplerEnv** (avg) | Coarse-to-Control (83.3) | TBD-VLA (82.1) | GTA-VLA (81.2) |
+| **SimplerEnv** (avg) | Coarse-to-Control (83.3) | GTA-VLA (81.2) | InstructVLA (80.3) |
 | **RoboTwin v1** (avg) | Qwen-RobotManip (93.8) | Fast-WAM (91.8) | Qwen-VLA (86.7) |
 | **RoboTwin v2** (avg) | MotuBrain (96.0) | BCP (93.9) | STARRY (93.6) |
 | **RoboCasa** (avg) | Z-1 (80.6) | StereoPolicy (75.6) | Xiaomi-Robotics-1 (74.5) |
