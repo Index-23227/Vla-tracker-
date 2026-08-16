@@ -1,0 +1,59 @@
+name: SALT
+full_name: "SALT: Semantically ALigned action Tokenizer (Lost in Reconstruction: Aligning Action Representations with Language in Vision-Language-Action Models)"
+organization: "Carnegie Mellon University"
+date: "2026-08-11"
+paper_url: https://arxiv.org/abs/2608.10484
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "miniVLA (Prismatic-style VLA) with Qwen2.5-0.5B backbone"
+  llm: "Qwen2.5-0.5B"
+  action_head: "Autoregressive discrete action-token prediction over a residual-VQ codebook (7 residual groups x 256 codes per 8-step chunk); frozen tokenizer decoder maps predicted IDs to continuous 7-DoF actions"
+  action_head_category: autoregressive
+  action_space: discrete
+  parameters: "0.5B"
+  key_innovation: "SALT augments a residual VQ-VAE action tokenizer with a generative language-alignment loss: quantized action latents of an episode are turned into soft prefix embeddings (learned scalar gain + positional encoding) and fed with a describe prompt to a frozen pretrained LM that must generate the episode instruction. Gradients flow through the straight-through quantizer into the encoder and codebooks, so the action vocabulary is partitioned along linguistically meaningful (verb) distinctions instead of reconstruction error alone. The LM is discarded after tokenizer training and downstream VLA training is unchanged."
+
+benchmarks:
+  simpler_env:
+    simpler_widowx_put_spoon_on_towel: 75.0
+    simpler_widowx_put_carrot_on_plate: 62.5
+    simpler_widowx_stack_green_on_yellow: 70.8
+    simpler_widowx_put_eggplant_in_basket: 79.2
+    simpler_avg: 71.9
+    source: "Table 2 (SALT row), arXiv:2608.10484"
+    date_reported: "2026-08-11"
+    eval_condition: "SimplerEnv visual-matching WidowX suite; miniVLA (Qwen2.5-0.5B) trained on BridgeV2 from the base VLM checkpoint for 15k steps, batch 128; 24 episodes per task (n=96); open-loop 8-step action chunks"
+
+  simpler_env_vqvae_baseline:
+    simpler_widowx_put_spoon_on_towel: 58.3
+    simpler_widowx_put_carrot_on_plate: 45.8
+    simpler_widowx_stack_green_on_yellow: 33.3
+    simpler_widowx_put_eggplant_in_basket: 33.3
+    mean_success: 42.7
+    source: "Table 2 (VQ-VAE row), arXiv:2608.10484"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical miniVLA recipe; reconstruction-only residual VQ-VAE tokenizer (same architecture and capacity as SALT, no alignment loss)"
+
+  simpler_env_fast_baseline:
+    simpler_widowx_put_spoon_on_towel: 54.2
+    simpler_widowx_put_carrot_on_plate: 29.2
+    simpler_widowx_stack_green_on_yellow: 20.8
+    simpler_widowx_put_eggplant_in_basket: 20.8
+    mean_success: 31.2
+    source: "Table 2 (FAST row), arXiv:2608.10484"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical miniVLA recipe; FAST tokenizer fitted on the same BridgeV2 chunks, vocabulary 1024, ~7 tokens per chunk"
+
+eval_conditions:
+  simpler_env: "SimplerEnv visual-matching WidowX, 4 tasks x 24 episodes; action tokenizer is the only component varied across conditions"
+
+training:
+  dataset: "BridgeData V2 (WidowX 250, 7-DoF; 27,271 verb-labeled episodes across 17 verb classes used for the analyses)"
+  method: "Two stages: (1) residual VQ-VAE tokenizer trained with reconstruction + VQ/commitment + language-alignment loss (L = L_recon + L_VQ + lambda*L_align) using a frozen LM instruction-generation objective; (2) miniVLA policy trained from the base vision-language checkpoint with the frozen tokenizer, no prior robot-action pretraining"
+  compute: "NVIDIA L40S (48GB); each headline policy 15k steps on 2 L40S for ~1-2 days; tokenizers ~4-8 h each on 1 L40S (~150 GPU-h total); ~1,500 L40S GPU-h aggregate"
+
+tags: [simpler-env, bridgev2, action-tokenizer, vq-vae, residual-vq, language-alignment, minivla, widowx, discrete-tokens]

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-16T16:49:41.498488",
-  "num_models": 408,
+  "generated_at": "2026-08-16T16:52:28.958894",
+  "num_models": 409,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -18304,6 +18304,68 @@
       "rank": 349
     },
     {
+      "name": "SALT",
+      "organization": "Carnegie Mellon University",
+      "date": "2026-08-11",
+      "paper_url": "https://arxiv.org/abs/2608.10484",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "simpler-env",
+        "bridgev2",
+        "action-tokenizer",
+        "vq-vae",
+        "residual-vq",
+        "language-alignment",
+        "minivla",
+        "widowx",
+        "discrete-tokens"
+      ],
+      "architecture": {
+        "backbone": "miniVLA (Prismatic-style VLA) with Qwen2.5-0.5B backbone",
+        "llm": "Qwen2.5-0.5B",
+        "action_head": "Autoregressive discrete action-token prediction over a residual-VQ codebook (7 residual groups x 256 codes per 8-step chunk); frozen tokenizer decoder maps predicted IDs to continuous 7-DoF actions",
+        "action_head_category": "autoregressive",
+        "parameters": "0.5B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "simpler_env": {
+          "simpler_widowx_put_spoon_on_towel": 75.0,
+          "simpler_widowx_put_carrot_on_plate": 62.5,
+          "simpler_widowx_stack_green_on_yellow": 70.8,
+          "simpler_widowx_put_eggplant_in_basket": 79.2,
+          "simpler_avg": 71.9
+        },
+        "simpler_env_vqvae_baseline": {
+          "simpler_widowx_put_spoon_on_towel": 58.3,
+          "simpler_widowx_put_carrot_on_plate": 45.8,
+          "simpler_widowx_stack_green_on_yellow": 33.3,
+          "simpler_widowx_put_eggplant_in_basket": 33.3,
+          "mean_success": 42.7
+        },
+        "simpler_env_fast_baseline": {
+          "simpler_widowx_put_spoon_on_towel": 54.2,
+          "simpler_widowx_put_carrot_on_plate": 29.2,
+          "simpler_widowx_stack_green_on_yellow": 20.8,
+          "simpler_widowx_put_eggplant_in_basket": 20.8,
+          "mean_success": 31.2
+        }
+      },
+      "eval_conditions": {
+        "simpler_env": "SimplerEnv visual-matching WidowX, 4 tasks x 24 episodes; action tokenizer is the only component varied across conditions",
+        "simpler_env_vqvae_baseline": "Identical miniVLA recipe; reconstruction-only residual VQ-VAE tokenizer (same architecture and capacity as SALT, no alignment loss)",
+        "simpler_env_fast_baseline": "Identical miniVLA recipe; FAST tokenizer fitted on the same BridgeV2 chunks, vocabulary 1024, ~7 tokens per chunk"
+      },
+      "simpler_avg": 71.9,
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 350
+    },
+    {
       "name": "SAM2Act",
       "organization": "University of Washington / NVIDIA",
       "date": "2025-01-30",
@@ -18343,7 +18405,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 350
+      "rank": 351
     },
     {
       "name": "SAMoE-VLA",
@@ -18379,7 +18441,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 351
+      "rank": 352
     },
     {
       "name": "SAPS",
@@ -18478,7 +18540,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 352
+      "rank": 353
     },
     {
       "name": "SceneDiver",
@@ -18548,7 +18610,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 353
+      "rank": 354
     },
     {
       "name": "SEAM",
@@ -18602,7 +18664,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 354
+      "rank": 355
     },
     {
       "name": "SeeLikeARobot",
@@ -18648,7 +18710,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 355
+      "rank": 356
     },
     {
       "name": "Sentinel-VLA",
@@ -18695,7 +18757,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 356
+      "rank": 357
     },
     {
       "name": "SiMDex",
@@ -18764,7 +18826,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 357
+      "rank": 358
     },
     {
       "name": "SOMA",
@@ -18828,7 +18890,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 358
+      "rank": 359
     },
     {
       "name": "SpaceVLA",
@@ -18885,7 +18947,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 359
+      "rank": 360
     },
     {
       "name": "SPARK",
@@ -18954,7 +19016,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 360
+      "rank": 361
     },
     {
       "name": "SpikeVLA",
@@ -18991,7 +19053,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 361
+      "rank": 362
     },
     {
       "name": "SSAA",
@@ -19035,7 +19097,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 362
+      "rank": 363
     },
     {
       "name": "StableIDM",
@@ -19084,7 +19146,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 363
+      "rank": 364
     },
     {
       "name": "STARRY",
@@ -19124,7 +19186,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 364
+      "rank": 365
     },
     {
       "name": "StereoPolicy",
@@ -19194,7 +19256,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 365
+      "rank": 366
     },
     {
       "name": "SuSIE",
@@ -19225,7 +19287,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 366
+      "rank": 367
     },
     {
       "name": "Tabero",
@@ -19275,7 +19337,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 367
+      "rank": 368
     },
     {
       "name": "TacCoRL",
@@ -19315,7 +19377,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 368
+      "rank": 369
     },
     {
       "name": "TacVLA",
@@ -19350,7 +19412,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 369
+      "rank": 370
     },
     {
       "name": "TAP",
@@ -19400,7 +19462,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 370
+      "rank": 371
     },
     {
       "name": "TEMPO",
@@ -19449,7 +19511,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 371
+      "rank": 372
     },
     {
       "name": "Temporal-GRPO",
@@ -19498,7 +19560,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 372
+      "rank": 373
     },
     {
       "name": "TinyVLA",
@@ -19530,7 +19592,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 373
+      "rank": 374
     },
     {
       "name": "TraceVLA",
@@ -19569,7 +19631,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 374
+      "rank": 375
     },
     {
       "name": "TTT-VLA",
@@ -19630,7 +19692,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 375
+      "rank": 376
     },
     {
       "name": "TwinBrainVLA",
@@ -19668,7 +19730,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 376
+      "rank": 377
     },
     {
       "name": "UniDex",
@@ -19709,7 +19771,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 377
+      "rank": 378
     },
     {
       "name": "UniDriveVLA",
@@ -19745,7 +19807,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 378
+      "rank": 379
     },
     {
       "name": "UniPi",
@@ -19775,7 +19837,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 379
+      "rank": 380
     },
     {
       "name": "UniT",
@@ -19821,7 +19883,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 380
+      "rank": 381
     },
     {
       "name": "UP-VLA",
@@ -19854,7 +19916,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 381
+      "rank": 382
     },
     {
       "name": "V2V-VLA",
@@ -19922,7 +19984,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 382
+      "rank": 383
     },
     {
       "name": "ValueFormer",
@@ -20048,7 +20110,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 383
+      "rank": 384
     },
     {
       "name": "VANE",
@@ -20104,7 +20166,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 384
+      "rank": 385
     },
     {
       "name": "VIA",
@@ -20143,7 +20205,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 385
+      "rank": 386
     },
     {
       "name": "VILAS",
@@ -20173,7 +20235,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 386
+      "rank": 387
     },
     {
       "name": "VISTA",
@@ -20228,7 +20290,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 387
+      "rank": 388
     },
     {
       "name": "VLA-RL",
@@ -20260,7 +20322,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 388
+      "rank": 389
     },
     {
       "name": "VLA-ATTC",
@@ -20298,7 +20360,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 389
+      "rank": 390
     },
     {
       "name": "VLA-Pro",
@@ -20352,7 +20414,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 390
+      "rank": 391
     },
     {
       "name": "VLAs-as-Tools",
@@ -20401,7 +20463,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 391
+      "rank": 392
     },
     {
       "name": "Vlaser",
@@ -20451,7 +20513,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 392
+      "rank": 393
     },
     {
       "name": "VLGA",
@@ -20494,7 +20556,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 393
+      "rank": 394
     },
     {
       "name": "VP-VLA",
@@ -20548,7 +20610,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 394
+      "rank": 395
     },
     {
       "name": "w2VLA",
@@ -20606,7 +20668,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 395
+      "rank": 396
     },
     {
       "name": "WALL-WM",
@@ -20655,7 +20717,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 396
+      "rank": 397
     },
     {
       "name": "WAM-Diff2",
@@ -20716,7 +20778,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 397
+      "rank": 398
     },
     {
       "name": "WCM",
@@ -20793,7 +20855,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 398
+      "rank": 399
     },
     {
       "name": "WCog-VLA",
@@ -20846,7 +20908,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 399
+      "rank": 400
     },
     {
       "name": "WeaveLA",
@@ -20884,7 +20946,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 400
+      "rank": 401
     },
     {
       "name": "WNM-3D",
@@ -21028,7 +21090,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 401
+      "rank": 402
     },
     {
       "name": "X-DiffVLA",
@@ -21069,7 +21131,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 402
+      "rank": 403
     },
     {
       "name": "X-Foresight",
@@ -21110,7 +21172,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 403
+      "rank": 404
     },
     {
       "name": "X-Mind",
@@ -21146,7 +21208,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 404
+      "rank": 405
     },
     {
       "name": "X-Tokenizer",
@@ -21191,7 +21253,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 405
+      "rank": 406
     },
     {
       "name": "XCoT-VLA",
@@ -21345,7 +21407,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 406
+      "rank": 407
     },
     {
       "name": "Xiaomi-Robotics-1",
@@ -21408,7 +21470,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 407
+      "rank": 408
     },
     {
       "name": "Z-1",
@@ -21455,7 +21517,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 408
+      "rank": 409
     }
   ]
 }
