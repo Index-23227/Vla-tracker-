@@ -25,8 +25,11 @@ benchmarks:
     date_reported: "2026-08-11"
     eval_condition: "LIBERO-Long only (10 long-horizon tasks); K=1 demonstration + autonomous online RL; 50 rollouts per task, mean +/- std over 3 seeds (91.2 +/- 4.2); horizon 500 steps; action chunk C=10"
     notes: "Zero-shot pre-trained pi0.5 is 0.0% on every task. Baselines at 1 demo: BC 33.5 +/- 1.8, DSRL 33.5 +/- 0.8, Filtered BC 39.0 +/- 5.9, DICE-RL 89.3 +/- 1.8. Per-task MiDAS: Alph.Soup+Cr.Cheese 99.3, Alph.Soup+Tom.Sauce 82.7, Black Bowl->Bottom Drawer 98.7, Book->Caddy 98.7, Both Moka Pots->Stove 76.0, Cr.Cheese+Butter->Basket 96.0, Moka Pot->Stove 95.3, White Mug+Choc.Pudding 96.7, White Mug+Plates 79.3, Yellow-White Mug->Microwave 89.3. Stage-I BC-only scaling (Table 16): K=1 33.5, K=3 56.3, K=5 78.1. LIBERO-PRO perturbations (Tables 4/6/7), pi1_base -> pi1_RL: language paraphrase 34.7 -> 90.2; visual (color/texture) 31.3 -> 82.0 (ID subset 38.9 -> 88.7); shape change 6.3 -> 29.0 (ID 25.8 -> 92.5); object swap 0.0 -> 0.0 (ID 38.9 -> 88.7); object change (Book->Caddy) 0.0 -> 2.0."
-  robocasa:
-    robocasa_avg: 89.3
+  # RoboCasa-365, not the standard RoboCasa suite, and only 3 of 4 tasks.
+  # Kept out of benchmarks.robocasa so it is not ranked against models
+  # reporting the standard suite.
+  robocasa365:
+    robocasa365_partial_avg: 89.3
     source: "arXiv:2608.11363 Table 1 (MiDAS, 1 demo, RoboCasa-365 average)"
     date_reported: "2026-08-11"
     eval_condition: "RoboCasa-365, 3 of 4 evaluated tasks averaged (LoadDishwasher excluded by the authors); K=1 demonstration + autonomous online RL; 50 rollouts per task, mean +/- std over 3 seeds (89.3 +/- 8.7); mobile manipulator, 256x256 cameras, horizons 500-800 steps"
