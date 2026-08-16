@@ -1,0 +1,160 @@
+name: WNM-3D
+full_name: 'WNM-3D: A World Navigation Model with 3D Scene Conditioning for Closed-Loop
+  VLN'
+organization: Institute of Artificial Intelligence (China Telecom) / Zhejiang University
+  / Tongji University / Shanghai Jiao Tong University
+date: '2026-08-07'
+paper_url: https://arxiv.org/abs/2608.07267
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: navigation
+tags:
+- navigation
+- vln
+- world-model
+- world-action-model
+- flow-matching
+- diffusion-transformer
+- 3d-scene-conditioning
+- vggt
+- dagger
+- grpo
+- closed-loop
+architecture:
+  backbone: Wan2.2-TI2V-5B world-action DiT (frozen video VAE) + frozen VGGT-Omega
+    geometry encoder
+  llm: Wan2.2-TI2V-5B native language/current-frame cross-attention encoder
+  action_head: joint video-action flow matching over a shared Diffusion Transformer
+    with block-causal attention (3-DoF dx/dy/dpsi increments, 4 blocks x 8 actions)
+  action_space: continuous
+  parameters: 5B
+  action_head_category: flow_matching
+  key_innovation: 3D Scene-to-Token Adapter (23.97M trainable params) turns frozen
+    VGGT-Omega features from a 33-frame monocular RGB history into a fixed 450-token
+    geometry-aware clean prefix that conditions both future-view and action generation
+training:
+  dataset: 16K A*-generated instruction-conditioned demonstrations; Stage-II DAgger
+    set of ~633K chunks (WNM-3D); Stage-III ~96K policy-generated simulation records
+  method: three-stage curriculum - Stage I offline A* SFT (20 epochs), Stage II closed-loop
+    DAgger-SFT (5 epochs), Stage III closed-loop DanceGRPO with visual/navigation/stopping
+    reward streams (1,500 updates)
+  compute: 16x NVIDIA H100, global batch 192 (Stage I/II)
+benchmarks:
+  gn_bench_seen:
+    ne: 2.0
+    os: 87.2
+    sr: 81.3
+    spl: 78.3
+    tl: 8.1
+    source: 'arXiv:2608.07267 Table 1 (WNM-3D, full three-stage curriculum, Seen split,
+      1,000 episodes)'
+    date_reported: '2026-08-07'
+    eval_condition: closed-loop, monocular FPV RGB only, seed 1140
+  gn_bench_unseen:
+    ne: 4.4
+    os: 54.1
+    sr: 46.8
+    spl: 43.5
+    tl: 7.7
+    source: 'arXiv:2608.07267 Table 1 (WNM-3D, full three-stage curriculum, Unseen
+      split, 5,000 episodes)'
+    date_reported: '2026-08-07'
+    eval_condition: closed-loop, monocular FPV RGB only, seed 1140
+  ablation_stage1_astar_sft_seen:
+    ne: 4.4
+    os: 52.0
+    sr: 49.6
+    spl: 49.1
+    tl: 4.9
+    source: 'arXiv:2608.07267 Table 2 (WNM-3D, A* SFT only, Seen)'
+  ablation_stage1_astar_sft_unseen:
+    ne: 5.3
+    os: 42.6
+    sr: 39.7
+    spl: 38.9
+    tl: 4.3
+    source: 'arXiv:2608.07267 Table 2 (WNM-3D, A* SFT only, Unseen)'
+  ablation_stage2_dagger_sft_seen:
+    ne: 2.3
+    os: 86.1
+    sr: 80.6
+    spl: 77.9
+    tl: 8.5
+    source: 'arXiv:2608.07267 Table 2 (WNM-3D, A* SFT + DAgger-SFT, Seen)'
+  ablation_stage2_dagger_sft_unseen:
+    ne: 4.7
+    os: 53.1
+    sr: 45.7
+    spl: 41.9
+    tl: 7.8
+    source: 'arXiv:2608.07267 Table 2 (WNM-3D, A* SFT + DAgger-SFT, Unseen)'
+  ablation_sft_dancegrpo_no_dagger_seen:
+    ne: 5.8
+    os: 40.2
+    sr: 39.4
+    spl: 38.5
+    tl: 3.6
+    source: 'arXiv:2608.07267 Table 2 (WNM-3D, A* SFT + DanceGRPO without DAgger, Seen)'
+  ablation_sft_dancegrpo_no_dagger_unseen:
+    ne: 5.8
+    os: 38.7
+    sr: 35.6
+    spl: 33.8
+    tl: 3.5
+    source: 'arXiv:2608.07267 Table 2 (WNM-3D, A* SFT + DanceGRPO without DAgger, Unseen)'
+  baseline_wnm_2d_seen:
+    ne: 2.8
+    os: 80.7
+    sr: 75.6
+    spl: 72.9
+    tl: 7.9
+    source: 'arXiv:2608.07267 Table 1 (WNM-2D architectural control, VAE RGB-history
+      prefix, Seen)'
+  baseline_wnm_2d_unseen:
+    ne: 4.8
+    os: 52.6
+    sr: 45.9
+    spl: 42.8
+    tl: 7.9
+    source: 'arXiv:2608.07267 Table 1 (WNM-2D architectural control, VAE RGB-history
+      prefix, Unseen)'
+  baseline_gn_bae_depth_bev_seen:
+    ne: 4.3
+    os: 59.3
+    sr: 58.6
+    spl: 58.6
+    tl: 5.2
+    source: 'arXiv:2608.07267 Table 1 (GN-BAE with Depth + BEV observations, Seen)'
+  baseline_gn_bae_depth_bev_unseen:
+    ne: 5.8
+    os: 40.2
+    sr: 38.5
+    spl: 38.2
+    tl: 4.0
+    source: 'arXiv:2608.07267 Table 1 (GN-BAE with Depth + BEV observations, Unseen)'
+  baseline_internnav_s2_sft_seen:
+    ne: 7.1
+    os: 22.5
+    sr: 22.4
+    spl: 22.4
+    tl: 2.9
+    source: 'arXiv:2608.07267 Table 1 (InternNav(S2) fine-tuned on GN-Matrix, Seen)'
+  baseline_internnav_s2_sft_unseen:
+    ne: 6.9
+    os: 24.9
+    sr: 24.0
+    spl: 23.7
+    tl: 2.9
+    source: 'arXiv:2608.07267 Table 1 (InternNav(S2) fine-tuned on GN-Matrix, Unseen)'
+  flow_action_consistency_near_goal_stop:
+    s_flow_act: 0.3781
+    e_motion: 0.0255
+    source: 'arXiv:2608.07267 Table 3 (WNM-3D Stage III on the fixed 640-snapshot near-goal
+      STOP set; R_action = -0.1211, flow-valid ratio >= 0.9984)'
+    eval_condition: fixed near-goal STOP set, one stochastic sample per snapshot, seed
+      root 42
+eval_conditions:
+  gn_bench_seen: closed-loop receding-horizon, FPV RGB only, no depth/BEV/metric map
+  gn_bench_unseen: closed-loop receding-horizon, FPV RGB only, no depth/BEV/metric
+    map

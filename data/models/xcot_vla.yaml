@@ -1,0 +1,182 @@
+# Paper: XCoT-VLA: Executable Chain-of-Thought for Vision-Language-Action Driving
+# arXiv: 2608.10976
+
+name: XCoT-VLA
+full_name: "XCoT-VLA: Executable Chain-of-Thought for Vision-Language-Action Driving"
+organization: "Foundation Model Team, XPeng Inc."
+date: "2026-08-11"
+paper_url: https://arxiv.org/abs/2608.10976
+code_url: null
+venue: "arXiv Technical Report"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "VLM backbone consuming camera observations, task prompt, ego status (velocity, acceleration, history trajectory) and high-level drive command; N x Transformer blocks with shared multimodal self-attention followed by deterministic token-function routing into two FFN branches (Reason FFN / Control FFN). Specific vision encoder and LLM sizes are not disclosed in the paper."
+  llm: null
+  action_head: "Flow-matching trajectory decoder (Conditional Flow Matching, inspired by pi0) over 24 fixed learnable trajectory queries Q_traj in R^{24xd}; each query decodes one future step as (longitudinal acceleration a_lon, yaw change delta-psi), giving u_t in R^{24x2} (x1 = vec(u_t) in R^48). A parameter-free temporal integration operator I_traj(u_t; s_t) converts the motion sequence into ego-centric coordinates tau_t in R^{24x2} over a 6 s horizon (H = 24)."
+  action_head_category: flow_matching
+  action_space: "continuous 24-step future motion sequence (longitudinal acceleration, yaw change), temporally integrated to a 6 s ego-centric (x, y) trajectory"
+  parameters: null
+  key_innovation: "Executable Chain-of-Thought (XCoT): verbose natural-language rationales are replaced by a canonical sequence of only 2-6 executable semantic-action tokens (KEEP_SPEED, DECELERATE, LANE_KEEPING, NAV_LEFT_LANE_CHANGE, EFFICIENCY_LEFT_LANE_CHANGE, LEFT_TURN_PREPARE, LEFT_TURN, RED_LIGHT_HOLD, LEFT_OVERTAKE, VISIBILITY_CAUTION, HAZARD_YIELD, ...) plus EOS, with M_max = 6. Labels are built offline by a Reason-Action pipeline: (o_t, tau_t) -> f_act -> a_t -> f_ground -> (r*_t, a_t) -> g_XCoT -> z*_t, where the logged -3s..+6s trajectory supplies longitudinal/lateral action evidence and scene context supplies the causal reason (navigation, road structure, traffic rule, interaction, safety); vision-language experts are queried only offline and their free-form text is mapped to a taxonomy signature, with a consensus score S_cons selecting the causal reason. At inference the predicted XCoT sequence stays in context and conditions the fixed trajectory queries through shared self-attention, while deterministic (router-free, non-MoE) token-function routing sends all valid non-trajectory tokens to the Reason FFN and only the 24 trajectory queries to the Control FFN, with disjoint masks m_Reason + m_Control = 1."
+
+benchmarks:
+  internal_general_openloop:
+    ade_6s_lat: 0.2162
+    ade_6s_long: 1.3233
+    fde_6s_lat: 0.5765
+    fde_6s_long: 3.0887
+    source: "XCoT-VLA paper Table 4, row XCoT-VLA on the general-distribution set"
+    date_reported: "2026-08-11"
+    eval_condition: "In-house general-distribution open-loop planning set; directional ADE/FDE in an ego-centric route-aligned frame over the full 6 s horizon (H = 24); meters, lower is better"
+
+  internal_general_openloop_baseline_trajectory_only:
+    ade_6s_lat: 0.2609
+    ade_6s_long: 1.6452
+    fde_6s_lat: 0.7352
+    fde_6s_long: 4.3541
+    source: "XCoT-VLA paper Table 4, row Trajectory-only (SFT) on the general-distribution set"
+    date_reported: "2026-08-11"
+    eval_condition: "Same backbone, trajectory decoder, horizon and protocol; no explicit reasoning tokens"
+
+  internal_general_openloop_baseline_verbose_cot:
+    ade_6s_lat: 0.2798
+    ade_6s_long: 1.4382
+    fde_6s_lat: 0.7822
+    fde_6s_long: 3.5045
+    source: "XCoT-VLA paper Table 4, row Verbose CoT on the general-distribution set"
+    date_reported: "2026-08-11"
+    eval_condition: "Controlled variant with a long natural-language-style rationale interface, same decoder"
+
+  internal_general_openloop_baseline_latent_tokens:
+    ade_6s_lat: 0.2511
+    ade_6s_long: 1.3738
+    fde_6s_lat: 0.6804
+    fde_6s_long: 3.2861
+    source: "XCoT-VLA paper Table 4, row Latent tokens on the general-distribution set"
+    date_reported: "2026-08-11"
+    eval_condition: "Compact semantic tokens from compressed labels without joint Reason-Action assignment, same decoder and data"
+
+  internal_lane_change_openloop:
+    ade_6s_lat: 0.3091
+    ade_6s_long: 1.4552
+    fde_6s_lat: 0.6484
+    fde_6s_long: 3.2258
+    source: "XCoT-VLA paper Table 4, row XCoT-VLA on the lane-change set"
+    date_reported: "2026-08-11"
+    eval_condition: "In-house lane-change open-loop evaluation set, 6 s horizon directional ADE/FDE in meters"
+
+  internal_lane_change_openloop_baseline_trajectory_only:
+    ade_6s_lat: 0.5941
+    ade_6s_long: 1.8221
+    fde_6s_lat: 1.6160
+    fde_6s_long: 4.8399
+    source: "XCoT-VLA paper Table 4, row Trajectory-only (SFT) on the lane-change set"
+    date_reported: "2026-08-11"
+    eval_condition: "Trajectory-supervised SFT baseline without reasoning tokens"
+
+  internal_lane_change_openloop_baseline_verbose_cot:
+    ade_6s_lat: 0.3589
+    ade_6s_long: 1.6217
+    fde_6s_lat: 0.7692
+    fde_6s_long: 3.8088
+    source: "XCoT-VLA paper Table 4, row Verbose CoT on the lane-change set"
+    date_reported: "2026-08-11"
+    eval_condition: "Verbose natural-language reasoning interface variant"
+
+  internal_lane_change_openloop_baseline_latent_tokens:
+    ade_6s_lat: 0.3347
+    ade_6s_long: 1.5453
+    fde_6s_lat: 0.7102
+    fde_6s_long: 3.5303
+    source: "XCoT-VLA paper Table 4, row Latent tokens on the lane-change set"
+    date_reported: "2026-08-11"
+    eval_condition: "Latent compact-token variant without Reason-Action causal supervision"
+
+  ablation_xcot_and_navigation_supervision:
+    trajectory_only_ade_6s_lat: 0.5941
+    trajectory_only_ade_long: 1.8221
+    trajectory_only_fde_6s_lat: 1.6160
+    trajectory_only_fde_6s_long: 4.8399
+    xcot_only_ade_6s_lat: 0.4856
+    xcot_only_ade_long: 1.8418
+    xcot_only_fde_6s_lat: 1.2106
+    xcot_only_fde_6s_long: 4.8458
+    xcot_plus_nav_ade_6s_lat: 0.4518
+    xcot_plus_nav_ade_long: 1.7977
+    xcot_plus_nav_fde_6s_lat: 1.1122
+    xcot_plus_nav_fde_6s_long: 4.7230
+    xcot_only_ade_lat_reduction_pct: 18.3
+    xcot_only_fde_lat_reduction_pct: 25.1
+    source: "XCoT-VLA paper Table 5 (ablation on XCoT reasoning and targeted navigation data)"
+    date_reported: "2026-08-11"
+    eval_condition: "Controlled lane-change diagnostic split; the paper states this split must NOT be compared numerically with Table 4"
+
+  ablation_training_stability:
+    sft_ade_6s_lat: 0.2302
+    sft_ade_6s_long: 1.2997
+    sft_ade_2s_lat: 0.0360
+    sft_ade_2s_long: 0.2774
+    sft_fde_6s_lat: 0.5710
+    sft_fde_6s_long: 3.2521
+    joint_xcot_ft_ade_6s_lat: 0.2774
+    joint_xcot_ft_ade_6s_long: 1.6005
+    joint_xcot_ft_ade_2s_lat: 0.0355
+    joint_xcot_ft_ade_2s_long: 1.1684
+    joint_xcot_ft_fde_6s_lat: 0.7313
+    joint_xcot_ft_fde_6s_long: 3.2854
+    decoupled_xcot_ft_ade_6s_lat: 0.1872
+    decoupled_xcot_ft_ade_6s_long: 1.3330
+    decoupled_xcot_ft_ade_2s_lat: 0.0313
+    decoupled_xcot_ft_ade_2s_long: 0.2766
+    decoupled_xcot_ft_fde_6s_lat: 0.4690
+    decoupled_xcot_ft_fde_6s_long: 3.3864
+    source: "XCoT-VLA paper Table 7 (training stability under joint vs decoupled XCoT fine-tuning)"
+    date_reported: "2026-08-11"
+    eval_condition: "ADE-6s/FDE-6s over the full 6 s horizon, ADE-2s over the first 2 s (H_2s = 8 steps); meters, lower is better"
+
+  reasoning_interface_latency:
+    inter_token_latency_ms: 3.25
+    budget_12hz_ms: 83.3
+    xcot_output_tokens_max: 6
+    xcot_latency_2k_ms: 38.6
+    xcot_latency_3p5k_ms: 47.3
+    xcot_latency_5k_ms: 57.7
+    xcot_latency_6k_ms: 66.3
+    verbose_cot_output_tokens_max: 80
+    verbose_cot_latency_2k_ms: 279.1
+    verbose_cot_latency_3p5k_ms: 287.8
+    verbose_cot_latency_5k_ms: 298.2
+    verbose_cot_latency_6k_ms: 306.8
+    source: "XCoT-VLA paper Table 6 (worst-case reasoning-interface latency on an H100)"
+    date_reported: "2026-08-11"
+    eval_condition: "NVIDIA H100; total latency estimated as TTFT + 3.25 * M with M = 6 (XCoT-VLA) and M = 80 (Verbose CoT); input context lengths 2K / 3.5K / 5K / 6K; excludes perception preprocessing, trajectory postprocessing and full-stack scheduling"
+
+training:
+  data: "Large-scale hybrid corpus of ~3,620,000 unique samples: General SFT 3,100,000 (automatic Reason-Action labeling of logged driving data), Human-Annotated 200,000 (human Reason-Action supervision for ambiguous interactive scenarios), Targeted Lane-Change 320,000 (rule-based XCoT labeling mined for lateral planning)"
+  stage_1_sft: "Supervised Reason-Action training on the full mixed dataset, jointly training the Reason FFN and the Control FFN. Loss L_SFT = lambda_XCoT * L_XCoT + lambda_FM * L_FM, where L_XCoT is token cross-entropy over the offline XCoT label sequence (padding masked, EOS supervised) and L_FM is the conditional flow-matching loss E||v_theta(x_alpha; alpha, c) - (x1 - x0)||^2 with x_alpha = (1 - alpha) x0 + alpha x1, x0 ~ N(0, I_48). lambda_XCoT = 1 and lambda_FM tuned on a validation split. The trajectory decoder is teacher-forced on the XCoT labels z* during training and conditioned on the predicted sequence z-hat at inference."
+  stage_2_xcpo: "XCoT Policy Optimization, an optional refinement applied to a subset of safety-critical and complex interaction scenarios. The visual encoder, shared self-attention, Control FFN and flow-matching trajectory head are frozen (theta_exec^frozen); only the Reason FFN and XCoT prediction head (theta_reason) are updated. A group of G XCoT sequences is sampled per observation and decoded by the frozen executor; group-relative advantages A_i = (R_i - mu_R) / (sigma_R + eps) are computed from a weighted reward R_i = sum_k w_k r_k(tau_i), and a clipped sequence-level GRPO-style objective plus a KL term to the Stage-I reference policy is optimized. Gradients flow only through the autoregressive XCoT log-probabilities."
+  optimizer: "AdamW; peak learning rate 4e-5 for Stage I and 1e-4 for Stage II"
+  horizon: "Prediction horizon 6 s with H = 24 future motion steps; action evidence extracted over a -3 s to +6 s logged window"
+  note: "XCPO is explicitly NOT quantitatively evaluated in this version of the paper; the authors state its benefits should be assessed with closed-loop metrics (route completion, collisions, rule violations, interventions, comfort)"
+
+eval_conditions:
+  general_set: "In-house general-distribution open-loop planning set; directional ADE/FDE reported separately for longitudinal (x) and lateral (y) axes in an ego-centric route-aligned coordinate frame, full 6 s horizon"
+  lane_change_set: "In-house lane-change open-loop evaluation set targeting route-conditioned lateral decisions"
+  lane_change_diagnostic_split: "Separate controlled lane-change diagnostic split used only for Table 5; the paper warns it is not numerically comparable with Table 4"
+  latency: "Worst-case reasoning-interface latency profiled on a single NVIDIA H100 against a 12 Hz (83.3 ms) planning budget"
+  closed_loop: "No closed-loop simulation or public benchmark (nuScenes / NAVSIM) results are reported; all quantitative results use proprietary open-loop sets"
+
+tags:
+- autonomous_driving
+- vla
+- chain_of_thought
+- executable_reasoning
+- action_tokens
+- flow_matching
+- trajectory_planning
+- reinforcement_learning
+- grpo
+- moe_style_routing
+- real_time
+- open_loop_planning
