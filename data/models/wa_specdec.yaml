@@ -1,0 +1,454 @@
+# Paper: WA-SpecDec: World-Aware Speculative Decoding for Vision-Language-Action Models
+# arXiv: 2608.08725
+
+name: WA-SpecDec
+full_name: "WA-SpecDec: World-Aware Speculative Decoding for Vision-Language-Action Models"
+organization: "The University of Sydney"
+date: "2026-08-09"
+paper_url: https://arxiv.org/abs/2608.08725
+code_url: null
+venue: "arXiv 2026"
+open_source: false
+model_type: "world-aware speculative decoding VLA (trained world-aware target + distilled draft)"
+
+architecture:
+  backbone: "Frozen VLA visual backbone + multimodal projector (OpenVLA primary target; ActionCodec and UniVLA also evaluated as targets). Frozen Wan 2.2 VAE encoder used only as a latent compressor for the World-Aware Bias path."
+  llm: "Target VLA language model with trainable LoRA adapters (base VLA parameters frozen)"
+  action_head: "Autoregressive discrete action-token decoding of the target VLA, accelerated by speculative decoding: a distilled lightweight draft model proposes gamma tokens from the shared world-aware prefill hidden states and the world-aware target verifies them in parallel under an unchanged relaxed acceptance rule (rho-based, KERV, or HeiSD)."
+  action_head_category: autoregressive
+  parameters: "Not reported; trainable parts are the WAB path (token projector, 4-layer spatial VideoEncoder, bias projector, training-only VideoHead) plus LoRA adapters on the target LLM"
+  key_innovation: "World-Aware Bias (WAB) module maps a frozen Wan 2.2 VAE latent map of the current frame into world tokens, spatially aligns them to the VLA visual patch grid, and adds a per-patch bias w_t to the visual patch embeddings BEFORE prefill (no extra multimodal tokens, unchanged sequence length). WAB and the LoRA adapters are trained with the action-token objective plus a dense next-frame VAE-latent prediction loss (L = L_action + lambda*L_video, lambda=0.1); the VideoHead is discarded at inference so deployment uses only the current frame. The resulting world-aware prefill hidden states are shared by draft proposal (draft distilled by KL against the frozen world-aware target) and target verification, so the acceptance rule itself is untouched and only the target reference changes. Introduces near-contact failure (NCF): share of failed episodes whose minimum gripper-fingertip-to-object/receptacle distance drops below delta (default 2 cm)."
+
+benchmarks:
+  libero:
+    libero_spatial: 83.0
+    libero_object: 68.8
+    libero_goal: 75.8
+    libero_long: 56.2
+    libero_avg: 71.0
+    speedup_spatial: 1.54
+    speedup_object: 1.24
+    speedup_goal: 1.32
+    speedup_long: 1.21
+    ncf_spatial: 72.9
+    ncf_object: 48.7
+    ncf_goal: 46.3
+    ncf_long: 44.7
+    source: "Paper Table 1 (rho row, WA-SpecDec) and Table 5 (rho=10 column, Mean 71.0)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on fine-tuned OpenVLA target, rho-based relaxed acceptance (rho=10), 50 rollouts per task / 500 episodes per suite; speedup is wall-clock vs the AR OpenVLA target and includes WAB overhead; NCF at delta=2 cm"
+  libero_kerv:
+    libero_spatial: 83.4
+    libero_object: 68.4
+    libero_goal: 77.6
+    libero_long: 52.8
+    speedup_spatial: 1.59
+    speedup_object: 1.64
+    speedup_goal: 1.67
+    speedup_long: 1.45
+    ncf_spatial: 72.3
+    ncf_object: 48.1
+    ncf_goal: 47.3
+    ncf_long: 42.8
+    source: "Paper Table 1 (KERV row, WA-SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on fine-tuned OpenVLA target with the KERV kinematic relaxed verifier"
+  libero_heisd:
+    libero_spatial: 80.4
+    libero_object: 70.6
+    libero_goal: 78.0
+    libero_long: 57.0
+    speedup_spatial: 1.77
+    speedup_object: 2.31
+    speedup_goal: 2.12
+    speedup_long: 1.79
+    ncf_spatial: 65.3
+    ncf_object: 49.0
+    ncf_goal: 43.6
+    ncf_long: 42.3
+    source: "Paper Table 1 (HeiSD row, WA-SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on fine-tuned OpenVLA target with the HeiSD hybrid token+kinematic relaxed verifier"
+  libero_ar_openvla_baseline:
+    libero_spatial: 82.8
+    libero_object: 69.8
+    libero_goal: 78.2
+    libero_long: 57.8
+    libero_avg: 72.2
+    ncf_spatial: 73.3
+    ncf_object: 49.7
+    ncf_goal: 46.8
+    ncf_long: 45.5
+    source: "Paper Table 1 (AR: OpenVLA row) and Table 5 (AR target column, Mean 72.2)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: autoregressive fine-tuned OpenVLA target without speculative decoding (1.00x reference)"
+  libero_standard_specdec_rho_baseline:
+    libero_spatial: 79.4
+    libero_object: 63.0
+    libero_goal: 69.6
+    libero_long: 49.4
+    libero_avg: 65.4
+    speedup_spatial: 1.26
+    speedup_object: 1.13
+    speedup_goal: 1.23
+    speedup_long: 1.18
+    ncf_spatial: 78.6
+    ncf_object: 60.0
+    ncf_goal: 64.5
+    ncf_long: 52.2
+    source: "Paper Table 1 (rho row, Standard SpecDec = Spec-VLA) and Table 5 (rho=10 column, Mean 65.4)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec (Spec-VLA) on the same OpenVLA target, rho-based relaxed acceptance (rho=10)"
+  libero_standard_specdec_kerv_baseline:
+    libero_spatial: 80.2
+    libero_object: 63.4
+    libero_goal: 70.8
+    libero_long: 48.6
+    speedup_spatial: 1.52
+    speedup_object: 1.54
+    speedup_goal: 1.61
+    speedup_long: 1.41
+    ncf_spatial: 75.8
+    ncf_object: 63.9
+    ncf_goal: 61.6
+    ncf_long: 54.1
+    source: "Paper Table 1 (KERV row, Standard SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the OpenVLA target with the KERV verifier"
+  libero_standard_specdec_heisd_baseline:
+    libero_spatial: 77.4
+    libero_object: 68.0
+    libero_goal: 70.8
+    libero_long: 50.4
+    speedup_spatial: 1.74
+    speedup_object: 2.26
+    speedup_goal: 2.10
+    speedup_long: 1.71
+    ncf_spatial: 69.0
+    ncf_object: 63.8
+    ncf_goal: 66.4
+    ncf_long: 51.6
+    source: "Paper Table 1 (HeiSD row, Standard SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the OpenVLA target with the HeiSD verifier"
+  libero_rho5:
+    libero_spatial: 82.4
+    libero_object: 69.0
+    libero_goal: 76.4
+    libero_long: 57.2
+    libero_avg: 71.3
+    source: "Paper Table 5 (rho=5, WA-SpecDec column)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on OpenVLA target under rho-based relaxed acceptance with tolerance rho=5"
+  libero_rho15:
+    libero_spatial: 80.8
+    libero_object: 66.4
+    libero_goal: 72.4
+    libero_long: 48.2
+    libero_avg: 67.0
+    source: "Paper Table 5 (rho=15, WA-SpecDec column)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on OpenVLA target under rho-based relaxed acceptance with tolerance rho=15"
+  libero_rho20:
+    libero_spatial: 78.4
+    libero_object: 65.8
+    libero_goal: 66.8
+    libero_long: 43.0
+    libero_avg: 63.5
+    source: "Paper Table 5 (rho=20, WA-SpecDec column)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on OpenVLA target under rho-based relaxed acceptance with tolerance rho=20"
+  libero_spec_vla_rho5_baseline:
+    libero_spatial: 79.0
+    libero_object: 64.2
+    libero_goal: 73.2
+    libero_long: 54.2
+    libero_avg: 67.7
+    source: "Paper Table 5 (rho=5, Spec-VLA column)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Spec-VLA on OpenVLA target, rho=5"
+  libero_spec_vla_rho15_baseline:
+    libero_spatial: 76.0
+    libero_object: 61.8
+    libero_goal: 66.4
+    libero_long: 40.6
+    libero_avg: 61.2
+    source: "Paper Table 5 (rho=15, Spec-VLA column)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Spec-VLA on OpenVLA target, rho=15"
+  libero_spec_vla_rho20_baseline:
+    libero_spatial: 72.6
+    libero_object: 57.0
+    libero_goal: 58.2
+    libero_long: 32.4
+    libero_avg: 55.1
+    source: "Paper Table 5 (rho=20, Spec-VLA column)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Spec-VLA on OpenVLA target, rho=20"
+  libero_goal_actioncodec_rho:
+    libero_goal: 95.2
+    speedup: 1.25
+    ncf: 70.8
+    source: "Paper Table 2 (rho row, WA-SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the stronger ActionCodec target policy, LIBERO-Goal only, rho-based relaxed acceptance"
+  libero_goal_actioncodec_kerv:
+    libero_goal: 95.6
+    speedup: 1.72
+    ncf: 77.3
+    source: "Paper Table 2 (KERV row, WA-SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the ActionCodec target policy, LIBERO-Goal only, KERV verifier"
+  libero_goal_actioncodec_heisd:
+    libero_goal: 94.2
+    speedup: 2.63
+    ncf: 72.4
+    source: "Paper Table 2 (HeiSD row, WA-SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the ActionCodec target policy, LIBERO-Goal only, HeiSD verifier"
+  libero_goal_actioncodec_ar_baseline:
+    libero_goal: 95.8
+    ncf: 76.2
+    source: "Paper Table 2 (AR ActionCodec row)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: autoregressive ActionCodec target on LIBERO-Goal (1.00x reference)"
+  libero_goal_actioncodec_standard_specdec_rho_baseline:
+    libero_goal: 88.6
+    speedup: 1.18
+    ncf: 88.7
+    source: "Paper Table 2 (rho row, Standard SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the ActionCodec target, LIBERO-Goal, rho verifier"
+  libero_goal_actioncodec_standard_specdec_kerv_baseline:
+    libero_goal: 91.2
+    speedup: 1.57
+    ncf: 84.1
+    source: "Paper Table 2 (KERV row, Standard SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the ActionCodec target, LIBERO-Goal, KERV verifier"
+  libero_goal_actioncodec_standard_specdec_heisd_baseline:
+    libero_goal: 88.0
+    speedup: 2.41
+    ncf: 86.7
+    source: "Paper Table 2 (HeiSD row, Standard SpecDec)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the ActionCodec target, LIBERO-Goal, HeiSD verifier"
+  libero_ablation_wa_target_only:
+    libero_avg: 73.5
+    speedup: 0.97
+    source: "Paper Table 6 (WA target-only row), averaged over four LIBERO suites"
+    date_reported: "2026-08-09"
+    eval_condition: "Ablation: WAB added to the autoregressive target without speculative drafting or relaxed acceptance"
+  libero_ablation_wa_without_video_loss:
+    libero_avg: 69.4
+    accepted_length: 4.09
+    speedup: 1.31
+    source: "Paper Table 6 (WA w/o video loss row), averaged over four LIBERO suites"
+    date_reported: "2026-08-09"
+    eval_condition: "Ablation: WA-SpecDec at rho=10 without the auxiliary next-frame latent prediction loss"
+  libero_ablation_full:
+    libero_avg: 71.0
+    accepted_length: 4.22
+    speedup: 1.34
+    source: "Paper Table 6 (WA-SpecDec full row), averaged over four LIBERO suites"
+    date_reported: "2026-08-09"
+    eval_condition: "Ablation reference: full WA-SpecDec at rho=10 (Spec-VLA baseline in the same table: 65.4% success, 3.59 accepted length, 1.20x)"
+  simpler_env:
+    carrot: 29.17
+    stack: 12.50
+    spoon: 33.33
+    eggplant: 20.83
+    simpler_avg: 24.0
+    speedup_carrot: 1.53
+    speedup_stack: 1.34
+    speedup_spoon: 1.43
+    speedup_eggplant: 1.54
+    source: "Paper Table 3 (rho row, WA-SpecDec); paper text reports the 24.0% four-task average"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the OpenVLA target in SIMPLER-Env, rho-based relaxed acceptance; speedups are wall-clock vs the AR OpenVLA target"
+  simpler_env_kerv:
+    carrot: 25.00
+    stack: 16.67
+    spoon: 41.67
+    eggplant: 25.00
+    simpler_avg: 27.1
+    speedup_carrot: 1.78
+    speedup_stack: 1.67
+    speedup_spoon: 1.72
+    speedup_eggplant: 1.87
+    source: "Paper Table 3 (KERV row, WA-SpecDec); average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the OpenVLA target in SIMPLER-Env with the KERV verifier"
+  simpler_env_heisd:
+    carrot: 33.33
+    stack: 20.83
+    spoon: 41.67
+    eggplant: 25.00
+    simpler_avg: 30.2
+    speedup_carrot: 2.98
+    speedup_stack: 2.42
+    speedup_spoon: 2.60
+    speedup_eggplant: 2.56
+    source: "Paper Table 3 (HeiSD row, WA-SpecDec); average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the OpenVLA target in SIMPLER-Env with the HeiSD verifier"
+  simpler_env_ar_openvla_baseline:
+    carrot: 25.00
+    stack: 12.50
+    spoon: 33.33
+    eggplant: 16.67
+    source: "Paper Table 3 (AR: OpenVLA row)"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: autoregressive OpenVLA target in SIMPLER-Env (1.00x reference)"
+  simpler_env_standard_specdec_rho_baseline:
+    carrot: 16.67
+    stack: 8.33
+    spoon: 20.83
+    eggplant: 12.50
+    simpler_avg: 14.6
+    source: "Paper Table 3 (rho row, Standard SpecDec); average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the OpenVLA target in SIMPLER-Env, rho verifier (speedups 1.31/1.27/1.14/1.28x)"
+  simpler_env_standard_specdec_kerv_baseline:
+    carrot: 12.50
+    stack: 8.33
+    spoon: 16.67
+    eggplant: 12.50
+    simpler_avg: 12.5
+    source: "Paper Table 3 (KERV row, Standard SpecDec); average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the OpenVLA target in SIMPLER-Env, KERV verifier (speedups 1.41/1.52/1.53/1.66x)"
+  simpler_env_standard_specdec_heisd_baseline:
+    carrot: 25.00
+    stack: 12.50
+    spoon: 29.17
+    eggplant: 12.50
+    simpler_avg: 19.8
+    source: "Paper Table 3 (HeiSD row, Standard SpecDec); average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the OpenVLA target in SIMPLER-Env, HeiSD verifier (speedups 2.16/1.80/2.13/2.14x)"
+  simpler_env_univla_rho:
+    carrot: 0.583
+    stack: 0.208
+    spoon: 0.625
+    eggplant: 0.875
+    simpler_avg: 0.573
+    speedup_carrot: 1.43
+    speedup_stack: 1.56
+    speedup_spoon: 1.38
+    speedup_eggplant: 1.48
+    source: "Paper Table 4 (rho row, WA-SpecDec); paper reports these as success fractions, not percentages"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the stronger UniVLA target in SIMPLER-Env, rho verifier (values are fractions as printed in Table 4)"
+  simpler_env_univla_kerv:
+    carrot: 0.625
+    stack: 0.208
+    spoon: 0.583
+    eggplant: 0.833
+    simpler_avg: 0.562
+    speedup_carrot: 1.67
+    speedup_stack: 1.74
+    speedup_spoon: 1.78
+    speedup_eggplant: 1.92
+    source: "Paper Table 4 (KERV row, WA-SpecDec); success fractions"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the UniVLA target in SIMPLER-Env, KERV verifier (fractions)"
+  simpler_env_univla_heisd:
+    carrot: 0.708
+    stack: 0.250
+    spoon: 0.625
+    eggplant: 0.917
+    simpler_avg: 0.625
+    speedup_carrot: 2.78
+    speedup_stack: 2.55
+    speedup_spoon: 2.67
+    speedup_eggplant: 2.36
+    source: "Paper Table 4 (HeiSD row, WA-SpecDec); success fractions"
+    date_reported: "2026-08-09"
+    eval_condition: "WA-SpecDec on the UniVLA target in SIMPLER-Env, HeiSD verifier (fractions)"
+  simpler_env_univla_ar_baseline:
+    carrot: 0.625
+    stack: 0.208
+    spoon: 0.583
+    eggplant: 0.833
+    source: "Paper Table 4 (AR: UniVLA row); success fractions"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: autoregressive UniVLA target in SIMPLER-Env (1.00x reference)"
+  simpler_env_univla_standard_specdec_rho_baseline:
+    carrot: 0.417
+    stack: 0.042
+    spoon: 0.375
+    eggplant: 0.708
+    simpler_avg: 0.386
+    source: "Paper Table 4 (rho row, Standard SpecDec); success fractions, average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the UniVLA target, rho verifier (speedups 1.26/1.19/1.23/1.20x)"
+  simpler_env_univla_standard_specdec_kerv_baseline:
+    carrot: 0.375
+    stack: 0.125
+    spoon: 0.375
+    eggplant: 0.667
+    simpler_avg: 0.386
+    source: "Paper Table 4 (KERV row, Standard SpecDec); success fractions, average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the UniVLA target, KERV verifier (speedups 1.44/1.50/1.43/1.71x)"
+  simpler_env_univla_standard_specdec_heisd_baseline:
+    carrot: 0.542
+    stack: 0.083
+    spoon: 0.583
+    eggplant: 0.750
+    simpler_avg: 0.490
+    source: "Paper Table 4 (HeiSD row, Standard SpecDec); success fractions, average from paper text"
+    date_reported: "2026-08-09"
+    eval_condition: "Baseline: Standard SpecDec on the UniVLA target, HeiSD verifier (speedups 2.31/2.04/1.95/2.23x)"
+  ncf_threshold_sweep_wa_rho:
+    ncf_1cm: 35.20
+    ncf_2cm: 50.26
+    ncf_3cm: 58.07
+    ncf_4cm: 63.12
+    source: "Paper Table 7 (rho row, WA SpecDec), averaged across the four LIBERO suites"
+    date_reported: "2026-08-09"
+    eval_condition: "NCF threshold sensitivity for WA-SpecDec with the rho verifier (baselines in the same table: Standard SpecDec 44.64/60.89/67.93/72.35; AR target 36.83/51.17/59.72/62.87)"
+  ncf_threshold_sweep_wa_kerv:
+    ncf_1cm: 32.82
+    ncf_2cm: 49.24
+    ncf_3cm: 56.75
+    ncf_4cm: 62.78
+    source: "Paper Table 7 (KERV row, WA SpecDec), averaged across the four LIBERO suites"
+    date_reported: "2026-08-09"
+    eval_condition: "NCF threshold sensitivity for WA-SpecDec with the KERV verifier (Standard SpecDec baseline: 46.85/61.46/68.15/73.34)"
+  ncf_threshold_sweep_wa_heisd:
+    ncf_1cm: 31.17
+    ncf_2cm: 48.25
+    ncf_3cm: 56.07
+    ncf_4cm: 65.90
+    source: "Paper Table 7 (HeiSD row, WA SpecDec), averaged across the four LIBERO suites"
+    date_reported: "2026-08-09"
+    eval_condition: "NCF threshold sensitivity for WA-SpecDec with the HeiSD verifier (Standard SpecDec baseline: 45.31/60.72/67.43/70.21)"
+
+eval_conditions:
+  libero: "Four LIBERO suites (Spatial, Object, Goal, Long), 50 rollouts per task = 500 episodes per suite; identical task splits, rollout budget and simulator settings across all methods; target policy, verifier and decoding configuration held fixed between Standard SpecDec and WA-SpecDec."
+  simpler_env: "Four SIMPLER-Env manipulation tasks (Carrot, Stack, Spoon, Eggplant) with OpenVLA and UniVLA targets; Table 3 reports percentages and Table 4 reports success fractions."
+  metrics: "Task success, accepted length (draft action tokens accepted per target verification step), wall-clock speedup vs the AR target (includes draft proposal, target verification, WAB computation and cache updates), and near-contact failure NCF (share of failed episodes whose minimum gripper-fingertip-to-object/receptacle distance falls below delta=2 cm)."
+  headline_claims: "1.5x matched-success speedup over VLA speculative decoding alone and 18.6% average NCF reduction relative to the corresponding speculative baselines."
+  not_recorded: "Figure 3 accepted-length/success frontier curves are graphical only and are not transcribed."
+
+training:
+  method: "Two stage. (1) Train the world-aware target: minimize L = L_action + lambda*L_video (lambda=0.1) over ϕ_tok, the 4-layer spatial VideoEncoder F_omega, bias projector f_bias, training-only VideoHead g_eta, and LoRA adapter delta-theta, with the Wan 2.2 VAE encoder and base visual stack frozen. (2) Freeze the world-aware target and distill the lightweight draft model q_phi by minimizing KL against the target distribution over the same world-aware prefill hidden states."
+  auxiliary_objective: "Dense next-frame VAE latent prediction MSE over the full latent grid, using the next frame only during training"
+  inference: "Current frame only; VideoHead discarded, no future-frame prediction, no VAE decoding or video generation; draft proposes gamma tokens per block and the first rejected token is replaced by the target token"
+
+tags:
+- speculative-decoding
+- relaxed-acceptance
+- world-model
+- inference-acceleration
+- libero
+- simpler-env
+- openvla
+- univla
+- actioncodec
+- lora
+- vae-latent
+- near-contact-failure
+- autoregressive

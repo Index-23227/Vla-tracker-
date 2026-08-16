@@ -1,0 +1,89 @@
+name: SLIM-0.5B
+full_name: "SLIM-0.5B: Learning Action-Grounded Predictive Latents for Robot Manipulation"
+organization: "Fudan University; Beijing Academy of Artificial Intelligence (BAAI); Tsinghua University; Renmin University of China"
+date: "2026-08-10"
+paper_url: https://arxiv.org/abs/2608.09771
+code_url: https://kzz1031.github.io/slim-project-page/
+venue: "arXiv preprint"
+open_source: false
+model_type: vla
+inference_hz: 16.5
+
+architecture:
+  backbone: "DINOv2-B/14 visual encoder (86.58M, fine-tuned jointly with the policy), two RGB views (workspace + wrist) at 224x224"
+  llm: "T5-small language encoder (frozen; embeddings cached, excluded from the reported 0.47B trainable count)"
+  action_head: "Flow matching (conditional flow matching velocity field) over continuous action tokens, decoded by a 16-layer Mixture-of-Transformers (MoT) interaction trunk (d=768) with joint observation-action attention and per-stream language cross-attention; 4 flow-sampling steps at inference"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "0.47B (472.14M trainable policy parameters; 558.72M instantiated during Stage 1 including the frozen EMA target encoder)"
+  key_innovation: "SLIM (Self-supervised Latent Interaction Model) moves the main control computation out of a large VLM backbone and into a compact MoT that models interactions between observation latents and continuous action tokens. Stage 1 learns action-grounded predictive latents via bidirectional masked trajectory prediction: an inverse-dynamics branch reconstructs the flow-noised action chunk from current and future observation latents, and a forward-dynamics branch predicts masked future observation latents (supervised by a stop-gradient EMA target encoder, JEPA-style) from the current latent plus the clean action chunk. Stage 2 trains the deployable flow-matching policy with no future latent as input, so no pixel decoder, no video rollout, and no explicit future generation is needed at inference."
+
+benchmarks:
+  libero:
+    libero_long: 94.4
+    libero_spatial: 99.4
+    libero_object: 99.4
+    libero_goal: 96.8
+    libero_avg: 97.5
+    libero_plus_camera: 70.73
+    libero_plus_robot: 36.90
+    libero_plus_language: 87.57
+    libero_plus_light: 94.75
+    libero_plus_background: 92.01
+    libero_plus_noise: 86.07
+    libero_plus_layout: 83.21
+    libero_plus_overall: 77.45
+    source: "arXiv:2608.09771 Table 1 (LIBERO-Plus) and Appendix Table 5 (original LIBERO suites)"
+    date_reported: "2026-08-10"
+    eval_condition: "Trained only on original LIBERO data; 50 rollouts per task (2,000 rollouts over the four suites). LIBERO-Plus is zero-shot: the same LIBERO-trained checkpoint is evaluated on all 10,030 perturbation cases without adaptation. Action horizon 8, 4 flow-sampling steps."
+    notes: "LIBERO-Plus overall 77.45 vs VLA-JEPA 79.5, OpenVLA-OFT 69.6, pi0 69.3, RIPT-VLA 68.4, Fast-WAM 50.0, UnifiedVLA 42.9, NORA 39.0, WorldVLA 25.0, OpenVLA 15.6. SLIM is weakest on the robot-initial-state perturbation (36.90). Original-LIBERO overall 97.5 matches RIPT-VLA (7B) with 0.47B parameters; Fast-WAM 97.6, VLA-JEPA 97.2, OpenVLA-OFT 97.1."
+  calvin:
+    calvin_abc_d_task1: 99.3
+    calvin_abc_d_task2: 96.7
+    calvin_abc_d_task3: 92.3
+    calvin_abc_d_task4: 87.1
+    calvin_abc_d_task5: 80.2
+    calvin_abc_d_avg_len: 4.556
+    source: "arXiv:2608.09771 Table 2"
+    date_reported: "2026-08-10"
+    eval_condition: "Trained on the language-annotated ABC split, evaluated on the held-out environment D over the standard 1,000 five-instruction chains; action horizon 12"
+    notes: "Best reported entry in the table: FLOWER 4.53, DreamVLA 4.44, UnifiedVLA 4.41, VPP 4.33, Seer-Large 4.28, GR-MG 4.04, RoboDual 3.66, OpenVLA 3.27, GR-1 3.06, RoboFlamingo 2.47, UniPi 0.92."
+  real_world:
+    real_nominal_progress: 86.0
+    real_distractor_progress: 63.0
+    real_lighting_progress: 73.0
+    real_background_progress: 49.0
+    real_avg_progress: 67.8
+    source: "arXiv:2608.09771 Figure 6"
+    date_reported: "2026-08-10"
+    eval_condition: "Five multi-task real-robot manipulation tasks (carrot into bowl, stack three plates, take toast out of toaster, stack blocks, wipe whiteboard), 150 demos each (750 total), trained as a single multi-task policy; 10 trials per task-condition pair; score is 100x mean task-dependent partial-credit progress"
+    notes: "pi0.5 baseline average 56.8 (72.0/54.0/47.0/54.0); Fast-WAM average 40.0 (71.0/39.0/48.0/2.0). SLIM leads on nominal, distractor, and lighting; under background shift SLIM 49 vs pi0.5 54."
+
+training:
+  datasets: ["LIBERO: Stage 1 mixes LIBERO-90 with the four target suites; Stage 2 uses only LIBERO-10/Object/Spatial/Goal", "CALVIN: language-annotated ABC training split (both stages)", "Real-world: 750 teleoperated demonstrations across five tasks (150 each)"]
+  method: "Two stages sharing one MoT backbone. Stage 1 = action-grounded masked trajectory prediction with lambda_IDM=0.125, lambda_FDM=1, EMA momentum 0.999, 3 epochs, 2,000-step warmup. Stage 2 = flow-matching policy only, initialized from the Stage-1 checkpoint, 40 epochs (20 for the real-world policy), EMA target encoder discarded. AdamW (beta1=0.9, beta2=0.95, eps=1e-8, weight decay 0.01), gradient clipping 1.0, cosine decay to 1e-6; LR 1e-4 for the action model, 1e-5 for the visual encoder, 2.5e-5 base for remaining parameters. Global batch size 128 (LIBERO) / 256 (CALVIN). Actions normalized with per-dataset 1st/99th percentile statistics. No additional embodied pretraining (P.T. = x)."
+  compute: "8 x NVIDIA H100 80GB, BF16"
+
+eval_conditions:
+  libero: "fine-tuned"
+  libero_plus: "zero-shot (LIBERO-trained checkpoint, no adaptation)"
+  calvin: "zero-shot environment transfer (trained on ABC, evaluated on D)"
+  real_world: "fine-tuned (multi-task, trained from 750 physical demonstrations)"
+
+tags:
+  - 0.5B
+  - flow-matching
+  - mixture-of-transformers
+  - jepa
+  - latent-world-model
+  - inverse-dynamics
+  - forward-dynamics
+  - masked-trajectory-prediction
+  - dinov2
+  - t5-small
+  - ema-target
+  - libero
+  - libero-plus
+  - calvin
+  - real-robot
+  - efficient-inference

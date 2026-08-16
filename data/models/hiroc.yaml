@@ -1,0 +1,46 @@
+name: HiRoC
+full_name: 'Beyond Flat Policies: Hierarchical Post-Training for Embodied Agents in Robotic Manipulation'
+organization: Jilin University / Joy Future Academy (JD)
+date: '2026-08-06'
+paper_url: https://arxiv.org/abs/2608.05999
+architecture:
+  base_model: OpenVLA-OFT (executor)
+  planner: Qwen2.5-VL-3B (LoRA SFT, frozen during RL)
+  action_head: autoregressive action tokens + hierarchical GRPO (task-level + subgoal-level advantage)
+  action_head_category: autoregressive
+  action_chunk_size: 8
+key_innovation: 'Hierarchical post-training framework that decouples a high-level planner (Qwen2.5-VL-3B, SFT-trained on
+  reorganized VLA-OS subgoal data) from a low-level VLA executor (OpenVLA-OFT). Subgoal-conditioned SFT first mitigates the
+  planner-executor distribution misalignment (cold start), then online RL optimizes the executor with a hierarchical GRPO
+  objective that mixes trajectory-level and subgoal-level advantages via adaptive weights. The planner stays frozen during
+  RL tuning.
+
+  '
+benchmarks:
+  libero:
+    libero_spatial: 95.6
+    libero_object: 96.0
+    libero_goal: 84.4
+    libero_long: 98.0
+    libero_avg: 93.5
+    source: 'arXiv:2608.05999 Table 1 (50 test episodes per task)'
+eval_conditions:
+  libero: Suite-specific OpenVLA-OFT SFT checkpoint + subgoal-conditioned SFT + online hierarchical GRPO; 50 episodes per
+    task, max 512 env steps, 8 deterministic seeds
+training:
+  hardware: 8x NVIDIA H200
+  learning_rate: 2e-5
+  precision: BF16 FSDP
+  grpo_group_size: 64 vectorized environments per worker
+  rollout_epochs: 16
+  epochs: 200 (Spatial/Object/Goal), 150 (LIBERO-10)
+  replanning_interval: every 20 policy calls
+tags:
+- RL
+- GRPO
+- hierarchical
+- planner-executor
+- post-training
+- subgoal
+- OpenVLA-OFT
+- Qwen2.5-VL

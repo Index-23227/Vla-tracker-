@@ -17,26 +17,48 @@ architecture:
   key_innovation: "Calibration-free, reconstruction-free stereo fusion: two pretrained 2D encoders process synchronized left/right images and a Stereo Transformer with 2D RoPE cross-attends across views, implicitly capturing disparity and spatial correspondence. The module is a plug-in for both diffusion policies and pretrained VLAs and consistently beats RGB, RGB-D, point cloud, and multi-view baselines across RoboMimic, RoboCasa, OmniGibson and real-world tabletop / bimanual mobile manipulation."
 
 benchmarks:
-  robocasa:
-    robocasa_toolhang_100: 94.1
-    robocasa_toolhang_200: 57.1
-    source: "StereoPolicy paper Table 2 (StereoPolicy-DP, simulation)"
+  # The paper's Table 2 covers Robomimic and OmniGibson only. Its RoboCasa-Kitchen24
+  # results appear solely in Figure 5, a raster bar chart with no extractable
+  # values, so no robocasa block is recorded rather than a guessed one.
+  robomimic:
+    toolhang_100demo: 94.0
+    toolhang_200demo: 96.0
+    square_100demo: 88.0
+    square_200demo: 100.0
+    transport_100demo: 94.0
+    transport_200demo: 96.0
+    source: "StereoPolicy paper Table 2, STEREOPOLICY-DP row (Robomimic columns)"
     date_reported: "2026-05-11"
-    eval_condition: "Diffusion Policy head with stereo input; per-task best of RGB / RGB-D / RGBD-3DDA / PCD-PointNet / PCD-DP3 / Multi-View baselines"
-
-real_world:
-  tabletop_avg_success_rate: 59.0
-  baselines_avg:
+    eval_condition: "Diffusion Policy head with stereo input; mean over three seeds (std 0.0-2.8)"
+  omnigibson:
+    strawberry_100demo: 82.0
+    strawberry_200demo: 100.0
+    pourwater_100demo: 34.0
+    pourwater_200demo: 70.0
+    opendoor_200demo: 57.0
+    opendoor_300demo: 100.0
+    turnonradio_200demo: 55.0
+    turnonradio_300demo: 82.0
+    source: "StereoPolicy paper Table 2, STEREOPOLICY-DP row (OmniGibson columns)"
+    date_reported: "2026-05-11"
+    eval_condition: "Diffusion Policy head with stereo input; mean over three seeds (std 0.0-4.3)"
+  real_world:
+    tabletop_avg_success_rate: 59.0
+    source: "StereoPolicy paper, real-world tabletop suite"
+    date_reported: "2026-05-11"
+    eval_condition: "5-task tabletop suite (Banana PnP, Toast Insert, Plastic / Steel / Glass Cup), 20 trials per task; best baseline RGBD-3DDA 45.0"
+  real_world_baselines:
     rgb: 42.0
     rgb_d: 41.0
     rgbd_3dda: 45.0
     pcd_pointnet: 14.0
     pcd_dp3: 27.0
     multi_view: 44.0
-  notes: "5-task tabletop suite (Banana PnP, Toast Insert, Plastic / Steel / Glass Cup) with 20 trials per task — StereoPolicy-DP 59% vs best baseline 45% (RGBD-3DDA). StereoPolicy-VLA on pi_0.5 mobile manipulation: 74.40% at 300 demos vs 70.31% RGB; 51.72% at 30 demos vs 48.71% RGB."
+    source: "StereoPolicy paper, real-world tabletop suite (baseline rows)"
+    eval_condition: "Same 5-task tabletop protocol; these are baselines, not StereoPolicy"
 
 eval_conditions:
-  robocasa: "StereoPolicy-DP fine-tuned per task with 100-300 demos; consistently outperforms RGB, RGB-D, point cloud, and multi-view baselines across RoboMimic / RoboCasa / OmniGibson tasks."
-  vla: "StereoPolicy-VLA trained on 8x H100; GR00T-N1.5 backbone for 60K steps (LR 1e-4), pi_0.5 backbone for 80K steps (global batch 128, LR 2.5e-5)."
+  simulation: "StereoPolicy-DP fine-tuned per task with 100-300 demos across Robomimic (3 tasks), OmniGibson (4 tasks) and RoboCasa-Kitchen24; beats RGB, RGB-D, point cloud and multi-view baselines."
+  vla: "StereoPolicy-VLA trained on 8x H100; GR00T-N1.5 backbone for 60K steps (LR 1e-4), pi_0.5 backbone for 80K steps (global batch 128, LR 2.5e-5). Mobile manipulation 74.40% at 300 demos vs 70.31% RGB; 51.72% at 30 demos vs 48.71% RGB."
 
-tags: [robocasa, stereo, plug-in, diffusion-policy, vla]
+tags: [robomimic, omnigibson, robocasa, stereo, plug-in, diffusion-policy, vla]

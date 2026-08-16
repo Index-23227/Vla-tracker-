@@ -1,0 +1,143 @@
+name: RecoverFly
+full_name: "RecoverFly: A Failure-Aware Reinforcement Learning Post-Training Framework for Aerial Vision-Language Navigation"
+organization: "Jilin University / Tsinghua University / Beihang University / Zhongguancun Academy"
+date: "2026-08-10"
+paper_url: https://arxiv.org/abs/2608.09467
+code_url: null
+venue: null
+open_source: false
+model_type: aerial_vln
+
+architecture:
+  backbone: "AerialVLA (OpenVLA-7B backbone with LoRA adapter) used as the initial policy; an added value head enables actor-critic optimization"
+  llm: "OpenVLA-7B (Llama-2 7B based VLA), inherited via AerialVLA"
+  action_head: "Grammar-constrained autoregressive action-token decoding: three numerical control tokens plus an optional LAND token, each control dimension uniformly quantized into 99 bins over [0,5] (forward), [-5,5] (vertical), and [-pi,pi] (yaw); a deterministic detokenizer maps valid sequences to continuous 3-DoF commands, and unparseable sequences map to a safe no-op with an invalid-action penalty"
+  action_head_category: autoregressive
+  parameters: 7B
+  key_innovation: "Failure-aware online RL post-training of an end-to-end UAV-VLA policy, combining (1) token-level PPO that applies the clipped surrogate separately to each valid action token while sharing the action-level GAE advantage, with a value head and event-aware reward (clipped distance progress plus success/collision/stuck/away/early-stop/timeout events); (2) dynamic failure replay that stores unresolved task initializations (not stale trajectories) with active/solved/dropped states and regenerates each rollout under the current policy, preserving on-policy PPO; (3) a two-stage long-tail scene curriculum (Stage I samples scenes by empirical frequency, Stage II uses equal per-scene quotas); (4) stage-wise frozen reference-policy KL regularization (Stage I anchors to the initial VLA policy, Stage II to the final Stage I policy)."
+
+benchmarks:
+  travel_uav_test_seen:
+    full_ne: 54.96
+    full_sr: 56.33
+    full_osr: 65.40
+    full_spl: 45.98
+    easy_ne: 37.60
+    easy_sr: 56.28
+    easy_osr: 67.39
+    easy_spl: 42.91
+    hard_ne: 76.36
+    hard_sr: 56.38
+    hard_osr: 62.94
+    hard_spl: 49.75
+    source: "Table 1 (Comparison on the Test Seen set)"
+    date_reported: "2026-08-10"
+    eval_condition: "TravelUAV UAV-Need-Help task, closed-loop AirSim rollouts on 1,418 Test Seen trajectories; mean over three evaluation seeds (reported std: full NE +/-1.19, SR +/-0.15, OSR +/-0.80, SPL +/-1.13); NE in meters, other metrics in percent; trajectories under 250 m are Easy, the rest Hard"
+  travel_uav_test_unseen_map:
+    full_ne: 58.88
+    full_sr: 42.97
+    full_osr: 60.09
+    full_spl: 31.83
+    easy_ne: 44.02
+    easy_sr: 46.88
+    easy_osr: 63.04
+    easy_spl: 32.44
+    hard_ne: 79.88
+    hard_sr: 37.45
+    hard_osr: 55.92
+    hard_spl: 30.98
+    source: "Table 2 (Comparison on the Test Unseen Map set)"
+    date_reported: "2026-08-10"
+    eval_condition: "958 Test Unseen Map trajectories; mean over three seeds (reported std: full NE +/-2.09, SR +/-1.76, OSR +/-1.01, SPL +/-1.25)"
+  travel_uav_test_unseen_object:
+    full_ne: 53.42
+    full_sr: 59.72
+    full_osr: 68.31
+    full_spl: 51.34
+    easy_ne: 35.49
+    easy_sr: 63.80
+    easy_osr: 72.09
+    easy_spl: 50.97
+    hard_ne: 62.34
+    hard_sr: 57.70
+    hard_osr: 66.43
+    hard_spl: 51.52
+    source: "Table 3 (Comparison on the Test Unseen Object set)"
+    date_reported: "2026-08-10"
+    eval_condition: "629 Test Unseen Object trajectories; mean over three seeds (reported std: full NE +/-0.97, SR +/-0.81, OSR +/-1.66, SPL +/-0.77); no additional object annotations or external detector are introduced by RL post-training"
+  travel_uav_aerialvla_initialization:
+    seen_full_ne: 65.88
+    seen_full_sr: 47.96
+    seen_full_osr: 57.69
+    seen_full_spl: 38.54
+    unseen_map_full_ne: 67.42
+    unseen_map_full_sr: 37.58
+    unseen_map_full_osr: 52.92
+    unseen_map_full_spl: 28.22
+    unseen_object_full_ne: 61.45
+    unseen_object_full_sr: 56.60
+    unseen_object_full_osr: 64.86
+    unseen_object_full_spl: 46.61
+    source: "Tables 1-3 (AerialVLA rows), reported from the original publication"
+    date_reported: "2026-08-10"
+    eval_condition: "AerialVLA behavior-cloning checkpoint that initializes RecoverFly; direct measure of the RL post-training gain (SR +8.37 Seen, +5.39 Unseen Map, +3.12 Unseen Object)"
+  travel_uav_component_ablation:
+    baseline_aerialvla_seen_sr: 47.96
+    baseline_aerialvla_unseen_map_sr: 37.58
+    baseline_aerialvla_unseen_object_sr: 56.60
+    baseline_aerialvla_avg_sr: 47.38
+    id1_token_level_ppo_seen_sr: 48.17
+    id1_token_level_ppo_unseen_map_sr: 42.90
+    id1_token_level_ppo_unseen_object_sr: 56.44
+    id1_token_level_ppo_avg_sr: 49.17
+    id2_plus_failure_replay_seen_sr: 56.21
+    id2_plus_failure_replay_unseen_map_sr: 31.21
+    id2_plus_failure_replay_unseen_object_sr: 59.78
+    id2_plus_failure_replay_avg_sr: 49.07
+    id3_plus_kl_regularization_seen_sr: 55.01
+    id3_plus_kl_regularization_unseen_map_sr: 37.47
+    id3_plus_kl_regularization_unseen_object_sr: 62.32
+    id3_plus_kl_regularization_avg_sr: 51.60
+    id4_full_seen_sr: 56.28
+    id4_full_unseen_map_sr: 44.89
+    id4_full_unseen_object_sr: 60.41
+    id4_full_avg_sr: 53.86
+    source: "Table 4 (Incremental ablation of the RecoverFly framework)"
+    date_reported: "2026-08-10"
+    eval_condition: "full-split success rate (%) with seed 1 only; Avg. is the unweighted mean across the three evaluation splits"
+  travel_uav_scene_sampling_ablation:
+    uniform_sampling_seen_sr: 50.71
+    uniform_sampling_unseen_map_sr: 41.23
+    uniform_sampling_unseen_object_sr: 52.31
+    uniform_sampling_avg_sr: 48.08
+    original_distribution_seen_sr: 56.13
+    original_distribution_unseen_map_sr: 40.92
+    original_distribution_unseen_object_sr: 59.14
+    original_distribution_avg_sr: 52.06
+    two_stage_curriculum_seen_sr: 56.28
+    two_stage_curriculum_unseen_map_sr: 44.89
+    two_stage_curriculum_unseen_object_sr: 60.41
+    two_stage_curriculum_avg_sr: 53.86
+    source: "Table 5 (Scene-sampling strategies comparison using full-split SR)"
+    date_reported: "2026-08-10"
+    eval_condition: "seed 1; Uniform Sampling uses equal scene quotas in one stage, Original Distribution preserves empirical scene proportions across two stages"
+
+training:
+  datasets: ["TravelUAV (UAV-Need-Help task): 7,922 training trajectories; long-tailed scene distribution"]
+  method: "Online RL post-training initialized from the AerialVLA checkpoint. Only the LoRA adapter and the added value head are optimized; objective L = -J_PPO^token + c_v * L_V + beta * L_KL with GAE advantages. Two stages: Stage I samples scenes by empirical frequency and regularizes toward the initial VLA policy; Stage II uses equal per-scene quotas and regularizes toward the final Stage I policy. Dynamic failure replay samples fresh and failed task instances at replay ratio eta; entries unsolved after N_max attempts are dropped. Implemented on RLinf with AirSim, the TravelUAV environment, and the AerialVLA action-token pipeline."
+  compute: "8x NVIDIA A100 (80GB), approximately 21 hours; total rollout budget (including failure replays) about 30% of the training-set size"
+
+eval_conditions:
+  travel_uav: "closed-loop AirSim / TravelUAV simulation only; no physical UAV deployment. Baseline numbers are quoted from the original publications on the same splits."
+
+tags:
+- aerial_vln
+- uav
+- navigation
+- reinforcement_learning
+- ppo
+- post_training
+- autoregressive
+- lora
+- curriculum_learning
+- travel_uav

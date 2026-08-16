@@ -1,0 +1,164 @@
+# Paper: Explicit Language Memory for Long-Horizon Planning in Vision-Language-Action Models
+# arXiv: 2608.04765 (v1, 5 Aug 2026)
+# NOTE: The paper does not assign an official method name; it refers to the system as
+# "pi0.5 + language memory". The tracker name below is descriptive.
+
+name: Explicit-Language-Memory-VLA
+full_name: "Explicit Language Memory for Long-Horizon Planning in Vision-Language-Action Models"
+organization: "Fudan University"
+date: "2026-08-05"
+paper_url: https://arxiv.org/abs/2608.04765
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Hierarchical two-branch system. High level: PaliGemma VLM (same VLM family as the pi0.5 baseline) reading global instruction + current observation + previous language memory. Low level: pi0.5-style VLA conditioned on the current observation and the predicted subtask."
+  llm: "PaliGemma (high-level semantic branch); Gemma-based VLM backbone in the low-level VLA"
+  action_head: "Flow-matching action expert (300M parameters, following the pi0.5 action expert), predicting a continuous action chunk of horizon H = 30"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "300M expert"
+  key_innovation: >-
+    Replaces frame-concatenated visual history with an explicit, recursively
+    updated natural-language memory. At each decision step the high-level VLM
+    consumes (global instruction, current observation, previous memory) and emits
+    an updated memory plus a concise subtask; the low-level VLA turns that subtask
+    into a continuous action chunk. Memory follows a rolling-compression rule:
+    before a milestone completes it keeps identifying detail (category, color,
+    location); after completion the detail collapses into a short past-tense
+    statement plus the next intent, so context stays bounded over long horizons.
+    Supervision is generated automatically by prompting a general-purpose VLM with
+    each frame plus the episode's skill annotations to emit an aligned
+    (subtask, memory) pair. The two branches are trained independently, avoiding a
+    hand-tuned balance between semantic-generation and continuous-control losses.
+    Because memory and subtask are plain text, the loop yields an interpretable
+    progress log that separates high-level semantic errors from low-level motor
+    failures, and lets a recorded grasp failure condition the next prediction
+    (in-context recovery) with no separate recovery controller.
+
+training:
+  dataset: >-
+    Expert episodes with skill-level annotations (skill names, descriptions,
+    start/end timestamps) from BEHAVIOR-1K, Genie Sim 3.0, and a real XLeRobot
+    platform. Frame-aligned (memory, subtask) targets are auto-annotated by a
+    general-purpose VLM; two annotation routes are reported: a hosted
+    Gemini 3.5 Flash API and a locally deployed Qwen3.5-9B model.
+    The real-robot dataset contains 25 manually collected trajectories.
+  method: >-
+    Independent training of the two branches. High level: autoregressive
+    cross-entropy on the updated memory and the subtask. Low level: flow-matching
+    action objective following the pi0.5 action expert. The high-level PaliGemma
+    and the low-level VLM backbone are adapted with LoRA; the 300M Gemma action
+    expert is fully fine-tuned. AdamW with warmup + cosine decay,
+    peak learning rate 2.5e-5, batch size 64, 50,000 steps.
+  num_trajectories: 25
+  compute: "4x NVIDIA A100 for training/fine-tuning; inference on 1x NVIDIA RTX 5880 Ada Generation"
+
+benchmarks:
+  behavior_1k:
+    move_to: 100.0
+    pick_up: 30.0
+    press_on: 10.0
+    place_on: 20.0
+    behavior_1k_avg: 40.0
+    source: "Paper Table 1, row 'pi0.5 + language memory' (BEHAVIOR-1K turning-on-radio, stage-wise success rate %)"
+    date_reported: "2026-08-05"
+    eval_condition: "fine-tuned; 4 scored stages (MoveTo, PickUp, PressOn, PlaceOn)"
+
+  behavior_1k_baseline_pi05:
+    move_to: 100.0
+    pick_up: 10.0
+    press_on: 0.0
+    place_on: 10.0
+    behavior_1k_avg: 30.0
+    source: "Paper Table 1, baseline row 'pi0.5' (native pi0.5, no language memory)"
+    date_reported: "2026-08-05"
+    eval_condition: "baseline comparison, not this model"
+
+  genie_sim:
+    follow: 100.0
+    pick_up_1: 100.0
+    inside_1: 83.3
+    upright: 50.0
+    pick_up_2: 25.0
+    inside_2: 25.0
+    genie_sim_avg: 63.9
+    source: "Paper Table 2, single-package sorting, row 'pi0.5 + language memory' (Genie Sim 3.0, stage-wise success rate %)"
+    date_reported: "2026-08-05"
+    eval_condition: "fine-tuned; single-package sorting task, 6 scored stages"
+
+  genie_sim_baseline_pi05:
+    follow: 50.0
+    pick_up_1: 50.0
+    inside_1: 50.0
+    upright: 50.0
+    pick_up_2: 25.0
+    inside_2: 25.0
+    genie_sim_avg: 41.7
+    source: "Paper Table 2, single-package sorting, baseline row 'pi0.5'"
+    date_reported: "2026-08-05"
+    eval_condition: "baseline comparison, not this model"
+
+  genie_sim_continuous:
+    upright_1: 100.0
+    upright_2: 37.5
+    upright_3: 37.5
+    upright_4: 12.5
+    genie_sim_continuous_avg: 46.9
+    source: "Paper Table 2, continuous sorting, row 'pi0.5 + language memory' (four differently colored packages, any order)"
+    date_reported: "2026-08-05"
+    eval_condition: "fine-tuned; continuous four-package sorting variant"
+
+  genie_sim_continuous_baseline_pi05:
+    upright_1: 100.0
+    upright_2: 25.0
+    upright_3: 0.0
+    upright_4: 0.0
+    genie_sim_continuous_avg: 31.3
+    source: "Paper Table 2, continuous sorting, baseline row 'pi0.5'"
+    date_reported: "2026-08-05"
+    eval_condition: "baseline comparison, not this model"
+
+  real_world:
+    follow: 100.0
+    pick_up: 55.0
+    move_to: 55.0
+    place: 55.0
+    real_world_avg: 66.3
+    source: "Paper Table 3, row 'pi0.5 + language memory' (real XLeRobot pick-and-place, 20 trials, stage-wise success rate %)"
+    date_reported: "2026-08-05"
+    eval_condition: "fine-tuned on 25 teleoperated trajectories; 20 evaluation trials"
+
+  real_world_baseline_pi05:
+    follow: 100.0
+    pick_up: 50.0
+    move_to: 50.0
+    place: 50.0
+    real_world_avg: 62.5
+    source: "Paper Table 3, baseline row 'pi0.5'"
+    date_reported: "2026-08-05"
+    eval_condition: "baseline comparison, not this model"
+
+eval_conditions:
+  behavior_1k: "BEHAVIOR-1K turning-on-radio task; instruction 'Turn on the radio receiver that is on the table in the living room'; stage-wise success rate averaged over 4 stages"
+  genie_sim: "Genie Sim 3.0 (Isaac Sim humanoid manipulation platform); single-package sorting, 6 scored stages (Follow, PickUp, Inside-1, Upright, PickUp, Inside-2)"
+  genie_sim_continuous: "Genie Sim 3.0 continuous variant; four colored packages sorted in any order, each scored when placed barcode-up in the scanning area"
+  real_world: "XLeRobot: two SO-ARM 101 arms, LeKiwi mobile base, 1 RGB head camera + hand cameras; pick a block from a table and place it on a plate; scored at Follow, PickUp, MoveTo, Place over 20 trials"
+
+tags:
+  - flow-matching
+  - hierarchical
+  - language-memory
+  - long-horizon
+  - pi0.5
+  - paligemma
+  - behavior-1k
+  - genie-sim
+  - real-robot
+  - xlerobot
+  - subtask-decomposition
+  - interpretability
+  - failure-recovery
+  - sim-to-real

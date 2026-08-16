@@ -1,0 +1,62 @@
+name: TEMPO
+version: '1.0'
+full_name: 'TEMPO: Semantic-Action Decoupled RL Post-Training for Vision-Language-Action Models'
+organization: Zhejiang Gongshang University / KTH Royal Institute of Technology
+paper_url: https://arxiv.org/abs/2608.07314
+code_url: null
+date: '2026-08-07'
+venue: arXiv 2026
+inference_hz: null
+architecture:
+  backbone: Florence-2 vision-language backbone (frozen, via FLOWER base policy)
+  llm: null
+  action_head: flow-matching action expert (FLOWER), RL post-trained with TD3
+  action_space: continuous action chunks
+  parameters: not specified (FLOWER base policy)
+  key_innovation: Two-timescale semantic-action decoupled RL post-training - the
+    semantic projection layer and the low-level action expert are optimized by two
+    separate module-level TD3 loops (each with its own replay buffer, twin critics,
+    target networks) while the vision-language backbone stays frozen; the action
+    expert is updated more frequently than the semantic projection layer to prevent
+    latent-action drift
+  action_head_category: flow_matching
+training:
+  dataset: CALVIN ABC->D online rollouts; 120 real-robot demonstration episodes (60
+    per task) before online RL
+  method: Online RL post-training of a pretrained FLOWER policy with two decoupled
+    TD3 loops, sparse binary instruction-completion reward, action-to-semantic update
+    frequency ratio 5:1 (best) / 10:1
+  compute: not specified
+benchmarks:
+  calvin:
+    calvin_abc_d_1: 100.0
+    calvin_abc_d_2: 97.1
+    calvin_abc_d_3: 92.9
+    calvin_abc_d_4: 87.1
+    calvin_abc_d_5: 81.7
+    calvin_abc_d_avg_len: 4.59
+    source: Table I, TEMPO paper (arXiv:2608.07314), CALVIN ABC->D
+    date_reported: '2026-08-07'
+    eval_condition: RL post-trained FLOWER policy; trained on environments A,B,C and
+      evaluated on unseen environment D with chains of five language instructions
+eval_conditions:
+  calvin_protocol: ABC->D, success rate of completing the first k tasks in a five-instruction
+    chain, Avg. Len. = mean number of consecutively completed tasks
+  base_policy: FLOWER (reported 4.49 Avg. Len.); single-loop RL baseline FLOWER-RL
+    reaches 4.51
+  frequency_ratio: 5:1 action-to-semantic update frequency used for the main result
+    (10:1 gives 4.57, 1:1 gives 4.46)
+  real_world: 6-DoF Synria Alicia-D arm with 1-DoF gripper, RealSense D435i third-person
+    and D405 wrist cameras; two multi-stage tasks (block sliding, car retrieval); 20
+    trials per checkpoint over three seeds, reward reported as curves only
+open_source: false
+open_source_note: No code repository released; anonymous project page only
+model_type: vla
+tags:
+- rl-post-training
+- td3
+- calvin
+- flow-matching
+- flower
+- long-horizon
+- real-robot

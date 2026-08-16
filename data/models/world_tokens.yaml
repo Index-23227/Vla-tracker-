@@ -1,0 +1,97 @@
+# Paper: World Tokens: Enhancing Embodied Policies with Training-Time World Modeling
+# arXiv: 2608.09730
+
+name: WorldTokens
+full_name: "World Tokens: Enhancing Embodied Policies with Training-Time World Modeling"
+organization: "JIUTIAN Research, Zhongguancun Academy"
+date: "2026-08-10"
+paper_url: https://arxiv.org/abs/2608.09730
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-2B-Instruct VLM encoding multi-view RGB observations and the language instruction into a variable-length patch+language token sequence"
+  llm: "Qwen3-VL-2B-Instruct"
+  action_head: "DiT-B flow-matching action expert generating an 8-step action chunk with 4 flow-integration steps, conditioned solely on the 256 world tokens produced by the World Adapter (no parallel access to the full VLM sequence)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "2B"
+  key_innovation: "A World Adapter (Perceiver-resampler style, K=256 learned queries, L=12 blocks, width d=2048, 8 heads, ~0.5B params) compresses the VLM sequence into a fixed set of world tokens that (a) are the action expert's sole visual-language context (exclusive routing, preventing a controller bypass) and (b) cross-condition a jointly fine-tuned Cosmos-Predict2.5-2B future-video denoiser during training. The video branch's first-frame condition is weakened to a Canny edge map (structural anchor) so the tokens must carry appearance/semantic content. At deployment the entire video branch (VAE encoder, projection, denoiser) is discarded, leaving VLM + World Adapter + action expert at VLA-level latency."
+
+training:
+  dataset: "LIBERO (4 suites pooled, 40 tasks, 500 demos per suite) for the LIBERO policy; BridgeV2 + Fractal real-robot mixture for the SIMPLER policy; self-collected Galaxea R1 Pro demonstrations for the real-robot policy"
+  method: "Joint training of a flow-matching action loss and a future-video diffusion denoising loss on the shared world tokens: L = L_act + lambda_w * L_vid with lambda_w = 0.5. 8-step action chunks, 8-frame future video targets. AdamW (beta=(0.9,0.95), eps=1e-8, weight decay 1e-8), cosine schedule with linear warmup; per-group LRs 1e-5 (VLM), 2e-5 (video denoiser), 1e-4 (World Adapter, world-model projection, action expert). VAE tokenizer frozen. Canny thresholds 60/140 with Gaussian blur sigma=2.5. No embodied action pretraining."
+  compute: "H100 GPUs, 16 samples per device, no gradient accumulation. LIBERO: 70K steps, effective batch 128 on 8 GPUs. SIMPLER: 140K steps, effective batch 256 on 16 GPUs. R1 Pro: 30K steps, effective batch 128 on 8 GPUs."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 98.8
+    libero_goal: 97.4
+    libero_long: 97.0
+    libero_avg: 98.2
+    source: "World Tokens paper (arXiv:2608.09730) Table 1; 50 episodes per task over 40 tasks = 2,000 episodes, unweighted suite mean"
+    date_reported: "2026-08-10"
+    eval_condition: "fine-tuned (single policy trained on all 4 suites pooled), no embodied action pretraining"
+  simpler_env:
+    simpler_widowx_put_spoon_on_towel: 74.0
+    simpler_widowx_put_carrot_on_plate: 85.0
+    simpler_widowx_stack_block: 32.0
+    simpler_widowx_put_eggplant_in_basket: 95.0
+    simpler_widowx_avg: 71.5
+    google_robot_pick_coke_can: 91.0
+    google_robot_move_near: 65.0
+    google_robot_drawer: 78.7
+    google_robot_place_apple: 93.5
+    simpler_google_avg: 82.1
+    simpler_avg: 71.5
+    source: "World Tokens paper (arXiv:2608.09730) Table 3, SIMPLER visual-matching. simpler_avg records the WidowX average (71.5); the Google Robot visual-matching average reported in the same table is 82.1 (simpler_google_avg)."
+    date_reported: "2026-08-10"
+    eval_condition: "trained on BridgeV2 + Fractal real-robot data, evaluated zero-shot in the visually matched simulator; official WidowX protocol with 24 prescribed object-pose configurations per task"
+  real_world:
+    r1_pro_lemon: 70.8
+    r1_pro_strawberry: 83.3
+    r1_pro_mango: 75.0
+    r1_pro_banana: 75.0
+    r1_pro_avg: 76.0
+    source: "World Tokens paper (arXiv:2608.09730) Table 4, Galaxea R1 Pro closed-loop pick-and-place, 24 trials per object (96 pooled trials)"
+    date_reported: "2026-08-10"
+    eval_condition: "fine-tuned on self-collected R1 Pro demonstrations, no embodied action pretraining"
+
+eval_conditions:
+  libero:
+    setting: "fine-tuned"
+    base_model: "Qwen3-VL-2B-Instruct + World Adapter (K=256) + DiT-B flow-matching action expert; Cosmos-Predict2.5-2B video denoiser used at training time only"
+    note: "50 episodes per task, multiple environment seeds, 2,000 episodes total. Matched action-only baseline Qwen-GR00T (same backbone and GR00T-style head, action expert reads VLM hidden states directly) scores 96.9 avg / 92.8 Long. Ablations: w/o world model 97.4 avg, w/ VLM bypass 97.2, FFN adapter 97.0, RGB anchor instead of Canny 96.2."
+  simpler_env:
+    setting: "real-to-sim (trained on real-robot data, evaluated in visually matched simulator)"
+    base_model: "Single policy jointly trained on BridgeV2 and Fractal, evaluated on both WidowX and Google Robot embodiments"
+    note: "WidowX avg 71.5 is the highest among the listed methods (4B Qwen-GR00T 65.3, StarVLA 65.2). Google Robot avg 82.1. Block-stacking (32.0) remains the weakest WidowX task, though no listed method exceeds 57%. Several published Google averages omit the Place task."
+  real_world:
+    setting: "fine-tuned"
+    base_model: "World Tokens 2B on the right arm of a Galaxea R1 Pro, cropped head-mounted fisheye view, 8-dim joint+gripper action"
+    note: "24 trials per object, 96 pooled trials, randomized object-basket positions and policy evaluation order. Matched Qwen-GR00T baseline 59.4% pooled. Context rows (not matched comparisons): pi0.5 without embodied pretraining 15.6%, pi0.5 pretrained checkpoint 100%."
+  latency:
+    setting: "measured"
+    base_model: "World Tokens 2B, compiled graph with cached conditioning"
+    note: "61.85 ms median per 8-action chunk (~129 actions/s) on a single 24 GB RTX 5090 D with two 224x224 views, batch size 1, 4 flow-integration steps; pi0.5 measured at 56.32 ms on the same setup (within 1.1x). In a 10-step uncompiled configuration matching Fast-WAM, World Tokens takes 119.72 ms vs Fast-WAM's 182 ms. The World Adapter accounts for roughly 10 ms of the 61.85 ms."
+
+tags:
+  - vla
+  - world-model
+  - training-time-world-modeling
+  - world-adapter
+  - flow-matching
+  - perceiver-resampler
+  - video-diffusion-supervision
+  - canny-structural-anchor
+  - qwen3-vl-2b
+  - cosmos-predict
+  - libero
+  - simpler-env
+  - real-robot
+  - galaxea-r1-pro
+  - action-chunking
+  - low-latency

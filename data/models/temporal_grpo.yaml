@@ -1,0 +1,54 @@
+# Paper: Temporal GRPO: Beyond Trajectory-Level Credit in Vision-Language-Action Reinforcement Learning
+# arXiv: 2608.13026
+
+name: Temporal-GRPO
+full_name: "Temporal GRPO: Beyond Trajectory-Level Credit in Vision-Language-Action Reinforcement Learning"
+organization: "Institute of Software, Chinese Academy of Sciences / University of Chinese Academy of Sciences"
+date: "2026-08-13"
+paper_url: https://arxiv.org/abs/2608.13026
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  base_model: "OpenVLA-OFT (task-specific SFT checkpoints released by SimpleVLA-RL)"
+  action_head: "Outcome-driven GRPO post-training with stage-conditioned temporal credit assignment. An ordered sequence of detectable task stages m1 -> ... -> mK is generated from the task instruction and initial observation by a frozen RynnBrain-4B embodied planner plus a Stage Compiler; a relation detector aligns each rollout with stage action intervals B_i,k = (T_i,k-1, T_i,k]; group-relative advantages are computed only over rollouts sharing the prerequisite stage (entered-stage gating V_i,k) and assigned solely to the corresponding interval, giving a piecewise temporal advantage A_i,t inside the standard clipped GRPO objective."
+  action_head_category: autoregressive
+  parameters: "7B (OpenVLA-OFT policy; frozen RynnBrain-4B used only for stage generation during post-training)"
+  key_innovation: "Identifies and formalizes 'trajectory-level credit aliasing' — vanilla GRPO broadcasts one rollout-level advantage to every action, so a rollout that clears several stages and fails late penalizes the actions that produced its earlier progress. Temporal GRPO replaces the comparison unit (complete rollout) and the assignment unit (whole action sequence) with detectable task stages, while keeping complete-rollout sampling, a single VLA policy, and the final task-success objective unchanged. Privileged simulator states and stage modules are used only during RL post-training, never at evaluation."
+
+training:
+  method: "Outcome-driven RL post-training (GRPO variant). All controlled RL methods start from the same task-specific OpenVLA-OFT SFT checkpoint and share rollout, environment-interaction, policy-update budgets and evaluation protocol. RoboTwin 2.0 results are mean +/- std over three training seeds."
+
+benchmarks:
+  robotwin_v2:
+    short_horizon: 73.2
+    medium_horizon: 79.0
+    long_and_extra_long_horizon: 75.2
+    robotwin_v2_avg: 75.8
+    source: "arXiv:2608.13026 Table 1"
+    date_reported: "2026-08-13"
+    eval_condition: "RL post-trained from task-specific OpenVLA-OFT SFT checkpoint; mean +/- std over 3 seeds (73.2+/-0.9 / 79.0+/-0.8 / 75.2+/-1.1 / 75.8+/-0.7)"
+    notes: "Baselines under the same table: SimpleVLA-RL 68.8, Stage-Reward GRPO 59.2, TGRPO 52.1, pi0 49.2, Trajectory-GRPO 46.4, OpenVLA-OFT (SFT) 38.3, RDT-1B 33.3. Gains over SimpleVLA-RL are +8.3 (short), +6.5 (medium), +6.2 (long/extra-long), +7.0 macro."
+  libero:
+    libero_long: 99.1
+    source: "arXiv:2608.13026 Table 2 (LIBERO-Long ablation)"
+    date_reported: "2026-08-13"
+    eval_condition: "RL post-trained, same policy initialization and training budget; mean +/- std over 3 seeds (99.1+/-0.4)"
+    notes: "Only LIBERO-Long is reported in the main paper (full four-suite results are deferred to the supplementary material). Ablations on the same table: w/o Stage Compiler 96.8, Stage-Reward GRPO 94.7, w/o entered-stage gating 92.5, w/o same-stage grouping 90.6, Trajectory-GRPO 88.4."
+
+eval_conditions:
+  robotwin_v2: "RL post-training on RoboTwin 2.0 tasks; matched interaction budgets; 3 seeds"
+  libero: "LIBERO-Long only; controlled credit-assignment analysis and ablations; 3 seeds"
+
+tags:
+- RL
+- GRPO
+- reinforcement-learning
+- post-training
+- credit-assignment
+- long-horizon
+- robotwin
+- libero
+- openvla-oft

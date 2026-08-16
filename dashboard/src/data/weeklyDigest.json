@@ -1,30 +1,30 @@
 {
- "week": "2026-W32",
- "week_display": "Week 32, August 2026",
- "headline": "LIBERO tops out near 99 — SAM3D-VLA and DLAM enter the top-7 while the trajectory prior moves into training",
+ "week": "2026-W33",
+ "week_display": "Week 33, August 2026",
+ "headline": "Three weeks of backlog cleared — and four benchmark scores that were never real",
  "insights": [
   {
-   "title": "The LIBERO ceiling is now a 0.8-point band",
-   "body": "SAM3D-VLA (99.1, SAM-3D promptable grounding + flow matching) lands at #5 and DLAM (99.03, discrete latent action modeling) at #7, joined by MVUCF (98.92) and ChainVLA (98.8). Four new entrants pushed PearlVLA, FoMoVLA, SnapFlow and TFP out of the top 13 in a single cycle — the entire top-13 now spans 99.8 down to 98.8. Ranking on LIBERO alone has stopped being informative; LIBERO-Plus and RoboTwin v2 are where the separation lives.",
-   "delta": "4 new top-13",
+   "title": "The wrapper line held: 23 of 63 candidates rejected",
+   "body": "The highest-rejection cycle so far, and almost every rejection was the same shape — a paper improving a policy it never trains. Several said so outright: OnEvoMemory 'keeping the pretrained policy frozen', HyMeS 'no weight update, parameters remain fixed', Deltoris 'we do not train a separate small VLA model from scratch'. Titles are unreliable in both directions: FACT and EMS read like analysis and runtime papers but train real weights, while ARIES-Mission2 and RoboSynChallenge read like systems and are a frozen-model pipeline and a competition proposal.",
+   "delta": "23 rejected",
+   "direction": "down"
+  },
+  {
+   "title": "A RoboCasa #2 that was two other benchmarks misread",
+   "body": "StereoPolicy sat at RoboCasa 75.6 built from robocasa_toolhang_100: 94.1 and _200: 57.1. Its paper's Table 2 has no RoboCasa column at all — the row reads '941.9 ... 571.9', value and standard deviation run together, so 94.1 is Robomimic ToolHang @100 demos (94±1.9) and 57.1 is OmniGibson OpenDoor @200 (57±1.9). Two different benchmarks, two corrupted numbers. Fixed alongside three more: SimplerEnv averaged a paper's headline with its own sub-aggregates (TBD-VLA 82.09 → 77.7), COAST mixed three host policies, SAPS averaged in a pi0.5 baseline row.",
+   "delta": "4 corrected",
+   "direction": "down"
+  },
+  {
+   "title": "The tracker was discarding data it had already collected",
+   "body": "build_leaderboard.py filtered benchmark blocks through a hardcoded list of eight names, so 118 blocks across 91 models never reached leaderboard.json — including real_world for 59 models, which has its own definition file and appears in benchmarks_available. Meta-World was tracked by the data and absent from the dashboard, so nine models' scores were unreachable; it now has a chip and COAST leads at 94.0. Reviews for four models never attached because two scripts disagreed on filenames while coverage kept reporting 100%.",
+   "delta": "118 recovered",
    "direction": "up"
   },
   {
-   "title": "Trajectory priors work best as training-time bias, not runtime constraint",
-   "body": "Hermite-VLA reparameterizes the action chunk as a piecewise cubic Hermite curve and tests it at three integration levels. The winner is the variant that uses the curve only as an auxiliary training loss and discards the head at inference — LIBERO 98.7, LIBERO-Plus 90.9 (vs π0.5's 85.7), real-robot 90.0 (vs 63.4) at zero inference overhead. The runtime-constrained variants score lower. Same lesson as FoMoVLA's train-only foresight branch, arrived at independently.",
-   "delta": "+26.6pp real",
-   "direction": "up"
-  },
-  {
-   "title": "Memory and critics get separated from policies",
-   "body": "SkillMemo stores skill-level MoE gating signatures rather than observations and lifts π0.5 to LIBERO 98.0, but its real result is compositional: a model trained on Goal beats the in-distribution baseline on unseen Spatial. ValueFormer (Chef Robotics) and WCM go further and ship as pure critics with no action head — ValueFormer's causal-transformer value function only reweights π0.5's post-training loss. Its on-robot 70%→85% is honestly flagged as within noise (n=20, Fisher p=0.45).",
-   "delta": "3 critic/memory",
-   "direction": "up"
-  },
-  {
-   "title": "373 models; 10 of 33 candidates rejected as non-policy",
-   "body": "The strictest cycle yet: the two highest-scored candidates were both rejected — RoboBRIDGE (orchestration framework) and GUARD (test-time failure detection) — alongside Pigey (frontier-VLM orchestrator over frozen π0/π0.5), RTCF (training-free test-time correction), a task-vector locality audit, an adversarial-attack paper and a red-team security framework. A paper improving a frozen policy's LIBERO score is a result about the wrapper, not a model for the leaderboard.",
-   "delta": "348 → 373",
+   "title": "413 models; LIBERO's top-13 now spans one point",
+   "body": "G0.5 (Galaxea, single autoregressive stream) enters at #10 with 98.9 and also takes SimplerEnv at 87.3; LIRA follows at 98.88 from a 0.5B model running 186 Hz. The band from #1 to #13 is 99.8 down to 98.83. MiDAS was briefly the RoboCasa leader at 89.3 before that turned out to be RoboCasa-365 over three of four tasks — moved to its own block rather than ranked against the standard suite.",
+   "delta": "353 → 413",
    "direction": "up"
   }
  ]

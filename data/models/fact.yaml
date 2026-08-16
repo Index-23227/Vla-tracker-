@@ -1,0 +1,131 @@
+# Paper: Demystifying When and Why VLAs Fail in Contact-Rich Tasks and How to Fix Them
+# arXiv: 2608.01402v1 (2 Aug 2026) — verified against PDF (2026-08-16)
+# Project page: https://stanford-iprl-lab.github.io/fact/ (code + STL bill of materials stated as "will be released")
+
+name: FACT
+full_name: "FACT: Force-Aware Contact-rich manipulation via Timestep modulation"
+organization: "Stanford University (IPRL Lab)"
+date: "2026-08-02"
+paper_url: https://arxiv.org/abs/2608.01402
+venue: arXiv 2026
+open_source: false
+model_type: "force-aware post-training recipe + force injection module for flow-matching VLAs (applied to pi0.5 and pi0)"
+
+architecture:
+  backbone: "pi0.5 (primary) and pi0 (transfer experiment); pre-trained VLM prefix + flow-matching action expert (18 layers). All methods fine-tuned with LoRA (~50M trainable params). FACT adds ~2.2M parameters: a shared causal TCN force encoder (~0.2M, 4 dilated blocks, hidden width 64) and an AdaRMS conditioning head (~2.1M, two MLP layers + zero-initialized gamma projection)."
+  action_head: "Flow-matching action expert with AdaRMSNorm timestep conditioning. Two modifications: (1) Logit-Normal (LN) noise schedule during post-training, tau = sigmoid(s*z - m) with m=1.5, s=1, replacing the default Beta(1.5, 1.0) schedule — allocates 6x more gradient signal to tau < 0.2 (the contact-correction regime); (2) time-aware force injection where the mean-pooled current 6-D F/T window modulates the per-layer AdaRMS scale (h_l = (gamma_l(tau) + delta_gamma(f_t)) * RMSNorm(h_{l-1}) + beta_l(tau) + h_{l-1} g_l(tau)) and H=30 past force windows (~2 s) are encoded as prepended tokens."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~2.2M added modules on top of the pi0.5 backbone (vs ~45M for ForceVLA, ~2.1M for TA-VLA)"
+  sensors: "external Realsense D435 + wrist-mounted ZED Mini (15 Hz); wrist-mounted Bota SensONE 6-axis F/T sensor at 400 Hz, one-euro filtered, 27 raw readings per control step"
+  key_innovation: >-
+    Diagnoses two causally distinct VLA failure modes in contact-rich manipulation and fixes each
+    separately. (1) Precision failures come from a flow-matching training mismatch: the default Beta
+    noise schedule starves the low-noise denoising regime (e.g. SmolVLA allocates only 8.9% of gradient
+    signal to tau < 0.2) where small sub-millimeter corrective actions are generated. Fix: swap in a
+    Logit-Normal schedule with m=1.5, requiring no new data, parameters, or architectural change, and
+    applicable as a drop-in to any flow-matching VLA. (2) Force failures come from three structural
+    properties of force signals — contact sparsity (near-zero over most free-space steps), temporal
+    structure (instantaneous reading vs. recent history), and sensitivity modulation (force should
+    matter only at contact). Fix: time-aware force injection with contact-state AdaRMS modulation,
+    a causal-TCN-encoded contact history prepended as tokens, and contact gating that blocks gradients
+    through the force encoders below a threshold delta = 0.5 N.
+
+training:
+  data: "100 teleoperated demonstrations per task (5 tasks), collected with a Haply Inverse 3 haptic device providing force feedback to the operator; target position sampled uniformly over a 32x20 cm surface, home position sampled uniformly in a 5 cm cube"
+  compute: "LoRA fine-tuning from the pre-trained pi0.5 checkpoint for 20,000 steps; identical protocol for all baselines"
+  inputs_outputs: "RGB (external + wrist, 15 Hz) + proprioception + 6-D wrist F/T (400 Hz) + language prompt -> delta end-effector pose actions (3-D position + 3-D angle displacement), executed by a two-rate operational-space controller (15 Hz policy / 1 kHz joint torque)"
+  hyperparameters: "LN location m=1.5 with s=1; force history H=30 windows (~2 s); per-step F/T window H_w=27; contact gradient gate threshold delta=0.5 N"
+
+benchmarks:
+  real_world_fact_pi05:
+    plug_insertion: 57.5
+    usb_insertion: 47.5
+    button_push: 75.0
+    board_erasing: 90.0
+    key_insertion: 60.0
+    real_world_avg: 66.0
+    source: "Table 1 — FACT on the pi0.5 backbone (main result). Fisher's exact p vs pi0.5: plug .012, USB .249, button < .001, board 1.00, key < .001. Re-implemented baselines on the same pi0.5 backbone: ForceVLA 32.5/37.5/12.5/77.5/42.5 (all avg 40.5), TA-VLA 30.0/25.0/20.0/97.5/15.0 (all avg 37.5)."
+    date_reported: "2026-08-02"
+    eval_condition: "Franka Research 3 + Robotiq gripper + wrist Bota SensONE F/T sensor; 40 independent rollouts per task, 60 s timeout, target and home poses sampled from the training distribution; ~2,500 rollouts across all conditions"
+    notes: "Plug and USB insertion are precision-critical; button push, board erasing and key insertion are force-critical. Board erasing is near-saturated for all methods because the compliant operational-space controller handles sustained surface contact."
+  real_world_pi05_baseline:
+    plug_insertion: 30.0
+    usb_insertion: 37.5
+    button_push: 12.5
+    board_erasing: 100.0
+    key_insertion: 15.0
+    real_world_avg: 39.0
+    source: "Table 1 — unmodified pi0.5 baseline (Beta noise schedule, no force input), the reference condition for all Fisher's exact tests"
+    date_reported: "2026-08-02"
+    eval_condition: "same hardware and protocol as the main condition; LoRA fine-tuned for 20,000 steps on the same 100 demonstrations per task"
+  real_world_ln_only_pi05:
+    plug_insertion: 50.0
+    usb_insertion: 47.5
+    button_push: 57.5
+    board_erasing: 87.5
+    key_insertion: 37.5
+    real_world_avg: 56.0
+    source: "Table 1 — pi0.5 + Logit-Normal noise schedule only (no force injection). Isolates the precision-failure fix: +20 pp plug (p=.055), ~+10 pp USB, +45 pp button (p<.001), +22.5 pp key (p=.020)."
+    date_reported: "2026-08-02"
+    eval_condition: "same hardware and protocol; only the post-training noise schedule differs from the pi0.5 baseline (no additional data or parameters)"
+  real_world_fact_pi0:
+    plug_insertion: 70.0
+    key_insertion: 50.0
+    button_push: 60.0
+    source: "Table 4 — FACT applied to the pi0 backbone (modified to use pi0.5-style AdaRMS timestep conditioning). Baselines on pi0: pi0 32.5/45.0/47.5, ForceVLA 55.0/42.5/42.5, TA-VLA 30.0/27.5/27.5. No aggregate average is reported for this table."
+    date_reported: "2026-08-02"
+    eval_condition: "three-task subset (plug insertion, key insertion, button push); 40 rollouts per task on the pi0 backbone"
+  real_world_ablation_no_contact_gating:
+    plug_insertion: 42.5
+    key_insertion: 27.5
+    button_push: 57.5
+    source: "Table 3 — FACT without the gradient threshold (contact gating). No aggregate average reported."
+    date_reported: "2026-08-02"
+    eval_condition: "three-task ablation subset on the pi0.5 backbone; 40 rollouts per task"
+  real_world_ablation_no_current_reading:
+    plug_insertion: 60.0
+    key_insertion: 35.0
+    button_push: 50.0
+    source: "Table 3 — FACT without the instantaneous force reading (AdaRMS contact-state modulation removed). Largest effect on key insertion (-25 pp), where the hard-stop peak provides the completion cue. No aggregate average reported."
+    date_reported: "2026-08-02"
+    eval_condition: "three-task ablation subset on the pi0.5 backbone; 40 rollouts per task"
+  real_world_ablation_no_force_history:
+    plug_insertion: 30.0
+    key_insertion: 20.0
+    button_push: 12.5
+    source: "Table 3 — FACT without the H=30 force-history tokens; the most damaging ablation (button -62.5 pp, key -40 pp). No aggregate average reported."
+    date_reported: "2026-08-02"
+    eval_condition: "three-task ablation subset on the pi0.5 backbone; 40 rollouts per task"
+  real_world_force_to_noise:
+    plug_insertion: 40.0
+    key_insertion: 5.0
+    button_push: 17.5
+    source: "Table A.1 — noise-substitution control: the measured F/T stream is replaced with i.i.d. zero-mean unit-variance Gaussian noise at both training and evaluation, preserving input dimensionality. FACT drops significantly on key insertion and button push (p < .001) and by 17.5 pp on plug insertion (p=.090), confirming genuine force exploitation. No aggregate average reported."
+    date_reported: "2026-08-02"
+    eval_condition: "policies retrained from scratch with Gaussian noise in place of F/T readings; 40 rollouts per task on the pi0.5 backbone"
+
+eval_conditions:
+  hardware: "Franka Research 3 arm, Cartesian impedance control at 1 kHz, wrist-mounted Bota SensONE 6-axis F/T sensor, Robotiq gripper, Realsense D435 external + ZED Mini wrist cameras at 15 Hz"
+  protocol: "40 independent rollouts per task per method, 60 s timeout, success = task completion; statistical significance via Fisher's exact test against the pi0.5 baseline; ~2,500 rollouts total"
+  tasks: "plug insertion and USB insertion (precision-critical, sub-millimeter alignment under self-occlusion); key insertion, button push and board erasing (force-critical); key insertion uses visually identical keys of different lengths plus Gaussian blur (sigma=2) to force reliance on force signals"
+  ln_transfer: "Table 2 — adding the LN schedule to force-augmented baselines on the same pi0.5 backbone raises TA-VLA from 30.0/15.0/20.0 to 47.5/32.5/42.5 and ForceVLA from 32.5/42.5/12.5 to 57.5/30.0/30.0 on plug / key / button"
+
+tags:
+  - contact-rich-manipulation
+  - force-sensing
+  - force-torque-sensor
+  - flow-matching
+  - noise-schedule
+  - logit-normal
+  - adarmsnorm
+  - timestep-modulation
+  - post-training
+  - failure-analysis
+  - pi0.5-backbone
+  - pi0-backbone
+  - lora
+  - real-robot
+  - franka
+  - insertion
+  - imitation-learning

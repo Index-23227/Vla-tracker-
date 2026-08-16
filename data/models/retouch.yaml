@@ -1,0 +1,125 @@
+# Paper: ReTouch: Empowering Contact-Rich Dexterous Manipulation with Online-Refined Tactile Prediction
+# arXiv: 2608.01824v1 (3 Aug 2026) — verified against PDF
+
+name: ReTouch
+full_name: "ReTouch: Empowering Contact-Rich Dexterous Manipulation with Online-Refined Tactile Prediction"
+organization: "University of Science and Technology of China; iFLYTEK; The Chinese University of Hong Kong"
+date: "2026-08-03"
+paper_url: https://arxiv.org/abs/2608.01824
+code_url: null
+venue: arXiv 2026
+open_source: false
+model_type: "tactile-aware vision-language-action model for dexterous manipulation"
+inference_hz: 36
+
+architecture:
+  backbone: "Initialized from a pretrained pi0 checkpoint. Vision input: one wrist-mounted RGB view + two fixed external RGB views, all resized to 224x224 with aspect-ratio-preserving padding and normalized to [-1,1]. Proprioception: 18-dim state (6 UR7e joint positions + 12 XHand joint positions). Tactile input: 5 fingers x 120 three-axis force taxels, with a 10-frame window (9 history + current)."
+  llm: "pi0 vision-language backbone (VLM), run at 9 Hz with cached semantic context"
+  action_head: "Two parameter-independent 18-layer Transformer Action Experts (hidden width 1024, 8 attention heads) trained with action flow matching. The Hindsight Action Expert (HAE) is a training-only privileged branch conditioned on ground-truth future tactile patch features; the Foresight Action Expert (FAE) is the deployable expert that infers future tactile latents from learnable Tactile Foresight Queries. Alignment at layer l=12 via a 1024->1024->1024 SiLU projector and mean cosine distance (weight 0.1) with stop-gradient on HAE targets. Outputs a 16-step chunk of 18-dim absolute joint-position commands; inference uses 10 explicit-Euler steps from t=1 to 0."
+  action_head_category: flow_matching
+  action_space: "continuous, 18-dim absolute joint-position commands (6 arm + 12 hand)"
+  parameters: "not stated in paper (pi0-initialized; each Action Expert is an 18-layer Transformer with width 1024)"
+  key_innovation: >-
+    Two coupled contributions. (1) Tactile-Patch Encoder: the 120 3D force taxels on each finger are
+    partitioned into five functional patches (tip, center, base, left, right) using fixed taxel-to-patch
+    maps (T30 for the thumb, T16 for the other four fingers). Soft contact weights w_j = sigmoid((||f_j||_2 - theta_c)/gamma_c)
+    aggregate each patch into contact-gated mean force, component-wise max force, contact area and contact
+    strength; a Patch-Informed Tokenizer adds finger-identity and patch-position embeddings and pools the
+    five patches into one compact finger token, giving only five tactile tokens per frame while preserving
+    finger-wise contact topology. The encoder is pretrained for 20k steps with three heads (contact-strength
+    distribution via cross-entropy, patch mean-force reconstruction, binary contact state), which are then
+    discarded. (2) Online Tactile Prediction Refinement: future tactile latents are treated as a recursively
+    maintained control state rather than a fixed one-shot forecast. At each high-frequency call the FAE
+    rebuilds its Tactile Foresight Queries from the stop-gradient latent prefix of the previous call plus
+    learnable queries for the remaining horizon, jointly re-predicting the refined latents and the remaining
+    action chunk. A directional attention mask lets tactile queries attend to context but not to action
+    tokens, while action tokens attend to the freshly updated tactile latents, so prediction always precedes
+    action within a call. Training samples a random intra-chunk offset from {4, 8, 12} to match deployment.
+
+training:
+  dataset: "XHT-Dataset — 900 successful real-world teleoperated demonstrations across seven contact-rich dexterous tasks on an XHand-UR7e platform (Pipette Press, Bottle Grasp, Cob Grasp, Sponge Wipe, Button Press, Cabinet Retrieval, Liquid Transfer). 100 trajectories held out as an offline test set, 800 used for training. Each demonstration records visual observations, language instructions, robot states, actions and dense five-finger tactile streams."
+  method: "Two-stage. Stage 1: Tactile-Patch Encoder pretraining for 20k steps with L_TPE = lambda_dist*L_CE + lambda_force*L_force + lambda_contact*L_BCE. Stage 2: single joint policy over all seven tasks for 80k steps with L_policy = L_act^hid + L_act^fore + lambda_align*L_align + L_update; the encoder is frozen for the first 5k policy steps then optimized end to end."
+  compute: "8x NVIDIA A800 GPUs, bfloat16 mixed precision; AdamW with gradient clipping 1.0, 1k warmup updates, cosine LR decay 2.5e-5 -> 2.5e-6; global batch size 32 (encoder pretraining) and 8 (policy training). Color jitter on all three views (brightness 0.3, contrast 0.4, saturation 0.5); base view also gets random crop retaining 95% area and random rotation within +/-5 degrees."
+  inputs_outputs: "3 RGB views (224x224) + language instruction + 18-dim proprioceptive state + 10x5x120x3 tactile window -> 16x18 action chunk of absolute joint-position commands"
+  hyperparameters: "16-step action horizon; 9-frame tactile history (10-frame window); VLM at 9 Hz, FAE at 36 Hz; alignment layer l=12 with weight 0.1; theta_c = 0.5 during encoder pretraining and 1.0 during policy training, gamma_c = 0.5, eps = 1e-6; flow-matching timestep t = 0.001 + 0.999*t~ with t~ ~ Beta(1.5, 1)"
+
+benchmarks:
+  real_world:
+    pipette_press: 86.0
+    bottle_grasp: 95.0
+    cob_grasp: 100.0
+    sponge_wipe: 87.5
+    button_press: 85.0
+    cabinet_retrieval: 62.5
+    liquid_transfer: 69.0
+    real_world_avg: 83.6
+    source: "Table 1 — success rates (%) on seven contact-rich dexterous tasks under standard evaluation. Baselines: Tactile-VLA 65.2 (strongest, +18.4 for ReTouch), pi0.5 + tactile 53.1, pi0.5 51.5, pi0 45.6, pi0 + tactile 43.8, ViTacFormer 33.1, RDP 31.6. ViTacFormer is the only method beating ReTouch on a task (Cabinet Retrieval 67.5 vs 62.5); ReTouch ties Tactile-VLA on Button Press at 85.0."
+    date_reported: "2026-08-03"
+    eval_condition: "real XHand-UR7e platform; 20 real-robot rollouts per task; normalized task score in [0,1] with stage-based partial credit (Button Press is binary); 60 s timeout for the first five tasks, 120 s for Liquid Transfer and Cabinet Retrieval; single policy trained jointly on all seven tasks"
+    notes: "real_world_avg is the macro-average across the seven tasks as reported in the paper."
+
+ood_robustness:
+  height_variation_sponge_wipe: 42.5
+  object_position_shift_cob_grasp: 98.5
+  lighting_change_liquid_transfer: 66.5
+  pulling_disturbance_bottle_grasp: 85.0
+  ood_avg: 73.1
+  source: "Table 2 — out-of-distribution generalization and disturbance robustness (%). Baselines: pi0.5 + tactile 49.3 (strongest, +23.8 for ReTouch), pi0.5 47.1, Tactile-VLA 35.0, RDP 10.0, ViTacFormer 7.8. Largest gain is the post-grasp pulling disturbance (85.0 vs 55.0 best baseline, +30.0)."
+  date_reported: "2026-08-03"
+  eval_condition: "20 rollouts per challenging setting; Sponge Wipe at held-out heights 2.5 and 5 cm (training heights 7.5/9/10.5 cm); Cob Grasp at held-out positions outside the training region; Liquid Transfer under projector-generated dynamic illumination; Bottle Grasp with a downward pull after stable lift, followed by autonomous grasp recovery"
+
+ablations:
+  full_retouch_avg: 83.6
+  wo_intra_chunk_refinement_avg: 60.0
+  wo_tactile_prediction_refinement_avg: 68.4
+  wo_future_tactile_prediction_avg: 67.6
+  non_blocking_joint_refinement_avg: 75.8
+  wo_tactile_patch_encoder_avg: 69.1
+  source: "Table 3 — average success rate (%) over the seven tasks. Deltas from the full model: -23.6, -15.2, -16.0, -7.8, -14.5 respectively. The 0.8-point gap between 'w/o tactile-prediction refinement' (68.4) and 'w/o future tactile prediction' (67.6) indicates a fixed one-shot tactile forecast adds little on its own."
+  date_reported: "2026-08-03"
+
+efficiency:
+  initial_vlm_fae_pass_ms: 52.25
+  cached_context_fae_refinement_ms: 19.54
+  vlm_rate_hz: 9
+  fae_rate_hz: 36
+  source: "Table 4 — mean model-compute latency on an NVIDIA RTX 5090, excluding communication, command execution and controller-side scheduling. One full VLM-FAE pass plus three cached-context FAE refinements per cycle gives 9.02 cycles/s and 36.08 FAE passes/s, reported as 9 Hz and 36 Hz."
+
+offline_diagnostics:
+  latent_cosine_similarity_offset_4: 0.9835
+  latent_cosine_similarity_offset_8: 0.9857
+  latent_cosine_similarity_offset_12: 0.9878
+  oneshot_latent_cosine_offset_4: 0.9382
+  oneshot_latent_cosine_offset_8: 0.9453
+  oneshot_latent_cosine_offset_12: 0.9523
+  action_mse_offset_4: 0.0143
+  action_mse_offset_8: 0.0135
+  action_mse_offset_12: 0.0151
+  oneshot_action_mse_offset_4: 0.0174
+  oneshot_action_mse_offset_8: 0.0212
+  oneshot_action_mse_offset_12: 0.0250
+  source: "Figure 5 — in-contact phase, 100 held-out test trajectories. Online refinement improves mean latent cosine similarity by 0.908% and reduces overall action error by 2.139% relative to the one-shot variant; the action-error reduction grows with successive updates."
+  date_reported: "2026-08-03"
+
+eval_conditions:
+  real_world: "XHand-UR7e platform, 20 real-robot rollouts per task, graded normalized task score averaged over rollouts then macro-averaged over seven tasks"
+  ood_robustness: "four challenging settings (height variation, object-position shift, lighting change, post-grasp pulling disturbance), 20 rollouts each"
+  offline_diagnostics: "100 held-out offline test trajectories, split into pre-contact and in-contact phases at the first contact timestep"
+
+tags:
+  - tactile
+  - visuo-tactile
+  - dexterous-manipulation
+  - contact-rich
+  - five-finger-hand
+  - xhand
+  - ur7e
+  - flow-matching
+  - pi0-backbone
+  - action-chunking
+  - asynchronous-inference
+  - closed-loop
+  - tactile-prediction
+  - hindsight-foresight
+  - real-robot
+  - real-world-only

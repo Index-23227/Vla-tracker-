@@ -1,0 +1,145 @@
+# Paper: FIRE-VLA: Failure-Informed Self-Evolution for Vision-Language-Action Models in Autonomous Driving
+# arXiv: 2608.13395
+
+name: FIRE-VLA
+full_name: "FIRE-VLA: Failure-Informed Self-Evolution for Vision-Language-Action Models in Autonomous Driving"
+organization: "Harbin Institute of Technology"
+date: "2026-08-13"
+paper_url: https://arxiv.org/abs/2608.13395
+code_url: https://github.com/forever-free1/FIRE-VLA
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Qwen2.5-VL-3B-Instruct vision encoder (front-view camera image, at most 196,608 pixels; vision tower trainable)"
+  llm: "Qwen2.5-VL-3B-Instruct"
+  action_head: "Autoregressive text decoding: given the front-view image and an ego-history description, the policy emits reasoning followed by six ego-frame BEV waypoints at 0.5 s intervals inside an <answer> span (384-token response limit)"
+  action_head_category: autoregressive
+  parameters: "3B"
+  key_innovation: "Failure-informed self-evolution for RL post-training. GRPO stays active for every rollout group, but groups that are simultaneously low-reward and low-diversity (reward mean and population std both at or below the batch 30th percentile, with valid fraction >= 0.5) are flagged as 'unresolved failure groups' and additionally routed to privileged self-distillation (PSD). The PSD teacher is a frozen copy of the same round-start policy with identical parameter scale; its only advantage is that its context contains the hidden ground-truth future trajectory inside <priv> tags. Both branches condition on the same student-generated on-policy prefix, and supervision is applied only to trajectory-answer tokens via a capped Jensen-Shannon divergence over the teacher's top-16 tokens plus one residual-tail bucket (beta = 0.5, per-token cap 0.05), with gradients flowing only through the student. The total actor loss is L = L_GRPO + 0.1 * L_PSD. At each round boundary the updated student is promoted to initialize both the student and the frozen teacher of the next round, so the unresolved-failure distribution that determines where privileged supervision lands co-evolves with the policy without any larger external teacher."
+
+training:
+  method: "Common SFT checkpoint -> RL post-training. FIRE-VLA runs K=2 evolution rounds of 75 policy updates each (GRPO for all groups + routed PSD); the standard-GRPO control runs 150 continuous updates from the same SFT checkpoint."
+  dataset: "nuScenes front-view driving. Frozen 1,200-prompt RL set sampled without replacement (seed 42), split by position into two disjoint 600-prompt subsets for Rounds 1 and 2; standard GRPO uses the same 1,200 prompts in a separate seeded shuffle. Four responses per prompt, 4,800 on-policy student rollouts per method."
+  reward: "Trajectory-only bounded reciprocal reward r = (1 + (1/6) * sum_t ||p_t - p*_t||_2^2)^-1 over the six future waypoints; invalid responses receive zero reward. No GRPO KL penalty, no auxiliary reward terms."
+  routing_incidence: "The online unresolved-failure gate routed 56 prompt groups (224 responses) in Round 1 and 58 groups (232 responses) in Round 2."
+  compute: "Full-parameter BF16 FSDP on 4 x RTX 3090 GPUs; global actor batch size 8 (one micro-example per device), prompt/response limits 3,072/384 tokens, learning rate 5e-7, weight decay 1e-2, warm-up ratio 0.05, gradient-norm cap 1.0, LoRA disabled."
+  note: "Not an equal-compute comparison: FIRE-VLA adds frozen-teacher forward passes and restarts optimizer/scheduler state between rounds. Matched across methods are initialization, unique-prompt set, rollout count and policy-update count, but not minibatch order."
+
+benchmarks:
+  nuscenes_planning:
+    single_sample_reward: 0.6785
+    single_sample_avg_l2_m: 0.6023
+    single_sample_l2_1s_m: 0.1997
+    single_sample_l2_2s_m: 0.6106
+    single_sample_l2_3s_m: 1.3898
+    g4_reward: 0.6156
+    g4_avg_l2_m: 1.5001
+    g4_l2_1s_m: 0.6953
+    g4_l2_2s_m: 1.5912
+    g4_l2_3s_m: 3.0597
+    g4_persistent_failure_count: 674
+    g4_persistent_failure_pct: 11.20
+    g4_any_above_10m_pct: 0.83
+    source: "FIRE-VLA paper Tables 1, 2 and 3 (row FIRE-VLA), arXiv:2608.13395"
+    date_reported: "2026-08-13"
+    eval_condition: "Frozen 6,019-sample nuScenes evaluation from 150 scene-disjoint scenes (5,119 unique images), open-loop front-camera planning, six waypoints at 0.5 s. Single-sample = n=1 at temperature 0.2 (sampled, not deterministic); G=4 = four stochastic rollouts at temperature 0.8 averaged within sample then across samples. Persistent failures counted by a frozen detector calibrated once on a disjoint 256-sample / 37-scene SFT validation split (thresholds mean reward <= 0.4457839238, std <= 0.0747977498, validity >= 0.5)."
+
+  nuscenes_planning_baselines:
+    sft_single_sample_reward: 0.6656
+    sft_single_sample_avg_l2_m: 0.6240
+    sft_single_sample_l2_1s_m: 0.2050
+    sft_single_sample_l2_2s_m: 0.6402
+    sft_single_sample_l2_3s_m: 1.4332
+    sft_g4_reward: 0.5565
+    sft_g4_avg_l2_m: 1.0038
+    sft_g4_l2_1s_m: 0.3649
+    sft_g4_l2_2s_m: 1.0048
+    sft_g4_l2_3s_m: 2.3445
+    grpo_single_sample_reward: 0.6788
+    grpo_single_sample_avg_l2_m: 0.6421
+    grpo_single_sample_l2_1s_m: 0.2135
+    grpo_single_sample_l2_2s_m: 0.6396
+    grpo_single_sample_l2_3s_m: 1.5302
+    grpo_g4_reward: 0.6370
+    grpo_g4_avg_l2_m: 1.8478
+    grpo_g4_l2_1s_m: 0.8692
+    grpo_g4_l2_2s_m: 1.9219
+    grpo_g4_l2_3s_m: 3.9002
+    grpo_g4_persistent_failure_count: 784
+    grpo_g4_persistent_failure_pct: 13.03
+    grpo_g4_any_above_10m_pct: 1.35
+    source: "FIRE-VLA paper Tables 1, 2 and 3 (rows Common SFT and Standard GRPO), arXiv:2608.13395"
+    date_reported: "2026-08-13"
+    eval_condition: "Same frozen 6,019-sample nuScenes evaluation and sampling protocol as the FIRE-VLA row. Common SFT is the shared initialization of both RL runs; Standard GRPO is the matched control with 150 continuous policy updates."
+
+  nuscenes_severe_error_statistics:
+    fire_vla_cvar95_m: 17.72
+    fire_vla_cvar99_m: 79.21
+    fire_vla_worst_of_4_m: 4.13
+    fire_vla_intra_sample_std_m: 1.56
+    fire_vla_any_above_10m_pct: 0.83
+    grpo_cvar95_m: 25.52
+    grpo_cvar99_m: 118.58
+    grpo_worst_of_4_m: 5.57
+    grpo_intra_sample_std_m: 2.19
+    grpo_any_above_10m_pct: 1.35
+    fire_vla_candidate_median_m: 0.598
+    fire_vla_candidate_p90_m: 1.594
+    fire_vla_candidate_p95_m: 2.013
+    fire_vla_candidate_p99_m: 2.881
+    grpo_candidate_median_m: 0.550
+    grpo_candidate_p90_m: 1.498
+    grpo_candidate_p95_m: 1.890
+    grpo_candidate_p99_m: 2.926
+    source: "FIRE-VLA paper Table 5 and Appendix A text (24,076 G=4 candidates per policy), arXiv:2608.13395"
+    date_reported: "2026-08-13"
+    eval_condition: "G=4 stochastic rollouts at temperature 0.8 on the frozen 6,019-sample evaluation. GRPO is better through the ordinary region (median, P90, P95) while FIRE-VLA reduces the severe tail."
+
+  nuscenes_paired_deltas:
+    single_sample_avg_l2_delta_m: -0.0397
+    g4_avg_l2_delta_m: -0.3476
+    g4_reward_delta: -0.0213
+    candidate_p90_delta_m: 0.0956
+    candidate_p95_delta_m: 0.1224
+    candidate_p99_delta_m: -0.0456
+    candidate_cvar95_delta_m: -7.8035
+    candidate_cvar99_delta_m: -39.3676
+    worst_of_4_mean_delta_m: -1.4420
+    within_sample_std_delta_m: -0.6234
+    any_above_10m_delta_pp: -0.52
+    persistent_rate_delta_pp: -1.83
+    reference_recovery_rate_delta_pp: 1.86
+    source: "FIRE-VLA paper Table 4, scene-clustered paired bootstrap (10,000 replicates), deltas are FIRE-VLA minus standard GRPO, arXiv:2608.13395"
+    date_reported: "2026-08-13"
+    eval_condition: "Paired by sample over the 6,019-sample evaluation, scene as the resampling cluster. 95% CIs: single-sample Avg. L2 [-0.1104, 0.0087] (inconclusive), G=4 Avg. L2 [-0.7711, -0.0319], G=4 reward [-0.0250, -0.0178] (favours GRPO), CVaR95 [-16.2990, -1.5186], CVaR99 [-81.3940, -7.8663], worst-of-4 [-3.1306, -0.1835], within-sample std [-1.3526, -0.0785], any>10m [-0.83, -0.22] pp, persistent rate [-2.55, -1.11] pp, recovery rate [-1.13, 4.90] pp (inconclusive)."
+
+  nuscenes_sft_failure_recovery:
+    reference_persistent_failures: 484
+    fire_vla_recovered_count: 122
+    fire_vla_recovery_pct: 25.21
+    grpo_recovered_count: 113
+    grpo_recovery_pct: 23.35
+    source: "FIRE-VLA paper Section 4.3 and Appendix C, arXiv:2608.13395"
+    date_reported: "2026-08-13"
+    eval_condition: "Recovery = a sample in the fixed SFT reference-persistent set (484 of 6,019) becoming detector-negative under the same frozen persistent-failure detector. The recovery-rate difference is not statistically conclusive."
+
+eval_conditions:
+  nuscenes_planning: "Open-loop nuScenes front-camera trajectory prediction; 6,019 fixed samples from 150 held-out scenes with no scene overlap with RL or SFT training and no image overlap with SFT training; six future waypoints at 0.5 s intervals; L2 in metres, lower is better"
+  sampling: "Single-sample low-temperature (n=1, temperature 0.2, still sampled via vLLM so not strictly deterministic) and G=4 stochastic (temperature 0.8, identical sampling settings for all checkpoints)"
+  statistics: "All GRPO-FIRE comparisons paired by sample; 10,000 bootstrap replicates with scene as the resampling cluster; single training seed per method"
+  limitations: "Open-loop only, so closed-loop safety, traffic compliance, comfort and compounding state shift are not measured; the end-to-end comparison does not isolate failure routing, privileged distillation and teacher promotion; not equal-compute"
+
+tags:
+- autonomous_driving
+- nuscenes
+- reinforcement_learning
+- grpo
+- self_distillation
+- privileged_information
+- self_evolution
+- failure_aware
+- post_training
+- qwen2_5_vl
+- open_loop_planning
+- text_waypoint

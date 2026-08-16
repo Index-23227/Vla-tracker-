@@ -22,6 +22,19 @@ VALID_ACTION_HEAD_CATEGORIES = {
     "regression", "inverse_dynamics", "hybrid", "other",
 }
 
+# Keys build_leaderboard.py accepts as a block's paper-declared headline average.
+# Must stay in sync with the compute_*_avg functions there.
+HEADLINE_KEYS = {
+    "libero": ("libero_5_suite_avg", "libero_avg"),
+    "calvin": ("calvin_abc_d_avg_len", "calvin_avg"),
+    "simpler_env": ("simpler_avg",),
+    "rlbench": ("rlbench_avg", "rlbench_18tasks", "average"),
+    "robocasa": ("robocasa_avg", "average"),
+    "robotwin_v1": ("average", "robotwin_v1_avg"),
+    "robotwin_v2": ("robotwin_v2_avg", "average"),
+    "metaworld": ("metaworld_avg", "ml45_avg", "metaworld_mt50_avg", "average"),
+}
+
 errors = []
 warnings = []
 
@@ -73,6 +86,32 @@ def validate_model(path: Path, data: dict, known_benchmarks: set[str]):
                     warnings.append(
                         f"[{name}] {bench_name}.{key} = {val} — outside 0-100 range"
                     )
+
+    # Guessed-average check.
+    #
+    # When a ranked benchmark block declares no headline average, the builder
+    # falls back to the mean of whatever numeric fields are present. That is
+    # right for per-task score lists but wrong when the fields are separate eval
+    # conditions -- it silently produced a SimplerEnv score that mixed a paper's
+    # own headline with its sub-aggregates, and an RLBench score averaged with
+    # COLOSSEUM and MemoryBench. Few fields plus a wide spread is the signature
+    # of conditions rather than tasks, so flag those for a human to declare.
+    for bench_name, keys in HEADLINE_KEYS.items():
+        block = benchmarks.get(bench_name)
+        if not isinstance(block, dict):
+            continue
+        nums = {k: v for k, v in block.items()
+                if k not in ("source", "date_reported", "eval_condition")
+                and isinstance(v, (int, float))}
+        if len(nums) < 2 or len(nums) > 3 or any(k in nums for k in keys):
+            continue
+        spread = max(nums.values()) - min(nums.values())
+        if spread >= 20:
+            warnings.append(
+                f"[{name}] {bench_name} has no headline key "
+                f"({'/'.join(keys)}); its average is the mean of "
+                f"{', '.join(nums)} which span {spread:.1f} points"
+            )
 
     # Tags check
     if not data.get("tags"):

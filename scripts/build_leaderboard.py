@@ -26,6 +26,55 @@ REVIEWS_DIR = PUBLIC_DIR / "reviews"
 
 METADATA_KEYS = ("source", "date_reported", "eval_condition")
 
+CANONICAL_BENCHMARKS = ("libero", "calvin", "simpler_env", "rlbench", "metaworld",
+                        "robotwin_v1", "robotwin_v2", "robocasa", "real_world")
+
+# LIBERO robustness suites are written both as their own top-level block and as
+# libero_plus_* / libero_pro_* keys inside benchmarks.libero. Only the nested
+# form ever reached consumers, so the block form was silently discarded.
+LIBERO_VARIANTS = ("libero_plus", "libero_pro")
+
+
+# Evaluation results that were written at the YAML root instead of under
+# benchmarks:, where nothing reads them. Engineering metrics that also live at
+# the root (latency, inference_speedup, verifier_metrics) are deliberately not
+# listed -- they are not benchmark scores.
+ROOT_RESULT_BLOCKS = ("real_world", "real_world_results", "ood_robustness",
+                      "one_shot", "cross_task", "vlabench")
+
+
+def hoist_root_result_blocks(model: dict) -> dict:
+    """Move stray root-level result blocks into the model's benchmarks map."""
+    benchmarks = dict(model.get("benchmarks") or {})
+    for key in ROOT_RESULT_BLOCKS:
+        block = model.get(key)
+        if isinstance(block, dict) and key not in benchmarks:
+            benchmarks[key] = block
+    return benchmarks
+
+
+def fold_libero_variants(model_benchmarks: dict) -> dict:
+    """Merge top-level libero_plus / libero_pro blocks into benchmarks.libero."""
+    if not isinstance(model_benchmarks, dict):
+        return {}
+    if not any(v in model_benchmarks for v in LIBERO_VARIANTS):
+        return model_benchmarks
+
+    folded = dict(model_benchmarks)
+    libero = dict(folded.get("libero") or {})
+    for variant in LIBERO_VARIANTS:
+        block = folded.pop(variant, None)
+        if not isinstance(block, dict):
+            continue
+        for key, val in block.items():
+            if key in METADATA_KEYS:
+                # Keep the variant's provenance without clobbering LIBERO's own.
+                libero.setdefault(f"{variant}_{key}", val)
+            elif isinstance(val, (int, float)):
+                libero.setdefault(key if key.startswith(variant) else f"{variant}_{key}", val)
+    folded["libero"] = libero
+    return folded
+
 
 def review_slug(name: str) -> str:
     """Filesystem- and URL-safe key for a per-model review file.
@@ -199,11 +248,24 @@ def compute_robotwin_v2_avg(benchmarks: dict) -> float | None:
     return declared(robotwin_v2, "robotwin_v2_avg", "average") or mean_of_parts(robotwin_v2)
 
 
+def compute_metaworld_avg(benchmarks: dict) -> float | None:
+    metaworld = benchmarks.get("metaworld")
+    if not metaworld:
+        return None
+    # Papers headline this as metaworld_avg, ml45_avg or metaworld_mt50_avg.
+    return declared(metaworld, "metaworld_avg", "ml45_avg", "metaworld_mt50_avg",
+                    "average") or mean_of_parts(metaworld)
+
+
 def compute_rlbench_avg(benchmarks: dict) -> float | None:
     rlbench = benchmarks.get("rlbench")
     if not rlbench:
         return None
-    return declared(rlbench, "rlbench_avg", "average") or mean_of_parts(rlbench)
+    # rlbench_18tasks is the standard 18-task protocol and is how four models
+    # headline their score; without it the mean swept in COLOSSEUM / GemBench /
+    # MemoryBench suites that happen to share the block.
+    return (declared(rlbench, "rlbench_avg", "rlbench_18tasks", "average")
+            or mean_of_parts(rlbench))
 
 
 
@@ -242,16 +304,24 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
             "eval_conditions": {},
         }
 
-        model_benchmarks = model.get("benchmarks", {})
+        model_benchmarks = fold_libero_variants(hoist_root_result_blocks(model))
 
-        # Process each benchmark
-        for bench_name in ["libero", "calvin", "simpler_env", "rlbench", "metaworld", "robotwin_v1", "robotwin_v2", "robocasa"]:
-            if bench_name in model_benchmarks:
-                scores, meta = extract_scores(model_benchmarks[bench_name])
-                if scores:
-                    entry["benchmarks"][bench_name] = scores
-                if meta.get("eval_condition"):
-                    entry["eval_conditions"][bench_name] = meta["eval_condition"]
+        # Carry every scored block, not just a hardcoded list. The old list left
+        # out real_world — which has its own definition file and appears in
+        # benchmarks_available — so 59 models' real-robot numbers never reached
+        # leaderboard.json at all, along with driving, maniskill and a dozen
+        # other blocks written into the YAMLs.
+        ordered = [b for b in CANONICAL_BENCHMARKS if b in model_benchmarks]
+        ordered += [b for b in model_benchmarks if b not in CANONICAL_BENCHMARKS]
+        for bench_name in ordered:
+            block = model_benchmarks[bench_name]
+            if not isinstance(block, dict):
+                continue
+            scores, meta = extract_scores(block)
+            if scores:
+                entry["benchmarks"][bench_name] = scores
+            if meta.get("eval_condition"):
+                entry["eval_conditions"][bench_name] = meta["eval_condition"]
 
         # Also carry over eval_conditions from model YAML
         model_eval = model.get("eval_conditions", {})
@@ -287,6 +357,10 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
         robocasa_avg = compute_robocasa_avg(model_benchmarks)
         if robocasa_avg is not None:
             entry["robocasa_avg"] = robocasa_avg
+
+        metaworld_avg = compute_metaworld_avg(model_benchmarks)
+        if metaworld_avg is not None:
+            entry["metaworld_avg"] = metaworld_avg
 
         # Merge peer-review data if available
         if reviews and model["name"] in reviews:

@@ -75,6 +75,17 @@ export const BENCHMARKS = {
       robocasa_gr1_articulated: 'GR1 Articulated',
     },
   },
+  metaworld: {
+    key: 'metaworld_avg',
+    label: 'Meta-World',
+    max: 100,
+    metric: 'Success Rate (%)',
+    suites: ['metaworld_easy', 'metaworld_medium', 'metaworld_hard', 'metaworld_very_hard'],
+    suiteLabels: {
+      metaworld_easy: 'Easy', metaworld_medium: 'Medium',
+      metaworld_hard: 'Hard', metaworld_very_hard: 'Very Hard',
+    },
+  },
 }
 
 /**

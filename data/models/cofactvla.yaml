@@ -1,0 +1,118 @@
+# Paper: CofactVLA: Deconfounding Vision-Language-Action Models via Counterfactual Intervention
+# arXiv: 2608.04396
+
+name: CofactVLA
+full_name: "CofactVLA: Deconfounding Vision-Language-Action Models via Counterfactual Intervention"
+organization: "Department of Automation, Tsinghua University"
+date: "2026-08-05"
+paper_url: https://arxiv.org/abs/2608.04396
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (fine-tuned from the pre-trained pi0.5 checkpoint within the HuggingFace lerobot framework)"
+  action_head: "pi0.5 continuous flow-matching action expert, driven by a dual-branch (factual + language-masked counterfactual) forward pass; Action-Level Orthogonal Projection Guidance (OPG) replaces scalar CFG-style extrapolation by projecting the factual velocity field off the counterfactual visual-prior direction, and Feature-Level Counterfactual Covariance Reduction (CCR) cleanses the Key/Value latents before they reach the action expert."
+  action_head_category: flow_matching
+  key_innovation: "Formalizes the 'vision-override' phenomenon as causal confusion in a Dual-path Deconfounding Graph (DDG), where a latent visual confounder C creates a spurious backdoor path I -> C -> A that bypasses the language instruction T. A language-masked counterfactual branch is built inside a single forward pass to isolate C. OPG computes v_proj = <v_cond, v_uncond>/||v_uncond||^2 * v_uncond, extracts the orthogonal residual v_perp = v_cond - v_proj, and forms v_causal = v_cond + gamma * v_perp, so guidance re-weights only the causal semantic direction and keeps trajectories on the valid action manifold. CCR eigendecomposes the covariance difference dSigma = Sigma_cf - Sigma_f, takes the top-k positive eigenvectors as the nuisance basis U_bias, and removes the collinear component: F_causal = F - beta (F U_bias) U_bias^T."
+  intervention_layers: "[15, 16] (Key/Value states of the final VLM layers)"
+  causal_scale_gamma: 2.0
+  intervention_strength_beta: 0.15
+
+training:
+  framework: "HuggingFace lerobot"
+  initialization: "pre-trained pi0.5 checkpoint (Apache 2.0)"
+  compute: "4x NVIDIA H100 96GB"
+  batch_size: "32 per GPU"
+  learning_rate: 2.5e-5
+  steps: 6000
+  warmup_steps: 1000
+  optimizer: "AdamW, betas [0.9, 0.95], weight decay 0.01"
+  action_chunk_size: 50
+  freeze_vision_encoder: false
+  freeze_action_expert: false
+  gradient_checkpointing: true
+  simulation_data: "trained exclusively on the standard LIBERO dataset (Spatial / Object / Goal / Long)"
+  real_world_data: "~400 self-collected expert trajectories (~100 per task) on a 6-DoF AgileX PiPer arm"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 100.0
+    libero_goal: 98.0
+    libero_long: 97.0
+    libero_avg: 98.5
+    libero_plus_camera: 44.7
+    libero_plus_robot: 49.7
+    libero_plus_language: 71.8
+    libero_plus_light: 85.6
+    libero_plus_background: 83.6
+    libero_plus_noise: 78.0
+    libero_plus_layout: 70.2
+    libero_plus_total: 69.1
+    source: "Paper Table 1 (standard LIBERO) and Table 2 (LIBERO-Plus zero-shot)"
+    date_reported: "2026-08-05"
+    eval_condition: "Standard LIBERO suites trained on LIBERO only, evaluated over 10 episodes per task. LIBERO-Plus numbers are zero-shot: the LIBERO-trained policy is deployed directly, evaluated with a single episode per task due to benchmark scale."
+
+baselines_reported:
+  libero_standard:
+    pi0_5: 96.9
+    x_vla: 98.1
+    openvla_oft: 97.1
+    pi0: 94.2
+    dreamvla: 92.6
+    source: "Paper Table 1"
+  libero_plus_total:
+    pi0: 53.6
+    pi0_fast: 61.6
+    openvla_oft_w: 55.8
+    openvla_oft_m: 67.9
+    univla: 42.9
+    nora: 39.0
+    worldvla: 25.0
+    openvla: 15.6
+    source: "Paper Table 2"
+
+real_world:
+  platform: "6-DoF AgileX PiPer arm with 1-DoF parallel gripper, 2x Intel RealSense D435 (overhead + wrist), 10 Hz control"
+  tasks: "I. remove the cuboid from the blue plate; II. move the tennis ball from the yellow plate to the blue plate; III. put the apple on the yellow plate; IV. pick the red cube into the yellow plate"
+  standard_avg: 90.8
+  standard_pi0_5_baseline_avg: 71.0
+  standard_task_iv: 88.0
+  standard_task_iv_pi0_5_baseline: 31.0
+  ood_avg: 75.8
+  ood_pi0_5_baseline_avg: 23.5
+  source: "Paper Section 4.3 and Figure 3"
+  eval_condition: "100 independent trials per task; OOD setting introduces object, environment (texture/background) and instruction perturbations"
+
+ablations:
+  baseline:
+    libero_avg: 97.0
+  with_ccr_only:
+    libero_avg: 97.5
+  with_opg_only:
+    libero_avg: 98.0
+  full_cofactvla:
+    libero_avg: 98.5
+  counterfactual_design_add:
+    libero_avg: 94.0
+  counterfactual_design_sub:
+    libero_avg: 96.0
+  counterfactual_design_cag:
+    libero_avg: 97.5
+  source: "Paper Table 3"
+
+eval_conditions:
+  libero: "Trained exclusively on standard LIBERO; 10 evaluation episodes per task."
+  libero_plus: "Zero-shot transfer of the LIBERO-trained policy, single episode per task, seven perturbation axes (camera, robot, language, light, background, noise, layout)."
+  real_world: "AgileX PiPer, 4 tasks, ~100 demos each, 100 trials each; OOD scenes add distractors, background texture shifts, novel objects and instruction perturbations."
+  sensitivity: "gamma swept over {0, 0.5, 1, 2, 3} (best at 2.0); beta swept over {0, 0.05, 0.1, 0.15, 0.2} (best at 0.15, 98.5% avg)."
+
+tags:
+  - libero
+  - libero-plus
+  - pi0.5
+  - flow-matching
+  - causal-inference
+  - counterfactual
+  - deconfounding
+  - guidance
+  - real-robot

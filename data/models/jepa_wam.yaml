@@ -1,0 +1,100 @@
+# Paper: JEPA-WAM: Learning Vision-Language-Action Policies with Joint-Embedding World Modeling
+# arXiv: 2608.09381
+
+name: JEPA-WAM
+full_name: "JEPA-WAM: Learning Vision-Language-Action Policies with Joint-Embedding World Modeling"
+organization: "Renmin University of China / XYZ Embodied AI / Shenzhen University of Advanced Technology / Institute for AI Industry Research (AIR), Tsinghua University"
+date: "2026-08-10"
+paper_url: https://arxiv.org/abs/2608.09381
+code_url: null
+venue: arXiv
+open_source: false
+model_type: latent_world_action_model
+inference_hz: 11.76
+
+architecture:
+  backbone: "Frozen V-JEPA 2.1 video encoder (300M) producing dense 24x24 patch grids of 1024-d features per camera view, concatenated in fixed camera order without spatial pooling"
+  llm: "Qwen2.5-0.5B shared predictor (hidden dim 896), adapted with LoRA rank 32 / scaling 64 / dropout 0.1 during robot-policy training"
+  action_head: "16-layer DiT-L action expert trained with conditional flow matching (velocity prediction; x-prediction for RoboTwin 2.0), conditioned on 64 dedicated action-placeholder hidden states C_t plus proprioceptive state and 32 learnable future tokens; 4 Euler integration steps at inference"
+  action_head_category: flow_matching
+  action_space: "LIBERO: 7-dim actions, chunk length H=8. RoboTwin 2.0 / real-world: 14-dim bimanual actions, action horizon H=50"
+  parameters: "0.5B main backbone (Qwen2.5-0.5B), excluding the DiT action expert; frozen 300M V-JEPA 2.1 encoder"
+  key_innovation: >
+    A latent world action model built directly inside the pretrained V-JEPA 2.1 representation space, where a single
+    shared predictor couples latent transition prediction with continuous action generation. Instead of predicting the
+    absolute future state, JEPA-WAM predicts a spatially structured JOINT current-future target Y_{t,t+delta}: the current
+    and future observations are stacked along the temporal axis and jointly encoded by the frozen V-JEPA encoder (whose
+    tubelet size of 2 collapses the pair into one temporal token per spatial location, preserving the same 24x24 grid as
+    the current representation Z_t). Supervision is a mean patch-wise cosine distance, preserving dense patch-level
+    correspondence rather than pooling the transition into a few global latent tokens. Because the same Qwen predictor
+    produces both the visual-position hidden states used for transition prediction and the dedicated action placeholders
+    used for action conditioning, transition supervision directly shapes the backbone the action expert reads from, while
+    the action expert never has to consume the full predicted transition. At deployment the target encoder, prediction
+    head, and transition loss are all removed. The same formulation transfers to a pretrained VLA: 64 learnable future
+    tokens appended to the pi-0.5 VLM prefix are reshaped to an 8x8 grid, projected (2048->2048->1408) and bilinearly
+    upsampled to 24x24 for patch-wise alignment against the frozen V-JEPA 2.1 ViT-G joint target, with action tokens
+    masked from attending to them so the original action pathway is untouched.
+
+training:
+  method: "Joint objective L = L_act + lambda_wm * L_wm with lambda_wm = 0.5. L_act is conditional flow matching with Beta-scheduled flow time (alpha=1.5, beta=1.0); L_wm is mean patch-wise cosine distance to the stop-gradient joint current-future V-JEPA target. Vision-language interface first initialized Prismatic-style (single-stage finetune on LLaVA v1.5, 2 epochs, lr 2e-5, wd 0.1, batch 128). During policy training the V-JEPA encoder, visual projector, and base Qwen weights are frozen; only LoRA adapters, transition prediction head, and action expert are optimized."
+  optimizer: "AdamW, peak lr 2e-4 with cosine decay to 1e-5, 3% warmup, zero weight decay, grad clip 1.0, BF16"
+  batch_size: "global batch size 128 (FSDP, 8 GPUs)"
+  budget: "60K optimization steps for LIBERO policy training"
+  training_data: "LIBERO: joint training on all four standard suites (primary + wrist views), temporal target offset delta=31. RoboTwin 2.0: Clean-setting demonstrations from 20 tasks (one external + two wrist cameras), delta=50. Real world: 100 demonstrations per task across 5 bimanual tasks."
+
+benchmarks:
+  libero:
+    libero_spatial: 95.6
+    libero_object: 99.4
+    libero_goal: 97.2
+    libero_long: 94.6
+    libero_avg: 96.7
+    source: "Paper Table 1 (JEPA-WAM row, without robot-policy pretraining group)"
+    date_reported: "2026-08-10"
+    eval_condition: "jointly trained on the four standard LIBERO suites and evaluated on the corresponding test tasks under the standard success-rate protocol; primary + wrist camera views, 7-dim actions, chunk length 8"
+
+  libero_plus:
+    libero_plus_camera: 79.2
+    libero_plus_robot: 59.2
+    libero_plus_language: 68.2
+    libero_plus_light: 93.3
+    libero_plus_background: 94.6
+    libero_plus_noise: 83.6
+    libero_plus_layout: 76.1
+    libero_plus_avg: 79.2
+    source: "Paper Table 2 (JEPA-WAM row; best average among methods without large-scale robot-policy pretraining)"
+    date_reported: "2026-08-10"
+    eval_condition: "zero-shot transfer of the LIBERO-trained policy to LIBERO-Plus perturbed environments with NO OOD fine-tuning; averaged over the seven perturbation categories"
+
+  robotwin_v2:
+    robotwin_v2_clean: 79.9
+    robotwin_v2_randomized: 36.9
+    robotwin_v2_avg: 58.4
+    source: "Paper Table 3 (JEPA-WAM row; AVG computed over all 20 tasks, full per-task table in Appendix D)"
+    date_reported: "2026-08-10"
+    eval_condition: "trained only on Clean-setting demonstrations of 20 RoboTwin 2.0 tasks, then the same policy evaluated under both Clean and Random settings; one external + two wrist cameras, 14-dim bimanual actions, horizon 50, x-prediction flow matching"
+
+eval_conditions:
+  libero: "Joint 4-suite training, standard LIBERO success-rate protocol. Params. column of Table 1 reports 0.5B main backbone excluding the action expert."
+  libero_plus: "Direct transfer from LIBERO demonstrations, no OOD fine-tuning. Categories: Camera, Robot, Language, Light, Background, Noise, Layout."
+  robotwin_v2: "Clean-only training, dual-setting (Clean / Random) evaluation over 20 tasks. Measured inference latency 85.00 ms median (11.76 Hz) in the RoboTwin setting, vs 54.05 ms (18.50 Hz) for pi-0.5 and 125.23 ms (7.99 Hz) for ABot-M0 (Appendix C.3, Table 12)."
+  real_world: "AgileX CobotMagic bimanual platform, two 6-DoF arms, one global + two wrist cameras, 5 tasks (bread on plate, fruits on plate, three blocks on plate, stack three blocks, toy duck in drawer), 100 demos per task. JEPA-WAM scores 59.8 ID / 54.2 OOD average vs pi-0 51.8 / 22.5; pi-0.5 + JEPA Obj. reaches 90.3 ID / 84.7 OOD vs pi-0.5 77.5 / 72.5 (Figure 5)."
+
+tags:
+  - vla
+  - world-action-model
+  - latent-world-model
+  - jepa
+  - v-jepa2
+  - qwen2.5
+  - flow-matching
+  - dit-action-expert
+  - shared-predictor
+  - transition-prediction
+  - ood-generalization
+  - libero
+  - libero-plus
+  - robotwin
+  - bimanual
+  - real-world
+  - lora

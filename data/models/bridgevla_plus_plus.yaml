@@ -1,0 +1,89 @@
+name: BridgeVLA++
+full_name: "BridgeVLA++: A Data-Efficient, Generalizable, and Memory-Augmented Vision-Language-Action Framework for 3D Manipulation"
+organization: CASIA (NLPR) / UCAS / FiveAges / ByteDance Seed
+date: '2026-08-05'
+paper_url: https://arxiv.org/abs/2608.05042
+code_url: https://bridgevla-plus.github.io/
+venue: arXiv (IEEE TPAMI submission; extension of NeurIPS 2025 BridgeVLA)
+open_source: false
+model_type: 3d-vla
+inference_hz: 1.75
+
+architecture:
+  backbone: PaliGemma (SigLIP vision encoder + Gemma LLM), 2.92B
+  llm: Gemma (within PaliGemma)
+  action_head: >-
+    Multi-view 2D translational heatmap (convex upsampling) back-projected to 3D
+    position, plus 3-layer MLP regressing continuous 6D rotation, gripper state and
+    collision flag; coarse-to-fine two-pass refinement
+  action_head_category: regression
+  parameters: 2.92B backbone + 269.77M memory modules (~3.19B total, +9.2%)
+  memory: >-
+    Unified spatio-temporal memory: temporal memory (~168M) over anchor/neighbor/sub-goal
+    keyframe tokens, spatial memory (~84M) re-rendering the initial point cloud,
+    adaptive sub-goal selection module (~18M)
+  inputs: RGB-D point cloud rendered into 3 orthographic views (top/front/right) + language
+  bimanual: shared trunk with arm-specific convex-upsampling and MLP action heads
+
+benchmarks:
+  rlbench:
+    rlbench_18tasks: 93.7
+    source: 'arXiv:2608.05042 Table I (BridgeVLA++ row)'
+    date_reported: '2026-08-05'
+    eval_condition: RLBench 18 tasks, 100 demos/task, 5 seeds x 25 episodes
+  colosseum:
+    colosseum_avg: 65.2
+    colosseum_all_perturb: 38.9
+    source: 'arXiv:2608.05042 Table III (BridgeVLA++ row)'
+    date_reported: '2026-08-05'
+    eval_condition: COLOSSEUM 14 perturbation settings, 3 repetitions
+  gembench:
+    gembench_avg: 51.1
+    gembench_l1: 88.6
+    gembench_l2: 68.9
+    gembench_l3: 38.5
+    gembench_l4: 8.2
+    source: 'arXiv:2608.05042 Table XI (BridgeVLA++ row)'
+    date_reported: '2026-08-05'
+    eval_condition: GemBench 4 generalization levels, 5 seeds
+  memorybench:
+    memorybench_avg: 99.7
+    source: 'arXiv:2608.05042 Table XII (BridgeVLA++ row)'
+    date_reported: '2026-08-05'
+    eval_condition: MemoryBench 3 tasks, 5 seeds
+  rmbench:
+    rmbench_overall_avg: 96.0
+    rmbench_m1_avg: 95.2
+    rmbench_mn_avg: 97.0
+    source: 'arXiv:2608.05042 Table II (BridgeVLA++ row, 9 dual-arm tasks)'
+    date_reported: '2026-08-05'
+    eval_condition: dual-arm, 50 demos/task, 100 evaluation episodes per task
+  real_world:
+    franka_basic_avg: 96.9
+    franka_basic_3demos: 95.4
+    dobot_memory_tasks_avg: 93.3
+    source: 'arXiv:2608.05042 Table IV and Fig. 4'
+    date_reported: '2026-08-05'
+    eval_condition: >-
+      Franka Research 3, 13 tasks x 10 trials, 10 demos/task (BridgeVLA base);
+      Dobot CR5A memory-dependent tasks, 10 demos/instruction x 10 trials
+
+eval_conditions:
+  rlbench: fine-tuned
+  rmbench: fine-tuned
+  real_world: fine-tuned
+
+training:
+  pretraining: 2D language-conditioned heatmap (object grounding) pre-training on detection data
+  finetuning: two-phase, PaliGemma backbone frozen during initial freeze epochs
+  hardware: 8x H20 / 8x A100 GPUs depending on benchmark
+
+tags:
+- 3d-manipulation
+- heatmap
+- paligemma
+- spatio-temporal-memory
+- bimanual
+- coarse-to-fine
+- data-efficient
+- rlbench-sota

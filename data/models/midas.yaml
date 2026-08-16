@@ -1,0 +1,55 @@
+name: MiDAS
+full_name: "MiDAS: Minimal-Data Adaptation Strategy — Adaptation of Generalist Robot Policies with Minimal Data"
+organization: "Carnegie Mellon University"
+date: "2026-08-11"
+paper_url: https://arxiv.org/abs/2608.11363
+code_url: https://minimal-data-adaptation.github.io
+venue: "arXiv preprint"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 pre-trained vision-language-action model (frozen after Stage I); VLM backbone provides the state representation for the residual actor and critic"
+  llm: "pi0.5 VLM backbone (LoRA-adapted during Stage I behavior cloning)"
+  action_head: "Two-stage recipe. Stage I: fine-tune pi0.5 on K demonstrations with the native flow-matching objective (LoRA on the VLM backbone, full action head trained) to obtain pi_base^K. Stage II: freeze pi_base^K and train a lightweight residual actor pi_res_theta(.|s_t, a_base) = tanh(N(mu_theta, sigma^2_theta)) that directly predicts the executed action chunk conditioned on the base policy's proposed chunk, together with a critic ensemble trained by TD learning. Policy improvement follows PA-RL: sample action candidates, take gradient-ascent steps on the Q function, and distill the optimized chunk back into the residual policy."
+  action_head_category: flow_matching
+  action_space: continuous
+  key_innovation: "Studies 'minimal-data adaptation' (MDA): a pre-trained generalist policy must learn a new task from as little as ONE demonstration plus autonomous online interaction. MiDAS is an offline-to-online RL recipe that first anchors the VLA to the target task with behavior cloning on a single demonstration, then improves it with value-based online RL over a residual policy parameterization while keeping the large pre-trained policy frozen. Key design choices: (1) offline warmup that initializes the residual actor to reproduce the base proposal and calibrates the critic from the demonstrations plus a few autonomous rollouts; (2) a success-buffer oversampling ratio that biases actor updates toward reward-bearing states; (3) a non-additive residual parameterization that predicts the executed action directly, so corrections are not bounded to a fixed neighborhood of the base proposal. Claimed as the first demonstration of reliable robot policy adaptation from a single task demonstration."
+
+benchmarks:
+  libero:
+    libero_long: 91.2
+    # No libero_avg: the paper evaluates LIBERO-Long only, so declaring one
+    # would rank a single suite against other models' four-suite averages.
+    source: "arXiv:2608.11363 Table 1 / Table 5 (MiDAS, 1 demo, LIBERO-Long average)"
+    date_reported: "2026-08-11"
+    eval_condition: "LIBERO-Long only (10 long-horizon tasks); K=1 demonstration + autonomous online RL; 50 rollouts per task, mean +/- std over 3 seeds (91.2 +/- 4.2); horizon 500 steps; action chunk C=10"
+    notes: "Zero-shot pre-trained pi0.5 is 0.0% on every task. Baselines at 1 demo: BC 33.5 +/- 1.8, DSRL 33.5 +/- 0.8, Filtered BC 39.0 +/- 5.9, DICE-RL 89.3 +/- 1.8. Per-task MiDAS: Alph.Soup+Cr.Cheese 99.3, Alph.Soup+Tom.Sauce 82.7, Black Bowl->Bottom Drawer 98.7, Book->Caddy 98.7, Both Moka Pots->Stove 76.0, Cr.Cheese+Butter->Basket 96.0, Moka Pot->Stove 95.3, White Mug+Choc.Pudding 96.7, White Mug+Plates 79.3, Yellow-White Mug->Microwave 89.3. Stage-I BC-only scaling (Table 16): K=1 33.5, K=3 56.3, K=5 78.1. LIBERO-PRO perturbations (Tables 4/6/7), pi1_base -> pi1_RL: language paraphrase 34.7 -> 90.2; visual (color/texture) 31.3 -> 82.0 (ID subset 38.9 -> 88.7); shape change 6.3 -> 29.0 (ID 25.8 -> 92.5); object swap 0.0 -> 0.0 (ID 38.9 -> 88.7); object change (Book->Caddy) 0.0 -> 2.0."
+  # RoboCasa-365, not the standard RoboCasa suite, and only 3 of 4 tasks.
+  # Kept out of benchmarks.robocasa so it is not ranked against models
+  # reporting the standard suite.
+  robocasa365:
+    robocasa365_partial_avg: 89.3
+    source: "arXiv:2608.11363 Table 1 (MiDAS, 1 demo, RoboCasa-365 average)"
+    date_reported: "2026-08-11"
+    eval_condition: "RoboCasa-365, 3 of 4 evaluated tasks averaged (LoadDishwasher excluded by the authors); K=1 demonstration + autonomous online RL; 50 rollouts per task, mean +/- std over 3 seeds (89.3 +/- 8.7); mobile manipulator, 256x256 cameras, horizons 500-800 steps"
+    notes: "Zero-shot pre-trained pi0.5 is 0.0% on every task. Baselines: BC 22.2 +/- 3.4, DSRL 19.1 +/- 3.2, Filtered BC 34.0 +/- 10.6. Per-task MiDAS: Banana Fridge Drawer->Shelf 93.3, Hot Dog Counter->Cabinet 100.0, Mug->Coffee Machine + Start 74.7. Excluded task Cup+Bowl->Dishwasher+Close is 0.0% for all methods including MiDAS (1100-step horizon), reported as a limitation."
+  real_world:
+    block_placement_bimanual: 67.0
+    knife_and_donut_on_plate: 80.0
+    real_avg: 73.5
+    source: "arXiv:2608.11363 Table 3 (MiDAS, 1 demo, real-world YAM bimanual platform)"
+    date_reported: "2026-08-11"
+    eval_condition: "Bimanual YAM hardware; K=1 demonstration; 15 rollouts per task varying target object position and orientation in a mix of ID/OOD settings; 5-6 hours of autonomous online interaction per task"
+    notes: "One-demo BC baseline: 40.0 / 27.0, average 33.5. MiDAS improves to 67.0 / 80.0, average 73.5."
+
+training:
+  datasets: ["LIBERO-Long (10 tasks, K=1 demonstration used out of 50 available)", "RoboCasa-365 (4 long-horizon kitchen tasks, 1 demonstration per scene/layout configuration)", "Real-world bimanual YAM teleoperation (1 demonstration per task)"]
+  method: "Stage I: fine-tune pi0.5 with the official OpenPI codebase on the K demonstrations for 16,000 gradient steps using the native flow-matching loss, LoRA on the VLM backbone and full action-head training. Stage II: freeze the Stage-I policy; build a warmup buffer from the demonstrations plus a few autonomous rollouts; run a 10k-step offline warmup that trains the residual actor to reproduce the base proposal while calibrating the critic ensemble with TD learning on a mixture of the warmup buffer and a success-only buffer (success oversampling ratio rho_succ); then run sparse-reward online PA-RL with gradient ascent on the critic and distillation back into the residual actor. Residual learner consumes 100x100 images for efficiency."
+
+eval_conditions:
+  libero: "fine-tuned"
+  robocasa: "fine-tuned"
+  real_world: "fine-tuned"
+
+tags: [reinforcement_learning, residual_policy, online_rl, offline_to_online, one_shot_adaptation, flow_matching, pi0_5, pa_rl, libero, libero_pro, robocasa, real_robot, bimanual, sample_efficiency]

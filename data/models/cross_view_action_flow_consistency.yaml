@@ -1,0 +1,54 @@
+name: Cross-View Action-Flow Consistency
+full_name: "Cross-View Action Consistency for Camera-Robust Vision-Language-Action Policies"
+organization: "Tsinghua University; University of Amsterdam; Vrije Universiteit Amsterdam"
+date: "2026-08-07"
+paper_url: https://arxiv.org/abs/2608.06965
+venue: "arXiv preprint"
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "pi0.5-style vision-language trunk (fine-tuned from the open-sourced pi0.5 checkpoint)"
+  llm: "pi0.5 VLM trunk (PaliGemma-style)"
+  action_head: "Flow-matching action expert (pi0.5 action expert). Training adds a cross-view consistency term L_CV that forces the predicted action-flow velocity v_theta(x_t, t | o, l, q) of a nominal and a perturbed scene-camera view of the SAME MuJoCo state to agree at the same sampled flow coordinate (t_k, eps_k), on the active action dims (A_act = 7). Final recipe: bilateral gradients, K=2 flow samples per pair, lambda_CV = 0.10, t ~ Beta(2,3), pair-consistent spatial augmentation. Inference is unchanged: single scene RGB + language + proprioception."
+  action_head_category: flow_matching
+  action_space: continuous
+  key_innovation: "Places viewpoint invariance at the action-flow velocity field (the quantity actually integrated to produce action chunks) rather than at a hidden visual representation, using action-equivalent view pairs built by resetting LIBERO demos to the same MuJoCo state and re-rendering under nominal/perturbed cameras. Training-only objective: no depth, point clouds, camera extrinsics, camera labels, calibration, or novel-view rendering at deployment. A mean-residual reformulation shows L_FM + lambda_CV*L_CV == ||v_bar - u_t||^2 + (1 + 4*lambda_CV)||delta||^2, i.e. the cross-view term penalizes only the view-disagreement residual and never redirects either view away from the demonstrated action."
+
+benchmarks:
+  libero:
+    libero_avg: 95.0
+    libero_plus_camera_avg: 87.2
+    libero_plus_camera_c1: 81.8
+    libero_plus_camera_c2: 87.9
+    libero_plus_camera_c3: 90.6
+    source: "arXiv:2608.06965 Table 1 / Table 3 / Table 5 (Proposed, bilateral K=2 + Beta(2,3), mean over seeds 42-44)"
+    date_reported: "2026-08-07"
+    eval_condition: "Single-scene-RGB, WRIST-CAMERA-MASKED protocol during both training and evaluation (wrist stream masked so the unperturbed wrist view cannot act as a shortcut). Absolute numbers are therefore NOT comparable to standard LIBERO / LIBERO-Plus numbers that retain the wrist view. libero_avg = standard LIBERO nominal-camera ID benchmark, 4 suites x 30 trials, 95.0 +/- 0.8. libero_plus_* = official LIBERO-Plus camera-perturbation track, 1,599 task instances (C1 n=313 distance/scale, C2 n=992 spherical position, C3 n=294 endpoint orientation), 4,797 rollouts per seed; 87.2 +/- 0.4, C1 81.8 +/- 1.0, C2 87.9 +/- 0.5, C3 90.6 +/- 0.9. All policies fine-tuned from pi0.5 for 10,000 steps on 338,575 same-state rendered pairs from libero_spatial/object/goal/100."
+    notes: "Baselines under the identical wrist-masked protocol (Table 1/3): nominal-only pi0.5 SFT ID 85.8 / Camera 16.8 (C1 1.1, C2 13.2, C3 45.7); naive mixed-camera SFT ID 69.2 / Camera 74.7 (C1 68.4, C2 75.7, C3 78.2); same-data FM-only control (lambda_CV = 0, seeds 42-44) ID 95.0 +/- 4.3 / Camera 79.8 +/- 0.8 (C1 72.6, C2 79.9, C3 87.2). Proposed gains: +7.4pp over the same-data FM-only control and +12.5pp over naive mixed-camera SFT. Ablations (Table 2/4): stop-gradient K=2 + Beta(1.5,1) ID 96.7 / Camera 84.3; shuffled single-sample CV ID 80.8 / Camera 50.4; shuffled bilateral K=2 ID 50.8 / Camera 25.8 (matched K=1 84.9 vs shuffled 50.4). lambda_CV sweep in an exploratory single-sample regime: 0.05 -> 81.1, 0.10 -> 80.9, 0.20 -> 73.6, 0.50 -> 68.1 Camera. Pair-consistent spatial augmentation 84.9 vs independent augmentation 80.9 Camera. Exploratory feature-level alternatives (Appendix G): canonical-token injection 15.3 Camera; hard action-path bottleneck 67.4 vs 71.4 for FM on the same 30% subset."
+
+real_world:
+  real_heldout_camera_avg: 74.4
+  real_seen_camera_avg: 87.8
+  real_heldout_battery_box: 76.7
+  real_heldout_headphone_stand: 46.7
+  real_heldout_laptop_lid: 100.0
+  real_seen_battery_box: 86.7
+  real_seen_headphone_stand: 80.0
+  real_seen_laptop_lid: 96.7
+  source: "arXiv:2608.06965 Table 7 (Proposed)"
+  date_reported: "2026-08-07"
+  eval_condition: "RealMan RM-75 7-DoF manipulator, delta end-effector pose actions at 15 Hz; Intel RealSense D435i 640x480 @ 15 fps; 70 demos per task with domain randomization; 3 synchronized training scene cameras (C0, C1, C2) forming action-equivalent pairs; 3 held-out placements (H0 farther, H1 azimuth rotation, H2 higher/top-down) used only at evaluation; 10 rollouts per task-placement cell (90 seen + 90 held-out per method); wrist stream masked; final checkpoint, no held-out rollouts used for checkpoint selection."
+  notes: "Held-out aggregate 67/90 (74.4) for the proposed method vs 48/90 (53.3) for the FM-only multi-view control (two-proportion test p < 0.005); seen-camera aggregate 79/90 (87.8) vs 80/90 (88.9), i.e. the two training signals separate only on held-out cameras. Per-task held-out counts (Proposed vs FM): battery box 23/30 vs 17/30, headphone stand 14/30 vs 5/30, laptop lid 30/30 vs 26/30. Per-placement held-out aggregates: H0 24/30 vs 20/30, H1 23/30 vs 17/30, H2 20/30 vs 11/30. Most extreme cell: headphone stand on H2, 4/10 vs 0/10."
+
+training:
+  datasets: ["338,575 same-state action-equivalent camera pairs re-rendered from LIBERO demonstrations (libero_spatial, libero_object, libero_goal, libero_100) with perturbed cameras drawn from the LIBERO-Plus C1/C2/C3 distribution", "Real-robot synchronized 3-camera teleoperation demos: 70 demos per task x 3 tabletop tasks (battery box, headphone stand, laptop lid)"]
+  method: "Fine-tuned from the pi0.5 checkpoint for 10,000 steps. Per pair, K=2 (t_k, eps_k) samples are drawn with t ~ Beta(2,3) and shared across both views; both views receive standard conditional flow matching to the same demonstrated action chunk, plus lambda_CV = 0.10 times the squared difference of the two predicted velocities on the 7 active action dims. Gradients flow bilaterally through both branches. Spatial augmentation is pair-consistent (photometric augmentation may stay independent). The cross-view term is training-only. A batch-level derangement of the pairs inside L_CV serves as the mechanism control."
+  compute: "6 x NVIDIA RTX PRO 6000 Server Edition GPUs; ~2.8 s/step at K=2 vs ~2.6 s/step single-sample (VLM trunk forward is reused across the K flow samples)"
+
+eval_conditions:
+  libero: "fine-tuned"
+  libero_plus_camera: "fine-tuned"
+  real_world: "fine-tuned"
+
+tags: [flow_matching, camera_robustness, viewpoint_invariance, cross_view_consistency, multi_view_supervision, training_objective, libero, libero_plus, pi0_5, real_robot]

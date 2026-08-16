@@ -1,0 +1,309 @@
+# Paper: Embodied Multimodal Grounding for Open-Vocabulary Mobile Manipulation via Semantic 3D Gaussian Splatting
+# arXiv: 2608.10756
+
+name: Semantic-3DGS-VLA
+full_name: "Embodied Multimodal Grounding for Open-Vocabulary Mobile Manipulation via Semantic 3D Gaussian Splatting"
+organization: "The Hong Kong University of Science and Technology (Guangzhou); Midea Group"
+date: "2026-08-11"
+paper_url: https://arxiv.org/abs/2608.10756
+code_url: null
+venue: "ACM MM 2026"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "DexVLA-style policy with a Qwen2-VL vision-language backbone; four actively acquired wrist-camera RGB views feed a local Semantic-3DGS field whose geometry is initialized by a pretrained VGGT model and whose per-Gaussian semantics are distilled from CLIP and DINOv2 with SAM mask-aware pooling"
+  llm: "Qwen2-VL"
+  action_head: >
+    ScaleDP diffusion action expert (DexVLA plug-in diffusion expert). Semantic-3DGS cues are fused
+    into a single conditioning vector and injected only into the final five diffusion blocks
+    B = {L-4, L-3, L-2, L-1, L} via zero-initialized projections and lightweight MLP adapters
+    (h_l <- h_l + A_l(Proj(z_sem))). The cue set is a language-conditioned target heatmap H_t, an
+    obstacle-aware occupancy cue O_t, a three-channel PCA rendering P_t of the distilled per-Gaussian
+    semantic field, and a target-relative pose vector r_t = [p_obj^B, h_t] in R^4; the image cues are
+    concatenated with the RGB observation and encoded to z_img in R^128, the pose cue to z_pose in
+    R^128, and their sum is z_sem. The VLM backbone and all pretrained diffusion blocks stay frozen;
+    only the semantic encoder, projection layers, late-block adapters and the embodiment-specific
+    action head are trained. Action chunk length 15, two recent observation frames, arm joint targets
+    (including gripper) streamed at 30 Hz over ROS.
+  action_head_category: diffusion
+  action_space: "continuous 6-DoF arm joint targets plus gripper, streamed at 30 Hz"
+  parameters: null
+  key_innovation: >
+    A single target-conditioned local Semantic-3DGS field is reused as a shared perception-to-action
+    interface across five stages instead of being a one-off perception output: (1) active view
+    acquisition, where candidate IK-feasible wrist poses are scored by
+    J(v) = lambda_cov*C_sem(v) + lambda_par*C_par(v) - lambda_move*C_move(v) and the argmax view is
+    visited until four images are collected (the base stays fixed and no VLA policy is used for view
+    planning); (2) open-vocabulary Gaussian-level language localization, where a frozen CLIP text
+    encoder plus generic negative prompts gives each Gaussian a softmax relevance score s_k, and the
+    object position is the opacity/inverse-covariance-weighted centroid
+    p_obj = sum_{k in K} w_k*mu_k / sum_{k in K} w_k with w_k = alpha_k * trace(Sigma_k)^-1 over the
+    support K = {k | s_k > delta}, with a 6D pose from PCA and optional ICP refinement; (3)
+    obstacle-aware rendering; (4) reachability-aware base stance preparation
+    (x* = x_obj - 0.35 m, y* = y_obj - sign(y_obj)*0.20 m, psi* = atan2(y_obj, x_obj), and a
+    crouch/stand switch at z_obj < 0.30 m) executed by a PPO leg-residual policy trained in Isaac Lab
+    with domain randomization; (5) Late-Block Semantic Injection into only the final five diffusion
+    experts, which the paper argues preserves pretrained continuous action priors that early or
+    all-block injection degrades. The field is built before manipulation and refreshed on grounding
+    failure, never optimized inside the low-level servo loop.
+
+training:
+  dataset: "10 teleoperated real demonstrations per task on the target embodiment; each trajectory records wrist RGB, robot proprioception and arm joint targets at 30 Hz. Test objects are held-out instances, though semantically related object families may appear in the demonstrations."
+  method: >
+    Two separately trained pieces. (a) Manipulation: only the semantic encoder, projection layers,
+    late-block adapters and embodiment-specific action head are trained offline from the real
+    demonstrations; the Qwen2-VL backbone and all pretrained diffusion blocks are frozen. The
+    Semantic-3DGS feature field is optimized per scene with a cosine feature loss
+    L_feat = sum_{i,u} (1 - cos(F_C_hat, F_C_tilde)) + lambda_D * sum_{i,u} (1 - cos(F_D_hat, F_D)),
+    lambda_D = 0.1. (b) Base posture: a PPO policy outputting leg-joint residuals and the
+    stand/crouch switch, trained in Isaac Lab on NVIDIA Isaac Sim with domain randomization. It is
+    the only component trained in simulation.
+  hardware: >
+    Unitree Go2 Edu quadruped (standing and crouching modes) with a Unitree 4D L1 LiDAR, onboard
+    Jetson Orin NX, and an Alicia-D 6-DoF arm with a gripper-mounted RGB camera. Semantic-3DGS
+    perception and VLA inference run off-board on an RTX 4090 workstation; low-level control and the
+    base posture policy run onboard.
+
+benchmarks:
+  real_robot_long_horizon:
+    success_rate: 60.0
+    successful_trials: 30
+    total_trials: 50
+    wilson_ci_low: 46.2
+    wilson_ci_high: 72.4
+    avg_time_s: 140.7
+    avg_time_std_s: 15.9
+    source: "Table 1, 'Ours (full)' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Long-horizon real-robot task: open a drawer, retrieve a banana, close the drawer, navigate to a black chair and place the banana; 50 trials, randomized initial object poses, 180 s time budget, success only if the complete instruction finishes without unsafe behavior; 95% Wilson interval"
+
+  real_robot_long_horizon_baseline_dexvla:
+    success_rate: 28.0
+    successful_trials: 14
+    total_trials: 50
+    wilson_ci_low: 17.5
+    wilson_ci_high: 41.7
+    avg_time_s: 178.6
+    avg_time_std_s: 18.4
+    source: "Table 1, 'DexVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Same long-horizon protocol, same embodiment, same 10 teleoperated demonstrations per task, same navigation waypoints and evaluation budget; DexVLA retains its native RGB-only perception representation"
+
+  real_robot_long_horizon_baseline_pointvla:
+    success_rate: 40.0
+    successful_trials: 20
+    total_trials: 50
+    wilson_ci_low: 27.6
+    wilson_ci_high: 53.8
+    avg_time_s: 161.8
+    avg_time_std_s: 17.6
+    source: "Table 1, 'PointVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Same long-horizon protocol and demonstration budget; PointVLA retains its native point-cloud perception representation"
+
+  real_robot_long_horizon_ablation_no_base_rl:
+    success_rate: 22.0
+    successful_trials: 11
+    total_trials: 50
+    wilson_ci_low: 12.8
+    wilson_ci_high: 35.2
+    avg_time_s: 204.1
+    avg_time_std_s: 21.3
+    source: "Table 1, 'Ours w/o Base-RL' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Full Semantic-3DGS grounding but the reachability-aware base posture module removed, so the initial stance is retained; same long-horizon protocol"
+
+  real_robot_height_adaptation:
+    height_offset_30cm: 80.0
+    height_offset_60cm: 78.0
+    height_offset_75cm: 75.0
+    source: "Table 2, 'Ours (full)' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Height adaptability task: the target platform height is offset by 30, 60 and 75 cm relative to the nominal setting; 30 real-robot trials per setting with randomized initial object poses, 60 s budget"
+
+  real_robot_height_adaptation_baseline_dexvla:
+    height_offset_30cm: 48.0
+    height_offset_60cm: 33.0
+    height_offset_75cm: 23.0
+    source: "Table 2, 'DexVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical height-offset protocol and demonstration budget, DexVLA baseline"
+
+  real_robot_height_adaptation_baseline_pointvla:
+    height_offset_30cm: 58.0
+    height_offset_60cm: 46.0
+    height_offset_75cm: 35.0
+    source: "Table 2, 'PointVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical height-offset protocol and demonstration budget, PointVLA baseline"
+
+  real_robot_height_adaptation_ablation_no_base_rl:
+    height_offset_30cm: 0.0
+    height_offset_60cm: 0.0
+    height_offset_75cm: 0.0
+    source: "Table 2, 'Ours w/o Base-RL' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Base-RL stance preparation removed; the variant fails at every offset because the initial stance is retained and the target leaves the arm workspace"
+
+  real_robot_photo_deception:
+    real_object_success: 88.0
+    photo_false_grasp_rate: 0.0
+    source: "Table 3, 'Ours (full)' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Photo-deception task: a real banana is replaced by a photo-realistic banana shown on a tablet; the robot must manipulate the real object and reject the flat-screen distractor; higher real success and lower false-grasp rate are better"
+
+  real_robot_photo_deception_baseline_dexvla:
+    real_object_success: 78.0
+    photo_false_grasp_rate: 76.0
+    source: "Table 3, 'DexVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical photo-deception protocol; RGB-only DexVLA baseline"
+
+  real_robot_photo_deception_baseline_pointvla:
+    real_object_success: 80.0
+    photo_false_grasp_rate: 0.0
+    source: "Table 3, 'PointVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical photo-deception protocol; PointVLA also rejects the flat-screen distractor but has lower real-object success"
+
+  real_robot_photo_deception_ablation_single_view:
+    real_object_success: 76.0
+    photo_false_grasp_rate: 70.0
+    source: "Table 3, 'Ours Single-View' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical photo-deception protocol; the Semantic-3DGS field is built from only the initial wrist image (N=1) instead of four actively acquired views"
+
+  real_robot_cluttered_banana_to_bowl:
+    success_rate: 74.0
+    successful_trials: 37
+    total_trials: 50
+    wilson_ci_low: 60.4
+    wilson_ci_high: 84.1
+    collision_free_rate: 88.0
+    false_grasp_rate: 6.0
+    avg_time_s: 33.2
+    avg_time_std_s: 3.6
+    source: "Table 4, 'Ours (full)' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Cluttered banana-to-bowl manipulation with multiple physical distractors and frequent occlusions; 50 real-robot trials, randomized initial object poses, 60 s budget; 95% Wilson interval"
+
+  real_robot_cluttered_banana_to_bowl_baseline_dexvla:
+    success_rate: 26.0
+    successful_trials: 13
+    total_trials: 50
+    wilson_ci_low: 15.9
+    wilson_ci_high: 39.6
+    collision_free_rate: 44.0
+    false_grasp_rate: 32.0
+    avg_time_s: 27.9
+    avg_time_std_s: 3.1
+    source: "Table 4, 'DexVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical cluttered banana-to-bowl protocol, 50 trials; DexVLA baseline"
+
+  real_robot_cluttered_banana_to_bowl_baseline_pointvla:
+    success_rate: 46.0
+    successful_trials: 23
+    total_trials: 50
+    wilson_ci_low: 33.0
+    wilson_ci_high: 59.6
+    collision_free_rate: 62.0
+    false_grasp_rate: 20.0
+    avg_time_s: 30.7
+    avg_time_std_s: 3.4
+    source: "Table 4, 'PointVLA' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical cluttered banana-to-bowl protocol, 50 trials; PointVLA baseline"
+
+  real_robot_cluttered_banana_to_bowl_ablation_single_view:
+    success_rate: 52.0
+    successful_trials: 26
+    total_trials: 50
+    wilson_ci_low: 38.5
+    wilson_ci_high: 65.2
+    collision_free_rate: 70.0
+    false_grasp_rate: 18.0
+    avg_time_s: 29.5
+    avg_time_std_s: 3.2
+    source: "Table 4, 'Ours Single-View' row, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Identical cluttered banana-to-bowl protocol with the Semantic-3DGS field built from the single initial wrist image; active four-view sensing adds about 3.7 s of wall-clock time (33.2 s vs 29.5 s) for +22 points of success and +18 points of collision-free execution"
+
+  real_robot_clutter_component_ablations:
+    vggt_pointmap_variant: 58.0
+    without_clip_dino_semantics: 60.0
+    without_obstacle_occupancy_cue: 65.0
+    all_block_semantic_injection: 68.0
+    full_system: 74.0
+    source: "Section 4.3.5 'Component ablations' (values stated in text), arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Separate 30-trial clutter ablations isolating the representation and conditioning choices; the paper notes collision-free execution and false-grasp rate degrade in the same ablations, but only success rates are given numerically"
+
+  real_robot_injection_depth_ablation:
+    all_block_avg_success: 75.0
+    all_block_chunk_latency_ms: 175.0
+    late_block_5_avg_success: 82.0
+    late_block_5_chunk_latency_ms: 80.0
+    source: "Table 5, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Late-block versus all-block semantic injection; average success across the evaluated tasks and per-action-chunk latency. Injecting into only the final five diffusion blocks gives a better success/latency trade-off than modifying all action-expert blocks"
+
+  runtime_profile:
+    four_view_wrist_motion_and_capture_s: 16.0
+    vggt_pose_depth_initialization_s: 0.62
+    semantic_3dgs_feature_update_s: 1.21
+    semantic_rendering_and_localization_s: 0.34
+    vla_action_chunk_inference_s: 0.08
+    ros_wifi_communication_s: 0.05
+    full_clutter_task_wall_clock_s: 33.2
+    full_clutter_task_wall_clock_std_s: 3.6
+    source: "Table 6, arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Mean latency per component. The first four rows are one-time stages executed before manipulation; VLA inference and communication are per action chunk. The paper explicitly does not sum one-time and per-chunk costs to estimate task duration: full-task wall-clock time is measured independently from the start of active sensing to completion of placement. Perception and VLA inference run off-board on an RTX 4090"
+
+  real_robot_few_shot_multi_task:
+    avg_success: 81.7
+    source: "Section 4.3.1 (value stated in text; per-task bars appear only in Figure 8), arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Few-shot multi-task manipulation averaged over bottle-to-basket, banana-to-book, and ordered toy/banana/bottle placement into a white ceramic bowl; 30 real-robot trials per setting, 60 s budget, unseen test object instances"
+
+  real_robot_few_shot_multi_task_baselines:
+    pointvla_avg_success: 64.0
+    dexvla_avg_success: 37.7
+    source: "Section 4.3.1 (values stated in text), arXiv:2608.10756"
+    date_reported: "2026-08-11"
+    eval_condition: "Same few-shot multi-task protocol, same 10 demonstrations per task and same navigation/stance assistance; each baseline retains its native perception representation"
+
+eval_conditions:
+  platform: "Unitree Go2 Edu quadruped with an Alicia-D 6-DoF arm and gripper-mounted RGB camera; arm joint targets streamed at 30 Hz over ROS; quasi-static household manipulation, not fast dynamic interaction"
+  protocol: "Unless otherwise noted 30 real-robot trials per setting with randomized initial object poses; the long-horizon and cluttered banana-to-bowl evaluations are expanded to 50 trials per method with success counts, time standard deviations and 95% Wilson confidence intervals"
+  success_definition: "A trial counts as successful only when the complete instruction is finished within the time budget (60 s for local multi-task manipulation, 180 s for the long-horizon task) without unsafe behavior"
+  fair_baseline_adaptation: "All baselines use the same embodiment and the same 10 teleoperated demonstrations per task, with train/test split, wrist-camera setup, action interface, navigation waypoints, base-control assistance, initial scene distributions and evaluation budgets held fixed; each method keeps its native perception representation"
+  scope: "Open-vocabulary target grounding with few-shot embodiment-specific manipulation, not zero-shot acquisition of arbitrary robot skills; the local Semantic-3DGS is built before manipulation and refreshed on grounding failure rather than updated inside the servo loop"
+  limitations: "Semantic-3DGS construction and VLA inference run on an off-board RTX 4090; no simulation-benchmark numbers (LIBERO, CALVIN, SimplerEnv, RoboTwin) are reported; per-task few-shot success rates and the block-sensitivity trend appear only in figures"
+
+tags:
+  - real-robot
+  - mobile-manipulation
+  - quadruped
+  - 3d-gaussian-splatting
+  - semantic-3dgs
+  - open-vocabulary
+  - grounding
+  - diffusion
+  - dexvla
+  - qwen2-vl
+  - scaledp
+  - clip
+  - dinov2
+  - sam
+  - vggt
+  - adapter
+  - late-block-injection
+  - few-shot
+  - ppo
+  - isaac-lab
+  - clutter
+  - occlusion
+  - acm-mm

@@ -1,0 +1,55 @@
+# Paper: BrainWAM: Action-Space Coordination of Semantic Priors and Predictive Dynamics for Autonomous Driving
+# arXiv: 2608.12854
+
+name: BrainWAM
+full_name: "BrainWAM: Action-Space Coordination of Semantic Priors and Predictive Dynamics for Autonomous Driving"
+organization: "NLPR, Institute of Automation, Chinese Academy of Sciences (CASIA) / Li Auto Inc."
+date: "2026-08-13"
+paper_url: https://arxiv.org/abs/2608.12854
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: driving_vla
+
+architecture:
+  backbone: "Dual-branch: Wan2.2-TI2V-5B video generative backbone (WAM branch) + Qwen3-VL-4B VLM (VLA branch), each with a lightweight rectified-flow action expert"
+  llm: "Qwen3-VL-4B"
+  action_head: "Two rectified-flow action experts (8 action tokens, hidden dim 1024) producing prediction-grounded and semantic-grounded action tokens; coupled by Callosal Action Bridge (CAB, 2 cross-attention blocks at layers 9/18, 8 heads x 128 dim, zero-init tanh gates, ~16.8M params) and fused by Cerebellar Intent Fusion (CIF, 2-layer Transformer with AdaLN timestep conditioning, ~49.3M params); action decoder emits an 8-waypoint 4s trajectory at 2Hz"
+  action_head_category: flow_matching
+  parameters: "~9B backbone total (Wan2.2-TI2V-5B + Qwen3-VL-4B); CAB ~16.8M + CIF ~49.3M trainable in Stage 3"
+  key_innovation: "Diagnoses an attention-allocation mismatch in Tri-modal Joint Attention (Tri-MoT): action tokens attend far more to clean VLM tokens than to still-denoising VGM tokens, so raw-token fusion (87.8 PDMS) underperforms WAM-only (88.1 PDMS). Instead of mixing raw tokens, BrainWAM keeps a brain-inspired left-hemisphere (semantic/VLM) and right-hemisphere (predictive/VGM) pathway separate and coordinates them only at the compact action-token level via CAB (corpus callosum) and CIF (cerebellum). Three-stage training: (1) WAM branch with video+action rectified-flow losses, (2) VLA branch with action loss, (3) both branches frozen, only CAB/CIF/action decoder trained. Asynchronous rectified-flow inference decouples video and action timesteps, letting the video stream terminate early and cache features (3-step action sampling)."
+
+benchmarks:
+  driving:
+    navsim_v1_pdms: 89.5
+    navsim_v1_nc: 98.1
+    navsim_v1_dac: 97.5
+    navsim_v1_ttc: 94.9
+    navsim_v1_comfort: 100.0
+    navsim_v1_ep: 83.8
+    navsim_v2_epdms: 89.6
+    navsim_v2_nc: 98.1
+    navsim_v2_dac: 97.5
+    navsim_v2_ddc: 99.6
+    navsim_v2_tlc: 99.9
+    navsim_v2_ep: 88.2
+    navsim_v2_ttc: 97.4
+    navsim_v2_lk: 97.6
+    navsim_v2_hc: 98.4
+    navsim_v2_ec: 85.8
+    source: "Tables 1-2 in BrainWAM paper (NAVSIM v1 PDMS, NAVSIM v2 EPDMS)"
+    date_reported: "2026-08-13"
+    eval_condition: "open-loop non-reactive simulation on NAVSIM v1/v2 (OpenScene/nuPlan real driving logs), 4s trajectory at 2Hz (8 waypoints)"
+
+training:
+  hardware: "8x NVIDIA H20 GPUs, per-GPU batch size 6"
+  optimizer: "AdamW, peak LR 5e-5, weight decay 0.01, cosine schedule, 200 warmup steps, bf16, DeepSpeed ZeRO-2"
+  steps: "100K steps per stage (3 stages)"
+  notes: "Reported branch convergence: VLA-only reaches 86.1 PDMS at 54K steps; WAM-only reaches 88.1 PDMS at 81K steps"
+
+eval_conditions:
+  driving: "fine-tuned, end-to-end open-loop planning (NAVSIM v1 navtest / NAVSIM v2)"
+
+inference_hz: null
+
+tags: [autonomous_driving, world_model, wam, navsim, rectified_flow, flow_matching, dual_branch, brain_inspired, cross_attention_bridge, video_generation, qwen3_vl, wan2_2, asynchronous_denoising]

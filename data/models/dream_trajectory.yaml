@@ -1,0 +1,126 @@
+name: DreamTrajectory
+full_name: 'DreamTrajectory: Trajectory-Guided Action Generation with World Model Alignment for Mobile Manipulation'
+organization: Hong Kong University of Science and Technology (Guangzhou) / Ola Dimensions
+date: '2026-08-02'
+paper_url: https://arxiv.org/abs/2608.01381
+code_url: null
+venue: arXiv preprint 2026
+open_source: false
+model_type: vla
+architecture:
+  backbone: 'pi0.5 VLM backbone (dual-view egocentric head camera + wrist camera, proprioceptive state, language instruction)'
+  llm: 'inherited from the pretrained pi0.5 vision-language backbone'
+  action_head: 'dual-stream flow-matching action expert that jointly denoises a 7D end-effector trajectory stream and a
+    whole-body action chunk stream under a group-causal attention mask; plus a GRU-based action-conditioned trajectory
+    world model used only at test time'
+  action_space: continuous
+  parameters: '3.5B pi0.5 VLA; trajectory head adds 0.017M (<0.01%), trajectory world model adds 49.02M (1.40%),
+    complete DT adds 49.04M'
+  action_head_category: flow_matching
+  key_innovation: 'DreamTrajectory (DT) attacks two failure modes of whole-body mobile-manipulation VLAs. (i) Instead of
+    mapping observations directly to whole-body action chunks, a single action expert jointly generates an intention-level
+    end-effector trajectory tau_{t:t+H-1} (each waypoint a 7D pose = 3D position + quaternion, expressed in a chunk-local
+    frame B_t anchored at the current base pose) and the whole-body action chunk. Both streams are interpolated with
+    independently sampled Gaussian noise but a SHARED flow time sigma ~ U(0,1) so they denoise synchronously, and a
+    group-causal attention mask makes action tokens attend to the complete trajectory stream while trajectory tokens
+    cannot see action tokens — the plan guides the actions without leakage back. (ii) A lightweight action-conditioned
+    trajectory world model W_phi(o_t, s_t, a_{t:t+H-1}) predicts the trajectory a candidate chunk would actually induce,
+    learned from recorded interaction outcomes (successes and failures) rather than derived analytically, so it captures
+    contact, self-collision and low-level tracking error. At test time a search-predict-score loop samples N=30 candidates
+    around the initial chunk (per-dimension AR(1) Gaussian perturbations, marginal sigma=0.05, lag-one rho=0.9), scores
+    them in parallel by lambda*S_traj + (1-lambda)*eta*S_smooth (lambda=0.5, eta=1e-3), and executes the best. Because
+    scoring happens in compact trajectory space rather than pixel space, the refiner is a plug-in stage requiring no
+    policy retraining.'
+training:
+  dataset: 'MS-HAB (ManiSkill-HAB) set_table reinforcement-learning demonstrations with a Fetch mobile manipulator
+    (six subtasks); real-world teleoperated demonstrations on an ARX LIFT mobile manipulator (fruit pick-and-place with
+    apple/orange/pear/mangosteen, drawer opening, drawer closing). World model trained on an additional interaction
+    dataset containing both successful and failed trials, densely sampled with sliding windows.'
+  method: 'Two separately optimized stages. Stage I: initialize from pretrained pi0.5 weights and fine-tune with a joint
+    conditional flow-matching objective L_VLA = E[lambda_tau*||v_tau - u_tau||^2 + lambda_a*||v_a - u_a||^2] over the
+    trajectory and action velocity fields. Stage II: supervised training of the GRU trajectory world model on
+    (I_head, I_wrist, s_t, a_{t:t+H-1}, tau_exec) samples, with action and trajectory dimensions independently
+    standardized; language is omitted because execution outcomes are task-agnostic. The two components are combined only
+    at deployment through test-time refinement.'
+  compute: 'inference latency measured on a single RTX 4090 in BF16; DT adds 11.75ms per replanning step
+    (trajectory head 3.65ms + trajectory world model 8.10ms)'
+benchmarks:
+  ms_hab:
+    ms_hab_avg: 54.8
+    pick_apple: 39.0
+    pick_bowl: 35.0
+    open_fridge: 51.0
+    close_fridge: 33.0
+    open_counter: 91.0
+    close_counter: 80.0
+    source: 'DreamTrajectory paper Table 2 (success rate %, DT (ours), MS-HAB set_table suite)'
+    date_reported: '2026-08-02'
+    eval_condition: 'Fetch mobile manipulator, 100 episodes per subtask (600 episodes total), full DT with 30-candidate
+      test-time refinement'
+  ms_hab_ablation:
+    dt_wo_trajectory_guidance_avg: 32.3
+    dt_wo_refiner_avg: 47.5
+    dt_full_avg: 54.8
+    open_fridge_wo_guidance: 5.0
+    open_fridge_wo_refiner: 44.0
+    open_fridge_full: 51.0
+    close_counter_wo_guidance: 38.0
+    close_counter_wo_refiner: 72.0
+    close_counter_full: 80.0
+    source: 'DreamTrajectory paper Table 3 (ablation on MS-HAB, 100 episodes per task)'
+    date_reported: '2026-08-02'
+    eval_condition: '22.5-point total gain over the action-only pi0.5 baseline = 15.2 points from trajectory guidance
+      plus 7.3 points from world-model refinement'
+  ms_hab_baselines:
+    act_avg: 28.0
+    diffusion_policy_avg: 27.7
+    rdt_1b_avg: 8.7
+    groot_n1_avg: 21.2
+    pi0_5_avg: 32.3
+    source: 'DreamTrajectory paper Table 2 (baseline success rates %, reproduced by the authors on MS-HAB set_table)'
+    date_reported: '2026-08-02'
+    eval_condition: '100 episodes per task, same demonstrations, inputs, action representation and evaluation protocol as DT'
+  real_world:
+    real_world_avg: 90.0
+    fruit_pick_and_place: 80.0
+    open_drawer: 90.0
+    close_drawer: 100.0
+    dt_wo_refiner_avg: 81.7
+    pi0_5_baseline_avg: 63.3
+    source: 'DreamTrajectory paper Table 4 (real-world success rate %)'
+    date_reported: '2026-08-02'
+    eval_condition: 'ARX LIFT mobile manipulator, 20 episodes per task, three tasks; all tasks require base adjustment
+      during manipulation'
+  trajectory_world_model:
+    gru_xyz_ade_m: 0.028
+    gru_xyz_fde_m: 0.035
+    gru_angular_ade_deg: 6.2
+    gru_geodesic_ade: 0.014
+    analytical_fk_xyz_ade_m: 0.241
+    diffusion_xyz_ade_m: 0.061
+    one_shot_transformer_xyz_ade_m: 0.036
+    cross_attention_xyz_ade_m: 0.033
+    source: 'DreamTrajectory paper Table 5 (world model architecture comparison; lower is better)'
+    date_reported: '2026-08-02'
+    eval_condition: 'evaluated on 4,096 trajectories at horizon H=16; predicted quaternions unit-normalized and
+      sign-aligned with ground truth; GRU selected for DT'
+eval_conditions:
+  ms_hab: 'ManiSkill-HAB set_table suite, six subtasks, Fetch mobile manipulator, 100 episodes per subtask'
+  real_world: 'ARX LIFT mobile manipulator, three tasks, 20 episodes per task'
+  trajectory_world_model: 'trajectory-prediction accuracy over 4,096 held-out trajectories, horizon H=16'
+inference_hz: null
+tags:
+- mobile-manipulation
+- whole-body-control
+- trajectory-guidance
+- world-model
+- test-time-refinement
+- flow-matching
+- pi0.5
+- group-causal-attention
+- GRU
+- MS-HAB
+- ManiSkill-HAB
+- ARX-LIFT
+- real-world
+- HKUST-GZ

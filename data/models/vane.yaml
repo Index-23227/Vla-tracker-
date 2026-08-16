@@ -1,0 +1,66 @@
+name: VANE
+full_name: 'VANE: Reliable Test-Time Training for Vision-Language-Action Models via Future Visual Representation Prediction'
+organization: CUHK-Shenzhen / BUPT / CASIA / UCAS / Li Auto
+date: '2026-08-12'
+paper_url: https://arxiv.org/abs/2608.09448
+venue: arXiv preprint
+open_source: false
+model_type: manipulation
+architecture:
+  backbone: Qwen3-VL (QwenPi / StarVLA-alpha instantiation)
+  llm: Qwen3-VL
+  action_head: flow-matching action expert (16x7 action chunk, 36-layer DiT)
+  action_space: continuous
+  action_head_category: flow_matching
+  proxy_branch: World-Predictive Interface (WPI) — Latent-Action DiT predicting frozen
+    V-JEPA 2 future visual latents at offset k=8
+  prompt_bank: Mixture of Latent Prompts, shape [8, 16, 1024], top-2 context routing
+  key_innovation: 'Trains QwenWPI, a QwenPi variant whose state-grounding proxy branch
+    is replaced by future visual representation prediction (WPI) against a frozen V-JEPA 2
+    encoder, jointly with a context-routed Mixture of Latent Prompts (MoLP) bank and a
+    load-balancing loss. At deployment only the latent-prompt bank is updated: AGV-TTT
+    proposes a shadow prompt step at cross-layer attention-redistribution events and
+    commits it atomically only when focused loss improves, global loss does not degrade,
+    and a temporal majority of future pairs favors the candidate; otherwise it rolls back.
+
+    '
+training:
+  data: BridgeData V2 + RT-1 (equal sampling probability)
+  objective: L_act (flow matching) + 0.1 * L_wpi (future latent MSE) + 0.01 * L_lb (router
+    load balancing)
+  checkpoints: results averaged over 50K / 60K / 70K / 80K steps
+  test_time: prompt-only AdamW, lr 1e-5; only 1.3% of eligible frames trigger a backward
+    pass, 19.4% of proposals accepted
+benchmarks:
+  simpler_env:
+    simpler_avg: 71.2
+    simpler_widowx_avg: 71.2
+    simpler_widowx_carrot: 68.8
+    simpler_widowx_eggplant: 94.5
+    simpler_widowx_spoon: 77.3
+    simpler_widowx_stack: 44.3
+    google_robot_avg: 70.4
+    google_robot_pick_coke_can_vm: 89.1
+    google_robot_pick_coke_can_va: 83.7
+    google_robot_move_near_vm: 83.3
+    google_robot_move_near_va: 67.5
+    google_robot_open_close_drawer_vm: 55.2
+    google_robot_open_close_drawer_va: 55.4
+    google_robot_put_in_drawer_vm: 58.8
+    google_robot_put_in_drawer_va: 70.4
+    source: 'arXiv:2608.09448 Tables 3 and 5 (QwenWPI + MoLP + AGV-TTT)'
+    date_reported: '2026-08-12'
+    eval_condition: 'closed-loop SimplerEnv, checkpoint-averaged (50K-80K), test-time
+      prompt adaptation only'
+eval_conditions:
+  simpler_env: test-time trained (prompt-only, label-free)
+tags:
+- test-time-training
+- flow-matching
+- mixture-of-experts
+- latent-prompt
+- V-JEPA2
+- world-model
+- SimplerEnv
+- QwenPi
+- "2026"

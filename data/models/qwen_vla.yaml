@@ -36,11 +36,19 @@ benchmarks:
     date_reported: "2026-05-28"
     eval_condition: "fine-tuned (instruct)"
   simpler_env:
+    # Headline SimplerEnv number reported by the paper is Simpler-WidowX = 73.7 (Table 4).
+    simpler_avg: 73.7
     widowx_avg: 73.7
-    simpler_ood_avg: 32.0
-    source: "Qwen-VLA paper / GitHub README (Qwen-VLA-Instruct)"
+    source: "Qwen-VLA paper Table 4 (Qwen-VLA-Instruct, Simpler-WidowX column)"
     date_reported: "2026-05-28"
     eval_condition: "fine-tuned (instruct)"
+  simpler_env_ood:
+    # Separate benchmark: SimplerEnv-OOD, 6 held-out tasks, models fine-tuned only on the
+    # Bridge pick-and-place split. NOT part of the Simpler-WidowX headline average.
+    simpler_ood_avg: 32.0
+    source: "Qwen-VLA paper Table 8 (SimplerEnv-OOD, 6-task Avg., Qwen-VLA-Instruct; pi0.5 = 12.6)"
+    date_reported: "2026-05-28"
+    eval_condition: "OOD generalization; fine-tuned on Bridge pick-and-place split only"
   robotwin_v1:
     robotwin_easy: 86.1
     robotwin_hard: 87.2

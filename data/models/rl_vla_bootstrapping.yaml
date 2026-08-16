@@ -1,0 +1,69 @@
+name: RL-VLA-Bootstrapping
+full_name: "RL-Only Bootstrapping of OpenVLA-OFT for a Novel Cable-Driven Robot Embodiment"
+organization: "Innopolis University (Research Center of the AI Institute); Volgograd State Technical University"
+date: '2026-08-02'
+paper_url: https://arxiv.org/abs/2608.01013
+code_url: https://anonymous.4open.science/r/RL_VLA_Bootstrapping-E77F/README.md
+venue: null
+open_source: false
+model_type: vla
+architecture:
+  backbone: "OpenVLA-OFT (initialized from public openvla/openvla-7b checkpoint); two RGB inputs (overview + wrist camera)"
+  llm: "Llama-2-7B (inherited from OpenVLA-7B backbone)"
+  action_head: "OpenVLA-OFT parallel-decoding continuous L1 regression head, 8-step action chunk over a 5-DoF interface (x, y, z, yaw, gripper)"
+  action_head_category: regression
+  action_space: continuous
+  parameters: 7B
+  key_innovation: >-
+    Zero-demonstration embodiment alignment: instead of supervised fine-tuning on
+    embodiment-specific demonstrations, the pretrained OpenVLA-OFT policy is adapted
+    to a cable-driven parallel robot (CDPR) with a minimal gripper purely by
+    reinforcement learning in MuJoCo simulation. Dense geometric rewards computed
+    from simulator state, r_t = w_p (d_{t-1} - d_t) + b_s I[succ_t] - w_a P(a_t),
+    provide progress signal before successful trajectories are common. Training is
+    two-stage: PPO on four directional motion primitives, then GRPO continuation from
+    the PPO checkpoint with an expanded instruction space adding move to <object>
+    over eight YCB/LIBERO object categories. Only adapters and action-head parameters
+    are updated; no embodiment-specific dataset is used at any point.
+training:
+  dataset: "No embodiment-specific demonstrations. Randomized MuJoCo scenes built from YCB and LIBERO assets; PID low-level controller in simulation"
+  method: "Two-stage RL: Stage 1 PPO on four directional instructions; Stage 2 GRPO continuation from PPO checkpoint with added object-conditioned instructions. Adapters + action-head parameters trained"
+  compute: "~175 h PPO + ~170 h GRPO = ~345 h total on 2x NVIDIA A40 GPUs"
+benchmarks:
+  cdpr_directional:
+    move_left: 52.0
+    move_right: 52.0
+    move_forward: 62.0
+    move_backward: 48.0
+    cdpr_directional_avg: 53.5
+    source: "Table I, PPO->GRPO column; arXiv 2608.01013. 100 held-out randomized rollouts per instruction"
+    date_reported: '2026-08-02'
+    eval_condition: "PPO->GRPO checkpoint, held-out randomized MuJoCo scenes, strict validator"
+  cdpr_directional_ppo_stage1:
+    move_left: 17.0
+    move_right: 43.0
+    move_forward: 62.0
+    move_backward: 15.0
+    cdpr_directional_avg: 34.25
+    source: "Table I, PPO column (Stage 1 baseline); arXiv 2608.01013"
+    date_reported: '2026-08-02'
+    eval_condition: "Stage 1 PPO-only checkpoint, same held-out directional protocol"
+  cdpr_object_conditioned:
+    success_rate: 9.75
+    source: "Section VI-B; arXiv 2608.01013. move to <object> over 8 categories (apple, baseball, bowl, cup, mug, peach, pear, plate), 39/400 strict successes"
+    date_reported: '2026-08-02'
+    eval_condition: "PPO->GRPO checkpoint, 400 rollouts total, strict validator (undercounts correct approach with late-stage drift)"
+eval_conditions:
+  cdpr_directional: "RL-only adaptation, zero embodiment-specific demonstrations, simulation only"
+  cdpr_object_conditioned: "RL-only adaptation, strict success metric, simulation only"
+tags:
+- openvla-oft
+- reinforcement-learning
+- PPO
+- GRPO
+- embodiment-adaptation
+- zero-demonstration
+- dense-reward
+- cable-driven-parallel-robot
+- mujoco
+- simulation-only

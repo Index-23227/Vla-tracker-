@@ -1,0 +1,82 @@
+# Paper: CMU-Drive and V2V-VLA: Cooperative Multi-agent Unified Driving with Reasoning Benchmark and Vehicle-to-Vehicle Vision-Language-Action Models
+# arXiv: 2608.07621
+
+name: V2V-VLA
+full_name: "V2V-VLA: Vehicle-to-Vehicle Vision-Language-Action Model for Cooperative Autonomous Driving"
+organization: "Carnegie Mellon University, Robotics Institute"
+date: "2026-08-07"
+paper_url: https://arxiv.org/abs/2608.07621
+code_url: null
+venue: "arXiv preprint"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "InternViT vision encoder over two image streams: the ego vehicle's front RGB camera image I_ego and a merged bird-eye-view (BEV) occupancy map O_merged rendered as an RGB image. UniAD generates the camera-based BEV occupancy maps for each CAV and is kept frozen during training."
+  llm: "Qwen2"
+  action_head: "The LLM autoregressively emits the language output (action, reasoning, communication target) together with the action output formatted as in SimLingo: future isochronous waypoints and future equidistant waypoints. Predicted waypoints are converted to steer/throttle/brake by PID controllers. The target waypoint input is encoded by an MLP as an action token."
+  action_head_category: autoregressive
+  action_space: "future isochronous and equidistant 2D waypoints in the ego frame, converted to steer/throttle/brake by PID controllers"
+  parameters: null
+  key_innovation: "V2V-VLA folds cooperative perception, reasoning, planning and the communication decision into a single forward pass, instead of the multi-round LLM negotiation used by prior cooperative driving systems such as CoLMDriver. Cooperative perception is realized at the representation level: the ego CAV and its selected communicating CAV_c each build a camera-based BEV occupancy map, O_c is warped into the ego frame via coordinate transformation from the two poses (O_{c->ego} = CoordinateTransform(O_c, P_ego, P_c)) and fused with an element-wise-or (O_merged = ElementwiseOr(O_ego, O_{c->ego})). The communication policy is itself a language output: by default the ego picks its closest front CAV, but when the model states in language that some other CAV_k can observe a critical object invisible to the ego, CAV_k becomes the communicating vehicle at the next timestep. The language input also carries the relative positions of the other CAVs in the ego coordinate system. The paper additionally introduces CMU-Drive, a closed-loop cooperative benchmark built on Bench2Drive, and V2V-VLA is presented as its first cooperative baseline."
+
+benchmarks:
+  cmu_drive:
+    driving_score: 63.67
+    success_rate: 34.55
+    source: "V2V-VLA paper Table 2, row V2V-VLA (ours), cooperation enabled"
+    date_reported: "2026-08-07"
+    eval_condition: "220 closed-loop evaluation routes of CMU-Drive in CARLA; route-level DS = RC * IS with RC the mean agent-level route completion and IS the product of all agent-level infraction scores; SR counts routes with DS = 100; 2 to 16 CAVs per route"
+
+  cmu_drive_baseline_simlingo:
+    driving_score: 56.32
+    success_rate: 30.91
+    source: "V2V-VLA paper Table 2, row SimLingo, no cooperation"
+    date_reported: "2026-08-07"
+    eval_condition: "Same 220 CMU-Drive closed-loop routes, single-agent SimLingo policy run per CAV without any multi-agent cooperation"
+
+  cmu_drive_benchmark_statistics:
+    num_routes: 220
+    min_cavs_per_route: 2
+    max_cavs_per_route: 16
+    avg_cavs_per_route: 6.56
+    gpus_per_route: 1
+    num_scenario_types: 44
+    weather_lighting_conditions: 5
+    source: "V2V-VLA paper Table 1 (CMU-Drive row) and Section 2.1"
+    eval_condition: "CMU-Drive extends Bench2Drive: 44 scenario types x 5 weather/lighting conditions = 220 routes; for comparison InterDrive has 92 routes (2-8 CAVs, avg 3.80, 3 GPUs) and MDrive has 225 routes (1-8 CAVs, avg 3.36, 3 GPUs)"
+
+training:
+  data: "180K supervised fine-tuning samples collected on multi-agent training routes extended from a subset of the SimLingo single-agent training routes using the same procedure applied to the Bench2Drive evaluation routes. PDM-lite, a rule-based expert that uses ground-truth locations and velocities of all objects regardless of visibility, drives every agent; its future waypoints become the action-output ground truth. Suggested action and reasoning text are generated with a rule-based pipeline similar to DriveLM and SimLingo."
+  communication_supervision: "Novel annotation: at each timestep the critical objects influencing the expert's action are identified; if such an object is invisible to the ego vehicle but observable by another CAV, that CAV is annotated as the recommended communication partner."
+  initialization: "Model weights initialized from SimLingo and UniAD"
+  objective: "Smooth-L1 loss on the future waypoints of the action output A_output plus cross-entropy loss on the language output L_output"
+  finetuning: "LoRA on the LLM; UniAD frozen; all other trainable layers of V2V-VLA fine-tuned"
+  epochs: 12
+  batch_size: 8
+  hardware: "8x NVIDIA H100-80GB, 48 hours"
+  hyperparameters: "All other hyperparameters follow SimLingo"
+
+eval_conditions:
+  simulator: "CARLA closed-loop simulation; each CAV has RGB cameras, IMU and GPS"
+  benchmark: "CMU-Drive, 220 evaluation routes inheriting the 44 Bench2Drive scenario types under 5 weather/lighting conditions, with 2 to 16 cooperative autonomous vehicles per route plus background vehicles, pedestrians and cyclists"
+  metrics: "Agent-level route completion RC_i^j and infraction score IS_i^j (base 1.0, multiplicatively penalized for collisions with pedestrians/cyclists/vehicles/static objects, red-light and stop-sign running, off-road driving and failure to yield to emergency vehicles); route-level RC^j is the mean over agents, IS^j the product over agents, DS^j = RC^j * IS^j, SS^j = 1 iff DS^j = 100; overall DS and SR average over R = 220 routes"
+  route_setup: "The first CAV follows the original Bench2Drive route configuration and triggers the safety-critical events; additional CAV start/goal pairs are generated automatically from road topology while avoiding lanes that would interfere with the safety-critical event triggers"
+  qualitative: "Figure 4 shows CAV_0 unable to observe a leading bicycle due to distance and rain-induced image blur, slowing down using perception shared by the leading CAV_4"
+  limitations: "Only one baseline (SimLingo) is compared; no ablation on the communication policy, the occupancy merging, or the number of CAVs is reported; per-scenario driving scores are shown only as a bar chart (Figure 3) without a numeric table"
+
+tags:
+- autonomous_driving
+- vla
+- cooperative_driving
+- multi_agent
+- v2v_communication
+- closed_loop
+- carla
+- bench2drive
+- benchmark
+- occupancy
+- bev
+- reasoning
+- waypoint_prediction
+- lora
