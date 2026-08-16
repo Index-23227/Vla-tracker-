@@ -1,0 +1,79 @@
+# Paper: GWM-VLA: Geometry-Aware Latent World Modeling for Vision-Language-Action Learning
+# arXiv: 2608.07619
+
+name: GWM-VLA
+full_name: "GWM-VLA: Geometry-Aware Latent World Modeling for Vision-Language-Action Learning"
+organization: "Tongji University"
+date: "2026-08-07"
+paper_url: https://arxiv.org/abs/2608.07619
+code_url: null
+venue: arXiv
+open_source: false
+model_type: latent_world_model_vla
+
+architecture:
+  backbone: "VGGT-Omega feed-forward geometric foundation model as the geometry-aware multi-view encoder; the aggregator is frozen throughout training and jointly aggregates all camera views at each timestep into register tokens R_t and patch tokens P_t (features extracted from Layer 24 by default)"
+  llm: "Qwen3-VL-2B vision-language backbone (fully trainable), which receives the current multi-view observation, the language instruction, and timestep-grouped learnable latent-action query tokens"
+  action_head: "Conditional flow-matching action head generating action chunks over horizon T, conditioned on the shared latent-action sequence A_{0:T-1} and the current proprioceptive state s_0"
+  action_head_category: flow_matching
+  action_space: "Continuous robot action chunks over a shared horizon T; LIBERO uses the Franka Emika Panda arm, real-world experiments use the SO-101 robot"
+  key_innovation: >
+    Geometry-aware latent world modeling. Instead of encoding each camera view independently (as VLA-JEPA does with
+    V-JEPA 2 followed by feature concatenation), GWM-VLA uses a frozen VGGT-Omega aggregator to jointly process all
+    views at a single timestep, so cross-view correspondences and camera-relative scene structure are baked into the
+    predictive state. Rather than predicting the complete multi-view state, the latent world model performs causal,
+    teacher-forced next-step prediction of the patch tokens of ONE selected target view (the wrist view in the
+    experiments), while the corresponding target-view register tokens supply global geometric context. Because both
+    token sets are extracted after cross-view aggregation, the objective stays cheap yet still carries multi-view
+    geometry. The third design is a unified latent-action representation: the same VLM-produced latent-action tokens
+    condition both the latent world model and the flow-matching action head, so latent-prediction supervision and
+    ground-truth robot-action supervision jointly shape one representation (unlike VLA-JEPA, which adds separate
+    embodied-action queries). The world-model loss is auxiliary and is dropped at deployment.
+
+training:
+  method: "Joint objective L = L_action + lambda * L_wm with lambda = 0.1 by default. L_wm is an l1 latent prediction loss on next-step target-view patch tokens under teacher forcing and a time-causal attention mask (tokens within a timestep interact bidirectionally; tokens at t attend only to timesteps <= t). L_action is conditional flow matching with u_gamma = (1-gamma)*eps + gamma*u_{0:T-1}, gamma ~ U(0,1). The VGGT-Omega aggregator is frozen; Qwen3-VL, the latent world model, and the action head are fully trainable."
+  training_data: "Pretraining on DROID (~76,000 action-labeled demonstration trajectories across multiple institutions and operators), then fine-tuning on the standard LIBERO demonstration sets for simulation. Real-world: 100 teleoperated SO-101 demonstrations across five pick-and-place tasks."
+  budget: "Pretraining and simulation fine-tuning on 8x NVIDIA A800 GPUs; diagnostic ablations on a single NVIDIA RTX 6000D GPU (batch size 16, 10,000 optimization steps, LIBERO-Spatial only)"
+
+benchmarks:
+  libero:
+    libero_spatial: 96.8
+    libero_object: 99.0
+    libero_goal: 98.0
+    libero_long: 94.4
+    libero_avg: 97.1
+    libero_plus_camera: 57.9
+    libero_plus_robot: 54.7
+    libero_plus_language: 89.8
+    libero_plus_light: 95.4
+    libero_plus_background: 90.8
+    libero_plus_noise: 72.5
+    libero_plus_layout: 77.1
+    libero_plus_avg: 76.9
+    source: "Paper Table 1 (LIBERO success rates) and Table 2 (LIBERO-Plus success rates), GWM-VLA rows"
+    date_reported: "2026-08-07"
+    eval_condition: "LIBERO: DROID-pretrained model fine-tuned on the standard LIBERO demonstration sets, task success rate averaged over the four suites (Spatial, Object, Goal, LIBERO-10); ties OpenVLA-OFT at 97.1 for best overall and beats robot-only VLA-JEPA by 1.0 pt. LIBERO-Plus: same task families with seven perturbation dimensions, success rate averaged over the perturbation dimensions; state-of-the-art average, +7.3 pt over OpenVLA-OFT and +14.0 pt over robot-only VLA-JEPA."
+
+eval_conditions:
+  libero: "Franka Emika Panda arm, four task suites (Spatial, Object, Goal, LIBERO-10), used as the in-distribution simulation benchmark. GWM-VLA is pretrained on robot demonstrations only, so robot-only VLA-JEPA (without human-video pretraining) is the most directly comparable baseline."
+  libero_plus: "Out-of-distribution robustness benchmark extending the LIBERO task families with seven perturbation dimensions: camera viewpoint, robot initial state, language instruction, illumination, background, visual noise, object layout. GWM-VLA ranks first under language, lighting, and object-layout perturbations and second under camera-viewpoint, robot-initial-state, and background perturbations."
+  real_world: "SO-101 robot with the open-source LeRobot deployment stack; 100 teleoperated demonstrations over five pick-and-place training tasks, each evaluation task attempted 10 times. Three settings: in-distribution (3 seen instructions, nominal layouts), OOD task (3 held-out object-receptacle recombinations), OOD object layouts (same 3 ID instructions, novel arrangements). GWM-VLA 0.80 ID / 0.53 OOD-task / 0.67 OOD-layout / 0.67 average, vs pi-0.5 at 0.70 / 0.60 / 0.60 / 0.63 and pi-0 at 0.57 / 0.07 / 0.17 / 0.27 (Figure 3)."
+  ablations: "Diagnostic runs on LIBERO-Spatial only (single RTX 6000D, batch 16, 10K steps), not comparable to the main pretraining-plus-fine-tuning numbers. Target view: wrist 92.8, mixed 80/20 92.4, third-person 87.8. VGGT-Omega feature extraction layer: 5 -> 89.0, 12 -> 89.4, 18 -> 92.0, 24 -> 92.8. Action conditioning: shared latent action 92.8 vs additional embodied query 88.0 (+4.8 pt)."
+
+tags:
+  - vla
+  - latent-world-model
+  - geometry-aware
+  - vggt
+  - multi-view
+  - qwen3-vl
+  - flow-matching
+  - latent-action
+  - shared-representation
+  - teacher-forcing
+  - ood-robustness
+  - libero
+  - libero-plus
+  - droid
+  - so-101
+  - real-world
