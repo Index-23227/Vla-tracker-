@@ -1,0 +1,43 @@
+name: EMS
+full_name: "Fast and Accurate: An Adaptive VLA Inference Framework through Environment-aware Model Selection"
+organization: "ACSLab, Huawei Technologies; Southern University of Science and Technology"
+date: "2026-08-06"
+paper_url: https://arxiv.org/abs/2608.06434
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "PI0 (System 2, slow deliberative policy) + BCViLT / ACT (System 1, fast reactive policy)"
+  action_head: "Fully decoupled dual-system: System 2 is a flow-matching VLA (PI0) emitting action chunks (chunk size 5 on LIBERO) at ~10 Hz; System 1 is a lightweight regression visuomotor policy (BCViLT single-arm, ACT dual-arm) at ~100 Hz; a shallow fully-connected switching module selects between them at each decision boundary"
+  action_head_category: hybrid
+  parameters: "System 2 = PI0 (public pretrained weights, fully fine-tuned); System 1 = BCViLT or ACT trained from scratch; switching module = shallow MLP Q-network"
+  key_innovation: "EMS removes the feature-level coupling of prior dual-system VLAs: the two systems interact only at the action level, so each can be trained, deployed and swapped independently. Stage-wise training: (I) fine-tune PI0 on teleoperation trajectories; (II) trajectory distillation — System 1 is trained from scratch by imitation learning on successful PI0 rollouts so the fast policy matches the slow policy's trajectory distribution; (III) the switching policy is learned by RL over a two-action MDP on robot state (online: Double-DQN with dueling architecture, prioritized experience replay and NoisyNet exploration; offline: IQL with expectile regression and advantage-weighted regression). Action fusion averages one fast and one slow action at the handoff step to suppress discontinuities."
+
+benchmarks:
+  libero:
+    libero_object: 98.60
+    libero_spatial: 93.40
+    libero_goal: 92.20
+    libero_long: 85.40
+    libero_avg: 92.40
+    source: "Table I, EMS (ours); mean switch ratio 0.153, effective action frequency 93.37 Hz"
+    eval_condition: "PI0 fine-tuned on official LIBERO teleoperation data (50 successful trajectories x 40 tasks); BCViLT distilled from PI0 rollouts; per-suite switching policy trained with online RL; 50 trials per task on held-out seeds"
+
+  libero_fixed_switching_baseline:
+    libero_object: 96.00
+    libero_spatial: 94.00
+    libero_goal: 89.60
+    libero_long: 81.80
+    libero_avg: 90.35
+    source: "Table I, Fixed Switching baseline (slow model invoked once every four action chunks, switch ratio 0.33, 87.5 Hz)"
+    eval_condition: "same trained System 1 / System 2, but fixed switching schedule instead of the learned RL policy"
+
+training:
+  datasets: ["LIBERO teleoperation demonstrations (2,000 trajectories, 40 tasks)", "PI0-distilled rollouts (2,000 successful trajectories)", "Realman RM75-6F MuJoCo simulation rollouts", "real dual-arm Realman teleoperation (100 successful trajectories per model)"]
+  method: "Three-stage pipeline: imitation fine-tuning of System 2, from-scratch trajectory distillation of System 1, then online DQN / offline IQL reinforcement learning of the switching module"
+
+eval_conditions:
+  libero: "fine-tuned; four suites (Object, Spatial, Goal, LIBERO-10), 50 trials per task with held-out environment seeds"
+
+tags: [dual_system, fast_slow, inference_efficiency, reinforcement_learning, trajectory_distillation, action_fusion, libero, pi0, act, real_robot]
