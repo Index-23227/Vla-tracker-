@@ -35,6 +35,24 @@ CANONICAL_BENCHMARKS = ("libero", "calvin", "simpler_env", "rlbench", "metaworld
 LIBERO_VARIANTS = ("libero_plus", "libero_pro")
 
 
+# Evaluation results that were written at the YAML root instead of under
+# benchmarks:, where nothing reads them. Engineering metrics that also live at
+# the root (latency, inference_speedup, verifier_metrics) are deliberately not
+# listed -- they are not benchmark scores.
+ROOT_RESULT_BLOCKS = ("real_world", "real_world_results", "ood_robustness",
+                      "one_shot", "cross_task", "vlabench")
+
+
+def hoist_root_result_blocks(model: dict) -> dict:
+    """Move stray root-level result blocks into the model's benchmarks map."""
+    benchmarks = dict(model.get("benchmarks") or {})
+    for key in ROOT_RESULT_BLOCKS:
+        block = model.get(key)
+        if isinstance(block, dict) and key not in benchmarks:
+            benchmarks[key] = block
+    return benchmarks
+
+
 def fold_libero_variants(model_benchmarks: dict) -> dict:
     """Merge top-level libero_plus / libero_pro blocks into benchmarks.libero."""
     if not isinstance(model_benchmarks, dict):
@@ -286,7 +304,7 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
             "eval_conditions": {},
         }
 
-        model_benchmarks = fold_libero_variants(model.get("benchmarks", {}))
+        model_benchmarks = fold_libero_variants(hoist_root_result_blocks(model))
 
         # Carry every scored block, not just a hardcoded list. The old list left
         # out real_world — which has its own definition file and appears in

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T15:55:05.315299",
+  "generated_at": "2026-08-16T15:58:25.740983",
   "num_models": 397,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -156,6 +156,11 @@
           "easy_avg": 45.1,
           "hard_avg": 58.6,
           "robotwin_v2_avg": 51.85
+        },
+        "real_world": {
+          "average_success": 88.0,
+          "baseline_pi0_5": 64.5,
+          "improvement": 23.5
         }
       },
       "eval_conditions": {
@@ -1875,12 +1880,20 @@
           "libero_plus_noise": 78.0,
           "libero_plus_layout": 70.2,
           "libero_plus_total": 69.1
+        },
+        "real_world": {
+          "standard_avg": 90.8,
+          "standard_pi0_5_baseline_avg": 71.0,
+          "standard_task_iv": 88.0,
+          "standard_task_iv_pi0_5_baseline": 31.0,
+          "ood_avg": 75.8,
+          "ood_pi0_5_baseline_avg": 23.5
         }
       },
       "eval_conditions": {
         "libero": "Trained exclusively on standard LIBERO; 10 evaluation episodes per task.",
-        "libero_plus": "Zero-shot transfer of the LIBERO-trained policy, single episode per task, seven perturbation axes (camera, robot, language, light, background, noise, layout).",
         "real_world": "AgileX PiPer, 4 tasks, ~100 demos each, 100 trials each; OOD scenes add distractors, background texture shifts, novel objects and instruction perturbations.",
+        "libero_plus": "Zero-shot transfer of the LIBERO-trained policy, single episode per task, seven perturbation axes (camera, robot, language, light, background, noise, layout).",
         "sensitivity": "gamma swept over {0, 0.5, 1, 2, 3} (best at 2.0); beta swept over {0, 0.05, 0.1, 0.15, 0.2} (best at 0.15, 98.5% avg)."
       },
       "libero_avg": 98.5,
@@ -2110,6 +2123,14 @@
           "robocasa_others": 54.4,
           "robocasa_human50_avg": 54.8,
           "robocasa_avg": 54.8
+        },
+        "real_world": {
+          "scene_a": 55.0,
+          "scene_b": 70.0,
+          "scene_c": 35.0,
+          "scene_d": 40.0,
+          "average": 50.0,
+          "baseline_pi0_5_average": 34.4
         }
       },
       "eval_conditions": {
@@ -3791,6 +3812,12 @@
           "easy_avg": 62.5,
           "hard_avg": 34.7,
           "robotwin_v2_avg": 48.6
+        },
+        "one_shot": {
+          "libero_avg": 70.5
+        },
+        "cross_task": {
+          "libero_long_to_object": 31.2
         }
       },
       "eval_conditions": {
@@ -5089,6 +5116,13 @@
           "libero_long": 93.5,
           "libero_avg": 97.3,
           "libero_plus": 56.5
+        },
+        "real_world": {
+          "place_banana": 90.0,
+          "stack_blocks": 55.0,
+          "insert_circle": 65.0,
+          "average": 70.0,
+          "baseline_pi0_average": 58.3
         }
       },
       "eval_conditions": {
@@ -5879,6 +5913,11 @@
           "libero_object_latency_s": 0.385,
           "libero_goal_latency_s": 0.345,
           "libero_long_latency_s": 0.421
+        },
+        "real_world": {
+          "avg_completion_time_s": 25.6,
+          "baseline_dense_completion_time_s": 30.2,
+          "trials_per_task": 50
         },
         "bridge_v2": {
           "success": 89.49,
@@ -6916,6 +6955,10 @@
           "stack_blocks": 44.0,
           "put_eggplant_in_basket": 84.0,
           "simpler_avg": 67.0
+        },
+        "real_world": {
+          "average_success": 43.0,
+          "baseline_average_success": 28.7
         }
       },
       "eval_conditions": {
@@ -7703,12 +7746,22 @@
           "libero_plus_camera_c1": 81.8,
           "libero_plus_camera_c2": 87.9,
           "libero_plus_camera_c3": 90.6
+        },
+        "real_world": {
+          "real_heldout_camera_avg": 74.4,
+          "real_seen_camera_avg": 87.8,
+          "real_heldout_battery_box": 76.7,
+          "real_heldout_headphone_stand": 46.7,
+          "real_heldout_laptop_lid": 100.0,
+          "real_seen_battery_box": 86.7,
+          "real_seen_headphone_stand": 80.0,
+          "real_seen_laptop_lid": 96.7
         }
       },
       "eval_conditions": {
         "libero": "fine-tuned",
-        "libero_plus_camera": "fine-tuned",
-        "real_world": "fine-tuned"
+        "real_world": "fine-tuned",
+        "libero_plus_camera": "fine-tuned"
       },
       "libero_avg": 95.0,
       "ai_review": {
@@ -10090,6 +10143,14 @@
           "clean": 48.2,
           "randomized": 50.0,
           "robotwin_v2_avg": 49.1
+        },
+        "real_world": {
+          "pick_up_banana": 80,
+          "pick_up_apple": 70,
+          "put_banana_in_bowl": 80,
+          "put_apple_in_bowl": 50,
+          "put_apple_in_drawer": 20,
+          "overall": 60
         }
       },
       "eval_conditions": {
@@ -13216,6 +13277,10 @@
         "memory_scaling": "Scale configuration expands the latent memory to 10K entries using SimScale-synthesized scenarios; no retraining of the base model",
         "ablations": "All ablation tables run on NAVSIMv1 against the same base model whose no-memory PDMS is 91.0"
       },
+      "ai_review": {
+        "content": "# DriveVLA-M0: Failure-Aware Memory Augmentation for Autonomous Driving\n\n> **한 줄 요약**: 주행 VLA가 \"같은 상황에서 같은 실수를 반복\"하는 문제를 정면으로 다뤄, 오라클 PDM 시뮬레이터로 걸러낸 **실패 사례만을 latent memory에 적재**하고, vision-language feature가 아니라 **도로 구조(map)와 동적 agent를 분리한 구조적 retrieval key**로 유사 실패를 찾아, **Decoupled LoRA 기반 test-time training**으로 Action Decoder만 시나리오별로 즉석 보정하여 NAVSIMv1 Navtest 92.3 PDMS (메모리 10K 확장 시 94.1) / NAVSIMv2 Navhard 47.0 EPDMS를 달성한 연구.\n\n- **arXiv**: 2608.10413v1 (2026-08-11, cs.CV)\n- **소속**: Institute of Automation, Chinese Academy of Sciences / Chongqing Chang'an Technology Co., Ltd.\n- **형식**: ACM MM '26 (Rio de Janeiro), DOI 10.1145/3767308.3835233, 15 pages\n- **코드**: https://github.com/ZebinX/DriveVLA-M0\n\n---\n\n## 1. 배경 및 동기\n\nVLA 기반 end-to-end 자율주행은 perception–language–planning을 하나의 정책으로 통합한다는 점에서 각광받아 왔다. LMDrive가 VLM의 주행 명령 수행 가능성을 보였고, 이후 언어 모델 기반 reasoning이 복잡한 주행 시나리오 성능을 끌어올렸다.\n\n그러나 저자들이 지목하는 결함은 명확하다.\n\n> **기존 VLA는 과거의 실패를 활용하는 메커니즘이 없다.** 파라미터가 고정된 채 배포되므로, 이전에 실패했던 것과 유사한 상황에서 **지속적으로 같은 실수를 반복**하고, distribution shift에도 적응하지 못한다.\n\n동기는 인지과학에서 온다. Botvinick et al.의 conflict monitoring, Brown & Braver의 anterior cingulate cortex 오류 예측 연구를 인용하며, **인간은 현재 상황을 과거의 오류와 연결(associative retrieval)하여 실패 가능성을 예측하고 행동을 조정한다**는 점을 지적한다. DriveVLA-M0는 이 메커니즘을 명시적 latent memory + test-time adaptation으로 구현한다.\n\n📌 [Figure 1 삽입] — (a) Classic VLA (VLM → Action Decoder 단방향) vs (b) Ours (latent memory retrieve → gradient descent 주입) vs (c) Navtest/Navhard SOTA 위치\n\n---\n\n## 2. 핵심 문제 정의: 왜 vision-language feature로 retrieve하면 안 되는가\n\nEmbodied AI 쪽의 memory-augmented VLA(MemoryVLA, EchoVLA)는 대체로 **intermediate vision-language feature를 retrieval key로** 쓴다. 저자들은 이것이 주행에서는 부적절하다고 주장한다.\n\n주행 planning이 의존하는 본질적 정보는 두 가지다.\n1. **Dynamic information**: 주변 agent의 움직임\n2. **Scene structure information**: 도로 topology\n\nVision-language feature는 고수준 semantic은 잡지만 도로 경계·차선·agent 배치 같은 **구조적 속성**은 흐려진다. 결과적으로 \"의미는 비슷하지만 구조적으로는 전혀 다른\" 사례가 retrieve되고, 이는 안전 판단에 오히려 해롭다. (이 주장은 §4의 Table 3 ablation에서 실제로 검증된다 — 언어 feature retrieval은 base model보다 **성능이 떨어진다**.)\n\n따라서 저자들이 요구하는 두 성질은:\n- **Structural retrieval**: vision-language 유사도가 아닌 dynamic + physical structure 유사도\n- **Failure awareness**: base model이 실제로 못 하는 시나리오에 집중\n\n---\n\n## 3. 방법론: 전체 아키텍처\n\n파이프라인은 학습 단계(Base Model + Retrieve Model 학습)와 배포 단계 2-stage로 구성된다.\n\n**[M] Memory Generation (offline)**: base model이 학습/외부 데이터에 대해 추론 → 오라클 시뮬레이션으로 실패 판정 → 중간 표현을 latent memory에 기록\n**[I] Inference with TTT (online)**: Retrieve Model이 구조적으로 유사한 실패 사례를 검색 → Decoupled LoRA로 planning head를 test-time 학습 → 보정된 궤적 출력\n\nAlgorithm 1의 흐름을 요약하면:\n\n```\n[M] Offline\n  for s in D:\n      tau_hat, features <- B(s)                 # base model 추론\n      (F_map, F_agent)  <- R(I)                 # retrieval key\n      Q(tau_hat)        <- PDM(tau_hat)         # 오라클 채점\n      if Q(tau_hat) < beta:  M <- M ∪ (k, x, y) # 실패만 저장\n\n[I] Online\n  (F_lang, F_ego, T_hat) <- B_enc(I, z)\n  C_map, C_agent <- top-k retrieve from M with sim > lambda\n  if both empty: return tau_0                   # TTT 스킵\n  init Map LoRA theta_m, Agent LoRA theta_a\n  for i in 1..S: theta <- theta - eta * grad L_TTT(C_map, C_agent)\n  return argmax PDMS-style aggregated score\n```\n\n📌 [Figure 2 삽입] — 전체 개요: 상단 Memory Generation(Simulation → Failure? → Add to Memory), 하단 Inference with TTT(Retrieve → Trigger → Decoupled LoRA Router A/B)\n\n---\n\n## 4. Base Model 상세\n\n### 4.1 VLM Backbone\nReCogDrive를 따라 **InternVL3**를 주행 QA 데이터로 fine-tune한 것을 백본으로 사용한다. 전방 카메라 이미지 `I ∈ R^{C×W×H}`와 시스템 프롬프트 `T`를 각각 인코딩해 통합 공간으로 매핑하고, LLM의 **마지막 레이어 feature h_{-1}**을 중간 scene 표현으로 뽑는다.\n\n문제는 크기다. `h_{-1}`은 **2800 × 1536 토큰**으로 메모리 부담이 과도하다. 이를 Q-Former 스타일 **Compress Module**(학습 가능한 쿼리 `Q_cmp ∈ R^{N×D}`, N=16, D=256)로 cross-attention 압축한다.\n\n```\nF_lang = Transformer(Q_cmp, Linear(h_-1), Linear(h_-1))\n```\n\n→ **1050배 압축**된 `F_lang ∈ R^{16×256}`.\n\n### 4.2 Action Decoder (proposal-and-score)\nscore-based planning 계열(iPad, GTRS 등)을 따라 2단 구조를 쓴다.\n\n**Trajectory Head**: ego-status를 경량 MLP로 `F_ego ∈ R^{1×D}`로 압축한 뒤, 학습 가능한 임베딩 `Q_ego ∈ R^{M×D}`와 함께 `F_lang`을 cross-attend하여 **M개의 다양한 궤적 모드 클러스터** `T_hat ∈ R^{M×8×3}` 생성.\n\n```\nF_proposals = Transformer((Q_ego + F_ego), F_lang, F_lang)\nT_hat       = MLP(F_proposals)\n```\n\n**Score Head**: `T_hat`을 재인코딩해 `F_lang`과 융합, proposal당 **K개의 sub-score**(collision rate, drivable area compliance 등 안전 기준)를 예측. 최종적으로 aggregated score 최대 궤적을 선택.\n\n**학습 (Appendix A)**:\n- 1단계 VLM pre-training: RecogDrive가 수집한 12개 공개 데이터셋(Talk2Car, SUTD, NuScenes-QA, OmniDrive 등) 총 **3.1M QA pair** → 고품질 필터링 후 NAVSIM 학습용 **약 775K** 유지. Compress Module은 이 단계에서 제외.\n- 2단계: **VLM을 freeze**하고 Compress Module + Action Decoder만 학습.\n  - `L_total = L_traj + L_score`\n  - `L_traj = min_i ||tau_hat_i - tau*||_1` (min-over-N → 다양성 확보하면서 최소 하나는 expert에 근접)\n  - `L_score = -1/N Σ [s_i log(s_hat_i) + (1-s_i) log(1-s_hat_i)]`, soft target `s_i`는 PDM scorer가 부여\n\n> 💡 **세미나 포인트**: VLM을 freeze한다는 점이 중요하다. 이 논문의 TTT는 **Action Decoder(planning head)만** 건드리며 backbone은 수정하지 않는다. 그래서 latency overhead가 26.44 ms에 그친다.\n\n---\n\n## 5. Retrieve Model: 구조적 검색 키의 설계\n\n경량 **DINOv2**를 feature extractor로 쓰고 LoRA로 fine-tune하되, 정적 도로와 동적 agent를 독립 적응시키기 위해 **Decoupled LoRA**로 Map(static) / Agent(dynamic) 두 branch로 분리한다.\n\n```\nF_map, F_agent = DINO_LoRA(I)          # 두 branch 병렬 라우팅\n```\n\n각 feature map은 학습 가능한 쿼리를 가진 Transformer decoder로 집약되고, 별도 head가 이를 **occupancy grid** 출력 `M_hat_map`, `M_hat_agent`로 매핑한다.\n\n**학습 (Transfuser의 occupancy-grid supervision 패러다임)**:\n```\nL_Retrieve = BCE(M_hat_map, M_map) + alpha * BCE(M_hat_agent, M_agent)\n```\n`alpha = 10` — agent loss의 크기가 map loss보다 훨씬 작아서 균형을 맞추기 위함(Appendix B).\n\nAttention map 시각화(Figure 3) 결과: **map embedding은 도로 경계·차선 표식 등 topology에**, **agent embedding은 전방 차량에** 집중. 의도한 disentanglement가 실제로 나타났다.\n\n📌 [Figure 3 삽입] — query scene vs retrieved scenes의 map/agent attention map\n📌 [Figure 5 삽입] — Retrieve Model 구조 (DINO + Transformer + Query)\n\n---\n\n## 6. Memory Generation: 무엇을 저장하는가\n\n각 memory case는 세 범주를 담는다.\n\n| 범주 | 내용 | 용도 |\n|------|------|------|\n| `k` (Retrieval keys) | `F_map`, `F_agent` | 구조적 검색 |\n| `x` (Adaptation inputs) | `F_lang`, `F_ego`, 궤적 클러스터 `T_hat` | TTT 입력 |\n| `y` (Supervision targets) | expert 궤적 `tau`, 오라클 sub-score `S` | TTT 지도 신호 |\n\n```\nM = {(k_i, x_i, y_i)}_{i=1}^N\n```\n\n**실패 판정**: base model 예측 `tau_hat`을 오라클 PDM scorer로 시뮬레이션 채점, K개 안전·승차감 sub-score를 곱셈·덧셈 조합으로 집약해 `Q(tau_hat) ∈ [0,1]`을 얻고, **`Q(tau_hat) < beta`이면 실패 사례로 기록**. Appendix B에 따르면 `beta = 0.5` — NAVSIM 채점 관례상 NC/DAC가 0.5 미만이면 충돌 또는 주행가능영역 위반을 의미하기 때문이다.\n\n**중복 제거**: 대규모 외부 데이터를 넣을 때 확장성을 위해, 기록 전 cosine similarity 기반 dedup으로 충분히 유사한 시나리오가 이미 있으면 건너뛰어 메모리 풀 크기를 관리 가능한 수준으로 묶는다.\n\n---\n\n## 7. Inference with TTT: 주입 메커니즘\n\n### 7.1 Trigger\nTTT는 **실패 확률이 높은 시나리오에서만** 정당화된다. 따라서 cosine similarity 기반 이진 게이트를 둔다.\n\n```\ng = 1  if  (F^T F*) / (||F||_2 ||F*||_2) > lambda,  else 0\n```\n`F* ∈ {F*_map, F*_agent}`는 메모리에서 검색된 feature. `C_map`과 `C_agent`가 모두 비면 TTT 없이 base 궤적을 그대로 반환한다.\n\n### 7.2 Decoupled LoRA TTT\n검색된 `{x, y}`로 Action Decoder의 LoRA를 fine-tune하되, **LoRA 가중치는 테스트 시나리오마다 재초기화**되어 시나리오 특화 적응을 보장한다. 분리 설계는 다음과 같다.\n\n- **map으로 검색된 사례 → Map(static) LoRA branch**\n- **agent로 검색된 사례 → Agent(dynamic) LoRA branch**\n\n추론 시 두 branch가 각각 독립적인 score를 예측하고, **pathway-aware score fusion**을 적용한다.\n- drivable-area compliance 같은 **도로 이해형 sub-score → Static LoRA 예측 채택**\n- collision avoidance 같은 **동적 능력형 sub-score → Dynamic LoRA 예측 채택**\n\n### 7.3 하이퍼파라미터 (Appendix B)\n| 항목 | 값 |\n|------|-----|\n| Retrieve Model alpha | 10 |\n| 실패 임계 beta | 0.5 |\n| Trigger 임계 lambda | 0.9 |\n| TTT optimizer | AdamW, lr 2e-4 |\n| TTT steps | 3 |\n| Memory 크기 | ~4K (Base) / 10K (Scale) |\n| 계층적 검색 | map으로 top-k1 → agent로 top-k2, k1 = 3·k2, k2 = 3 |\n\n> 계층적 검색은 순수한 엔지니어링 대응이다. NAVSIM에는 주변 차량·보행자가 없는 **빈 도로 구간이 많아서**, agent embedding만으로 검색하면 노이즈가 들어온다. 그래서 map으로 먼저 거른다.\n\n📌 [Figure 4 삽입] — TTT 주입 전(상)/후(하) 궤적 분포. 주입 후 GT score density가 우측 이동 = 클러스터 품질 자체가 개선\n\n---\n\n## 8. 실험 결과\n\n### 8.1 벤치마크\n- **NAVSIMv1 (Navtest)**: nuPlan/OpenScene 센서 데이터 기반 non-reactive 시뮬레이션. BEV 추상화를 짧은 horizon으로 unroll. 주 지표 **PDMS** = NC, DAC, EP, TTC, C의 곱셈·가중합 조합.\n- **NAVSIMv2 (Navhard)**: pseudo closed-loop 2-stage 프로토콜. **EPDMS**는 PDMS에 LK, DDC, TLC, EC를 추가하고, 인간 운전자도 같은 위반을 저지른 경우 페널티를 무효화하는 false-positive filtering을 도입. Stage 1은 초기 계획 궤적, Stage 2는 Stage 1 결과에서 분기한 사전계산 후속 장면을 채점.\n\n### 8.2 NAVSIMv1 (Table 1)\n\n| 구분 | Method | NC | DAC | EP | TTC | C | **PDMS** |\n|------|--------|----|-----|----|-----|---|----------|\n| Classic E2E | TransFuser | 97.7 | 92.8 | 84.0 | 92.8 | 100 | 83.4 |\n| | DiffusionDrive | 98.2 | 96.2 | 82.2 | 94.9 | 99.9 | 88.1 |\n| | GoalFlow | 98.4 | 98.3 | 85.0 | 94.6 | 100 | 90.3 |\n| | iPad | 98.6 | 98.3 | 88.0 | 94.9 | 100 | 91.7 |\n| | Centaur (TTT 계열) | 99.5 | 98.9 | 85.9 | 98.0 | 100 | 92.6 |\n| | DriveSuprim | 98.6 | 98.6 | 91.3 | 95.5 | 100 | 93.5 |\n| VLA | MTRDrive | 97.3 | 95.8 | 86.8 | 91.2 | 100 | 88.3 |\n| | AutoVLA | 98.4 | 95.6 | 81.9 | 98.0 | 99.9 | 89.1 |\n| | DriveVLA-W0 | 98.7 | 99.1 | 83.3 | 95.3 | 99.3 | 90.2 |\n| | ReCogDrive | 97.9 | 97.3 | 87.3 | 94.9 | 100 | 90.8 |\n| | ELF-VLA | 98.9 | 98.1 | 85.3 | 96.0 | 100 | 91.0 |\n| | MTDrive | 97.5 | 98.2 | 90.6 | 91.8 | 99.8 | 91.1 |\n| **Ours** | **DriveVLA-M0-Base** | 99.0 | 97.7 | 89.5 | 95.0 | 99.9 | **92.3** |\n| | **DriveVLA-M0-Scale** | 99.1 | 98.1 | 90.2 | 98.5 | 99.9 | **94.1** |\n\n전방 카메라 **한 대만** 쓰면서 모든 기존 VLA 계열을 앞선다. 특히 Centaur도 TTT 패러다임을 쓰는데, Base 설정에서는 92.3 vs 92.6으로 근소하게 뒤지지만 Scale 설정(94.1)에서는 DriveSuprim(93.5) 포함 표 전체를 넘어선다.\n\n### 8.3 메모리 스케일링\nSimScale로 시나리오를 합성해 latent memory를 **10K 케이스로 확장**하되 **재학습은 전혀 하지 않는다**. 새 실패 사례를 메모리에 넣고 추론 시 검색하기만 하면 되므로 92.3 → **94.1 PDMS**의 이득이 나온다. 이것이 이 논문에서 가장 실용적으로 매력적인 주장이다 — **post-training-free scaling**.\n\n### 8.4 NAVSIMv2 Navhard (Table 2)\n\nDriveVLA-M0-Base Stage 1 / Stage 2:\n\n| | NC | DAC | DDC | TLC | EP | TTC | LK | HC | EC | **EPDMS** |\n|---|----|-----|-----|-----|----|-----|----|----|----|-----------|\n| Stage 1 | 98.9 | 96.2 | 99.7 | 100.0 | 73.8 | 99.1 | 94.2 | 97.3 | 64.4 | |\n| Stage 2 | 91.1 | 89.5 | 93.1 | 98.6 | 65.5 | 89.2 | 52.7 | 98.6 | 72.1 | **47.0** |\n\n비교군: LTF 23.1, DiffusionDrive 28.9, GoalFlow 28.7, Mimir 34.6, DriveSuprim 44.7, GTRS-Dense 45.3 → **47.0으로 최고**. Navhard는 신설 벤치마크라 VLA 계열 보고가 거의 없어 강한 E2E baseline과 비교했다. Transfuser 대비 NC/DAC가 개선되고, scoring 기반 GTRS 대비 궤적 연속성(EC 72.1 vs 54.2)에서 앞선다.\n\n---\n\n## 9. Ablation 분석\n\n### 9.1 검색 키 (Table 3) — 논문의 핵심 주장 검증\n모든 ablation의 기준 base model은 **PDMS 91.0**.\n\n| Search Type | NC | DAC | EP | TTC | C | PDMS |\n|-------------|----|-----|----|-----|---|------|\n| Base Model† (메모리 없음) | 98.4 | 97.1 | 87.7 | 95.2 | 97.6 | 91.0 |\n| Lang | 98.0 | 97.3 | 88.1 | 93.9 | 100.0 | **90.7** |\n| Map | 98.4 | 97.7 | 89.1 | 94.5 | 99.9 | 91.7 |\n| Map + Agent | 98.9 | 97.7 | 89.6 | 95.0 | 99.9 | **92.3** |\n\n> **가장 중요한 수치**: 언어 임베딩 검색은 90.7로 **base model(91.0)보다 낮다**. \"vision-language space 검색은 주행에서 오히려 해롭다\"는 §2의 주장을 정면으로 뒷받침한다. Map만 써도 91.7, agent를 더하면 92.3(+1.3). Map 대비 agent 추가는 NC/EP/TTC를 각각 0.5씩 올린다 — map은 topology(DAC, EP), agent는 충돌계(NC, TTC)를 담당한다는 분리 설계가 지표별로 정확히 나타난다.\n\n### 9.2 주입 전략 (Table 4)\n\n| Injection Type | NC | DAC | EP | TTC | C | PDMS |\n|----------------|----|-----|----|-----|---|------|\n| Base Model† | 98.4 | 97.1 | 87.7 | 95.2 | 97.6 | 91.0 |\n| Offline (10 epochs LoRA post-training) | 98.1 | 97.5 | 88.6 | 94.2 | 99.9 | 91.2 |\n| TTT Full | 99.0 | 97.8 | 89.6 | 95.1 | 99.9 | **92.4** |\n| TTT LoRA (제안) | 99.0 | 97.8 | 89.5 | 95.0 | 99.9 | 92.3 |\n\n실패 사례로 **오프라인 post-training(10 epoch)을 해도 91.2에 그친다.** 저자들은 고정된 데이터 혼합으로 학습되어 시나리오 특화 적응이 없기 때문(distribution mismatch)이라고 해석한다. 반면 TTT는 92.4/92.3. **Decoupled LoRA가 full fine-tuning과 사실상 동률(-0.1)이면서 backward latency를 55.42 → 26.44 ms로 절반 이하로 줄인다.**\n\n### 9.3 Trigger 임계값 (Table 5, map-only 검색)\n\n| lambda | NC | DAC | EP | TTC | C | PDMS |\n|--------|----|-----|----|-----|---|------|\n| 0.70 | 98.0 | 96.9 | 88.1 | 93.8 | 99.9 | 90.4 |\n| **0.90** | 98.4 | 97.7 | 89.1 | 94.5 | 99.9 | **91.7** |\n| 0.95 | 98.1 | 97.6 | 88.8 | 94.3 | 99.9 | 91.4 |\n| 0.99 | 98.1 | 96.9 | 85.2 | 94.3 | 99.9 | 89.4 |\n\n양방향 실패 모드가 뚜렷하다. **너무 관대하면(0.70)** 무관한 시나리오까지 끌어와 noisy supervision → NC/TTC 저하(90.4). **너무 엄격하면(0.99)** 거의 트리거되지 않고 89.4로 **base model(91.0)보다도 떨어진다**. 선택적 적응이 무차별 test-time fine-tuning보다 낫다는 설계 원칙의 근거.\n\n### 9.4 Latency (Table 6, 단일 H20, 메모리 4,000 케이스)\n\n| Component | Retrieve | Forward | Backward LoRA | Backward Full |\n|-----------|----------|---------|---------------|---------------|\n| Time (ms) | 15.19 | 30.79 | **26.44** | 55.42 |\n\n검색 15.19 ms, forward 30.79 ms. TTT가 트리거될 때만 26.44 ms가 추가된다.\n\n---\n\n## 10. 비판적 검토\n\n**강점**\n1. **문제 설정이 정직하다.** \"실패를 재사용한다\"는 아이디어는 흔하지만, 오라클 PDM 점수로 실패를 **정량적으로 정의(beta=0.5)**하고, 그 사례만 저장하는 선택은 깔끔하다.\n2. **핵심 주장을 반증 가능한 형태로 검증했다.** Lang retrieval이 base보다 낮다는 결과(90.7 < 91.0)는 저자 주장에 유리한 방향이지만, 동시에 \"메모리를 잘못 쓰면 오히려 손해\"라는 리스크를 스스로 드러낸 정직한 보고다.\n3. **재학습 없는 스케일링.** 92.3 → 94.1을 메모리 확장만으로 얻는다는 것은 배포된 차량 fleet에서 수집한 실패를 계속 축적하는 운영 모델과 잘 맞는다.\n4. **Decoupled LoRA의 지표별 분업**이 attention 시각화(Figure 3)와 ablation 지표 변화(NC/TTC vs DAC/EP)로 이중 검증됐다.\n\n**약점 및 의문**\n1. **오라클 의존성.** 메모리 구축에 시뮬레이션 PDM scorer(정답 궤적과 시뮬레이터 필요)가 반드시 있어야 한다. 실제 도로 주행 로그에서는 \"실패\"를 이렇게 채점할 수 없다. Fleet-scale 확장 주장과 이 요구사항 사이에 긴장이 있다.\n2. **Ablation base(91.0)와 Table 1 base(92.3)의 관계.** Table 3/4의 Base Model†는 91.0인데 Table 1의 DriveVLA-M0-Base는 92.3이다. 즉 Table 1의 \"Base\"는 이미 메모리+TTT가 켜진 설정이고, \"Scale\"은 메모리 10K 설정이다. 표기가 다소 혼동을 부른다.\n3. **NAVSIMv2 결과가 Base 단일 행뿐이다.** Navhard에서 memory scaling 효과가 재현되는지 보고되지 않았다. 또한 Stage 2의 LK 52.7은 눈에 띄게 낮아, 장기 horizon에서 차선 유지가 취약할 가능성이 있다.\n4. **전방 카메라 단일 입력**은 효율 측면의 장점이지만, 측후방 정보가 필요한 시나리오(합류, 차선 변경)에서의 한계는 논의되지 않았다.\n5. **파라미터 수 미보고.** InternVL3 기반이라고만 밝히고 정확한 모델 크기가 명시되지 않아 다른 VLA(ReCogDrive-8B 등)와의 공정 비교가 어렵다.\n6. **VLM은 freeze되어 있고 TTT는 Action Decoder만 건드린다.** 따라서 \"실패로부터 배운다\"기보다 **\"실패 사례로 planning head를 순간 캘리브레이션한다\"**에 가깝다. reasoning 자체는 교정되지 않는다.\n\n---\n\n## 11. 관련 연구 속 위치\n\n- **메모리 계열 대비**: MANTRA/MemoNet(궤적 예측 메모리), JARVIS-1/MemGen(에이전트 episodic memory), MemoryVLA(perceptual-cognitive memory), MTRDrive(코너케이스 프로토타입 저장), EvoVLA(자기진화)와 달리, 검색 공간을 **vision-language space가 아닌 구조적 occupancy space**로 옮긴 것이 차별점.\n- **TTT 계열 대비**: TENT(entropy 최소화), TTT++, LoRA-TTT, Centaur(cluster entropy 최소화)는 **비지도 대리 목적**을 쓴다. DriveVLA-M0는 메모리가 **expert 궤적과 오라클 sub-score라는 명시적 지도 신호**를 제공한다는 점에서 더 강한 학습 신호를 갖는다.\n- **실패 활용 계열 대비**: SERA, ELF-VLA, BeyondDrive, SoAD는 실패/안전 값을 쓰되 **광범위한 post-training**을 요구한다. DriveVLA-M0는 실패 맥락을 latent memory로 압축해 **오프라인 재학습 없이** test-time에 직접 적응한다.\n\n---\n\n## 12. 총평 및 시사점\n\nDriveVLA-M0는 \"주행 VLA에 메모리를 붙인다\"는 흔한 아이디어를, **(a) 무엇을 저장할 것인가(오라클이 실패로 판정한 것만), (b) 무엇으로 찾을 것인가(도로 구조와 agent를 분리한 구조적 키), (c) 어떻게 주입할 것인가(트리거로 게이트된 decoupled LoRA TTT)** 세 질문으로 분해하고 각각을 ablation으로 방어한 잘 설계된 논문이다.\n\n특히 **언어 임베딩 검색이 base보다 나쁘다(90.7 < 91.0)**는 결과와 **트리거가 너무 엄격하면 89.4로 붕괴**한다는 결과는, 메모리 증강이 공짜 점심이 아니며 **검색 품질과 적응 게이팅이 성능을 좌우한다**는 일반적 교훈을 준다. Embodied manipulation VLA에 메모리를 도입하려는 연구자에게도 그대로 이식 가능한 시사점이다.\n\n한계는 오라클 시뮬레이터 의존성과 freeze된 VLM이다. 실차 로그에서 실패를 자동 라벨링하는 방법, 그리고 backbone reasoning 자체를 교정하는 확장이 후속 과제로 자연스럽다.\n\n**VLA-Tracker 관점**: 자체 학습된 주행 VLA policy(InternVL3 백본 도메인 사전학습 + Trajectory/Score Action Decoder imitation learning)이며, frozen 정책 위의 래퍼가 아니다. 메모리·TTT는 그 위에 얹힌 추론 시 보정 메커니즘이다.\n\n---\n\n<!-- VERIFIED: pdf -->\n",
+        "verified": true
+      },
       "rank": 243
     },
     {
@@ -13481,13 +13546,33 @@
           "long_horizon_ps": 55.0,
           "avg_sr": 55.0,
           "avg_ps": 67.0
+        },
+        "vlabench": {
+          "in_dist_sr": 69.7,
+          "in_dist_ps": 81.1,
+          "in_dist_is": 84.2,
+          "cross_category_sr": 47.0,
+          "cross_category_ps": 61.0,
+          "cross_category_is": 66.4,
+          "commonsense_sr": 44.0,
+          "commonsense_ps": 55.0,
+          "commonsense_is": 57.2,
+          "instruction_sr": 58.0,
+          "instruction_ps": 70.2,
+          "instruction_is": 73.8,
+          "texture_sr": 47.4,
+          "texture_ps": 62.3,
+          "texture_is": 70.6,
+          "avg_sr": 53.2,
+          "avg_ps": 65.9,
+          "avg_is": 70.4
         }
       },
       "eval_conditions": {
         "libero": "post-trained on LIBERO 4 suites (10K steps)",
         "real_world": "Franka-style single-arm with third-person + wrist camera; 5 trials per task across 20 tasks",
-        "libero_plus": "zero-shot direct transfer from LIBERO post-training",
-        "vlabench": "post-trained on VLABench (20K steps)"
+        "vlabench": "post-trained on VLABench (20K steps)",
+        "libero_plus": "zero-shot direct transfer from LIBERO post-training"
       },
       "ai_review": {
         "content": "# ERVLA: Revisiting Embodied Chain-of-Thought for Generalizable Robot Manipulation\n\n> **한 줄 요약**: Embodied CoT는 inference-time 자기회귀 prefix가 아니라 **VLM 표현 공간을 reshape하는 training signal**이어야 한다는 가설을 226M 샘플 규모로 검증. ERVLA는 (i) p=0.5 **reasoning dropout**, (ii) **choice policy** auxiliary branch (N=5 후보 action chunk), (iii) **knowledge-truncated KV conditioning** (DiT가 semantic prefix만 attend)의 3종 세트로 LIBERO-Plus 86.9% (π0.5 대비 +1.4), VLABench 53.2% SR (π0.5 대비 +5.1)을 달성. CoT를 학습 신호로 내재화하고 추론 시에는 직접 action을 생성해 autoregressive compounding error를 우회.\n\n---\n\n## 1. 배경 및 동기\n\n### 기존 Embodied CoT의 3대 한계\n1. **무엇이 효과적인 CoT인가가 불명확** — scene understanding, subtask decomposition, spatial grounding, end-effector trajectory, future frame 등 다양한 형태가 특정 architecture와 강하게 결합되어 비교 불가\n2. **CoT와 action policy의 결합 방식 문제** — 초기 ECoT는 reasoning을 **action prefix**로 autoregressive 생성 → latency + compounding error\n3. **Scaling 불명확** — 공개 reasoning-annotated robot 데이터셋이 희소해 large-scale CoT가 실제로 action generation을 강화하는지 확증 불가\n\n### 핵심 통찰\n- ECoT는 \"로봇이 더 많이 말하게\" 만드는 것이 아니라, VLM이 학습한 의미적 추상을 **action generation에 유용한 중간 표현**으로 번역하는 것\n- 따라서 CoT는 **출력 채널이 아니라 학습 신호**여야 한다\n\n---\n\n## 2. 방법론 심층 분석\n\n### 2.1 Mixture-of-Transformers 아키텍처\n\n```\n[Multi-view obs + Instruction + (optional CoT)] \n        ↓ Qwen3-VL-4B (VLM backbone, 36-layer DiT 위)\n        ↓ Hidden states + KV cache\n        ↓ Control-query tokens (state-query + action-query, 학습 가능)\n        ↓                                           ↓\n [Choice policy branch]                  [Knowledge truncation]\n  N=5 candidate action                    DiT만 semantic-prefix\n  chunks + scores                         KV cache만 attend\n                                                    ↓\n                                     [36-layer DiT, flow-matching]\n                                                    ↓\n                                       Continuous action chunk\n```\n\n### 2.2 3대 핵심 컴포넌트\n\n| 컴포넌트 | 메커니즘 | 효과 |\n|---|---|---|\n| **Reasoning dropout (p_cot=0.5)** | 학습 중 50% 확률로 `<cot></cot>` 비워두고 동일 action 라벨 학습 | 추론 시 CoT 없이 action 생성 가능, AR compounding error 회피, CoT contamination 완화 |\n| **Choice policy branch** | Auxiliary head가 action-query hidden state → N=5 후보 action chunk + 점수 (L1+score loss) | VLM backbone에 action-level discrimination 직접 주입 |\n| **Knowledge truncation** | DiT가 attention할 때 control-query/state-query turn을 mask 제외, semantic prefix KV만 사용 | DiT가 synthetic control-query를 shortcut copy 못 함 |\n\n### 2.3 학습 손실 종합\n\n`L_total = L_flow (DiT) + L_choice (L1 + score) + L_CoT (next-token)`\n\n세 손실 모두 end-to-end로 VLM backbone까지 역전파되지만, knowledge truncation으로 인해 DiT의 gradient는 **semantic prefix를 통해서만** VLM에 전달.\n\n### 2.4 CoT Contamination 발견\n\nBounding box, end-effector coordinate처럼 **dense하지만 jitter가 심한** grounding label은 의미적으로 유사한 인접 프레임에 inconsistent supervision을 주어 학습을 망가뜨림. 해결: (a) 향상된 annotation pipeline, (b) 불안정 field는 sparse 감독, (c) reasoning dropout이 contamination-resistant scaffolding 역할.\n\n---\n\n## 3. 데이터셋\n\n### 3.1 Pre-training Corpus (역대 최대 embodied-CoT)\n\n| 데이터셋 | Trajectory | Sample | Sampling weight |\n|---|---:|---:|---:|\n| AgiBot | 765.6K | 204.9M | 0.518 |\n| DROID | 74.7K | 15.1M | 0.180 |\n| Fractal (RT-1) | 86.7K | 3.7M | 0.120 |\n| BridgeData V2 | 43.8K | 1.4M | 0.100 |\n| MolmoAct | 7.9K | 1.1M | 0.082 |\n| **합계** | **978.7K** | **226.3M (2592.5 hours)** | 1.00 |\n\n### 3.2 CoT 필드 구조 (Understanding/Grounding/Planning/Acting)\n\n- Task understanding (글로벌 plan)\n- Object grounding (멀티뷰: cam0/cam1 별도 bbox)\n- Subtask decomposition + subtask reasoning\n- Movement description (액션-언어)\n- Gripper pose / future waypoint trajectory (2D image space)\n\n### 3.3 Post-training\n\n| Dataset | Trajectory | Sample |\n|---|---:|---:|\n| VLABench | 5,000 | 575,101 |\n| LIBERO-10 | 500 | 138,090 |\n| LIBERO-Goal | 500 | 63,728 |\n| LIBERO-Object | 500 | 74,507 |\n| LIBERO-Spatial | 500 | 62,250 |\n\n---\n\n## 4. 실험 결과 (Paper Table 3, 4, 14 직접 확인)\n\n### 4.1 LIBERO-Plus (Table 3, zero-shot from LIBERO)\n\n| Method | Spatial | Object | Goal | Long | Camera | Robot | Lang | Light | BG | Noise | Layout | **Total** |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| ECoT | 31.8 | 27.9 | 30.6 | 8.6 | 0.3 | 26.8 | 40.2 | 42.6 | 16.4 | 10.2 | 36.9 | 24.3 |\n| OpenVLA-OFT | 84.0 | 66.5 | 63.0 | 66.4 | 56.4 | 31.9 | 79.5 | 88.7 | 93.3 | 75.8 | 74.2 | 69.6 |\n| π0 | 60.7 | 61.4 | 44.9 | 48.4 | 13.8 | 6.0 | 58.8 | 85.0 | 81.4 | 79.0 | 68.8 | 53.6 |\n| π0-FAST | 74.4 | 72.7 | 57.6 | 43.4 | 65.1 | 21.6 | 61.0 | 73.2 | 73.2 | 74.4 | 68.8 | 61.6 |\n| PokeVLA | 85.4 | 81.8 | 77.6 | 72.7 | 84.7 | 46.1 | 84.8 | 94.6 | 82.6 | 89.8 | 77.2 | 79.3 |\n| π0.5 | 90.4 | 89.9 | 81.0 | 80.8 | 71.7 | 75.5 | 85.9 | 96.1 | 95.7 | 86.4 | 87.5 | 85.5 |\n| **ERVLA** | **96.2** | **89.6** | **79.6** | **82.1** | **77.2** | **75.3** | **87.1** | **95.1** | **94.7** | **92.3** | **86.4** | **86.9** |\n\n→ ERVLA가 π0.5 대비 **+1.4** 총점; Spatial track에서 background/lighting 변동에 대해 **100%** 성공.\n\n### 4.2 VLABench (Table 4, full post-training)\n\n| Method | In-dist SR | Cross Category SR | Commonsense SR | Instruction SR | Texture SR | **Avg SR** | Avg PS | Avg IS |\n|---|---|---|---|---|---|---|---|---|\n| π0 | 47.0 | 21.2 | 29.1 | 17.3 | 32.2 | 29.4 | 44.1 | 55.0 |\n| π0-FAST | 56.2 | 31.0 | 38.0 | 35.0 | 39.0 | 39.8 | 49.5 | 58.6 |\n| X-VLA | — | — | — | — | — | — | 51.1 | — |\n| ACoT-VLA | — | — | — | — | — | — | 47.4 | 63.5 |\n| π0.5 | 65.4 | 38.2 | 43.9 | 48.2 | 44.9 | 48.1 | 62.3 | 64.9 |\n| **ERVLA** | **69.7** | **47.0** | **44.0** | **58.0** | **47.4** | **53.2** | **65.9** | **70.4** |\n\n→ π0.5 대비 **+5.1 SR**, Instruction track 특히 **+9.8** 개선.\n\n### 4.3 Real-Robot (Table 14, 20 tasks × 5 trials)\n\n| Method | Basic SR | Distractor SR | Semantic SR | Long-horizon SR | **Avg SR** | Avg PS |\n|---|---|---|---|---|---|---|\n| ECoT | 60 | 18 | 10 | 6 | 24 | 35 |\n| WorldVLA | 78 | 28 | 18 | 12 | 34 | 47 |\n| UniVLA | 76 | 31 | 22 | 18 | 37 | 50 |\n| π0.5 | 97 | 45 | 31 | 35 | 53 | 60 |\n| **ERVLA** | **96** | **44** | **42** | **38** | **55** | **67** |\n\n→ Basic/Distractor는 π0.5와 동급, **Semantic (+11)** 과 **Long-horizon (+3 SR, +17 PS)** 에서 우위 — CoT 내재화의 효용이 분포 밖에서 두드러진다는 가설을 강하게 지지.\n\n---\n\n## 5. Ablation 핵심\n\n### 5.1 컴포넌트별 기여 (LIBERO-Plus / VLABench Avg SR)\n\n| Variant | LIBERO-Plus | VLABench |\n|---|---|---|\n| No Choice (E2E, DiT gradient → VLM 전체) | 61.9 | 39.2 |\n| No CoT (CoT supervision 제거) | 70.8 | 40.9 |\n| No Choice + Knowledge Insulation (ThinkAct-style) | 76.5 | 42.6 |\n| Choice + No Knowledge Truncation | 84.7 | 47.2 |\n| **Full ERVLA** | **86.9** | **53.2** |\n\n→ **Choice branch 단독 효과 ≈ +25 pt** (E2E → full), **knowledge truncation 효과 ≈ +2.2 pt** (KT 없음 → full). Choice가 dominant 기여.\n\n### 5.2 CoT field-level (Appendix Table 11 / Sec 3.1 요약)\n\n- **Low-level action-centric field** (movement description, 2D image-space end-effector trajectory) → 대부분의 이득\n- **High-level reasoning만** (subtask decomposition + planning) → marginal gain\n- **불안정한 dense grounding** (jittery bbox) → reasoning dropout 없으면 contamination\n\n### 5.3 Scaling (Sec 3.2 Figure 4)\n\n- ERVLA: CoT 데이터 증가에 따라 LIBERO-Plus / VLABench 모두 **꾸준히** 성능 향상\n- AR CoT + FAST (explicit prefix): 일정 규모 후 **saturate** 또는 **퇴화**\n- VLM + DiT (no CoT): saturate\n\n---\n\n## 6. Related Work 비교\n\n| 접근 | Reasoning ↔ Action 결합 |\n|---|---|\n| ECoT (Zawalski et al.) | Reasoning = AR action prefix → slow, brittle |\n| Emma-X | AR multi-modal reasoning → 동일 한계 |\n| ThinkAct / Latent reasoning (UniVLA) | Latent plan으로 distillation → 표현 흐려짐 |\n| WorldVLA | Visual prediction = reasoning → semantic ambiguity에 약함 |\n| π0.5 | VLM-conditioned DiT + 사전학습 reasoning → 강력하지만 CoT를 활용한 표현 reshaping은 없음 |\n| **ERVLA** | **Training-only CoT + choice branch + KT** → inference 시 CoT 없이도 reshape된 representation 활용 |\n\n---\n\n## 7. Limitations\n\n1. **Single-arm 위주 평가**: pre-train에 AgiBot (bimanual) 포함되지만 main evaluation은 single-arm. Bimanual real-world 검증 부족.\n2. **Choice branch 하이퍼파라미터** (N=5): 다른 N에 대한 ablation 없음.\n3. **Reasoning dropout p=0.5**: 다른 p에 대한 sweep은 제한적.\n4. **CoT 데이터 annotation pipeline**: 자동 라벨링 정확도가 contamination에 영향 — 라벨 노이즈 정량화 부족.\n5. **VLM backbone 의존**: Qwen3-VL-4B 외 다른 backbone (Table 8 transfer study는 있으나 ERVLA full system 변경 X).\n\n---\n\n## 8. 종합 평가\n\n| 항목 | 평점 (5점) |\n|---|---|\n| 혁신성 | 4.5 (CoT를 학습 신호로 재해석 + 3종 컴포넌트 결합) |\n| 재현성 | 4.0 (code/checkpoint 공개 예정, 풀 하이퍼파라미터 명시) |\n| 실험 폭 | 5.0 (sim 2개 + real-robot 4 tier + scaling 분석 + 4가지 ablation variant) |\n| 이론적 깊이 | 4.0 (CoT contamination 개념 + knowledge truncation 정당화) |\n| 실용성 | 4.5 (inference 시 CoT 미사용 → latency 우위, 86.9% LIBERO-Plus) |\n\n**총평**: \"Reasoning은 출력이 아니라 학습 신호\"라는 단순하면서도 강력한 주장과 그를 뒷받침할 3가지 구체적 메커니즘(reasoning dropout + choice policy + knowledge truncation), 그리고 226M 샘플 corpus + 4가지 ablation variant + 4-tier real-world 검증으로 입증. **embodied CoT 분야의 새 기본선**이 될 가능성이 매우 높다.\n\n---\n\n## 9. 예상 세미나 질문\n\n> ❓ **Reasoning dropout p=0.5는 일반 dropout과 어떻게 다른가?**\n> 일반 dropout은 hidden state를 랜덤하게 0으로 마스킹. Reasoning dropout은 **input의 CoT 토큰 전체 span을 통째로 비우면서 같은 action 라벨을 학습** — explicit reasoning을 mandatory prefix로 의존하지 못하게 만들고 backbone hidden state로 정보를 내재화하도록 강제.\n\n> ❓ **Knowledge truncation이 단순히 control-query token을 attention 마스크하는 건데 왜 그렇게 중요한가?**\n> Choice branch가 action-query token으로 forward되면서 hidden state에 action-related representation을 만드는데, 만약 DiT가 그 토큰의 KV에 직접 접근하면 **\"choice가 이미 정답을 알려주니까 그걸 copy하자\"** 식의 shortcut learning이 발생. KT는 DiT를 semantic prefix(원본 obs + 명령어 + CoT)에만 attend시켜 의미적 정보를 통해서만 action을 풀게 강제. LIBERO-Plus 84.7 → 86.9, VLABench 47.2 → 53.2.\n\n> ❓ **No CoT가 No Choice보다 좋은 게 좀 이상하다 — CoT가 정말 효과가 있나?**\n> Yes. No Choice는 DiT의 flow loss가 VLM 전체에 역전파되어 representation을 망가뜨림. No CoT는 choice + KT는 유지하므로 action-relevant supervision은 살아있음. 그러나 Full ERVLA vs No CoT를 보면 LIBERO-Plus +16.1, VLABench +12.3 → CoT는 명백히 기여. 단, **CoT의 형태**가 (high-level 만은 marginal, low-level 포함이 critical) 중요.\n\n> ❓ **AgiBot이 weight 0.518로 dominant인데 single-arm 평가에서도 효과가 있을까?**\n> 60-dim padded action vector로 single-arm/bimanual을 통합. AgiBot의 dual-arm trajectory는 한쪽 arm만 활용해도 풍부한 contact/semantic 신호 제공. LIBERO/VLABench single-arm 평가에서 ablation 없이 그대로 강한 결과 → 효과적인 transfer.\n\n> ❓ **Choice policy의 N=5는 어떻게 정했고 더 키우면?**\n> Table 9에 N=5 명시되지만 다른 N에 대한 ablation은 없음. 향후 연구 과제. 직관적으로는 모드 수가 적은 task에서는 N=2-3로 충분, 다중 모드 dexterous task에서는 N 확장 필요할 수 있음.\n\n---\n\n## 10. 코드 & 재현\n\n- **Project page**: https://taoshuaiz.github.io/ERVLA/\n- **Code / Data / Checkpoint**: 공개 예정 (\"will be released\")\n- **VLM backbone**: Qwen3-VL-4B-Instruct (공개)\n- **Pre-train**: 120K steps, batch 64, LR 5e-5, bfloat16, DeepSpeed, 17.6K-token packing\n- **Post-train**: LIBERO 10K steps, VLABench 20K steps, LR 1e-4 → 5e-7 cosine, action horizon 10\n\n---\n\n## 11. 데이터셋 / 후속 연구\n\n- **Embodied-CoT corpus (226M 샘플)**: 향후 모든 reasoning-VLA 연구의 표준 pre-train data가 될 가능성\n- **후속 방향**:\n  - Bimanual + dexterous hand에서의 검증\n  - Choice branch의 N 적응 (task-dependent N)\n  - CoT contamination에 robust한 unsupervised label cleaning\n  - 다른 VLM backbone (Gemma, Llama, InternVL)에서 동일 recipe 검증\n\n---\n\n## 12. 결론\n\nERVLA의 세 기여:\n1. **개념적**: Embodied CoT를 \"test-time 발화\"가 아닌 **\"학습 시 표현 공간을 reshape하는 신호\"** 로 재정의.\n2. **방법론적**: Reasoning dropout + choice policy + knowledge truncation 세트로 explicit CoT 의존 없이 reasoning의 이득을 흡수.\n3. **실증적**: 226M 샘플 corpus + LIBERO-Plus 86.9 / VLABench 53.2 SR / Real-robot 55 SR (semantic·long-horizon에서 π0.5 우위)로 입증.\n\nECoT 연구의 분기점이 될 만한 논문. 특히 \"**CoT는 출력이 아니라 학습 신호**\" 라는 framing은 향후 다른 모달리티 (visual reasoning, world model reasoning)에도 그대로 이식될 수 있다.\n\n---\n\n<!-- VERIFIED: pdf -->\n",
@@ -14141,7 +14226,15 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world_results": {
+          "object_level_intent_accuracy": 93.0,
+          "object_level_task_success": 89.0,
+          "part_level_intent_accuracy": 80.4,
+          "part_level_task_success": 72.4,
+          "dynamic_intent_steering": 47.0
+        }
+      },
       "eval_conditions": {
         "real_world": "Unitree G1 humanoid, 16 tasks x 50 trials each; ego-exo cross-view gaze grounding"
       },
@@ -15940,7 +16033,17 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world_results": {
+          "task_a_approach": 90.0,
+          "task_a_transport": 80.0,
+          "task_b_approach": 90.0,
+          "task_b_transport": 70.0,
+          "task_c_approach": 90.0,
+          "task_c_transport": 50.0,
+          "phase_classifier_accuracy": 97.0
+        }
+      },
       "eval_conditions": {
         "real_world": "Bimanual magnetic microrobot manipulation; three task configurations with increasing path curvature (Task A small turn, Task B larger turn, Task C sharpest turn)"
       },
@@ -16652,13 +16755,17 @@
           "wipe_table_scr": 84.4,
           "wipe_table_sr": 46.7,
           "avg_stage_completion_rate": 91.3,
-          "real_world_avg": 73.4,
+          "real_world_avg": 73.4
+        },
+        "real_world_baselines": {
           "baseline_pi05_scr": 58.6,
           "baseline_pi05_sr": 30.0,
           "baseline_pi05_w_pano_scr": 80.8,
           "baseline_pi05_w_pano_sr": 56.7,
           "baseline_pi05_w_stacked_pano_scr": 70.4,
-          "baseline_pi05_w_stacked_pano_sr": 38.3,
+          "baseline_pi05_w_stacked_pano_sr": 38.3
+        },
+        "real_world_ablations": {
           "ablation_expert_size_50m_scr": 84.4,
           "ablation_expert_size_50m_sr": 60.0,
           "ablation_expert_size_100m_scr": 95.6,
@@ -16672,7 +16779,9 @@
         }
       },
       "eval_conditions": {
-        "real_world": "fine-tuned per task on 200 demonstrations each; 15 closed-loop real-robot trials per task; single uninterrupted rollout with all actions generated by the policy and no manual resets; metrics are end-to-end success rate (SR) and stage completion rate (SCR)"
+        "real_world": "fine-tuned per task on 200 demonstrations each; 15 closed-loop real-robot trials per task; single uninterrupted rollout with all actions generated by the policy and no manual resets; metrics are end-to-end success rate (SR) and stage completion rate (SCR)",
+        "real_world_baselines": "Same four-task real-robot protocol; these are baselines, not PanoVLA",
+        "real_world_ablations": "Move Pen task only, 15 closed-loop trials per variant"
       },
       "ai_review": {
         "content": "# PanoVLA: Learning Panorama-Aware VLA for Mobile Manipulation with Whole-Body Teleoperation\n\n- arXiv: [2608.02257](https://arxiv.org/abs/2608.02257) (2026-08-03, cs.RO)\n- 저자: Donglin Yang, Haoran Chen, Xingyu Chen, Lixing Liu, Manyi Li, Changhe Tu, Ke Xu, Xiaojian Ma†, Si Liu†\n- 소속: Beihang University, Beijing Institute for General Artificial Intelligence (BIGAI), Shandong University, Johns Hopkins University, Delta Intelligence\n\n---\n\n## 1. 한 줄 요약\n\n바퀴형 양팔 로봇의 모바일 조작에서, 국소 카메라의 좁은 시야가 만드는 공간 이해 한계를 360도 파노라마 관측과 전용 파노라마 전문가(expert)로 메운 pi-0.5 기반 3-expert Mixture-of-Transformers VLA. 4개 실기 태스크에서 단계 완료율(SCR) 91.3%, 종단 성공률(SR) 73.4%를 달성해 국소 시야 베이스라인(58.6% / 30.0%)을 크게 앞선다.\n\n## 2. 문제 정의\n\n모바일 조작은 두 층위에서 VLA를 어렵게 만든다.\n\n- **데이터 층위**: 고품질 whole-body 시연을 모으려면 모바일 베이스와 양팔을 동시에 협응 제어해야 한다. 기존 텔레오퍼레이션은 이동과 조작의 입력을 분리하고, 베이스는 조이스틱·키보드 같은 별도 컨트롤러에 의존한다. 넓은 작업 공간을 가로지르며 접근-운반-조작이 이어지는 태스크에서 시연이 매끄럽지 못해진다.\n- **모델 층위**: 기존 VLA는 전방·손목 카메라 등 국소 관측에 의존한다. 베이스가 병진·회전하고 팔이 자기 가림(self-occlusion)을 일으키면 목표 물체·랜드마크·목표 영역이 시야에서 자주 사라진다. 단순히 이미지 스트림을 더 붙이는 것만으로는 로봇 중심의 일관된 전역 공간 이해가 서지 않는다.\n\n파노라마 영상은 전방위 관측을 자연스럽게 제공하지만, 비원근(non-perspective) 왜곡 때문에 원근 이미지로 사전학습된 시각 인코더와 도메인 격차가 크다. 그대로 넣으면 특징 품질이 떨어지고 의미 정보 보존이 제한된다. 이 지점이 논문의 출발점이다.\n\n## 3. 제안 방법 개요\n\n두 축으로 구성된다.\n\n1. **GMR 기반 whole-body 텔레오퍼레이션 시스템**: 단일 VR 세트로 희소 인체 모션을 추적해 바퀴형 양팔 로봇에 리타게팅.\n2. **PanoVLA 정책**: pi-0.5 백본에 파노라마 인코더 + 파노라마 전문가를 삽입한 3-expert MoT VLA.\n\n## 4. 텔레오퍼레이션 시스템과 데이터셋\n\n**조작자 인터페이스**: VR 헤드셋(6-DoF 헤드 추적) + 양손 컨트롤러(손 자세 + 그리퍼 명령) + 3개 바디 트래커(허리 1, 발목 2). 희소 추적 스트림을 실시간으로 SMPL 바디 상태로 복원하고, 여기서 골반 모션·발 모션·양손 자세를 리타게팅 입력으로 추출한다. 로봇 임베디먼트에 특화된 입력 장치가 필요 없다는 점이 장점이다.\n\n**로봇 임베디먼트**: RANGER MINI 3 모바일 베이스(3 DoF) + Agilex PIPER 6-DoF 팔 2개 + 병렬 그리퍼 2개. 센서는 상단 마운트 Insta X5 360 파노라마 카메라 1대와 국소 RGB 카메라 3대(전방 1, 손목 2). 베이스는 spin, ackermann-steering, diagonal-translation 세 모드를 지원한다.\n\n**모션 리타게팅**: 로봇 구성을 q = (x_b, y_b, theta_b, q_L, q_R)로 파라미터화하고 가중 목적 함수 q* = argmin (lambda_pos L_pos + lambda_rot L_rot + lambda_base L_base + lambda_reg L_reg)를 최소화한다. L_pos는 손-그리퍼 위치, L_rot는 자세, L_base는 평면 베이스 운동을 조작자 골반 변위·정면 방향에 결합, L_reg는 관절 한계 위반과 과도한 구성 변화를 억제한다.\n\n**모바일 적응**: 모바일 베이스를 3-DoF 평면 가상 부유 베이스(virtual floating base)로 모델링해 양팔 관절과 함께 최적화한다. 베이스 자세가 엔드이펙터 정렬 목적에 참여하므로, 목표 자세가 현재 팔 작업 공간을 벗어나면 옵티마이저가 베이스 병진·요를 조정해 리타게팅 오차와 관절 한계 접근 경향을 줄인다. 최적화된 베이스 모션은 속도 명령 (v_x, v_y, omega)로 변환된다. 물리 베이스에서 3-DoF 가상 명령을 실행하기 위해 **비용 기반 모드 전환(cost-driven mode-switching)** 전략을 제안한다. 매 제어 주기마다 세 모션 모드와 목표 병진·회전 간 매칭 비용을 평가해 최소 비용 모드를 선택하고, 짧은 시간 실행 후 최신 리타게팅 출력으로 비용을 재계산해 유지/전환을 결정한다.\n\n**데이터셋**: 4개 실기 모바일 조작 태스크 각각 200개, 총 800개 시연 궤적. 약 5.5시간, 궤적당 20-30초, 25 Hz 기록, 약 500k 동기화 프레임. 각 레코드는 국소 관측(전방 + 양 손목 RGB), 파노라마 관측(ERP 이미지로 저장), 고유수용 상태, whole-body 액션을 포함한다. 고유수용 상태는 양팔 6-DoF 절대 관절 위치, 그리퍼 개폐 상태, 궤적 시작 시점 로봇 프레임 기준 평면 베이스 자세 (x, y, theta)로 구성된다. 액션 a_t는 17차원으로, 양팔 관절 + 그리퍼 14차원과 베이스 명령 3차원(평면 속도 v_x, v_y와 요 레이트 omega)이다.\n\n**태스크 분류(Table I)**:\n\n| 태스크 | 목표 | 공간 설정 |\n|---|---|---|\n| Move Pen | 펜을 펜 홀더에 놓기 | 전방 / 좌 / 우 |\n| Move Block | 블록을 전방 영역으로 옮기기 | 좌 / 우 / 양측 |\n| Open Curtain | 양쪽 커튼 열기 | 좌 / 우 |\n| Wipe Table | 얼룩을 닦고 천을 되돌려 놓기 | 긴 테이블을 따라 |\n\n네 태스크 모두 태스크 관련 영역이 국소 카메라로 동시에 커버되지 않아, 교차 시점 공간 추론과 다단계 상태 추적이 필요하도록 설계됐다.\n\n## 5. 모델 아키텍처\n\n**문제 정식화**: 관측을 o_t = {I_loc_t, I_pano_t, s_t}로 확장하고, 언어 지시 l에 대해 정책 pi_theta가 horizon-H 연속 액션 시퀀스를 예측한다: â_{t:t+H-1} = pi_theta(o_t, l).\n\n**3-expert MoT**: VLM 전문가는 국소 뷰·지시·로봇 상태를 인코딩하고, 파노라마 전문가는 광시야 관측을 태스크 조건부 공간 컨텍스트로 변환하며, 액션 전문가는 연속 액션 청크를 예측한다. 블록 단위 causal attention 마스크를 사용해 토큰은 자기 컨텍스트 블록 내에서 양방향으로, 이후 블록은 자기 및 선행 블록만 attend한다. PanoVLA는 pi-0.5의 dual-expert 구조에서 VLM 전문가와 액션 전문가 사이에 파노라마 전문가를 끼워 넣어 인스턴스화된다.\n\n**KV 캐시 융합 인터페이스**: L층 전문가의 캐시는 C = {(K_l, V_l)}_{l=1..L}. 시각 t에 VLM 전문가가 I_loc_t, l, s_t로부터 C_vlm_t를 계산하고, 병렬로 파노라마 인코더가 I_pano_t를 토큰 Z_pano_t로 인코딩한다. 파노라마 전문가는 C_vlm_t와 joint self-attention을 수행하며 Z_pano_t를 처리해 C_pano_t를 만든다. 액션 전문가는 결합 캐시 C_t = [C_vlm_t; C_pano_t]로부터 액션 청크를 예측한다.\n\n**파노라마 인코더** (3단계):\n1. **구면 투영**: 동기화된 dual-fisheye 관측을 공통 시야 구면에 매핑하고 ERP 이미지로 래스터화.\n2. **파노라마 특징 추출**: E_p를 MTPano(밀집 장면 파싱용 파노라마 파운데이션 모델)로 인스턴스화하고, 분할(segmentation) 브랜치와 깊이(depth) 브랜치의 중간 특징을 뽑아 채널 차원으로 concat해 의미+기하 통합 밀집 표현을 만든다.\n3. **토큰 적응**: adaptive average pooling으로 고정 공간 해상도로 압축(파노라마 해상도와 무관한 상수 개수 토큰 생성) 후 경량 MLP로 파노라마 전문가 은닉 차원에 매핑. Z_pano_t = A_psi(E_p(Pi_sph(I_pano_t))), Z_pano_t ∈ R^{N_p x d}.\n\n**파노라마 전문가**: C_pano_t = phi_pano(Z_pano_t | C_vlm_t, M_pano). 블록 단위 causal 마스크 M_pano 하에서 계산된다.\n\n**학습 목적**: 결합 컨텍스트 C_t를 조건으로 액션 전문가가 conditional flow matching으로 연속 액션 청크를 예측한다. L = E[ || v_act_theta(x_tau, tau | C_t) - u(x_tau | a) ||_2^2 ].\n\n## 6. 실험 설정\n\n**베이스라인** (파노라마 표현/통합 방식만 다른 통제된 pi-0.5 변형 3종):\n- **pi-0.5**: 국소 카메라 뷰를 SigLIP으로 인코딩, 언어 지시 + 고유수용 상태 입력.\n- **pi-0.5 w/ Pano**: ERP 파노라마를 추가 이미지 입력으로 취급, 국소 뷰와 동일한 SigLIP으로 인코딩. 전용 파노라마 브랜치 없음.\n- **pi-0.5 w/ Stacked Pano**: 파노라마를 요(yaw) 방향으로 120도씩 균등 배치된 광축의 원근 뷰 3개로 재투영해 하나의 합성 이미지로 concat, 추가 시각 입력으로 제공.\n- **PanoVLA**: MTPano로 파노라마 인코딩 + 파노라마 전문가로 융합.\n\n**평가 프로토콜**: 각 태스크를 여러 단계로 분해하고, 태스크당 15회 폐루프 실기 시행. 매 시행은 단일 무중단 롤아웃이며 모든 액션은 정책이 생성하고 실패 단계의 수동 리셋은 없다. 지표는 SR(시행 단위 이진 종단 성공률)과 SCR(모든 시행에 걸친 적용 가능 단계 완료 비율 평균).\n\n**구현 세부**: pi-0.5 프레임워크 위에 구축, 언어 백본 Gemma-2B, 국소 관측용 SigLIP. 사전학습 MTPano 인코더와 100M 파라미터 파노라마 전문가 추가, 액션 전문가는 유지. 모든 방법에서 고유수용 상태와 액션은 17차원 벡터이며 1st/99th 백분위수로 정규화. 매 시점 팔과 베이스에 대해 32-step 액션 청크를 현재 고유수용 상태 상대값으로 예측하고, 그리퍼 액션은 이진 개폐 명령으로 별도 표현. 학습 중 언어 모델과 사전학습 MTPano 인코더는 동결.\n\n**학습 설정**: 태스크별 시연으로 정책을 독립 파인튜닝. 태스크 내에서 모든 방법이 동일한 학습 시연·최적화 설정 사용. AdamW, gradient norm clip 1.0, 30K 스텝, 첫 5K 스텝 선형 warmup 후 5e-5 고정, bfloat16, A100 4장에 GPU당 배치 64. 실기 평가는 RTX 4090 1장에서 폐루프 실행.\n\n## 7. 주요 결과\n\n**Table II (실기 폐루프 평가, 태스크당 15시행, 단위 %)**\n\n| 방법 | Move Pen SCR | Move Pen SR | Move Block SCR | Move Block SR | Open Curtain SCR | Open Curtain SR | Wipe Table SCR | Wipe Table SR | Avg SCR | Avg SR |\n|---|---|---|---|---|---|---|---|---|---|---|\n| pi-0.5 | 71.1 | 46.7 | 35.0 | 20.0 | 61.7 | 26.7 | 66.7 | 26.7 | 58.6 | 30.0 |\n| pi-0.5 w/ Pano | 95.6 | 86.7 | 80.0 | 73.3 | 73.3 | 46.7 | 74.4 | 20.0 | 80.8 | 56.7 |\n| pi-0.5 w/ Stacked Pano | 82.2 | 60.0 | 70.0 | 40.0 | 56.7 | 13.3 | 72.8 | 40.0 | 70.4 | 38.3 |\n| **PanoVLA** | **95.6** | **86.7** | **96.7** | **93.3** | **88.3** | **66.7** | **84.4** | **46.7** | **91.3** | **73.4** |\n\nPanoVLA는 네 태스크 모두에서 최고 SR을 달성한다. SCR의 큰 개선은 목표 탐색, 모바일 접근, 물리적 조작 같은 중간 단계 전반에서 더 잘 수행함을 시사한다.\n\n## 8. 분석\n\n**국소 시야의 실패 모드**: 표준 pi-0.5는 국소 카메라 뷰에만 의존해 목표 물체나 조작 영역의 로봇 상대 공간 위치를 추론하는 데 자주 실패한다.\n\n**파노라마 이득의 비일관성**: 파노라마 관측은 대체로 성능을 올리지만 변형 간 이득이 일관되지 않다. 이는 효과적인 파노라마 지각이 단순히 더 넓은 시야가 아니라 파노라마 기하를 **어떻게 표현하고 정책에 통합하는지**에 달려 있음을 시사한다.\n\n**Move Pen에서의 동률**: pi-0.5 w/ Pano가 Move Pen에서 PanoVLA와 동일(95.6 / 86.7)하다. 이 태스크는 주로 단일 목표 위치추정과 단기 pick-and-place여서 ERP 파노라마만으로 충분한 공간 정보가 제공되고, 파노라마 전문가로 명시적 모델링을 할 이득이 줄어든다.\n\n**Wipe Table의 단계별 붕괴 (Fig. 4)**: raw 파노라마 입력 베이스라인은 마지막 단계(천 되돌려 놓기)에서 무너진다. 해당 단계를 시행의 26.7%에서만 완료해 SCR 74.4%인데도 종단 SR은 20.0%에 그친다. 반면 PanoVLA는 73.3% 단계 완료와 46.7% SR을 달성한다. 파노라마 전문가가 다단계에 걸쳐 전역 공간 일관성을 보존하면서 태스크 상태 전이를 더 잘 추적함을 보여준다.\n\n**원근 재투영의 트레이드오프**: Stacked Pano는 ERP와 원근 인코더 간 불일치를 부분적으로 완화한다. Wipe Table에서 SR 40.0%로 raw 파노라마의 20.0%보다 높아, 원근 재투영이 조작 중심 단계에 도움이 될 수 있음을 시사한다. 그러나 나머지 태스크에서는 raw 파노라마 베이스라인보다 못해, 원근 크롭이 로봇 중심 이해에 기여하는 교차 시점 연속성을 약화시킬 수 있음을 보여준다.\n\n**태스크 난이도의 성격**: Move Pen과 Move Block은 목표 위치추정에 주로 의존해 방향만 제대로 추정되면 안정적으로 성공한다. 반면 Open Curtain과 Wipe Table은 단계에 걸친 연속적 상태 추적과 공간 이해를 요구한다. 요구 조건이 다름에도 PanoVLA가 네 태스크 모두에서 최고 SR을 내는 일관성은, 로봇 중심 파노라마 표현이 공간 인식뿐 아니라 긴 호라이즌의 폐루프 실행 안정성까지 개선함을 시사한다.\n\n## 9. 어블레이션 (Table III, 모두 Move Pen 태스크, 변형당 15회 폐루프 실기 시행)\n\n**파노라마 전문가 규모**\n\n| 변형 | Expert Size | SCR | SR |\n|---|---|---|---|\n| PanoVLA w/ MTPano | 50M | 84.4 | 60.0 |\n| PanoVLA w/ MTPano | **100M** | **95.6** | **86.7** |\n| PanoVLA w/ MTPano | 200M | 93.3 | 86.7 |\n| PanoVLA w/ MTPano | 300M | 91.1 | 73.3 |\n\n50M 전문가는 교차 시점 의존성과 목표 방향 단서를 포착할 용량이 부족하고, 100M을 넘겨 스케일링해도 제한된 파인튜닝 데이터 하에서는 일관된 폐루프 개선으로 이어지지 않는다. 따라서 표현 용량과 데이터 효율적 파인튜닝 사이 균형점으로 100M을 채택한다.\n\n**파노라마 시각 인코더**\n\n| 변형 | Expert Size | SCR | SR |\n|---|---|---|---|\n| PanoVLA w/ SigLIP | 100M | 75.6 | 40.0 |\n| PanoVLA w/ MTPano | 100M | **95.6** | **86.7** |\n\nSigLIP은 주로 원근 이미지로 사전학습되어 ERP 관측의 수평 연속성과 전역 레이아웃을 포착하는 데 덜 효과적일 수 있다. MTPano는 파노라마 고유 공간 구조를 모델링하도록 설계되어 파노라마 전문가에 로봇 중심 공간 컨텍스트를 구성할 더 유익한 단서를 제공한다. 기하 인지 파노라마 표현이라는 설계 선택을 뒷받침하는 결과다.\n\n## 10. 관련 연구 위치\n\n- **데이터 수집**: Mobile ALOHA, TeleMoMa(이종 입력 장치로 베이스/매니퓰레이터 독립 제어), MoMa-Teleop(사전학습 컨트롤러가 베이스 속도 예측), HoMMI(로봇 없는 패러다임) 대비, 본 시스템은 VR 장치만으로 조작자 전신 모션을 추적해 로봇에 리타게팅하고 온보드 센서에서 데이터를 기록한다.\n- **모바일 조작 VLA**: MoManipVLA(고정 베이스 VLA를 대규모 재학습 없이 계층적 최적화로 적응), SG-VLA(보조 공간 그라운딩 태스크로 공동 최적화), AC-DiT(멀티모달 시각 입력에서 베이스-팔 협응 학습) 등은 환경을 국소 뷰로 모델링한다. PanoVLA는 파노라마 관측으로 장면 전체 지각과 더 풍부한 공간 컨텍스트를 확보하는 방향으로 차별화된다.\n- **추가 모달리티 VLA**: DepthVLA, LingBot-VLA 2.0(깊이 기하), TactileAloha, TACT(촉각)은 국소 정밀도와 접촉 강건성을 강화하지만 근본적으로 좁은 시야에 갇혀 있다는 것이 저자들의 지적이다.\n\n## 11. 한계와 비판적 검토\n\n- **평가 규모**: 태스크당 15회 시행, 총 60회 실기 롤아웃은 통계적 신뢰구간을 논하기에 작다. 예를 들어 15회 중 SR 차이 1건은 6.7%p에 해당하므로, Move Pen에서 PanoVLA와 pi-0.5 w/ Pano의 동률 같은 관찰을 과하게 해석하기 어렵다.\n- **태스크별 독립 파인튜닝**: 정책이 태스크마다 독립적으로 파인튜닝되므로, 단일 정책의 멀티태스크 일반화나 미학습 태스크로의 전이는 검증되지 않았다.\n- **표준 벤치마크 부재**: LIBERO, CALVIN, SimplerEnv 등 시뮬레이션 벤치마크 수치가 없어 커뮤니티 비교가 어렵다. 다만 대상 문제(모바일 양팔 + 파노라마 센싱)가 기존 테이블탑 벤치마크로 표현되지 않는다는 점은 정상 참작 가능하다.\n- **베이스라인 범위**: 비교 대상이 모두 pi-0.5 변형이다. 파노라마 기여를 격리하는 데는 깔끔한 통제이지만, 다른 계열의 모바일 조작 정책(AC-DiT, SG-VLA 등)과의 절대 비교는 없다.\n- **MTPano 의존**: 성능의 상당 부분이 외부 사전학습 파노라마 파운데이션 모델에서 온다(SigLIP 교체 시 SR 86.7 → 40.0). MTPano의 학습 도메인이 로봇 환경과 얼마나 겹치는지, 새로운 환경으로의 전이가 어떤지는 다루지 않는다.\n- **일반화 평가 부재**: 조명·배치·미지 물체 등 OOD 조건 실험이 없다. 파노라마 컨텍스트가 분포 변화에 대해서도 이득을 주는지는 미지수.\n- **텔레오퍼레이션 시스템 정량화**: 비용 기반 모드 전환 전략이나 GMR 리타게팅의 효과(리타게팅 오차, 수집 처리량, 조작자 부하)에 대한 정량 평가가 없다. 시스템 기여는 정성적 서술에 머문다.\n- **추론 속도 미보고**: RTX 4090에서 폐루프 실행한다는 서술은 있으나 제어 주기나 Hz가 명시되지 않는다. 3-expert MoT + MTPano 인코더 추가의 지연 비용을 알 수 없다.\n\n## 12. 시사점\n\n이 논문의 실질적 메시지는 \"파노라마를 붙이면 좋다\"가 아니라 **\"파노라마를 어떻게 인코딩하고 융합하느냐가 성패를 가른다\"**이다. 동일한 ERP 입력을 SigLIP으로 처리한 변형(SR 40.0%)과 MTPano + 파노라마 전문가로 처리한 PanoVLA(86.7%)의 격차, 그리고 원근 재투영 스택 방식이 태스크에 따라 raw 파노라마보다 나았다 나빴다 하는 비일관성이 이를 뒷받침한다. 비원근 관측을 VLA에 넣을 때는 사전학습 인코더의 도메인 가정을 먼저 점검해야 한다는 교훈이다.\n\n아키텍처 측면에서는 KV 캐시를 전문가 간 융합 인터페이스로 쓰는 설계가 주목할 만하다. 기존 dual-expert VLA(pi-0.5)에 새 모달리티 전문가를 \"끼워 넣는\" 방식으로 확장 가능하다는 것을 보였고, 이는 촉각·깊이·오디오 등 다른 모달리티로도 같은 패턴을 적용할 수 있음을 시사한다. 블록 단위 causal 마스크로 모달리티 간 정보 흐름 방향을 명시적으로 제어하는 점도 설계 참고 사항이다.\n\n데이터 측면에서 800 에피소드 / 5.5시간 / 500k 프레임은 대규모라 보기 어렵고, 저자들 스스로 \"제한된 파인튜닝 데이터\"를 100M 전문가 채택 근거로 든다. 파노라마 전문가 스케일링 곡선이 100M에서 꺾인 것은 아키텍처 한계라기보다 데이터 한계일 가능성이 높으며, 데이터가 커지면 최적 규모가 달라질 여지가 있다.\n\n<!-- VERIFIED: pdf -->\n",
@@ -17405,6 +17514,13 @@
           "cabinet_retrieval": 62.5,
           "liquid_transfer": 69.0,
           "real_world_avg": 83.6
+        },
+        "ood_robustness": {
+          "height_variation_sponge_wipe": 42.5,
+          "object_position_shift_cob_grasp": 98.5,
+          "lighting_change_liquid_transfer": 66.5,
+          "pulling_disturbance_bottle_grasp": 85.0,
+          "ood_avg": 73.1
         }
       },
       "eval_conditions": {
@@ -19480,7 +19596,7 @@
         "world-model",
         "SimplerEnv",
         "QwenPi",
-        2026
+        "2026"
       ],
       "architecture": {
         "backbone": "Qwen3-VL (QwenPi / StarVLA-alpha instantiation)",
@@ -19754,6 +19870,10 @@
           "rdt_backbone": 34.1,
           "x_vla_backbone": 30.0,
           "robotwin_v2_avg": 59.3
+        },
+        "real_world": {
+          "6_tasks_avg": 65.0,
+          "baseline_pi0_5": 5.8
         }
       },
       "eval_conditions": {
