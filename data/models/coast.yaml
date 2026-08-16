@@ -25,11 +25,19 @@ benchmarks:
     source: "MetaWorld ML45 with pi0.5 + COAST per-step (baseline 0.69 -> 0.94)"
     eval_condition: "training-free inference-time steering on top of pi0.5"
   robocasa:
+    # pi0.5 is the primary host policy throughout the paper (LIBERO, MetaWorld, real-world all
+    # use pi0.5), so the pi0.5 column is the representative RoboCasa number: Mean 0.56 (+Pos.).
+    robocasa_avg: 56.0
     robocasa_avg_pi05: 56.0
+    source: "Table 1 (RoboCasa, 7 atomic-seen tasks), pi0.5 + COAST +Pos. Mean 0.56; unsteered pi0.5 Base 0.40"
+    eval_condition: "training-free inference-time steering on top of pi0.5"
+  robocasa_ablation:
+    # Same Table 1, different host policies. Kept out of robocasa so they do not contaminate
+    # the headline average (three different base policies are not comparable as one mean).
     robocasa_avg_groot_n15: 75.0
     robocasa_avg_dp: 46.0
-    source: "RoboCasa results; pi0.5 0.40->0.56, GR00T-N1.5 0.59->0.75, Diffusion Policy 0.32->0.46"
-    eval_condition: "training-free inference-time steering"
+    source: "Table 1 (RoboCasa) alternate hosts: GR00T N1.5 + COAST +Glob. Mean 0.75 (Base 0.59); Diffusion Policy + COAST +Per. Mean 0.46 (Base 0.32)"
+    eval_condition: "training-free inference-time steering on GR00T N1.5 and Diffusion Policy hosts"
   real_world:
     droid_avg_improvement: 40.0
     source: "Real-world DROID platform; pi0.5 + COAST achieves +40% average improvement on 3 tasks"

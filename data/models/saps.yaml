@@ -42,12 +42,20 @@ benchmarks:
     # study on a SINGLE pick-and-place task from the Object suite (cream cheese into basket) across
     # 8 perturbation distances (n=20 per setup). The numbers below aggregate the high-perturbation
     # regime (distance >= 0.15) reported in Section 4.1.
-    libero_object: 87.9     # Blending success @ distance>=0.15 (pi0.5 baseline drops to 22.9%)
+    # SAPS's own numbers only. The pi0.5 baseline row was moved to `libero_baseline` below so it
+    # does not get folded into any LIBERO average. No standard LIBERO 4-suite average exists in
+    # the paper, so no `libero_avg` is asserted here.
+    libero_object: 87.9     # Blending success @ distance>=0.15
     libero_object_cosine: 90.0  # Cosine success @ distance>=0.15
-    libero_object_baseline_pi0_5: 22.9  # pi0.5 alone @ distance>=0.15
-    source: "Paper Section 4.1 and Figure 3 (n=20 per perturbation setup, 8 perturbation distances, single Object-suite task). Standard 4-suite numbers not reported."
+    source: "Paper Section 4.1 / Figure 3 (n=20 per perturbation setup, perturbation distances in Table A1; single cream-cheese pick-and-place task). Standard 4-suite numbers not reported."
     date_reported: "2026-06-14"
     eval_condition: "pi0.5 fine-tuned + SAPS shared autonomy; perturbed object placement, aggregated over distance>=0.15"
+  libero_baseline:
+    # Unsteered pi0.5 baseline (NOT a SAPS result) — separated so it never enters libero_avg.
+    libero_object_baseline_pi0_5: 22.9  # pi0.5 alone @ distance>=0.15
+    source: "Paper Section 4.1 / Figure 3 (unsteered pi0.5 at perturbation distance >= 0.15; Pearson r = -0.800, p = 0.005)"
+    date_reported: "2026-06-14"
+    eval_condition: "pi0.5 alone, no SAPS; perturbed object placement, aggregated over distance>=0.15"
   libero_pro:
     # LIBERO-PRO selected 10 tasks with task and swap perturbations (large semantic + spatial shifts)
     pi0_5_baseline_avg: 15.0
