@@ -61,13 +61,17 @@ benchmarks:
   robotwin_v2:
     clean: 68.1
     randomized: 53.5
+    source: "Ego2Robot paper Table 1, 'Ego2R+Robot (1:1)' row (best configuration); success rate %, 50 tasks x 50 episodes, binary success"
+    date_reported: "2026-08-03"
+    eval_condition: "RoboTwin 2.0 extended with 11 independent perturbation settings; pretrained on Ego2R:Robot = 1:1, finetuned on RoboTwin's 50 clean-setting tasks (50 demos/task), chunk 20, replan every 16"
+
+  robotwin_v2_dimension_breakdown:
     visual_dimension: 67.3
     scene_dimension: 56.9
     embodiment_dimension: 27.2
     task_dimension: 54.1
-    source: "Ego2Robot paper Table 1, 'Ego2R+Robot (1:1)' row (best configuration); success rate %, 50 tasks x 50 episodes, binary success"
-    date_reported: "2026-08-03"
-    eval_condition: "RoboTwin 2.0 extended with 11 independent perturbation settings; pretrained on Ego2R:Robot = 1:1, finetuned on RoboTwin's 50 clean-setting tasks (50 demos/task), chunk 20, replan every 16"
+    source: "Ego2Robot paper Table 1, per-dimension aggregates of the randomized setting"
+    eval_condition: "Decomposition of the randomized column, not an independent condition: Visual = mean(BG, Light, Robot Color), Scene = mean(Height, Clutter, Camera), Embodiment = mean(ARX, UR5, Franka), Task = mean(Obj, Lang)"
 
   robotwin_v2_baseline_robot_only:
     clean: 62.2

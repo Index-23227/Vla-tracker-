@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T16:48:54.479233",
+  "generated_at": "2026-08-16T16:49:41.498488",
   "num_models": 408,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -13471,7 +13471,9 @@
       "benchmarks": {
         "robotwin_v2": {
           "clean": 68.1,
-          "randomized": 53.5,
+          "randomized": 53.5
+        },
+        "robotwin_v2_dimension_breakdown": {
           "visual_dimension": 67.3,
           "scene_dimension": 56.9,
           "embodiment_dimension": 27.2,
@@ -13571,6 +13573,7 @@
       },
       "eval_conditions": {
         "robotwin_v2": "fine-tuned on RoboTwin 2.0's 50 clean tasks (50 demos/task, 2,500 episodes), evaluated at 50 episodes/task with binary success; aggregates are Visual = mean(BG, Light, Robot Color), Scene = mean(Height, Clutter, Camera), Embodiment = mean(ARX, UR5, Franka), Task = mean(Obj, Lang)",
+        "robotwin_v2_dimension_breakdown": "Decomposition of the randomized column, not an independent condition: Visual = mean(BG, Light, Robot Color), Scene = mean(Height, Clutter, Camera), Embodiment = mean(ARX, UR5, Franka), Task = mean(Obj, Lang)",
         "robotwin_v2_baseline_robot_only": "same protocol, robot-only pretraining (DROID + AgibotWorld + InternData)",
         "robotwin_v2_mixing_ratio_ablation": "same protocol, Ego2R:Robot pretraining ratios of 1:3 and 3:1",
         "robotwin_v2_perturbation_breakdown": "11 independently controlled perturbation settings decoupled from RoboTwin 2.0's bundled randomization, plus 4 newly introduced axes (robot color, camera offset, unseen objects, paraphrased language) and 3 zero-shot cross-embodiment settings",
@@ -13581,7 +13584,7 @@
         "ebench_pretraining_ablation": "identical EBench finetuning across all four pretraining configurations",
         "real_world_arx_acone": "real-robot deployment, sub-step partial scoring, 20 trials per task; absolute values are chart-only so only text-stated deltas are recorded"
       },
-      "robotwin_v2_avg": 54.52,
+      "robotwin_v2_avg": 60.8,
       "ai_review": {
         "verified": true
       },
@@ -19915,6 +19918,9 @@
         "route_setup": "The first CAV follows the original Bench2Drive route configuration and triggers the safety-critical events; additional CAV start/goal pairs are generated automatically from road topology while avoiding lanes that would interfere with the safety-critical event triggers",
         "qualitative": "Figure 4 shows CAV_0 unable to observe a leading bicycle due to distance and rain-induced image blur, slowing down using perception shared by the leading CAV_4",
         "limitations": "Only one baseline (SimLingo) is compared; no ablation on the communication policy, the occupancy merging, or the number of CAVs is reported; per-scenario driving scores are shown only as a bar chart (Figure 3) without a numeric table"
+      },
+      "ai_review": {
+        "verified": true
       },
       "rank": 382
     },
