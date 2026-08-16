@@ -1,37 +1,105 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: G0.5: One Autoregressive Stream for Robot Reasoning and Action
-# arXiv: 2608.11739
-
 name: G0.5
-full_name: "G0.5: One Autoregressive Stream for Robot Reasoning and Action"
-organization: "TODO: check paper"
+full_name: "Galaxea G0.5: One Autoregressive Stream for Robot Reasoning and Action"
+organization: "Galaxea"
 date: "2026-08-12"
 paper_url: https://arxiv.org/abs/2608.11739
-code_url: null  # TODO: check for GitHub repo
-venue: null
-open_source: false  # TODO: verify
+code_url: https://opengalaxea.github.io/G05/
+venue: arXiv preprint
+open_source: true
 
 architecture:
-  action_head: "flow matching"
-  action_head_category: flow_matching
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Qwen3.5 2B vision-language model (visual encoder + autoregressive decoder, shared multimodal vocabulary)"
+  llm: "Qwen3.5 2B"
+  action_head: "Native autoregressive next-token decoding of discrete action codes in the same token stream as chain-of-thought; an optional pi0.5-style flow-matching head can be attached for comparison/deployment"
+  action_head_category: autoregressive
+  action_space: "Discrete action codes from a learned cross-embodiment ActionCodec (residual vector quantizer), decoded back to continuous motor commands in a unified cross-embodiment action space"
+  parameters: "~2B (initialized from Qwen3.5 2B)"
+  key_innovation: >
+    G0.5 rejects the prevailing VLM-as-encoder + separate flow-matching expert recipe and keeps the VLM
+    itself as the actor: a single transformer decoder emits reasoning tokens and action tokens under one
+    next-token cross-entropy objective with one set of weights. Three components make this tractable at
+    foundation-model scale: (1) a learned cross-embodiment ActionCodec (time-contrastive action encoder +
+    residual vector quantizer) that maps heterogeneous robot actions into a shared discrete vocabulary,
+    with active-part tokenization that drops token groups for idle control parts instead of padding them;
+    (2) a native chain-of-thought stream combining four reasoning primitives (object bounding boxes,
+    atomic subtask text, 2D end-effector traces, action hints) as prompt-conditional templates switchable
+    at inference without retraining; (3) a short-term visual memory module injecting multi-second history
+    through the vision encoder at bounded cost. Because reasoning and action share weights, the VLM's
+    prompt steerability and in-context ability carry over to physical behavior, and token log-probabilities
+    plug directly into ratio-based RL (GRPO) with no surrogate.
+
+training:
+  dataset: "Large-scale collection of robot datasets (including DROID and BridgeData V2) co-trained with VQA samples; post-training datasets per evaluation (50h R1-Lite tabletop pick-and-place for PP Bench; 2,500 clean + 25,000 randomized RoboTwin 2.0 demos; 10,000 episodes across 50 BEHAVIOR tasks)"
+  method: "Single next-token cross-entropy loss computed only over the generative segment (CoT + action tokens); no auxiliary regression objective or expert distillation in pre-training"
+  initialization: "Qwen3.5 2B pretrained VLM"
+  finetuning: "LIBERO 100K steps @ lr 1e-5, weight decay 1e-2; RoboTwin 2.0 4 epochs @ lr 4e-5, global batch size 1024; BridgeData V2 80K steps @ lr 3e-5 (state-free input)"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 98.4
+    libero_object: 100.0
+    libero_goal: 98.6
+    libero_long: 98.6
+    libero_avg: 98.9
+    source: "G0.5 paper (arXiv 2608.11739) Table 3 - G0.5 (Ours) row; 50 rollout trials per task, benchmark-defined initial states"
+    date_reported: "2026-08-12"
+    eval_condition: "fine-tuned (100K steps)"
+  robotwin_v2:
+    robotwin_clean: 93.7
+    robotwin_randomized: 92.8
+    robotwin_v2_avg: 93.3
+    source: "G0.5 paper (arXiv 2608.11739) Table 2 - RoboTwin 2.0, G0.5 (Ours) row; success rates averaged over 100 trials per task under clean and randomized settings"
+    date_reported: "2026-08-12"
+    eval_condition: "fine-tuned, multi-task (2.5K clean + 25K randomized demos, 4 epochs)"
   simpler_env:
-    google_robot_pick_coke_can: TODO
-  robotwin_v1:
-    robotwin_easy: TODO
-    robotwin_hard: TODO
+    simpler_widowx_put_spoon_on_towel: 97.5
+    simpler_widowx_put_carrot_on_plate: 75.0
+    simpler_widowx_stack_green_on_yellow: 83.3
+    simpler_widowx_put_eggplant_in_basket: 93.3
+    simpler_avg: 87.3
+    source: "G0.5 paper (arXiv 2608.11739) Table 1 - Bridge-SimplerEnv (WidowX), G0.5 (Ours) row; state-free policy input"
+    date_reported: "2026-08-12"
+    eval_condition: "post-trained on BridgeData V2 (80K steps), evaluated in SimplerEnv with no simulation-domain training"
+  behavior_challenge_2025:
+    task_success_score_1_epoch: 0.2904
+    task_success_score_4_epochs: 0.3136
+    source: "G0.5 paper (arXiv 2608.11739) Table 4 - 2025 BEHAVIOR Challenge, 50 long-horizon household tasks, 10 instances each; single checkpoint averaged over two eval runs. Baselines: RLC 1st place 0.2605 (4 checkpoints), Comet 2nd place 0.1830, pi0.5 4 epochs 0.2626"
+    date_reported: "2026-08-12"
+    eval_condition: "generalist single-checkpoint post-training, standard track, low-resolution RGB"
+  droid_zero_shot:
+    droid_zero_shot_avg: 82.5
+    source: "G0.5 paper (arXiv 2608.11739) Fig. 6 - DROID environment- and object-level zero-shot evaluation, 10 tabletop tasks on Franka Research 3, 10 trials each. Baselines: pi0.5-DROID 57.5, MolmoAct2-DROID 52.0"
+    date_reported: "2026-08-12"
+    eval_condition: "DROID post-training, held-out physical environment and unseen object instances"
+  real_world_r1:
+    real_world_success_rate_avg: 76.7
+    real_world_process_score_avg: 129.2
+    source: "G0.5 paper (arXiv 2608.11739) Sec. 5.4.2 / Fig. 8 - six task-embodiment settings on R1-Lite and R1-Pro. Baselines: pi0.5 53.3% success / 105.2 process, GR00T-N1.7 24.4% / 68.9"
+    date_reported: "2026-08-12"
+    eval_condition: "real-world fine-tuning, matched compute and protocol"
 
 eval_conditions:
-  libero: "fine-tuned"
-  simpler_env: "fine-tuned"
-  robotwin: "fine-tuned"
+  libero: "fine-tuned, standard LIBERO 4-suite, 50 trials/task"
+  robotwin_v2: "fine-tuned, multi-task clean + randomized settings"
+  simpler_env: "WidowX/Bridge subset, post-trained on BridgeData V2, state-free input"
+  behavior_challenge_2025: "generalist single checkpoint, 50 long-horizon mobile manipulation tasks"
+  droid_zero_shot: "zero-shot transfer to held-out environment and unseen objects after DROID post-training"
+  real_world_r1: "real-world fine-tuning on R1-Lite (6-DoF dual-arm) and R1-Pro (7-DoF humanoid upper body)"
 
-tags: [flow-matching, autoregressive, libero, simpler_env, robotwin]
+tags:
+  - vla
+  - autoregressive
+  - action-tokenization
+  - residual-vq
+  - chain-of-thought
+  - cross-embodiment
+  - visual-memory
+  - reinforcement-learning
+  - grpo
+  - qwen3.5
+  - libero
+  - robotwin
+  - simpler-env
+  - behavior-1k
+  - droid
+  - 2B

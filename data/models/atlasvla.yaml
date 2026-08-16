@@ -1,33 +1,74 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
-# Paper: AtlasVLA: Persistent World-Ego State Modeling for Vision-Language-Action Models
-# arXiv: 2608.06729
-
 name: AtlasVLA
-full_name: "AtlasVLA: Persistent World-Ego State Modeling for Vision-Language-Action Models"
-organization: "TODO: check paper"
-date: "2026-08-07"
+full_name: 'AtlasVLA: Persistent World-Ego State Modeling for Vision-Language-Action Models'
+organization: Institute of Automation, Chinese Academy of Sciences (CASIA) / UCAS / Beijing Freedo Technology / Beihang University
+date: '2026-08-07'
 paper_url: https://arxiv.org/abs/2608.06729
-code_url: null  # TODO: check for GitHub repo
+code_url: null
 venue: null
-open_source: false  # TODO: verify
+open_source: false
+model_type: vla
+inference_hz: 101.3
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: frozen DINOv2 + SigLIP (RGB stream) with fine-tuned Depth Anything v3 (spatial/depth stream)
+  llm: LLaMA-2 7B decoder-only (initialized from OpenVLA-7b)
+  action_head: step-wise conditioned Diffusion Transformer (DiT) with decoupled ego-working attention and world state attention; DDIM 10 steps, CFG 1.5
+  action_space: continuous
+  parameters: 7B
+  action_head_category: diffusion
+  action_expert_parameters: ~300M
+  action_chunk_size: 16
+  key_innovation: 'Dual-memory "world-ego state" architecture for wrist-camera-only manipulation. A 4D Persistent World State
+    Memory lifts 2D wrist tokens into 3D via streaming depth estimation and camera extrinsics, then maintains a global voxel-hashed
+    (0.025 m) map through TSDF-style confidence-weighted neighborhood fusion, a temporal sliding window, and a permanently anchored
+    first frame. An Ego-Working State Memory uses learnable intent queries plus redundancy-aware consolidation to track task
+    progress and prevent intention drift. A step-wise conditioned DiT attends sequentially to the retrieved ego-working context
+    and world state context to generate 7-DoF action chunks.
+
+    '
+
+training:
+  method: imitation learning; MSE denoising objective on action chunks with condition dropout (p=0.1) for classifier-free guidance
+  dataset: LIBERO (50 demos/task), RLBench (100 demos/task), real-world Franka wrist-camera demonstrations
+  compute: 8x NVIDIA A100 (PyTorch FSDP), global batch 256, peak LR 2e-5
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.4
+    libero_object: 99.8
+    libero_goal: 98.2
+    libero_long: 94.6
+    libero_90: 95.8
+    libero_5_suite_avg: 97.6
+    source: 'Table 1, arXiv:2608.06729 (wrist-only camera; 50 rollouts per task)'
   rlbench:
-    rlbench_avg: TODO
+    sweep_to_dustpan: 70.0
+    phone_on_base: 70.0
+    umbrella_out: 80.0
+    frame_off_hanger: 65.0
+    wine_at_rack: 75.0
+    water_plants: 65.0
+    rlbench_avg: 70.8
+    source: 'Table 2, arXiv:2608.06729 (wrist-only 128x128 view; 6 tasks, 20 trials each)'
+  real_world:
+    general_tasks_avg: 78.7
+    long_horizon_tasks_avg: 69.5
+    source: 'Tables 3-4, arXiv:2608.06729 (Franka + RealSense D415 wrist-only; 50 trials per task)'
 
 eval_conditions:
-  libero: "fine-tuned"
-  rlbench: "fine-tuned"
+  libero: fine-tuned
+  rlbench: fine-tuned
+  real_world: fine-tuned
 
-tags: [libero, rlbench]
+tags:
+- 7B
+- diffusion-transformer
+- memory
+- world-model
+- spatial-memory
+- wrist-camera-only
+- partial-observability
+- long-horizon
+- libero
+- rlbench
+- real-world

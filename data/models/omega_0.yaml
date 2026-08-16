@@ -1,0 +1,79 @@
+name: "OMEGA-0"
+full_name: "ω-0: A Latent Predictive World Action Model for Concurrent Humanoid Loco-Manipulation"
+organization: "MARS Lab, NTU; Peking University; BAAI; HKUST(GZ)"
+date: "2026-08-09"
+paper_url: https://arxiv.org/abs/2608.06375
+code_url: https://gentlefress.github.io/OMEGA-0_page/
+venue: "arXiv preprint"
+open_source: false
+model_type: world-action-model
+inference_hz: 7.1
+
+architecture:
+  backbone: "Frozen V-JEPA 2.1 image encoder for current-observation features (egocentric RGB / exocentric RGB / exocentric depth, distinguished by a learnable view token); frozen Wan encoder supplies ground-truth future visual latents; frozen T5 encoder for language; Qwen3-VL-2B-Instruct whole-body action VLM provides an action-aware semantic prefix"
+  llm: "Qwen3-VL-2B-Instruct (fine-tuned in Stage 1 into a whole-body action VLM, frozen in Stages 2-3)"
+  action_head: "Action DiT (0.45B) denoising 66-dim whole-body action latents (64-dim SONIC controller latent + 2 continuous hand-close commands in [0,1]) with an x0-prediction objective; DDIM reverse sampling at inference; conditioned via a condition-fusion module on future-aware motion features, T5 text features and a 47-dim robot state embedding"
+  action_head_category: diffusion
+  action_space: continuous
+  parameters: "2B VLM + 0.45B DiT"
+  key_innovation: >
+    Latent predictive world-action modeling: instead of generating future video and inverting it to
+    actions, ω-0 predicts compact future observation embeddings (V-JEPA-style, reconstruction-free)
+    as a lightweight auxiliary objective coupled to diffusion-based whole-body action generation.
+    A joint video-action latent predictor uses prefix-guided dual-query attention with token-specific
+    RoPE (2D for visual prefix patches, 3D for future video queries, 1D temporal for action queries):
+    motion and video queries first cross-attend to the prefix condition, then motion queries
+    cross-attend to video queries so predicted scene evolution is injected into the action
+    representation. Outputs are SONIC-controller-compatible whole-body action latents, so
+    locomotion, torso, arms and hands are generated as one unified interface rather than decomposed
+    into separate locomotion and manipulation modules. Human/public motion priors are grounded into
+    robot-executable supervision by SONIC simulation replay with filtering of untrackable motions.
+
+training:
+  dataset: >
+    Stage 1-2 public human data: ARCTIC (ego + exo), Xperience-10M (manually filtered), Motion-X;
+    all SMPL-H/SMPL-X annotations unified to SMPL with z-up canonicalization and zero-yaw
+    normalization, then replayed with SONIC to obtain robot states and action latents.
+    ω-HOME (collected in this work): 40.3 hours, 4,827 episodes, 24 household tasks at 30 Hz with
+    synchronized egocentric RGB, exocentric RGB-D (ZED), whole-body SMPL motion, robot
+    proprioceptive state and controller action latents. Stage 3 real-robot fine-tuning uses 2,220
+    SONIC-teleoperated trajectories (~200 demos per task) over the 11 downstream tasks.
+  method: >
+    Three stages. Stage 1: train a whole-body FAST tokenizer on SMPL action trajectories, then
+    fine-tune Qwen3-VL-2B-Instruct to autoregressively predict discrete whole-body action tokens
+    (next-token loss). Stage 2: human-to-humanoid action-latent pretraining — joint objective
+    L = L_action + λ·L_video, with L_video an L2 loss on future Wan latents and L_action an x0
+    diffusion loss on SONIC-replayed action latents. Stage 3: real-world fine-tuning with
+    training-time real-time chunking (RTC), replacing the first M noisy frames with clean action
+    latents and computing the loss only on the non-prefix portion. V-JEPA, Wan and the action VLM
+    stay frozen in Stages 2-3.
+  num_trajectories: 2220
+  compute: "8x NVIDIA H100 for all three stages"
+  deployment: "Unitree G1 humanoid with SONIC low-level whole-body controller; receding horizon with chunk length H=25, executing only the first K=8 actions per update; RTC warm start plus linear overlap blending; ~0.14 s per forward pass (>7 Hz)"
+
+benchmarks:
+  real_world:
+    success_rate_omni: 81.8
+    success_rate_ego: 79.1
+    task_progress_omni: 90.3
+    task_progress_ego: 88.7
+    source: "ω-0 paper Table 2 (11 real-world household loco-manipulation tasks on a Unitree G1, single multi-task policy, 10 trials per task; score column 36.7/35.8 out of a maximum of 41 subtask points). Baselines under the identical protocol: ACT 8.2, Diffusion Policy 15.5, π-0.5 27.3, InternVLA-M1 31.8, EgoVLA 25.5, GR00T-N1.7 22.7, ψ-0 44.5, Fast-WAM 37.1, DiT4DiT 43.6 success rate."
+    date_reported: "2026-08-09"
+    eval_condition: "real Unitree G1 humanoid, 11 household loco-manipulation tasks, 10 trials each, single unified multi-task policy, no teleoperation or scripted intervention"
+
+eval_conditions:
+  real_world: "11 household loco-manipulation tasks (tabletop, cleaning, laundry, object transfer, appliance interaction, mobile manipulation) on a Unitree G1 with SONIC controller; 10 trials per task; metrics are success rate, subtask score (max 41) and task progress"
+
+tags:
+  - humanoid
+  - loco-manipulation
+  - world-action-model
+  - whole-body-control
+  - diffusion
+  - latent-prediction
+  - v-jepa
+  - qwen3-vl
+  - real-robot
+  - unitree-g1
+  - human-data-transfer
+  - real-time-chunking
