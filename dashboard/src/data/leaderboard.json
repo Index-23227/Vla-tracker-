@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T15:09:04.240289",
+  "generated_at": "2026-08-16T15:11:09.301055",
   "num_models": 378,
   "primary_benchmark": "libero",
   "benchmarks_available": [
@@ -146,7 +146,9 @@
           "libero_object": 99.9,
           "libero_goal": 100.0,
           "libero_long": 98.7,
-          "libero_avg": 99.6
+          "libero_avg": 99.6,
+          "libero_plus_zero_shot_avg": 90.3,
+          "libero_plus_finetuned_avg": 90.9
         },
         "robotwin_v2": {
           "easy_avg": 45.1,
@@ -215,18 +217,28 @@
           "robocasa365_composite_seen": 20.1,
           "robocasa365_composite_unseen": 14.9,
           "robocasa_avg": 35.9
+        },
+        "real_world": {
+          "robotwin_xe_eef_avg": 23.9,
+          "robotwin_xe_arx_x5": 42.9,
+          "robotwin_xe_ur5_wsg": 22.8,
+          "robotwin_xe_franka": 5.9,
+          "libero_plus_total": 91.4,
+          "robotwin_c2r_hard_joint": 69.4,
+          "ebench_overall_sr": 45.6,
+          "robotwin_if_avg": 72.2
         }
       },
       "eval_conditions": {
         "libero": "fine-tuned",
         "robotwin_v1": "fine-tuned",
         "robocasa": "fine-tuned (RoboCasa365)",
+        "real_world": "ALOHA / Franka / UR / ARX in-domain + OOD + few-shot",
         "libero_plus": "OOD (LIBERO-Plus, 7 perturbations)",
         "robotwin_c2r": "OOD (RoboTwin-Clean2Rand)",
         "ebench": "fine-tuned (Isaac Sim dual-arm mobile)",
         "robotwin_if": "instruction-following with held-out templates",
-        "robotwin_xe": "zero-shot cross-embodiment transfer",
-        "real_world": "ALOHA / Franka / UR / ARX in-domain + OOD + few-shot"
+        "robotwin_xe": "zero-shot cross-embodiment transfer"
       },
       "libero_avg": 99.2,
       "robotwin_v1_avg": 93.85,
@@ -411,6 +423,7 @@
         "real_world": "Piper 6-DoF arm, 4 tasks (insert cylinder, insert cube, arrange flowers, hang cup): 73.8% avg vs 63.8% for pi0+ALAM, 53.8% for pi0.5, 40.0% for pi0"
       },
       "libero_avg": 99.03,
+      "metaworld_avg": 87.6,
       "ai_review": {
         "verified": true
       },
@@ -507,13 +520,16 @@
           "press_stapler": 93.5,
           "turn_switch": 11.0,
           "robotwin_v2_avg": 61.9
+        },
+        "real_world": {
+          "success_avg": 81.7
         }
       },
       "eval_conditions": {
         "libero": "fine-tuned, matched GR00T-N1.6 setting, 3 training seeds",
         "robotwin_v2": "fine-tuned, six-task taxonomy suite (Touch / Move-and-Place / Contact)",
-        "libero_plus": "zero-shot from the LIBERO seed-0 checkpoint, 7 perturbation families",
-        "real_world": "fine-tuned, AgiBot Expedition A2 humanoid, 30 trials per task"
+        "real_world": "fine-tuned, AgiBot Expedition A2 humanoid, 30 trials per task",
+        "libero_plus": "zero-shot from the LIBERO seed-0 checkpoint, 7 perturbation families"
       },
       "libero_avg": 98.92,
       "robotwin_v2_avg": 61.9,
@@ -576,6 +592,17 @@
           "robotwin_clean": 93.7,
           "robotwin_randomized": 92.8,
           "robotwin_v2_avg": 93.3
+        },
+        "behavior_challenge_2025": {
+          "task_success_score_1_epoch": 0.2904,
+          "task_success_score_4_epochs": 0.3136
+        },
+        "droid_zero_shot": {
+          "droid_zero_shot_avg": 82.5
+        },
+        "real_world_r1": {
+          "real_world_success_rate_avg": 76.7,
+          "real_world_process_score_avg": 129.2
         }
       },
       "eval_conditions": {
@@ -755,6 +782,14 @@
           "libero_goal": 99.2,
           "libero_long": 98.2,
           "libero_avg": 98.8
+        },
+        "real_world": {
+          "rmbench_obs": 11.0,
+          "rmbench_rearrange_blocks": 93.0,
+          "rmbench_put_back_block": 96.0,
+          "rmbench_swap_blocks": 74.0,
+          "rmbench_swap_towers": 40.0,
+          "rmbench_avg": 62.8
         }
       },
       "eval_conditions": {
@@ -952,14 +987,25 @@
           "libero_object": 99.0,
           "libero_goal": 99.4,
           "libero_long": 97.0,
-          "libero_avg": 98.75
+          "libero_avg": 98.75,
+          "libero_plus_noise": 88.5,
+          "libero_plus_light": 96.1,
+          "libero_plus_background": 96.7,
+          "libero_plus_avg": 93.77
+        },
+        "real_world": {
+          "object_swap": 75.0,
+          "counting_pick_place": 90.0
+        },
+        "mikasa_robo": {
+          "shell_game_touch": 75.0
         }
       },
       "eval_conditions": {
         "libero": "fine-tuned; same-backbone controlled comparison vs pi0.5 under adaptive receding-horizon executor",
-        "libero_plus": "robustness evaluation under noise, lighting, and background perturbations",
+        "real_world": "memory-dependent tabletop manipulation (object swapping, counting pick-and-place), 20 trials per method",
         "mikasa_robo": "ShellGameTouch occlusion-memory diagnostic",
-        "real_world": "memory-dependent tabletop manipulation (object swapping, counting pick-and-place), 20 trials per method"
+        "libero_plus": "robustness evaluation under noise, lighting, and background perturbations"
       },
       "libero_avg": 98.75,
       "ai_review": {
@@ -1125,6 +1171,12 @@
           "robotwin_v2_clean_avg": 91.06,
           "robotwin_v2_rand_avg": 89.92,
           "robotwin_v2_avg": 90.49
+        },
+        "real_world": {
+          "agilex_bimanual_avg": 85.9,
+          "ldt01_bimanual_avg": 81.0,
+          "universal_grasping_overall_avg": 90.1,
+          "libero_plus_zero_shot_avg": 88.7
         }
       },
       "eval_conditions": {
@@ -1174,7 +1226,15 @@
           "libero_object": 100.0,
           "libero_goal": 98.8,
           "libero_long": 95.8,
-          "libero_avg": 98.7
+          "libero_avg": 98.7,
+          "libero_plus_avg": 81.0,
+          "libero_plus_camera": 73.8,
+          "libero_plus_robot": 64.5,
+          "libero_plus_language": 78.0,
+          "libero_plus_light": 98.4,
+          "libero_plus_background": 94.8,
+          "libero_plus_noise": 84.7,
+          "libero_plus_layout": 81.5
         },
         "simpler_env": {
           "simpler_widowx_put_carrot_on_plate": 75.0,
@@ -1287,6 +1347,13 @@
           "libero_goal": 99.0,
           "libero_long": 96.8,
           "libero_avg": 98.7
+        },
+        "real_world": {
+          "real_task1_open_pot_franka": 100.0,
+          "real_task2_open_pot_cybopal": 66.7,
+          "real_task3_dual_arm_pot": 93.3,
+          "real_task4_towel_fold_arx": 100.0,
+          "real_avg": 90.0
         }
       },
       "eval_conditions": {
@@ -1465,6 +1532,12 @@
         "robotwin_v2": {
           "robotwin_v2_clean": 92.64,
           "robotwin_v2_random": 89.8
+        },
+        "real_world": {
+          "pick_and_place": 93.3,
+          "open_drawer": 86.7,
+          "fold_towel": 90.0,
+          "real_world_avg": 90.0
         }
       },
       "eval_conditions": {
@@ -1577,6 +1650,13 @@
         "robotwin_v2": {
           "avg_clean": 85.18,
           "avg_randomized": 86.06
+        },
+        "real_world": {
+          "stack_block": 70.0,
+          "insert_cube": 60.0,
+          "place_cylinder": 60.0,
+          "place_cup": 70.0,
+          "avg": 65.0
         }
       },
       "eval_conditions": {
@@ -1744,6 +1824,16 @@
         "robotwin_v2": {
           "robotwin_v2_easy": 60.71,
           "robotwin_v2_hard": 18.21
+        },
+        "real_world": {
+          "table_cleaning_standard": 63.3,
+          "occluded_placement_standard": 86.7,
+          "bimanual_plug_insertion_standard": 60.0,
+          "real_world_standard_avg": 70.0,
+          "table_cleaning_ood": 50.0,
+          "occluded_placement_ood": 73.3,
+          "bimanual_plug_insertion_ood": 33.3,
+          "real_world_ood_avg": 52.22
         }
       },
       "eval_conditions": {
@@ -1858,7 +1948,16 @@
           "libero_long": 96.0,
           "libero_long_90": 97.8,
           "libero_5_suite_avg": 98.4,
-          "libero_avg": 98.4
+          "libero_avg": 98.4,
+          "libero_plus_camera": 36.4,
+          "libero_plus_robot": 68.9,
+          "libero_plus_language": 88.7,
+          "libero_plus_light": 93.8,
+          "libero_plus_background": 90.6,
+          "libero_plus_noise": 63.5,
+          "libero_plus_layout": 83.8,
+          "libero_plus_avg_zeroshot": 73.1,
+          "libero_plus_avg_sft": 82.7
         },
         "calvin": {
           "calvin_abc_d_1": 0.956,
@@ -1876,6 +1975,14 @@
           "simpler_eggplant_in_basket": 100.0,
           "simpler_bridge": 73.9,
           "simpler_avg": 73.9
+        },
+        "mikasa_robo": {
+          "shell_game_touch": 97,
+          "intercept_medium": 40,
+          "remember_color_3": 50,
+          "remember_color_5": 19,
+          "remember_color_9": 16,
+          "mikasa_avg": 44.4
         }
       },
       "eval_conditions": {
@@ -2101,13 +2208,26 @@
           "libero_object": 99.8,
           "libero_goal": 99.6,
           "libero_long": 95.4,
-          "libero_avg": 98.3
+          "libero_avg": 98.3,
+          "libero_plus_avg": 89.5,
+          "libero_plus_camera": 91.2,
+          "libero_plus_robot": 78.4,
+          "libero_plus_language": 83.3,
+          "libero_plus_light": 97.5,
+          "libero_plus_background": 97.1,
+          "libero_plus_noise": 95.4,
+          "libero_plus_layout": 87.8
+        },
+        "real_world": {
+          "pick_and_place_task_score": 72.0,
+          "pick_and_place_full_sr": 64.0,
+          "stack_block_sr": 52.0
         }
       },
       "eval_conditions": {
         "libero": "fine-tuned, standard 4-suite protocol (ACoT-VLA baseline collection)",
-        "libero_plus": "supervised fine-tuning on LIBERO-Plus training set; zero-shot transfer avg 83.8 also reported",
-        "real_world": "UR7e tabletop pick-and-place and block stacking, 25 trials each"
+        "real_world": "UR7e tabletop pick-and-place and block stacking, 25 trials each",
+        "libero_plus": "supervised fine-tuning on LIBERO-Plus training set; zero-shot transfer avg 83.8 also reported"
       },
       "libero_avg": 98.3,
       "ai_review": {
@@ -2561,6 +2681,7 @@
         "metaworld": "fine-tuned; MT50 with 4 difficulty splits"
       },
       "libero_avg": 98.05,
+      "metaworld_avg": 85.0,
       "ai_review": {
         "verified": true
       },
@@ -2599,6 +2720,15 @@
           "libero_goal": 99.0,
           "libero_long": 96.0,
           "libero_avg": 98.1
+        },
+        "real_world": {
+          "so100_pick_cube_move": 100.0,
+          "so100_stack_cube": 90.0,
+          "so100_open_drawer": 90.0,
+          "kinova_pick_banana": 90.0,
+          "kinova_stack_cube": 100.0,
+          "kinova_pour_water": 90.0,
+          "real_world_avg": 93.3
         }
       },
       "eval_conditions": {
@@ -2914,6 +3044,20 @@
           "libero_object": 98.2,
           "libero_long": 95.4,
           "libero_avg": 98.0
+        },
+        "diffusion_policy_suite": {
+          "push_t": 55.2,
+          "block_push": 78.1,
+          "franka_kitchen": 60.6,
+          "dp_suite_avg": 64.6
+        },
+        "real_world_ur5e": {
+          "strawberry_in_bowl": 82.5,
+          "lemon_on_plate": 80.0,
+          "corn_in_pot": 90.0,
+          "butter_in_pot": 75.0,
+          "chip_bucket_on_table": 77.5,
+          "real_world_avg": 81.0
         }
       },
       "eval_conditions": {
@@ -2967,6 +3111,14 @@
           "libero_goal": 97.5,
           "libero_long": 95.3,
           "libero_avg": 98.0
+        },
+        "world_modeling": {
+          "libero_fvd_action_conditioned": 373.1,
+          "libero_psnr_action_conditioned": 23.88,
+          "libero_ssim_action_conditioned": 82.41,
+          "libero_lpips_action_conditioned": 16.33,
+          "language_table_fvd_action_conditioned": 392.2,
+          "franka_fvd_action_conditioned": 421.9
         }
       },
       "eval_conditions": {
@@ -3012,7 +3164,15 @@
           "libero_object": 99.6,
           "libero_goal": 97.6,
           "libero_long": 96.8,
-          "libero_avg": 97.4
+          "libero_avg": 97.4,
+          "libero_plus_camera": 56.0,
+          "libero_plus_robot": 56.8,
+          "libero_plus_language": 91.5,
+          "libero_plus_light": 96.8,
+          "libero_plus_background": 97.0,
+          "libero_plus_noise": 80.9,
+          "libero_plus_layout": 78.9,
+          "libero_plus_avg": 78.1
         },
         "simpler_env": {
           "put_spoon": 66.6,
@@ -3424,6 +3584,9 @@
           "simpler_google_variant_aggregation": 86.3,
           "simpler_google_avg": 88.65,
           "simpler_avg": 77.7
+        },
+        "real_world": {
+          "franka_fr3_avg": 67.1
         }
       },
       "eval_conditions": {
@@ -3648,6 +3811,13 @@
           "simpler_bridge": 63.6,
           "simpler_fractal": 80.7,
           "simpler_avg": 72.15
+        },
+        "real_world": {
+          "cup_sleeving": 90.0,
+          "charger_plugging": 67.5,
+          "cap_opening": 80.0,
+          "screw_insertion": 52.5,
+          "avg_success": 72.5
         }
       },
       "eval_conditions": {
@@ -3817,6 +3987,10 @@
           "wine_at_rack": 75.0,
           "water_plants": 65.0,
           "rlbench_avg": 70.8
+        },
+        "real_world": {
+          "general_tasks_avg": 78.7,
+          "long_horizon_tasks_avg": 69.5
         }
       },
       "eval_conditions": {
@@ -5192,6 +5366,24 @@
           "libero_object_latency_s": 0.385,
           "libero_goal_latency_s": 0.345,
           "libero_long_latency_s": 0.421
+        },
+        "bridge_v2": {
+          "success": 89.49,
+          "latency_s": 0.367,
+          "baseline_openvla_success": 75.37,
+          "baseline_openvla_latency_s": 0.345
+        },
+        "fractal": {
+          "success": 90.82,
+          "latency_s": 0.367
+        },
+        "roboturk": {
+          "success": 96.1,
+          "latency_s": 0.415
+        },
+        "ut_austin_mutex": {
+          "success": 77.26,
+          "latency_s": 0.451
         }
       },
       "eval_conditions": {
@@ -5247,7 +5439,15 @@
           "libero_object": 99.4,
           "libero_goal": 97.2,
           "libero_long": 94.6,
-          "libero_avg": 96.7
+          "libero_avg": 96.7,
+          "libero_plus_camera": 79.2,
+          "libero_plus_robot": 59.2,
+          "libero_plus_language": 68.2,
+          "libero_plus_light": 93.3,
+          "libero_plus_background": 94.6,
+          "libero_plus_noise": 83.6,
+          "libero_plus_layout": 76.1,
+          "libero_plus_avg": 79.2
         },
         "robotwin_v2": {
           "robotwin_v2_clean": 79.9,
@@ -5778,6 +5978,12 @@
           "libero_goal": 97.4,
           "libero_long": 94.8,
           "libero_avg": 96.5
+        },
+        "real_world": {
+          "franka_normal": 72.5,
+          "franka_low_light": 70.0,
+          "franka_near_dark": 52.5,
+          "franka_avg": 65.0
         }
       },
       "eval_conditions": {
@@ -6151,6 +6357,11 @@
           "libero_avg": 96.0,
           "libero_pro_task_perturbation_avg": 77.5,
           "libero_pro_position_perturbation_avg": 60.2
+        },
+        "real_world": {
+          "in_distribution_avg": 92.5,
+          "task_perturbation_avg": 63.8,
+          "position_perturbation_avg": 66.3
         }
       },
       "eval_conditions": {
@@ -6328,6 +6539,10 @@
           "libero_goal": 96.4,
           "libero_long": 90.2,
           "libero_avg": 96.0
+        },
+        "real_world": {
+          "stack_cubes_so100": 60.0,
+          "stack_cubes_ood": 38.1
         }
       },
       "eval_conditions": {
@@ -6501,6 +6716,10 @@
           "calvin_abc_d_5": 75.9,
           "calvin_abc_d_avg_len": 4.33,
           "calvin_avg": 4.33
+        },
+        "real_world": {
+          "basic_tasks_avg": 88.3,
+          "complex_tasks_avg": 82.9
         }
       },
       "eval_conditions": {
@@ -6706,6 +6925,9 @@
         },
         "metaworld": {
           "metaworld_avg": 84.4
+        },
+        "real_world": {
+          "success_avg": 90.0
         }
       },
       "eval_conditions": {
@@ -6714,6 +6936,7 @@
         "real_world": "fine-tuned (4 task suites, average across tasks)"
       },
       "libero_avg": 95.4,
+      "metaworld_avg": 84.4,
       "ai_review": {
         "verified": true
       },
@@ -6799,6 +7022,14 @@
           "libero_goal": 93.7,
           "libero_long": 88.9,
           "libero_avg": 95.1
+        },
+        "vla_arena": {
+          "extrapolation": 25.9,
+          "distractor": 41.4,
+          "safe": 35.9,
+          "long_horizon": 0.0,
+          "avg": 30.9,
+          "pi0_5_baseline_avg": 33.0
         }
       },
       "eval_conditions": {
@@ -6929,10 +7160,17 @@
           "libero_object": 96.5,
           "libero_goal": 94.0,
           "libero_avg": 94.5
+        },
+        "libero_openvla_teacher": {
+          "libero_spatial": 79.5,
+          "libero_object": 62.5,
+          "libero_goal": 79.5,
+          "libero_avg": 73.8
         }
       },
       "eval_conditions": {
-        "libero": "distilled student (158M)"
+        "libero": "distilled student (158M)",
+        "libero_openvla_teacher": "distilled student (158M)"
       },
       "libero_avg": 94.5,
       "ai_review": {
@@ -7793,6 +8031,9 @@
           "hard": 77.0,
           "very_hard": 79.6,
           "metaworld_avg": 78.5
+        },
+        "real_world": {
+          "piper_6dof_10tasks": 68.0
         }
       },
       "eval_conditions": {
@@ -7801,6 +8042,7 @@
         "real_world": "PiPER 6-DOF arm with RealSense D405 (wrist) + D435 (agent), 10 tasks x 10 trials"
       },
       "libero_avg": 91.05,
+      "metaworld_avg": 78.5,
       "ai_review": {
         "verified": true
       },
@@ -8026,6 +8268,9 @@
           "libero_goal": 88.0,
           "libero_long": 86.0,
           "libero_avg": 90.0
+        },
+        "real_world": {
+          "xlerobot_carrot_transfer": 75.0
         }
       },
       "eval_conditions": {
@@ -8279,6 +8524,7 @@
         "metaworld": "fine-tuned"
       },
       "libero_avg": 88.7,
+      "metaworld_avg": 83.2,
       "ai_review": {
         "verified": true
       },
@@ -9174,6 +9420,9 @@
           "libero_long": 74.1,
           "libero_avg": 81.2,
           "libero_plus_avg": 81.2
+        },
+        "real_world": {
+          "avg_success": 82.5
         }
       },
       "eval_conditions": {
@@ -9407,6 +9656,12 @@
           "libero_goal": 79.0,
           "libero_long": 53.4,
           "libero_avg": 76.55
+        },
+        "real_world": {
+          "piper_pick_and_place": 74.0,
+          "piper_open_drawer": 63.0,
+          "piper_stack": 58.0,
+          "real_world_avg": 65.0
         }
       },
       "eval_conditions": {
@@ -9569,10 +9824,17 @@
           "libero_goal": 82.0,
           "libero_long": 57.0,
           "libero_avg": 73.88
+        },
+        "bridge_v2_simpler": {
+          "aat_height": 48.13,
+          "sr_height": 47.6,
+          "avg_speed_cms": 21.38,
+          "sr_speed": 48.9
         }
       },
       "eval_conditions": {
         "libero": "Per-suite fine-tuned OpenVLA with closed-loop height-steering applied; unsteered baseline avg 71.37%",
+        "bridge_v2_simpler": "OpenVLA + CTRL-STEER RL on BridgeData V2 / SimplerEnv pick-place tasks",
         "libero_speed_steering": "CTRL-STEER RL avg SR 76.12% (Long 66.5, Goal 83.0, Object 76.5, Spatial 78.5) vs unsteered 71.37%",
         "pid_only": "PID controller avg SR: 71.00% (height), 72.50% (speed)",
         "static_steering_c20": "Static baseline C=20 collapses to 27.37% (height) / 1.8% (speed)",
@@ -9850,6 +10112,12 @@
           "libero_goal": 71.2,
           "libero_long": 55.2,
           "libero_avg": 68.2
+        },
+        "real_world": {
+          "clothes_folding_success": 67.0,
+          "object_sweeping_success": 73.0,
+          "table_cleaning_success": 84.0,
+          "real_avg_success": 74.7
         }
       },
       "eval_conditions": {
@@ -10261,6 +10529,11 @@
         "rlbench": {
           "colosseum_unperturbed": 62.9,
           "colosseum_all_variations_avg": 44.8
+        },
+        "real_world": {
+          "button_pressing_avg": 80.0,
+          "pouring_avg": 68.0,
+          "pick_and_place_avg": 62.0
         }
       },
       "eval_conditions": {
@@ -10389,6 +10662,10 @@
           "easy_setting_avg": 61.2,
           "hard_setting_avg": 28.8,
           "robotwin_v2_avg": 45.0
+        },
+        "real_world": {
+          "inference_hz": 12.4,
+          "inference_latency_ms": 80.4
         }
       },
       "eval_conditions": {
@@ -10431,7 +10708,19 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "bench2drive_driving_score": 89.92,
+          "bench2drive_success_rate": 77.28,
+          "bench2drive_comfort": 28.94,
+          "bench2drive_multi_ability_mean": 74.22,
+          "bench2drive_merging": 65.0,
+          "bench2drive_overtake": 81.11,
+          "bench2drive_brake": 90.0,
+          "bench2drive_give_way": 50.0,
+          "bench2drive_traffic_sign": 85.0
+        }
+      },
       "eval_conditions": {
         "driving": "fine-tuned, closed-loop CARLA simulation (Bench2Drive, PDM-Lite expert data)"
       },
@@ -10466,8 +10755,22 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "benchmarks": {
+        "real_world": {
+          "slotbench_ordinal_sr": 92.0,
+          "slotbench_size_sr": 80.0,
+          "slotbench_height_sr": 76.0,
+          "slotbench_distance_sr": 96.0,
+          "slotbench_compositional_sr": 88.0,
+          "slotbench_negation_sr": 100.0,
+          "slotbench_vague_sr": 88.0,
+          "slotbench_affordance_sr": 96.0,
+          "slotbench_world_knowledge_sr": 90.0
+        }
+      },
+      "eval_conditions": {
+        "real_world": "SlotBench zero-shot test set, 50 trials per task, full-fine-tuned π0.5 + Nano-Banana 2 grounding"
+      },
       "ai_review": {
         "verified": true
       },
@@ -10620,8 +10923,32 @@
       },
       "model_type": "vla",
       "inference_hz": 1.82,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "bench2drive_sr": 76.18,
+          "bench2drive_sr_std": 0.64,
+          "bench2drive_ds": 90.58,
+          "bench2drive_ds_std": 0.12,
+          "bench2drive_sr_criticvla": 76.04,
+          "bench2drive_ds_criticvla": 90.37,
+          "longest6v2_ds": 36,
+          "longest6v2_rc": 84,
+          "longest6v2_is": 0.43,
+          "longest6v2_gpu_hours": 56,
+          "multi_ability_mean": 73.89,
+          "multi_ability_merge": 61.44,
+          "multi_ability_overtake": 80.0,
+          "multi_ability_embrake": 93.27,
+          "multi_ability_giveway": 50.0,
+          "multi_ability_tsign": 84.74,
+          "speedup_vs_simlingo": 2.54,
+          "speedup_vs_criticvla": 4.5,
+          "fps": 1.82,
+          "latency_ms": 549.5
+        }
+      },
       "eval_conditions": {
+        "driving": "closed-loop CARLA; Bench2Drive (220 routes, 44 scenario categories) and Longest6 v2",
         "bench2drive": "closed-loop CARLA; single front-view camera; no LiDAR; language annotations only; frozen SimLingo / CriticVLA backbone with trained gate",
         "longest6v2": "long-horizon closed-loop CARLA; sustained driving quality (DS / RC / IS); A100 GPU hours reported"
       },
@@ -10806,8 +11133,19 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "benchmarks": {
+        "real_world": {
+          "basket_lift_sr": 100.0,
+          "tape_measure_sr": 100.0,
+          "book_handover_sr": 83.3,
+          "three_robot_move_sr": 90.0,
+          "reactivity_perturbed_handover_sr": 85.0,
+          "avg_two_robot_sr": 94.4
+        }
+      },
+      "eval_conditions": {
+        "real_world": "Real-world rollouts on TidyBot++ mobile manipulators; 10-18 rollouts per task with distractor variants; decentralized inference, no inter-robot communication, asynchronous chunked execution"
+      },
       "ai_review": {
         "verified": true
       },
@@ -10977,6 +11315,9 @@
           "robocasa_avg_pi05": 56.0,
           "robocasa_avg_groot_n15": 75.0,
           "robocasa_avg_dp": 46.0
+        },
+        "real_world": {
+          "droid_avg_improvement": 40.0
         }
       },
       "eval_conditions": {
@@ -10986,6 +11327,7 @@
         "real_world": "real-robot DROID platform with pi0.5 base"
       },
       "robocasa_avg": 59.0,
+      "metaworld_avg": 94.0,
       "ai_review": {
         "verified": true
       },
@@ -11152,9 +11494,15 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "maniskill": {
+          "pi0_5_throughput_steps_per_sec": 376.0,
+          "openvla_oft_throughput_steps_per_sec": 250.9
+        }
+      },
       "eval_conditions": {
         "libero": "RL training throughput benchmark; not a per-suite success-rate result",
+        "maniskill": "ManiSkill RL training, 16 GPUs, batch size matched across frameworks",
         "primary": "System / infrastructure benchmark: throughput (steps/s), step time, rollout time, actor time",
         "baselines": "RLinf-VLA (co-located, disaggregated, hybrid), RL-VLA3 (three-stage async), all with same 16-GPU cluster",
         "scalability": "Single-node and 16-GPU multi-node; environment-count sweep 384 -> 3072, peak throughput 379 steps/s at 768 envs"
@@ -11292,6 +11640,13 @@
           "view_plus_noise": 69.2,
           "view_plus_noise_plus_light": 75.0,
           "pi0_fast_novel_viewpoint_avg": 79.4
+        },
+        "real_world": {
+          "eggplant_pick_place": 91.7,
+          "lemon_pick_place": 91.7,
+          "carrot_pick_place": 83.3,
+          "stack_cube": 41.7,
+          "press_stapler": 100.0
         }
       },
       "eval_conditions": {
@@ -11367,12 +11722,17 @@
         "libero": {
           "avg_improvement_over_vlash_d1": 0.2,
           "avg_improvement_over_vlash_d7": 4.6
+        },
+        "real_world": {
+          "conveyor_i": 96.7,
+          "conveyor_ii": 90.0,
+          "whack_a_mole_moles_per_30s": 13.6
         }
       },
       "eval_conditions": {
         "libero": "async post-training; baseline pi0.5/VLASH, delays d=0..7",
-        "kinetix": "12 contact-rich tasks, 1024 rollouts/cell, d=0..7",
-        "real_world": "bimanual arm, 3 tasks"
+        "real_world": "bimanual arm, 3 tasks",
+        "kinetix": "12 contact-rich tasks, 1024 rollouts/cell, d=0..7"
       },
       "ai_review": {
         "verified": true
@@ -11406,8 +11766,19 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world_basic": {
+          "avg_success": 89.6,
+          "num_tasks": 12
+        },
+        "real_world_dexterous": {
+          "avg_success": 66.7,
+          "num_tasks": 6
+        }
+      },
       "eval_conditions": {
+        "real_world_basic": "real-world, in-domain",
+        "real_world_dexterous": "real-world, in-domain",
         "real_world": "in-domain + OOD (background, lighting, objects, occlusion, clutter, height)",
         "cross_embodiment": "single-arm grippers, dual-arm grippers, single-arm hands via action projection"
       },
@@ -11600,7 +11971,18 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "wod_e2e_rfs_overall_2b": 8.06,
+          "wod_e2e_rfs_overall_4b": 8.079,
+          "wod_e2e_rfs_spotlight_2b": 7.251,
+          "wod_e2e_rfs_spotlight_4b": 7.169,
+          "wod_e2e_ade_5s_2b": 2.616,
+          "wod_e2e_ade_5s_4b": 2.67,
+          "navsim_pdms_2b": 90.5,
+          "navsim_pdms_4b": 91.2
+        }
+      },
       "eval_conditions": {
         "driving": "fine-tuned, end-to-end (WOD-E2E + NAVSIM)"
       },
@@ -11639,7 +12021,20 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "navsimv1_pdms_sft": 89.8,
+          "navsimv1_pdms_rft": 91.6,
+          "navsimv1_nc": 99.4,
+          "navsimv1_dac": 98.4,
+          "navsimv2_epdms_filter_true": 91.0,
+          "navsimv2_epdms_filter_false": 87.3,
+          "navhard_epdms": 34.9,
+          "bench2drive_driving_score": 79.49,
+          "bench2drive_success_rate": 56.36,
+          "bench2drive_efficiency": 164.52
+        }
+      },
       "eval_conditions": {
         "driving": "fine-tuned, end-to-end (NAVSIMv1/v2, Navhard, Bench2Drive)"
       },
@@ -11681,7 +12076,21 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "navsim_navtest_pdms": 90.4,
+          "navsim_navtest_nc": 98.5,
+          "navsim_navtest_dac": 96.9,
+          "navsim_navtest_ttc": 97.9,
+          "navsim_navtest_comfort": 98.2,
+          "navsim_navtest_ep": 88.5,
+          "navsim_pdms_oracle_gt_tgp": 90.8,
+          "nuscenes_l2_m_stp3": 0.3,
+          "nuscenes_collision_pct_stp3": 0.12,
+          "nuscenes_l2_m_uniad": 0.6,
+          "nuscenes_collision_pct_uniad": 0.31
+        }
+      },
       "eval_conditions": {
         "driving": "fine-tuned, end-to-end (NAVSIM navtest closed-loop; nuScenes open-loop 3s horizon)"
       },
@@ -11724,6 +12133,13 @@
         "robotwin_v2": {
           "avg_clean": 92.38,
           "avg_randomized": 91.9
+        },
+        "real_world": {
+          "folding_shirt": 95.0,
+          "folding_skirt": 100.0,
+          "folding_pant": 90.0,
+          "folding_towel": 100.0,
+          "folding_avg": 96.3
         }
       },
       "eval_conditions": {
@@ -11929,13 +12345,25 @@
           "libero_plus_noise": 92.3,
           "libero_plus_layout": 86.4,
           "libero_plus_avg": 86.9
+        },
+        "real_world": {
+          "basic_sr": 96.0,
+          "basic_ps": 97.0,
+          "distractor_sr": 44.0,
+          "distractor_ps": 58.0,
+          "semantic_sr": 42.0,
+          "semantic_ps": 58.0,
+          "long_horizon_sr": 38.0,
+          "long_horizon_ps": 55.0,
+          "avg_sr": 55.0,
+          "avg_ps": 67.0
         }
       },
       "eval_conditions": {
         "libero": "post-trained on LIBERO 4 suites (10K steps)",
+        "real_world": "Franka-style single-arm with third-person + wrist camera; 5 trials per task across 20 tasks",
         "libero_plus": "zero-shot direct transfer from LIBERO post-training",
-        "vlabench": "post-trained on VLABench (20K steps)",
-        "real_world": "Franka-style single-arm with third-person + wrist camera; 5 trials per task across 20 tasks"
+        "vlabench": "post-trained on VLABench (20K steps)"
       },
       "ai_review": {
         "verified": true
@@ -12100,6 +12528,7 @@
       "eval_conditions": {
         "metaworld": "fine-tuned on Evo-1 MT50 demos; 10 episodes/task, 400-step horizon, environment seed 4042, corner RGB view only"
       },
+      "metaworld_avg": 90.0,
       "ai_review": {
         "verified": true
       },
@@ -12169,8 +12598,26 @@
       },
       "model_type": null,
       "inference_hz": 521,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "benchmarks": {
+        "nuscenes": {
+          "l2_error_1s": 0.12,
+          "l2_error_2s": 0.33,
+          "l2_error_3s": 0.5,
+          "l2_error_avg": 0.32
+        },
+        "wod_e2e": {
+          "ade_3s": 1.254,
+          "ade_5s": 2.907,
+          "rfs": 7.823,
+          "ade_3s_4rollouts": 1.24,
+          "ade_5s_4rollouts": 2.821,
+          "rfs_4rollouts": 7.827
+        }
+      },
+      "eval_conditions": {
+        "nuscenes": "open-loop trajectory prediction",
+        "wod_e2e": "open-loop with optional 4-rollout test-time stochastic decoding"
+      },
       "ai_review": {
         "verified": true
       },
@@ -12406,7 +12853,12 @@
       },
       "model_type": "vla",
       "inference_hz": 10,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "ivar_full_assembly_sr": 40.0,
+          "ivar_per_part_avg_sr": 78.1
+        }
+      },
       "eval_conditions": {
         "real_world": "pi0.5 fully finetuned on 100 real IVAR demos; subtask-decomposed instructions with progress-triggered transitions"
       },
@@ -12509,7 +12961,15 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "pick_and_place_block": 95.0,
+          "select_jelly": 75.0,
+          "select_fruit_vegetable": 80.0,
+          "overall_avg": 83.3,
+          "intent_reasoning_accuracy": 94.3
+        }
+      },
       "eval_conditions": {
         "real_world": "Real robot manipulation under gesture+language instructions; tested in simple and hard (cluttered, similar-distractor) conditions"
       },
@@ -12736,10 +13196,43 @@
       "benchmarks": {
         "robocasa": {
           "robocasa_avg": 64.1
+        },
+        "dreamgen": {
+          "dreamgen_12task_success": 38.3,
+          "n1_baseline": 13.1
+        },
+        "robocasa_30demo": {
+          "robocasa_30demo_avg": 47.5,
+          "n1_baseline": 17.4
+        },
+        "sim_gr1": {
+          "language_table": 93.2,
+          "n1_language_table": 52.8,
+          "sim_gr1_language": 54.4,
+          "n1_sim_gr1_language": 36.4,
+          "sim_gr1_zero_shot": 43.9,
+          "sim_gr1_30demo": 47.4
+        },
+        "real_gr1": {
+          "language_following_rate": 93.3,
+          "overall_success": 83.0,
+          "n1_language_following": 46.6,
+          "n1_overall_success": 43.3
+        },
+        "novel_object_generalization": {
+          "zero_shot": 15.0,
+          "n1_zero_shot": 0.0,
+          "post_trained_on_human_videos": 55.0
+        },
+        "unitree_g1": {
+          "post_training_avg": 98.8,
+          "n1_post_training_avg": 44.0
         }
       },
       "eval_conditions": {
-        "robocasa": "fine-tuned"
+        "robocasa": "fine-tuned",
+        "dreamgen": "zero-shot and few-shot",
+        "robocasa_30demo": "30-demo post-training"
       },
       "robocasa_avg": 64.1,
       "ai_review": {
@@ -12874,6 +13367,14 @@
       "model_type": null,
       "inference_hz": null,
       "benchmarks": {
+        "libero": {
+          "libero_plus_libero_spatial": 84.0,
+          "libero_plus_libero_object": 80.9,
+          "libero_plus_libero_goal": 70.8,
+          "libero_plus_libero_long": 66.2,
+          "libero_plus_libero_avg": 75.4,
+          "libero_plus_pi0_baseline_avg": 68.2
+        },
         "robotwin_v2": {
           "robotwin_v2_avg": 90.63,
           "pi0_baseline_avg": 77.38
@@ -12915,7 +13416,14 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "intervention_jitter_reduction": 99.8,
+          "grasp_failure_reduction": 87.5,
+          "completion_time_reduction": 19.1,
+          "policy_improvement_long_horizon": 19.0
+        }
+      },
       "eval_conditions": {
         "real_world": "Bimanual dexterous tasks with human teleoperation intervention"
       },
@@ -13032,7 +13540,22 @@
       },
       "model_type": null,
       "inference_hz": 13.6,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "kneel_and_manipulate_t3": 100.0,
+          "tidy_table_t3": 41.7,
+          "bring_box_pack_t3": 41.7,
+          "mirror_pose_t2": 100.0,
+          "pour_liquor_t2": 91.7,
+          "human_assist_t2": 83.3,
+          "walking_avoid_obstacles_t2": 100.0,
+          "box_convey_grasp": 100.0,
+          "box_convey_turn": 100.0,
+          "box_convey_walk": 73.3,
+          "box_convey_place": 53.3,
+          "generalization_pose_pouring_box_kneel_avg": 61.8
+        }
+      },
       "eval_conditions": {
         "real_world": "Tienkung 2.0/3.0 humanoids, 12-15 trials per task, 73.34ms latency on RTX 4090"
       },
@@ -13073,7 +13596,14 @@
       },
       "model_type": "hierarchical memory framework (memory-augmented hierarchical VLA system)",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "object_search_progress": 92.0,
+          "counting_progress": 92.0,
+          "rearrangement_progress": 87.0,
+          "average_progress": 90.0
+        }
+      },
       "eval_conditions": {
         "real_world": "WidowX-250s arm, parallel gripper, third-person RealSense D435 + wrist camera; Executor at 2 Hz predicting 10-action chunks (10 Hz control loop); Sentry queried every 10 execution steps; 20 trials per task per method; metrics: Task Progress, Planner API Calls, Memory Hit Rate"
       },
@@ -13183,7 +13713,58 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "simulation": {
+          "vla_50_dx_cm": 21.56,
+          "vla_50_dy_cm": 0.88,
+          "vla_50_dpsi_deg": 3.85,
+          "vla_50_manhattan_cm": 22.44,
+          "vla_50_plus_10_rl_dx_cm": 15.09,
+          "vla_50_plus_10_rl_dy_cm": 1.83,
+          "vla_50_plus_10_rl_dpsi_deg": 4.58,
+          "vla_50_plus_10_rl_manhattan_cm": 16.92,
+          "vla_50_plus_20_rl_dx_cm": 1.72,
+          "vla_50_plus_20_rl_dy_cm": 0.82,
+          "vla_50_plus_20_rl_dpsi_deg": 0.29,
+          "vla_50_plus_20_rl_manhattan_cm": 2.54,
+          "hoist_dx_cm": 5.16,
+          "hoist_dy_cm": 1.09,
+          "hoist_dpsi_deg": 2.76,
+          "hoist_manhattan_cm": 6.25,
+          "vla_80_dx_cm": 15.69,
+          "vla_80_dy_cm": 2.89,
+          "vla_80_dpsi_deg": 12.14,
+          "vla_80_manhattan_cm": 18.58,
+          "human_expert_teleop_dx_cm": 4.35,
+          "human_expert_teleop_dy_cm": 3.0,
+          "human_expert_teleop_dpsi_deg": 8.48,
+          "human_expert_teleop_manhattan_cm": 7.35
+        },
+        "real_robot": {
+          "vla_50_dx_cm": 1.6,
+          "vla_50_dy_cm": 7.68,
+          "vla_50_dpsi_deg": 14.5,
+          "vla_50_manhattan_cm": 9.28,
+          "vla_50_plus_10_rl_dx_cm": 2.15,
+          "vla_50_plus_10_rl_dy_cm": 5.22,
+          "vla_50_plus_10_rl_dpsi_deg": 21.0,
+          "vla_50_plus_10_rl_manhattan_cm": 7.37,
+          "vla_50_plus_20_rl_dx_cm": 4.2,
+          "vla_50_plus_20_rl_dy_cm": 2.49,
+          "vla_50_plus_20_rl_dpsi_deg": 12.1,
+          "vla_50_plus_20_rl_manhattan_cm": 6.69,
+          "hoist_dx_cm": 1.64,
+          "hoist_dy_cm": 4.74,
+          "hoist_dpsi_deg": 28.9,
+          "hoist_manhattan_cm": 6.38,
+          "vla_80_dx_cm": 0.54,
+          "vla_80_dy_cm": 8.03,
+          "vla_80_dpsi_deg": 27.0,
+          "vla_80_manhattan_cm": 8.57,
+          "headline_translational_reduction_cm": 19.9,
+          "headline_angular_reduction_deg": 3.56
+        }
+      },
       "eval_conditions": {
         "simulation": "Humanoid hoisting simulation; suspended payload positioned through whole-body contact; placement metrics ∆x, ∆y, ∆ψ, |∆x|+|∆y|",
         "real_robot": "Real humanoid platform with GR00T Whole-Body Control; PICO VR teleoperation for demo collection; suspended payload with IMU for residual-motion analysis"
@@ -13254,7 +13835,22 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "hsr_pickup": {
+          "real_robot_score_mean": 3.5,
+          "real_robot_score_max": 4.0,
+          "real_robot_trials": 20,
+          "real_robot_n4_complete": 12,
+          "real_robot_n3_touch_no_lift": 6,
+          "real_robot_n2_approach_no_grasp": 2,
+          "real_robot_n1_no_approach": 0,
+          "offline_total_mse_x1e3": 1.61,
+          "offline_arm_mse_x1e3": 0.88,
+          "offline_gripper_mse_x1e3": 3.77,
+          "offline_head_mse_x1e3": 0.01,
+          "offline_base_mse_x1e3": 3.18
+        }
+      },
       "eval_conditions": {
         "hsr_pickup": "fine-tuned on 3,971-episode HSR pick-up release; 20 real-robot trials per model graded on a 4-point rubric (4 = complete, 3 = touches no lift, 2 = approaches no grasp, 1 = no approach)"
       },
@@ -13326,6 +13922,12 @@
         "robotwin_v2": {
           "robotwin_v2_clean": 90.9,
           "robotwin_v2_randomized": 90.1
+        },
+        "real_world": {
+          "dobot_xtrainer_flowpro_bottle": 99.0,
+          "dobot_xtrainer_flowpro_cap": 99.0,
+          "dobot_xtrainer_flowpro_usb": 98.0,
+          "dobot_xtrainer_flowpro_zip": 94.0
         }
       },
       "eval_conditions": {
@@ -13495,7 +14097,29 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "twist_cap_open_success_overall": 92,
+          "twist_cap_open_capx_overall": 32,
+          "twist_cap_open_pi0_5_baseline_overall": 0,
+          "pour_beans_into_bowl_success_overall": 96,
+          "pour_beans_into_bowl_capx_overall": 0,
+          "pour_beans_into_bowl_pi0_5_baseline_overall": 0,
+          "twist_then_pour_composition_overall": 80,
+          "twist_then_pour_composition_capx": 4,
+          "twist_then_pour_composition_pi0_5_baseline": 0,
+          "sweeping_from_scooping_success": 100,
+          "base_skill_retention_top_pickplace": 100,
+          "base_skill_retention_side_pickplace": 100,
+          "base_skill_retention_top_pickplace_pi0_5_baseline": 100,
+          "base_skill_retention_side_pickplace_pi0_5_baseline": 86
+        },
+        "simulation": {
+          "libero_block_flip_success": 75,
+          "libero_block_flip_rl_sac_baseline": 0,
+          "libero_drawer_close_success": 100
+        }
+      },
       "eval_conditions": {
         "real_world": "UFactory xArm (6-DoF). 25 evaluation trials per method per primitive (Fig. 6); 15 trials for base-skill retention (Fig. 8); 5 trials for sweeping. Each rollout requires a manual environment reset by a human; failure analysis is not incorporated, only successful rollouts are kept.",
         "simulation": "LIBERO + Franka Panda (7-DoF). Block flip: 0% RL-SAC baseline given the same total rollout budget. Drawer close: VLM completion check is used to terminate the OOD approach primitive and trigger the new push-drawer-closed primitive."
@@ -13638,7 +14262,24 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "labutopia": {
+          "pick_up_id": 49.2,
+          "press_button_id": 100.0,
+          "open_door_id": 65.0,
+          "pour_liquid_id": 43.3,
+          "heat_beaker_id": 83.3,
+          "transport_beaker_id": 85.8,
+          "labutopia_id_avg": 71.1,
+          "pick_up_ood": 48.3,
+          "press_button_ood": 98.3,
+          "open_door_ood": 65.8,
+          "pour_liquid_ood": 34.2,
+          "heat_beaker_ood": 87.5,
+          "transport_beaker_ood": 85.8,
+          "labutopia_ood_avg": 70.0
+        }
+      },
       "eval_conditions": {
         "labutopia": "Fine-tuned on LabUtopia (six tasks: Pick Up, Press Button, Open Door, Pour Liquid, Heat Beaker, Transport Beaker); 120 episodes per task per setting; ID follows training distribution, OOD perturbs object placement, appearance, or scene configuration",
         "real_world": "Franka platform, 4 tasks (Shake Liquid, Pour Liquid, Magnetic Stir, Stopper Plug/Unplug) with 30-50 demos each; 50 rollouts per condition; 4-cell crossing of (in/out-of-domain) x (clean/cluttered); LabVLA averages 86.5 / 80.0 / 80.0 / 74.0 across the four conditions"
@@ -13719,10 +14360,15 @@
       },
       "model_type": "rl-post-training-method",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "franka_fr3_success_rate": 56.0,
+          "grpo_baseline_success_rate": 22.0
+        }
+      },
       "eval_conditions": {
-        "libero_pro": "Out-of-distribution LIBERO-PRO tasks (task perturbation over LIBERO-90 scenes); reported as normalized gain over initial policy, ~5x sample-efficiency improvement over GRPO; transfers across pi0.5, GR00T, OpenVLA-OFT backbones",
-        "real_world": "Franka FR3, 10 SFT tasks (20 SpaceMouse demos each) then RL fine-tune on held-out task with binary human reward"
+        "real_world": "Franka FR3, 10 SFT tasks (20 SpaceMouse demos each) then RL fine-tune on held-out task with binary human reward",
+        "libero_pro": "Out-of-distribution LIBERO-PRO tasks (task perturbation over LIBERO-90 scenes); reported as normalized gain over initial policy, ~5x sample-efficiency improvement over GRPO; transfers across pi0.5, GR00T, OpenVLA-OFT backbones"
       },
       "ai_review": {
         "verified": true
@@ -13809,6 +14455,7 @@
         "metaworld": "fine-tuned (multi-task, 100 demos/task, single corner camera, Sawyer)"
       },
       "rlbench_avg": 82.8,
+      "metaworld_avg": 87.7,
       "ai_review": {
         "verified": true
       },
@@ -14066,7 +14713,17 @@
       },
       "model_type": "vla",
       "inference_hz": 16,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "wod_e2e_val_rfs": 8.2,
+          "wod_e2e_test_rfs": 7.87,
+          "wod_e2e_val_ade_3s": 0.86,
+          "wod_e2e_val_ade_5s": 2.13,
+          "wod_e2e_test_ade_3s": 1.09,
+          "wod_e2e_test_ade_5s": 2.66,
+          "inference_fps": 16.0
+        }
+      },
       "eval_conditions": {
         "real_world": "WOD-E2E long-tail autonomous driving benchmark, RL post-training + Intent-CFG"
       },
@@ -14261,7 +14918,18 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "musevla_avg_seen_pretrained": 80.6,
+          "musevla_avg_seen_no_pretrain": 76.4,
+          "musevla_avg_unseen_zero_shot": 66.7,
+          "thermal_seen": 87.5,
+          "acoustic_seen": 70.8,
+          "mmwave_seen": 83.3,
+          "sensor_selection_acc_unseen": 100.0,
+          "target_description_acc_unseen": 82.0
+        }
+      },
       "eval_conditions": {
         "real_world": "fine-tuned + co-trained on synthesized multisensory data; single model evaluated across thermal/acoustic/mmWave tasks and zero-shot unseen tasks"
       },
@@ -14402,7 +15070,14 @@
       },
       "model_type": "world-action-model",
       "inference_hz": 7.1,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "success_rate_omni": 81.8,
+          "success_rate_ego": 79.1,
+          "task_progress_omni": 90.3,
+          "task_progress_ego": 88.7
+        }
+      },
       "eval_conditions": {
         "real_world": "11 household loco-manipulation tasks (tabletop, cleaning, laundry, object transfer, appliance interaction, mobile manipulation) on a Unitree G1 with SONIC controller; 10 trials per task; metrics are success rate, subtask score (max 41) and task progress"
       },
@@ -14483,8 +15158,25 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world_openeai_arm": {
+          "clean_table": 0.94,
+          "make_tea": 0.7,
+          "fold_towel": 0.8,
+          "fold_t_shirt": 0.83,
+          "average": 0.82
+        },
+        "real_world_arm_comparison": {
+          "clean_table": 0.92,
+          "make_tea": 0.6,
+          "fold_towel": 0.73,
+          "fold_t_shirt": 0.75,
+          "average": 0.75
+        }
+      },
       "eval_conditions": {
+        "real_world_openeai_arm": "Fine-tuned on in-domain OpenEAI-Arm demos; same protocol as ACT/Octo/OpenVLA-oft/pi0/pi0.5 baselines",
+        "real_world_arm_comparison": "pi0 policy on OpenEAI-Arm — proxy hardware-suitability metric, not OpenEAI-VLA",
         "real_world": "Four desktop manipulation tasks on OpenEAI-Arm: Clean Table (5 in-domain objects, single-arm pick-place), Make Tea (multi-step), Fold Towel (long-horizon deformable), Fold T-shirt (dual-arm deformable, 5 sub-steps). Step-wise and final success rates reported. Compared on the same in-domain fine-tuning dataset against ACT, Octo, OpenVLA-oft, pi0, and pi0.5 — final success row used for the benchmark above.\n",
         "ablation_findings": "Removing dataset adapter -> 0.00 avg; removing multimodal co-training during fine-tuning -> 0.30; downgrading backbone to Qwen2.5-VL -> 0.51; adding UMI data -> 0.61; relative action space -> 0.67; early VLM unfreezing -> 0.52; late VLM unfreezing -> 0.72. Best (Ours) -> 0.82.\n"
       },
@@ -14525,7 +15217,22 @@
       },
       "model_type": "vla",
       "inference_hz": 10,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "hlm12_8_training_tasks_avg_progress": 89,
+          "hlm12_4_holdout_stationary_cotrain_progress": 87,
+          "hlm12_4_holdout_humi_cotrain_progress": 80,
+          "hlm12_4_holdout_baseline_no_cotrain_progress": 33,
+          "hlm12_12_task_oracle_progress": 94,
+          "long_horizon_openhlm_humi_cotrain_progress": 87.5,
+          "long_horizon_openhlm_teleop_oracle_progress": 97.5,
+          "long_horizon_gr00t_n1_6_progress": 57.5,
+          "long_horizon_psi0_progress": 48.8,
+          "long_horizon_openhlm_humi_demo_hours": 1.14,
+          "long_horizon_baseline_demo_hours": 2.7,
+          "long_horizon_teleop_oracle_demo_hours": 2.73
+        }
+      },
       "eval_conditions": {
         "real_world": "Unitree G1 humanoid in real-world scenes; task progress fraction in [0,1] averaged over 5 rollouts per (policy, task) pair with shared scene configurations and matched distractors; full pipeline includes SONIC low-level controller + joint-based whole-body teleop data + π0.5-initialized humanoid-adapted VLA."
       },
@@ -14605,7 +15312,21 @@
       },
       "model_type": "vla",
       "inference_hz": 250,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "connector_insertion_task_success_pct": 90.0,
+          "connector_insertion_physical_contact_success_pct": 100.0,
+          "ev_charging_gun_task_success_pct": 53.3,
+          "lateral_error_mm": 0.181,
+          "nonsemantic_baseline_task_success_pct": 40.0,
+          "energy_tank_baseline_task_success_pct": 60.0,
+          "nonsemantic_baseline_lateral_error_mm": 0.622,
+          "energy_tank_baseline_lateral_error_mm": 0.617,
+          "force_torque_threshold_violations": 0,
+          "vla_accept_fraction": 96.8,
+          "guarded_recovery_fraction": 2.7
+        }
+      },
       "eval_conditions": {
         "real_world": "Real AUBO-i5 connector / EV charging-gun insertion with 250 Hz passivity shield and F/T governor",
         "simulation": "MuJoCo connector-insertion: 1000-trial runtime-contract adversarial sampling (0/1000 violations vs 50.5% without projection); 192-trial matched classical-control comparison (PaCo-VLA proposals 31.8% task success, all baselines <=26%); 1584 paired counterfactual semantic trials (Live L+V 97.9% / Oracle 99.3%; all 7 counterfactual ablations 0% task success)"
@@ -14763,7 +15484,19 @@
       },
       "model_type": "driving VLA (decoupled 2D planning + deterministic 3D lifting)",
       "inference_hz": 3.0,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "nuscenes_open_loop_l2_avg_m": 0.3,
+          "nuscenes_collision_avg_pct": 0.25,
+          "nuscenes_intersection_avg_pct": 1.77,
+          "nuscenes_2d_detection_map": 54.2,
+          "bench2drive_driving_score": 79.14,
+          "bench2drive_success_rate": 58.87,
+          "bench2drive_efficiency": 153.26,
+          "bench2drive_comfortness": 38.01,
+          "waymo_zero_shot_l2_avg_m": 0.4
+        }
+      },
       "eval_conditions": {
         "driving": "SFT+GRPO on nuScenes+Waymo for open-loop; SFT-only on Bench2Drive for closed-loop; Waymo evaluated zero-shot"
       },
@@ -14851,10 +15584,19 @@
       "benchmarks": {
         "libero": {
           "libero_long": 71.0
+        },
+        "reassemble": {
+          "success_m0": 27.0,
+          "success_m1": 41.0,
+          "success_m3": 62.0,
+          "success_m5": 71.0,
+          "success_m10": 78.0,
+          "finetune_upper_bound_50demos": 79.0
         }
       },
       "eval_conditions": {
         "libero": "m=3 few-shot transfer on held-out LIBERO-Long tasks; no weight updates; primitive boundaries constructed via sub-task structure (move-to/grasp/transport/place)",
+        "reassemble": "6 held-out (object, primitive) pairs; few-shot transfer with m demonstrations; chunked-policy evaluation uses corrected element-level gate",
         "primary": "Industrial contact-rich assembly on REASSEMBLE (NIST Task Board 1) — 6 held-out (object, primitive) combinations spanning compositional distance 1–3 held-out pairs",
         "cross_dataset": "LIBERO-Long household manipulation with sub-task primitive boundaries (move-to / grasp / transport / place)",
         "out_of_vocabulary": "Threaded-fastener rotate-to-engage task where rotate-to-engage primitive is absent from training vocabulary — primitive-trained underperforms flat-trained (0.08 vs 0.14 at m=5)",
@@ -14893,7 +15635,18 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "libero": {
+          "libero_plus_camera": 93.2,
+          "libero_plus_robot": 71.5,
+          "libero_plus_language": 93.6,
+          "libero_plus_light": 86.8,
+          "libero_plus_background": 92.3,
+          "libero_plus_noise": 74.8,
+          "libero_plus_layout": 86.7,
+          "libero_plus_avg": 85.5
+        }
+      },
       "eval_conditions": {
         "libero_plus": "fine-tuned"
       },
@@ -14939,7 +15692,30 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "ogbench": {
+          "aggregate_50_tasks_online_success_rate": 90.0,
+          "aggregate_50_tasks_offline_success_rate": 48.0,
+          "qpilots_u_aggregate_online": 89.0,
+          "qpilots_u_aggregate_offline": 44.0,
+          "humanoid_large_navigate_online": 60.0,
+          "cube_quadruple_play_online": 79.0,
+          "puzzle_4x4_play_sparse_online": 100.0,
+          "scene_play_sparse_online": 99.0
+        },
+        "latency_analysis": {
+          "pi0_5_baseline_ms_per_step": 112.7,
+          "qpilots_u_ms_per_step": 114.1,
+          "qpilots_u_overhead_x": 1.04,
+          "qpilots_m_ms_per_step": 240.1,
+          "qpilots_m_overhead_x": 2.14,
+          "best_of_5_ms_per_step": 127.2,
+          "best_of_20_ms_per_step": 158.0,
+          "qpilots_u_sr_pct": 83.3,
+          "qpilots_m_sr_pct": 88.5,
+          "pi0_5_sr_pct": 19.2
+        }
+      },
       "eval_conditions": {
         "libero": "LIBERO-90 subset (6 tasks: 26/31/38/59/60/64). Frozen pi0.5-LIBERO base; SARSA online critic; 5 seeds; EMA time-weighted alpha=0.99 smoothing along training axis before averaging across seeds.",
         "ogbench": "OGBench single-task; 1e6 offline + 5e5 online steps; 8 seeds; per-domain (H, gamma, rho) follows Li & Levine 2026.",
@@ -14996,12 +15772,25 @@
           "hand_over_mic": 47.5,
           "lift_pot": 45.0,
           "robotwin_v2_avg": 37.5
+        },
+        "real_world": {
+          "close_cabinet": 30.0,
+          "place_bottle_plastic_box": 80.0,
+          "open_cabinet_trained": 90.0,
+          "baseline_close_cabinet": 0.0,
+          "baseline_place_bottle": 10.0
+        },
+        "pusht": {
+          "cross_embodiment_unseen_angles_avg": 34.9,
+          "baseline_cosmos_policy": 6.0,
+          "pi05_with_retrieval": 25.1,
+          "pi05_no_retrieval": 6.6
         }
       },
       "eval_conditions": {
         "robotwin_v2": "Aloha-Agilex target + UR5 pool; 5 seen + 5 unseen tasks; pool grows 11→17→23→29→35 tasks",
-        "pusht": "frozen policy, test-time pool progression on 7 unseen goal angles",
-        "real_world": "human-hand video pool with VR wrist tracking, fine-tuned on single open-cabinet task only"
+        "real_world": "human-hand video pool with VR wrist tracking, fine-tuned on single open-cabinet task only",
+        "pusht": "frozen policy, test-time pool progression on 7 unseen goal angles"
       },
       "robotwin_v2_avg": 37.5,
       "ai_review": {
@@ -15043,7 +15832,15 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "fetch_toolbox_organization_success": 50.0,
+          "fetch_vegetable_sorting_success": 60.0,
+          "fetch_soda_can_disposal_success": 75.0,
+          "fetch_avg_success": 61.7,
+          "fetch_avg_qscore": 75.0
+        }
+      },
       "eval_conditions": {
         "real_world": "Physical Fetch robot, 20 trials per task across three tabletop tasks; VLM (Qwen3-VL-8B-Instruct) monitors a sparse 5-frame RGB history with Delta=15s; residual recovery activates only when detected failure category is in the simulator-trained catalog C_train and confidence rho_t >= tau_deploy. Reported here is the M4 variant (full ReCoVLA: failure-relevant reward mask + stage-aware gates). M6 (same stage-gated design on OpenVLA backbone) and OOD object-substitution evaluation (M4 reaches 53.3% avg success) are reported in the paper.\n"
       },
@@ -15087,7 +15884,19 @@
       },
       "model_type": "navigation",
       "inference_hz": 10.6,
-      "benchmarks": {},
+      "benchmarks": {
+        "evt_bench": {
+          "stt_success_rate": 89.4,
+          "stt_tracking_rate": 92.5,
+          "stt_collision_rate": 1.6,
+          "dt_success_rate": 73.3,
+          "dt_tracking_rate": 81.8,
+          "dt_collision_rate": 7.6,
+          "at_success_rate": 74.1,
+          "at_tracking_rate": 85.7,
+          "at_collision_rate": 7.7
+        }
+      },
       "eval_conditions": {
         "evt_bench": "EVT-Bench standard suite in Habitat 3.0; metrics are Success Rate (SR), Tracking Rate (TR) and Collision Rate (CR). An episode succeeds if the agent keeps a 1-3 m following distance with the target in view. Main protocol uses the front RGB camera only.",
         "ablation_dt": "Ablations on the DT split (single forward view). Oracle TVBI built from ground-truth target bboxes without Refer-CoT: 81.5 SR / 84.7 TR / 3.6 CR. Removing TVBI only: 70.4 / 80.8 / 7.5. Removing both Refer-CoT and TVBI: 55.7 / 71.4 / 9.4. The oracle expert policy with full simulator state reaches 85.1 SR, indicating identification rather than motion planning is the DT bottleneck.",
@@ -15225,6 +16034,13 @@
         },
         "simpler_env": {
           "simpler_avg": 79.5
+        },
+        "real_world": {
+          "openarm_bowl_stacking": 80.0,
+          "openarm_cube_handoff": 52.0,
+          "openarm_test_tube": 24.0,
+          "aloha_piper_tshirt_yellow": 50.0,
+          "aloha_piper_tshirt_white": 46.0
         }
       },
       "eval_conditions": {
@@ -15405,8 +16221,20 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "humanoid_manipulation": {
+          "erase_whiteboard_sft_demo_only": 45.0,
+          "erase_whiteboard_iter1": 45.0,
+          "erase_whiteboard_iter3": 80.0,
+          "bread_into_toaster_sft_demo_only": 56.7,
+          "bread_into_toaster_iter1": 56.7,
+          "bread_into_toaster_iter3": 86.7,
+          "erase_whiteboard_ablation_H50": 65.0,
+          "erase_whiteboard_ablation_tr_at_onset": 50.0
+        }
+      },
       "eval_conditions": {
+        "humanoid_manipulation": "Real IRON-R01-1.11 humanoid robot. Erase the whiteboard: 20 trials, one per handwriting mark; success if all assigned marks removed. Put the bread into the toaster: 30 independent trials per policy; success if bread fully inserted and stable. All baselines (HG-DAgger, Filtered BC, RECAP) use the same backbone, rollout- intervention episodes, and reward-label construction pipeline.\n",
         "real_robot": "IRON-R01-1.11 humanoid robot with dexterous hands; ego-view RGB + language + 50-dim proprio; whole-body and dexterous-hand teleoperation via VR + motion-capture; human takeover triggered when supervisor detects near-failure."
       },
       "ai_review": {
@@ -15485,6 +16313,9 @@
       "benchmarks": {
         "robotwin_v2": {
           "robotwin_v2_avg": 56.0
+        },
+        "real_world": {
+          "real_world_avg": 33.0
         }
       },
       "eval_conditions": {
@@ -15608,7 +16439,20 @@
         "libero": {
           "libero_object": 87.9,
           "libero_object_cosine": 90.0,
-          "libero_object_baseline_pi0_5": 22.9
+          "libero_object_baseline_pi0_5": 22.9,
+          "libero_pro_pi0_5_baseline_avg": 15.0,
+          "libero_pro_blending_avg": 92.6,
+          "libero_pro_takeover_avg": 93.2,
+          "libero_pro_cosine_avg": 97.4,
+          "libero_pro_teleoperation_avg": 98.8,
+          "libero_pro_blending_intervention_pct": 10.8,
+          "libero_pro_takeover_intervention_pct": 11.7,
+          "libero_pro_cosine_intervention_pct": 30.0,
+          "libero_pro_blending_completion_time_s": 11.1,
+          "libero_pro_takeover_completion_time_s": 13.2,
+          "libero_pro_cosine_completion_time_s": 13.0,
+          "libero_pro_pi0_5_completion_time_s": 30.7,
+          "libero_pro_teleoperation_completion_time_s": 46.0
         },
         "calvin": {
           "calvin_abc_d_st_sr": 94.85,
@@ -15625,13 +16469,28 @@
           "dynaguide_baseline_avg_len": 3.167,
           "teleoperation_avg_len": 0.9,
           "teleoperation_3x_st_sr": 86.78
+        },
+        "real_world": {
+          "pick_place_pi0_5": 50,
+          "pick_place_cosine": 100,
+          "pick_place_blending": 100,
+          "close_drawer_pi0_5": 25,
+          "close_drawer_cosine": 100,
+          "close_drawer_blending": 80,
+          "open_cabinet_pi0_5": 5,
+          "open_cabinet_cosine": 95,
+          "open_cabinet_blending": 100,
+          "cosine_avg": 98.33,
+          "blending_avg": 93.33,
+          "pi0_5_avg": 26.67,
+          "teleoperation_avg": 100
         }
       },
       "eval_conditions": {
         "libero": "pi0.5 backbone fine-tuned; only Object-suite single task with perturbation sweep evaluated. Standard 4-suite numbers NOT reported.",
         "calvin": "pi0.5 trained on CALVIN ABC, tested on D, long-horizon 5-task chains; Cosine arbitration only (selected as best from LIBERO-PRO)",
-        "libero_pro": "pi0.5 backbone + SAPS arbitration on 10 LIBERO-PRO tasks with task+swap perturbations",
         "real_world": "Franka arm with pi0.5 DROID checkpoint; teleop via keyboard (Blending) or gamepad (Cosine); 20 Hz control",
+        "libero_pro": "pi0.5 backbone + SAPS arbitration on 10 LIBERO-PRO tasks with task+swap perturbations",
         "hardware": "Franka Panda arm with operational-space pose controller; RGB third-person + wrist cameras; gamepad / keyboard teleop interfaces"
       },
       "calvin_avg": 4.3,
@@ -15955,10 +16814,34 @@
       },
       "model_type": "neurosymbolic-agent",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "libero": {
+          "libero_pro_object_pos": 43.4,
+          "libero_pro_object_task": 36.4,
+          "libero_pro_goal_pos": 40.0,
+          "libero_pro_goal_task": 14.0,
+          "libero_pro_spatial_pos": 56.0,
+          "libero_pro_spatial_task": 72.4,
+          "libero_pro_avg": 43.7
+        },
+        "real_world": {
+          "ur10e_utensils_in_bowl": 55.0,
+          "ur10e_utensils_in_tray": 90.0,
+          "ur10e_plushie_in_bowl": 100.0,
+          "ur10e_stack_blocks": 65.0,
+          "fr3_utensils_in_tray": 80.0,
+          "fr3_sponge_wash_plate": 100.0,
+          "fr3_mug_pour": 65.0,
+          "fr3_sweep_to_dustpan": 55.0,
+          "fr3_tshirt_fold": 50.0,
+          "bimanual_tshirt_fold": 30.0,
+          "bimanual_silverware_sort": 60.0,
+          "physical_mean": 68.0
+        }
+      },
       "eval_conditions": {
-        "libero_pro": "Adaptive configuration (3 alternative SAM3 prompts/object), 2 Gemini 3.1 Pro calls per trial, simulator depth, CaP-Agent0 S2 protocol; goal-task cell (14.0) is where adaptive prompts backfire vs fair baseline (22.4)",
         "real_world": "1 Gemini 3.5 Flash call per trial, single-prompt SAM3, same BT grammar across all three embodiments with per-platform IK/gripper/workspace tuning",
+        "libero_pro": "Adaptive configuration (3 alternative SAM3 prompts/object), 2 Gemini 3.1 Pro calls per trial, simulator depth, CaP-Agent0 S2 protocol; goal-task cell (14.0) is where adaptive prompts backfire vs fair baseline (22.4)",
         "cap_bench": "CaP-Bench (robosuite, 100 trials/task): Lift 100, Stack 97, CubeRestack 100, Wipe 60, NutAssemblySquare 0 (shared OSC z-bound kinematic ceiling), TwoArmLift 63, TwoArmHandover 24"
       },
       "ai_review": {
@@ -16073,8 +16956,24 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
-      "eval_conditions": {},
+      "benchmarks": {
+        "real_world": {
+          "agibot_offline_heavy_acc": 30.7,
+          "agibot_offline_heavy_acc_per_dim": 44.7,
+          "agibot_offline_light_acc": 28.6,
+          "agibot_offline_light_acc_per_dim": 47.6,
+          "realworld_replay_pick_place_sr": 53.8,
+          "realworld_replay_microwave_sr": 42.3,
+          "realworld_replay_sink_cleaning_sr": 46.2,
+          "realworld_replay_avg_sr": 47.4,
+          "video_plan_grasp_sr": 53.8,
+          "annotator_pi05_baseline": 35.3,
+          "annotator_pi05_with_stableidm": 52.9
+        }
+      },
+      "eval_conditions": {
+        "real_world": "AgiBot benchmark (100 episodes), real-robot dual-arm open-loop, monocular video-generation deployment"
+      },
       "ai_review": {
         "verified": true
       },
@@ -16673,10 +17572,15 @@
         "robocasa": {
           "robocasa_gr1_pick_place": 67.3,
           "robocasa_gr1_articulated": 64.7
+        },
+        "real_world": {
+          "iron_pick_and_place": 78.0,
+          "iron_pouring": 75.0
         }
       },
       "eval_conditions": {
-        "robocasa": "Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)"
+        "robocasa": "Full training data (24×1000 trajs); VLA-UniT (Qwen2.5-VL)",
+        "real_world": "IRON-R01-1.11 humanoid; few-shot robot data + EgoDex human co-training"
       },
       "robocasa_avg": 66.0,
       "ai_review": {
@@ -16756,8 +17660,81 @@
       },
       "model_type": "value_model",
       "inference_hz": 2.0,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_robot_sandwich_assembly": {
+          "iwr_control_completion_pct": 70.0,
+          "vf_mask_completion_pct": 85.0,
+          "vf_awr_completion_pct": 85.0,
+          "iwr_control_second_sandwich_pct": 60.0,
+          "vf_mask_second_sandwich_pct": 90.0,
+          "vf_awr_second_sandwich_pct": 80.0,
+          "iwr_control_mean_subtask": 0.91,
+          "vf_mask_mean_subtask": 0.94,
+          "vf_awr_mean_subtask": 0.96,
+          "iwr_control_clean_cells_pct": 88.0,
+          "vf_mask_clean_cells_pct": 88.0,
+          "vf_awr_clean_cells_pct": 92.0,
+          "iwr_control_catastrophic_cells": 7,
+          "vf_mask_catastrophic_cells": 2,
+          "vf_awr_catastrophic_cells": 2,
+          "iwr_control_repeat_picks": 4,
+          "vf_mask_repeat_picks": 0,
+          "vf_awr_repeat_picks": 0
+        },
+        "value_prediction": {
+          "validation_mse": 0.0003,
+          "validation_mae": 0.015,
+          "mean_v_success": 0.537,
+          "mean_v_fail": 0.0,
+          "separation_delta_v": 0.537
+        },
+        "label_shape_ablation": {
+          "mc_smooth_val_loss": 0.00051,
+          "mc_smooth_rollout_mae": 0.024,
+          "mc_smooth_delta_v": 0.143,
+          "outcome_scaled_val_loss": 0.00192,
+          "outcome_scaled_rollout_mae": 0.058,
+          "outcome_scaled_delta_v": 0.309,
+          "cliff_val_loss": 0.00202,
+          "cliff_rollout_mae": 0.047,
+          "cliff_delta_v": 0.254,
+          "c_linear_val_loss": 0.0019,
+          "c_linear_rollout_mae": 0.058,
+          "c_linear_delta_v": 0.249,
+          "c_late_val_loss": 0.00178,
+          "c_late_rollout_mae": 0.048,
+          "c_late_delta_v": 0.25
+        },
+        "failure_detection": {
+          "manual_only_average_precision": 0.38,
+          "manual_plus_intervention_average_precision": 0.82,
+          "manual_only_auroc": 0.69,
+          "manual_plus_intervention_auroc": 0.94,
+          "manual_only_detected_before_takeover_pct": 35.0,
+          "manual_plus_intervention_detected_before_takeover_pct": 95.0,
+          "manual_only_median_lead_s": 1.2,
+          "manual_plus_intervention_median_lead_s": 2.4
+        },
+        "serving_cost": {
+          "pi0_5_isolated_ms": 58.6,
+          "pi0_5_concurrent_ms": 84.3,
+          "pi0_5_concurrent_p90_ms": 100.6,
+          "value_tick_fp32_ms": 266.0,
+          "value_tick_batched_tf32_ms": 88.0,
+          "value_tick_batched_bf16_ms": 52.0,
+          "encode_original_ms": 349.8,
+          "encode_batched_fp32_ms": 172.0,
+          "encode_batched_tf32_ms": 129.9,
+          "encode_batched_bf16_ms": 85.1,
+          "encode_bf16_speedup_x": 4.1
+        }
+      },
       "eval_conditions": {
+        "real_robot_sandwich_assembly": "Bimanual station with two 7-DoF Trossen WidowX arms and six ingredient bins; pi0.5-family VLA prompted 'make a sandwich'; six ordered stages (bottom_bun, patty, cheese, tomato, lettuce, top_bun). All three variants train on the same 985k-frame merged set (134-episode HIL corrections with no-motion operator-pause frames excised, merged 2:1 with replayed base autonomous data) and keep the same w=9 floor on human-takeover frames; only the weight on autonomous frames of takeover episodes differs. vf-mask zeroes the 9.6% of autonomous frames V_bin flags as failing; vf-awr scales them by clip(exp(A_t / 0.3), 0.1, 9) with A_t = V_mc(t+50) - V_mc(t) (median weight 1.03, range 0.13-7.61, effective intervention gradient share 0.459 matched to the control's ~0.46). ValueFormer supplies only the per-frame training weight and is not part of the policy at inference.",
+        "value_prediction": "By-episode train/val split (181,421 / 31,681 samples, no frame leakage). MSE reported as a measurement only; training uses BCE throughout.",
+        "label_shape_ablation": "Legacy four-view single-head configuration (ViT-L/16 backbone, 32-frame/16 s window) so that only the V_mc label shape varies; evaluated on a held-out rollout set of 12 successes and 9 failures. Rollout MAE here is not comparable to the validation MAE of Table II.",
+        "failure_detection": "Best configuration is seq_len=16 with intervention share 0.2, deployed as a 2-seed ensemble. Lead is measured from the raw takeover flag onset, not the shifted target. Caveat stated by the authors: the held-out ground truth is itself intervention-derived (with the lambda=1.5 s reaction-lag correction), so it measures agreement with where the operator intervened rather than an independent notion of failure.",
+        "serving_cost": "Cost is dominated by six frozen DINOv3 ViT-L/16 forward passes at 518 px; the causal transformer head is sub-millisecond. Batched FP32 output is numerically identical to the per-view path (max |delta| = 3.5e-5); bf16 shifts the value output by <1e-3 with V_bin unchanged to four decimals. bf16 re-validation on the 24-episode held-out HIL set: cosine similarity to FP32 embeddings mean 0.99994 / min 0.99969, AUROC 0.943 -> 0.942, AP 0.818 -> 0.816, median lead 2.4 s unchanged; only a more sensitive trigger loses one of twenty onset episodes (95% -> 90%) at +0.2 false alarms per minute. Absolute times in Table VIII are inflated ~1.3x because the policy server was resident.",
         "task": "Real-robot bimanual sandwich assembly on a live restaurant-style station; success requires all six ingredients placed correctly and the sandwich closed. Common failure modes: retry (failed grasp then recovery), double-placement (two patties), wrong-stage (scratching the cheese bin without grasping), and stall.",
         "ab_protocol": "10 trials of two consecutive sandwiches with no scene reset between them, deliberately chosen because a single sandwich from a freshly staged station is already reliably achievable and discriminates poorly; the second-sandwich rate acts as hard-example mining and is the most sensitive column.",
         "no_simulation_benchmarks": "No LIBERO, CALVIN, SimplerEnv, RoboTwin, RLBench, or RoboCasa results. Deformable and granular food (folding lettuce, sticking cheese, tipping patties) is precisely what current simulators reproduce least faithfully, so all evaluation is on real hardware.",
@@ -16874,8 +17851,18 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "twenty_task_avg_success": 0.598
+        },
+        "simulation": {
+          "robotwin_umi_avg": 0.683,
+          "libero_umi_avg": 0.943,
+          "overall_avg": 0.813
+        }
+      },
       "eval_conditions": {
+        "real_world": "RealMan/AC one/Galaxea R1 Pro dual-arm platforms with wrist-mounted fisheye cameras; same validated UMI dataset across methods",
         "simulation": "RoboTwin-UMI and LIBERO-UMI: fisheye-adapted versions of original benchmarks reconstructed with wrist-only fisheye observations to match UMI deployment distribution",
         "real_robot": "FastUMI Pro handheld for collection; deployment on RealMan, AC one, Galaxea R1 Pro (dual-arm). Multi-machine Zenoh-based distributed inference with temporal action ensembling and routing"
       },
@@ -17233,7 +18220,23 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "s1_seen_back_rotate": 94.4,
+          "s1_transfer_back_rotate": 91.7,
+          "s2_seen_plate_bowl": 94.4,
+          "s2_transfer_plate_bowl": 94.4,
+          "s3_seen_poke_nudge": 97.2,
+          "s3_transfer_poke_nudge": 91.7,
+          "s4_seen_drop_forward": 94.4,
+          "s4_transfer_drop_forward": 88.9,
+          "avg_seen_success": 95.1,
+          "avg_skill_transfer_success": 91.7,
+          "robustness_s1_distractors_seen": 83.3,
+          "robustness_s1_distractors_transfer": 77.8,
+          "robustness_s2_unseen_objects_transfer": 83.3
+        }
+      },
       "eval_conditions": {
         "real_world": "Real-world SO-101 leader/follower with ZED2i camera. Skill transfer = applying a skill from one trained (skill, object) pair to the other object in the same scenario (zero-shot). Robustness experiments add 3-5 distractor objects (S1) or replace target objects with completely unseen ones (S2, e.g. Coca Cola can, Fanta can, tomato, strawberry)."
       },
@@ -17271,8 +18274,18 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "internal": {
+          "diverse_manipulation_task_progress": 75.86,
+          "reasoning_manipulation_task_progress": 71.6,
+          "co3dv2_point_err": 0.271,
+          "co3dv2_depth_err": 0.132,
+          "co3dv2_auc_5": 0.21,
+          "co3dv2_auc_30": 0.727
+        }
+      },
       "eval_conditions": {
+        "internal": "real-robot tabletop bimanual; Task Progress dense 0-100 metric",
         "real_robot": "high-performance tabletop bimanual arms; synchronized multi-view; Task Progress 0-100 with task-specific rubrics",
         "ood": "50 OOD tasks with novel object-verb pairings, paraphrased instructions"
       },
@@ -17311,8 +18324,26 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "navsim_v1_pdms": 88.3,
+          "navsim_v1_pdms_with_selection": 91.1,
+          "navsim_v2_epdms": 88.6,
+          "navsim_v2_epdms_with_selection": 90.7,
+          "navsim_v1_pdms_unified_multitask": 87.44,
+          "navsim_v2_epdms_unified_multitask": 87.5,
+          "bench2drive_driving_score": 78.93,
+          "bench2drive_success_rate": 49.55,
+          "bench2drive_multi_ability_mean": 60.58,
+          "drivebench_gpt_score": 48.8,
+          "lingoqa_lingo_judge": 65.8,
+          "coco_map": 36.3,
+          "decode_tps": 124.8,
+          "decode_tps_optimized": 673.4
+        }
+      },
       "eval_conditions": {
+        "driving": "fine-tuned; task-specific protocol for NAVSIM/Bench2Drive planning, unified multi-task protocol (single frozen checkpoint) for DriveBench/LingoQA/COCO and the *_unified_multitask entries",
         "navsim": "fine-tuned, open-loop planning on NAVSIM v1/v2 (PDMS / EPDMS, original v2 protocol)",
         "bench2drive": "fine-tuned, closed-loop CARLA evaluation (Driving Score, Success Rate, multi-ability tests)",
         "drivebench": "unified multi-task protocol, single frozen checkpoint, GPT Score",
@@ -17358,21 +18389,44 @@
       "model_type": "vla",
       "inference_hz": null,
       "benchmarks": {
+        "libero": {
+          "libero_plus_total_pi0": 72.8,
+          "libero_plus_total_pi0_5": 73.7,
+          "libero_plus_total_openvla_oft": 74.0
+        },
         "calvin": {
           "calvin_avg": 4.748
         },
         "metaworld": {
           "metaworld_avg": 83.4
+        },
+        "real_world": {
+          "carrot_pick_place": 88.0,
+          "banana_pick_place": 76.0,
+          "pepper_pick_place": 86.0,
+          "cloth_folding": 76.0,
+          "towel_folding": 70.0,
+          "stovetop_cleaning": 66.0,
+          "conveyor_sushi_picking": 48.0
+        },
+        "maniskill": {
+          "ind_avg_pi0": 84.4,
+          "ind_avg_pi0_5": 91.9,
+          "ind_avg_openvla_oft": 99.0,
+          "ood_avg_pi0": 51.5,
+          "ood_avg_pi0_5": 64.4,
+          "ood_avg_openvla_oft": 77.9
         }
       },
       "eval_conditions": {
         "calvin": "RL fine-tuned, average task completion length over 5 sequential subtasks",
         "metaworld": "RL fine-tuned, final success rate",
+        "real_world": "WidowX-250S, off-policy RL, 50 trials per task",
         "maniskill": "RL fine-tuned from few-shot SFT, sparse 0/1 reward, WCM critic",
-        "libero_plus": "one-shot SFT initialization plus ~250 RL steps, robustness perturbation suites",
-        "real_world": "WidowX-250S, off-policy RL, 50 trials per task"
+        "libero_plus": "one-shot SFT initialization plus ~250 RL steps, robustness perturbation suites"
       },
       "calvin_avg": 4.75,
+      "metaworld_avg": 83.4,
       "ai_review": {
         "verified": true
       },
@@ -17409,7 +18463,20 @@
       },
       "model_type": "vla",
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "driving": {
+          "navsimv1_pdms": 92.9,
+          "navsimv1_nc": 99.4,
+          "navsimv1_dac": 98.8,
+          "navsimv1_ttc": 98.5,
+          "navsimv1_comfort": 100.0,
+          "navsimv1_ep": 87.1,
+          "navsimv2_epdms": 85.9,
+          "navsimv2_nc": 98.8,
+          "navsimv2_dac": 96.6,
+          "navsimv2_ttc": 98.2
+        }
+      },
       "eval_conditions": {
         "driving": "fine-tuned, camera-only, end-to-end (NAVSIM v1/v2 navtest)"
       },
@@ -17523,7 +18590,13 @@
       },
       "model_type": null,
       "inference_hz": null,
-      "benchmarks": {},
+      "benchmarks": {
+        "real_world": {
+          "safety_score": 85.83,
+          "compliance_score": 87.08,
+          "collision_rate_pct": 0.191
+        }
+      },
       "eval_conditions": {
         "real_world": "real-world (XPeng proprietary driving dataset), open-loop trajectory prediction + closed-loop safety metrics"
       },
@@ -17652,13 +18725,23 @@
           "robocasa365_atomic": 80.2,
           "robocasa365_composite_seen": 57.1,
           "robocasa365_composite_unseen": 32.1
+        },
+        "real_world": {
+          "vlabench_avg_sr": 59.1,
+          "vlabench_avg_ps": 70.3,
+          "vlabench_avg_is": 69.9,
+          "robodojo_avg_score": 20.07,
+          "robodojo_avg_sr": 13.93,
+          "downstream_finetune_avg_sr": 75.0,
+          "downstream_finetune_avg_progress": 90.0,
+          "ootb_unseen_env_sr": 79.0
         }
       },
       "eval_conditions": {
         "robocasa": "fine-tuned (RoboCasa 300 demos, RoboCasa365 100 demos/task)",
+        "real_world": "out-of-the-box in unseen environments + low-data downstream fine-tuning (<10h/task)",
         "vlabench": "trained on In-distribution track, evaluated across 5 tracks with CoT labeling",
-        "robodojo": "official protocol, no history observation used",
-        "real_world": "out-of-the-box in unseen environments + low-data downstream fine-tuning (<10h/task)"
+        "robodojo": "official protocol, no history observation used"
       },
       "robocasa_avg": 74.5,
       "ai_review": {

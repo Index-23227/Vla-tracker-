@@ -146,7 +146,9 @@ export default function ModelDetailModal({ model, onClose }) {
   if (!model) return null
 
   const benchEntries = Object.entries(model.benchmarks || {})
-  const benchCount = benchEntries.length
+  // Blocks like real_world or driving are shown but are not tracked benchmarks,
+  // so they must not inflate the N/M coverage count.
+  const benchCount = benchEntries.filter(([k]) => k in BENCHMARKS).length
   const totalBenchmarks = Object.keys(BENCHMARKS).length
   const hasReview = !!model.ai_review
 

@@ -182,7 +182,10 @@ export default function LeaderboardTable({ models, onModelClick }) {
                     <div className="flex items-center gap-1.5">
                       <span className="text-[11px] text-zinc-500">{m.organization}</span>
                       {(() => {
-                        const count = Object.keys(m.benchmarks || {}).length
+                        // Only tracked benchmarks count toward the N/M badge;
+                        // models also carry blocks like real_world or driving.
+                        const count = Object.keys(m.benchmarks || {})
+                          .filter(k => k in BENCHMARKS).length
                         return (
                           <span className={`text-[9px] tabular-nums ${count >= 3 ? 'text-emerald-600' : count >= 1 ? 'text-zinc-600' : 'text-zinc-700'}`}>
                             {count}/{Object.keys(BENCHMARKS).length}
