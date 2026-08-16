@@ -1,0 +1,79 @@
+name: StellaVLA
+full_name: "StellaVLA: In-Context Structured Demonstration for Generalizable Vision-Language-Action Models"
+organization: "StellarEdge AI Technical Team"
+date: "2026-08-12"
+paper_url: https://arxiv.org/abs/2608.11671
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct vision-language model"
+  llm: "Qwen3-VL-4B-Instruct"
+  action_head: "OpenVLA-OFT-style two-block residual MLP action expert regressing continuous action chunks under an L1 objective; a parallel autoregressive spatial-language expert (native LM head) supervises subtask + 2D/3D steering rationales during training only and is stripped at inference"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "~4B (Qwen3-VL-4B backbone) + lightweight MLP action expert"
+  key_innovation: >
+    In-Context Imitation Learning with structured demonstrations. An automated offline pipeline
+    (Qwen3-VL as annotator) converts raw expert trajectories into rationale-augmented segments:
+    high-level semantic rationales (sub-goal descriptions) plus fine-grained kinematic rationales
+    verbalized by a deterministic operator Phi as 3D workspace displacement and its 2D image-plane
+    projection, at zero human-annotation cost. A retrieved top-1 demonstration (retrieved purely by
+    language embedding of the task instruction) forms a context prefix. A parallel dual-training
+    design jointly optimizes L_act (L1 regression) and L_lang (cross-entropy on rationales, lambda=0.3)
+    over a shared latent; the two experts read the same hidden state and never causally depend on each
+    other. At inference the spatial-language expert is removed entirely and the immutable demonstration
+    prefix is KV-cached, so structured reasoning costs no autoregressive decoding latency.
+
+training:
+  dataset: "LIBERO (simulation); VLA-Arena L0 data only; real-robot pool of 125 teleoperated AgileX Piper episodes (71,702 frames) across 4 tabletop tasks, plus 26 XR human-hand takes and 26 frame-aligned XR-to-Piper retargeted trajectories (10,996 frames each) used as retrieval context only"
+  method: "Full fine-tuning from Qwen3-VL-4B-Instruct with leave-one-out top-1 retrieval; joint action + spatial-language objective (lambda = 0.3); 2D gripper-path dropout 0.5; context-demonstration dropout 0.0 (LIBERO/LIBERO-Plus) or 0.5 (VLA-Arena, real robot)"
+  optimizer: "AdamW (beta 0.9/0.95, weight decay 1e-8), backbone LR 5e-6, action-expert LR 1e-4, cosine schedule with 500 warmup steps, grad clip 1.0, bf16, DeepSpeed ZeRO-2"
+  steps: "30k steps, global batch size 128"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.0
+    libero_goal: 99.6
+    libero_long: 96.8
+    libero_avg: 98.8
+    libero_plus_orig: 98.8
+    libero_plus_camera: 70.5
+    libero_plus_robot: 74.8
+    libero_plus_noise: 92.8
+    libero_plus_layout: 79.3
+    libero_plus_background: 95.2
+    libero_plus_light: 95.7
+    libero_plus_language: 95.3
+    libero_plus_avg: 85.1
+    source: "StellaVLA paper (arXiv 2608.11671) Table 1 (LIBERO, 500 rollouts/suite) and Table 3 (LIBERO-Plus zero-shot, task-count-weighted mean excluding Orig.)"
+    date_reported: "2026-08-12"
+    eval_condition: "fine-tuned on LIBERO; LIBERO-Plus evaluated zero-shot without retraining"
+  real_world:
+    real_in_distribution_avg: 85.0
+    real_ood_l1_avg: 75.0
+    source: "StellaVLA paper Figure 4 / Sec 4.3 (AgileX Piper 6-DoF, 4 tabletop tasks, 10 rollouts per cell; 40 rollouts in distribution, 20 under OOD-L1). No method completes the unseen OOD-L2 drawer task; StellaVLA scores 1.9/4 average task progress vs 1.5 for pi-0.5 and 1.1 for StarVLA-OFT"
+    date_reported: "2026-08-12"
+    eval_condition: "fine-tuned on 125 teleoperated episodes; cross-source retrieval pool (robot + human-hand + XR-retargeted)"
+
+eval_conditions:
+  libero: "fine-tuned, standard 4-suite protocol; LIBERO-Plus perturbations zero-shot from the LIBERO checkpoint"
+  real_world: "AgileX Piper, in-distribution and OOD-L1 object-attribute perturbation, 10 rollouts per cell"
+
+tags:
+  - vla
+  - in-context-learning
+  - retrieval-augmented
+  - cross-embodiment
+  - language-as-action
+  - test-time-adaptation
+  - kv-cache
+  - qwen3-vl
+  - libero
+  - libero-plus
+  - vla-arena
+  - real-world
+  - 4B

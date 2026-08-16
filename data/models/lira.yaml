@@ -1,33 +1,75 @@
-# DRAFT - Auto-generated from arXiv scan. Needs human review.
 # Paper: LIRA: Local Cross-Layer Information Routing for Vision-Language-Action Decoding
 # arXiv: 2608.07596
 
 name: LIRA
 full_name: "LIRA: Local Cross-Layer Information Routing for Vision-Language-Action Decoding"
-organization: "TODO: check paper"
+organization: "Unknown (author affiliations not stated in the arXiv v1 PDF)"
 date: "2026-08-06"
 paper_url: https://arxiv.org/abs/2608.07596
-code_url: null  # TODO: check for GitHub repo
+code_url: null  # "Code and model checkpoints will be released upon publication"
 venue: null
-open_source: false  # TODO: verify
+open_source: false
+model_type: policy
+inference_hz: 186.3
 
 architecture:
-  action_head: "TODO: check paper"
-  action_head_category: other
-  parameters: "TODO"
-  key_innovation: "TODO: Read paper and summarize key contribution in 2-3 sentences."
+  backbone: "Prismatic-style VLM taking a third-person image and a gripper-view image, plus proprioceptive state through a learnable projection"
+  llm: "Qwen2.5-0.5B language backbone (LoRA rank 64 fine-tuning)"
+  action_head: "Action decoder of L Parallel Fusion Blocks (PFBs) initialized by Action Query tokens; each PFB uses Bridge Attention (self-attention + cross-attention) over depth-aligned task-token features, locally routed LIRA Query features and the proprioceptive embedding. A final output head regresses a continuous action chunk of horizon H, trained with an L1 behavior-cloning objective."
+  action_head_category: regression
+  parameters: "0.5B"
+  key_innovation: "LIRA reframes the VLM-to-action interface as depth-aware information routing on top of VLA-Adapter. Instead of conditioning each Parallel Fusion Block on the single matched VLM layer, it appends M=64 learnable LIRA Query tokens to the VLM and gives PFB i a centered local window W_r(i) = {l : |l - i| <= r} of adjacent VLM layers (r=1, i.e. a three-layer window, clipped to two layers at the boundaries), concatenating those LIRA Query features along the token dimension. The routing adds no projection layers and no trainable parameters, leaves backbone, action decoder and training recipe unchanged, and mostly pays off under distribution shift (LIBERO-Plus zero-shot 59.1 -> 78.0)."
+
+training:
+  dataset: "LIBERO (4 suites), LIBERO-Plus (10,030 perturbed tasks, fine-tuned setting only), CALVIN ABC->D (train A/B/C, evaluate D), and self-collected real-world Franka demonstrations via SpaceMouse teleoperation"
+  method: "Supervised continuous-action regression (L1 loss over an action chunk of horizon H), LoRA rank 64, identical objective and recipe as the VLA-Adapter baseline so the comparison isolates the routing change. M=64 LIRA Query tokens, routing window r=1."
+  compute: "Four NVIDIA H100 GPUs, learning rate 1e-4, batch size 16; 12.8 GB training memory at batch size 8"
 
 benchmarks:
   libero:
-    libero_spatial: TODO
-    libero_object: TODO
-    libero_goal: TODO
-    libero_long: TODO
+    libero_spatial: 99.6
+    libero_object: 99.8
+    libero_goal: 98.5
+    libero_long: 97.6
+    libero_avg: 98.9
+    libero_plus_camera: 74.9
+    libero_plus_robot: 51.8
+    libero_plus_language: 82.0
+    libero_plus_light: 96.9
+    libero_plus_background: 90.2
+    libero_plus_noise: 80.5
+    libero_plus_layout: 78.1
+    libero_plus_avg: 78.0
+    source: "LIRA paper (arXiv:2608.07596) Table 2 (LIBERO, 500 trials per suite) and Table 4 (LIBERO-Plus zero-shot transfer, Overall over all 10,030 tasks)"
+    date_reported: "2026-08-06"
+    eval_condition: "LIBERO fine-tuned; libero_plus_* are zero-shot transfer (no LIBERO-Plus fine-tuning)"
   calvin:
-    calvin_abc_d_avg_len: TODO
+    calvin_abc_d_1_5: 98.8
+    calvin_abc_d_2_5: 95.3
+    calvin_abc_d_3_5: 91.0
+    calvin_abc_d_4_5: 85.8
+    calvin_abc_d_5_5: 80.5
+    calvin_abc_d_avg_len: 4.52
+    source: "LIRA paper (arXiv:2608.07596) Table 3, CALVIN ABC->D, 1,000 task sequences"
+    date_reported: "2026-08-06"
+    eval_condition: fine-tuned
 
 eval_conditions:
-  libero: "fine-tuned"
-  calvin: "fine-tuned"
+  libero:
+    setting: "fine-tuned"
+    base_model: "LIRA 0.5B (Prismatic-style VLM + Qwen2.5-0.5B, LoRA), VLA-Adapter architecture with local cross-layer routing"
+    note: "500 trials per LIBERO suite. Controlled baseline VLA-Adapter scores 97.3 avg; VLA-Adapter-Pro 98.5."
+  libero_plus:
+    setting: "zero-shot transfer"
+    base_model: "LIRA 0.5B LIBERO-trained checkpoint, no LIBERO-Plus fine-tuning"
+    note: "Official protocol, one rollout for each of the 10,030 tasks; Overall is task-weighted, not the unweighted mean of the seven categories. With LIBERO-Plus fine-tuning LIRA reaches 82.9 Overall (VLA-Adapter 81.0, OpenVLA-OFT 79.5)."
+  calvin:
+    setting: "fine-tuned"
+    base_model: "LIRA 0.5B trained on CALVIN environments A/B/C"
+    note: "Evaluated on environment D over 1,000 task sequences."
+  real_world:
+    setting: "fine-tuned"
+    base_model: "LIRA 0.5B"
+    note: "Franka Research 3 (7-DoF) with Franka Hand and two Orbbec Gemini 336L cameras; 10 trials per task. Move 10/10, Pick-and-Place 9/10, Collection step2 8/10, Transfer step2 7/10. Authors call these preliminary."
 
-tags: [libero, calvin]
+tags: [libero, libero_plus, calvin, real_robot, vla_adapter, cross_layer_routing, parallel_fusion_block, bridge_attention, qwen2.5-0.5b, lightweight, action_chunking, lora]
