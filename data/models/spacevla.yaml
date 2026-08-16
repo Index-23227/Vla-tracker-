@@ -1,0 +1,48 @@
+name: SpaceVLA
+full_name: "SpaceVLA: Spatially Grounded VLA for Robotic Manipulation with User-Authored Grasp and Place Anchors"
+organization: "Skolkovo Institute of Science and Technology; R&D Center, MWS"
+date: "2026-08-06"
+paper_url: https://arxiv.org/abs/2608.05730
+venue: arXiv preprint
+open_source: false
+model_type: manipulation
+
+architecture:
+  backbone: "OpenVLA-7B (unmodified), fine-tuned with LoRA (r=8, effective batch size 8)"
+  action_head: "OpenVLA discrete action tokenizer predicting tokenized 7-DoF incremental actions (translational deltas, orientation deltas, gripper-width command)"
+  action_head_category: autoregressive
+  parameters: "7B (OpenVLA-7B backbone; LoRA adapter r=8)"
+  key_innovation: "Visual Intent Anchors: user-authored grasp (green) and placement (blue) targets selected in a Unity/XR interface are rendered as disk-shaped image-space binary masks and alpha-composited onto the RGB observation fed to the VLA. The grasp mask is removed after grasp completion, leaving only the placement mask during transport and release. Spatial intent is encoded entirely in the RGB input, so no VLA architectural change is required."
+
+training:
+  data: "200 Unity pick-and-place demonstrations (mug, pot, thermos, saucepan), ~150 RGB frames per episode; episode-level split into 120 training / 80 held-out evaluation episodes; 18,000 anchor-augmented training observations"
+  method: "LoRA fine-tuning of OpenVLA-7B on anchor-augmented RGB observations; action statistics computed on the training split only for normalization; best LoRA adapter selected by validation performance"
+  instruction: "Anchor-conditioned: 'Pick up the object by the green region and place it on the blue region.' No-anchor baseline: 'Pick up the object and place it on the table.'"
+  simulator: "Unity digital twin of a UR3 manipulator, tabletop workspace, fixed camera, local OpenVLA server"
+
+benchmarks:
+  simulation:
+    unity_grasp_success: 95.0
+    unity_placement_success: 91.25
+    unity_full_task_success: 91.25
+    unity_mean_grasp_anchor_distance_cm: 0.5
+    unity_mean_placement_anchor_distance_cm: 0.7
+    unity_mean_event_action_error_cm: 0.6
+    unity_random_anchor_grasp_success: 85.0
+    unity_random_anchor_placement_success: 77.5
+    unity_random_anchor_full_task_success: 77.5
+    unity_random_anchor_grasp_distance_cm: 2.6
+    unity_random_anchor_placement_distance_cm: 3.4
+    unity_random_anchor_mean_event_action_error_cm: 3.0
+    unity_no_anchor_grasp_success: 66.25
+    unity_no_anchor_placement_success: 50.0
+    unity_no_anchor_full_task_success: 50.0
+    source: "SpaceVLA paper Table 1 and Section 4.2 (closed-loop Unity evaluation, 80 held-out episodes)"
+    date_reported: "2026-08-06"
+    eval_condition: fine-tuned
+
+eval_conditions:
+  simulation: "Closed-loop Unity rollouts on 80 held-out episodes (disjoint from the 120 training episodes), no manual intervention or assistive grasping; grasp success requires grasping inside the green region, lifting at least 5 cm and holding stably; placement success requires full release with object center inside the blue region, stable for at least 1 s"
+  anchor_following: "Separate qualitative test with anchors placed at arbitrary workspace locations, including positions away from any object; the robot redirected its gripper toward the specified locations"
+
+tags: [openvla-based, lora, visual-prompting, anchor-conditioned, xr, mixed-reality, human-robot-interaction, unity, simulation, pick-and-place]

@@ -28,19 +28,29 @@ architecture:
 benchmarks:
   rlbench:
     rlbench_18tasks: 93.7
+    source: 'arXiv:2608.05042 Table I (BridgeVLA++ row)'
+    date_reported: '2026-08-05'
+    eval_condition: RLBench 18 tasks, 100 demos/task, 5 seeds x 25 episodes
+  colosseum:
     colosseum_avg: 65.2
     colosseum_all_perturb: 38.9
+    source: 'arXiv:2608.05042 Table III (BridgeVLA++ row)'
+    date_reported: '2026-08-05'
+    eval_condition: COLOSSEUM 14 perturbation settings, 3 repetitions
+  gembench:
     gembench_avg: 51.1
     gembench_l1: 88.6
     gembench_l2: 68.9
     gembench_l3: 38.5
     gembench_l4: 8.2
-    memorybench_avg: 99.7
-    source: 'arXiv:2608.05042 Tables I, III, XI, XII (BridgeVLA++ rows)'
+    source: 'arXiv:2608.05042 Table XI (BridgeVLA++ row)'
     date_reported: '2026-08-05'
-    eval_condition: >-
-      RLBench 18 tasks, 100 demos/task, 5 seeds x 25 episodes; COLOSSEUM 14 settings,
-      3 repetitions; GemBench 4 levels, 5 seeds; MemoryBench 3 tasks, 5 seeds
+    eval_condition: GemBench 4 generalization levels, 5 seeds
+  memorybench:
+    memorybench_avg: 99.7
+    source: 'arXiv:2608.05042 Table XII (BridgeVLA++ row)'
+    date_reported: '2026-08-05'
+    eval_condition: MemoryBench 3 tasks, 5 seeds
   rmbench:
     rmbench_overall_avg: 96.0
     rmbench_m1_avg: 95.2

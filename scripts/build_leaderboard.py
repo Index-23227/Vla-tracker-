@@ -243,7 +243,11 @@ def compute_rlbench_avg(benchmarks: dict) -> float | None:
     rlbench = benchmarks.get("rlbench")
     if not rlbench:
         return None
-    return declared(rlbench, "rlbench_avg", "average") or mean_of_parts(rlbench)
+    # rlbench_18tasks is the standard 18-task protocol and is how four models
+    # headline their score; without it the mean swept in COLOSSEUM / GemBench /
+    # MemoryBench suites that happen to share the block.
+    return (declared(rlbench, "rlbench_avg", "rlbench_18tasks", "average")
+            or mean_of_parts(rlbench))
 
 
 

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-16T15:22:05.966120",
-  "num_models": 385,
+  "generated_at": "2026-08-16T15:24:13.232179",
+  "num_models": 387,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -11401,6 +11401,9 @@
       "eval_conditions": {
         "driving": "fine-tuned, end-to-end open-loop planning (NAVSIM v1 navtest / NAVSIM v2)"
       },
+      "ai_review": {
+        "verified": true
+      },
       "rank": 213
     },
     {
@@ -11432,20 +11435,26 @@
       "inference_hz": 1.75,
       "benchmarks": {
         "rlbench": {
-          "rlbench_18tasks": 93.7,
-          "colosseum_avg": 65.2,
-          "colosseum_all_perturb": 38.9,
-          "gembench_avg": 51.1,
-          "gembench_l1": 88.6,
-          "gembench_l2": 68.9,
-          "gembench_l3": 38.5,
-          "gembench_l4": 8.2,
-          "memorybench_avg": 99.7
+          "rlbench_18tasks": 93.7
         },
         "real_world": {
           "franka_basic_avg": 96.9,
           "franka_basic_3demos": 95.4,
           "dobot_memory_tasks_avg": 93.3
+        },
+        "colosseum": {
+          "colosseum_avg": 65.2,
+          "colosseum_all_perturb": 38.9
+        },
+        "gembench": {
+          "gembench_avg": 51.1,
+          "gembench_l1": 88.6,
+          "gembench_l2": 68.9,
+          "gembench_l3": 38.5,
+          "gembench_l4": 8.2
+        },
+        "memorybench": {
+          "memorybench_avg": 99.7
         },
         "rmbench": {
           "rmbench_overall_avg": 96.0,
@@ -11456,9 +11465,15 @@
       "eval_conditions": {
         "rlbench": "fine-tuned",
         "real_world": "fine-tuned",
+        "colosseum": "COLOSSEUM 14 perturbation settings, 3 repetitions",
+        "gembench": "GemBench 4 generalization levels, 5 seeds",
+        "memorybench": "MemoryBench 3 tasks, 5 seeds",
         "rmbench": "fine-tuned"
       },
-      "rlbench_avg": 61.42,
+      "rlbench_avg": 93.7,
+      "ai_review": {
+        "verified": true
+      },
       "rank": 214
     },
     {
@@ -16792,14 +16807,17 @@
       "inference_hz": null,
       "benchmarks": {
         "rlbench": {
-          "rlbench_18tasks": 86.8,
-          "memorybench": 94.3
+          "rlbench_18tasks": 86.8
+        },
+        "memorybench": {
+          "memorybench_avg": 94.3
         }
       },
       "eval_conditions": {
-        "rlbench": "fine-tuned"
+        "rlbench": "fine-tuned",
+        "memorybench": "fine-tuned"
       },
-      "rlbench_avg": 90.55,
+      "rlbench_avg": 86.8,
       "ai_review": {
         "verified": true
       },
@@ -17219,6 +17237,60 @@
       "rank": 341
     },
     {
+      "name": "SpaceVLA",
+      "organization": "Skolkovo Institute of Science and Technology; R&D Center, MWS",
+      "date": "2026-08-06",
+      "paper_url": "https://arxiv.org/abs/2608.05730",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "openvla-based",
+        "lora",
+        "visual-prompting",
+        "anchor-conditioned",
+        "xr",
+        "mixed-reality",
+        "human-robot-interaction",
+        "unity",
+        "simulation",
+        "pick-and-place"
+      ],
+      "architecture": {
+        "backbone": "OpenVLA-7B (unmodified), fine-tuned with LoRA (r=8, effective batch size 8)",
+        "llm": null,
+        "action_head": "OpenVLA discrete action tokenizer predicting tokenized 7-DoF incremental actions (translational deltas, orientation deltas, gripper-width command)",
+        "action_head_category": "autoregressive",
+        "parameters": "7B (OpenVLA-7B backbone; LoRA adapter r=8)"
+      },
+      "model_type": "manipulation",
+      "inference_hz": null,
+      "benchmarks": {
+        "simulation": {
+          "unity_grasp_success": 95.0,
+          "unity_placement_success": 91.25,
+          "unity_full_task_success": 91.25,
+          "unity_mean_grasp_anchor_distance_cm": 0.5,
+          "unity_mean_placement_anchor_distance_cm": 0.7,
+          "unity_mean_event_action_error_cm": 0.6,
+          "unity_random_anchor_grasp_success": 85.0,
+          "unity_random_anchor_placement_success": 77.5,
+          "unity_random_anchor_full_task_success": 77.5,
+          "unity_random_anchor_grasp_distance_cm": 2.6,
+          "unity_random_anchor_placement_distance_cm": 3.4,
+          "unity_random_anchor_mean_event_action_error_cm": 3.0,
+          "unity_no_anchor_grasp_success": 66.25,
+          "unity_no_anchor_placement_success": 50.0,
+          "unity_no_anchor_full_task_success": 50.0
+        }
+      },
+      "eval_conditions": {
+        "simulation": "Closed-loop Unity rollouts on 80 held-out episodes (disjoint from the 120 training episodes), no manual intervention or assistive grasping; grasp success requires grasping inside the green region, lifting at least 5 cm and holding stably; placement success requires full release with object center inside the blue region, stable for at least 1 s",
+        "anchor_following": "Separate qualitative test with anchors placed at arbitrary workspace locations, including positions away from any object; the robot redirected its gripper toward the specified locations"
+      },
+      "rank": 342
+    },
+    {
       "name": "SPARK",
       "organization": "Case Western Reserve University",
       "date": "2026-06-29",
@@ -17285,7 +17357,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 342
+      "rank": 343
     },
     {
       "name": "SpikeVLA",
@@ -17322,7 +17394,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 343
+      "rank": 344
     },
     {
       "name": "SSAA",
@@ -17366,7 +17438,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 344
+      "rank": 345
     },
     {
       "name": "StableIDM",
@@ -17415,7 +17487,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 345
+      "rank": 346
     },
     {
       "name": "STARRY",
@@ -17455,7 +17527,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 346
+      "rank": 347
     },
     {
       "name": "StereoPolicy",
@@ -17495,7 +17567,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 347
+      "rank": 348
     },
     {
       "name": "SuSIE",
@@ -17526,7 +17598,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 348
+      "rank": 349
     },
     {
       "name": "Tabero",
@@ -17576,7 +17648,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 349
+      "rank": 350
     },
     {
       "name": "TacCoRL",
@@ -17616,7 +17688,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 350
+      "rank": 351
     },
     {
       "name": "TacVLA",
@@ -17651,7 +17723,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 351
+      "rank": 352
     },
     {
       "name": "TAP",
@@ -17701,7 +17773,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 352
+      "rank": 353
     },
     {
       "name": "TEMPO",
@@ -17750,7 +17822,53 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 353
+      "rank": 354
+    },
+    {
+      "name": "Temporal-GRPO",
+      "organization": "Institute of Software, Chinese Academy of Sciences / University of Chinese Academy of Sciences",
+      "date": "2026-08-13",
+      "paper_url": "https://arxiv.org/abs/2608.13026",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "RL",
+        "GRPO",
+        "reinforcement-learning",
+        "post-training",
+        "credit-assignment",
+        "long-horizon",
+        "robotwin",
+        "libero",
+        "openvla-oft"
+      ],
+      "architecture": {
+        "backbone": null,
+        "llm": null,
+        "action_head": "Outcome-driven GRPO post-training with stage-conditioned temporal credit assignment. An ordered sequence of detectable task stages m1 -> ... -> mK is generated from the task instruction and initial observation by a frozen RynnBrain-4B embodied planner plus a Stage Compiler; a relation detector aligns each rollout with stage action intervals B_i,k = (T_i,k-1, T_i,k]; group-relative advantages are computed only over rollouts sharing the prerequisite stage (entered-stage gating V_i,k) and assigned solely to the corresponding interval, giving a piecewise temporal advantage A_i,t inside the standard clipped GRPO objective.",
+        "action_head_category": "autoregressive",
+        "parameters": "7B (OpenVLA-OFT policy; frozen RynnBrain-4B used only for stage generation during post-training)"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_long": 99.1
+        },
+        "robotwin_v2": {
+          "short_horizon": 73.2,
+          "medium_horizon": 79.0,
+          "long_and_extra_long_horizon": 75.2,
+          "robotwin_v2_avg": 75.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "LIBERO-Long only; controlled credit-assignment analysis and ablations; 3 seeds",
+        "robotwin_v2": "RL post-training on RoboTwin 2.0 tasks; matched interaction budgets; 3 seeds"
+      },
+      "robotwin_v2_avg": 75.8,
+      "rank": 355
     },
     {
       "name": "TinyVLA",
@@ -17782,7 +17900,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 354
+      "rank": 356
     },
     {
       "name": "TraceVLA",
@@ -17821,7 +17939,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 355
+      "rank": 357
     },
     {
       "name": "TTT-VLA",
@@ -17882,7 +18000,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 356
+      "rank": 358
     },
     {
       "name": "TwinBrainVLA",
@@ -17920,7 +18038,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 357
+      "rank": 359
     },
     {
       "name": "UniDex",
@@ -17961,7 +18079,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 358
+      "rank": 360
     },
     {
       "name": "UniDriveVLA",
@@ -17997,7 +18115,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 359
+      "rank": 361
     },
     {
       "name": "UniPi",
@@ -18027,7 +18145,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 360
+      "rank": 362
     },
     {
       "name": "UniT",
@@ -18073,7 +18191,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 361
+      "rank": 363
     },
     {
       "name": "UP-VLA",
@@ -18106,7 +18224,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 362
+      "rank": 364
     },
     {
       "name": "ValueFormer",
@@ -18232,7 +18350,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 363
+      "rank": 365
     },
     {
       "name": "VIA",
@@ -18271,7 +18389,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 364
+      "rank": 366
     },
     {
       "name": "VILAS",
@@ -18301,7 +18419,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 365
+      "rank": 367
     },
     {
       "name": "VISTA",
@@ -18356,7 +18474,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 366
+      "rank": 368
     },
     {
       "name": "VLA-RL",
@@ -18388,7 +18506,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 367
+      "rank": 369
     },
     {
       "name": "VLA-ATTC",
@@ -18426,7 +18544,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 368
+      "rank": 370
     },
     {
       "name": "VLA-Pro",
@@ -18476,7 +18594,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 369
+      "rank": 371
     },
     {
       "name": "VLAs-as-Tools",
@@ -18525,7 +18643,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 370
+      "rank": 372
     },
     {
       "name": "Vlaser",
@@ -18575,7 +18693,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 371
+      "rank": 373
     },
     {
       "name": "VLGA",
@@ -18618,7 +18736,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 372
+      "rank": 374
     },
     {
       "name": "VP-VLA",
@@ -18672,7 +18790,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 373
+      "rank": 375
     },
     {
       "name": "w2VLA",
@@ -18730,7 +18848,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 374
+      "rank": 376
     },
     {
       "name": "WALL-WM",
@@ -18779,7 +18897,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 375
+      "rank": 377
     },
     {
       "name": "WAM-Diff2",
@@ -18840,7 +18958,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 376
+      "rank": 378
     },
     {
       "name": "WCM",
@@ -18917,7 +19035,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 377
+      "rank": 379
     },
     {
       "name": "WCog-VLA",
@@ -18970,7 +19088,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 378
+      "rank": 380
     },
     {
       "name": "WeaveLA",
@@ -19008,7 +19126,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 379
+      "rank": 381
     },
     {
       "name": "X-DiffVLA",
@@ -19049,7 +19167,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 380
+      "rank": 382
     },
     {
       "name": "X-Foresight",
@@ -19090,7 +19208,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 381
+      "rank": 383
     },
     {
       "name": "X-Mind",
@@ -19126,7 +19244,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 382
+      "rank": 384
     },
     {
       "name": "X-Tokenizer",
@@ -19171,7 +19289,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 383
+      "rank": 385
     },
     {
       "name": "Xiaomi-Robotics-1",
@@ -19234,7 +19352,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 384
+      "rank": 386
     },
     {
       "name": "Z-1",
@@ -19281,7 +19399,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 385
+      "rank": 387
     }
   ]
 }
