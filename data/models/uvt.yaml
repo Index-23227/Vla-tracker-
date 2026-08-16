@@ -1,0 +1,108 @@
+name: UVT
+full_name: "UVT: Unified Visuomotor Targets — Supervising VLAs Beyond Physical Actions"
+organization: "University of California, Irvine (Department of Computer Science)"
+date: "2026-08-04"
+paper_url: https://arxiv.org/abs/2608.03563
+code_url: null
+venue: "IROS (submission; acknowledges IROS reviewers and Area Chair)"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Backbone-agnostic; instantiated on VLA-Adapter (regression head) and pi0.5 (flow-matching action expert)"
+  llm: "Inherited from the host VLA (VLA-Adapter VLM backbone / pi0.5 VLM backbone)"
+  action_head: >
+    Unchanged host policy head, re-targeted to predict a 32-D unified visuomotor target u_t
+    instead of raw actions; a trainable MVAE action decoder g_a maps predicted u_t back to an
+    executable action chunk. Demonstrated with a regression-style head (L2 on u_t, VLA-Adapter)
+    and a flow-matching head that generates u_t in place of a_t (pi0.5).
+  action_head_category: regression
+  action_space: continuous
+  parameters: "No added policy parameters (lightweight MVAE encoders/decoders only); host VLA size unchanged"
+  key_innovation: >
+    Changes *what* a VLA is supervised to predict rather than *how* it is architected. A frozen
+    pretrained Latent Action Model (inverse-dynamics on image pairs v_t, v_{t+k}) yields a discrete
+    dynamics code z_t. A lightweight multimodal VAE encodes the action chunk a_t and z_t into two
+    diagonal Gaussians in a shared space, fuses them by weighted Product-of-Experts with learnable
+    precision weights alpha_a, alpha_z, and takes the fused mean as the unified visuomotor target
+    u_t in R^32. MVAE training minimizes L_UVT = L_ACT (L1 action recon) + L_DYN (CE on dynamics code)
+    + L_KL. Targets are precomputed once, then the VLA is fine-tuned with
+    L_VLA = ||u_hat - u||_2^2 + gamma * ||a_hat - a||_1 (gamma = 0.5), the action decoder kept
+    trainable so it adapts to the predicted-UVT distribution. Requires no architectural change,
+    no extra data, and no schedule change.
+
+training:
+  dataset: "LIBERO and LIBERO-Plus demonstration data; 30 human VR-teleoperated demos per real bimanual task"
+  method: >
+    Two stages. (1) Train the precision-aware MVAE once on the demonstration dataset to build u_t
+    from (a_t, z_t) and precompute u_t for every sample. (2) Fine-tune the VLA on triples
+    (x_t, u_t, a_t) with the UVT alignment loss plus the trainable-decoder action loss. Identical
+    data splits, batch sizes and optimization schedules as the baselines; results reported at fixed
+    step budgets of 10k and 100k.
+  compute: "NVIDIA A6000; ~8 GPU hours for the 10k-step budget; 10 GPU hours per real-world task"
+
+benchmarks:
+  libero:
+    libero_object: 99.6
+    libero_spatial: 98.6
+    libero_goal: 97.2
+    libero_long: 91.2
+    libero_avg: 96.7
+    libero_object_10k: 94.0
+    libero_spatial_10k: 95.0
+    libero_goal_10k: 95.0
+    libero_long_10k: 68.8
+    libero_avg_10k: 88.2
+    libero_pi05_object: 99.0
+    libero_pi05_spatial: 98.4
+    libero_pi05_goal: 97.8
+    libero_pi05_long: 92.4
+    libero_pi05_avg: 96.9
+    libero_plus_object: 60.4
+    libero_plus_spatial: 87.2
+    libero_plus_goal: 74.7
+    libero_plus_long: 72.1
+    libero_plus_avg: 73.6
+    libero_plus_object_10k: 52.4
+    libero_plus_spatial_10k: 81.5
+    libero_plus_goal_10k: 67.8
+    libero_plus_long_10k: 63.0
+    libero_plus_avg_10k: 66.2
+    source: >
+      UVT paper Table II (LIBERO final, 100k steps: UVT (VLA-Adapter) headline; libero_pi05_* =
+      UVT (pi0.5) row) and Table I (10k/100k training-efficiency grid for LIBERO and LIBERO-Plus,
+      UVT on VLA-Adapter). LIBERO-Plus here is reported over the same Object/Spatial/Goal/Long
+      suite split, not the standard perturbation categories.
+    date_reported: "2026-08-04"
+    eval_condition: "fine-tuned; success rate under the standard LIBERO protocol"
+  real_world:
+    lift_pot: 54.0
+    close_marker: 38.0
+    plate_handover: 40.0
+    source: >
+      UVT paper Sec. IV-D and Figs. 2-4. Bimanual tabletop tasks, 50 trials each, 30 VR-teleop
+      demos per task, 10 GPU hours fine-tuning. Lift Pot 27/50 full successes. Close Marker
+      5 full + 28 half; Plate Handover 12 full + 16 half, scored as (#Full + 0.5 x #Half)/50.
+    date_reported: "2026-08-04"
+    eval_condition: "fine-tuned per task on a real dual-arm platform"
+
+eval_conditions:
+  libero: "fine-tuned; UVT applied to VLA-Adapter (headline) and pi0.5; 10k and 100k step budgets reported"
+  real_world: "real bimanual manipulation, 50 trials per task, half-success credited at 0.5"
+
+tags:
+  - vla
+  - latent-actions
+  - latent-action-model
+  - supervision-target
+  - multimodal-vae
+  - product-of-experts
+  - training-efficiency
+  - regression
+  - flow-matching
+  - vla-adapter
+  - pi0.5
+  - libero
+  - libero-plus
+  - real-robot
+  - bimanual
