@@ -151,59 +151,59 @@ def compute_calvin_avg(benchmarks: dict) -> float | None:
     return None
 
 
-def compute_simpler_avg(benchmarks: dict) -> float | None:
-    simpler = benchmarks.get("simpler_env")
-    if not simpler:
-        return None
-    scores = [v for k, v in simpler.items()
+def declared(block: dict, *keys) -> float | None:
+    """First numeric value among `keys`, the paper-reported headline average."""
+    for key in keys:
+        val = block.get(key)
+        if isinstance(val, (int, float)):
+            return round(val, 2)
+    return None
+
+
+def mean_of_parts(block: dict) -> float | None:
+    """Mean of every numeric score in a benchmark block.
+
+    Only reached when the block declares no headline average. Other *_avg keys
+    are left in deliberately: a key like colosseum_all_variations_avg summarizes
+    a sibling eval condition, not the other keys here, so dropping it would
+    silently swing the model toward whichever condition it reports in full.
+    """
+    scores = [v for k, v in block.items()
               if k not in METADATA_KEYS and isinstance(v, (int, float))]
     if scores:
         return round(sum(scores) / len(scores), 2)
     return None
+
+
+def compute_simpler_avg(benchmarks: dict) -> float | None:
+    simpler = benchmarks.get("simpler_env")
+    if not simpler:
+        return None
+    # Prefer the paper's own headline average, as every other benchmark here
+    # does. Averaging it in with its own components inflated TBD-VLA from its
+    # reported 77.7 to 82.09 and moved it up the SimplerEnv ranking.
+    return declared(simpler, "simpler_avg") or mean_of_parts(simpler)
 
 
 def compute_robotwin_v1_avg(benchmarks: dict) -> float | None:
     robotwin = benchmarks.get("robotwin_v1")
     if not robotwin:
         return None
-    # Use pre-computed average if available
-    avg = robotwin.get("average")
-    if avg is not None and isinstance(avg, (int, float)):
-        return round(avg, 2)
-    scores = [v for k, v in robotwin.items()
-              if k not in METADATA_KEYS and isinstance(v, (int, float))]
-    if scores:
-        return round(sum(scores) / len(scores), 2)
-    return None
+    return declared(robotwin, "average", "robotwin_v1_avg") or mean_of_parts(robotwin)
 
 
 def compute_robotwin_v2_avg(benchmarks: dict) -> float | None:
     robotwin_v2 = benchmarks.get("robotwin_v2")
     if not robotwin_v2:
         return None
-    # Use pre-computed average if available
-    avg = robotwin_v2.get("robotwin_v2_avg")
-    if avg is not None and isinstance(avg, (int, float)):
-        return round(avg, 2)
-    scores = [v for k, v in robotwin_v2.items()
-              if k not in METADATA_KEYS and isinstance(v, (int, float))]
-    if scores:
-        return round(sum(scores) / len(scores), 2)
-    return None
+    return declared(robotwin_v2, "robotwin_v2_avg", "average") or mean_of_parts(robotwin_v2)
 
 
 def compute_rlbench_avg(benchmarks: dict) -> float | None:
     rlbench = benchmarks.get("rlbench")
     if not rlbench:
         return None
-    avg = rlbench.get("rlbench_avg")
-    if avg is not None and isinstance(avg, (int, float)):
-        return round(avg, 2)
-    scores = [v for k, v in rlbench.items()
-              if k not in METADATA_KEYS and isinstance(v, (int, float))]
-    if scores:
-        return round(sum(scores) / len(scores), 2)
-    return None
+    return declared(rlbench, "rlbench_avg", "average") or mean_of_parts(rlbench)
 
 
 
@@ -211,14 +211,7 @@ def compute_robocasa_avg(benchmarks: dict) -> float | None:
     robocasa = benchmarks.get("robocasa")
     if not robocasa:
         return None
-    avg = robocasa.get("robocasa_avg")
-    if avg is not None and isinstance(avg, (int, float)):
-        return round(avg, 2)
-    scores = [v for k, v in robocasa.items()
-              if k not in METADATA_KEYS and isinstance(v, (int, float))]
-    if scores:
-        return round(sum(scores) / len(scores), 2)
-    return None
+    return declared(robocasa, "robocasa_avg", "average") or mean_of_parts(robocasa)
 
 
 def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
