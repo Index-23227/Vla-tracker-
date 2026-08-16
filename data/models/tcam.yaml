@@ -1,0 +1,82 @@
+name: TCAM
+full_name: "TCAM (TermiBrain Causal Action Model): The RMC2 Champion System for WBCD 2026 Track 4 Deformable Manipulation"
+organization: "TermiTech (Shenzhen, China) — RMC2 Team"
+date: "2026-08-11"
+paper_url: https://arxiv.org/abs/2608.10718
+venue: "Technical Report (ICRA WBCD 2026 Track 4 Challenge, 1st place)"
+open_source: false
+model_type: bimanual_deformable_manipulation
+
+architecture:
+  backbone: "Self-developed multi-view VLA backbone; four wrist-mounted camera streams (2x upper fisheye RGB 1920x1080, 2x lower close-range RGB 320x240, all resized to 224x224) plus robot proprioception (end-effector poses, gripper states) and task-conditioning prompts"
+  action_head: "Action-chunking head emitting 30-step chunks of end-effector delta-pose actions for both arms; paper does not specify the head parameterization (no diffusion/flow-matching/autoregressive detail given)"
+  action_head_category: other
+  action_space: continuous
+  key_innovation: >
+    A system-level co-design in which hardware, perception, data and learning jointly narrow the
+    physical interaction distribution the policy must handle, rather than solving deformable
+    manipulation with the policy alone. Three coupled pieces: (1) a custom 3D-printed gripper with
+    hard fingertips, a hook-side Velcro top-layer flipping surface and inward-angled fingertip
+    geometry, which makes single-layer fabric separation physically repeatable and thereby changes
+    the learning problem itself; (2) a contact-aware wrist-centric four-view perception split into
+    two tiers — upper fisheye views for task-level global context (stack, pallet, garment pose) and
+    lower close-range RGB views that make the gripper-cloth contact state (single vs. double layer,
+    gripper above/below the fabric edge) directly observable; (3) the TCAM data closed loop, which
+    organizes each rollout as a causal interaction chain from observation and contact to action,
+    garment deformation and outcome. Causal tagging is semi-automated: software aggregates
+    synchronized observations, actions and outcome labels into a structured rollout record, and
+    human reviewers confirm the physical failure factors (missed edge contact, double picking,
+    transport slip, collar misalignment, remaining wrinkles, over-adjustment). Successful and failed
+    trajectories plus their human-verified causal tags live in a trajectory memory buffer supporting
+    replay for retraining, failure-mode identification for targeted recollection, and dataset
+    rebalancing toward hard cases, driving an iterative deploy-analyze-recollect-retrain cycle.
+
+training:
+  datasets:
+    - "UMI-style portable demonstrations: 600 raw episodes, ~200 after filtering (upper fisheye views only, since the UMI rig cannot conveniently mount lower wrist cameras)"
+    - "Real-robot demonstrations on the deployable dual-arm ARX X5: 500 raw episodes, ~400 after filtering, full four-view setup, collected in the practice environment and on the competition field"
+    - "Final mixed training set: 600 filtered episodes out of 1100 raw"
+  method: >
+    Imitation learning from a prompt-conditioned mixture of two-view UMI data and four-view
+    real-robot data; the four-view prompt conditions the model toward the deployable rollout
+    distribution at competition-time inference. Real-robot data uses a master-deployment integrated
+    setup — operators drag the deployable ARX X5 arms directly under force-compensation mode instead
+    of conventional master-slave teleoperation — which substantially reduces the embodiment gap.
+    Quality filtering removes low-quality trajectories, ambiguous demonstrations, poorly synchronized
+    camera streams and undesirable outcomes. Training is iterative rather than single-shot: collect,
+    train, deploy, analyze failure causes, recollect targeted data, rebalance, retrain.
+  hardware_platform: "Dual-arm ARX X5, arms positioned face-to-face to cover both the T-shirt stack and the printing pallet; custom 3D-printed grippers; taped pallet edges, 3D-printed under-pallet screw cover, high-contrast black tape markers and a patterned tablecloth for visual grounding"
+
+benchmarks:
+  wbcd_2026_track4:
+    completed_tshirts: 25
+    smooth_tshirts: 22
+    avg_time_per_attempt_sec: 23
+    unused_autonomous_loading_time_sec: 15
+    source: "TCAM technical report (arXiv 2608.10718) Table 5, final competition performance summary; also stated in the abstract and Section 9"
+    date_reported: "2026-08-11"
+    eval_condition: "WBCD 2026 Track 4 Deformable Manipulation Challenge final, official 30-minute session plus one minute of judging-time compensation; fully autonomous TCAM policy execution during every manipulation attempt; time values are approximate as reported"
+
+eval_conditions:
+  wbcd_2026_track4: "Pick a single T-shirt from a stack, load it onto a printing pallet, align the collar with the target area, and smooth the printing region. Scoring: +5 pick+load, +2.5 alignment, +2.5 smooth surface (only if aligned), autonomy multiplier x1/x2/x4, -5 for picking multiple T-shirts, -0.5 per dislocated unpicked T-shirt, -5 for manual intervention. The manipulation policy was fully autonomous with no teleoperation or corrective action; a human-monitored score-aware early-termination decision was made at the run-management level (not by an autonomous failure detector). Post-competition analysis found alignment-specific demonstrations underrepresented in training, so only a limited number of attempts received full alignment scores."
+
+tags:
+  - deformable-manipulation
+  - garment
+  - cloth-folding
+  - bimanual
+  - dual-arm
+  - arx-x5
+  - multi-view
+  - wrist-camera
+  - fisheye
+  - action-chunking
+  - umi
+  - learning-from-demonstration
+  - data-closed-loop
+  - trajectory-memory
+  - competition
+  - wbcd2026
+  - icra2026
+  - real-robot
+  - technical-report
