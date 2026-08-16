@@ -1,0 +1,66 @@
+# Paper: Learning Panorama-Aware VLA for Mobile Manipulation with Whole-Body Teleoperation
+# arXiv: 2608.02257
+
+name: PanoVLA
+full_name: "PanoVLA: Learning Panorama-Aware VLA for Mobile Manipulation with Whole-Body Teleoperation"
+organization: "Beihang University; Beijing Institute for General Artificial Intelligence (BIGAI); Shandong University; Johns Hopkins University; Delta Intelligence"
+date: "2026-08-03"
+paper_url: https://arxiv.org/abs/2608.02257
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  action_head: "Conditional flow matching action expert. Three-expert Mixture-of-Transformers (MoT) instantiated from the pi-0.5 dual-expert backbone by inserting a 100M-parameter panorama expert between the VLM expert and the action expert. Fusion interface is the transformer key-value (KV) cache: the VLM expert builds C_vlm from local views + instruction + proprio state, the panorama expert performs joint self-attention over panorama tokens conditioned on C_vlm under a block-wise causal mask to yield C_pano, and the action expert predicts a 32-step continuous action chunk from the concatenated cache [C_vlm; C_pano]."
+  action_head_category: flow_matching
+  backbone: "PaliGemma-based VLM (SigLIP for local camera views) + MTPano panoramic encoder (segmentation and depth branch features concatenated, adaptive average pooling + MLP token adapter)"
+  llm: "Gemma-2B (frozen during training)"
+  action_space: continuous
+  parameters: "pi-0.5 backbone (Gemma-2B LLM) + 100M panorama expert + pretrained MTPano encoder; total not stated in paper"
+  key_innovation: "Existing VLA policies rely on local front-facing and wrist cameras whose narrow field of view breaks down under continuous base motion in mobile manipulation. PanoVLA adds a robot-centric 360-degree panoramic observation stored as an equirectangular projection (ERP) image, encoded by the panorama-specific foundation model MTPano rather than a perspective-pretrained encoder, and fused via a dedicated panorama expert. Paired with a GMR-based whole-body VR teleoperation system that jointly retargets human motion to a 3-DoF planar virtual floating base and dual 6-DoF arms, yielding 800 episodes / 5.5 hours / ~500k frames at 25 Hz."
+
+training:
+  data: "Self-collected real-robot mobile bimanual manipulation dataset: 800 successful teleoperated trajectories (200 per task x 4 tasks), ~5.5 hours, ~500k synchronized frames recorded at 25 Hz, each trajectory 20-30 seconds. Modalities: front-facing RGB + 2 wrist RGB cameras, top-mounted Insta X5 360-degree panorama (ERP), proprioceptive state, and 17-D whole-body actions (14-D dual-arm joints + grippers, 3-D base command v_x, v_y, omega)."
+  hardware: "Robot: RANGER MINI 3 mobile base (3 DoF) + 2 x 6-DoF Agilex PIPER arms + 2 x 1-DoF parallel grippers. Training on 4 x NVIDIA A100; closed-loop inference on a single NVIDIA RTX 4090."
+  recipe: "Per-task independent fine-tuning on the corresponding task demonstrations. AdamW, gradient norm clipped to 1.0, 30K optimization steps, learning rate linearly warmed up over the first 5K steps then fixed at 5e-5, bfloat16, per-GPU batch size 64. Language model and pretrained MTPano encoder are frozen; remaining modules optimized. Proprio state and action are 17-D vectors normalized by 1st/99th percentiles; 32-step action chunk relative to current proprio state; gripper actions as binary open/close."
+
+benchmarks:
+  real_world:
+    move_pen_scr: 95.6
+    move_pen_sr: 86.7
+    move_block_scr: 96.7
+    move_block_sr: 93.3
+    open_curtain_scr: 88.3
+    open_curtain_sr: 66.7
+    wipe_table_scr: 84.4
+    wipe_table_sr: 46.7
+    avg_stage_completion_rate: 91.3
+    real_world_avg: 73.4
+    source: "arXiv:2608.02257 Table II (real-world closed-loop evaluation)"
+    date_reported: "2026-08-03"
+    eval_condition: "fine-tuned per task; 15 closed-loop real-robot trials per task, single uninterrupted rollout, no manual resets of failed stages; real_world_avg is the end-to-end success rate (SR) averaged over the four tasks, avg_stage_completion_rate is the SCR"
+    notes: "No standard simulation benchmark is reported in this paper; all numbers are real-robot closed-loop trials on a wheeled bimanual platform. Tasks: Move Pen (place pen in holder, target front/left/right), Move Block (transfer blocks to front area, left/right/both sides), Open Curtain (open curtains on both sides), Wipe Table (wipe stains and return the cloth along a long table)."
+    baseline_pi05_scr: 58.6
+    baseline_pi05_sr: 30.0
+    baseline_pi05_w_pano_scr: 80.8
+    baseline_pi05_w_pano_sr: 56.7
+    baseline_pi05_w_stacked_pano_scr: 70.4
+    baseline_pi05_w_stacked_pano_sr: 38.3
+    baselines_note: "Controlled pi-0.5 baselines from Table II, averaged over the four tasks. pi-0.5 = local views + SigLIP only (58.6 SCR / 30.0 SR). pi-0.5 w/ Pano = ERP panorama as an extra SigLIP-encoded image (80.8 / 56.7). pi-0.5 w/ Stacked Pano = panorama reprojected into three perspective views 120 degrees apart, concatenated into one composite image (70.4 / 38.3). Per-task pi-0.5: Move Pen 71.1/46.7, Move Block 35.0/20.0, Open Curtain 61.7/26.7, Wipe Table 66.7/26.7. Per-task pi-0.5 w/ Pano: 95.6/86.7, 80.0/73.3, 73.3/46.7, 74.4/20.0. Per-task pi-0.5 w/ Stacked Pano: 82.2/60.0, 70.0/40.0, 56.7/13.3, 72.8/40.0."
+    ablation_expert_size_50m_scr: 84.4
+    ablation_expert_size_50m_sr: 60.0
+    ablation_expert_size_100m_scr: 95.6
+    ablation_expert_size_100m_sr: 86.7
+    ablation_expert_size_200m_scr: 93.3
+    ablation_expert_size_200m_sr: 86.7
+    ablation_expert_size_300m_scr: 91.1
+    ablation_expert_size_300m_sr: 73.3
+    ablation_siglip_panorama_encoder_scr: 75.6
+    ablation_siglip_panorama_encoder_sr: 40.0
+    ablations_note: "All ablations (Table III) are run on the Move Pen task only, 15 closed-loop real-robot trials per variant. Panorama expert scale: 50M (84.4 SCR / 60.0 SR), 100M (95.6 / 86.7, adopted), 200M (93.3 / 86.7), 300M (91.1 / 73.3). Panorama encoder choice at 100M expert size: SigLIP (75.6 / 40.0) vs MTPano (95.6 / 86.7). Stage-wise Wipe Table detail from the text: pi-0.5 w/ Pano completes the final return-cloth stage in only 26.7% of trials (74.4 SCR but 20.0 SR), whereas PanoVLA reaches 73.3% stage completion and 46.7% SR."
+
+eval_conditions:
+  real_world: "fine-tuned per task on 200 demonstrations each; 15 closed-loop real-robot trials per task; single uninterrupted rollout with all actions generated by the policy and no manual resets; metrics are end-to-end success rate (SR) and stage completion rate (SCR)"
+
+tags: [mobile-manipulation, panorama, bimanual, whole-body-teleoperation, flow-matching, mixture-of-transformers, pi0.5, real-world, equirectangular, VR-teleoperation]

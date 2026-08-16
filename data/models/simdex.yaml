@@ -1,0 +1,100 @@
+name: SiMDex
+full_name: "SiMDex: Mining Similar Egocentric Videos for Cross-Embodiment Dexterous Manipulation"
+organization: "The University of Tokyo; ByteDance Seed; The University of Hong Kong; Shanghai Jiao Tong University; Tsinghua University"
+date: "2026-08-04"
+paper_url: https://arxiv.org/abs/2608.04196
+code_url: https://lin-nie.github.io/SiMDex/
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "GR-Dexter [47] base model: a pi0-like flow-matching VLA for bimanual dexterous manipulation (vision-language backbone encodes image I_t and instruction l)"
+  llm: "vision-language backbone of GR-Dexter (not further specified in the SiMDex paper)"
+  action_head: "Flow-matching action decoder predicting an action chunk a_{t:t+H} in R^{H x 88} over horizon H = 30; 88-dim action space = 42 morphology-agnostic shared dims (left/right wrist 6D deltas + 5 wrist-local fingertip positions per hand) + 46 robot-specific arm/hand joint dims. Human samples are supervised only on the 42 shared dims via a binary mask m in {0,1}^88; robot samples on all 88."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "not disclosed"
+  key_innovation: >
+    Reframes human-data selection for VLA post-training as a recommendation/retrieval problem.
+    A three-layer recall-ranking-re-ranking cascade mines task-relevant samples for each robot
+    demonstration from a ~32M-sample egocentric human pool (EgoDex), operating in a
+    morphology-agnostic fingertip-centric action space so no VLA architecture or training change
+    is required. Stage I (Recall) fuses L2-normalized initial fingertip descriptor (R^15,
+    Euclidean NN) and sentence-embedding language similarity (R^384, cosine) by rank fusion.
+    Stage II (Ranking) rescores by four motion components -- wrist translation waveform, wrist
+    rotation waveform, finger trajectory (R^{30x15}), wrist trajectory (R^{31x3}) -- with fused
+    rank r = r_tr + r_rot + r_fg + r_ee, then deduplicates by source trajectory; this output is
+    the mined subset used for training. Stage III (Re-ranking) verifies embodiment-agnostically
+    via clip-level dense optical-flow descriptors. Crucially it re-mines the *same* egocentric
+    corpus used for pre-training, task-aware, so egocentric collection "pays off twice".
+
+training:
+  dataset: >
+    Robot: ~1.35M frame-level samples (~12.4 hours) from bimanual teleoperation, single
+    industrial-assembly scenario, 3 tasks. Human pool: EgoDex [19], 32,034,551 frame-level
+    samples (~300 hours of 30fps egocentric video, 164,959 episodes) sliced into ~1s / 30-step
+    sliding windows. SiMDex retrieves ~1.49M samples (under 5% of the pool); the baseline
+    randomly samples an equal amount.
+  method: >
+    Flow-matching objective with masked MSE: L = sum_{h,d} m_{h,d} (u_hat_{tau,h,d} -
+    u_{tau,h,d})^2 / sum_{h,d} m_{h,d}, over horizon h in 1..H (H=30) and action dim d in 1..88.
+    Robot and mined human data loaded as two independently weighted streams at a 1:1 mixture.
+    Human preprocessing: body-centered frame transform to remove ego-motion, hand-visibility and
+    velocity filtering, temporal smoothing, then wrist-local retargeting. Robot wrist/fingertip
+    states recovered via forward kinematics.
+  steps: "40K training steps; all hyperparameters identical between SiMDex and the baseline (only the human-data source differs)"
+  hardware: "not disclosed"
+
+benchmarks:
+  real_world:
+    real_world_avg: 61.1
+    drill_success_rate: 54.5
+    flick_wheel_success_rate: 45.5
+    pick_and_place_success_rate: 83.4
+    drill_total_score: 1.63
+    flick_wheel_total_score: 1.37
+    pick_and_place_total_score: 3.33
+    source: "SiMDex paper Table 1, 'SiMDex (Ours)' rows; Success Rate = Total / max x 100%; 10 trials per task (2 rounds x 5); overall SR reported as 61.1%"
+    date_reported: "2026-08-04"
+    eval_condition: "real bimanual dexterous robot, 3 industrial-assembly tasks (Drill max 3, Flick Wheel max 3, Pick & Place max 4); sub-tasks scored 0-1 by completion progress with strict sequential dependency"
+  real_world_baseline_gr_dexter:
+    real_world_baseline_gr_dexter_avg: 47.7
+    drill_success_rate: 64.5
+    flick_wheel_success_rate: 24.5
+    pick_and_place_success_rate: 54.0
+    drill_total_score: 1.93
+    flick_wheel_total_score: 0.73
+    pick_and_place_total_score: 2.16
+    source: "SiMDex paper Table 1, 'GR-Dexter [47]' rows -- identical model trained with an equal amount (~1.49M) of randomly sampled human data"
+    date_reported: "2026-08-04"
+    eval_condition: "identical architecture/training/hyperparameters to SiMDex; only difference is random rather than mined human-data selection"
+  real_world_data_scaling_ablation:
+    delta_success_rate_0p25x_robot_data: 6.8
+    delta_success_rate_0p5x_robot_data: 17.2
+    delta_success_rate_1x_robot_data: 12.8
+    delta_success_rate_2x_robot_data: 6.1
+    baseline_success_rate_2x_robot_data: 50.9
+    baseline_success_rate_0p25x_robot_data: 40.9
+    source: "SiMDex paper Fig. 3a and Sec. 4.4; robot data scaled 0.25x (~3.1h) to 2x (~24.9h) with mined human data fixed; single-round evaluation so the 1x column differs slightly from Table 1"
+    date_reported: "2026-08-04"
+    eval_condition: "overall success rate delta (SiMDex - GR-Dexter baseline); SiMDex sustains a near-constant ~57-58% floor from 0.5x to 2x while the baseline falls from 50.9% to 40.9%"
+
+eval_conditions:
+  real_world: "3 real-world dexterous tasks (Drill, Flick Wheel, Pick & Place), 10 trials each (2 rounds x 5), mean +/- std, continuous 0-1 sub-task scoring; no simulation benchmarks (LIBERO/CALVIN/SimplerEnv) reported"
+  real_world_baseline_gr_dexter: "GR-Dexter with equal-size randomly sampled human data, same 10-trial protocol"
+  real_world_data_scaling_ablation: "single round per robot-data scale (0.25x / 0.5x / 1x / 2x), mined human data held fixed"
+
+tags:
+  - data-mining
+  - data-curation
+  - egocentric-video
+  - cross-embodiment
+  - dexterous-hands
+  - bimanual
+  - flow-matching
+  - retrieval
+  - egodex
+  - post-training
+  - real-robot
+  - gr-dexter
