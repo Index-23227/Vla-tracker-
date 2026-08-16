@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-16T16:46:04.813792",
-  "num_models": 405,
+  "generated_at": "2026-08-16T16:47:04.509690",
+  "num_models": 408,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -12360,6 +12360,9 @@
         "navitrace_goal_pose": "Adds a target pixel coordinate on top of the language instruction and embodiment type; not directly comparable to the language-only setting.",
         "real_world": "Wheeled and legged platforms, egocentric RGB camera, NVIDIA Jetson Orin onboard with remote RTX 4090 workstation inference over WiFi. Four tasks (two indoor semantic targets, one elevated-platform target, one outdoor turning task), 5 trials each per platform per method. Identical low-level controller across methods; reference path length and time taken from human expert paths."
       },
+      "ai_review": {
+        "verified": true
+      },
       "rank": 229
     },
     {
@@ -13433,6 +13436,155 @@
       "rank": 250
     },
     {
+      "name": "Ego2Robot",
+      "organization": "AIM3 Lab, Renmin University of China; Qwen Team, Alibaba Inc.; ShanghaiTech University; Beijing Institute for General Artificial Intelligence (BIGAI); Beijing University of Aeronautics and Astronautics",
+      "date": "2026-08-03",
+      "paper_url": "https://arxiv.org/abs/2608.02580",
+      "code_url": "https://www-ye.github.io/ego2robot_blog/",
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "data-synthesis",
+        "egocentric-video",
+        "human-video",
+        "cross-embodiment",
+        "retargeting",
+        "flow-matching",
+        "diffusion-transformer",
+        "qwen3.5",
+        "robotwin",
+        "generalization-benchmark",
+        "ood-generalization",
+        "real-robot",
+        "pretraining",
+        "bimanual"
+      ],
+      "architecture": {
+        "backbone": "Qwen3.5-4B vision-language backbone processing 2-3 RGB views per timestep plus a structured text prompt (embodiment / instruction fields); camera intrinsics K and extrinsics T_wc injected into visual features via mRoPE positional encodings",
+        "llm": "Qwen3.5-4B",
+        "action_head": "Diffusion Transformer (DiT) action head conditioned on backbone hidden states H via cross-attention. A context generator compresses H into conditioning features C using 8 learnable query tokens; DiT layers attend to C to predict 32-step action chunks. Trained with a flow-matching objective L = E ||v_theta(a_t, t, c) - (eps - a_0)||^2 on a_t = (1-t)a_0 + t*eps; 8 training steps / 4 Euler inference steps (dt = 1/4). Each action step is 7-dim: 3D position delta, 3D rotation-vector delta, 1D gripper, expressed as camera-frame relative EEF.\n",
+        "action_head_category": "flow_matching",
+        "parameters": "~4B backbone (Qwen3.5-4B) + DiT action head (head size not disclosed)"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "robotwin_v2": {
+          "clean": 68.1,
+          "randomized": 53.5,
+          "visual_dimension": 67.3,
+          "scene_dimension": 56.9,
+          "embodiment_dimension": 27.2,
+          "task_dimension": 54.1
+        },
+        "robotwin_v2_baseline_robot_only": {
+          "clean": 62.2,
+          "randomized": 50.9,
+          "visual_dimension": 61.4,
+          "scene_dimension": 52.9,
+          "embodiment_dimension": 23.8,
+          "task_dimension": 46.2
+        },
+        "robotwin_v2_mixing_ratio_ablation": {
+          "ratio_1to3_clean": 61.4,
+          "ratio_1to3_randomized": 51.0,
+          "ratio_1to3_visual": 61.2,
+          "ratio_1to3_scene": 52.5,
+          "ratio_1to3_embodiment": 21.9,
+          "ratio_1to3_task": 49.5,
+          "ratio_3to1_clean": 64.1,
+          "ratio_3to1_randomized": 49.2,
+          "ratio_3to1_visual": 62.7,
+          "ratio_3to1_scene": 54.3,
+          "ratio_3to1_embodiment": 28.2,
+          "ratio_3to1_task": 51.6
+        },
+        "robotwin_v2_perturbation_breakdown": {
+          "background": 70.3,
+          "lighting": 65.8,
+          "robot_color": 65.8,
+          "table_height": 62.4,
+          "clutter": 52.0,
+          "camera_offset": 56.3,
+          "embodiment_arx_x5": 51.2,
+          "embodiment_ur5_wsg": 25.0,
+          "embodiment_franka_panda": 5.3,
+          "unseen_objects": 39.6,
+          "paraphrased_language": 68.5
+        },
+        "robotwin_v2_perturbation_breakdown_baseline_robot_only": {
+          "background": 66.6,
+          "lighting": 58.2,
+          "robot_color": 59.4,
+          "table_height": 60.1,
+          "clutter": 48.3,
+          "camera_offset": 50.4,
+          "embodiment_arx_x5": 44.1,
+          "embodiment_ur5_wsg": 20.2,
+          "embodiment_franka_panda": 7.0,
+          "unseen_objects": 29.3,
+          "paraphrased_language": 63.1
+        },
+        "robotwin_v2_perturbation_breakdown_mixing_ratio_ablation": {
+          "ratio_1to3_background": 65.0,
+          "ratio_1to3_lighting": 58.3,
+          "ratio_1to3_robot_color": 60.3,
+          "ratio_1to3_table_height": 58.6,
+          "ratio_1to3_clutter": 49.3,
+          "ratio_1to3_camera_offset": 49.6,
+          "ratio_1to3_embodiment_arx_x5": 43.7,
+          "ratio_1to3_embodiment_ur5_wsg": 17.6,
+          "ratio_1to3_embodiment_franka_panda": 4.5,
+          "ratio_1to3_unseen_objects": 36.8,
+          "ratio_1to3_paraphrased_language": 62.2,
+          "ratio_3to1_background": 65.5,
+          "ratio_3to1_lighting": 60.9,
+          "ratio_3to1_robot_color": 61.8,
+          "ratio_3to1_table_height": 62.0,
+          "ratio_3to1_clutter": 49.2,
+          "ratio_3to1_camera_offset": 51.6,
+          "ratio_3to1_embodiment_arx_x5": 47.6,
+          "ratio_3to1_embodiment_ur5_wsg": 31.4,
+          "ratio_3to1_embodiment_franka_panda": 5.6,
+          "ratio_3to1_unseen_objects": 40.0,
+          "ratio_3to1_paraphrased_language": 63.1
+        },
+        "robotwin_v2_morphology_scaling_ablation": {
+          "raw_ego_only": 28.1,
+          "ego2r_1_morphology": 31.7,
+          "ego2r_15_morphologies": 33.5,
+          "ego2r_15_morphologies_plus_raw_ego": 37.3
+        },
+        "ebench": {
+          "ebench_avg": 49.8
+        },
+        "ebench_pretraining_ablation": {
+          "robot_only": 39.6,
+          "ratio_1to3": 47.4,
+          "ratio_3to1": 51.7,
+          "ratio_1to1": 49.8
+        },
+        "real_world_arx_acone": {
+          "put_blocks_delta_vs_robot_only": 14.0,
+          "insert_screw_delta_vs_robot_only": 13.0
+        }
+      },
+      "eval_conditions": {
+        "robotwin_v2": "fine-tuned on RoboTwin 2.0's 50 clean tasks (50 demos/task, 2,500 episodes), evaluated at 50 episodes/task with binary success; aggregates are Visual = mean(BG, Light, Robot Color), Scene = mean(Height, Clutter, Camera), Embodiment = mean(ARX, UR5, Franka), Task = mean(Obj, Lang)",
+        "robotwin_v2_baseline_robot_only": "same protocol, robot-only pretraining (DROID + AgibotWorld + InternData)",
+        "robotwin_v2_mixing_ratio_ablation": "same protocol, Ego2R:Robot pretraining ratios of 1:3 and 3:1",
+        "robotwin_v2_perturbation_breakdown": "11 independently controlled perturbation settings decoupled from RoboTwin 2.0's bundled randomization, plus 4 newly introduced axes (robot color, camera offset, unseen objects, paraphrased language) and 3 zero-shot cross-embodiment settings",
+        "robotwin_v2_perturbation_breakdown_baseline_robot_only": "identical perturbation protocol with robot-only pretraining",
+        "robotwin_v2_perturbation_breakdown_mixing_ratio_ablation": "identical perturbation protocol at 1:3 and 3:1 pretraining ratios",
+        "robotwin_v2_morphology_scaling_ablation": "ego-only pretraining (no robot data) to isolate the pipeline's contribution; success rate on RoboTwin Randomized",
+        "ebench": "fine-tuned separately on EBench Table Top training set, chunk 32",
+        "ebench_pretraining_ablation": "identical EBench finetuning across all four pretraining configurations",
+        "real_world_arx_acone": "real-robot deployment, sub-step partial scoring, 20 trials per task; absolute values are chart-only so only text-stated deltas are recorded"
+      },
+      "robotwin_v2_avg": 54.52,
+      "rank": 251
+    },
+    {
       "name": "ElegantVLA",
       "organization": "Tsinghua University; University of Illinois at Urbana-Champaign",
       "date": "2026-05-28",
@@ -13474,7 +13626,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 251
+      "rank": 252
     },
     {
       "name": "ERVLA",
@@ -13566,7 +13718,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 252
+      "rank": 253
     },
     {
       "name": "EventVLA",
@@ -13610,7 +13762,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 253
+      "rank": 254
     },
     {
       "name": "EvoScene-VLA",
@@ -13653,7 +13805,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 254
+      "rank": 255
     },
     {
       "name": "Explicit-Language-Memory-VLA",
@@ -13763,7 +13915,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 255
+      "rank": 256
     },
     {
       "name": "EXPO-FT",
@@ -13796,7 +13948,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 256
+      "rank": 257
     },
     {
       "name": "FabriVLA",
@@ -13840,7 +13992,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 257
+      "rank": 258
     },
     {
       "name": "FALCON",
@@ -13878,7 +14030,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 258
+      "rank": 259
     },
     {
       "name": "Fast-dDrive",
@@ -13929,7 +14081,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 259
+      "rank": 260
     },
     {
       "name": "FineVLA",
@@ -13972,7 +14124,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 260
+      "rank": 261
     },
     {
       "name": "FIRE-VLA",
@@ -14102,7 +14254,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 261
+      "rank": 262
     },
     {
       "name": "FLOWER",
@@ -14133,7 +14285,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 262
+      "rank": 263
     },
     {
       "name": "FORCE",
@@ -14178,7 +14330,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 263
+      "rank": 264
     },
     {
       "name": "Foresight Residual RL",
@@ -14216,7 +14368,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 264
+      "rank": 265
     },
     {
       "name": "FrozenGraft",
@@ -14258,7 +14410,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 265
+      "rank": 266
     },
     {
       "name": "FurnitureVLA",
@@ -14303,7 +14455,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 266
+      "rank": 267
     },
     {
       "name": "Gaze2Act",
@@ -14346,7 +14498,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 267
+      "rank": 268
     },
     {
       "name": "Gemini Robotics",
@@ -14377,7 +14529,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 268
+      "rank": 269
     },
     {
       "name": "GesVLA",
@@ -14422,7 +14574,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 269
+      "rank": 270
     },
     {
       "name": "GigaWorld-Policy",
@@ -14460,7 +14612,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 270
+      "rank": 271
     },
     {
       "name": "Goal2Skill",
@@ -14493,7 +14645,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 271
+      "rank": 272
     },
     {
       "name": "GR-Dexter",
@@ -14523,7 +14675,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 272
+      "rank": 273
     },
     {
       "name": "GR-1",
@@ -14567,7 +14719,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 273
+      "rank": 274
     },
     {
       "name": "GR-2",
@@ -14610,7 +14762,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 274
+      "rank": 275
     },
     {
       "name": "GR00T-N1.5",
@@ -14684,7 +14836,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 275
+      "rank": 276
     },
     {
       "name": "GR00T-N1.6",
@@ -14726,7 +14878,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 276
+      "rank": 277
     },
     {
       "name": "Guided-Action-Flow",
@@ -14783,7 +14935,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 277
+      "rank": 278
     },
     {
       "name": "GuidedVLA",
@@ -14836,7 +14988,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 278
+      "rank": 279
     },
     {
       "name": "Hand-in-the-Loop",
@@ -14876,7 +15028,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 279
+      "rank": 280
     },
     {
       "name": "HC-VLA",
@@ -14916,7 +15068,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 280
+      "rank": 281
     },
     {
       "name": "HELM",
@@ -14959,7 +15111,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 281
+      "rank": 282
     },
     {
       "name": "HEX",
@@ -15008,7 +15160,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 282
+      "rank": 283
     },
     {
       "name": "HiMe",
@@ -15056,7 +15208,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 283
+      "rank": 284
     },
     {
       "name": "HiMoE-VLA",
@@ -15087,7 +15239,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 284
+      "rank": 285
     },
     {
       "name": "HiVLA",
@@ -15126,7 +15278,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 285
+      "rank": 286
     },
     {
       "name": "HOIST",
@@ -15218,7 +15370,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 286
+      "rank": 287
     },
     {
       "name": "HPT",
@@ -15249,7 +15401,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 287
+      "rank": 288
     },
     {
       "name": "HSR-SmolVLA",
@@ -15303,7 +15455,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 288
+      "rank": 289
     },
     {
       "name": "Humanoid-VLA",
@@ -15333,7 +15485,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 289
+      "rank": 290
     },
     {
       "name": "Hy-Embodied-0.5-VLA",
@@ -15384,7 +15536,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 290
+      "rank": 291
     },
     {
       "name": "HY-Embodied-0.5",
@@ -15418,7 +15570,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 291
+      "rank": 292
     },
     {
       "name": "HyWorldVLA",
@@ -15459,7 +15611,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 292
+      "rank": 293
     },
     {
       "name": "IDL-VLA",
@@ -15508,7 +15660,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 293
+      "rank": 294
     },
     {
       "name": "InSight",
@@ -15573,7 +15725,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 294
+      "rank": 295
     },
     {
       "name": "InternVLA-A1",
@@ -15603,7 +15755,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 295
+      "rank": 296
     },
     {
       "name": "InternVLA-M1",
@@ -15636,7 +15788,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 296
+      "rank": 297
     },
     {
       "name": "KineVLA",
@@ -15675,7 +15827,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 297
+      "rank": 298
     },
     {
       "name": "LabVLA",
@@ -15733,7 +15885,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 298
+      "rank": 299
     },
     {
       "name": "LeHome-Fold",
@@ -15775,7 +15927,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 299
+      "rank": 300
     },
     {
       "name": "LfH",
@@ -15819,7 +15971,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 300
+      "rank": 301
     },
     {
       "name": "LIFT",
@@ -15862,7 +16014,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 301
+      "rank": 302
     },
     {
       "name": "Lift3D-VLA",
@@ -15905,7 +16057,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 302
+      "rank": 303
     },
     {
       "name": "LingBot-VLA",
@@ -15945,7 +16097,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 303
+      "rank": 304
     },
     {
       "name": "LLARVA",
@@ -15976,7 +16128,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 304
+      "rank": 305
     },
     {
       "name": "LLaVA-VLA",
@@ -16031,7 +16183,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 305
+      "rank": 306
     },
     {
       "name": "LVDrive",
@@ -16068,7 +16220,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 306
+      "rank": 307
     },
     {
       "name": "Mag-VLA",
@@ -16115,7 +16267,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 307
+      "rank": 308
     },
     {
       "name": "MiDAS",
@@ -16172,7 +16324,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 308
+      "rank": 309
     },
     {
       "name": "MindVLA-U1",
@@ -16215,7 +16367,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 309
+      "rank": 310
     },
     {
       "name": "Mobility VLA",
@@ -16245,7 +16397,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 310
+      "rank": 311
     },
     {
       "name": "MotuBrain",
@@ -16283,7 +16435,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 311
+      "rank": 312
     },
     {
       "name": "Motus",
@@ -16326,7 +16478,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 312
+      "rank": 313
     },
     {
       "name": "Moving-Eye",
@@ -16370,7 +16522,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 313
+      "rank": 314
     },
     {
       "name": "MuseVLA",
@@ -16421,7 +16573,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 314
+      "rank": 315
     },
     {
       "name": "NanoVLA",
@@ -16460,7 +16612,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 315
+      "rank": 316
     },
     {
       "name": "NaVILA",
@@ -16491,7 +16643,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 316
+      "rank": 317
     },
     {
       "name": "NORA",
@@ -16522,7 +16674,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 317
+      "rank": 318
     },
     {
       "name": "ω-0",
@@ -16569,7 +16721,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 318
+      "rank": 319
     },
     {
       "name": "OneVLA",
@@ -16609,7 +16761,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 319
+      "rank": 320
     },
     {
       "name": "OpenEAI-VLA",
@@ -16668,7 +16820,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 320
+      "rank": 321
     },
     {
       "name": "OpenHLM",
@@ -16724,7 +16876,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 321
+      "rank": 322
     },
     {
       "name": "OpenSPM",
@@ -16766,7 +16918,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 322
+      "rank": 323
     },
     {
       "name": "PaCo-VLA",
@@ -16819,7 +16971,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 323
+      "rank": 324
     },
     {
       "name": "PanoVLA",
@@ -16892,7 +17044,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 324
+      "rank": 325
     },
     {
       "name": "ParaVLA",
@@ -16938,7 +17090,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 325
+      "rank": 326
     },
     {
       "name": "Phone2Act",
@@ -16972,7 +17124,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 326
+      "rank": 327
     },
     {
       "name": "PhysBrain",
@@ -17008,7 +17160,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 327
+      "rank": 328
     },
     {
       "name": "PixelPilot",
@@ -17061,7 +17213,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 328
+      "rank": 329
     },
     {
       "name": "PrimitiveVLA",
@@ -17103,7 +17255,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 329
+      "rank": 330
     },
     {
       "name": "PrimSubVLA",
@@ -17165,7 +17317,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 330
+      "rank": 331
     },
     {
       "name": "ProGAL-VLA",
@@ -17211,7 +17363,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 331
+      "rank": 332
     },
     {
       "name": "QPILOTS",
@@ -17284,7 +17436,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 332
+      "rank": 333
     },
     {
       "name": "ReCAP",
@@ -17354,7 +17506,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 333
+      "rank": 334
     },
     {
       "name": "RecoverFly",
@@ -17488,7 +17640,7 @@
         "travel_uav_scene_sampling_ablation": "seed 1; Uniform Sampling uses equal scene quotas in one stage, Original Distribution preserves empirical scene proportions across two stages",
         "travel_uav": "closed-loop AirSim / TravelUAV simulation only; no physical UAV deployment. Baseline numbers are quoted from the original publications on the same splits."
       },
-      "rank": 334
+      "rank": 335
     },
     {
       "name": "ReCoVLA",
@@ -17539,7 +17691,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 335
+      "rank": 336
     },
     {
       "name": "ReferTrack",
@@ -17597,7 +17749,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 336
+      "rank": 337
     },
     {
       "name": "ReFineVLA",
@@ -17653,7 +17805,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 337
+      "rank": 338
     },
     {
       "name": "ResTacVLA",
@@ -17693,7 +17845,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 338
+      "rank": 339
     },
     {
       "name": "ReTouch",
@@ -17757,7 +17909,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 339
+      "rank": 340
     },
     {
       "name": "Retrieve-then-Steer",
@@ -17808,7 +17960,62 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 340
+      "rank": 341
+    },
+    {
+      "name": "RL-VLA-Bootstrapping",
+      "organization": "Innopolis University (Research Center of the AI Institute); Volgograd State Technical University",
+      "date": "2026-08-02",
+      "paper_url": "https://arxiv.org/abs/2608.01013",
+      "code_url": "https://anonymous.4open.science/r/RL_VLA_Bootstrapping-E77F/README.md",
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "openvla-oft",
+        "reinforcement-learning",
+        "PPO",
+        "GRPO",
+        "embodiment-adaptation",
+        "zero-demonstration",
+        "dense-reward",
+        "cable-driven-parallel-robot",
+        "mujoco",
+        "simulation-only"
+      ],
+      "architecture": {
+        "backbone": "OpenVLA-OFT (initialized from public openvla/openvla-7b checkpoint); two RGB inputs (overview + wrist camera)",
+        "llm": "Llama-2-7B (inherited from OpenVLA-7B backbone)",
+        "action_head": "OpenVLA-OFT parallel-decoding continuous L1 regression head, 8-step action chunk over a 5-DoF interface (x, y, z, yaw, gripper)",
+        "action_head_category": "regression",
+        "parameters": "7B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "cdpr_directional": {
+          "move_left": 52.0,
+          "move_right": 52.0,
+          "move_forward": 62.0,
+          "move_backward": 48.0,
+          "cdpr_directional_avg": 53.5
+        },
+        "cdpr_directional_ppo_stage1": {
+          "move_left": 17.0,
+          "move_right": 43.0,
+          "move_forward": 62.0,
+          "move_backward": 15.0,
+          "cdpr_directional_avg": 34.25
+        },
+        "cdpr_object_conditioned": {
+          "success_rate": 9.75
+        }
+      },
+      "eval_conditions": {
+        "cdpr_directional": "RL-only adaptation, zero embodiment-specific demonstrations, simulation only",
+        "cdpr_directional_ppo_stage1": "Stage 1 PPO-only checkpoint, same held-out directional protocol",
+        "cdpr_object_conditioned": "RL-only adaptation, strict success metric, simulation only"
+      },
+      "rank": 342
     },
     {
       "name": "ROAD-VLA",
@@ -17839,7 +18046,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 341
+      "rank": 343
     },
     {
       "name": "RoboDual",
@@ -17869,7 +18076,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 342
+      "rank": 344
     },
     {
       "name": "RoboMamba",
@@ -17899,7 +18106,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 343
+      "rank": 345
     },
     {
       "name": "RoboVLM",
@@ -17938,7 +18145,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 344
+      "rank": 346
     },
     {
       "name": "ROVE",
@@ -17996,7 +18203,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 345
+      "rank": 347
     },
     {
       "name": "RT-2-X",
@@ -18036,7 +18243,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 346
+      "rank": 348
     },
     {
       "name": "SA-VLA",
@@ -18082,7 +18289,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 347
+      "rank": 349
     },
     {
       "name": "SAM2Act",
@@ -18124,7 +18331,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 348
+      "rank": 350
     },
     {
       "name": "SAMoE-VLA",
@@ -18160,7 +18367,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 349
+      "rank": 351
     },
     {
       "name": "SAPS",
@@ -18259,7 +18466,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 350
+      "rank": 352
     },
     {
       "name": "SceneDiver",
@@ -18329,7 +18536,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 351
+      "rank": 353
     },
     {
       "name": "SEAM",
@@ -18383,7 +18590,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 352
+      "rank": 354
     },
     {
       "name": "SeeLikeARobot",
@@ -18429,7 +18636,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 353
+      "rank": 355
     },
     {
       "name": "Sentinel-VLA",
@@ -18476,7 +18683,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 354
+      "rank": 356
     },
     {
       "name": "SiMDex",
@@ -18545,7 +18752,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 355
+      "rank": 357
     },
     {
       "name": "SOMA",
@@ -18609,7 +18816,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 356
+      "rank": 358
     },
     {
       "name": "SpaceVLA",
@@ -18666,7 +18873,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 357
+      "rank": 359
     },
     {
       "name": "SPARK",
@@ -18735,7 +18942,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 358
+      "rank": 360
     },
     {
       "name": "SpikeVLA",
@@ -18772,7 +18979,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 359
+      "rank": 361
     },
     {
       "name": "SSAA",
@@ -18816,7 +19023,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 360
+      "rank": 362
     },
     {
       "name": "StableIDM",
@@ -18865,7 +19072,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 361
+      "rank": 363
     },
     {
       "name": "STARRY",
@@ -18905,7 +19112,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 362
+      "rank": 364
     },
     {
       "name": "StereoPolicy",
@@ -18975,7 +19182,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 363
+      "rank": 365
     },
     {
       "name": "SuSIE",
@@ -19006,7 +19213,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 364
+      "rank": 366
     },
     {
       "name": "Tabero",
@@ -19056,7 +19263,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 365
+      "rank": 367
     },
     {
       "name": "TacCoRL",
@@ -19096,7 +19303,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 366
+      "rank": 368
     },
     {
       "name": "TacVLA",
@@ -19131,7 +19338,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 367
+      "rank": 369
     },
     {
       "name": "TAP",
@@ -19181,7 +19388,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 368
+      "rank": 370
     },
     {
       "name": "TEMPO",
@@ -19230,7 +19437,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 369
+      "rank": 371
     },
     {
       "name": "Temporal-GRPO",
@@ -19279,7 +19486,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 370
+      "rank": 372
     },
     {
       "name": "TinyVLA",
@@ -19311,7 +19518,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 371
+      "rank": 373
     },
     {
       "name": "TraceVLA",
@@ -19350,7 +19557,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 372
+      "rank": 374
     },
     {
       "name": "TTT-VLA",
@@ -19411,7 +19618,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 373
+      "rank": 375
     },
     {
       "name": "TwinBrainVLA",
@@ -19449,7 +19656,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 374
+      "rank": 376
     },
     {
       "name": "UniDex",
@@ -19490,7 +19697,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 375
+      "rank": 377
     },
     {
       "name": "UniDriveVLA",
@@ -19526,7 +19733,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 376
+      "rank": 378
     },
     {
       "name": "UniPi",
@@ -19556,7 +19763,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 377
+      "rank": 379
     },
     {
       "name": "UniT",
@@ -19602,7 +19809,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 378
+      "rank": 380
     },
     {
       "name": "UP-VLA",
@@ -19635,7 +19842,72 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 379
+      "rank": 381
+    },
+    {
+      "name": "V2V-VLA",
+      "organization": "Carnegie Mellon University, Robotics Institute",
+      "date": "2026-08-07",
+      "paper_url": "https://arxiv.org/abs/2608.07621",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "autonomous_driving",
+        "vla",
+        "cooperative_driving",
+        "multi_agent",
+        "v2v_communication",
+        "closed_loop",
+        "carla",
+        "bench2drive",
+        "benchmark",
+        "occupancy",
+        "bev",
+        "reasoning",
+        "waypoint_prediction",
+        "lora"
+      ],
+      "architecture": {
+        "backbone": "InternViT vision encoder over two image streams: the ego vehicle's front RGB camera image I_ego and a merged bird-eye-view (BEV) occupancy map O_merged rendered as an RGB image. UniAD generates the camera-based BEV occupancy maps for each CAV and is kept frozen during training.",
+        "llm": "Qwen2",
+        "action_head": "The LLM autoregressively emits the language output (action, reasoning, communication target) together with the action output formatted as in SimLingo: future isochronous waypoints and future equidistant waypoints. Predicted waypoints are converted to steer/throttle/brake by PID controllers. The target waypoint input is encoded by an MLP as an action token.",
+        "action_head_category": "autoregressive",
+        "parameters": null
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "cmu_drive": {
+          "driving_score": 63.67,
+          "success_rate": 34.55
+        },
+        "cmu_drive_baseline_simlingo": {
+          "driving_score": 56.32,
+          "success_rate": 30.91
+        },
+        "cmu_drive_benchmark_statistics": {
+          "num_routes": 220,
+          "min_cavs_per_route": 2,
+          "max_cavs_per_route": 16,
+          "avg_cavs_per_route": 6.56,
+          "gpus_per_route": 1,
+          "num_scenario_types": 44,
+          "weather_lighting_conditions": 5
+        }
+      },
+      "eval_conditions": {
+        "cmu_drive": "220 closed-loop evaluation routes of CMU-Drive in CARLA; route-level DS = RC * IS with RC the mean agent-level route completion and IS the product of all agent-level infraction scores; SR counts routes with DS = 100; 2 to 16 CAVs per route",
+        "cmu_drive_baseline_simlingo": "Same 220 CMU-Drive closed-loop routes, single-agent SimLingo policy run per CAV without any multi-agent cooperation",
+        "cmu_drive_benchmark_statistics": "CMU-Drive extends Bench2Drive: 44 scenario types x 5 weather/lighting conditions = 220 routes; for comparison InterDrive has 92 routes (2-8 CAVs, avg 3.80, 3 GPUs) and MDrive has 225 routes (1-8 CAVs, avg 3.36, 3 GPUs)",
+        "simulator": "CARLA closed-loop simulation; each CAV has RGB cameras, IMU and GPS",
+        "benchmark": "CMU-Drive, 220 evaluation routes inheriting the 44 Bench2Drive scenario types under 5 weather/lighting conditions, with 2 to 16 cooperative autonomous vehicles per route plus background vehicles, pedestrians and cyclists",
+        "metrics": "Agent-level route completion RC_i^j and infraction score IS_i^j (base 1.0, multiplicatively penalized for collisions with pedestrians/cyclists/vehicles/static objects, red-light and stop-sign running, off-road driving and failure to yield to emergency vehicles); route-level RC^j is the mean over agents, IS^j the product over agents, DS^j = RC^j * IS^j, SS^j = 1 iff DS^j = 100; overall DS and SR average over R = 220 routes",
+        "route_setup": "The first CAV follows the original Bench2Drive route configuration and triggers the safety-critical events; additional CAV start/goal pairs are generated automatically from road topology while avoiding lanes that would interfere with the safety-critical event triggers",
+        "qualitative": "Figure 4 shows CAV_0 unable to observe a leading bicycle due to distance and rain-induced image blur, slowing down using perception shared by the leading CAV_4",
+        "limitations": "Only one baseline (SimLingo) is compared; no ablation on the communication policy, the occupancy merging, or the number of CAVs is reported; per-scenario driving scores are shown only as a bar chart (Figure 3) without a numeric table"
+      },
+      "rank": 382
     },
     {
       "name": "ValueFormer",
@@ -19761,7 +20033,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 380
+      "rank": 383
     },
     {
       "name": "VANE",
@@ -19817,7 +20089,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 381
+      "rank": 384
     },
     {
       "name": "VIA",
@@ -19856,7 +20128,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 382
+      "rank": 385
     },
     {
       "name": "VILAS",
@@ -19886,7 +20158,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 383
+      "rank": 386
     },
     {
       "name": "VISTA",
@@ -19941,7 +20213,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 384
+      "rank": 387
     },
     {
       "name": "VLA-RL",
@@ -19973,7 +20245,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 385
+      "rank": 388
     },
     {
       "name": "VLA-ATTC",
@@ -20011,7 +20283,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 386
+      "rank": 389
     },
     {
       "name": "VLA-Pro",
@@ -20065,7 +20337,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 387
+      "rank": 390
     },
     {
       "name": "VLAs-as-Tools",
@@ -20114,7 +20386,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 388
+      "rank": 391
     },
     {
       "name": "Vlaser",
@@ -20164,7 +20436,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 389
+      "rank": 392
     },
     {
       "name": "VLGA",
@@ -20207,7 +20479,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 390
+      "rank": 393
     },
     {
       "name": "VP-VLA",
@@ -20261,7 +20533,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 391
+      "rank": 394
     },
     {
       "name": "w2VLA",
@@ -20319,7 +20591,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 392
+      "rank": 395
     },
     {
       "name": "WALL-WM",
@@ -20368,7 +20640,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 393
+      "rank": 396
     },
     {
       "name": "WAM-Diff2",
@@ -20429,7 +20701,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 394
+      "rank": 397
     },
     {
       "name": "WCM",
@@ -20506,7 +20778,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 395
+      "rank": 398
     },
     {
       "name": "WCog-VLA",
@@ -20559,7 +20831,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 396
+      "rank": 399
     },
     {
       "name": "WeaveLA",
@@ -20597,7 +20869,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 397
+      "rank": 400
     },
     {
       "name": "WNM-3D",
@@ -20741,7 +21013,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 398
+      "rank": 401
     },
     {
       "name": "X-DiffVLA",
@@ -20782,7 +21054,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 399
+      "rank": 402
     },
     {
       "name": "X-Foresight",
@@ -20823,7 +21095,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 400
+      "rank": 403
     },
     {
       "name": "X-Mind",
@@ -20859,7 +21131,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 401
+      "rank": 404
     },
     {
       "name": "X-Tokenizer",
@@ -20904,7 +21176,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 402
+      "rank": 405
     },
     {
       "name": "XCoT-VLA",
@@ -21058,7 +21330,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 403
+      "rank": 406
     },
     {
       "name": "Xiaomi-Robotics-1",
@@ -21121,7 +21393,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 404
+      "rank": 407
     },
     {
       "name": "Z-1",
@@ -21168,7 +21440,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 405
+      "rank": 408
     }
   ]
 }

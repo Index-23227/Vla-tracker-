@@ -1,0 +1,216 @@
+name: Ego2Robot
+full_name: "Ego2Robot: Scalable Robot Data Synthesis from Egocentric Human Data"
+organization: "AIM3 Lab, Renmin University of China; Qwen Team, Alibaba Inc.; ShanghaiTech University; Beijing Institute for General Artificial Intelligence (BIGAI); Beijing University of Aeronautics and Astronautics"
+date: "2026-08-03"
+paper_url: https://arxiv.org/abs/2608.02580
+code_url: https://www-ye.github.io/ego2robot_blog/
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3.5-4B vision-language backbone processing 2-3 RGB views per timestep plus a structured text prompt (embodiment / instruction fields); camera intrinsics K and extrinsics T_wc injected into visual features via mRoPE positional encodings"
+  llm: "Qwen3.5-4B"
+  action_head: >
+    Diffusion Transformer (DiT) action head conditioned on backbone hidden states H via
+    cross-attention. A context generator compresses H into conditioning features C using 8
+    learnable query tokens; DiT layers attend to C to predict 32-step action chunks. Trained with
+    a flow-matching objective L = E ||v_theta(a_t, t, c) - (eps - a_0)||^2 on a_t = (1-t)a_0 + t*eps;
+    8 training steps / 4 Euler inference steps (dt = 1/4). Each action step is 7-dim:
+    3D position delta, 3D rotation-vector delta, 1D gripper, expressed as camera-frame relative EEF.
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~4B backbone (Qwen3.5-4B) + DiT action head (head size not disclosed)"
+  key_innovation: >
+    An end-to-end ego-to-robot synthesis pipeline plus a disentangled generalization benchmark.
+    (1) Action alignment: 21 hand keypoints are retargeted to a parallel-gripper frame via a virtual
+    fingertip p_vf = 0.7*p_index + 0.3*p_middle, TCP = (p_thumb + p_vf)/2, width = ||p_thumb - p_vf||,
+    with a handedness-consistent orthonormal grasp frame; Savitzky-Golay smoothing on positions/widths
+    and Gaussian-weighted SLERP on orientations; per-source frame subsampling to match robot action speed.
+    (2) Visual alignment: SAM 3 arm segmentation, ProPainter inpainting for hand removal, robot base
+    pose search over SE(3) maximizing IK feasibility (mink/MuJoCo) with a reach penalty encouraging
+    operation at 65% of max reach, frame-by-frame IK, and depth-aware compositing (Depth Anything V3
+    scene depth vs MuJoCo render depth) separating arm-body and gripper masks.
+    (3) Three-level quality curation: L1 pipeline-internal (IK error, self-collision, visibility),
+    L2 statistical (Q1/Q99 outliers, residual/acceleration/jerk sudden-change, >60% invalid-frame
+    episode drop), L3 VLM consistency audit with Qwen3.5 at 4 fps.
+    Path A consumes annotated ego datasets; Path B estimates hand poses from raw video via WiLoR +
+    DynHaMR and segments long videos into subtasks with Qwen3.5. Camera-frame relative EEF actions
+    unify sources with unknown, diverse camera placements without per-video calibration.
+    The result is 18,561 h of synthetic robot data across 15 morphologies from ~1,940 h of ego video
+    (~9.6x amplification), the largest ego-to-robot dataset reported.
+
+training:
+  dataset: >
+    Ego sources (~1,940 h before processing): ANT (7 h, in-house pick-and-place with hand pose
+    annotations), EgoDex (732 h), ViTRA (249 h), EgoVerse (954 h). Rendered across 15 morphologies
+    (Panda, UR5e, ARX-L5, xArm7, Sawyer, Kinova Gen3, IIWA, Jaco, FR3, UR10e, ViperX, WidowX, Piper,
+    YAM, Aloha-Agilex) yielding 18,561 h after curation. Robot data (~6,565 h): DROID (~511 h),
+    AgibotWorld (~2,404 h), InternData (~3,650 h). Four pretraining configurations compared:
+    robot-only and Ego2R:Robot at 1:3, 3:1, 1:1 (implemented as per-source sampling weights).
+    Action speed alignment subsamples ANT/EgoDex to 60%, EgoVerse to 45%, ViTRA to 25% of frame rate.
+  method: >
+    Flow matching over 32-step action chunks in camera-frame relative EEF. Structured prompt with
+    embodiment field (robot_aloha / h2r_arx / human_ego) dropped to "None" with 15% probability;
+    instruction never dropped. All pretraining configurations process an identical number of frames
+    (~19.2M) so dataset-size effects are controlled.
+  steps: "Pretraining 200K steps (~19.2M frames); finetuning 50K steps from pretrained weights"
+  hardware: "8x A100 GPUs, batch 12/GPU, backbone lr 1e-5 -> 1e-6 cosine (5K warmup), action head lr 10x (1e-4 -> 1e-5), AdamW (beta1 0.9, beta2 0.95), bf16, ZeRO-1 (pretrain) / ZeRO-2 (finetune); no image augmentation during pretraining, ColorJitter during finetuning"
+
+benchmarks:
+  robotwin_v2:
+    clean: 68.1
+    randomized: 53.5
+    visual_dimension: 67.3
+    scene_dimension: 56.9
+    embodiment_dimension: 27.2
+    task_dimension: 54.1
+    source: "Ego2Robot paper Table 1, 'Ego2R+Robot (1:1)' row (best configuration); success rate %, 50 tasks x 50 episodes, binary success"
+    date_reported: "2026-08-03"
+    eval_condition: "RoboTwin 2.0 extended with 11 independent perturbation settings; pretrained on Ego2R:Robot = 1:1, finetuned on RoboTwin's 50 clean-setting tasks (50 demos/task), chunk 20, replan every 16"
+
+  robotwin_v2_baseline_robot_only:
+    clean: 62.2
+    randomized: 50.9
+    visual_dimension: 61.4
+    scene_dimension: 52.9
+    embodiment_dimension: 23.8
+    task_dimension: 46.2
+    source: "Ego2Robot paper Table 1, 'Robot-only' row (DROID + AgibotWorld + InternData, ~6,565 h)"
+    date_reported: "2026-08-03"
+    eval_condition: "identical architecture, hyperparameters and total training frames as the Ego2R configurations; only the pretraining data mixture differs"
+
+  robotwin_v2_mixing_ratio_ablation:
+    ratio_1to3_clean: 61.4
+    ratio_1to3_randomized: 51.0
+    ratio_1to3_visual: 61.2
+    ratio_1to3_scene: 52.5
+    ratio_1to3_embodiment: 21.9
+    ratio_1to3_task: 49.5
+    ratio_3to1_clean: 64.1
+    ratio_3to1_randomized: 49.2
+    ratio_3to1_visual: 62.7
+    ratio_3to1_scene: 54.3
+    ratio_3to1_embodiment: 28.2
+    ratio_3to1_task: 51.6
+    source: "Ego2Robot paper Table 1, 'Ego2R+Robot (1:3)' and 'Ego2R+Robot (3:1)' rows"
+    date_reported: "2026-08-03"
+    eval_condition: "Ego2R-to-Robot pretraining mixing ratios; 1:3 yields marginal gains, 3:1 and 1:1 produce substantial improvements"
+
+  robotwin_v2_perturbation_breakdown:
+    background: 70.3
+    lighting: 65.8
+    robot_color: 65.8
+    table_height: 62.4
+    clutter: 52.0
+    camera_offset: 56.3
+    embodiment_arx_x5: 51.2
+    embodiment_ur5_wsg: 25.0
+    embodiment_franka_panda: 5.3
+    unseen_objects: 39.6
+    paraphrased_language: 68.5
+    source: "Ego2Robot paper Table 2, 'Ego2R+Robot (1:1)' row"
+    date_reported: "2026-08-03"
+    eval_condition: "11 decoupled perturbation settings: background texture, lighting, robot hue shift [0,360), table height +/-4 cm, 3-5 distractor objects, head-camera offset up to 5 cm/axis, zero-shot cross-embodiment (dual single-arm URDFs, IK-aligned initial EEF poses), 50 unseen-object tasks, 505 paraphrased instructions"
+
+  robotwin_v2_perturbation_breakdown_baseline_robot_only:
+    background: 66.6
+    lighting: 58.2
+    robot_color: 59.4
+    table_height: 60.1
+    clutter: 48.3
+    camera_offset: 50.4
+    embodiment_arx_x5: 44.1
+    embodiment_ur5_wsg: 20.2
+    embodiment_franka_panda: 7.0
+    unseen_objects: 29.3
+    paraphrased_language: 63.1
+    source: "Ego2Robot paper Table 2, 'Robot-only' row"
+    date_reported: "2026-08-03"
+    eval_condition: "same 11 decoupled perturbation settings, robot-only pretraining"
+
+  robotwin_v2_perturbation_breakdown_mixing_ratio_ablation:
+    ratio_1to3_background: 65.0
+    ratio_1to3_lighting: 58.3
+    ratio_1to3_robot_color: 60.3
+    ratio_1to3_table_height: 58.6
+    ratio_1to3_clutter: 49.3
+    ratio_1to3_camera_offset: 49.6
+    ratio_1to3_embodiment_arx_x5: 43.7
+    ratio_1to3_embodiment_ur5_wsg: 17.6
+    ratio_1to3_embodiment_franka_panda: 4.5
+    ratio_1to3_unseen_objects: 36.8
+    ratio_1to3_paraphrased_language: 62.2
+    ratio_3to1_background: 65.5
+    ratio_3to1_lighting: 60.9
+    ratio_3to1_robot_color: 61.8
+    ratio_3to1_table_height: 62.0
+    ratio_3to1_clutter: 49.2
+    ratio_3to1_camera_offset: 51.6
+    ratio_3to1_embodiment_arx_x5: 47.6
+    ratio_3to1_embodiment_ur5_wsg: 31.4
+    ratio_3to1_embodiment_franka_panda: 5.6
+    ratio_3to1_unseen_objects: 40.0
+    ratio_3to1_paraphrased_language: 63.1
+    source: "Ego2Robot paper Table 2, 'Ego2R+Robot (1:3)' and 'Ego2R+Robot (3:1)' rows"
+    date_reported: "2026-08-03"
+    eval_condition: "same 11 decoupled perturbation settings; UR5-WSG peaks at 31.4 under the 3:1 ratio, unseen-object generalization peaks at 40.0 under 3:1"
+
+  robotwin_v2_morphology_scaling_ablation:
+    raw_ego_only: 28.1
+    ego2r_1_morphology: 31.7
+    ego2r_15_morphologies: 33.5
+    ego2r_15_morphologies_plus_raw_ego: 37.3
+    source: "Ego2Robot paper Figure 3 and Section 5.3 (values stated in text); 5- and 10-morphology bars are shown in the figure but not stated numerically"
+    date_reported: "2026-08-03"
+    eval_condition: "ego-sourced pretraining only (no real robot data), then finetuned on RoboTwin Clean; evaluated on RoboTwin Randomized. Raw ego ~1,940 h, Ego2R 1 morph ~1,237 h (ARX-L5), 5 morph ~6,187 h, 10 morph ~12,374 h, 15 morph ~18,561 h, 15 morph + raw ego ~20,501 h"
+
+  ebench:
+    ebench_avg: 49.8
+    source: "Ego2Robot paper Table 1, EBench Avg column, 'Ego2R+Robot (1:1)' row"
+    date_reported: "2026-08-03"
+    eval_condition: "EBench Table Top: 7 precision tabletop tasks in Isaac Sim (collect coffee beans, flip cup & collect cookies, frame against pen holder, install gear, peg in hole, put glass in glass box, tighten nut) with a higher-mounted head camera closer to the egocentric perspective; finetuned separately on 7 tasks x 400 demos (2,800 episodes), 50K steps, chunk 32"
+
+  ebench_pretraining_ablation:
+    robot_only: 39.6
+    ratio_1to3: 47.4
+    ratio_3to1: 51.7
+    ratio_1to1: 49.8
+    source: "Ego2Robot paper Table 1, EBench Avg column, all four pretraining rows"
+    date_reported: "2026-08-03"
+    eval_condition: "3:1 achieves the best EBench score (+12.1 over robot-only), suggesting co-training benefits are amplified when the viewpoint bias partially matches the egocentric perspective"
+
+  real_world_arx_acone:
+    put_blocks_delta_vs_robot_only: 14.0
+    insert_screw_delta_vs_robot_only: 13.0
+    source: "Ego2Robot paper Section 5.4 and Figure 4; only the two largest deltas are stated numerically in the text, absolute per-task success rates appear in the bar chart only"
+    date_reported: "2026-08-03"
+    eval_condition: "ARX ACone dual-arm platform (6-DOF/arm, parallel gripper, head + two wrist RGB cameras, 15 Hz control, replan every 32 steps), 5 long-horizon tasks (Put Fruits, Put Blocks, Fold Towel, Sweep Trash, Insert Screw), 20 teleop demos/task + ~35 min ego play video processed via Path B into 675 ACone synthetic episodes; sub-step partial scoring out of 100, 20 trials/task; 'Mix + Ego2R Play' (1:1 teleop-to-Ego2R finetuning mix) best on all five tasks"
+
+eval_conditions:
+  robotwin_v2: "fine-tuned on RoboTwin 2.0's 50 clean tasks (50 demos/task, 2,500 episodes), evaluated at 50 episodes/task with binary success; aggregates are Visual = mean(BG, Light, Robot Color), Scene = mean(Height, Clutter, Camera), Embodiment = mean(ARX, UR5, Franka), Task = mean(Obj, Lang)"
+  robotwin_v2_baseline_robot_only: "same protocol, robot-only pretraining (DROID + AgibotWorld + InternData)"
+  robotwin_v2_mixing_ratio_ablation: "same protocol, Ego2R:Robot pretraining ratios of 1:3 and 3:1"
+  robotwin_v2_perturbation_breakdown: "11 independently controlled perturbation settings decoupled from RoboTwin 2.0's bundled randomization, plus 4 newly introduced axes (robot color, camera offset, unseen objects, paraphrased language) and 3 zero-shot cross-embodiment settings"
+  robotwin_v2_perturbation_breakdown_baseline_robot_only: "identical perturbation protocol with robot-only pretraining"
+  robotwin_v2_perturbation_breakdown_mixing_ratio_ablation: "identical perturbation protocol at 1:3 and 3:1 pretraining ratios"
+  robotwin_v2_morphology_scaling_ablation: "ego-only pretraining (no robot data) to isolate the pipeline's contribution; success rate on RoboTwin Randomized"
+  ebench: "fine-tuned separately on EBench Table Top training set, chunk 32"
+  ebench_pretraining_ablation: "identical EBench finetuning across all four pretraining configurations"
+  real_world_arx_acone: "real-robot deployment, sub-step partial scoring, 20 trials per task; absolute values are chart-only so only text-stated deltas are recorded"
+
+tags:
+  - data-synthesis
+  - egocentric-video
+  - human-video
+  - cross-embodiment
+  - retargeting
+  - flow-matching
+  - diffusion-transformer
+  - qwen3.5
+  - robotwin
+  - generalization-benchmark
+  - ood-generalization
+  - real-robot
+  - pretraining
+  - bimanual
