@@ -1,0 +1,67 @@
+name: DreamFly
+full_name: "DreamFly: Causal Memory and Receding-Horizon Diffusion Planning for Aerial Vision-Language Navigation"
+organization: "Xi'an Technological University"
+date: "2026-08-12"
+paper_url: https://arxiv.org/abs/2608.12308
+code_url: null
+venue: null
+open_source: false
+model_type: aerial_vln
+
+architecture:
+  backbone: "Dream-VLA (discrete diffusion language model backbone with bidirectional attention); frozen CLIPSeg dense router + frozen OWLv2 region router for instruction-conditioned memory candidate extraction"
+  llm: "Dream-VLA / Dream-VL diffusion LLM backbone (arXiv:2512.22615)"
+  action_head: "Bidirectional discrete diffusion over K=4 dedicated action tokens (plan-K, execute-one receding-horizon chunk), plus LiteStop, an LN+MLP head mapping the initial all-mask K x |A| action-logit grid to a scalar stop logit"
+  action_head_category: discrete_diffusion
+  parameters: null
+  key_innovation: "Three components on top of Dream-VLA: (1) causally aligned historical memory with 16 long-term 512-d slots under a read-before-write protocol, fused into current visual tokens by zero-initialized gated cross-attention (dim 512, 8 heads); (2) receding-horizon discrete diffusion planning that jointly predicts a K-step action chunk with valid-prefix supervision and horizon decay gamma=0.7, executing only the first action before replanning; (3) LiteStop, a decoupled termination head trained with the navigation policy frozen (positive class weight 4.0) that estimates stop probability from the initial all-mask action logits."
+
+benchmarks:
+  openfly:
+    test_seen_ne: 44.87
+    test_seen_sr: 32.04
+    test_seen_osr: 46.77
+    test_seen_spl: 28.22
+    test_unseen_ne: 45.29
+    test_unseen_sr: 29.46
+    test_unseen_osr: 46.78
+    test_unseen_spl: 23.54
+    source: "Table 2 (Performance comparison on the seen and unseen splits)"
+    eval_condition: "closed-loop AirSim/UE rollouts on OpenFly; 1,392 test-seen trajectories (UE BigCity + 6 AirSim urban scenes) and 404 test-unseen trajectories (UE SmallCity); success radius 20 m; 12 discrete diffusion steps; tau_stop = 0.50"
+  openfly_ablation:
+    dream_vla_baseline_sr: 21.55
+    dream_vla_baseline_ne: 67.82
+    dream_vla_baseline_osr: 42.32
+    dream_vla_baseline_spl: 16.09
+    plus_causal_memory_sr: 24.11
+    plus_causal_memory_ne: 48.93
+    wo_memory_sr: 19.60
+    wo_chunk_sr: 27.73
+    wo_litestop_sr: 26.61
+    full_sr: 31.46
+    full_ne: 44.97
+    full_osr: 46.77
+    full_spl: 27.17
+    source: "Table 3 (Ablation study of different experimental settings)"
+    eval_condition: "progressive and leave-one-out ablation; the full-model row (SR 31.46 / NE 44.97m / SPL 27.17) differs slightly from the Table 2 headline numbers reported by the authors"
+  openfly_litestop_threshold_pilot:
+    tau_0_50_sr: 26.6
+    tau_0_50_spl: 22.9
+    tau_0_50_ne: 53.07
+    tau_0_65_sr: 25.0
+    tau_0_65_spl: 20.2
+    tau_0_65_ne: 51.42
+    tau_0_80_sr: 26.6
+    tau_0_80_spl: 23.0
+    tau_0_80_ne: 53.20
+    source: "Table 1 (Pilot selection of the LiteStop termination threshold)"
+    eval_condition: "64-trajectory balanced calibration set (8 per environment), disjoint from the final evaluation split, using the step-500 LiteStop checkpoint; tau_stop = 0.50 selected (45/64 episodes terminated by LiteStop)"
+
+training:
+  datasets: ["OpenFly (standardized: 20 subsets, 85,785 trajectories, 1,356,622 decision steps; pre-packaged historical keyframes removed, ~190,000 non-standard action labels remapped)"]
+  method: "Staged training. Stage 1: Dream-VLA backbone fine-tuned with all-linear LoRA (r=32, alpha=16) jointly with the memory-fusion adapter while the base projector and the memory-construction routers stay frozen; horizon-aware masked action objective with CAR context reweighting (p=0.1) and horizon decay gamma=0.7; AdamW, lr 1e-4, batch size 8, up to 10,000 steps with the step-5,000 checkpoint used for evaluation. Stage 2: the complete navigation policy is frozen and only LiteStop is optimized with a weighted BCE (positive weight 4.0)."
+
+eval_conditions:
+  openfly: "closed-loop simulation only (AirSim / Unreal Engine); no physical UAV deployment"
+
+tags: [aerial_vln, uav, navigation, discrete_diffusion, action_chunking, memory, receding_horizon, openfly, dream_vla, lora]

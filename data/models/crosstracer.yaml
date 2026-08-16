@@ -1,0 +1,125 @@
+name: CrossTracer
+full_name: "CrossTracer: Cross-Embodiment Navigation via VLA Model Reasoning and Trace Residuals Adapting"
+organization: "Peng Cheng Laboratory / Southern University of Science and Technology / Innovation Investment Research Institute / Soochow University"
+date: "2026-08-07"
+paper_url: https://arxiv.org/abs/2608.06688
+code_url: null
+venue: null
+open_source: true
+model_type: navigation
+inference_hz: null
+
+architecture:
+  backbone: "VL-Tracer: OmniVLA visual/goal encoder (LoRA fine-tuned). CE-Adapter: pretrained ResNet visual branch with FiLM modulation + Transformer fusion."
+  llm: "Llama 7B (OmniVLA language backbone, frozen; LoRA adapters trained)"
+  action_head: "Trace prediction head: MLP over LLM hidden states with tanh, emitting N=8 normalized 2D image-plane waypoints in [-1,1]^2. CE-Adapter adds a Trace Residual Head (delta_max * tanh(MLP)) producing residual waypoint offsets, plus auxiliary Traversability Reconstruction Head and Embodiment Sensitivity Head."
+  action_head_category: regression
+  parameters: "8B (reported as CrossTracer-8B in Table I)"
+  key_innovation: "Two-stage hierarchical design that uses a normalized pixel-space trace as the interface between embodiment-agnostic semantic reasoning and embodiment-aware physical grounding. VL-Tracer (LoRA-tuned from OmniVLA) proposes an initial trace from an egocentric RGB image plus flexible goals (language, target pixel pose, or both, with p_drop=0.3 modality dropout). CE-Adapter then predicts residual corrections conditioned on a learned robot embedding via FiLM layers and trace-to-visual cross-attention. Supervision comes from CE-RRT*, an automated labeling pipeline that turns Mask2Former (ResNet-50) panoptic segmentation into robot-conditioned traversability cost maps and runs RRT* (p_goal=0.15, step 25 px, radius 60 px, N_max=10,000) in the image plane to synthesize cost-minimizing reference traces. Segmentation and cost maps are training-only; inference needs just RGB, goal, and embodiment ID."
+
+training:
+  dataset: "VL-Tracer: navigation trace data from VAMOS. CE-Adapter: 62k egocentric navigation images auto-annotated by CE-RRT*."
+  method: "Two-stage. Stage 1: VL-Tracer LoRA fine-tuning (backbone frozen; LoRA params + trace head optimized) with waypoint L2 loss + smoothness term (lambda_smooth=0.01). Stage 2: VL-Tracer frozen, CE-Adapter trained with composite loss L_trace + lambda_trav*L_trav + lambda_cost*L_cost + lambda_smooth*L_smooth, weights (1.0, 1.0, 1.0, 0.05), Adam lr 1e-4, batch size 64, 64x64 input resolution, N=8 waypoints. No gradients flow back into VL-Tracer."
+  compute: "VL-Tracer: 8x NVIDIA A100, ~48 hours. CE-Adapter: 1x NVIDIA RTX 4090, ~3 hours."
+
+benchmarks:
+  navitrace:
+    total_score: 45.68
+    bicycle: 42.16
+    human: 46.26
+    legged_robot: 46.40
+    wheeled_robot: 46.28
+    accessibility: 33.79
+    dynamic_obstacle: 52.93
+    geometric_terrain: 45.87
+    semantic_terrain: 45.54
+    social_norms: 37.87
+    stationary_obstacle: 46.11
+    visibility: 52.49
+    source: "Table I, CrossTracer-8B (Ours) row"
+
+  navitrace_ablation_no_ce_adapter:
+    total_score: 22.56
+    bicycle: 23.94
+    human: 22.64
+    legged_robot: 22.47
+    wheeled_robot: 21.41
+    accessibility: -3.18
+    dynamic_obstacle: 31.68
+    geometric_terrain: 22.38
+    semantic_terrain: 27.53
+    social_norms: 1.28
+    stationary_obstacle: 25.23
+    visibility: 32.27
+    source: "Table I, CrossTracer w/o CE-Adapter row (VL-Tracer trace used directly)"
+
+  navitrace_goal_pose:
+    total_score: 63.91
+    bicycle: 60.79
+    human: 64.44
+    legged_robot: 64.57
+    wheeled_robot: 64.38
+    accessibility: 53.83
+    dynamic_obstacle: 71.16
+    geometric_terrain: 63.40
+    semantic_terrain: 61.50
+    social_norms: 63.32
+    stationary_obstacle: 63.13
+    visibility: 64.05
+    source: "Table I, CrossTracer w/ Goal Pose row (additional target pixel coordinate input)"
+
+  navitrace_baselines:
+    gemini_2_5_pro_total: 35.67
+    robobrain_2_5_8b_total: 27.96
+    qwen3_vl_235b_thinking_total: 26.24
+    claude_sonnet_4_5_total: 7.36
+    mimo_embodied_8b_thinking_total: -33.55
+    qwen3_vl_8b_thinking_total: -41.30
+    source: "Table I, baseline rows (total score column)"
+
+  real_world_wheeled_robot:
+    sr_avg: 0.65
+    spl_avg: 0.59
+    stt_avg: 0.30
+    sr_white_table: 0.80
+    sr_beige_sofa: 0.60
+    sr_wet_floor_sign_platform: 0.60
+    sr_outdoor_turn_trash_bin: 0.60
+    source: "Table II, wheeled robot columns, CrossTracer rows (5 trials per task per platform)"
+
+  real_world_legged_robot:
+    sr_avg: 0.70
+    spl_avg: 0.58
+    stt_avg: 0.43
+    sr_white_table: 0.60
+    sr_beige_sofa: 0.60
+    sr_wet_floor_sign_platform: 0.80
+    sr_outdoor_turn_trash_bin: 0.80
+    source: "Table II, legged robot columns, CrossTracer rows (5 trials per task per platform)"
+
+  real_world_baseline_omnivla:
+    wheeled_sr_avg: 0.40
+    wheeled_spl_avg: 0.37
+    wheeled_stt_avg: 0.17
+    legged_sr_avg: 0.45
+    legged_spl_avg: 0.31
+    legged_stt_avg: 0.27
+    source: "Table II, OmniVLA average-over-all-scenarios rows"
+
+eval_conditions:
+  navitrace: "Official NaviTrace protocol; egocentric RGB + language instruction + embodiment type; model outputs 8 normalized 2D pixel-space waypoints. Language-only goal setting."
+  navitrace_goal_pose: "Adds a target pixel coordinate on top of the language instruction and embodiment type; not directly comparable to the language-only setting."
+  real_world: "Wheeled and legged platforms, egocentric RGB camera, NVIDIA Jetson Orin onboard with remote RTX 4090 workstation inference over WiFi. Four tasks (two indoor semantic targets, one elevated-platform target, one outdoor turning task), 5 trials each per platform per method. Identical low-level controller across methods; reference path length and time taken from human expert paths."
+
+tags:
+  - navigation
+  - cross-embodiment
+  - pixel-space-trace
+  - residual-learning
+  - LoRA
+  - hierarchical
+  - navitrace
+  - real-world
+  - legged-robot
+  - wheeled-robot
+  - planner-supervision
