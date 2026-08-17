@@ -1,78 +1,83 @@
 name: Dexora
-full_name: "Dexora: Open-source VLA for High-DoF Bimanual Dexterity"
-organization: "Tsinghua University; Beijing Academy of Artificial Intelligence (BAAI); The University of Hong Kong; Shanghai Jiao Tong University; ShanghaiTech University; Peking University"
-date: "2026-05-18"
+full_name: 'Dexora: Open-source VLA for High-DoF Bimanual Dexterity'
+organization: Tsinghua University; Beijing Academy of Artificial Intelligence (BAAI); The University of
+  Hong Kong; Shanghai Jiao Tong University; ShanghaiTech University; Peking University
+date: '2026-05-18'
 paper_url: https://arxiv.org/abs/2605.18722
 code_url: https://dexoravla.github.io
 project_url: https://dexoravla.github.io
-venue: "ICRA 2026"
+venue: ICRA 2026
 open_source: true
-
 architecture:
-  backbone: "T5 (language encoder) + SigLIP (vision encoder)"
-  llm: "T5 (encoder-only used as language tower)"
-  action_head: "Decoder-only Transformer diffusion policy (28 layers, hidden 1024, 16 heads) producing 36-dim joint commands for dual arms + dual hands"
+  backbone: T5 (language encoder) + SigLIP (vision encoder)
+  llm: T5 (encoder-only used as language tower)
+  action_head: Decoder-only Transformer diffusion policy (28 layers, hidden 1024, 16 heads) producing
+    36-dim joint commands for dual arms + dual hands
   action_head_category: diffusion
-  action_space: "continuous, 36-dim synchronized joint commands (2 x AIRBOT 6-DoF arms + 2 x XHAND 12-DoF hands)"
-  parameters: "Policy: ~28L x 1024d x 16h transformer diffusion; Discriminator: 30M (12L x 512d x 8h)"
-  key_innovation: >
-    Open-source VLA targeting 36-DoF bimanual + dexterous-hand manipulation. Introduces a
-    data-quality-aware training recipe in which an offline discriminator scores teleoperated clips and
+  action_space: continuous, 36-dim synchronized joint commands (2 x AIRBOT 6-DoF arms + 2 x XHAND 12-DoF
+    hands)
+  parameters: 'Policy: ~28L x 1024d x 16h transformer diffusion; Discriminator: 30M (12L x 512d x 8h)'
+  key_innovation: 'Open-source VLA targeting 36-DoF bimanual + dexterous-hand manipulation. Introduces
+    a data-quality-aware training recipe in which an offline discriminator scores teleoperated clips and
     provides clip-level loss weights for the diffusion-transformer policy, down-weighting low-quality
     demonstrations. Combined with a large mixed sim+real dataset (100K sim trajectories / 6.5M frames
     plus 10K real episodes / 2.92M frames), this yields strong dexterous performance and substantially
     smoother trajectories (jerk -26%, acceleration -41%).
 
+    '
 training:
   dataset:
-    sim_trajectories: 100000  # 6.5M frames, 361 hours
-    real_episodes: 10000      # 2.92M frames, 40.5 hours
-    high_quality_fraction: 0.15  # approx fraction of real data passing quality filter
+    sim_trajectories: 100000
+    real_episodes: 10000
+    high_quality_fraction: 0.15
   policy_steps: 100000
   discriminator_steps: 10000
-  hardware: "8 x NVIDIA A100, distributed data parallel"
-  optimizer: "AdamW"
-  teleop_rig: "Custom exoskeleton backpack for arm kinematics + Apple Vision Pro for hand tracking; MuJoCo digital twin"
-
+  hardware: 8 x NVIDIA A100, distributed data parallel
+  optimizer: AdamW
+  teleop_rig: Custom exoskeleton backpack for arm kinematics + Apple Vision Pro for hand tracking; MuJoCo
+    digital twin
 benchmarks:
   real_world_basic:
     avg_success: 89.6
     num_tasks: 12
-    baselines:
-      gr00t_n1: 82.1
-      pi0: 50.4
-      diffusion_policy: 34.2
-    source: "Dexora paper Table I (basic 12-task real-world suite)"
-    date_reported: "2026-05-18"
-    eval_condition: "real-world, in-domain"
+    source: Dexora paper Table I (basic 12-task real-world suite)
+    date_reported: '2026-05-18'
+    eval_condition: real-world, in-domain
   real_world_dexterous:
     avg_success: 66.7
     num_tasks: 6
-    per_task:
-      use_pen: 65
-      fetch_book: 80
-      cut_leek: 80
-      place_plates: 70
-      rough_dough: 80
-      twist_cap: 25
-    baselines:
-      gr00t_n1: 51.7
-      pi0: 26.7
-      diffusion_policy: 6.7
-    source: "Dexora paper Table II (dexterous 6-task suite)"
-    date_reported: "2026-05-18"
-    eval_condition: "real-world, in-domain"
-
+    source: Dexora paper Table II (dexterous 6-task suite)
+    date_reported: '2026-05-18'
+    eval_condition: real-world, in-domain
+  real_world_basic_baselines:
+    gr00t_n1: 82.1
+    pi0: 50.4
+    diffusion_policy: 34.2
+    source: Dexora paper Table I (basic 12-task real-world suite)
+    eval_condition: Baselines under the same 12-task basic protocol; not DexORA
+  real_world_dexterous_per_task:
+    use_pen: 65
+    fetch_book: 80
+    cut_leek: 80
+    place_plates: 70
+    rough_dough: 80
+    twist_cap: 25
+    source: Dexora paper Table II (dexterous 6-task suite)
+  real_world_dexterous_baselines:
+    gr00t_n1: 51.7
+    pi0: 26.7
+    diffusion_policy: 6.7
+    source: Dexora paper Table II (dexterous 6-task suite)
+    eval_condition: Baselines under the same 6-task dexterous protocol; not DexORA
 eval_conditions:
-  real_world: "in-domain + OOD (background, lighting, objects, occlusion, clutter, height)"
-  cross_embodiment: "single-arm grippers, dual-arm grippers, single-arm hands via action projection"
-
+  real_world: in-domain + OOD (background, lighting, objects, occlusion, clutter, height)
+  cross_embodiment: single-arm grippers, dual-arm grippers, single-arm hands via action projection
 tags:
-  - bimanual
-  - dexterous-hands
-  - 36-DoF
-  - diffusion
-  - quality-aware-training
-  - open-source
-  - ICRA-2026
-  - real-world
+- bimanual
+- dexterous-hands
+- 36-DoF
+- diffusion
+- quality-aware-training
+- open-source
+- ICRA-2026
+- real-world

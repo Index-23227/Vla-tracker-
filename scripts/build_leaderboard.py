@@ -323,11 +323,20 @@ def build_leaderboard(models: list[dict], benchmarks_meta: dict[str, dict],
             if meta.get("eval_condition"):
                 entry["eval_conditions"][bench_name] = meta["eval_condition"]
 
-        # Also carry over eval_conditions from model YAML
+        # Also carry over eval_conditions from model YAML. 22 models write these
+        # as structured dicts ({setting, base_model, note}); the old str-only
+        # check silently dropped every one of them. Flatten dicts to the display
+        # string the dashboard's classifier and tooltips expect.
         model_eval = model.get("eval_conditions", {})
         for bench_name, cond in model_eval.items():
             if isinstance(cond, str):
                 entry["eval_conditions"][bench_name] = cond
+            elif isinstance(cond, dict):
+                parts = [str(cond[k]) for k in ("setting", "base_model") if cond.get(k)]
+                parts += [f"{k}: {v}" for k, v in cond.items()
+                          if k not in ("setting", "base_model") and isinstance(v, (str, int, float))]
+                if parts:
+                    entry["eval_conditions"][bench_name] = "; ".join(parts)
 
         # Compute averages per benchmark
         libero_avg = compute_libero_avg(model_benchmarks)

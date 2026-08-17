@@ -1,72 +1,72 @@
-# Paper: QPILOTS: Efficient Test-Time Q-Steering for Flow Policies
-# arXiv: 2606.14801
-
 name: QPILOTS
-full_name: "QPILOTS: Q-guided Posterior Inference for Learning Off-Policy and Test-Time Steering"
-organization: "University of Toronto; Vector Institute; LG Electronics"
-date: "2026-06-11"
+full_name: 'QPILOTS: Q-guided Posterior Inference for Learning Off-Policy and Test-Time Steering'
+organization: University of Toronto; Vector Institute; LG Electronics
+date: '2026-06-11'
 paper_url: https://arxiv.org/abs/2606.14801
-code_url: null
+code_url:
 venue: arXiv preprint
 open_source: false
-
 model_type: vla
-
 architecture:
-  backbone: "Inference-time Q-steering wrapper applied on top of a frozen flow-matching VLA. For VLA experiments, the base flow is the public pi0.5-LIBERO checkpoint of Black et al. (3B params, PaliGemma-class VLM + flow-matching action expert, finetuned on LIBERO-40). For from-scratch OGBench experiments, a flow-matching policy with critic ensemble is co-trained."
-  llm: "Inherits base policy's VLM (pi0.5 = PaliGemma-class for the VLA setting; not modified)"
-  action_head: "Inference-time Q-steered flow matching. The base velocity field v_theta(x_t, t, s) is left unchanged; at every Euler step the integrator is augmented with a critic-gradient drift v_steered = v_theta + alpha * g_t where g_t = (||v_theta|| / (||grad V_t|| + eps)) * grad V_t(x_t; s), and V_t is the log-tilt potential of the KL-regularized target pi* propto pi_beta * exp(tau * Qbar). Two variants: QPILOTS-U evaluates the critic gradient at the Tweedie-denoised endpoint x_hat_1 = x_t + (1-t) v_theta (single forward-backward pass through critic, no extra training); QPILOTS-M draws N=4 differentiable posterior samples from a learned Meta Flow Map X_hat_{0,1}(eps; t, x_t, s) and uses an MFM-G log-sum-exp Monte Carlo estimator of the posterior-tilt gradient."
+  backbone: Inference-time Q-steering wrapper applied on top of a frozen flow-matching VLA. For VLA experiments,
+    the base flow is the public pi0.5-LIBERO checkpoint of Black et al. (3B params, PaliGemma-class VLM
+    + flow-matching action expert, finetuned on LIBERO-40). For from-scratch OGBench experiments, a flow-matching
+    policy with critic ensemble is co-trained.
+  llm: Inherits base policy's VLM (pi0.5 = PaliGemma-class for the VLA setting; not modified)
+  action_head: 'Inference-time Q-steered flow matching. The base velocity field v_theta(x_t, t, s) is
+    left unchanged; at every Euler step the integrator is augmented with a critic-gradient drift v_steered
+    = v_theta + alpha * g_t where g_t = (||v_theta|| / (||grad V_t|| + eps)) * grad V_t(x_t; s), and V_t
+    is the log-tilt potential of the KL-regularized target pi* propto pi_beta * exp(tau * Qbar). Two variants:
+    QPILOTS-U evaluates the critic gradient at the Tweedie-denoised endpoint x_hat_1 = x_t + (1-t) v_theta
+    (single forward-backward pass through critic, no extra training); QPILOTS-M draws N=4 differentiable
+    posterior samples from a learned Meta Flow Map X_hat_{0,1}(eps; t, x_t, s) and uses an MFM-G log-sum-exp
+    Monte Carlo estimator of the posterior-tilt gradient.'
   action_head_category: other
   action_space: continuous
-  parameters: "3B (frozen pi0.5 base in LIBERO setting); QPILOTS adds zero parameters for U variant and a transformer-style MFM (auxiliary network matching pi0.5's action expert depth/heads, init from pi0.5 weights) for the M variant; no updates to base flow weights"
-  key_innovation: >
-    Recasts policy extraction for flow/diffusion VLAs as flow-time tilted sampling. Rather than (a) backpropagating
-    the critic gradient through the multi-step denoising chain (BPTT — numerically unstable), (b) distilling the
-    flow into a one-step actor (sacrifices expressivity), or (c) repeatedly retraining the policy when the critic
-    changes (couples policy and critic), QPILOTS leaves the base flow completely frozen and injects a noiseless-action
-    Q-gradient into the Euler integrator at every denoising step. The key technical insight is to never evaluate
-    the critic on noisy intermediate latents x_t (where critic predictions are uncalibrated): QPILOTS-U projects
-    x_t to the Tweedie denoised endpoint x_hat_1 before computing the critic gradient; QPILOTS-M instead draws
-    differentiable posterior samples from a Meta Flow Map and uses a log-sum-exp Monte Carlo estimator of the
-    posterior-tilt gradient. The KL-regularized target pi* propto pi_beta * exp(tau * Qbar) is realized via the
-    steered probability-flow ODE x_dot* = v_theta + (sigma_t^2 / 2) * grad V_t with sigma_t^2 = 2(1-t)/t. Provides
-    finite-step W2 and KL bounds C(1/sqrt(K) + 1/sqrt(N)) under the idealized exact-posterior sampler. Inherits
-    SARSA-based online critic learning to avoid prohibitive pi0.5 sampling inside Bellman targets. Magnitude
-    rescaling g_t = (||v_theta||/(||grad V_t||+eps)) * grad V_t avoids the t-singular sigma_t^2/2 schedule.
+  parameters: 3B (frozen pi0.5 base in LIBERO setting); QPILOTS adds zero parameters for U variant and
+    a transformer-style MFM (auxiliary network matching pi0.5's action expert depth/heads, init from pi0.5
+    weights) for the M variant; no updates to base flow weights
+  key_innovation: 'Recasts policy extraction for flow/diffusion VLAs as flow-time tilted sampling. Rather
+    than (a) backpropagating the critic gradient through the multi-step denoising chain (BPTT — numerically
+    unstable), (b) distilling the flow into a one-step actor (sacrifices expressivity), or (c) repeatedly
+    retraining the policy when the critic changes (couples policy and critic), QPILOTS leaves the base
+    flow completely frozen and injects a noiseless-action Q-gradient into the Euler integrator at every
+    denoising step. The key technical insight is to never evaluate the critic on noisy intermediate latents
+    x_t (where critic predictions are uncalibrated): QPILOTS-U projects x_t to the Tweedie denoised endpoint
+    x_hat_1 before computing the critic gradient; QPILOTS-M instead draws differentiable posterior samples
+    from a Meta Flow Map and uses a log-sum-exp Monte Carlo estimator of the posterior-tilt gradient.
+    The KL-regularized target pi* propto pi_beta * exp(tau * Qbar) is realized via the steered probability-flow
+    ODE x_dot* = v_theta + (sigma_t^2 / 2) * grad V_t with sigma_t^2 = 2(1-t)/t. Provides finite-step
+    W2 and KL bounds C(1/sqrt(K) + 1/sqrt(N)) under the idealized exact-posterior sampler. Inherits SARSA-based
+    online critic learning to avoid prohibitive pi0.5 sampling inside Bellman targets. Magnitude rescaling
+    g_t = (||v_theta||/(||grad V_t||+eps)) * grad V_t avoids the t-singular sigma_t^2/2 schedule.
 
+    '
 training:
-  method: >
-    Two regimes. (1) From-scratch (OGBench): the base flow v_theta, the J=10 critic ensemble Qbar with pessimism
-    rho, and (for M) the MFM are co-trained on offline data via standard conditional flow matching (Eq. 3), MFM
-    diagonal+consistency losses (Eqs. 9-10), and TD learning against a pessimistic target ensemble with next-actions
-    drawn from the steered policy. 1e6 offline gradient steps + 5e5 online interaction steps (1 update per env step).
-    (2) Frozen base (LIBERO): the pi0.5-LIBERO checkpoint is fully frozen; only a task-specific SARSA critic is
-    learned online for 5e5 steps. QPILOTS-M additionally distills an MFM offline on the public LIBERO-90 demos
-    (4e4 gradient steps, batch size 256, ~2 days on a single H100) via the GLASS reparameterization of Potaptchik
-    et al., with the frozen pi0.5-LIBERO base flow as the conditional teacher; MFM transformer initialized from
-    pi0.5-LIBERO. SARSA is chosen over IQL/MC/FQL after a value-learning ablation on LIBERO-90 task 64 (Fig. 3) —
-    SARSA reaches 90% SR at 5e5 steps where IQL/FQL exhibit high variance under non-stationary replay and MC is
-    dominated by early negative returns.
-  compute: "OGBench: TPU v4-8; 8h (U) / 12h (M) per task per 4 seeds for 1.5e6 total steps. LIBERO: 6h (U) / 8h (M) per task per seed for 5e5 online steps. MFM distillation: ~2 days on 1x NVIDIA H100 (3B teacher in every batch). Latency analysis on RTX PRO 6000."
-  notes: "Hyperparameters: tau=1 fixed, K Euler flow steps as in base policy, N=4 MFM posterior samples per Euler step for QPILOTS-M, ensemble size J=10, pessimism rho=0.5 (rho=0 on humanoid-maze), action-chunking horizon H=10 matching pi0.5 on LIBERO (H=1 navigation, H=5 manipulation on OGBench), gamma=0.99 (0.995 on giant/humanoid mazes). Steering coefficient alpha tuned per-domain (OGBench: alpha in {0.1,0.2,0.3,0.5,1.0,2.0}, picked from 4-seed sweep on 2 tuning tasks; LIBERO: alpha in {0.1,0.2,0.3} per task, see Table 4)."
+  method: 'Two regimes. (1) From-scratch (OGBench): the base flow v_theta, the J=10 critic ensemble Qbar
+    with pessimism rho, and (for M) the MFM are co-trained on offline data via standard conditional flow
+    matching (Eq. 3), MFM diagonal+consistency losses (Eqs. 9-10), and TD learning against a pessimistic
+    target ensemble with next-actions drawn from the steered policy. 1e6 offline gradient steps + 5e5
+    online interaction steps (1 update per env step). (2) Frozen base (LIBERO): the pi0.5-LIBERO checkpoint
+    is fully frozen; only a task-specific SARSA critic is learned online for 5e5 steps. QPILOTS-M additionally
+    distills an MFM offline on the public LIBERO-90 demos (4e4 gradient steps, batch size 256, ~2 days
+    on a single H100) via the GLASS reparameterization of Potaptchik et al., with the frozen pi0.5-LIBERO
+    base flow as the conditional teacher; MFM transformer initialized from pi0.5-LIBERO. SARSA is chosen
+    over IQL/MC/FQL after a value-learning ablation on LIBERO-90 task 64 (Fig. 3) — SARSA reaches 90%
+    SR at 5e5 steps where IQL/FQL exhibit high variance under non-stationary replay and MC is dominated
+    by early negative returns.
 
-inference_hz: null
-
+    '
+  compute: 'OGBench: TPU v4-8; 8h (U) / 12h (M) per task per 4 seeds for 1.5e6 total steps. LIBERO: 6h
+    (U) / 8h (M) per task per seed for 5e5 online steps. MFM distillation: ~2 days on 1x NVIDIA H100 (3B
+    teacher in every batch). Latency analysis on RTX PRO 6000.'
+  notes: 'Hyperparameters: tau=1 fixed, K Euler flow steps as in base policy, N=4 MFM posterior samples
+    per Euler step for QPILOTS-M, ensemble size J=10, pessimism rho=0.5 (rho=0 on humanoid-maze), action-chunking
+    horizon H=10 matching pi0.5 on LIBERO (H=1 navigation, H=5 manipulation on OGBench), gamma=0.99 (0.995
+    on giant/humanoid mazes). Steering coefficient alpha tuned per-domain (OGBench: alpha in {0.1,0.2,0.3,0.5,1.0,2.0},
+    picked from 4-seed sweep on 2 tuning tasks; LIBERO: alpha in {0.1,0.2,0.3} per task, see Table 4).'
+inference_hz:
 benchmarks:
-  libero:
-    libero_90:
-      task_26_put_wine_bottle_in_bottom_drawer: 43.0
-      task_31_put_black_bowl_on_top_of_cabinet: 55.0
-      task_38_put_right_moka_pot_on_stove: 91.0
-      task_59_pick_tomato_sauce_into_tray: 82.0
-      task_60_pick_black_bowl_left_into_tray: 99.0
-      task_64_stack_right_bowl_on_left_into_tray: 89.0
-      libero_90_6task_mean: 76.5
-      variant: "QPILOTS-U"
-    source: "Paper Table 3 (LIBERO end-of-training success rate, mean over 5 seeds at 5e5 steps, EMA-smoothed). QPILOTS-U mean across the 6 evaluated LIBERO-90 tasks is 76.5%; QPILOTS-M is 72.0%. Baselines on same 6 tasks: pi0.5 zero-shot 26%, DSRL 58%, BoN(N=5) 40%, EXPO 39%, CGQL-LinEx 31%."
-    date_reported: "2026-06-11"
-    eval_condition: "Frozen pi0.5-LIBERO base flow + per-task SARSA critic learned online (5e5 steps, 5 seeds) + QPILOTS-U/M inference-time steering. 6 LIBERO-90 tasks where pi0.5 zero-shot SR is 5-50%. Action chunking H=10, gamma=0.99, rho=0.5. alpha per Table 4."
-    notes: "Not evaluated on the standard LIBERO-4 suite (Spatial/Object/Goal/Long); evaluated on 6 hand-picked LIBERO-90 tasks selected to have pi0.5 zero-shot SR in [5%, 50%]. libero_avg not computed for standard suite."
   ogbench:
     aggregate_50_tasks_online_success_rate: 90.0
     aggregate_50_tasks_offline_success_rate: 48.0
@@ -76,9 +76,13 @@ benchmarks:
     cube_quadruple_play_online: 79.0
     puzzle_4x4_play_sparse_online: 100.0
     scene_play_sparse_online: 99.0
-    source: "Paper Table 1 (OGBench Offline -> Online Success Rate, 8 seeds, 50 eval episodes/seed). QPILOTS-M aggregate online 90% across 50 tasks beats QAM-E (85%), FQL (82%), FBRAC (64%), DSRL (60%), IFQL (49%), FEdit (79%), CGQL/CGQL-M/CGQL-L (67/64/58), and ReBRAC Gaussian (64%)."
-    date_reported: "2026-06-11"
-    eval_condition: "OGBench [Park et al. ICLR 2025] single-task: 10 domains (5 navigation, 5 manipulation), 5 tasks/domain, 50 tasks total. 1e6 offline + 5e5 online gradient steps. End-of-training mean SR over 8 seeds with 95% bootstrap CIs."
+    source: Paper Table 1 (OGBench Offline -> Online Success Rate, 8 seeds, 50 eval episodes/seed). QPILOTS-M
+      aggregate online 90% across 50 tasks beats QAM-E (85%), FQL (82%), FBRAC (64%), DSRL (60%), IFQL
+      (49%), FEdit (79%), CGQL/CGQL-M/CGQL-L (67/64/58), and ReBRAC Gaussian (64%).
+    date_reported: '2026-06-11'
+    eval_condition: 'OGBench [Park et al. ICLR 2025] single-task: 10 domains (5 navigation, 5 manipulation),
+      5 tasks/domain, 50 tasks total. 1e6 offline + 5e5 online gradient steps. End-of-training mean SR
+      over 8 seeds with 95% bootstrap CIs.'
   latency_analysis:
     pi0_5_baseline_ms_per_step: 112.7
     qpilots_u_ms_per_step: 114.1
@@ -90,32 +94,57 @@ benchmarks:
     qpilots_u_sr_pct: 83.3
     qpilots_m_sr_pct: 88.5
     pi0_5_sr_pct: 19.2
-    source: "Paper Table 5 (single-step inference on LIBERO-90 task 59, NVIDIA RTX PRO 6000). QPILOTS-U gives +333.8% SR for only 4% latency overhead; QPILOTS-M gives +360.9% SR at 2.14x latency."
-    date_reported: "2026-06-11"
-
+    source: Paper Table 5 (single-step inference on LIBERO-90 task 59, NVIDIA RTX PRO 6000). QPILOTS-U
+      gives +333.8% SR for only 4% latency overhead; QPILOTS-M gives +360.9% SR at 2.14x latency.
+    date_reported: '2026-06-11'
+  libero_90:
+    task_26_put_wine_bottle_in_bottom_drawer: 43.0
+    task_31_put_black_bowl_on_top_of_cabinet: 55.0
+    task_38_put_right_moka_pot_on_stove: 91.0
+    task_59_pick_tomato_sauce_into_tray: 82.0
+    task_60_pick_black_bowl_left_into_tray: 99.0
+    task_64_stack_right_bowl_on_left_into_tray: 89.0
+    libero_90_6task_mean: 76.5
+    variant: QPILOTS-U
+    source: 'Paper Table 3 (LIBERO end-of-training success rate, mean over 5 seeds at 5e5 steps, EMA-smoothed).
+      QPILOTS-U mean across the 6 evaluated LIBERO-90 tasks is 76.5%; QPILOTS-M is 72.0%. Baselines on
+      same 6 tasks: pi0.5 zero-shot 26%, DSRL 58%, BoN(N=5) 40%, EXPO 39%, CGQL-LinEx 31%.'
+    date_reported: '2026-06-11'
+    eval_condition: Frozen pi0.5-LIBERO base flow + per-task SARSA critic learned online (5e5 steps, 5
+      seeds) + QPILOTS-U/M inference-time steering. 6 LIBERO-90 tasks where pi0.5 zero-shot SR is 5-50%.
+      Action chunking H=10, gamma=0.99, rho=0.5. alpha per Table 4.
+    notes: Not evaluated on the standard LIBERO-4 suite (Spatial/Object/Goal/Long); evaluated on 6 hand-picked
+      LIBERO-90 tasks selected to have pi0.5 zero-shot SR in [5%, 50%]. libero_avg not computed for standard
+      suite.
 eval_conditions:
-  libero: "LIBERO-90 subset (6 tasks: 26/31/38/59/60/64). Frozen pi0.5-LIBERO base; SARSA online critic; 5 seeds; EMA time-weighted alpha=0.99 smoothing along training axis before averaging across seeds."
-  ogbench: "OGBench single-task; 1e6 offline + 5e5 online steps; 8 seeds; per-domain (H, gamma, rho) follows Li & Levine 2026."
-  steering_coef_sensitivity: "Most OGBench domains peak at alpha in {0.1, 0.2, 0.3, 0.5} and degrade gracefully; puzzle-4x4-play-sparse requires alpha=2.0 (only domain with sharp peak)."
-  value_learning_ablation: "On LIBERO-90 task 64, SARSA reaches 90% SR at 5e5 steps, outperforming IQL/FQL (unstable under non-stationary replay) and Monte-Carlo (dominated by early-training negative returns)."
-  theoretical_guarantee: "Idealized QPILOTS-M with exact posterior samples and unrescaled sigma_t^2/2 drift satisfies W2(p_hat_1, pi*) <= C(1/sqrt(K) + 1/sqrt(N)) and KL <= C(1/K + 1/N) under standard regularity on v_theta, Qbar, the exact posterior sampler, and sigma_t (Appendix B). QPILOTS-U has no formal guarantee — Bayes-optimal only when pi_beta is Gaussian."
-
+  libero: 'LIBERO-90 subset (6 tasks: 26/31/38/59/60/64). Frozen pi0.5-LIBERO base; SARSA online critic;
+    5 seeds; EMA time-weighted alpha=0.99 smoothing along training axis before averaging across seeds.'
+  ogbench: OGBench single-task; 1e6 offline + 5e5 online steps; 8 seeds; per-domain (H, gamma, rho) follows
+    Li & Levine 2026.
+  steering_coef_sensitivity: Most OGBench domains peak at alpha in {0.1, 0.2, 0.3, 0.5} and degrade gracefully;
+    puzzle-4x4-play-sparse requires alpha=2.0 (only domain with sharp peak).
+  value_learning_ablation: On LIBERO-90 task 64, SARSA reaches 90% SR at 5e5 steps, outperforming IQL/FQL
+    (unstable under non-stationary replay) and Monte-Carlo (dominated by early-training negative returns).
+  theoretical_guarantee: Idealized QPILOTS-M with exact posterior samples and unrescaled sigma_t^2/2 drift
+    satisfies W2(p_hat_1, pi*) <= C(1/sqrt(K) + 1/sqrt(N)) and KL <= C(1/K + 1/N) under standard regularity
+    on v_theta, Qbar, the exact posterior sampler, and sigma_t (Appendix B). QPILOTS-U has no formal guarantee
+    — Bayes-optimal only when pi_beta is Gaussian.
 tags:
-  - vla
-  - test-time-steering
-  - inference-time
-  - flow-matching
-  - q-learning
-  - rl-finetuning
-  - offline-to-online-rl
-  - tweedie-guidance
-  - meta-flow-map
-  - posterior-sampling
-  - classifier-guidance
-  - pi0.5-base
-  - libero-90
-  - ogbench
-  - frozen-base-policy
-  - sarsa
-  - critic-guided
-  - kl-regularized-policy-improvement
+- vla
+- test-time-steering
+- inference-time
+- flow-matching
+- q-learning
+- rl-finetuning
+- offline-to-online-rl
+- tweedie-guidance
+- meta-flow-map
+- posterior-sampling
+- classifier-guidance
+- pi0.5-base
+- libero-90
+- ogbench
+- frozen-base-policy
+- sarsa
+- critic-guided
+- kl-regularized-policy-improvement

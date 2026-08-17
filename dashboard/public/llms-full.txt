@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-08-16T17:04:27.049306
+# Generated: 2026-08-17T09:33:33.751046
 # Models: 414
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -575,7 +575,8 @@ MODEL: PriorVLA
   Benchmarks:
     libero (avg=99.05): libero_spatial=99.4, libero_object=99.8, libero_goal=99.4, libero_long=97.6, libero_avg=99.1
     robotwin_v2 (avg=52.8): grab_roller=93, handover_mic=84, lift_pot=66, move_can_pot=57, open_laptop=83, pick_dual_bottles=26, place_object_basket=42, place_dual_shoes=20, place_phone_stand=35, put_bottles_dustbin=45, put_object_cabinet=45, stack_blocks_two=17, stack_bowls_two=73, robotwin_v2_hard_avg=52.8, robotwin_v2_avg=52.8, robotwin_v2_hard_delta_vs_pi0_5=11.0
-  Eval Conditions: {'libero': 'fine-tuned (50 demonstrations per task)', 'robotwin': 'fine-tuned (RoboTwin 2.0-Hard, 50 demonstrations per task)', 'real_world': '100-300 demonstrations per task standard; 10 demonstrations per task few-shot'}
+    libero_baseline_pi0_5: spatial=98.8, object=98.2, goal=98.0, long=92.4, avg=96.9
+  Eval Conditions: {'libero_baseline_pi0_5': 'Base-policy comparison row from the same table; not this model', 'libero': 'fine-tuned (50 demonstrations per task)', 'robotwin': 'fine-tuned (RoboTwin 2.0-Hard, 50 demonstrations per task)', 'real_world': '100-300 demonstrations per task standard; 10 demonstrations per task few-shot'}
   AI Review Summary: 사전학습된 π₀.₅ 류 VLA의 prior가 full fine-tuning 중 좁은 학습 분포로 드리프트하는 문제를 해결하기 위해, **frozen Prior Expert + 학습 가능한 Adaptation Expert**를 두고 3종의 Expert Query(Scene/Motor/Action)로 prior를 명시적으로 추출/주입하는 PEFT 프레임워크. Full fine-tune의 **25% 파라미터**만 갱신하면서 LIBERO **99.1%**, RoboTwin 2.0-Hard 평균 **52.8%**, 실로봇 standard 8
   AI Review: PDF-verified
 
@@ -685,7 +686,7 @@ MODEL: LIRA
   Benchmarks:
     libero (avg=98.88): libero_spatial=99.6, libero_object=99.8, libero_goal=98.5, libero_long=97.6, libero_avg=98.9, libero_plus_camera=74.9, libero_plus_robot=51.8, libero_plus_language=82.0, libero_plus_light=96.9, libero_plus_background=90.2, libero_plus_noise=80.5, libero_plus_layout=78.1, libero_plus_avg=78.0
     calvin (avg=4.52): calvin_abc_d_1_5=98.8, calvin_abc_d_2_5=95.3, calvin_abc_d_3_5=91.0, calvin_abc_d_4_5=85.8, calvin_abc_d_5_5=80.5, calvin_abc_d_avg_len=4.52
-  Eval Conditions: {'libero': 'LIBERO fine-tuned; libero_plus_* are zero-shot transfer (no LIBERO-Plus fine-tuning)', 'calvin': 'fine-tuned'}
+  Eval Conditions: {'libero': 'fine-tuned; LIRA 0.5B (Prismatic-style VLM + Qwen2.5-0.5B, LoRA), VLA-Adapter architecture with local cross-layer routing; note: 500 trials per LIBERO suite. Controlled baseline VLA-Adapter scores 97.3 avg; VLA-Adapter-Pro 98.5.', 'calvin': 'fine-tuned; LIRA 0.5B trained on CALVIN environments A/B/C; note: Evaluated on environment D over 1,000 task sequences.', 'libero_plus': 'zero-shot transfer; LIRA 0.5B LIBERO-trained checkpoint, no LIBERO-Plus fine-tuning; note: Official protocol, one rollout for each of the 10,030 tasks; Overall is task-weighted, not the unweighted mean of the seven categories. With LIBERO-Plus fine-tuning LIRA reaches 82.9 Overall (VLA-Adapter 81.0, OpenVLA-OFT 79.5).', 'real_world': 'fine-tuned; LIRA 0.5B; note: Franka Research 3 (7-DoF) with Franka Hand and two Orbbec Gemini 336L cameras; 10 trials per task. Move 10/10, Pick-and-Place 9/10, Collection step2 8/10, Transfer step2 7/10. Authors call these preliminary.'}
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -1264,7 +1265,7 @@ MODEL: AtVLA
   Benchmarks:
     libero (avg=98.38): libero_spatial=99.3, libero_object=99.4, libero_goal=98.3, libero_long=96.5
     simpler_env: google_robot_pick_coke_can=91.3, google_robot_move_near=81.6, google_robot_open_close_drawer=57.5
-  Eval Conditions: {'libero': 'fine-tuned', 'simpler_env': 'fine-tuned'}
+  Eval Conditions: {'libero': 'fine-tuned; pi0 (PaliGemma 3B + 300M flow-matching action expert), post-trained with registers + uncertainty-gated cropping; note: A single unified policy is trained on the mixture of all four suites (2,000 trajectories). AtVLA lifts the pi0 baseline average from 94.2% to 98.4% and beats every listed baseline on all four suites, including VLANeXt (99.0/99.2/96.6/94.8) and pi0.5. Controlled ablations from the same initialization and data: pi0+Registers 98.8/99.0/98.0/93.1, pi0+Cropping (crops from an external VLM without embodied pre-training) 96.5/98.2/96.7/93.3. Removing the learned registers from pi0+Registers drops all four suites to 93.2/92.1/92.2/81.3, i.e. -4.45 average task-level change, showing the registers store embodied knowledge rather than merely suppressing artifacts. Register capacity saturates at four; fewer registers can fall below the pi0 baseline due to incomplete artifact absorption.', 'simpler_env': 'fine-tuned; pi0 checkpoint, Google Robot embodiment with its own calibrated uncertainty threshold; note: AtVLA leads on Pick Coke Can (91.3 vs pi0 88.0) and Move Near (81.6 vs 80.3) but is only competitive on Open/Close Drawer (57.5 vs pi0 56.0, RT-1-X 59.7). The authors explain the drawer case: the cabinet occupies most of the scene, so nearly every crop preserves the whole image instead of resolving the handle or contact point, which is exactly the regime where adaptive refinement has nothing to add.', 'real_world': 'fine-tuned; pi0, Franka Research 3 with a single third-person RealSense D435i; note: Not a tracked benchmark here. Custom single-view benchmark with two suites — Kitchen (Move/Grab/Pick/Long/Spatial) and Building Blocks (Stack/Edge/Spatial/Long/Grab), 20 independent experiments per cell. AtVLA scores 80/65/80/40/75 and 80/50/70/35/70 versus pi0 at 50/35/55/15/75 and 55/25/55/15/35, raising average real-world success from 46.5% to 69.0%. Largest gains are on grasping and small-object stacking, where single-view depth ambiguity hurts most.', 'inference_cost': 'deployment; note: C_AtVLA = N(C_base + K*C_A + r*(C_crop + C_A)) versus C_pi0 = N(C_base + C_A). With K=4 and trigger rate r ~ 0.3, and one expert pass / crop refinement costing ~10-15% / ~20-25% of a full pi0 replanning pass, total computation is ~1.4-1.6x pi0. Attention rollout itself is nearly free because it reuses attention already computed during action sampling, and the base prefix KV cache is reused when crop tokens are appended. The gate is evaluated once per action-chunk replanning step, not per low-level control step. The threshold is calibrated per embodiment (shared across the four LIBERO suites; separate for Google Robot and Franka), initialized at the 70th percentile of the validation uncertainty distribution under a 30% trigger-rate budget.'}
   AI Review Summary: VLA의 시각 인코더도 ViT의 high-norm attention artifact를 앓고 있으며, embodied post-training이 그걸 **악화시킨다**는 진단에서 출발한다. 해법은 두 개. (a) SigLIP에 학습 가능한 **register token 4개**를 꽂아 넘치는 global 정보를 흡수시키고 patch attention을 정화하며, 그 register 출력을 버리지 않고 policy에 **embodied spatial context로 재활용**. (b) action expert가 K=4개 청크를 뽑아 *
   AI Review: PDF-verified
 
@@ -1432,7 +1433,7 @@ MODEL: WorldTokens
     libero (avg=98.2): libero_spatial=99.6, libero_object=98.8, libero_goal=97.4, libero_long=97.0, libero_avg=98.2
     simpler_env: simpler_widowx_put_spoon_on_towel=74.0, simpler_widowx_put_carrot_on_plate=85.0, simpler_widowx_stack_block=32.0, simpler_widowx_put_eggplant_in_basket=95.0, simpler_widowx_avg=71.5, google_robot_pick_coke_can=91.0, google_robot_move_near=65.0, google_robot_drawer=78.7, google_robot_place_apple=93.5, simpler_google_avg=82.1, simpler_avg=71.5
     real_world: r1_pro_lemon=70.8, r1_pro_strawberry=83.3, r1_pro_mango=75.0, r1_pro_banana=75.0, r1_pro_avg=76.0
-  Eval Conditions: {'libero': 'fine-tuned (single policy trained on all 4 suites pooled), no embodied action pretraining', 'simpler_env': 'trained on BridgeV2 + Fractal real-robot data, evaluated zero-shot in the visually matched simulator; official WidowX protocol with 24 prescribed object-pose configurations per task', 'real_world': 'fine-tuned on self-collected R1 Pro demonstrations, no embodied action pretraining'}
+  Eval Conditions: {'libero': 'fine-tuned; Qwen3-VL-2B-Instruct + World Adapter (K=256) + DiT-B flow-matching action expert; Cosmos-Predict2.5-2B video denoiser used at training time only; note: 50 episodes per task, multiple environment seeds, 2,000 episodes total. Matched action-only baseline Qwen-GR00T (same backbone and GR00T-style head, action expert reads VLM hidden states directly) scores 96.9 avg / 92.8 Long. Ablations: w/o world model 97.4 avg, w/ VLM bypass 97.2, FFN adapter 97.0, RGB anchor instead of Canny 96.2.', 'simpler_env': 'real-to-sim (trained on real-robot data, evaluated in visually matched simulator); Single policy jointly trained on BridgeV2 and Fractal, evaluated on both WidowX and Google Robot embodiments; note: WidowX avg 71.5 is the highest among the listed methods (4B Qwen-GR00T 65.3, StarVLA 65.2). Google Robot avg 82.1. Block-stacking (32.0) remains the weakest WidowX task, though no listed method exceeds 57%. Several published Google averages omit the Place task.', 'real_world': 'fine-tuned; World Tokens 2B on the right arm of a Galaxea R1 Pro, cropped head-mounted fisheye view, 8-dim joint+gripper action; note: 24 trials per object, 96 pooled trials, randomized object-basket positions and policy evaluation order. Matched Qwen-GR00T baseline 59.4% pooled. Context rows (not matched comparisons): pi0.5 without embodied pretraining 15.6%, pi0.5 pretrained checkpoint 100%.', 'latency': "measured; World Tokens 2B, compiled graph with cached conditioning; note: 61.85 ms median per 8-action chunk (~129 actions/s) on a single 24 GB RTX 5090 D with two 224x224 views, batch size 1, 4 flow-integration steps; pi0.5 measured at 56.32 ms on the same setup (within 1.1x). In a 10-step uncompiled configuration matching Fast-WAM, World Tokens takes 119.72 ms vs Fast-WAM's 182 ms. The World Adapter accounts for roughly 10 ms of the 61.85 ms."}
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -1989,7 +1990,7 @@ MODEL: TurboVLA
   Benchmarks:
     libero (avg=97.65): libero_spatial=99.2, libero_object=99.8, libero_goal=97.4, libero_long=94.2, libero_avg=97.7
     robotwin_v2 (avg=60.2): robotwin_v2_avg=60.2
-  Eval Conditions: {'libero': 'fine-tuned', 'robotwin_v2': 'fine-tuned'}
+  Eval Conditions: {'libero': 'fine-tuned; TurboVLA (DINOv3 ViT-B + BERT), 0.2B, trained from scratch on LIBERO without embodied pretraining; note: Single mixed-suite model, VLA-Adapter rollout protocol, 50 rollouts per task (2000 trials). 31.2 ms latency, 0.9 GB inference VRAM on RTX 4090.', 'robotwin_v2': 'fine-tuned; TurboVLA (DINOv3 ViT-L), 0.4B, multi-task; note: Clean setting only, no randomized-scene data; StarVLA training/evaluation framework; 43.4 ms latency.'}
   AI Review Summary: VLA의 통념인 LLM-centric `V→L→A` 경로를 버리고 DINOv3(vision)와 BERT(text)를 독립 인코딩한 뒤 **양방향 cross-attention 6층**으로 직접 융합하는 `V+L→A` 패러다임. ACT-style 디코더가 연속 action chunk를 한 번의 forward pass로 뽑아, **0.2B 파라미터 / 31.2 ms(32 Hz) / 0.9 GB VRAM**으로 LIBERO 평균 **97.7%** 달성 — π0.5(3.4B, 93.6 ms, 96.9%)를 성능·속도·메모리 모두에서 상회.
   AI Review: PDF-verified
 
@@ -2155,7 +2156,7 @@ MODEL: CoTinyVLA
   Tags: libero, libero-plus, chain-of-thought, distillation, sub-1b, lightweight, efficient, robustness, action-chunking, qwen3.5, dual-view, temporal-history, paraphrase-augmentation, open-source
   Benchmarks:
     libero (avg=97.5): libero_spatial=99.4, libero_object=100.0, libero_goal=98.6, libero_long=92.0, libero_avg=97.5
-  Eval Conditions: {'libero': 'fine-tuned'}
+  Eval Conditions: {'libero': "fine-tuned; CoTinyVLA (Qwen3.5-0.8B backbone), 0.9B, fine-tuned for two epochs on the union of the four LIBERO-Plus suites; note: Standard LIBERO numbers use 50 trials per task over 10 tasks per suite. Rollout caps follow the OpenVLA-OFT family: 220 steps on Spatial, 280 on Object, 300 on Goal, 520 on Long. The 97.5% average matches the strongest 7B baseline (RIPT-VLA 97.5%) and is 2.7 points above the strongest sub-1B baseline (Evo-1 94.8%). Closed-loop inference on an L40S: 1.37 s median steady-state step per 8-step chunk, 2.25 GiB peak allocated memory, greedy decoding with a 120-token reasoning budget.; libero_plus_note: The paper's headline result is on LIBERO-Plus (10,030 perturbed tasks, seven perturbation dimensions, one rollout per task), which is not a tracked benchmark here. CoTinyVLA scores 90.8 Spatial / 87.3 Object / 86.6 Goal / 80.7 Long, leading the strongest 7B baseline (OpenVLA-OFT+) by 4.7 / 2.8 / 15.9 / 3.0 points with all four margin intervals excluding zero."}
   AI Review Summary: 파라미터를 키우는 대신 **감독 신호를 구조화**해서 robustness를 산다. Qwen3.5-0.8B 위에 (a) 3인칭·손목 각 8프레임 = 16프레임 dual-view temporal input, (b) 35B teacher로부터 증류한 **episode-level `Plan` + chunk-level `Think`** 2단 CoT, (c) 40개 지시문 → 800개 paraphrase 증강을 얹어, **0.9B 모델이 LIBERO-Plus 4개 suite 전부에서 7B 최강 baseline(OpenVLA-OFT+)을 4.7
   AI Review: PDF-verified
 
@@ -2428,7 +2429,7 @@ MODEL: FiberTune
   Benchmarks:
     libero (avg=97.1): libero_spatial=97.8, libero_object=98.8, libero_goal=97.8, libero_long=94.0, libero_avg=97.1
     calvin (avg=4.12): calvin_abc_d_avg_len=4.116, calvin_abc_d_sr1=94.3, calvin_abc_d_sr2=87.3, calvin_abc_d_sr3=80.9, calvin_abc_d_sr4=77.0, calvin_abc_d_sr5=72.1
-  Eval Conditions: {'libero': 'fine-tuned from lerobot/pi05_libero adapted checkpoint for 6k steps; 10 tasks x 50 episodes per suite', 'calvin': 'fine-tuned from RLinf adapted pi0.5 CALVIN-ABC-D-SFT checkpoint for 6k steps; 1000 chain-evaluation trials'}
+  Eval Conditions: {'libero': 'fine-tuned from lerobot/pi05_libero adapted checkpoint for 6k steps; 10 tasks x 50 episodes per suite', 'calvin': 'fine-tuned from RLinf adapted pi0.5 CALVIN-ABC-D-SFT checkpoint for 6k steps; 1000 chain-evaluation trials', 'so101_physical': 'setup: Physical SO-101 arm pick-place; 90 demos; 128 trials per arm (32 per color x 4 colors: yellow/orange/purple ID + green OOD); task_success: 78.1; id_color_success: 83.3; ood_green_success: 62.5; baseline_task_success: 72.7; baseline_ood_green: 46.9; note: pi0.5 + FiberTune vs pi0.5 task-loss baseline; largest gain on held-out green (+15.6 pp) despite identical training data'}
   AI Review Summary: VLA fine-tuning이 "action-supervised loss로는 제약되지 않는 action-equivalent visual 구조(색·카테고리·distractor·미래 관련 객체 상태)"를 붕괴시킨다는 점을 *local action fiber* 개념으로 형식화하고, 온라인 linear action probe로 action-predictive 방향을 필터링한 잔차 표현 Rpf에 대해 (i) 동결된 RADIO teacher에 cosine 정렬, (ii) effective-rank prior를 부여하는 **추론-time ove
   AI Review: PDF-verified
 
@@ -4412,6 +4413,7 @@ MODEL: Reflex
   Tags: flow-matching, libero, streaming-inference, kv-cache, ICML2026
   Benchmarks:
     libero (avg=79.5): libero_spatial=83.2, libero_object=80.4, libero_goal=82.0, libero_long=72.4
+  Eval Conditions: {'libero': 'fine-tuned; Pi0.5 (2.3B); note: Reflex is a streaming inference framework; scores are Pi0.5 with Reflex, maintaining parity with the synchronous baseline'}
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -4778,7 +4780,8 @@ MODEL: Pre-VLA
   Tags: libero, runtime-verification, world-model, verifier, focal-loss, chameleon, worldvla
   Benchmarks:
     libero (avg=37.62): libero_spatial=45.66, libero_object=3.95, libero_goal=81.26, libero_long=19.61, libero_avg=37.62
-  Eval Conditions: {'libero': 'closed-loop, fine-tuned (Pre-VLA verifier on top of RynnVLA-002; 4 suites)'}
+    libero_baseline_rynnvla_002: libero_spatial=39.48, libero_object=1.14, libero_goal=72.25, libero_10=10.29, avg=30.79
+  Eval Conditions: {'libero_baseline_rynnvla_002': 'Base-policy comparison row from the same table; not this model', 'libero': 'closed-loop, fine-tuned (Pre-VLA verifier on top of RynnVLA-002; 4 suites)'}
   AI Review Summary: VLA 정책(RynnVLA-002, 개선된 WorldVLA/Chameleon 기반)이 산출한 action chunk를 **실행/world-model 상상 직전**에 평가하는 경량 dual-branch verifier(분류 head=safety confidence, 회귀 head=advantage). Focal + MSE + soft-threshold 다중 손실로 1.28M chunk 샘플을 학습하고, 추론 시 dual-mode preemptive resampling scheduler가 저품질 chunk를 기각/재샘플. **LIBER
   AI Review: PDF-verified
 
@@ -5053,7 +5056,10 @@ MODEL: BORA
     LLM: inherited from VITRA (unspecified)
     Parameters: inherited VITRA size (not disclosed); residual actor is a lightweight MLP
   Tags: dexterous, real-world, offline-rl, online-adaptation, consistency-policy, residual-policy, VITRA, human-in-the-loop, IQL
-  Eval Conditions: {'real_world': 'Franka + 12-DoF dexterous hand; 20 trials per task', 'benchmarks_not_run': 'LIBERO, CALVIN, SimplerEnv -- BORA evaluates real-world dexterous tasks only'}
+  Benchmarks:
+    real_world: pick_plush_toy=100.0, pick_and_place=90.0, open_box=75.0, pull_tissue=80.0, press_button=85.0, average=86.0
+    real_world_object_unseen: pick_plush_toy=85.0, pick_and_place=70.0, open_box=50.0, pull_tissue=70.0, press_button=75.0, average=70.0
+  Eval Conditions: {'real_world': 'Franka + 12-DoF dexterous hand; 20 trials per task', 'real_world_object_unseen': 'Franka arm + 12-DoF dexterous hand (DexHand021), 20 trials per task; unseen objects', 'benchmarks_not_run': 'LIBERO, CALVIN, SimplerEnv -- BORA evaluates real-world dexterous tasks only'}
   AI Review Summary: VITRA VLA backbone에 *action-conditioned IQL-style critic* (VLM token + action chunk 입력)으로 offline RL을 수행하고, deployment 시 frozen base 위에 *lightweight MLP residual actor*를 Intervention-Driven RLPD로 online 학습 — 12-DoF dexterous hand에서 Standard 86%, Object-Unseen 70% (각각 baseline 대비 +33, +43 absolute).
   AI Review: PDF-verified
 
@@ -5184,6 +5190,7 @@ MODEL: ChunkFlow
   Benchmarks:
     libero: libero_long=93.4
     calvin (avg=4.3): calvin_abc_d_avg_len=4.3
+  Eval Conditions: {'libero': 'condition: fine-tuned; note: LIBERO-Long success rate only', 'calvin': 'condition: fine-tuned; note: ABC-D, 5-step average episode length'}
   AI Review: PDF-verified
 
 ------------------------------------------------------------
@@ -5466,7 +5473,10 @@ MODEL: Dexora
   Benchmarks:
     real_world_basic: avg_success=89.6, num_tasks=12
     real_world_dexterous: avg_success=66.7, num_tasks=6
-  Eval Conditions: {'real_world_basic': 'real-world, in-domain', 'real_world_dexterous': 'real-world, in-domain', 'real_world': 'in-domain + OOD (background, lighting, objects, occlusion, clutter, height)', 'cross_embodiment': 'single-arm grippers, dual-arm grippers, single-arm hands via action projection'}
+    real_world_basic_baselines: gr00t_n1=82.1, pi0=50.4, diffusion_policy=34.2
+    real_world_dexterous_per_task: use_pen=65, fetch_book=80, cut_leek=80, place_plates=70, rough_dough=80, twist_cap=25
+    real_world_dexterous_baselines: gr00t_n1=51.7, pi0=26.7, diffusion_policy=6.7
+  Eval Conditions: {'real_world_basic': 'real-world, in-domain', 'real_world_dexterous': 'real-world, in-domain', 'real_world_basic_baselines': 'Baselines under the same 12-task basic protocol; not DexORA', 'real_world_dexterous_baselines': 'Baselines under the same 6-task dexterous protocol; not DexORA', 'real_world': 'in-domain + OOD (background, lighting, objects, occlusion, clutter, height)', 'cross_embodiment': 'single-arm grippers, dual-arm grippers, single-arm hands via action projection'}
   AI Review Summary: T5(언어) + SigLIP(시각) 인코더에 28-layer decoder-only transformer diffusion policy를 결합하여 36-DoF dual-arm + dual-hand 시스템을 제어하는 오픈소스 VLA. 핵심 기여는 *offline discriminator(30M)가 클립-수준 quality weight*를 제공해 저품질 teleoperation 데모를 down-weighting하는 **data-quality-aware training recipe**. 기본 12 태스크 89.6%, 정밀 dexterou
   AI Review: PDF-verified
 
@@ -7379,7 +7389,7 @@ MODEL: PrimSubVLA
   Benchmarks:
     libero: libero_long=71.0
     reassemble: success_m0=27.0, success_m1=41.0, success_m3=62.0, success_m5=71.0, success_m10=78.0, finetune_upper_bound_50demos=79.0
-  Eval Conditions: {'libero': 'm=3 few-shot transfer on held-out LIBERO-Long tasks; no weight updates; primitive boundaries constructed via sub-task structure (move-to/grasp/transport/place)', 'reassemble': '6 held-out (object, primitive) pairs; few-shot transfer with m demonstrations; chunked-policy evaluation uses corrected element-level gate', 'primary': 'Industrial contact-rich assembly on REASSEMBLE (NIST Task Board 1) — 6 held-out (object, primitive) combinations spanning compositional distance 1–3 held-out pairs', 'cross_dataset': 'LIBERO-Long household manipulation with sub-task primitive boundaries (move-to / grasp / transport / place)', 'out_of_vocabulary': 'Threaded-fastener rotate-to-engage task where rotate-to-engage primitive is absent from training vocabulary — primitive-trained underperforms flat-trained (0.08 vs 0.14 at m=5)', 'subspace_ablation': 'Layer-24 4-D primitive-decodable subspace ablation drops m=3 success 0.62→0.30 (OpenVLA) and 0.66→0.34 (π0.5); random subspace control drops by 0.02 only', 'evaluation_gate': 'Corrected element-level rate (vmodel) calibrated against ground-truth chunk distributions with τ=0.01; replaces legacy 3σ frame gate that fails π0.5 16-step ground-truth chunks at 42% rate', 'hardware_real': 'Simulation only — sim-to-real not tested'}
+  Eval Conditions: {'libero': 'm=3 few-shot transfer on held-out LIBERO-Long tasks; no weight updates; primitive boundaries constructed via sub-task structure (move-to/grasp/transport/place)', 'reassemble': '6 held-out (object, primitive) pairs; few-shot transfer with m demonstrations; chunked-policy evaluation uses corrected element-level gate', 'primary': 'Industrial contact-rich assembly on REASSEMBLE (NIST Task Board 1) — 6 held-out (object, primitive) combinations spanning compositional distance 1–3 held-out pairs', 'cross_dataset': 'LIBERO-Long household manipulation with sub-task primitive boundaries (move-to / grasp / transport / place)', 'out_of_vocabulary': 'Threaded-fastener rotate-to-engage task where rotate-to-engage primitive is absent from training vocabulary — primitive-trained underperforms flat-trained (0.08 vs 0.14 at m=5)', 'subspace_ablation': 'Layer-24 4-D primitive-decodable subspace ablation drops m=3 success 0.62→0.30 (OpenVLA) and 0.66→0.34 (π0.5); random subspace control drops by 0.02 only', 'baselines': 'zero_shot_primitive_sequencing: 0.27; flat_few_shot: 0.34; diffusion_policy_cnn: 0.36; octo_style_demo_conditioned: 0.41; primitive_few_shot_ours: 0.62; full_finetune_50demos_ub: 0.79', 'evaluation_gate': 'Corrected element-level rate (vmodel) calibrated against ground-truth chunk distributions with τ=0.01; replaces legacy 3σ frame gate that fails π0.5 16-step ground-truth chunks at 42% rate', 'hardware_real': 'Simulation only — sim-to-real not tested'}
   AI Review Summary: OpenVLA 7B와 π0.5에 **architectural 변경 없이** primitive-segmented data + primitive-specific 언어 prompt로 LoRA fine-tune하면, test time에 m=3 시범만으로 fine-tune upper-bound의 78–80%를 달성. Linear probe로 식별한 layer-24의 **4-D primitive-decodable subspace**를 inference time에 orthogonal projection으로 제거하면 success가 32 pp 폭
   AI Review: PDF-verified
 
@@ -7419,7 +7429,8 @@ MODEL: QPILOTS
   Benchmarks:
     ogbench: aggregate_50_tasks_online_success_rate=90.0, aggregate_50_tasks_offline_success_rate=48.0, qpilots_u_aggregate_online=89.0, qpilots_u_aggregate_offline=44.0, humanoid_large_navigate_online=60.0, cube_quadruple_play_online=79.0, puzzle_4x4_play_sparse_online=100.0, scene_play_sparse_online=99.0
     latency_analysis: pi0_5_baseline_ms_per_step=112.7, qpilots_u_ms_per_step=114.1, qpilots_u_overhead_x=1.04, qpilots_m_ms_per_step=240.1, qpilots_m_overhead_x=2.14, best_of_5_ms_per_step=127.2, best_of_20_ms_per_step=158.0, qpilots_u_sr_pct=83.3, qpilots_m_sr_pct=88.5, pi0_5_sr_pct=19.2
-  Eval Conditions: {'libero': 'LIBERO-90 subset (6 tasks: 26/31/38/59/60/64). Frozen pi0.5-LIBERO base; SARSA online critic; 5 seeds; EMA time-weighted alpha=0.99 smoothing along training axis before averaging across seeds.', 'ogbench': 'OGBench single-task; 1e6 offline + 5e5 online steps; 8 seeds; per-domain (H, gamma, rho) follows Li & Levine 2026.', 'steering_coef_sensitivity': 'Most OGBench domains peak at alpha in {0.1, 0.2, 0.3, 0.5} and degrade gracefully; puzzle-4x4-play-sparse requires alpha=2.0 (only domain with sharp peak).', 'value_learning_ablation': 'On LIBERO-90 task 64, SARSA reaches 90% SR at 5e5 steps, outperforming IQL/FQL (unstable under non-stationary replay) and Monte-Carlo (dominated by early-training negative returns).', 'theoretical_guarantee': 'Idealized QPILOTS-M with exact posterior samples and unrescaled sigma_t^2/2 drift satisfies W2(p_hat_1, pi*) <= C(1/sqrt(K) + 1/sqrt(N)) and KL <= C(1/K + 1/N) under standard regularity on v_theta, Qbar, the exact posterior sampler, and sigma_t (Appendix B). QPILOTS-U has no formal guarantee — Bayes-optimal only when pi_beta is Gaussian.'}
+    libero_90: task_26_put_wine_bottle_in_bottom_drawer=43.0, task_31_put_black_bowl_on_top_of_cabinet=55.0, task_38_put_right_moka_pot_on_stove=91.0, task_59_pick_tomato_sauce_into_tray=82.0, task_60_pick_black_bowl_left_into_tray=99.0, task_64_stack_right_bowl_on_left_into_tray=89.0, libero_90_6task_mean=76.5
+  Eval Conditions: {'ogbench': 'OGBench single-task; 1e6 offline + 5e5 online steps; 8 seeds; per-domain (H, gamma, rho) follows Li & Levine 2026.', 'libero_90': 'Frozen pi0.5-LIBERO base flow + per-task SARSA critic learned online (5e5 steps, 5 seeds) + QPILOTS-U/M inference-time steering. 6 LIBERO-90 tasks where pi0.5 zero-shot SR is 5-50%. Action chunking H=10, gamma=0.99, rho=0.5. alpha per Table 4.', 'libero': 'LIBERO-90 subset (6 tasks: 26/31/38/59/60/64). Frozen pi0.5-LIBERO base; SARSA online critic; 5 seeds; EMA time-weighted alpha=0.99 smoothing along training axis before averaging across seeds.', 'steering_coef_sensitivity': 'Most OGBench domains peak at alpha in {0.1, 0.2, 0.3, 0.5} and degrade gracefully; puzzle-4x4-play-sparse requires alpha=2.0 (only domain with sharp peak).', 'value_learning_ablation': 'On LIBERO-90 task 64, SARSA reaches 90% SR at 5e5 steps, outperforming IQL/FQL (unstable under non-stationary replay) and Monte-Carlo (dominated by early-training negative returns).', 'theoretical_guarantee': 'Idealized QPILOTS-M with exact posterior samples and unrescaled sigma_t^2/2 drift satisfies W2(p_hat_1, pi*) <= C(1/sqrt(K) + 1/sqrt(N)) and KL <= C(1/K + 1/N) under standard regularity on v_theta, Qbar, the exact posterior sampler, and sigma_t (Appendix B). QPILOTS-U has no formal guarantee — Bayes-optimal only when pi_beta is Gaussian.'}
   AI Review Summary: Flow-matching VLA를 한 줄도 수정하지 않고, Euler 적분기 매 스텝마다 **Tweedie 디노이즈된 깨끗한 액션 위에서 평가한 Q-gradient**를 drift에 더해 KL-정규화 최적 정책 π* ∝ π_β · exp(τ Q̄)에서 샘플링하는 inference-time Q-steering 기법. OGBench 50태스크 online에서 aggregate 90% SR로 BPTT/distillation/fine-tuning 계열을 모두 제치고, 3B π0.5-LIBERO를 frozen 상태로 둔 채 6개 LIBERO
   AI Review: PDF-verified
 
