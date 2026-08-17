@@ -4,15 +4,33 @@ Validate data integrity for all YAML files in data/.
 Checks required fields, value ranges, and cross-references.
 """
 
+import json
 import sys
 from pathlib import Path
 
 import yaml
 
+try:
+    from jsonschema import Draft7Validator
+except ImportError:  # keep the rest of the checks usable without the dep
+    Draft7Validator = None
+
 
 ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "data" / "models"
 BENCHMARKS_DIR = ROOT / "data" / "benchmarks"
+MODEL_SCHEMA_FILE = ROOT / "schemas" / "model.schema.json"
+
+
+def load_model_schema_validator():
+    """Compile schemas/model.schema.json, which until 2026-08 was enforced
+    nowhere and had drifted to 147 failing models. It now matches the data
+    exactly, so violations are errors — in particular a nested score dict
+    inside a benchmark block, which the builder cannot see."""
+    if Draft7Validator is None or not MODEL_SCHEMA_FILE.exists():
+        return None
+    with open(MODEL_SCHEMA_FILE, "r", encoding="utf-8") as f:
+        return Draft7Validator(json.load(f))
 
 REQUIRED_MODEL_FIELDS = ["name", "organization", "date", "architecture", "benchmarks"]
 REQUIRED_BENCHMARK_FIELDS = ["name", "metric", "higher_is_better"]
@@ -148,12 +166,20 @@ def main():
             validate_benchmark(bf, data)
 
     # Load and validate models
+    schema_validator = load_model_schema_validator()
+    if schema_validator is None:
+        warnings.append("jsonschema unavailable — schemas/model.schema.json NOT enforced")
+
     model_files = list(MODELS_DIR.glob("*.yaml"))
     print(f"Validating {len(model_files)} model files...")
     for mf in sorted(model_files):
         data = load_yaml(mf)
         if data:
             validate_model(mf, data, known_benchmarks)
+            if schema_validator is not None:
+                for err in schema_validator.iter_errors(data):
+                    where = "/".join(str(x) for x in err.absolute_path) or "<root>"
+                    errors.append(f"[{data.get('name', mf.stem)}] schema: {where}: {err.message[:120]}")
 
     # Report
     print(f"\n{'='*40}")
