@@ -1,5 +1,5 @@
 # VLA-Tracker: Complete Model Database
-# Generated: 2026-08-17T09:33:33.751046
+# Generated: 2026-08-17T11:01:40.528989
 # Models: 414
 # Benchmarks: calvin, libero, metaworld, real_world, rlbench, robocasa, robotwin, simpler_env
 # Source: https://github.com/HyeongjinKim/Vla-tracker-
@@ -520,7 +520,7 @@ MODEL: Qwen-RobotManip
   Date: 2026-06-18
   Paper: https://arxiv.org/abs/2606.17846
   Code: https://github.com/QwenLM/Qwen-RobotManip
-  Venue: None
+  Venue: arXiv 2026
   Open Source: True
   Architecture:
     Action Head: Diffusion Transformer (DiT) flow-matching action expert (10 blocks, hidden=768, 12 heads)
@@ -674,7 +674,7 @@ MODEL: LIRA
   Date: 2026-08-06
   Paper: https://arxiv.org/abs/2608.07596
   Code: None
-  Venue: None
+  Venue: arXiv 2026
   Open Source: False
   Architecture:
     Action Head: Action decoder of L Parallel Fusion Blocks (PFBs) initialized by Action Query tokens; each PFB uses Bridge Attention (self-attention + cross-attention) over depth-aligned task-token features, locally routed LIRA Query features and the proprioceptive embedding. A final output head regresses a continuous action chunk of horizon H, trained with an L1 behavior-cloning objective.
@@ -2640,7 +2640,7 @@ MODEL: JEPA-WAM
   Tags: vla, world-action-model, latent-world-model, jepa, v-jepa2, qwen2.5, flow-matching, dit-action-expert, shared-predictor, transition-prediction, ood-generalization, libero, libero-plus, robotwin, bimanual, real-world, lora
   Benchmarks:
     libero (avg=96.7): libero_spatial=95.6, libero_object=99.4, libero_goal=97.2, libero_long=94.6, libero_avg=96.7, libero_plus_camera=79.2, libero_plus_robot=59.2, libero_plus_language=68.2, libero_plus_light=93.3, libero_plus_background=94.6, libero_plus_noise=83.6, libero_plus_layout=76.1, libero_plus_avg=79.2
-    robotwin_v2 (avg=58.4): robotwin_v2_clean=79.9, robotwin_v2_randomized=36.9, robotwin_v2_avg=58.4
+    robotwin_v2 (avg=58.4): robotwin_v2_clean=79.9, robotwin_v2_randomized=36.9
   Eval Conditions: {'libero': 'Joint 4-suite training, standard LIBERO success-rate protocol. Params. column of Table 1 reports 0.5B main backbone excluding the action expert.', 'robotwin_v2': 'Clean-only training, dual-setting (Clean / Random) evaluation over 20 tasks. Measured inference latency 85.00 ms median (11.76 Hz) in the RoboTwin setting, vs 54.05 ms (18.50 Hz) for pi-0.5 and 125.23 ms (7.99 Hz) for ABot-M0 (Appendix C.3, Table 12).', 'libero_plus': 'Direct transfer from LIBERO demonstrations, no OOD fine-tuning. Categories: Camera, Robot, Language, Light, Background, Noise, Layout.', 'real_world': 'AgileX CobotMagic bimanual platform, two 6-DoF arms, one global + two wrist cameras, 5 tasks (bread on plate, fruits on plate, three blocks on plate, stack three blocks, toy duck in drawer), 100 demos per task. JEPA-WAM scores 59.8 ID / 54.2 OOD average vs pi-0 51.8 / 22.5; pi-0.5 + JEPA Obj. reaches 90.3 ID / 84.7 OOD vs pi-0.5 77.5 / 72.5 (Figure 5).'}
   AI Review Summary: 사전학습된 **V-JEPA 2.1 표현공간 안에서** latent world action model을 구성하고, **하나의 shared predictor**가 latent transition 예측과 continuous action 생성을 동시에 담당하게 만든 VLA. 절대적 미래 상태 대신 현재-미래를 **함께 인코딩한 joint target**을 patch 단위로 예측하여 시간적 관계를 학습한다. LIBERO 96.7%, LIBERO-Plus **79.2%** (robot-policy pretraining 없는 방법 중 최고), 
   AI Review: PDF-verified

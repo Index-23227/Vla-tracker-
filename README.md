@@ -163,7 +163,8 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 | [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 68 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 11 | Diverse manipulation | RA-L 2020 |
 | [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 31 | Home robot tasks | RSS 2024 |
-| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | — | Multi-task dexterity | CoRL 2020 |
+| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | 9 | Multi-task dexterity | CoRL 2020 |
+| [Real-World](data/benchmarks/real_world.yaml) | Per-paper | 81 | Physical robot evaluations | — |
 
 ---
 

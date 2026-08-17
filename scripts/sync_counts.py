@@ -78,6 +78,7 @@ def sync_top3_table(text: str, leaderboard: dict) -> tuple[str, list[str]]:
         ("RoboTwin v1", "robotwin_v1_avg", False),
         ("RoboTwin v2", "robotwin_v2_avg", False),
         ("RoboCasa", "robocasa_avg", False),
+        ("Meta-World", "metaworld_avg", False),
     ]
     for bench_name, avg_key, is_calvin in benchmarks:
         top3 = get_top3(leaderboard, avg_key)
@@ -204,7 +205,7 @@ def sync_readme(leaderboard: dict, dry_run: bool) -> list[str]:
     for bench_name, avg_key in [
         ("LIBERO", "libero_avg"), ("CALVIN", "calvin_avg"),
         ("SimplerEnv", "simpler_avg"), ("RLBench", "rlbench_avg"),
-        ("RoboCasa", "robocasa_avg"),
+        ("RoboCasa", "robocasa_avg"), ("Meta-World", "metaworld_avg"),
     ]:
         actual = count_benchmark_models(leaderboard, avg_key)
         pattern = rf"(\[{bench_name}\][^\n]*?\|\s*)\d+(\s*\|)"
@@ -212,6 +213,17 @@ def sync_readme(leaderboard: dict, dry_run: bool) -> list[str]:
         if n and new_text != text:
             changes.append(f"Benchmark table {bench_name}: → {actual}")
             text = new_text
+
+    # Real-World has no ranking average; count models carrying the block
+    rw_total = sum(
+        1 for m in leaderboard["models"]
+        if "real_world" in (m.get("benchmarks") or {})
+    )
+    pattern = r"(\[Real-World\][^\n]*?\|\s*)\d+(\s*\|)"
+    new_text, n = re.subn(pattern, rf"\g<1>{rw_total}\2", text)
+    if n and new_text != text:
+        changes.append(f"Benchmark table Real-World: → {rw_total}")
+        text = new_text
 
     # RoboTwin (unique models across v1+v2)
     rt_total = len(set(

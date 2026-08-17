@@ -69,8 +69,10 @@ benchmarks:
   robotwin_v2:
     robotwin_v2_clean: 79.9
     robotwin_v2_randomized: 36.9
-    robotwin_v2_avg: 58.4
-    source: "Paper Table 3 (JEPA-WAM row; AVG computed over all 20 tasks, full per-task table in Appendix D)"
+    # No robotwin_v2_avg: the paper reports Clean AVG and Random AVG as separate
+    # columns and no combined figure. The leaderboard average is derived here as
+    # the mean of the two settings, same as Ego2Robot and the pi0 easy/hard rows.
+    source: "Paper Table 3 (JEPA-WAM row; Clean AVG and Random AVG over 20 tasks, per-task table in Appendix D)"
     date_reported: "2026-08-10"
     eval_condition: "trained only on Clean-setting demonstrations of 20 RoboTwin 2.0 tasks, then the same policy evaluated under both Clean and Random settings; one external + two wrist cameras, 14-dim bimanual actions, horizon 50, x-prediction flow matching"
 
