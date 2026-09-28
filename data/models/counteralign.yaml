@@ -1,0 +1,155 @@
+# Paper: CounterAlign: Counterfactual Supervision for Vision-Language-Action Models
+# arXiv: 2608.21740
+
+name: CounterAlign
+full_name: "CounterAlign: Counterfactual Supervision for Vision-Language-Action Models"
+organization: "Institute of Science Tokyo / AI Robot Association (AIRoA) / RIKEN AIP / Tohoku University"
+date: "2026-08-22"
+paper_url: https://arxiv.org/abs/2608.21740
+code_url: null
+venue: arXiv
+open_source: false
+model_type: "Offline-RL post-training of a flow-matching VLA with a learned instruction-grounded reward"
+
+architecture:
+  backbone: "pi0.5 (policy architecture unchanged from the BC baseline)"
+  llm: "PaliGemma-based VLM (inherited from pi0.5)"
+  action_head: "pi0.5 flow-matching action expert trained with advantage-weighted flow matching (IQL-style critic); adversarial + relabeling discriminators and double-Q/V critics share VLM backbones with separate expert heads"
+  action_head_category: flow_matching
+  parameters: "Policy ~3.4B (same as BC baseline); total trainable incl. discriminators and critics ~12.7B"
+  key_innovation: >
+    Converts successful expert demonstrations into corrective supervision via counterfactual relabeling:
+    instruction-, action- and jointly-relabeled instruction-observation-action tuples (similarity-thresholded
+    near-misses) train a relabeling discriminator with a PN + non-negative PU (nnPU) objective plus entropy
+    regularization, combined with a GAIL-style offline adversarial discriminator (expert vs policy actions).
+    The weighted log-discriminator reward drives IQL with clipped double-Q; the critic also sees
+    near-positive instruction-relabeled samples; the actor is trained with exp(beta*advantage)-weighted
+    flow-matching loss. No additional rollouts, annotations or reward labels.
+
+training:
+  dataset: "LIBERO (train) -> LIBERO-PRO eval; CALVIN ABC; TX-G2 real robot 4 tasks / 1,198 demos"
+  method: "Full-parameter fine-tuning of pi0.5; iterative discriminator / critic / actor updates (offline RL, IQL + advantage-weighted flow matching)"
+  compute: "LIBERO: 15K steps, batch 256, 8x H200, ~28 h. TX-G2: 150K steps, batch 64, 8x H200, ~96 h"
+
+inference_hz: null
+
+benchmarks:
+  libero:
+    libero_pro_spatial_obj: 98.0
+    libero_pro_spatial_pos: 60.0
+    libero_pro_spatial_sem: 97.0
+    libero_pro_spatial_task: 63.0
+    libero_pro_object_obj: 80.0
+    libero_pro_object_pos: 51.0
+    libero_pro_object_sem: 99.0
+    libero_pro_object_task: 26.0
+    libero_pro_goal_obj: 82.0
+    libero_pro_goal_pos: 41.0
+    libero_pro_goal_sem: 94.0
+    libero_pro_goal_task: 46.0
+    libero_pro_long_obj: 64.0
+    libero_pro_long_pos: 11.0
+    libero_pro_long_sem: 97.0
+    libero_pro_long_task: 29.0
+    source: "Paper Table 1 (CounterAlign row); paper reports success as fractions (e.g. 0.98), stored here x100"
+    date_reported: "2026-08-22"
+    eval_condition: "LIBERO-PRO (Obj/Pos/Sem/Task perturbations per suite), trained on LIBERO, 100 trials per cell; LIBERO-PRO only, no standard LIBERO and no averages reported"
+  libero_pro_baselines_pi05:
+    libero_pro_spatial_obj: 99.0
+    libero_pro_spatial_pos: 53.0
+    libero_pro_spatial_sem: 97.0
+    libero_pro_spatial_task: 55.0
+    libero_pro_object_obj: 89.0
+    libero_pro_object_pos: 19.0
+    libero_pro_object_sem: 95.0
+    libero_pro_object_task: 10.0
+    libero_pro_goal_obj: 90.0
+    libero_pro_goal_pos: 29.0
+    libero_pro_goal_sem: 95.0
+    libero_pro_goal_task: 17.0
+    libero_pro_long_obj: 66.0
+    libero_pro_long_pos: 6.0
+    libero_pro_long_sem: 91.0
+    libero_pro_long_task: 17.0
+    source: "Paper Table 1 (pi0.5 BC baseline row; also BC row of Table 2), fractions x100"
+  libero_pro_ablation_base_offline_rl:
+    libero_pro_spatial_pos: 56.0
+    libero_pro_spatial_task: 60.0
+    libero_pro_object_pos: 49.0
+    libero_pro_object_task: 22.0
+    libero_pro_goal_pos: 36.0
+    libero_pro_goal_task: 29.0
+    libero_pro_long_pos: 9.0
+    libero_pro_long_task: 14.0
+    source: "Paper Table 2, first row (IQL + advantage-weighted flow matching, no relabeling); Pos/Task cells only, fractions x100"
+  libero_pro_ablation_actor_relabel:
+    libero_pro_spatial_pos: 55.0
+    libero_pro_spatial_task: 62.0
+    libero_pro_object_pos: 62.0
+    libero_pro_object_task: 35.0
+    libero_pro_goal_pos: 36.0
+    libero_pro_goal_task: 33.0
+    libero_pro_long_pos: 9.0
+    libero_pro_long_task: 15.0
+    source: "Paper Table 2, last method row (relabeling on discriminator + critic + actor); Pos/Task cells only, fractions x100"
+  calvin:
+    calvin_abc_d_avg_len: 4.03
+    calvin_task1: 91.3
+    calvin_task2: 84.8
+    calvin_task3: 80.4
+    calvin_task4: 75.7
+    calvin_task5: 70.3
+    source: "Paper Supplementary Table 3 (Ours row); task success reported as fractions, stored x100"
+    date_reported: "2026-08-22"
+    eval_condition: "CALVIN ABC->D, 1,000 trials, pi0.5 base"
+  calvin_baselines_pi05_bc:
+    calvin_abc_d_avg_len: 3.93
+    calvin_task1: 90.6
+    calvin_task2: 83.5
+    calvin_task3: 77.6
+    calvin_task4: 73.3
+    calvin_task5: 68.2
+    source: "Paper Supplementary Table 3 (BC row), fractions x100"
+  real_world:
+    task1_cutlery_transfer: 20.0
+    task2_bowl_stacking: 53.0
+    task3_clothes_to_basket: 93.0
+    task4_dishes_to_rack: 85.0
+    source: "Paper Table 3 (CounterAlign row); mean primitive-task success, fractions x100"
+    date_reported: "2026-08-22"
+    eval_condition: "TX-G2 (AGIBot G2 compatible), 10 trials per task with pose perturbations (8 small, 2 OOD)"
+  real_world_baselines:
+    pi05_task1: 5.0
+    pi05_task2: 48.0
+    pi05_task3: 80.0
+    pi05_task4: 60.0
+    xvla_task1: 0.0
+    xvla_task2: 8.0
+    xvla_task3: 5.0
+    xvla_task4: 5.0
+    vla_adapter_task1: 0.0
+    vla_adapter_task2: 0.0
+    vla_adapter_task3: 0.0
+    vla_adapter_task4: 0.0
+    source: "Paper Table 3, fractions x100"
+
+eval_conditions:
+  libero: "LIBERO-PRO robustness protocol only (Obj, Pos, Sem, Task perturbations), 100 trials per cell; not standard LIBERO"
+  calvin: "ABC->D, 1,000 trials (supplementary)"
+  real_world: "TX-G2, 4 tasks decomposed into 4-6 primitives, 10 trials each, inference on RTX 5070"
+
+tags:
+  - offline-rl
+  - iql
+  - counterfactual-relabeling
+  - reward-learning
+  - discriminator
+  - pu-learning
+  - advantage-weighted-flow-matching
+  - pi0.5
+  - flow-matching
+  - libero-pro
+  - calvin
+  - real-robot
+  - tx-g2
+  - airoa

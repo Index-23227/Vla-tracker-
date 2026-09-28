@@ -1,0 +1,108 @@
+# Paper: Gripper-aware Vision Language Action Models
+# arXiv: 2608.24603
+
+name: GVLA
+full_name: "Gripper-aware Vision Language Action Models"
+organization: "University of Liverpool; MBZUAI; Indian Institute of Science; The University of Tokyo; ZHAW; University of Arkansas; Physical Intelligence; Huazhong University of Science and Technology"
+date: "2026-08-25"
+paper_url: https://arxiv.org/abs/2608.24603
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (also pi0 variant)"
+  llm: "pi0.5 pre-trained VLM"
+  action_head: >
+    pi0.5 flow-matching action expert extended with (i) a multi-gripper tokenizer: three levels of
+    learnable soft-prompt tokens (platform, gripper type, gripper instance) prepended to observation
+    tokens, and (ii) a dual Mixture-of-Adapters at the final action-expert layer, with a platform router
+    and a gripper router selecting top-k bottleneck adapters added residually. Trained with conditional
+    flow-matching action loss + auxiliary gripper-type classification loss + load-balance loss.
+  action_head_category: flow_matching
+  parameters: "Not stated"
+  key_innovation: >
+    Gripper-conditioned VLA: hierarchical gripper soft-prompt tokenization and gripper/platform-routed
+    Mixture-of-Adapters so a single policy learns gripper-specific grasp strategies; introduces MiGA,
+    a 103K-demonstration dataset over 5 gripper types (parallel-jaw, 3-finger, soft, suction, dexterous hand).
+
+training:
+  data: "MiGA: 103,000 demonstrations, 36 tasks, 5 gripper types, sim (Isaac Lab) + real (xArm7, Franka, UR5)"
+  method: "fine-tuned from pi0.5 / pi0 backbones on MiGA"
+
+benchmarks:
+  miga_sim:
+    flat: 53.00
+    stacked: 76.00
+    constrained: 62.50
+    semantic: 72.50
+    miga_sim_avg: 66.00
+    source: "Paper Table 2 (GVLA pi0.5 backbone row)"
+    date_reported: "2026-08-25"
+    eval_condition: "MiGA simulation, success rate (%) across four task categories and gripper types"
+  miga_sim_pi0_backbone:
+    flat: 27.50
+    stacked: 45.00
+    constrained: 50.00
+    semantic: 70.00
+    avg: 48.13
+    source: "Paper Table 2 (GVLA pi0 backbone row)"
+    date_reported: "2026-08-25"
+    eval_condition: "GVLA built on pi0 instead of pi0.5"
+  miga_sim_baselines:
+    anygrasp_avg: 11.50
+    graspmas_avg: 12.00
+    graspvla_avg: 7.88
+    openvla_oft_avg: 41.88
+    pi0_avg: 38.13
+    pi05_flat: 52.50
+    pi05_stacked: 71.00
+    pi05_constrained: 57.50
+    pi05_semantic: 52.50
+    pi05_avg: 58.38
+    source: "Paper Table 2 (baseline rows)"
+    date_reported: "2026-08-25"
+    eval_condition: "baselines on MiGA simulation"
+  gripper_tokenizer_comparison:
+    gvla_pe: 0.032
+    gvla_capd: 1.34
+    gvla_gcs: 0.249
+    mlp_pe: 0.053
+    mlp_capd: 0.82
+    vqvae_pe: 0.051
+    vqvae_capd: 0.70
+    language_prompt_pe: 0.053
+    language_prompt_capd: 0.64
+    source: "Paper Table 3 (tokenizer comparison; PE lower better, CAPD/GCS higher better)"
+    date_reported: "2026-08-25"
+    eval_condition: "gripper representation ablation"
+  component_ablation:
+    gvla_pe: 0.032
+    gvla_adapt: 0.92
+    wo_gripper_type_token_adapt: 0.86
+    wo_platform_token_adapt: 0.54
+    wo_instance_token_adapt: 0.90
+    wo_moa_adapt: 0.52
+    wo_gripper_moa_adapt: 0.56
+    wo_platform_moa_adapt: 0.54
+    source: "Paper Table 4 (PE on MiGA; Adapt. = success adapting to unseen Robotiq 2F-85 after 20K steps)"
+    date_reported: "2026-08-25"
+    eval_condition: "component ablation"
+
+eval_conditions:
+  miga_sim: "MiGA simulation (NVIDIA Isaac Lab, Franka/UR10), task categories Flat/Stacked/Constrained/Semantic"
+  notes: "Real-world UR5 + Robotiq 2F-85 results (Fig. 10b), cross-object generalization (Fig. 8b) and adaptation curves (Fig. 9) are figure-only and omitted"
+
+tags:
+  - vla
+  - gripper-aware
+  - cross-embodiment
+  - mixture-of-adapters
+  - soft-prompt
+  - pi0.5
+  - flow-matching
+  - dataset
+  - grasping
+  - dexterous-hand
+  - suction

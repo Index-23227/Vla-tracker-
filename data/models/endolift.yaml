@@ -1,0 +1,136 @@
+# Paper: EndoLIFT: Language-Disambiguated Latent-Conditioned Rectified Flow for Bidirectional Endoscopic Control
+# arXiv: 2608.20478
+
+name: EndoLIFT
+full_name: "EndoLIFT: Language-Disambiguated Latent-Conditioned Rectified Flow for Bidirectional Endoscopic Control"
+organization: "The Chinese University of Hong Kong; The Sixth Affiliated Hospital, Sun Yat-sen University"
+date: "2026-08-20"
+paper_url: https://arxiv.org/abs/2608.20478
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+inference_hz: 20
+
+architecture:
+  backbone: "PaliGemma 2 3B (google/paligemma2-3b-pt-224) with LoRA"
+  llm: "Gemma 2 (PaliGemma 2)"
+  action_head: >
+    Latent-conditioned rectified-flow Transformer action expert (width 1024, 8 blocks, 16 heads;
+    self-attention over state/action tokens, cross-attention to the PaliGemma 2 prefix, FFN).
+    AdaRMSNorm is conditioned on flow time and a 32-D variational trajectory latent (VTL) whose
+    posterior over the target chunk is used only in training (z ~ N(0,I) at inference). 20 Euler
+    steps produce a 32x3 normalized action chunk (axial advance/retract, up/down bend, left/right bend).
+  action_head_category: flow_matching
+  action_space: "3-D continuous endoscope action (longitudinal, up/down bending, left/right bending), chunk H=32"
+  parameters: "~3B (PaliGemma 2 3B backbone) + action expert"
+  key_innovation: >
+    Formalizes "intent aliasing" in bidirectional endoscopy (identical views requiring opposite
+    axial actions) and resolves it with language-based mode selection; a variational trajectory latent
+    stochastically conditions rectified-flow action generation, improving directional correctness and
+    triggered retraction; external monitor/speech trigger supervisor switches canonical instructions.
+
+training:
+  data: "44,942-frame base imitation dataset (185 episodes, 90/5/5 split), followed by 2,000 instruction-conditioning updates with 40+40 paraphrases"
+  losses: "rectified-flow velocity loss + free-bits KL (0.5 nat per dim, beta warm-up to 1e-3 over 500 steps)"
+
+benchmarks:
+  real_world:
+    colon_navigation_sr: 100
+    colon_retraction_sr: 100
+    colon_overall_sr: 100
+    source: "Paper Table VI (EndoLIFT row, seen colon phantom, n=10 per mode)"
+    date_reported: "2026-08-20"
+    eval_condition: "closed-loop, seen colon phantom"
+  real_world_unseen_phantoms:
+    lung_navigation_sr: 100
+    stomach_navigation_sr: 100
+    lung_retraction_sr: 100
+    stomach_retraction_sr: 100
+    overall_sr: 100
+    source: "Paper Table VIII (EndoLIFT row, unseen lung and stomach phantoms)"
+    date_reported: "2026-08-20"
+    eval_condition: "closed-loop transfer, unseen phantoms, n=10 per condition"
+  real_world_ex_vivo:
+    porcine_trachea_success_trials: "10/10"
+    trigger_to_switch_ms: "445 +/- 126"
+    switch_to_first_retract_ms: "54 +/- 61"
+    post_trigger_retract_fraction: 100
+    post_trigger_bending_activity: 5.2
+    human_takeover: 0
+    source: "Paper Table VII (ex-vivo porcine trachea, 10 human-triggered retraction trials)"
+    date_reported: "2026-08-20"
+    eval_condition: "ex-vivo porcine trachea"
+  real_world_baselines_colon:
+    dinov2_mlp_overall: 0
+    qwen3vl_gr00t_overall: 0
+    qwen3vl_mlp_navigation: 40
+    qwen3vl_mlp_retraction: 0
+    qwen3vl_mlp_overall: 20
+    endolift_wo_vtl_navigation: 100
+    endolift_wo_vtl_retraction: 40
+    endolift_wo_vtl_overall: 70
+    source: "Paper Table VI (baseline and w/o VTL rows, seen colon phantom)"
+    date_reported: "2026-08-20"
+    eval_condition: "closed-loop baselines, seen colon phantom"
+  real_world_baselines_unseen:
+    dinov2_mlp_overall: 0
+    qwen3vl_gr00t_overall: 0
+    qwen3vl_mlp_nav_lung: 80
+    qwen3vl_mlp_nav_stomach: 50
+    qwen3vl_mlp_overall: 32.5
+    endolift_wo_vtl_ret_lung: 30
+    endolift_wo_vtl_ret_stomach: 50
+    endolift_wo_vtl_overall: 70
+    source: "Paper Table VIII (baseline and w/o VTL rows, unseen phantoms)"
+    date_reported: "2026-08-20"
+    eval_condition: "closed-loop baselines, unseen lung/stomach phantoms"
+  offline_directional:
+    navigation_direction_accuracy: 0.565
+    wrong_direction_advance: 0.010
+    wo_vtl_navigation_direction_accuracy: 0.453
+    wo_vtl_wrong_direction_advance: 0.059
+    dinov2_mlp_navigation_direction_accuracy: 0.395
+    qwen3vl_mlp_navigation_direction_accuracy: 0.392
+    qwen3vl_gr00t_navigation_direction_accuracy: 0.351
+    source: "Paper Table V (held-out test set, 95% episode-bootstrap CIs omitted)"
+    date_reported: "2026-08-20"
+    eval_condition: "offline held-out test split (10 episodes)"
+  instruction_following:
+    seen_canonical_ifa: 90.0
+    en_paraphrase_ifa: 84.2
+    zh_paraphrase_ifa: 83.4
+    oral_ifa: 85.3
+    asr_noise_ifa: 77.8
+    distractor_ifa: 84.6
+    all_unseen_ifa: 82.8
+    wo_vtl_all_unseen_ifa: 78.2
+    qwen3vl_gr00t_all_unseen_ifa: 63.1
+    qwen3vl_mlp_all_unseen_ifa: 59.7
+    source: "Paper Table III (IFA %, 40-frame frozen pool, 44 held-out commands)"
+    date_reported: "2026-08-20"
+    eval_condition: "same-observation instruction-following accuracy"
+  modeflag_comparison:
+    canonical_text_ifa: 85.0
+    canonical_text_paired_flip: 70.0
+    modeflag_ifa: 68.8
+    modeflag_paired_flip: 37.5
+    source: "Paper Table II (40 frozen frames, identical image/state/noise seed)"
+    date_reported: "2026-08-20"
+    eval_condition: "text vs literal 1-bit mode interface"
+
+eval_conditions:
+  real_world: "Robotic flexible endoscope (feeding unit + 2-axis bending), 480x480 RGB tip camera, 20 Hz control; colon phantom seen, lung/stomach phantoms unseen; ex-vivo porcine trachea"
+  notes: "Medical endoscopy VLA; not a manipulation benchmark"
+
+tags:
+  - vla
+  - medical-robotics
+  - endoscopy
+  - rectified-flow
+  - flow-matching
+  - paligemma
+  - variational-latent
+  - language-conditioning
+  - real-robot
+  - ex-vivo

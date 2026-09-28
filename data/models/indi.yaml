@@ -1,0 +1,113 @@
+# Paper: Act with Intent: Distilling Behavior Intent for Vision-Language-Action Models
+# arXiv: 2608.23478
+
+name: INDI
+full_name: "INDI (Intention Distillation): Act with Intent — Distilling Behavior Intent for Vision-Language-Action Models"
+organization: "POSTECH (GSAI, IME)"
+date: "2026-08-24"
+paper_url: https://arxiv.org/abs/2608.23478
+project_url: https://leesangoh.github.io/indi-project-page/
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "GR00T-N1.7 (primary) and pi0.5 (secondary) with frozen vision-language module; action decoder augmented with 8 learnable intent queries, 8 textual-grounding rows and 16 visual-grounding rows per camera"
+  llm: "Backbone VLM of GR00T-N1.7 / pi0.5 (frozen); training-only teacher VLM Cosmos-Reason2-8B"
+  action_head: "Pretrained flow-matching action decoder (DiT / action expert) with intent queries supervised at 50% decoder depth; asymmetric attention (intent -> groundings -> actions), context-dropout gate and intent-mismatch margin loss"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "GR00T-N1.7+INDI 3.50B (3.455B -> 3.502B, +46.4M); pi0.5+INDI 3.64B (+23.1M)"
+  key_innovation: "Distills behavior-level intent from a frozen teacher VLM (which sees observation, instruction, coarse action summary and execution video of the demonstrated segment) into an intermediate layer of the VLA action decoder via cosine alignment; decoder also predicts endpoint-visual and textual-purpose grounding latents. Teacher and target modules removed at deployment."
+
+training:
+  method: "Fine-tuning of the action decoder of GR00T-N1.7 / pi0.5 with L = L_action(flow matching) + intent alignment + visual/textual grounding alignment + intent-mismatch hinge loss (margin 0.05); VL module frozen per backbone config"
+  data: "BridgeData V2 (LeRobot conversion, 53,192 episodes) for SimplerEnv-Bridge; RoboCasa Kitchen 100 machine-generated demos per task x 24 tasks; real-world SO-101 teleoperation demos"
+
+benchmarks:
+  simpler_env:
+    simpler_widowx_put_spoon_on_towel: 88.7
+    simpler_widowx_put_carrot_on_plate: 84.7
+    simpler_widowx_stack_block: 69.3
+    simpler_widowx_put_eggplant_in_basket: 96.0
+    simpler_widowx_avg: 84.7
+    simpler_avg: 84.7
+    source: "Paper Table 1 (row GR00T-N1.7 + INDI, mean over 3 evaluation runs)"
+    date_reported: "2026-08-24"
+    eval_condition: "SimplerEnv-Bridge (WidowX) 4 tasks, trained on BridgeData V2, 3 runs x 50 episodes per task"
+
+  simpler_env_baselines:
+    gr00t_n17_avg: 64.3
+    gr00t_n17_future_supervision_avg: 68.0
+    pi05_avg: 52.3
+    pi05_indi_avg: 58.8
+    pi05_indi_spoon: 81.3
+    pi05_indi_carrot: 76.0
+    pi05_indi_stack: 39.3
+    pi05_indi_eggplant_basket: 38.7
+    source: "Paper Table 1 (controlled backbone comparison rows)"
+    date_reported: "2026-08-24"
+    eval_condition: "Same demonstrations, optimization budget and evaluation protocol as INDI"
+
+  robocasa:
+    robocasa_pick_and_place: 49.8
+    robocasa_open_or_close: 82.8
+    robocasa_others: 79.1
+    robocasa_avg: 70.3
+    source: "Paper Table 2 (row GR00T-N1.7 + INDI, G100, mean over 3 runs)"
+    date_reported: "2026-08-24"
+    eval_condition: "RoboCasa Kitchen 24 tasks, 100 demos per task, 3 runs x 50 episodes per task; Avg is macro-average over 24 tasks"
+
+  robocasa_baselines:
+    gr00t_n17_g100_avg: 64.1
+    gr00t_n17_g100_future_supervision_avg: 65.8
+    gr00t_n17_g3000_avg: 70.8
+    pi05_avg: 34.9
+    pi05_indi_avg: 41.4
+    source: "Paper Table 2 (baseline and pi0.5 rows)"
+    date_reported: "2026-08-24"
+
+  real_world:
+    id_clean_avg: 76.0
+    held_out_objects_avg: 68.0
+    distractors_avg: 62.0
+    threading_id_clean: 96.0
+    basket_nesting_id_clean: 92.0
+    cross_bin_stacking_id_clean: 80.0
+    drawer_storage_id_clean: 36.0
+    source: "Paper Table 4 (INDI columns, GR00T-N1.7 backbone, 50 trials per task)"
+    date_reported: "2026-08-24"
+    eval_condition: "Bimanual SO-101 arms, 4 tabletop tasks; ID clean / held-out objects / distractors"
+
+  real_world_baseline_gr00t_n17:
+    id_clean_avg: 71.0
+    held_out_objects_avg: 62.0
+    distractors_avg: 53.0
+    source: "Paper Table 4 (Base columns)"
+    date_reported: "2026-08-24"
+
+  simpler_env_supervision_ablation:
+    gr00t_n17_avg: 61.5
+    groundings_only_avg: 60.0
+    future_supervision_avg: 68.0
+    free_latent_avg: 57.0
+    intent_only_avg: 76.0
+    indi_full_avg: 85.5
+    source: "Paper Table 6a (single fixed evaluation run, GR00T-N1.7)"
+    date_reported: "2026-08-24"
+
+eval_conditions:
+  simpler_env: "SimplerEnv-Bridge WidowX, GR00T-N1.7 fine-tuned on BridgeData V2"
+  robocasa: "RoboCasa Kitchen 24 tasks, 100 demos/task"
+  real_world: "Bimanual SO-101, 4 tasks, 50 trials each"
+
+tags:
+  - flow_matching
+  - intent-distillation
+  - teacher-vlm
+  - representation-alignment
+  - gr00t
+  - pi0.5
+  - simpler_env
+  - robocasa
+  - real-world
