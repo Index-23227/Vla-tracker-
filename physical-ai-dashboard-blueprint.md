@@ -374,11 +374,11 @@ See [CONTRIBUTING.md](link) — we welcome:
 
 | Benchmark | Tasks | Models | Focus |
 |-----------|-------|--------|-------|
-| LIBERO | 4 suites | 238 | Manipulation generalization |
-| CALVIN | ABC→D | 49 | Long-horizon, language |
+| LIBERO | 4 suites | 243 | Manipulation generalization |
+| CALVIN | ABC→D | 50 | Long-horizon, language |
 | Meta-World | ML-10/45 | - | Multi-task dexterity |
-| SimplerEnv | 5 tasks | 58 | Sim-to-real transfer |
-| RoboTwin v1/v2 | 50 tasks | 81 | Dual-arm, bimanual |
+| SimplerEnv | 5 tasks | 59 | Sim-to-real transfer |
+| RoboTwin v1/v2 | 50 tasks | 82 | Dual-arm, bimanual |
 | RoboCasa | 24 tasks | 35 | Home-kitchen manipulation |
 | RLBench | 18 tasks | 11 | Diverse manipulation |
 

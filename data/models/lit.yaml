@@ -1,0 +1,126 @@
+# Paper: Breaking the Vision-Action Shortcut: Latent Interface Training for Generalizable Robotics Foundation Models
+# arXiv: 2609.12641
+
+name: LIT
+full_name: "Breaking the Vision-Action Shortcut: Latent Interface Training for Generalizable Robotics Foundation Models"
+organization: "National University of Singapore / South China University of Technology / Nanyang Technological University"
+date: "2026-09-11"
+paper_url: https://arxiv.org/abs/2609.12641
+code_url: "https://magiclab-nus.github.io/LIT"
+venue: arXiv
+# open_source: Not stated in the paper (project page only)
+model_type: vla
+
+architecture:
+  backbone: "Framework-agnostic; instantiated on pi0.5, MolmoAct2 (VLAs) and FAST-WAM, ImageWAM (world-action models). Headline tracker entry = MolmoAct2 + LIT (the variant used for real-robot runs and all ablations)"
+  action_head: "Native flow-matching action expert of each framework, trained from scratch in Stage 1 (conditioned on language, robot state and the chunk's terminal SE(3) end-effector pose, no images), then conditioned in Stage 2 only through K=100 learnable latent tokens that cross-attend to visual and semantic backbone features layer-wise"
+  action_head_category: flow_matching
+  parameters: "Not stated in the paper"
+  key_innovation: "Two-stage Latent Interface Training: (1) image-free spatial-goal-conditioned action-prior pretraining using the terminal SE(3) pose of each demonstrated chunk; (2) a pose-supervised latent interface (MLP decoder reconstructs the same terminal pose, lambda_pose = 0.3) that is the action expert's ONLY visual conditioning pathway, mitigating vision-action shortcuts"
+
+training:
+  base_model: "Pretrained VLM/video backbones of pi0.5, MolmoAct2, FAST-WAM, ImageWAM; action experts randomly initialized (released policy checkpoints are NOT fine-tuned)"
+  method: "Stage 1: backbone frozen, action expert + SE(3) encoder trained with flow matching (10K steps on MolmoAct2). Stage 2: full fine-tuning of backbone, action expert, latent tokens/interface and pose decoder with L_act + 0.3 L_pose (20K steps on MolmoAct2); total budget matched to the baseline (30K)"
+  data: "Original LIBERO demonstrations only (LIBERO-Plus evaluated zero-shot); real robot: 300 demonstrations (100 per task) for one multi-task policy"
+  hardware: "Not stated in the paper"
+
+benchmarks:
+  libero:
+    libero_spatial: 94.60
+    libero_object: 96.20
+    libero_goal: 95.20
+    libero_long: 90.40
+    libero_avg: 94.10
+    libero_plus_camera: 48.41
+    libero_plus_noise: 70.77
+    libero_plus_light: 85.64
+    libero_plus_background: 94.42
+    libero_plus_robot: 59.03
+    libero_plus_layout: 71.61
+    libero_plus_language: 73.58
+    libero_plus_avg: 71.92
+    source: "Paper Table I (LIBERO) and Table II (LIBERO-Plus), MolmoAct2 + LIT rows"
+    date_reported: "2026-09-11"
+    eval_condition: "MolmoAct2 + LIT trained from pretrained backbone on original LIBERO data; LIBERO 4 suites, 50 rollouts per task (2,000 episodes); LIBERO-Plus zero-shot, 10,030 perturbed instances, one rollout each; libero_plus_avg = paper's Overall (unweighted mean of 7 perturbations)"
+
+  libero_lit_other_architectures:
+    pi05_lit_libero_avg: 91.80
+    fast_wam_lit_libero_avg: 98.10
+    imagewam_lit_libero_avg: 98.40
+    pi05_lit_libero_plus_overall: 79.67
+    fast_wam_lit_libero_plus_overall: 60.63
+    imagewam_lit_libero_plus_overall: 86.89
+    source: "Paper Table I and Table II, LIT rows for pi0.5, FAST-WAM, ImageWAM"
+    eval_condition: "LIT applied to the other three architectures; same protocol as headline"
+
+  libero_lit_imagewam_suites:
+    libero_spatial: 99.60
+    libero_object: 99.20
+    libero_goal: 99.20
+    libero_long: 95.60
+    avg: 98.40
+    source: "Paper Table I, ImageWAM LIT row"
+    eval_condition: "ImageWAM + LIT (best LIBERO average in the paper); kept separate from the headline MolmoAct2 entry"
+
+  libero_matched_baselines:
+    pi05_baseline_libero_avg: 87.75
+    molmoact2_baseline_libero_avg: 93.50
+    fast_wam_baseline_libero_avg: 97.60
+    imagewam_baseline_libero_avg: 98.10
+    pi05_baseline_libero_plus_overall: 68.97
+    molmoact2_baseline_libero_plus_overall: 63.62
+    fast_wam_baseline_libero_plus_overall: 51.44
+    imagewam_baseline_libero_plus_overall: 83.02
+    source: "Paper Table I and Table II, Baseline rows"
+    eval_condition: "architecture-matched baselines trained from the same pretrained backbone with randomly initialized action experts (not comparable to published fine-tuned results)"
+
+  libero_ablation_molmoact2:
+    lit_wo_stage1_libero_avg: 93.70
+    lit_wo_stage1_libero_plus_overall: 68.23
+    lit_wo_pose_supervision_libero_avg: 93.50
+    lit_wo_pose_supervision_libero_plus_overall: 68.86
+    lit_w_direct_visual_access_libero_avg: 94.25
+    lit_w_direct_visual_access_libero_plus_overall: 67.74
+    lit_wo_stage1_and_pose_libero_avg: 93.45
+    lit_wo_stage1_and_pose_libero_plus_overall: 65.70
+    la4vla_inspired_staged_libero_avg: 93.75
+    la4vla_inspired_staged_libero_plus_overall: 65.46
+    baseline_w_pose_supervision_libero_avg: 93.20
+    baseline_w_pose_supervision_libero_plus_overall: 65.45
+    source: "Paper Table III"
+    eval_condition: "MolmoAct2 ablations; LIBERO Avg (ID) and LIBERO-Plus Overall (OOD)"
+
+  real_world:
+    id_success: 88.0
+    lighting_ood_success: 70.0
+    camera_ood_success: 46.7
+    distractors_ood_success: 63.3
+    source: "Paper Sec. IV-D text (Fig. 6), LIT aggregated over three tasks"
+    date_reported: "2026-09-11"
+    eval_condition: "MolmoAct2 + LIT multi-task policy; tasks Keep LEGOs, Wipe trash, Transfer egg; 25 rollouts per task ID (75 total), 10 rollouts per task per OOD condition"
+
+  real_world_molmoact2_baseline:
+    id_success: 74.7
+    lighting_ood_success: 53.3
+    camera_ood_success: 30.0
+    distractors_ood_success: 50.0
+    source: "Paper Sec. IV-D text (Fig. 6), MolmoAct2 baseline aggregated over three tasks"
+    eval_condition: "architecture-matched MolmoAct2 baseline, same protocol"
+
+  real_world_per_task_text:
+    transfer_egg_id_lit: 92.0
+    transfer_egg_id_baseline: 52.0
+    transfer_egg_lighting_ood_lit: 90.0
+    transfer_egg_lighting_ood_baseline: 30.0
+    transfer_egg_distractors_ood_lit: 90.0
+    transfer_egg_distractors_ood_baseline: 20.0
+    wipe_trash_camera_ood_lit: 80.0
+    wipe_trash_camera_ood_baseline: 10.0
+    source: "Paper Sec. IV-D text"
+    eval_condition: "per-task values quoted in the text; other per-task values appear only in Fig. 6"
+
+eval_conditions:
+  libero: "MolmoAct2 + LIT; standard LIBERO 4 suites plus zero-shot LIBERO-Plus (7 perturbations)"
+  real_world: "3 tasks, ID + Lighting/Camera/Distractors OOD, MolmoAct2 backbone"
+
+tags: [training-strategy, shortcut-learning, latent-interface, pose-supervision, action-prior, flow-matching, molmoact2, pi0.5, world-action-model, libero, libero-plus, real-robot, robustness]

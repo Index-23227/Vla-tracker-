@@ -1,0 +1,173 @@
+# Paper: GeomVLA: Unifying Scene, Motion, and Action in 3D
+# arXiv: 2609.13812
+
+name: GeomVLA
+full_name: "GeomVLA: Unifying Scene, Motion, and Action in 3D"
+organization: "Carnegie Mellon University / NVIDIA"
+date: "2026-09-15"  # arXiv stamp on the PDF (2609.13812v2, 15 Sep 2026); v1 date not stated in the paper
+paper_url: https://arxiv.org/abs/2609.13812
+code_url: null  # code release not stated in the paper; project page: ziyin-xiong.github.io/geomvla.io
+venue: "Not stated in the paper"
+open_source: false  # weights/code release not stated in the paper
+model_type: vla
+
+architecture:
+  backbone: "Florence-2 VLM (public initialization) encoding multi-view RGB + language; patch tokens lifted to 3D robot-base-frame positions via depth and camera calibration"
+  llm: "Florence-2 (encoder-decoder VLM)"
+  action_head: "3D Action Denoiser: geometry-aware transformer (3D RoPE) over spatial action tokens, rectified-flow velocities for end-effector translation/rotation + BCE gripper-open head; optional Joint Angle Denoiser (GeomVLA-JA) with the same rectified-flow objective"
+  action_head_category: flow_matching
+  parameters: "1.2B (GeomVLA); 1.3B (GeomVLA-JA)"
+  key_innovation: "3D Scene Trajectory Denoiser (flow-matching decoder over a 20x20 grid of 3D anchors, 15 future steps) trained on SpatialTrackerV2 pseudo-labels; one velocity-field evaluation at the initial noise state gives intermediate motion tokens that are fused into 3D scene tokens by geometry-aware cross-attention (zero-initialized residual) before action denoising, so scene, future motion and actions share one metric robot-centric 3D frame"
+
+training:
+  base_model: "Florence-2 (no robot-action pretraining)"
+  method: "Stage 1: train 3D Scene Trajectory Denoiser on SpatialTrackerV2 point-track pseudo-labels with VLM frozen. Stage 2: jointly fine-tune action denoiser, trajectory denoiser and VLM using only the action loss"
+  data: "Benchmark demonstrations only (CALVIN, LIBERO, RoboTwin2.0: 50 clean + 500 randomized demos per task, 27,500 total); real world: 50 or 20 teleop demos per task on ALOHA2"
+  hardware: "Stage-2 training ~15 h on 4x L40S (CALVIN), ~25 h on 8x A100-40GB (LIBERO), ~48 h on 8x A100-40GB (RoboTwin2.0 five-task ablation)"
+
+benchmarks:
+  calvin:
+    calvin_abc_d_avg_len: 4.624
+    source: "Paper Table 1, GeomVLA row (CALVIN ABC->D)"
+    date_reported: "2026-09-15"
+    eval_condition: "CALVIN ABC->D, mean number of consecutive completed tasks in 5-instruction chains; trained on benchmark demos only"
+
+  libero:
+    libero_spatial: 98.6
+    libero_object: 99.8
+    libero_goal: 97.6
+    libero_long: 97.6
+    libero_avg: 98.4
+    source: "Paper Table 1, GeomVLA row"
+    date_reported: "2026-09-15"
+    eval_condition: "Standard four LIBERO suites; no robot-action pretraining"
+
+  robotwin_v2:
+    robotwin_v2_easy: 78.6
+    robotwin_v2_hard: 76.2
+    source: "Paper Appendix Table 5 (50 RoboTwin2.0 tasks, average row)"
+    date_reported: "2026-09-15"
+    eval_condition: "One multi-task policy on all 50 RoboTwin2.0 tasks, official Easy/Hard protocol, 50 rollouts per setting; paper reports no combined Easy/Hard average"
+
+  robotwin_v2_baseline_pi05_50task:
+    pi05_easy: 75.9
+    pi05_hard: 75.7
+    source: "Paper Appendix Table 5"
+    eval_condition: "baseline: pi0.5 fully fine-tuned from public base checkpoint on the same 50-task data"
+
+  robotwin_v2_5task_subset:
+    beat_block_hammer: 89.0
+    pick_dual_bottles: 98.0
+    move_can_pot: 99.0
+    handover_mic: 55.0
+    stack_bowls_two: 83.0
+    avg: 84.8
+    source: "Paper Table 1, GeomVLA row (RoboTwin2.0 tasks a-e)"
+    eval_condition: "Five-task subset following SimpleVLA-RL, each the mean of Easy and Hard; non-standard subset, not ranked against full averages"
+
+  robotwin_v2_5task_subset_variants:
+    geomvla_ja_avg: 81.6
+    two_d_ja_avg: 66.2
+    geomvla_wo_motion_avg: 70.0
+    source: "Paper Table 1"
+    eval_condition: "variants trained only on the five selected tasks (full GeomVLA trained on all 50); not a fully controlled ablation per the paper"
+
+  robotwin_v2_5task_subset_baselines:
+    pi05_avg: 81.2
+    posevla_avg: 85.6
+    simplevla_rl_avg: 76.4
+    x_vla_avg: 47.8
+    openvla_oft_avg: 34.4
+    source: "Paper Table 1"
+    eval_condition: "baselines as listed in the same table"
+
+  calvin_variants:
+    geomvla_ja: 4.508
+    two_d_ja: 4.195
+    geomvla_wo_motion: 4.508
+    source: "Paper Table 1 (CALVIN ABC->D)"
+    eval_condition: "variants: joint-angle output (GeomVLA-JA), 2D joint-angle baseline, and GeomVLA without the 3D Scene Trajectory Denoiser"
+
+  calvin_baselines:
+    flower: 4.480
+    x_vla: 4.430
+    openvla_oft: 4.279
+    pi05: 3.964
+    univla: 3.801
+    source: "Paper Table 1 (CALVIN ABC->D)"
+
+  libero_wo_motion:
+    libero_spatial: 94.8
+    libero_object: 99.2
+    libero_goal: 88.2
+    libero_long: 91.8
+    avg: 93.5
+    source: "Paper Table 1, GeomVLA w/o motion row"
+    eval_condition: "ablation: 3D Scene Trajectory Denoiser removed"
+
+  libero_baselines:
+    simplevla_rl_avg: 99.1
+    lamp_avg: 98.3
+    x_vla_avg: 98.1
+    openvla_oft_avg: 97.1
+    flower_avg: 97.0
+    pi05_avg: 96.8
+    posevla_avg: 96.0
+    univla_avg: 95.2
+    source: "Paper Table 1"
+
+  calvin_ablation:
+    two_d_geomvla_wo_motion: 4.411
+    two_d_geomvla: 4.437
+    two_d_geomvla_lamp_style: 4.462
+    geomvla_w_2d_motion: 4.085
+    geomvla_w_denoised_trace: 4.047
+    geomvla_w_denoised_latent: 4.334
+    geomvla_w_partial_denoising: 4.484
+    geomvla_encoder_only: 4.443
+    geomvla_w_arbitrary_frame: 4.596
+    geomvla_full: 4.624
+    source: "Paper Table 2 (CALVIN ABC-D ablations)"
+
+  calvin_ablation_extra:
+    horizon_h32: 4.272
+    frozen_random_trajectory_denoiser: 4.443
+    seed_42: 4.609
+    source: "Paper Appendix (Table 6; capacity-control and two-seed text)"
+    eval_condition: "longer trajectory horizon H=32; randomly initialized frozen trajectory module; second seed"
+
+  real_world:
+    insert_marker_successes_of_20: 5
+    stack_blocks_successes_of_20: 19
+    place_bottles_successes_of_20: 17
+    stand_bottle_successes_of_20: 17
+    transfer_marker_successes_of_20: 12
+    uncap_marker_successes_of_20: 20
+    rank_by_color_successes_of_20: 2
+    place_in_triangle_successes_of_20: 8
+    average: 62.5
+    source: "Paper Table 3, GeomVLA column"
+    date_reported: "2026-09-15"
+    eval_condition: "ALOHA2 right ViperX300S arm, 8 single-arm tabletop tasks, 20 trials each, one multi-task policy trained on 50/20 demos per task"
+
+  real_world_variants_and_baselines:
+    geomvla_ja_avg: 59.4
+    geomvla_wo_motion_avg: 44.4
+    two_d_ja_avg: 28.8
+    pi05_avg: 29.4
+    source: "Paper Table 3, Average row"
+    eval_condition: "pi0.5 LoRA-fine-tuned from public base checkpoint with joint-angle actions; same demonstrations"
+
+  inference_latency_calvin:
+    geomvla_ms_per_chunk: 280.0
+    geomvla_wo_motion_ms_per_chunk: 219.0
+    source: "Paper Appendix (Inference latency paragraph)"
+    eval_condition: "one model.step() call predicting a 10-action chunk, single NVIDIA L40S"
+
+eval_conditions:
+  calvin: "ABC->D, benchmark demos only, no robot-action pretraining"
+  libero: "standard 4 suites"
+  robotwin_v2: "50 tasks, Easy/Hard, 50 rollouts per setting; 5-task subset reported separately"
+  real_world: "ALOHA2 single arm, 8 tasks x 20 trials"
+
+tags: [3d, flow-matching, scene-flow, motion-prediction, trajectory-denoiser, florence-2, calvin, libero, robotwin, real-robot, aloha]

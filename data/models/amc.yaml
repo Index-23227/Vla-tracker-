@@ -1,0 +1,108 @@
+# Paper: Atomic Motion Coordinate for Language-Steerable and Force-Responsive Manipulation
+# arXiv: 2609.15012
+
+name: AMC
+full_name: "Atomic Motion Coordinate for Language-Steerable and Force-Responsive Manipulation"
+organization: "DEEP Robotics (Hangzhou DEEP Robotics Technology Co., Ltd.) / Tsinghua University / Zhejiang University / Shanghai AI Laboratory / Eastern Institute of Technology, Ningbo, et al."
+date: "2026-09-16"
+paper_url: https://arxiv.org/abs/2609.15012
+code_url: null
+venue: arXiv
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (SigLIP + Gemma VLM, 18-block action expert), 3.353B parameters; Qwen3.5-4B high-level planner used without task-specific SFT (1 Hz, emits subtasks from a fixed vocabulary only)"
+  action_head: "pi0.5 conditional flow-matching action expert (H=50 actions at 30 Hz, 32-D interface, first 16 dims control two 7-DoF arms + grippers), conditioned in every one of 18 blocks by a zero-initialized 2-head cross-attention residual on the per-arm atomic motion coordinates [z_R, z_L]"
+  action_head_category: flow_matching
+  parameters: "3.353B pi0.5 backbone + 46.96M added (34.56M atomic route, 12.40M force route; +1.40%)"
+  key_innovation: "Per-arm 13-atom spherical codebook (signed x/y/z translations, signed rx/ry/rz rotations, hold) grounded from atomic language and forward-kinematics labels with vision withheld; the coordinate conditions every action-expert block. A bounded spherical force correction (20 deg free cone, 45 deg cap) recomputed from the fixed nominal latent regenerates only the unexecuted RTC suffix."
+
+training:
+  base_model: "pi0.5"
+  method: "Stage z_T: vision-free atomic grounding (25k updates; DCT-II low-frequency masked flow target + Two-Way and Top-2 losses; codebooks then frozen). Stage z_M: full-observation training (25k, or 20k for the force recipe) with counterfactual hinge loss (weight 0.10). Force recipe adds B1 force-encoder/future-wrench pretraining (5k) and B2 action expert + force adapter RTC training (5k)"
+  data: "2,375 episodes, 3.07M valid 30-Hz samples on a CR1 dual-arm platform (cabinet, drawer, fruit, mixed manipulation, screwdriver, plug, vase domains); 6-axis wrist wrench at 120 Hz"
+  hardware: "8x H800 GPUs, global batch 256 (training); single RTX 4090 inference (117.4 ms atomic-only; 118.7/45.5 ms force slow/fast loops)"
+
+benchmarks:
+  real_world:
+    fruit_multi_sort_progress: 88.9
+    fruit_target_order_ood_progress: 87.8
+    plug_4point_progress: 59.0
+    vase_5point_progress: 71.6
+    source: "Paper Table III, AMC row"
+    date_reported: "2026-09-16"
+    eval_condition: "CR1 dual-arm robot, mean normalized task progress (%) over 50 trials per task; fruit tasks use human-supplied subtask prompts, Plug/Vase use Qwen3.5-4B planner prompts; columns are distinct capabilities and not pooled by the paper"
+
+  real_world_amc_force:
+    plug_4point_progress: 78.5
+    vase_5point_progress: 75.2
+    source: "Paper Table III, AMC + Force row"
+    eval_condition: "force-enabled recipe; evaluated on contact-rich Plug and Vase only"
+
+  real_world_baselines:
+    pi05_finetuned_fruit_multi_sort: 82.7
+    pi05_finetuned_fruit_ood: 60.5
+    pi05_finetuned_plug: 55.0
+    pi05_finetuned_vase: 65.2
+    rss_fruit_multi_sort: 54.5
+    rss_fruit_ood: 39.1
+    la4vla_style_fruit_multi_sort: 60.7
+    la4vla_style_fruit_ood: 40.4
+    forcevla_plug: 30.0
+    forcevla_vase: 40.4
+    source: "Paper Table III"
+    eval_condition: "matched reproductions on the same three-view RGB / 16-D state / 32-D action interface; LA4VLA and RSS evaluated only on fruit tasks, ForceVLA only on Plug and Vase"
+
+  atomic_steering:
+    single_absolute: 80.2
+    single_vs_empty: 74.5
+    single_pair_separation: 92.5
+    dual_absolute: 57.9
+    dual_vs_empty: 39.1
+    dual_pair_separation: 83.1
+    source: "Paper Table II, AMC rows"
+    eval_condition: "7,520 matched offline horizon-50 prompt interventions per policy (3,320 single, 4,200 dual) from recorded real-robot states, 10 mm / 2 deg threshold; uses the preceding non-spherical 50K checkpoint (25K z_T + 25K z_M)"
+
+  atomic_steering_baselines:
+    pi05_single_absolute: 50.5
+    pi05_single_vs_empty: 18.3
+    pi05_single_pair_separation: 18.1
+    pi05_dual_absolute: 37.1
+    pi05_dual_vs_empty: 6.9
+    pi05_dual_pair_separation: 8.1
+    la4vla_style_single_absolute: 52.9
+    la4vla_style_single_vs_empty: 31.7
+    la4vla_style_single_pair_separation: 39.1
+    la4vla_style_dual_absolute: 37.9
+    la4vla_style_dual_vs_empty: 13.2
+    la4vla_style_dual_pair_separation: 24.0
+    rss_single_absolute: 52.6
+    rss_single_vs_empty: 39.2
+    rss_single_pair_separation: 60.7
+    rss_dual_absolute: 26.2
+    rss_dual_vs_empty: 9.7
+    rss_dual_pair_separation: 22.5
+    source: "Paper Table II"
+    eval_condition: "same intervention set as atomic_steering"
+
+  force_route_ablation:
+    route_disabled_joint_rmse_rad: 0.0581
+    route_disabled_tcp_rmse_mm: 21.01
+    shifted_history_joint_rmse_rad: 0.0459
+    shifted_history_tcp_rmse_mm: 19.41
+    matched_history_joint_rmse_rad: 0.0349
+    matched_history_tcp_rmse_mm: 15.27
+    source: "Paper Table IV"
+    eval_condition: "matched force-route ablation on 50 Plug/Vase trials within one checkpoint; suffix-length weighted RMSE, lower is better"
+
+  planner_boundary_accuracy:
+    vase_next_subtask_within_5_queries: 94.6
+    plug_next_subtask_within_5_queries: 92.4
+    source: "Paper Sec. IV-B text"
+    eval_condition: "Qwen3.5-4B without task-specific SFT, 500 boundaries each; boundary-level, not end-to-end"
+
+eval_conditions:
+  real_world: "CR1 dual-arm platform, 4 task families, 50 trials per task, normalized task progress"
+  atomic_steering: "offline counterfactual prompt interventions with fixed images/state"
+
+tags: [language-steering, atomic-motion, forward-kinematics, codebook, force-adaptation, contact-rich, bimanual, pi0.5, flow-matching, real-time-chunking, hierarchical, qwen3.5, real-robot]

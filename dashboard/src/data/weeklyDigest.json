@@ -1,31 +1,31 @@
 {
- "week": "2026-W33",
- "week_display": "Week 33, August 2026",
- "headline": "Three weeks of backlog cleared — and four benchmark scores that were never real",
+ "week": "2026-W39",
+ "week_display": "Week 39, September 2026",
+ "headline": "Six weeks of scans cleared — 120 new models, and a leaderboard that now needs a comparability rule",
  "insights": [
   {
-   "title": "The wrapper line held: 23 of 63 candidates rejected",
-   "body": "The highest-rejection cycle so far, and almost every rejection was the same shape — a paper improving a policy it never trains. Several said so outright: OnEvoMemory 'keeping the pretrained policy frozen', HyMeS 'no weight update, parameters remain fixed', Deltoris 'we do not train a separate small VLA model from scratch'. Titles are unreliable in both directions: FACT and EMS read like analysis and runtime papers but train real weights, while ARIES-Mission2 and RoboSynChallenge read like systems and are a frozen-model pipeline and a competition proposal.",
-   "delta": "23 rejected",
-   "direction": "down"
-  },
-  {
-   "title": "A RoboCasa #2 that was two other benchmarks misread",
-   "body": "StereoPolicy sat at RoboCasa 75.6 built from robocasa_toolhang_100: 94.1 and _200: 57.1. Its paper's Table 2 has no RoboCasa column at all — the row reads '941.9 ... 571.9', value and standard deviation run together, so 94.1 is Robomimic ToolHang @100 demos (94±1.9) and 57.1 is OmniGibson OpenDoor @200 (57±1.9). Two different benchmarks, two corrupted numbers. Fixed alongside three more: SimplerEnv averaged a paper's headline with its own sub-aggregates (TBD-VLA 82.09 → 77.7), COAST mixed three host policies, SAPS averaged in a pi0.5 baseline row.",
-   "delta": "4 corrected",
-   "direction": "down"
-  },
-  {
-   "title": "The tracker was discarding data it had already collected",
-   "body": "build_leaderboard.py filtered benchmark blocks through a hardcoded list of eight names, so 118 blocks across 91 models never reached leaderboard.json — including real_world for 59 models, which has its own definition file and appears in benchmarks_available. Meta-World was tracked by the data and absent from the dashboard, so nine models' scores were unreachable; it now has a chip and COAST leads at 94.0. Reviews for four models never attached because two scripts disagreed on filenames while coverage kept reporting 100%.",
-   "delta": "118 recovered",
+   "title": "Nine scan PRs, ~193 papers read, 120 accepted",
+   "body": "The 08-19 through 09-16 scans were processed one PR at a time, every candidate read from its PDF under a shared rule set. The tracker grew from 414 to 534 models. Rejections held to the same line as before: benchmarks, surveys, analysis papers, and wrappers over frozen policies — many quoted their own 'no parameters are updated' in the abstract. Titles kept misleading both ways: EffVLA, FlashVLA and ActSafeGuard read like analysis or runtime papers but train real weights.",
+   "delta": "414 → 534",
    "direction": "up"
   },
   {
-   "title": "413 models; LIBERO's top-13 now spans one point",
-   "body": "G0.5 (Galaxea, single autoregressive stream) enters at #10 with 98.9 and also takes SimplerEnv at 87.3; LIRA follows at 98.88 from a 0.5B model running 186 Hz. The band from #1 to #13 is 99.8 down to 98.83. MiDAS was briefly the RoboCasa leader at 89.3 before that turned out to be RoboCasa-365 over three of four tasks — moved to its own block rather than ranked against the standard suite.",
-   "delta": "353 → 413",
+   "title": "LIBERO top-13 reshuffles: V-Link #4, ProWAM #8, StructRL #11",
+   "body": "V-Link (GR00T N1.6 + query tokens restoring DiT visual features) enters at 99.33, ProWAM (Wan2.2-5B world-action model) at 99.05 and StructRL at 98.95; MPCoT and LIRA drop out. ProWAM is also RoboTwin v2 #4 at 93.4 on the standard multi-task protocol. INDI takes SimplerEnv #2 (84.7) and GIFT-Feature takes RoboCasa #1 (82.3).",
+   "delta": "3 new top-13",
    "direction": "up"
+  },
+  {
+   "title": "Two ranking pitfalls caught mid-run",
+   "body": "LM-X's RoboTwin score was the hard split only, yet the builder's fallback averaged it into robotwin_v2_avg against Easy+Hard means — moved out and a rule added. Scan PRs kept re-proposing already-accepted papers and overwriting their real YAMLs with draft stubs; the stub cleanup was changed to delete only new files and restore overwrites, and every merge was checked against main.",
+   "delta": "2 fixed",
+   "direction": "down"
+  },
+  {
+   "title": "Open question: what counts as the same benchmark",
+   "body": "RoboCasa ranks Kitchen-24 and GR1-Tabletop-24 results together (GIFT-Feature #1 is GR1; Z-1 #2 is Kitchen). RoboTwin v2 ranks some paper-reported task-subset averages while excluding single-split and small-subset runs. Both need a single rule before the rankings in those two benchmarks can be read as like-for-like.",
+   "delta": "2 open",
+   "direction": "down"
   }
  ]
 }

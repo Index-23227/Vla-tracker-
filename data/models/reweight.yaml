@@ -1,0 +1,124 @@
+# Paper: ReWeight: Leveraging Human Data for VLA Post-Training via Demonstration Retrieval and Sample Weighting
+# arXiv: 2609.13851
+
+name: ReWeight
+full_name: "ReWeight: Leveraging Human Data for VLA Post-Training via Demonstration Retrieval and Sample Weighting"
+organization: "The University of Hong Kong / Institute of Artificial Intelligence (TeleAI), China Telecom / Shenzhen Research Institute of Northwestern Polytechnical University"
+date: "2026-09-12"  # arXiv stamp on the PDF (2609.13851v1, 12 Sep 2026)
+paper_url: https://arxiv.org/abs/2609.13851
+code_url: null  # code release not stated in the paper; project page: https://reweight-vla.github.io
+venue: "Not stated in the paper"
+open_source: false  # code/weights release not stated in the paper
+model_type: data_strategy
+
+architecture:
+  backbone: "pi0.5 (post-trained from the same pretrained checkpoint for all methods)"
+  action_head: "pi0.5 flow-matching action expert (unchanged)"
+  action_head_category: flow_matching
+  parameters: "Not stated in the paper"
+  key_innovation: "Cross-embodiment visuomotor encoder (ResNet-18 + temporal Transformer visual encoder aligned via domain-adversarial + OT correspondence losses, fused with 20-step future action chunks in an InfoVAE latent with stage supervision) used to (i) retrieve EgoDex human demonstrations by entropic-OT (Sinkhorn) discrepancy to robot demos (1:1 ratio) and (ii) weight each retrieved human sample by its frame-level OT discrepancy (w = alpha + (1-alpha) * normalized similarity, alpha = 0.5) in the pi0.5 post-training loss; human hand trajectories retargeted with LeVR and refined by a PPO residual RL policy"
+
+training:
+  base_model: "pi0.5"
+  method: "Post-training on robot demos + retrieved, sample-weighted egocentric human demos (EgoDex)"
+  optimizer: "AdamW, LR 2.5e-5, batch size 64"
+  steps: "20k (simulation), 40k (real world)"
+  hardware: "2x NVIDIA H100 (VLA post-training); 1x RTX 5090 (visuomotor encoder)"
+  data: "RoboTwin 2.0 (AgileX) robot demos + EgoDex human demos; real: DoBot dual-arm teleop demos + EgoDex"
+
+benchmarks:
+  robotwin_v2_8task_clean:
+    stack_bowls_two: 0.96
+    stack_bowls_three: 0.78
+    stack_blocks_two: 0.74
+    stack_blocks_three: 0.30
+    place_bread_basket: 0.31
+    place_can_basket: 0.37
+    place_object_basket: 0.51
+    put_object_cabinet: 0.55
+    average: 0.57
+    source: "Paper Table I(a), ReWeight (ours) column"
+    date_reported: "2026-09-12"
+    eval_condition: "8 self-selected RoboTwin 2.0 tasks, clean setting, 100 trials per task; success rates as fractions; non-standard subset, not comparable to full-suite averages"
+
+  robotwin_v2_4task_randomized:
+    stack_bowls_two: 0.68
+    stack_bowls_three: 0.48
+    stack_blocks_two: 0.29
+    put_object_cabinet: 0.23
+    average: 0.42
+    source: "Paper Table I(b), ReWeight (ours) column"
+    eval_condition: "4 RoboTwin 2.0 tasks, randomized setting, 100 trials per task; fractions"
+
+  robotwin_v2_8task_clean_baselines:
+    robot_only_avg: 0.39
+    all_human_w1_avg: 0.43
+    random_human_w1_avg: 0.44
+    retrieval_w04_avg: 0.45
+    retrieval_w07_avg: 0.48
+    retrieval_w10_avg: 0.52
+    source: "Paper Table I(a), Average row"
+    eval_condition: "same pi0.5 post-training; different human-data composition strategies"
+
+  robotwin_v2_4task_randomized_baselines:
+    robot_only_avg: 0.34
+    all_human_w1_avg: 0.29
+    random_human_w1_avg: 0.32
+    retrieval_w04_avg: 0.38
+    retrieval_w07_avg: 0.38
+    retrieval_w10_avg: 0.40
+    source: "Paper Table I(b), Average row"
+
+  alpha_sensitivity_3task:
+    robot_only_avg: 0.40
+    alpha_0_1_avg: 0.65
+    alpha_0_3_avg: 0.65
+    alpha_0_5_avg: 0.68
+    alpha_0_7_avg: 0.64
+    alpha_1_0_avg: 0.62
+    source: "Paper Table III (Stack Bowls Three, Stack Blocks Two, Place Object Basket)"
+
+  encoder_alignment_ablation:
+    ours_stage_acc: 0.93
+    ours_kf_dist: 4.1
+    wo_action_info_stage_acc: 0.83
+    wo_action_info_kf_dist: 10.0
+    wo_temporal_penalty_stage_acc: 0.86
+    wo_temporal_penalty_kf_dist: 8.0
+    source: "Paper Table II, Average columns"
+    eval_condition: "cross-embodiment correspondence quality on 4 stacking tasks (stage accuracy up, keyframe distance down)"
+
+  real_world:
+    average: 68.8
+    source: "Paper Abstract / Section IV-D (per-task values in Fig. 7 only)"
+    date_reported: "2026-09-12"
+    eval_condition: "DoBot dual-arm, 4 tasks (Stack Bowls, Place Teddy Drawer, Pick Fruits Basket, Press Stapler), clean setting, 20 trials per task"
+
+  real_world_baselines:
+    robot_only_average: 40.0
+    gain_over_robot_only_pp: 28.8
+    gain_over_naive_mixing_pp: 13.8
+    source: "Paper Section I and Section IV-D"
+
+  real_world_randomized:
+    lighting_successes_of_40: 24
+    distractors_successes_of_40: 24
+    overall: 60.0
+    source: "Paper Table IV and Section IV-D"
+    eval_condition: "lighting variation and unseen visual distractors, 10 trials per task per perturbation, 4 tasks"
+
+  real_world_randomized_baselines:
+    naive_mixing_overall: 41.3
+    robot_only_overall: 28.8
+    naive_mixing_lighting_successes_of_40: 18
+    naive_mixing_distractors_successes_of_40: 15
+    robot_only_lighting_successes_of_40: 12
+    robot_only_distractors_successes_of_40: 11
+    source: "Paper Table IV and Section IV-D"
+
+eval_conditions:
+  robotwin_v2_8task_clean: "8-task subset, clean, 100 trials/task"
+  real_world: "DoBot dual-arm, 4 tasks x 20 trials, clean"
+  real_world_randomized: "4 tasks x (10 lighting + 10 distractor) trials"
+
+tags: [human-data, egocentric-video, cross-embodiment, data-retrieval, sample-weighting, optimal-transport, pi0.5, post-training, robotwin, real-robot, bimanual]

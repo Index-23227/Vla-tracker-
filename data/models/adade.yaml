@@ -1,0 +1,156 @@
+# Paper: Dense to MoE Adaptation for Compact Vision Language Action Policies
+# arXiv: 2609.16503
+
+name: AdaDE
+full_name: "AdaDE: Dense to MoE Adaptation with Adaptive Dynamic Expert Deactivation for Compact VLA Policies"
+organization: "Shanghai Jiao Tong University / Tianji KernalMind Co., Ltd. / Alibaba Group"
+date: "2026-09-18"  # arXiv stamp on the PDF (2609.16503v2, 18 Sep 2026); v1 date not stated in the paper
+paper_url: https://arxiv.org/abs/2609.16503
+code_url: null  # Not stated in the paper
+venue: "Not stated in the paper"
+open_source: false  # code/weights release not stated in the paper
+model_type: "compression method (Dense2MoE reparameterization + adaptive expert deactivation during VLA fine-tuning)"
+
+architecture:
+  backbone: "pi0.5: PaliGemma (Gemma-2B) + SigLIP vision encoder; LLM-side FFNs (language model + action expert) converted to width-partitioned MoE layers (10 experts per module; 63 converted modules, dynamic deactivation on 36)"
+  llm: "Gemma-2B (PaliGemma) with Gemma-300M action expert"
+  action_head: "pi0.5 flow-matching action expert (unchanged interface; its FFNs converted to MoE and partially deactivated)"
+  action_head_category: flow_matching
+  parameters: "3.618B dense pi0.5 -> 2.841B (40% LLM deactivated) / 2.619B (50%) (Paper Table I(b))"
+  key_innovation: "Function-preserving Dense2MoE conversion (contiguous channel slices of gate/up/down projections, zero-initialized router so MoE output equals dense output at init) followed by AdaDE: warmup, EMA-smoothed router-utilization-based layer-wise expert masking with Wanda-protected experts (top 25%), minimum active experts and update budget, auxiliary min-probability routing loss, then mask freeze and physical removal of inactive experts from the checkpoint"
+
+training:
+  base_model: "pi0.5 (main); OpenVLA (compression comparison, Table II)"
+  method: "Fine-tuning with task loss + auxiliary routing loss; three stages (warmup, dynamic deactivation, final freeze)"
+  steps: "40,000 (Table V); mask warmup 1,000, update interval 100 steps, freeze at 15,000"
+  optimizer: "AdamW, peak LR 5e-5, 10,000 LR warmup steps"
+  hardware: "NVIDIA A100 (simulation); RTX 4090 (real-robot inference)"
+
+benchmarks:
+  libero_3suite:
+    libero_goal: 92.2
+    libero_spatial: 97.4
+    libero_object: 97.6
+    avg_3suite: 95.7
+    source: "Paper Table I(a), pi0.5 + AdaDE (40%) row; 95.7 average stated in Abstract"
+    date_reported: "2026-09-18"
+    eval_condition: "LIBERO Goal/Spatial/Object only (no LIBERO-Long reported); ~40% LLM parameters deactivated; non-standard 3-suite subset, not ranked against 4-suite averages"
+
+  libero_3suite_variants:
+    adade_0pct_goal: 94.0
+    adade_0pct_spatial: 98.4
+    adade_0pct_object: 98.2
+    adade_50pct_goal: 91.6
+    adade_50pct_spatial: 96.8
+    adade_50pct_object: 97.4
+    tflops_0pct: 4.692
+    tflops_40pct: 3.279
+    tflops_50pct: 2.921
+    source: "Paper Table I(a)"
+    eval_condition: "0% = Dense2MoE conversion without deactivation; 50% = ~50% LLM parameters deactivated"
+
+  libero_3suite_baselines:
+    pi0_goal: 92.0
+    pi0_spatial: 98.0
+    pi0_object: 97.8
+    pi05_goal: 93.6
+    pi05_spatial: 98.6
+    pi05_object: 98.2
+    openvla_goal: 79.2
+    openvla_spatial: 84.7
+    openvla_object: 88.4
+    x_vla_goal: 91.2
+    x_vla_spatial: 98.2
+    x_vla_object: 98.0
+    efficientvla_goal: 91.6
+    efficientvla_spatial: 95.8
+    efficientvla_object: 97.8
+    source: "Paper Table I(a)"
+
+  robotwin_v2_50task_clean:
+    avg_50task: 42.0
+    avg_10task_subset: 78.0
+    tflops: 3.18
+    source: "Paper Table I(c) and Appendix Table VII, pi0.5 + AdaDE (40%) column"
+    date_reported: "2026-09-18"
+    eval_condition: "All 50 RoboTwin2.0 DemoClean tasks, single clean setting (no Easy/Hard pair); ~40% LLM parameters deactivated"
+
+  robotwin_v2_50task_clean_variants:
+    base_pi05_avg_50task: 46.68
+    adade_0pct_avg_50task: 46.44
+    adade_50pct_avg_50task: 38.06
+    base_pi05_avg_10task_subset: 81.3
+    adade_0pct_avg_10task_subset: 81.6
+    adade_50pct_avg_10task_subset: 74.9
+    tflops_base: 4.38
+    tflops_50pct: 2.90
+    source: "Paper Table I(c) and Appendix Table VII"
+
+  libero_spatial_openvla_compression:
+    adade_20pct: 84.3
+    adade_30pct: 82.0
+    openvla: 84.7
+    llm_pruner: 23.4
+    llm_pruner_sft: 84.0
+    flap: 0.2
+    flap_sft: 82.6
+    quant_8bit: 84.6
+    quant_4bit: 81.0
+    magnitude_pruning: 83.4
+    wanda: 84.0
+    adade_20pct_params_b: 6.2
+    adade_30pct_params_b: 5.6
+    source: "Paper Table II(a)"
+    eval_condition: "OpenVLA backbone, LIBERO-Spatial success rate"
+
+  peak_vram_libero_gb:
+    dense_pi05_b1: 7.12
+    adade_40pct_b1: 5.69
+    adade_50pct_b1: 5.25
+    dense_pi05_b16: 9.24
+    adade_40pct_b16: 7.32
+    adade_50pct_b16: 6.87
+    source: "Paper Table II(b)"
+
+  libero_spatial_ablation:
+    base: 98.6
+    fixed_schedule_removal_50pct: 88.0
+    adade_wo_wanda_50pct: 90.0
+    adade_50pct: 95.0
+    adade_update_every_50_steps: 68.0
+    adade_update_every_500_steps: 93.0
+    source: "Paper Table III (LIBERO-Spatial after 30k training steps)"
+
+  real_world:
+    fold_towel: 53.2
+    fold_towel_into_storage_box: 61.3
+    fold_clothes: 65.3
+    wipe_plate: 75.8
+    wipe_blackboard: 74.2
+    spell_word: 49.0
+    arrange_letters: 51.0
+    average: 61.4
+    source: "Paper Appendix Table VI, AdaDE (40%) SR column"
+    date_reported: "2026-09-18"
+    eval_condition: "7 long-horizon physical tasks (cloth folding, wiping, letter arrangement); robot platform not named in the paper"
+
+  real_world_baselines:
+    pi05_average: 63.2
+    pi05_time_s: 46.0
+    adade_time_s: 54.3
+    pi05_mem_gb: 9.16
+    adade_mem_gb: 7.48
+    source: "Paper Appendix Table VI, Average row"
+
+  latency:
+    dense_ms_per_forward: 212
+    adade_50pct_ms_per_forward: 236
+    source: "Paper Section VII (Limitations)"
+    eval_condition: "batch size 1; AdaDE does not yet reduce end-to-end latency"
+
+eval_conditions:
+  libero_3suite: "Goal/Spatial/Object only, no Long"
+  robotwin_v2_50task_clean: "50 DemoClean tasks, clean setting only"
+  real_world: "7 physical long-horizon tasks, per-task trial count not stated"
+
+tags: [compression, mixture-of-experts, dense-to-moe, expert-pruning, pi0.5, flow-matching, libero, robotwin, real-robot, efficiency]
