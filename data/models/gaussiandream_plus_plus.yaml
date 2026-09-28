@@ -1,0 +1,160 @@
+# Paper: GaussianDream++: Efficient 3D Gaussian World Modeling for Robotic Manipulation
+# arXiv: 2608.25659
+# Successor of GaussianDream (data/models/gaussiandream.yaml, arXiv 2605.20752)
+
+name: GaussianDream++
+full_name: "GaussianDream++: Efficient 3D Gaussian World Modeling for Robotic Manipulation"
+organization: "Tuojing Intelligence; UCAS; Institute of Automation, CAS; Tsinghua University; USTC; HKUST (Guangzhou); NTU; Beihang University; CMU; University of Hong Kong"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.25659
+code_url: https://github.com/TuojingAI/GaussianDream
+venue: arXiv
+open_source: true
+
+architecture:
+  backbone: "pi0.5 (PaliGemma VLM + flow-matching Action Expert)"
+  llm: "PaliGemma (pi0.5 backbone)"
+  action_head: "pi0.5 flow-matching Action Expert conditioned on the world-token-augmented PaliGemma prefix (no extra world-to-action projector)"
+  action_head_category: flow_matching
+  parameters: "pi0.5 backbone + 20 learnable world tokens (16 World State Tokens in a 4x4 layout + 4 World Prediction Tokens); total parameter count not stated"
+  key_innovation: "Policy-native successor to GaussianDream: replaces the dense 1024-token VGGT/TGE-built Gaussian prefix with 16 World State Tokens and 4 World Prediction Tokens inserted directly into the PaliGemma prefix. A training-only World Representation Head decodes them into a renderable Current World (metric-depth unprojection, geometry/appearance decomposition with stop-gradient) and a coupled Future Prediction over the same Gaussian primitives (residual center displacement with static-dynamic gating and static-consistency loss). Head, renderer and VGGT/TGE path are removed at deployment; only 20 extra tokens remain (330 ms vs 286 ms for pi0.5 per chunk)."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 99.6
+    libero_goal: 99.0
+    libero_long: 96.6
+    libero_avg: 98.6
+    libero_plus_camera: 80.1
+    libero_plus_robot: 73.0
+    libero_plus_language: 87.4
+    libero_plus_light: 99.1
+    libero_plus_background: 98.8
+    libero_plus_noise: 94.2
+    libero_plus_layout: 90.0
+    libero_plus_total: 87.8
+    source: "Paper Table 1(a) and 1(b), GaussianDream++ (Ours) rows"
+    eval_condition: "fine-tuned on standard LIBERO; LIBERO-Plus evaluated zero-shot (official task-level Overall aggregation)"
+    date_reported: "2026-08-26"
+
+  libero_pi05_reproduced_baseline:
+    libero_spatial: 98.8
+    libero_object: 98.2
+    libero_goal: 98.0
+    libero_long: 92.4
+    libero_avg: 96.9
+    libero_plus_camera: 73.2
+    libero_plus_robot: 77.9
+    libero_plus_language: 84.3
+    libero_plus_light: 96.3
+    libero_plus_background: 95.5
+    libero_plus_noise: 89.9
+    libero_plus_layout: 87.7
+    libero_plus_total: 85.5
+    source: "Paper Table 1(a)/(b), pi0.5 reproduced row (matched GaussianDream-family protocol)"
+    eval_condition: "baseline: reproduced pi0.5 under the same protocol"
+
+  libero_gaussiandream_baseline:
+    libero_spatial: 99.0
+    libero_object: 99.6
+    libero_goal: 99.0
+    libero_long: 96.0
+    libero_avg: 98.4
+    libero_plus_camera: 77.3
+    libero_plus_robot: 72.1
+    libero_plus_language: 86.9
+    libero_plus_light: 98.9
+    libero_plus_background: 98.5
+    libero_plus_noise: 93.6
+    libero_plus_layout: 88.4
+    libero_plus_total: 87.0
+    source: "Paper Table 1(a)/(b), GaussianDream row (matched GaussianDream-family protocol)"
+    eval_condition: "baseline: GaussianDream predecessor"
+
+  libero_ablation_tokens_no_gaussian_supervision:
+    libero_avg: 97.5
+    libero_plus_total: 86.3
+    source: "Paper Table 4, World Tokens w/o Gaussian Supervision"
+    eval_condition: "ablation: world tokens added, no Gaussian supervision"
+
+  libero_ablation_current_world_only:
+    libero_avg: 97.9
+    libero_plus_total: 86.9
+    source: "Paper Table 4, Current World only"
+    eval_condition: "ablation: only Current World reconstruction supervision"
+
+  libero_ablation_uncoupled_current_future:
+    libero_avg: 98.1
+    libero_plus_total: 87.2
+    source: "Paper Table 4, Current + Future, uncoupled"
+    eval_condition: "ablation: current and future supervision without shared primitives"
+
+  libero_ablation_no_static_consistency:
+    libero_avg: 98.4
+    libero_plus_total: 87.5
+    source: "Paper Table 4, Coupled w/o Static Consistency"
+    eval_condition: "ablation: coupled prediction without static-consistency loss"
+
+  libero_ablation_no_rgb_rendering:
+    libero_avg: 98.4
+    libero_plus_total: 87.4
+    source: "Paper Table 4, Full w/o RGB Rendering"
+    eval_condition: "ablation: remove RGB rendering loss"
+
+  libero_ablation_no_metric_depth:
+    libero_avg: 98.0
+    libero_plus_camera: 76.5
+    libero_plus_layout: 87.7
+    libero_plus_total: 86.9
+    source: "Paper Table 4, Full w/o Metric Depth"
+    eval_condition: "ablation: remove metric depth loss"
+
+  libero_ablation_no_alpha:
+    libero_avg: 98.3
+    libero_plus_total: 87.3
+    source: "Paper Table 4, Full w/o Alpha Supervision"
+    eval_condition: "ablation: remove alpha supervision"
+
+  libero_ablation_no_metric_3d_flow:
+    libero_avg: 98.1
+    libero_plus_total: 87.2
+    source: "Paper Table 4, Full w/o Metric 3D Flow"
+    eval_condition: "ablation: remove metric 3D flow loss"
+
+  real_world:
+    bowl_proximity_overall: 46.7
+    eggplant_to_pink_plate_overall: 58.3
+    standard_pooled: 62.5
+    layout_pooled: 52.5
+    camera_pooled: 42.5
+    average: 52.5
+    source: "Paper Table 2, GaussianDream++ rows"
+    eval_condition: "dual-arm robot, 2 tasks x 3 conditions (Standard/Layout/Camera), 20 trials each (120 total)"
+
+  real_world_pi05_baseline:
+    bowl_proximity_overall: 25.0
+    eggplant_to_pink_plate_overall: 33.3
+    standard_pooled: 40.0
+    layout_pooled: 25.0
+    camera_pooled: 22.5
+    average: 29.2
+    source: "Paper Table 2, pi0.5 reproduced rows"
+    eval_condition: "baseline: reproduced pi0.5, same 120 trials protocol"
+
+  inference_latency:
+    gaussiandream_pp_ms_per_chunk: 330
+    pi05_reproduced_ms_per_chunk: 286
+    gaussiandream_reported_ms_per_chunk: 531
+    source: "Paper Table 3"
+    eval_condition: "batch size 1, one action chunk; GaussianDream value is reported reference from its original paper (different environment)"
+
+training:
+  base_model: "pi0.5"
+  method: "Joint optimization L = L_act (pi0.5 flow matching) + lambda_cur * L_cur (RGB/depth/alpha/reg rendering of Current World) + lambda_fut * L_fut (RGB/depth/metric 3D flow/static consistency over future horizons). Future observations used only as targets."
+
+eval_conditions:
+  libero: "fine-tuned on LIBERO (4 suites); LIBERO-Plus zero-shot, 7 perturbation dimensions"
+  real_world: "dual-arm platform, Bowl-Proximity and Eggplant-to-Pink-Plate under Standard/Layout/Camera shifts, 20 trials each"
+
+tags: [3d-gaussian, world-model, flow-matching, pi0_5, libero, libero-plus, real-world, training-only-auxiliary, successor]

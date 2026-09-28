@@ -1,0 +1,120 @@
+# Paper: StreamPI: Streaming Multimodal Temporal Modeling for Vision-Language-Action Models
+# arXiv: 2608.26067
+
+name: StreamPI
+full_name: "StreamPI: Streaming Multimodal Temporal Modeling for Vision-Language-Action Models"
+organization: "The University of Hong Kong / ACE Robotics"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.26067
+code_url: https://happinesslz.github.io/projects/StreamPI
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (PaliGemma VLM + action expert), all pretrained weights inherited; no new parameters"
+  action_head: "pi0.5 flow-matching action expert, conditioned on streaming multi-frame context via KV cache"
+  action_head_category: flow_matching
+  parameters: "Same as pi0.5 (zero additional parameters)"
+  key_innovation: "Parameter-free temporal extension of pi0.5 by restructuring the attention mask: each (multi-view observation, language instruction) pair is an atomic temporal unit with bidirectional intra-pair attention and causal inter-pair attention, so the instruction is re-anchored at every frame and past units are reused from a KV cache at inference. Random-interval streaming training samples inter-frame gaps delta ~ U[3,7] plus temporal masking of the earliest k frames, bridging synchronous training and asynchronous deployment. Relies on LLM length extrapolation; supports T=1/3/5 inference from one model. 5-frame streaming adds 9.2 ms over single-frame (103.6 vs 94.4 ms on RTX 4090)."
+
+training:
+  base_model: "pi0.5"
+  method: "Full fine-tuning of pi0.5 with streaming frames T=3/5 and random intervals; same optimizer and LR schedule as pi0.5"
+  data: "LIBERO (batch 256, 30k iterations); 100 teleoperated demos per real task at 30 FPS (batch 128, 50k iterations)"
+  hardware: "8x NVIDIA H100"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.8
+    libero_object: 99.8
+    libero_goal: 99.6
+    libero_long: 95.0
+    libero_avg: 98.3
+    source: "Paper Table 1, StreamPI (T=5) row"
+    date_reported: "2026-08-26"
+    eval_condition: "fully fine-tuned from pi0.5, T=5 streaming frames, inference interval delta=5, 50 trials per task"
+
+  libero_t3:
+    libero_spatial: 98.6
+    libero_object: 98.6
+    libero_goal: 98.6
+    libero_long: 93.8
+    avg: 97.5
+    source: "Paper Table 1, StreamPI (T=3) row"
+    eval_condition: "variant: T=3 streaming frames"
+
+  libero_pi05_baseline:
+    libero_spatial: 98.8
+    libero_object: 98.2
+    libero_goal: 96.8
+    libero_long: 92.4
+    avg: 96.9
+    source: "Paper Table 1, pi0.5 row"
+    eval_condition: "baseline: single-frame pi0.5 (reported number)"
+
+  libero_attention_ablation:
+    t1_causal_intra: 95.8
+    t1_bidirectional_intra: 96.5
+    t3_causal_intra: 95.3
+    t3_bidirectional_intra: 97.5
+    t5_causal_intra: 95.5
+    t5_bidirectional_intra: 98.3
+    source: "Paper Table 3 (Avg. Success Rate column)"
+    eval_condition: "ablation: intra-pair attention direction; inter-pair always causal"
+
+  libero_interval_ablation:
+    fixed_delta1_t3: 96.4
+    fixed_delta1_t5: 97.0
+    random_delta_t3: 97.5
+    random_delta_t5: 98.3
+    source: "Paper Table 4 (Avg. Success Rate column)"
+    eval_condition: "ablation: fixed interval delta=1 vs random delta ~ U[3,7] training"
+
+  libero_cross_stream_ablation:
+    train_t5_test_t1: 97.1
+    train_t5_test_t3: 97.4
+    train_t5_test_t5: 98.3
+    train_t3_test_t1: 97.0
+    source: "Paper Table 5 (Avg. Success Rate column)"
+    eval_condition: "ablation: evaluating with fewer streaming frames than trained"
+
+  calvin_split_unspecified:
+    task_1: 96.9
+    task_2: 93.6
+    task_3: 90.7
+    task_4: 88.5
+    task_5: 85.0
+    avg_len: 4.547
+    source: "Paper Table 2, StreamPI (T=5) row"
+    date_reported: "2026-08-26"
+    eval_condition: "CALVIN, split (ABC->D vs ABCD->D) not stated in the paper; kept out of the canonical calvin block"
+
+  calvin_baselines:
+    pi05_avg_len: 4.313
+    memoryvla_avg_len: 4.090
+    source: "Paper Table 2"
+    eval_condition: "baselines as reported in the same table"
+
+  real_world:
+    shell_game: 80.0
+    rolling_object_grasping: 63.3
+    pen_insertion_narrow_bottle: 66.7
+    cup_insertion_cup_sleeve: 92.0
+    source: "Paper Appendix Tables 7-10, StreamPI rows"
+    date_reported: "2026-08-26"
+    eval_condition: "AgileX PiperX 6-DoF arms (Aloha-style), 1 front + 2 wrist RealSense cameras, 100 demos/task; 15 / 30 / 30 / 25 trials; inference interval delta ~ U[3,7]"
+
+  real_world_pi05_baseline:
+    shell_game: 46.7
+    rolling_object_grasping: 26.7
+    pen_insertion_narrow_bottle: 40.0
+    cup_insertion_cup_sleeve: 60.0
+    source: "Paper Appendix Tables 7-10, pi0.5 rows"
+    eval_condition: "baseline: single-frame pi0.5"
+
+eval_conditions:
+  libero: "Standard LIBERO 4 suites, 50 trials per task, delta=5 at inference"
+  calvin: "Split not specified in paper; avg sequence length 4.547 vs pi0.5 4.313"
+  real_world: "2 memory-dependent + 2 precise-perception tasks on AgileX PiperX"
+
+tags: [pi0.5, temporal-modeling, streaming, kv-cache, memory, multi-frame, instruction-anchored, parameter-free, flow_matching, libero, calvin, real-robot, agilex-piper]

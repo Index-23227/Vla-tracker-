@@ -1,0 +1,154 @@
+# Paper: FlashVLA: Streaming Action Decoding for Fast and Asynchronous VLA Inference
+# arXiv: 2608.27384
+# NOTE: distinct from Realtime-VLA-FLASH (arXiv 2605.13778, speculative inference) already in data/models.
+
+name: FlashVLA
+full_name: "FlashVLA: Streaming Action Decoding for Fast and Asynchronous VLA Inference"
+organization: "UC San Diego; MIT"
+date: "2026-08-27"
+paper_url: https://arxiv.org/abs/2608.27384
+code_url: https://github.com/z-lab/flashvla
+venue: arXiv
+open_source: true
+
+architecture:
+  backbone: "pi0.5 (PaliGemma VLM + flow-matching action expert); also applied to SmolVLA and LingBot-VLA (4B)"
+  llm: "PaliGemma (pi0.5 backbone)"
+  action_head: "streaming flow-matching action expert: buffer of N action chunks at staggered noise levels denoised jointly under chunk-wise causal attention (noisier chunks attend to cleaner ones); FiLM multi-level timestep conditioning; one executable chunk emitted per forward pass"
+  action_head_category: flow_matching
+  parameters: "pi0.5 weights (no extra parameters stated for pi0.5; lightweight time-MLP + FiLM added only for SmolVLA)"
+  key_innovation: "Transfers streaming chunk-wise diffusion (diffusion forcing style) from long-video generation to VLA action decoding. Each forward pass advances every chunk in the buffer by one denoising step, amortizing the 10-step flow-matching loop across time (up to 20x lower per-step action-decoding latency), and chunk-wise causal attention gives future chunks implicit conditioning on the trajectory in flight, recovering asynchronous continuity without a future-state predictor. Pretrained VLAs are adapted by multi-buffer joint fine-tuning that packs all N cold-start buffer configurations into one sample with isolating attention masks."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.6
+    libero_object: 99.0
+    libero_goal: 97.8
+    libero_long: 96.2
+    libero_avg: 97.9
+    source: "Paper Table 3, pi0.5 + FlashVLA row (synchronous)"
+    eval_condition: "synchronous (d=0), chunk size 10, buffer length 4, averaged over five runs"
+    date_reported: "2026-08-27"
+
+  libero_async_d1:
+    libero_spatial: 98.8
+    libero_object: 99.6
+    libero_goal: 97.6
+    libero_long: 95.4
+    libero_avg: 97.8
+    time_per_step_ms: 22.1
+    speedup_vs_pi05: 2.43
+    source: "Paper Table 1, + FlashVLA (d=1) row"
+    eval_condition: "one-step asynchronous delay, RTX 4090, Time/Step includes rendering"
+
+  libero_pi05_baseline:
+    libero_spatial: 98.8
+    libero_object: 98.2
+    libero_goal: 98.0
+    libero_long: 92.4
+    libero_avg: 96.9
+    time_per_step_ms: 53.8
+    source: "Paper Table 1 / Table 3, pi0.5 row"
+    eval_condition: "baseline: synchronous pi0.5 fine-tuned with same budget"
+
+  libero_async_vlash_d1_baseline:
+    libero_avg: 97.2
+    time_per_step_ms: 46.8
+    source: "Paper Table 1, + VLASH (d=1) row"
+    eval_condition: "baseline: VLASH on pi0.5, one-step delay"
+
+  libero_async_streamingvla_d1_baseline:
+    libero_avg: 94.9
+    time_per_step_ms: 31.6
+    source: "Paper Table 1, + StreamingVLA (d=1) row"
+    eval_condition: "baseline: StreamingVLA on pi0.5, one-step delay"
+
+  robotwin_v2:
+    robotwin_v2_clean: 90.8
+    robotwin_v2_randomized: 90.2
+    robotwin_v2_avg: 90.5
+    source: "Paper Table 3, pi0.5 + FlashVLA row (RoboTwin 2.0 columns)"
+    eval_condition: "50-task multitask, one model trained on clean+randomized data, synchronous (d=0), chunk 20, buffer 4, 16-action execution horizon"
+    date_reported: "2026-08-27"
+
+  robotwin_v2_pi05_baseline:
+    robotwin_v2_clean: 86.1
+    robotwin_v2_randomized: 85.8
+    robotwin_v2_avg: 86.0
+    source: "Paper Table 3, pi0.5 row"
+    eval_condition: "baseline: synchronous pi0.5, same 50-task multitask protocol"
+
+  robotwin_v2_horizon_groups:
+    short_horizon_avg: 93.2
+    medium_horizon_avg: 85.4
+    long_horizon_avg: 89.6
+    source: "Paper Table 4, + FlashVLA row"
+    eval_condition: "synchronous 50-task RoboTwin 2.0 grouped by task horizon (LingBot-VLA grouping), average of clean and random"
+
+  robotwin_v2_horizon_groups_pi05_baseline:
+    short_horizon_avg: 93.9
+    medium_horizon_avg: 81.1
+    long_horizon_avg: 53.0
+    source: "Paper Table 4, pi0.5 row"
+    eval_condition: "baseline: pi0.5, same grouping"
+
+  robotwin_v2_async_d1:
+    robotwin_v2_avg: 90.6
+    time_per_step_ms: 43.8
+    source: "Paper Section 4.2 text"
+    eval_condition: "one-step asynchronous delay, 50-task multitask, average of clean and randomized"
+
+  inference_latency:
+    rtx4090_2view_ms: 26.7
+    rtx4090_3view_ms: 36.8
+    rtx5090_2view_ms: 20.3
+    rtx5090_3view_ms: 27.1
+    pi05_rtx4090_2view_ms: 45.8
+    pi05_rtx5090_2view_ms: 37.0
+    realtime_vla_rtx4090_2view_ms: 29.2
+    source: "Paper Table 2"
+    eval_condition: "per-policy-invocation latency, 100 samples after 10 warm-up, CUDA Graphs + kernel fusion for all methods"
+
+  cross_arch_smolvla_libero:
+    avg_success_sync: 80.1
+    avg_success_async_d1: 79.5
+    smolvla_baseline_avg_success: 80.1
+    inference_latency_ms: 10.1
+    smolvla_baseline_inference_latency_ms: 19.7
+    source: "Paper Table 5, LIBERO block"
+    eval_condition: "SmolVLA + FlashVLA fine-tuned from lerobot/smolvla_base, chunk 10, buffer 5, 4 LIBERO suites"
+
+  cross_arch_lingbot_robotwin_v2:
+    avg_success_sync: 88.6
+    avg_success_async_d1: 89.3
+    lingbot_baseline_avg_success: 85.2
+    inference_latency_ms: 25.1
+    lingbot_baseline_inference_latency_ms: 70.6
+    source: "Paper Table 5, RoboTwin 2.0 block"
+    eval_condition: "LingBot-VLA (4B) + FlashVLA, 50-task RoboTwin 2.0, average of clean and randomized"
+
+  real_world:
+    average_task_score: 84.4
+    source: "Paper Section 5 text"
+    eval_condition: "7-DoF Franka, RTX A4000, 30 Hz, two-step async delay; 3 tasks (pick-and-place, whiteboard wiping, table cleaning), 15 trials each, 3-point rubric"
+
+  real_world_baselines:
+    pi05_sync_average_task_score: 80.0
+    pi05_rtc_average_task_score: 80.0
+    pi05_naive_async_average_task_score: 75.6
+    source: "Paper Section 5 text"
+    eval_condition: "baselines: pi0.5 synchronous, pi0.5 with RTC, pi0.5 naive async, same system optimizations"
+
+training:
+  base_model: "pi0.5 (also SmolVLA, LingBot-VLA)"
+  method: "Multi-buffer joint fine-tuning: all N buffer configurations for one observation packed into a single sample with attention masks isolating buffers; standard flow-matching loss summed over configurations"
+  hardware: "8x NVIDIA H200"
+  libero_schedule: "LR 1e-4 cosine, 1K warm-up, 50K steps, per-GPU batch 32"
+  robotwin_schedule: "LR 5e-5 cosine, global batch 256, 100K steps"
+
+eval_conditions:
+  libero: "fine-tuned, 4 suites, LeRobot evaluation script, replan every 5 actions, averaged over 5 runs"
+  robotwin_v2: "50-task multitask, clean and randomized, 16-action execution horizon"
+  real_world: "Franka, 3 tasks x 15 trials, 3-point rubric"
+
+tags: [flow-matching, streaming-decoding, asynchronous-inference, efficient-inference, diffusion-forcing, pi0_5, libero, robotwin, real-world, fine-tuned]

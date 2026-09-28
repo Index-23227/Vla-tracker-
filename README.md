@@ -8,18 +8,18 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-[![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-465-purple?style=flat-square)](data/models/)
 =======
-[![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-465-purple?style=flat-square)](data/models/)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-465-purple?style=flat-square)](data/models/)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-419-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-465-purple?style=flat-square)](data/models/)
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
-[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-452-orange?style=flat-square)](data/ai_reviews/)
+[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-465-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
@@ -27,15 +27,15 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-**452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
+**465 VLA models** · **8 benchmarks** · **465 AI paper reviews** · **Auto-updated from arXiv**
 =======
-**452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
+**465 VLA models** · **8 benchmarks** · **465 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
+**465 VLA models** · **8 benchmarks** · **465 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**419 VLA models** · **8 benchmarks** · **414 AI paper reviews** · **Auto-updated from arXiv**
+**465 VLA models** · **8 benchmarks** · **465 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
@@ -56,7 +56,7 @@ VLA-Tracker solves this by:
 | New paper discovery | Manual updates | **Auto-scanned from arXiv twice weekly** |
 | Data validation | None | **CI checks on every PR** |
 | Interactive exploration | None | **Full React dashboard with filters** |
-| Paper reviews | None | **452 AI-generated seminar-style reviews** |
+| Paper reviews | None | **465 AI-generated seminar-style reviews** |
 | Machine-readable | None | **JSON API + llms.txt for AI agents** |
 
 ---
@@ -70,18 +70,18 @@ VLA-Tracker solves this by:
 | 1 | **LaST-R1** | **99.8** | Apr 2026 | — | AR latent CoT + parallel discrete action tokens |
 | 2 | **dVLA-RL** | **99.65** | Jun 2026 | arXiv | Discrete-diffusion + RL over denoising trajectories |
 | 3 | **QuoVLA** | **99.6** | May 2026 | — | Flow matching + 8-bit quantized prefix (pi0.5 base) |
-| 4 | **Qwen-RobotManip** | **99.2** | Jun 2026 | arXiv | Qwen3.5-4B + flow-matching DiT (RoboChallenge #1) |
-| 5 | **SAM3D-VLA** | **99.1** | Jul 2026 | arXiv | SAM-3D promptable 3D grounding + flow matching |
-| 6 | **PriorVLA** | **99.05** | May 2026 | — | Dual-expert flow matching (pi0.5 backbone) |
-| 7 | **DLAM** | **99.03** | Jul 2026 | arXiv | Discrete latent action modeling |
-| 8 | PLD | 99.0 | Oct 2025 | ICLR 2026 | Residual RL |
-| 9 | **StructRL** | **98.95** | Aug 2026 | arXiv | Structured-exploration RL post-training (GR00T N1.5 base) |
-| 10 | **MVUCF** | **98.92** | Aug 2026 | arXiv | Multi-view uncertainty-calibrated fusion |
-| 11 | **G0.5** | **98.9** | Aug 2026 | arXiv | Single autoregressive stream (Qwen3.5-2B, Galaxea) |
-| 12 | **LIRA** | **98.88** | Aug 2026 | arXiv | Local cross-layer routing, 0.5B at 186 Hz |
-| 13 | **MPCoT** | **98.85** | Jun 2026 | arXiv | OFT parallel-decoding + multi-path latent CoT |
+| 4 | **V-Link** | **99.33** | Aug 2026 | arXiv | GR00T N1.6 + spatial/semantic query tokens recovering DiT visual features |
+| 5 | **Qwen-RobotManip** | **99.2** | Jun 2026 | arXiv | Qwen3.5-4B + flow-matching DiT (RoboChallenge #1) |
+| 6 | **SAM3D-VLA** | **99.1** | Jul 2026 | arXiv | SAM-3D promptable 3D grounding + flow matching |
+| 7 | **PriorVLA** | **99.05** | May 2026 | — | Dual-expert flow matching (pi0.5 backbone) |
+| 8 | **DLAM** | **99.03** | Jul 2026 | arXiv | Discrete latent action modeling |
+| 9 | PLD | 99.0 | Oct 2025 | ICLR 2026 | Residual RL |
+| 10 | **StructRL** | **98.95** | Aug 2026 | arXiv | Structured-exploration RL post-training (GR00T N1.5 base) |
+| 11 | **MVUCF** | **98.92** | Aug 2026 | arXiv | Multi-view uncertainty-calibrated fusion |
+| 12 | **G0.5** | **98.9** | Aug 2026 | arXiv | Single autoregressive stream (Qwen3.5-2B, Galaxea) |
+| 13 | **LIRA** | **98.88** | Aug 2026 | arXiv | Local cross-layer routing, 0.5B at 186 Hz |
 
-> Full leaderboard with 211 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 219 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
@@ -98,7 +98,7 @@ VLA-Tracker solves this by:
 
 ## Paper Reviews
 
-VLA-Tracker includes **452 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
+VLA-Tracker includes **465 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
 
 1. One-line summary
 2. Background & motivation
@@ -110,7 +110,7 @@ VLA-Tracker includes **452 AI-generated seminar-style paper reviews** for every 
 8. Overall assessment with ratings
 9. Expected tough questions for seminars
 
-**452 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
+**465 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
 
 Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-tracker-/) · [Markdown files](data/ai_reviews/)
 
@@ -123,20 +123,20 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | Format | URL | Description |
 |--------|-----|-------------|
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
-| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (9600+ lines) |
+| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (10000+ lines) |
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-| **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (465 files) |
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (465 files) |
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (465 files) |
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (419 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (465 files) |
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 
 ### Quick Start (Python)
@@ -193,14 +193,14 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 | Benchmark | Tasks | Models | Focus | Venue |
 |-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 211 | Manipulation generalization | NeurIPS 2023 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 219 | Manipulation generalization | NeurIPS 2023 |
 | [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 48 | Long-horizon, language | RA-L 2022 |
 | [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 56 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 71 | Bimanual manipulation | CVPR 2025 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 75 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 11 | Diverse manipulation | RA-L 2020 |
-| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 32 | Home robot tasks | RSS 2024 |
-| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | 9 | Multi-task dexterity | CoRL 2020 |
-| [Real-World](data/benchmarks/real_world.yaml) | Per-paper | 111 | Physical robot evaluations | — |
+| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 33 | Home robot tasks | RSS 2024 |
+| [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | 10 | Multi-task dexterity | CoRL 2020 |
+| [Real-World](data/benchmarks/real_world.yaml) | Per-paper | 122 | Physical robot evaluations | — |
 
 ---
 
@@ -221,18 +221,18 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-│   ├── models/              # 452 model YAML files (source of truth)
+│   ├── models/              # 465 model YAML files (source of truth)
 =======
-│   ├── models/              # 452 model YAML files (source of truth)
+│   ├── models/              # 465 model YAML files (source of truth)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 452 model YAML files (source of truth)
+│   ├── models/              # 465 model YAML files (source of truth)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 419 model YAML files (source of truth)
+│   ├── models/              # 465 model YAML files (source of truth)
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 │   ├── benchmarks/          # 8 benchmark definitions
-│   ├── ai_reviews/          # 452 AI-generated paper reviews (markdown)
+│   ├── ai_reviews/          # 465 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── paper_reviews.json   # Venue peer-review data (ICLR, NeurIPS, CoLM)
 ├── scripts/
@@ -270,7 +270,7 @@ We also welcome:
 
 - Benchmark numbers are from papers — evaluation conditions vary (fine-tuned vs. zero-shot)
 - Not all models report on all benchmarks (fair comparison is hard)
-- AI reviews are generated by Claude and may contain inaccuracies (452/452 are PDF-verified)
+- AI reviews are generated by Claude and may contain inaccuracies (465/465 are PDF-verified)
 - Real-world performance ≠ benchmark performance
 
 ---

@@ -1,0 +1,155 @@
+# Paper: MA-VLA: Multi-Arm Vision-Language-Action Model for Collaboration and Compositional Generalization
+# arXiv: 2608.25864
+
+name: MA-VLA
+full_name: "MA-VLA: Multi-Arm Vision-Language-Action Model for Collaboration and Compositional Generalization"
+organization: "Dalian University of Technology / University of Oxford / Sun Yat-sen University / Shanghai Jiao Tong University / USTC / CUHK-Shenzhen / Beihang University"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.25864
+code_url: https://github.com/zhangzaibin/future-robots
+venue: arXiv
+open_source: true
+model_type: multi-arm-vla
+
+architecture:
+  backbone: "pi0 (initialized from official pi0_base checkpoint) as the VLA executor; GPT-4.1 as a frozen (not fine-tuned) VLM planner that emits per-arm atomic prompts"
+  action_head: "pi0-style flow-matching action expert jointly predicting all arms' actions in one forward pass, plus a multi-head projection layer that splits the shared latent into arm-specific action heads"
+  action_head_category: flow_matching
+  parameters: "pi0 backbone (size not restated in paper)"
+  key_innovation: "Hierarchical multi-arm VLA: a GPT-4.1 planner decomposes a high-level instruction into stage-wise per-arm atomic prompts drawn from a finite template set; the fine-tuned pi0 executor receives the concatenated 'Arm0: p0, Arm1: p1, ...' string plus global/wrist views and all arm states. Two training-only augmentations target multi-arm compositional generalization: Arm Shuffle randomly permutes (state, wrist view, atomic prompt, action) tuples across arms (p_shuffle up to 1.0) to break arm-identity binding, and View Dropout zero-masks camera views (p_drop 0.2-0.4)."
+
+training:
+  base_model: "pi0 (pi0_base)"
+  method: "Behavioral cloning (flow matching) fine-tuning of pi0 on per-arm atomic-prompt-labelled demonstrations; atomic labels produced by a rule-based parser over state predicates; 'Regularized' configuration adds Arm Shuffle + View Dropout"
+  data: "150 expert demos per simulation task (RoboFactory, RoboTwin 2.0); 50 LeRobot teleoperated demos per SO101 real task"
+  steps: "RoboFactory 10k steps (2-arm) / 15k steps (3-4 arm); RoboTwin 2.0 Hard 30k steps; SO101 15k steps; batch size 32, horizon 50"
+  hardware: "2x NVIDIA A800"
+
+benchmarks:
+  robotwin_v2:
+    place_dual_shoes: 22.0
+    handover_block: 46.0
+    stack_bowls_two: 63.0
+    grab_roller: 99.0
+    place_object_cabinet: 71.0
+    place_bread_skillet: 30.0
+    stamp_seal: 12.0
+    robotwin_v2_avg: 49.0
+    source: "Paper Table 2, MA-VLA row (RoboTwin 2.0 Hard, 7 dual-arm tasks)"
+    date_reported: "2026-08-26"
+    eval_condition: "RoboTwin 2.0 Hard setting, 7-task SUBSET only (not the full 50-task suite); 150 demos/task, 100 rollouts per task"
+
+  robotwin_v2_pi0_baseline:
+    place_dual_shoes: 14.0
+    handover_block: 27.0
+    stack_bowls_two: 59.0
+    grab_roller: 98.0
+    place_object_cabinet: 59.0
+    place_bread_skillet: 28.0
+    stamp_seal: 3.0
+    avg: 41.1
+    source: "Paper Table 2, Pi0 row"
+    eval_condition: "baseline: pi0 retrained on the same demos with matched budget"
+
+  robofactory_two_arm:
+    lift_barrier: 98.0
+    place_food: 59.0
+    two_arms_stack_cube: 86.0
+    pass_shoe: 91.0
+    avg: 83.5
+    source: "Paper Table 1 (top), MA-VLA row"
+    eval_condition: "RoboFactory in-domain, two-arm tasks, 100 rollouts per configuration"
+
+  robofactory_three_four_arm:
+    three_arms_stack_cube: 58.0
+    camera_alignment: 96.0
+    long_pipeline_delivery: 97.0
+    take_photo: 82.0
+    avg: 83.3
+    source: "Paper Table 1 (bottom), MA-VLA row"
+    eval_condition: "RoboFactory in-domain, three-arm (Stack3, Align) and four-arm (Deliver, Photo) tasks"
+
+  robofactory_two_arm_pi0_baseline:
+    lift_barrier: 97.0
+    place_food: 58.0
+    two_arms_stack_cube: 82.0
+    pass_shoe: 84.0
+    avg: 80.3
+    source: "Paper Table 1 (top), Pi0 row"
+    eval_condition: "baseline: pi0"
+
+  robofactory_three_four_arm_pi0_baseline:
+    three_arms_stack_cube: 48.0
+    camera_alignment: 94.0
+    long_pipeline_delivery: 82.0
+    take_photo: 82.0
+    avg: 76.5
+    source: "Paper Table 1 (bottom), Pi0 row"
+    eval_condition: "baseline: pi0"
+
+  compositional_ood:
+    stack_cube_gbr: 28.0
+    stack_cube_rgb: 9.0
+    stack_cube_brg: 9.0
+    pass_two_shoes: 9.0
+    stack_two_bowls: 10.0
+    avg: 13.0
+    source: "Paper Table 3, MA-VLA row"
+    eval_condition: "unseen collaboration patterns (RoboFactory + RoboTwin 2.0 Hard); Regularized config (Arm Shuffle + View Dropout); DP, Pi0-FAST and Pi0 all score 0.0 on every column"
+
+  robofactory_stack3_component_ablation:
+    atom_only_ood: 0.0
+    atom_only_id: 58.0
+    atom_shuffle_ood: 7.3
+    atom_shuffle_id: 52.0
+    full_ood: 15.3
+    full_id: 53.0
+    no_component_ood: 0.0
+    no_component_id: 48.0
+    source: "Paper Table 5 (Three Robots Stack Cube; OOD averaged over 3 unseen orders)"
+    eval_condition: "ablation: atomic prompts / Arm Shuffle / View Dropout"
+
+  robofactory_stack3_separate_model_ablation:
+    separate_pi0_ood: 0.0
+    separate_pi0_id: 61.0
+    separate_pi0_avg: 30.5
+    ma_vla_ood: 15.3
+    ma_vla_id: 53.0
+    ma_vla_avg: 34.2
+    source: "Paper Table 6"
+    eval_condition: "ablation: three independent per-arm pi0 models vs one unified MA-VLA"
+
+  real_world:
+    stack_bowls_id_successes: 12
+    place_cubes_id_successes: 15
+    pass_toys_id_successes: 6
+    stack_cubes_id_successes: 8
+    trials_per_task: 20
+    source: "Paper Table 4, MA-VLA ID columns (successes out of 20)"
+    eval_condition: "dual-arm SO101 (12-DoF), in-domain, 50 demos/task, 20 episodes/task"
+
+  real_world_ood:
+    stack_bowls_ood_successes: 10
+    place_cubes_ood_successes: 8
+    pass_toys_ood_successes: 2
+    stack_cubes_ood_successes: 2
+    trials_per_task: 20
+    source: "Paper Table 4, MA-VLA OOD columns (successes out of 20)"
+    eval_condition: "dual-arm SO101, compositional OOD (reversed stacking/placement, alternative passing order)"
+
+  real_world_pi0_baseline:
+    stack_bowls_id_successes: 9
+    place_cubes_id_successes: 12
+    pass_toys_id_successes: 3
+    stack_cubes_id_successes: 5
+    all_ood_successes: 0
+    trials_per_task: 20
+    source: "Paper Table 4, Pi0 row"
+    eval_condition: "baseline: pi0; 0/20 on all four OOD tasks"
+
+eval_conditions:
+  robotwin_v2: "RoboTwin 2.0 Hard, 7-task subset, 100 rollouts/task; average not comparable to full-suite RoboTwin 2.0 averages"
+  robofactory: "RoboFactory 2-4 arm cooperative tasks, 150 demos/task, 100 rollouts, randomized object pose / viewpoint / environment perturbations"
+  real_world: "Dual SO101 (6 DoF per arm), 1 global + 2 wrist cameras at 30 Hz, 20 episodes/task"
+
+tags: [multi-arm, bimanual, compositional-generalization, atomic-actions, hierarchical, pi0, flow_matching, arm-shuffle, view-dropout, robofactory, robotwin, so101, real-robot, gpt-4.1-planner]
