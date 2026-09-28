@@ -7,6 +7,7 @@
 [![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Visit-blue?style=for-the-badge)](https://hyeongjinkim.github.io/Vla-tracker-/)
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 [![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
 =======
 [![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
@@ -14,6 +15,9 @@
 =======
 [![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
+=======
+[![Models](https://img.shields.io/badge/Models-419-purple?style=flat-square)](data/models/)
+>>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
 [![AI Reviews](https://img.shields.io/badge/Paper_Reviews-452-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
@@ -22,6 +26,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 **452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
 =======
 **452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
@@ -29,6 +34,9 @@
 =======
 **452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
+=======
+**419 VLA models** · **8 benchmarks** · **414 AI paper reviews** · **Auto-updated from arXiv**
+>>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
 
@@ -119,6 +127,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 | **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
 =======
 | **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
@@ -126,6 +135,9 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 =======
 | **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
+=======
+| **YAML** | [data/models/](data/models/) | Individual model files (419 files) |
+>>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 
 ### Quick Start (Python)
 
@@ -208,6 +220,7 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 ├── data/
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 │   ├── models/              # 452 model YAML files (source of truth)
 =======
 │   ├── models/              # 452 model YAML files (source of truth)
@@ -215,6 +228,9 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 =======
 │   ├── models/              # 452 model YAML files (source of truth)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
+=======
+│   ├── models/              # 419 model YAML files (source of truth)
+>>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 │   ├── benchmarks/          # 8 benchmark definitions
 │   ├── ai_reviews/          # 452 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
