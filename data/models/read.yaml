@@ -1,0 +1,122 @@
+# Paper: READ: Learning Risk-Informed Fields for End-to-End Autonomous Driving
+# arXiv: 2609.12371
+
+name: READ
+full_name: "READ: Learning Risk-Informed Fields for End-to-End Autonomous Driving"
+organization: "School of Vehicle and Mobility, Tsinghua University"
+date: "2026-09-11"  # arXiv stamp on the PDF (2609.12371v1, 11 Sep 2026)
+paper_url: https://arxiv.org/abs/2609.12371
+code_url: null  # Not stated in the paper
+venue: "Not stated in the paper"
+open_source: false  # code/weights release not stated in the paper
+model_type: driving_vla
+
+architecture:
+  backbone: "Qwen3-VL-2B fine-tuned (VLA setting): front-view image + navigation text + learnable risk latent tokens + trajectory queries; E2E variants use TransFuser ResNet or a Drive-JEPA-initialized ViT with BEV queries"
+  llm: "Qwen3-VL-2B"
+  action_head: "Query-based trajectory decoder: trajectory queries attend to context tokens and risk-token states, then predict waypoints and scores"
+  action_head_category: regression
+  parameters: "2B-class VLM (Qwen3-VL-2B); exact count not stated in the paper"
+  key_innovation: "Learned continuous spatiotemporal Gaussian risk field (80 m x 64 m, 1 m resolution, 8 slices over 4 s) supervised only by partial constraints: non-drivable map cells, future agent boxes, global sparsity, low risk along the expert path, and a kinematic-residual (constant-velocity) query; used as auxiliary loss (L_traj + beta*L_field) through risk latents in the VLA, and optionally as a differentiable post-hoc trajectory refiner"
+
+training:
+  base_model: "Qwen3-VL-2B (VLA); TransFuser / Drive-JEPA ViT (E2E)"
+  method: "Joint trajectory + risk-field supervision; VLA fine-tuned 20 epochs on 8x A100; E2E trained 40 epochs on 2x A100"
+  data: "NAVSIM"
+
+benchmarks:
+  navsim_v1:
+    pdms: 90.7
+    nc: 98.9
+    dac: 98.0
+    ttc: 95.4
+    comfort: 100.0
+    ep: 85.5
+    source: "Paper Table I, READ (VLA setting) row"
+    date_reported: "2026-09-11"
+    eval_condition: "NAVSIM v1 navtest, open-loop PDMS; Qwen3-VL-2B VLA with front-view image"
+
+  navsim_v1_e2e_read:
+    transfuser_read_pdms: 84.6
+    drive_jepa_read_pdms: 90.0
+    transfuser_pdms: 84.0
+    drive_jepa_reproduced_pdms: 89.1
+    source: "Paper Table I (matched end-to-end backbones with/without READ)"
+    eval_condition: "non-VLA end-to-end planners with READ as auxiliary field supervision"
+
+  navsim_v1_vla_baselines:
+    autovla_pdms: 89.1
+    percept_wam_pdms: 90.2
+    drivevla_w0_pdms: 90.2
+    adathinkdrive_pdms: 90.3
+    source: "Paper Table I (Vision-language-action methods)"
+
+  navsim_v1_e2e_baselines:
+    hydra_mdp_pdms: 86.5
+    diffusiondrive_pdms: 88.1
+    wote_pdms: 88.3
+    source: "Paper Table I"
+
+  navsim_v2_e2e_vit:
+    epdms: 90.1
+    nc: 99.0
+    dac: 97.2
+    ddc: 99.6
+    tlc: 99.9
+    ep: 87.4
+    ttc: 98.5
+    lk: 97.8
+    hc: 98.4
+    ec: 87.0
+    source: "Paper Table II, Ours (ViT + field learning) row"
+    eval_condition: "NAVSIM v2 EPDMS; ViT end-to-end planner (not the VLA setting)"
+
+  navsim_v2_baselines:
+    ours_vit_bev_supervision_epdms: 89.4
+    meanfuser_epdms: 89.5
+    diffusiondrive_epdms: 88.2
+    wote_epdms: 87.7
+    drivevla_w0_epdms: 86.1
+    transfuser_epdms: 84.0
+    hydramdp_pp_epdms: 81.4
+    ego_status_mlp_epdms: 64.0
+    source: "Paper Table II"
+
+  navsim_v1_representation_ablation:
+    bev_semantics_pdms: 89.06
+    bev_plus_read_field_pdms: 89.23
+    eight_step_bev_prediction_pdms: 89.13
+    rule_based_field_pdms: 89.49
+    read_field_pdms: 90.02
+    source: "Paper Table III (same ViT planner)"
+
+  navsim_v1_constraint_ablation:
+    full_pdms: 90.02
+    wo_agent_pdms: 89.71
+    wo_ndr_pdms: 89.57
+    wo_reg_pdms: 89.80
+    wo_gt_pdms: 89.62
+    wo_res_pdms: 89.73
+    full_ttc: 96.36
+    wo_agent_ttc: 95.76
+    source: "Paper Table IV"
+
+  navsim_v1_sparsity_weight:
+    lambda_1_0_pdms: 89.66
+    lambda_0_5_pdms: 90.02
+    lambda_0_1_pdms: 89.29
+    source: "Paper Table V"
+
+  navsim_v1_posthoc_refinement:
+    transfuser_pdms: 84.14
+    transfuser_read_refined_pdms: 84.75
+    diffusiondrive_pdms: 88.08
+    diffusiondrive_read_refined_pdms: 88.43
+    source: "Paper Table VI"
+    eval_condition: "frozen external planners; only output waypoints optimized on the learned field"
+
+eval_conditions:
+  navsim_v1: "navtest, open-loop PDMS, VLA setting"
+  navsim_v2_e2e_vit: "EPDMS, ViT E2E planner"
+
+tags: [autonomous_driving, driving_vla, risk_field, safety_field, navsim, qwen3-vl, auxiliary_loss, trajectory_refinement, end_to_end]

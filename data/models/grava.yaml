@@ -1,0 +1,100 @@
+# Paper: GRAVA: Grounded Reasoning-to-Action Representation and Learning for Autonomous Driving
+# arXiv: 2609.15169
+
+name: GRAVA
+full_name: "GRAVA: Grounded Reasoning-to-Action Representation and Learning for Autonomous Driving"
+organization: "Beijing Institute of Technology / Nanyang Technological University / Shenzhen Jiguangzhijie Technology Co., Ltd."
+date: "2026-09-14"
+paper_url: https://arxiv.org/abs/2609.15169
+code_url: https://github.com/AhernResearch/grava
+venue: "Submitted to IEEE TPAMI"
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-8B-Instruct (single front camera)"
+  llm: "Qwen3-VL-8B"
+  action_head: "Autoregressive text generation of grounded reasoning (with bounding-box tokens and physical quantities) followed by a compact Executable Planner action (primitive in {STOP, CRAWL, CURVE, CRUISE}, gear, primitive-specific parameters), deterministically decoded by a fixed geometric decoder into an 8x2 waypoint trajectory over 4 s"
+  action_head_category: autoregressive
+  parameters: "8B"
+  key_innovation: "Grounded Reasoning-to-Action (GRA) trajectory-anchored typed graph serialized into grounded reasoning in the same autoregressive stream as an executable primitive-based planner action; agentic forward-grounding / backward-trajectory-anchoring data pipeline; Active RL loop on recoverable scenarios"
+
+training:
+  method: "Progressive: GRA grounded pre-training on QA, lightweight planner warm-up, verified self-distillation, then Active RL loop (GRPO with DAPO-style asymmetric clipping) using PDMS-based trajectory rewards on actively selected recoverable scenarios"
+  data: "GR-NavSim (built on nuPlan/NAVSIM): 107K grounded scenes, 2.2M grounded QA pairs, 415K front-camera Executable Planner examples, 70K GRA reasoning traces; about 60% of available human demonstrations used for action supervision"
+  hardware: "Not stated in the paper"
+
+benchmarks:
+  navsim_v1:
+    nc: 98.8
+    dac: 97.6
+    ep: 83.5
+    ttc: 97.1
+    comfort: 100.0
+    pdms: 90.48
+    source: "Paper Table IV full-model row (Table III reports the same row rounded to PDMS 90.5)"
+    date_reported: "2026-09-14"
+    eval_condition: "NAVSIM navtest v1, official full protocol, single camera, one greedy completion per scene, after Active RL"
+
+  navsim_v1_before_rl:
+    nc: 96.1
+    dac: 91.2
+    ep: 78.8
+    ttc: 91.0
+    comfort: 99.7
+    pdms: 82.10
+    source: "Paper Table IV (GRA + Executable Planner + SD, no Active RL)"
+
+  navsim_v1_ablation:
+    no_pretraining_pdms: 79.80
+    direct_waypoints_pdms: 87.23
+    no_sd_no_rl_pdms: 81.74
+    sd_no_rl_pdms: 82.10
+    full_pdms: 90.48
+    source: "Paper Table IV"
+
+  navsim_v1_baselines:
+    adathinkdrive_pdms: 90.3
+    curious_vla_pdms: 90.3
+    autovla_post_rft_pdms: 89.1
+    explorevla_pdms: 90.4
+    drivevla_w0_pdms: 90.2
+    recogdrive_pdms: 89.6
+    diffusiondrive_pdms: 88.1
+    source: "Paper Table III"
+
+  internal_long_tail:
+    collision_gate: 98.2
+    nds_gate: 97.6
+    koc: 92.3
+    progress: 92.9
+    comfort: 99.6
+    cds: 90.1
+    source: "Paper Table V (GRA pre-training, Full GRA, Active RL)"
+    eval_condition: "Internal long-tail benchmark (50K clips, 700K frames; not public)"
+
+  internal_long_tail_ablation:
+    no_pretraining_cds: 79.7
+    ungrounded_pretraining_cds: 82.2
+    action_only_cds: 74.8
+    coarse_reasoning_cds: 77.9
+    grounded_objects_only_cds: 85.5
+    no_active_rl_cds: 73.1
+    action_only_koc: 77.4
+    full_gra_koc: 92.3
+    source: "Paper Table V"
+
+  gr_navsim_qa:
+    scene_avg: 7.42
+    object_perception_avg: 5.70
+    object_interaction_avg: 6.12
+    overall: 6.86
+    qwen3_vl_8b_overall: 4.40
+    gpt_5_4_overall: 5.39
+    source: "Paper Table VI (held-out GR-NavSim QA; 0-10 judge scores / decision label accuracy)"
+
+eval_conditions:
+  navsim_v1: "navtest, single-sample greedy, front camera only"
+  internal_long_tail: "Internal closed-loop rollout benchmark; CDS = Safety x (0.45 KOC + 0.35 Progress + 0.20 Comfort)"
+
+tags: [autonomous-driving, driving-vla, grounded-reasoning, chain-of-thought, reinforcement-learning, grpo, qwen3-vl, navsim, nuplan, autoregressive]

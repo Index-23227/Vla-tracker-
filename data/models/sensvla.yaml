@@ -1,0 +1,75 @@
+# Paper: sensVLA: Spatially-Grounded Vision-Language-Action Model for Autonomous Wheel Loader
+# arXiv: 2609.17021
+
+name: sensVLA
+full_name: "sensVLA: Spatially-Grounded Vision-Language-Action Model for Autonomous Wheel Loader"
+organization: "sensmore GmbH"
+date: "2026-09-15"
+paper_url: https://arxiv.org/abs/2609.17021
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-2B-Instruct (frozen native ViT; language decoder truncated to first 14 blocks, LoRA r=16/alpha=16 on the final 8 decoder layers); frozen PointPillars lidar encoder producing multi-scale BEV features (32 BEV tokens via a resampler); 3-stage conv state-history encoder (8 Perceiver-resampled tokens)"
+  llm: "Qwen3-VL-2B language decoder (truncated to 14 blocks, LoRA-adapted)"
+  action_head: "Fully trainable transformer action expert (hidden 384, 8 heads; one bidirectional self-attention block followed by causal blocks with heterogeneous cross-attention to VLM context, BEV tokens, and their concatenation), trained by flow-matching velocity regression; 10-step action chunks of 6 action dims, integrated with a 10-step midpoint ODE solver. Paper states 4 layers in Sec. IV-C but 5 layers (1 bidirectional + 4 causal) in the implementation details."
+  action_head_category: flow_matching
+  parameters: "Not stated in the paper"
+  key_innovation: "Routes lidar BEV features directly into the action expert through a dedicated gated cross-attention pathway instead of through the VLM token stream, decoupling metric spatial grounding from language reasoning for wheel-loader control"
+
+training:
+  method: "Staged parameter-efficient imitation learning: LoRA adapters frozen for the first epoch while the action expert warms up, then joint training; AdamW (lr 1e-5 expert/BEV heads, 3e-6 BEV resampler, 1e-6 LoRA), cosine schedule, bf16, 30 epochs, effective batch 32; BEV token dropout and state-history dropout"
+  data: "Proprietary real-world wheel-loader dataset (front/rear RGB, front/rear lidar, IMU): 200K training chunks, 40K validation chunks, loading and underground-tunnel driving scenarios, split at recording-sequence level"
+  hardware: "Not stated in the paper"
+
+benchmarks:
+  wheel_loader_offline_rmse:
+    aggregate_dxdy_rmse_m: 0.101
+    aggregate_vx_rmse_mps: 0.886
+    loading_dxdy_rmse_m: 0.097
+    loading_vx_rmse_mps: 0.717
+    driving_dxdy_rmse_m: 0.105
+    driving_vx_rmse_mps: 1.054
+    source: "Paper Table I (sensVLA row)"
+    date_reported: "2026-09-15"
+    eval_condition: "Offline per-step physical RMSE on the proprietary 40K-chunk validation set; lower is better; no closed-loop deployment reported"
+
+  wheel_loader_offline_rmse_baseline:
+    aggregate_dxdy_rmse_m: 0.107
+    aggregate_vx_rmse_mps: 1.134
+    loading_dxdy_rmse_m: 0.106
+    loading_vx_rmse_mps: 0.996
+    driving_dxdy_rmse_m: 0.107
+    driving_vx_rmse_mps: 1.281
+    source: "Paper Table I (Baseline row)"
+    eval_condition: "Same architecture and training without the BEV pathway (camera-only); lower is better"
+
+  wheel_loader_text_metrics:
+    aggregate_dx_rmse_cm: 8.98
+    baseline_aggregate_dx_rmse_cm: 9.52
+    loading_dx_rmse_cm: 8.40
+    baseline_loading_dx_rmse_cm: 9.27
+    loading_final_displacement_error_m: 0.521
+    baseline_loading_final_displacement_error_m: 0.538
+    source: "Paper Sec. V-B text"
+    eval_condition: "dx RMSE and 2 s-horizon final displacement error; lower is better"
+
+  wheel_loader_input_ablation:
+    full_agg: 1.022
+    img_blur_agg: 1.022
+    no_state_hist_agg: 1.090
+    no_bev_agg: 1.206
+    no_cam_agg: 1.704
+    baseline_full_agg: 1.017
+    baseline_img_blur_agg: 1.06
+    baseline_no_state_hist_agg: 1.175
+    baseline_no_cam_agg: 2.378
+    source: "Paper Table II"
+    eval_condition: "Mean per-component RMSE in z-normalised action space under input ablation; lower is better"
+
+eval_conditions:
+  wheel_loader_offline_rmse: "Offline open-loop per-step RMSE on proprietary real wheel-loader validation data; not comparable with tracked benchmarks"
+
+tags: [heavy-equipment, wheel-loader, lidar, bev, flow-matching, qwen3-vl, lora, action-expert, real-world, offline-evaluation]

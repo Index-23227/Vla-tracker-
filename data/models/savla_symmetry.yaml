@@ -1,0 +1,123 @@
+# Paper: SAVLA: Symmetry-Aware Vision-Language-Action Models for Robotic Manipulation
+# arXiv: 2609.16641
+# Named SAVLA-Symmetry to avoid collision with the existing SA-VLA (arXiv 2606.30113, state-aware tokenizer).
+
+name: SAVLA-Symmetry
+full_name: "SAVLA: Symmetry-Aware Vision-Language-Action Models for Robotic Manipulation"
+organization: "University of Edinburgh / Shenzhen Institutes of Advanced Technology, Chinese Academy of Sciences"
+date: "2026-09-15"
+paper_url: https://arxiv.org/abs/2609.16641
+code_url: https://github.com/EVIEHub/SAVLA
+venue: arXiv
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "GR00T N1.5 vision-language backbone (SigLIP2 + Qwen3-1.7B, 12th-layer features), kept entirely frozen; learned canonicalizer (3-layer CNN, 0.09M params) scoring 8 rotation candidates and homography-warping the third-person image to a canonical view"
+  llm: "Qwen3-1.7B (frozen, via GR00T N1.5)"
+  action_head: "SO(3)-equivariant flow-matching action head (L=16 blocks, typed widths C0=C1=256, 8 heads, horizon 16, K=4 Euler steps) with scalar/vector (type-0/type-1) tracks, Vector Neuron projections, equivariant attention, RMS norm, modulation and FFN; conditioned on invariant VLM tokens and equivariant rotated reference points"
+  action_head_category: flow_matching
+  parameters: "103.3M trainable (action head); backbone frozen"
+  key_innovation: "Typed invariant/equivariant conditioning interface lets an exactly equivariant flow-matching head sit on a frozen non-equivariant VLM, combined with a self-supervised canonicalizer for oblique-view images, yielding approximate end-to-end rotational equivariance"
+
+training:
+  method: "Action head trained from scratch with flow matching on frozen backbone features (AdamW lr 1e-4, batch 16; best of 20K/40K/80K checkpoints per suite); canonicalizer trained separately and self-supervised for 3,000 steps (AdamW lr 1e-4, batch 32) plus scalar gain calibration on 12 frames"
+  data: "LIBERO demonstrations (four suites); real robot: 150 SO-101 demonstrations (50 per task), multi-task, 40K steps"
+  hardware: "Not stated in the paper"
+
+benchmarks:
+  libero:
+    libero_spatial: 96.7
+    libero_object: 92.9
+    libero_goal: 97.5
+    libero_long: 79.3
+    libero_avg: 91.6
+    source: "Paper Table I (SAVLA row)"
+    date_reported: "2026-09-15"
+    eval_condition: "Standard four LIBERO suites, 500 episodes per suite, mean over three seeds"
+
+  libero_baselines:
+    gr00t_n15_budget_matched_avg: 86.5
+    smolvla_avg: 88.8
+    openvla_avg: 76.5
+    octo_avg: 75.1
+    diffusion_policy_avg: 72.4
+    source: "Paper Table I (GR00T N1.5 is the parameter-matched in-house baseline; others taken from original papers)"
+
+  libero_rotation_ood:
+    spatial: 81.8
+    object: 53.9
+    goal: 90.4
+    long: 25.4
+    source: "Paper Sec. V-B text and Fig. 2 caption"
+    eval_condition: "Mean success over 13 unseen scene rotations (-30 to +30 deg, 5 deg steps), 200 episodes x 3 seeds per angle"
+
+  libero_rotation_ood_gr00t_n15:
+    spatial: 40.5
+    object: 26.0
+    goal: 41.5
+    long: 22.7
+    source: "Paper Sec. V-B text and Fig. 2 caption"
+    eval_condition: "Baseline under the same rotation sweep"
+
+  libero_goal_rotation_augmentation:
+    savla_in_range: 90.4
+    savla_extrapolation_35_45: 64.5
+    gr00t_n15_in_range: 41.5
+    gr00t_n15_extrapolation_35_45: 1.9
+    gr00t_n15_warped_aug_in_range: 69.1
+    gr00t_n15_warped_aug_extrapolation_35_45: 24.0
+    gr00t_n15_rerendered_aug_in_range: 74.5
+    gr00t_n15_rerendered_aug_extrapolation_35_45: 59.2
+    source: "Paper Table II (LIBERO-Goal)"
+
+  libero_goal_rotation_ablation:
+    savla_full: 90.4
+    savla_without_canonicalization: 46.0
+    gr00t_n15_with_canonicalization: 63.5
+    gr00t_n15: 41.5
+    source: "Paper Sec. V-C text and Fig. 3 caption (LIBERO-Goal, mean over 13 angles)"
+
+  libero_goal_rotation_oracle:
+    estimated_angle_mean: 90.4
+    estimated_angle_abs_ge_25: 82.1
+    gt_angle_mean: 90.9
+    gt_angle_abs_ge_25: 83.4
+    true_canonical_view_mean: 97.3
+    true_canonical_view_abs_ge_25: 96.8
+    source: "Paper Table IV"
+
+  libero_data_efficiency:
+    savla_10pct: 57.1
+    savla_25pct: 71.9
+    gr00t_n15_10pct: 48.3
+    gr00t_n15_25pct: 66.1
+    source: "Paper Table V (four-suite average success)"
+
+  real_world:
+    pick_and_place: 75
+    block_stacking: 70
+    block_sorting: 70
+    real_world_avg: 71.7
+    source: "Paper Table III (SAVLA row)"
+    date_reported: "2026-09-15"
+    eval_condition: "SO-101 arm, 3 tasks, 20 episodes per task, multi-task training on 150 demos"
+
+  real_world_baselines:
+    gr00t_n15_pick_and_place: 70
+    gr00t_n15_block_stacking: 60
+    gr00t_n15_block_sorting: 55
+    gr00t_n15_avg: 61.7
+    source: "Paper Table III (GR00T N1.5 row)"
+
+  real_world_rotation:
+    savla_avg: 57.1
+    gr00t_n15_avg: 47.9
+    source: "Paper Table VI"
+    eval_condition: "Pick-and-place under 7 scene rotations (-30 to +30 deg), 20 episodes per angle"
+
+eval_conditions:
+  libero: "Four standard suites, 500 episodes/suite, 3 seeds; frozen GR00T N1.5 backbone, action head trained from scratch"
+  real_world: "SO-101, 3 tasks x 20 episodes"
+
+tags: [equivariance, symmetry, canonicalization, flow-matching, gr00t-n1.5, frozen-backbone, rotation-robustness, data-efficiency, libero, real-world, so-101]

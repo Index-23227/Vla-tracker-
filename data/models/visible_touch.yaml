@@ -1,0 +1,217 @@
+# Paper: Visible Touch: Rendering Contact for Visuomotor Policies
+# arXiv: 2609.14156
+
+name: Visible Touch
+full_name: "Visible Touch: Rendering Contact for Visuomotor Policies"
+organization: "University of California, Los Angeles"
+date: "2026-09-12"  # arXiv stamp on the PDF (2609.14156v1, 12 Sep 2026)
+paper_url: https://arxiv.org/abs/2609.14156
+code_url: null  # policy code release not stated in the paper; project website: https://visibletouch.github.io/
+venue: "Not stated in the paper"
+open_source: false  # the magnetic contact sensor hardware is stated as open-sourced; policy code/weights release not stated in the paper
+model_type: vla
+
+architecture:
+  backbone: "Policy-agnostic input augmentation applied to three policy families: LIBERO BC-Transformer (ResNet-18, trained from scratch), miniVLA (Qwen2.5-0.5B + DINOv2/SigLIP 224px, fully unfrozen), and pi0.5 (pi05_droid, SigLIP-So400m + Gemma-2B, ~2.3B, LoRA)"
+  llm: "Qwen2.5-0.5B (miniVLA); Gemma-2B from PaliGemma (pi0.5); none (BC-Transformer)"
+  action_head: "Unchanged from each base policy: GMM head (BC-Transformer), VQ action tokens via extra vocabulary (miniVLA), 311M Gemma flow-matching action expert with 10-step chunks (pi0.5, real-world headline)"
+  action_head_category: other
+  parameters: "~2.3B for the pi0.5 real-world policy (LoRA r=16 backbone / r=32 action expert); miniVLA 0.5B LLM; BC-Transformer small (not totalled in the paper)"
+  key_innovation: "Contact is rendered as an image-space overlay composited onto the policy's existing RGB views: each taxel's 3-axis reading is drawn as an arrow projected via forward kinematics and camera extrinsics (variants Multi-arrows / Avg. Arrow / Binbars), so any image-conditioned policy or VLA becomes contact-aware with no architectural change and no force calibration. Paired with an open-source 3x3 magnetic contact sensor (4 mm, <$5 in elastomer+magnet parts) built via a parametric CAD-to-mold pipeline"
+
+training:
+  base_model: "BC-Transformer (from scratch); miniVLA (pretrained from scratch on LIBERO_90 with overlays, and fine-tuned from released checkpoint); pi0.5 pi05_droid (LoRA)"
+  method: "Supervised imitation with overlay-augmented RGB inputs; pi0.5 LoRA fine-tuning (batch 8, peak lr 1e-4, up to 20k steps with early stopping)"
+  data: "LIBERO demonstrations with MuJoCo gripper-finger contact forces rendered as overlays; real world: 100 TeleDex teleop demos per task (397 accepted) on a UFactory xArm7 with custom magnetic sensors"
+  hardware: "miniVLA pretraining on 4x L40S (200k steps); pi0.5 runs on 4x H200 each"
+
+benchmarks:
+  real_world:
+    lift_pick_successes_of_30: 24
+    transfer_tube_pick_successes_of_30: 24
+    transfer_tube_insert_successes_of_30: 16
+    dishwasher_pull_successes_of_30: 28
+    dishwasher_pick_successes_of_30: 22
+    dishwasher_place_successes_of_30: 21
+    plug_charger_pick_successes_of_30: 18
+    plug_charger_insert_successes_of_30: 2
+    source: "Paper Appendix Table 15, Visible Touch Multi-arrows row"
+    date_reported: "2026-09-12"
+    eval_condition: "pi0.5 (pi05_droid) LoRA fine-tuned with Multi-arrows overlay; UFactory xArm7, 4 contact-rich tasks, 30 trials per condition, sub-task scored (final stage = full task success)"
+
+  real_world_improvement_summary:
+    multi_arrows_vs_baseline_macro_avg_pp: 30.3
+    source: "Paper Sec. 4.2 text"
+    eval_condition: "macro-average across tasks of the Multi-arrows minus Baseline difference in mean sub-task success"
+
+  real_world_baseline:
+    lift_pick_successes_of_30: 20
+    transfer_tube_pick_successes_of_30: 5
+    transfer_tube_insert_successes_of_30: 0
+    dishwasher_pull_successes_of_30: 21
+    dishwasher_pick_successes_of_30: 11
+    dishwasher_place_successes_of_30: 11
+    plug_charger_pick_successes_of_30: 9
+    plug_charger_insert_successes_of_30: 0
+    source: "Paper Appendix Table 15, Baseline row"
+    eval_condition: "baseline: standard pi0.5 LoRA fine-tuning without contact, same data"
+
+  real_world_tac_view:
+    lift_pick_successes_of_30: 16
+    transfer_tube_pick_successes_of_30: 9
+    transfer_tube_insert_successes_of_30: 0
+    dishwasher_pull_successes_of_30: 22
+    dishwasher_pick_successes_of_30: 18
+    dishwasher_place_successes_of_30: 16
+    plug_charger_pick_successes_of_30: 17
+    plug_charger_insert_successes_of_30: 0
+    source: "Paper Appendix Table 15, Tac-View row"
+    eval_condition: "baseline: same contact arrows as a separate image stream in a pi0.5 camera slot"
+
+  real_world_avg_arrow:
+    lift_pick_successes_of_30: 23
+    transfer_tube_pick_successes_of_30: 17
+    transfer_tube_insert_successes_of_30: 3
+    dishwasher_pull_successes_of_30: 23
+    dishwasher_pick_successes_of_30: 14
+    dishwasher_place_successes_of_30: 12
+    plug_charger_pick_successes_of_30: 13
+    plug_charger_insert_successes_of_30: 0
+    source: "Paper Appendix Table 15, Avg. Arrow row"
+    eval_condition: "variant: per-finger averaged arrow overlay"
+
+  real_world_binbars:
+    lift_pick_successes_of_30: 23
+    transfer_tube_pick_successes_of_30: 10
+    transfer_tube_insert_successes_of_30: 1
+    dishwasher_pull_successes_of_30: 24
+    dishwasher_pick_successes_of_30: 15
+    dishwasher_place_successes_of_30: 15
+    plug_charger_pick_successes_of_30: 9
+    plug_charger_insert_successes_of_30: 0
+    source: "Paper Appendix Table 15, Binbars row"
+    eval_condition: "variant: per-finger magnitude bars at fixed image location"
+
+  real_world_position_only:
+    lift_pick_successes_of_30: 22
+    transfer_tube_pick_successes_of_30: 21
+    transfer_tube_insert_successes_of_30: 7
+    dishwasher_pull_successes_of_30: 17
+    dishwasher_pick_successes_of_30: 14
+    dishwasher_place_successes_of_30: 11
+    plug_charger_pick_successes_of_30: 9
+    plug_charger_insert_successes_of_30: 0
+    source: "Paper Appendix Table 15, Position-Only row"
+    eval_condition: "ablation: projected taxel markers without contact information"
+
+  real_world_binary_contact_1x:
+    lift_pick_successes_of_30: 19
+    transfer_tube_pick_successes_of_30: 17
+    transfer_tube_insert_successes_of_30: 2
+    dishwasher_pull_successes_of_30: 13
+    dishwasher_pick_successes_of_30: 5
+    dishwasher_place_successes_of_30: 4
+    plug_charger_pick_successes_of_30: 16
+    plug_charger_insert_successes_of_30: 0
+    source: "Paper Appendix Table 15, Binary Contact (1x) row"
+    eval_condition: "ablation: per-finger binary contact occurrence only"
+
+  real_world_binary_contact_9x:
+    lift_pick_successes_of_30: 9
+    transfer_tube_pick_successes_of_30: 6
+    transfer_tube_insert_successes_of_30: 0
+    dishwasher_pull_successes_of_30: 25
+    dishwasher_pick_successes_of_30: 13
+    dishwasher_place_successes_of_30: 12
+    plug_charger_pick_successes_of_30: 11
+    plug_charger_insert_successes_of_30: 0
+    source: "Paper Appendix Table 15, Binary Contact (9x) row"
+    eval_condition: "ablation: per-taxel binary contact occurrence only"
+
+  libero_contact_overlay_bc_transformer:
+    libero_spatial: 92.3
+    libero_object: 98.2
+    libero_goal: 92.8
+    libero_long: 86.5
+    avg: 92.5
+    source: "Paper Appendix Table 5 (and Table 2), Visible Touch 2-view (Avg. Arrow) column"
+    date_reported: "2026-09-12"
+    eval_condition: "Non-standard input: privileged MuJoCo gripper-finger contact forces rendered as overlays; BC-Transformer trained from scratch (multitask), agentview + wrist, 3 seeds, 20 rollouts per task; kept out of the ranked libero block"
+
+  libero_bc_transformer_baselines_2view:
+    plain_spatial: 84.8
+    plain_object: 82.8
+    plain_goal: 86.8
+    plain_long: 52.8
+    plain_avg: 76.8
+    proprio_contact_wrench_spatial: 80.0
+    proprio_contact_wrench_object: 80.0
+    proprio_contact_wrench_goal: 81.5
+    proprio_contact_wrench_long: 42.8
+    proprio_contact_wrench_avg: 71.1
+    source: "Paper Appendix Table 5"
+    eval_condition: "baselines: plain RGB + 8-D proprio; Proprio = plain + 12-D contact wrench in the state vector; 2-view, 3 seeds"
+
+  libero_bc_transformer_1view:
+    plain_spatial: 79.0
+    plain_object: 90.7
+    plain_goal: 79.3
+    plain_long: 41.8
+    plain_avg: 72.7
+    visible_touch_spatial: 90.5
+    visible_touch_object: 95.0
+    visible_touch_goal: 91.7
+    visible_touch_long: 63.8
+    visible_touch_avg: 85.2
+    source: "Paper Appendix Table 5"
+    eval_condition: "agentview only, 3 seeds"
+
+  libero_bc_transformer_overlay_variants_2view:
+    multi_arrows_spatial: 90.2
+    multi_arrows_object: 94.3
+    multi_arrows_goal: 91.8
+    multi_arrows_long: 76.2
+    multi_arrows_avg: 88.1
+    binbars_spatial: 94.5
+    binbars_object: 98.0
+    binbars_goal: 92.7
+    binbars_long: 78.8
+    binbars_avg: 91.0
+    source: "Paper Table 2"
+    eval_condition: "overlay granularity ablation, BC-Transformer 2-view, 3 seeds"
+
+  libero_minivla_finetune:
+    libero_spatial: 87.0
+    libero_object: 70.6
+    libero_goal: 80.5
+    libero_long: 66.6
+    avg: 76.2
+    source: "Paper Table 1, Visible Touch fine-tuning row"
+    eval_condition: "History-2 miniVLA fine-tuned per suite with overlays (privileged sim contact), mean over 5 seeds; suite-specific recipes"
+
+  libero_minivla_finetune_baseline:
+    libero_spatial: 71.5
+    libero_object: 51.0
+    libero_goal: 48.5
+    libero_long: 32.5
+    avg: 50.9
+    source: "Paper Table 1, Baseline fine-tuning row"
+    eval_condition: "strongest available single-run non-contact baselines per suite"
+
+  libero_90_minivla_pretraining:
+    visible_touch_minivla: 63.2
+    released_stanford_minivla: 48.3
+    source: "Paper Table 1 and Appendix D.1"
+    eval_condition: "LIBERO_90, 90 tasks x 20 trials, single image, no chunking; overlay model pretrained from scratch on LIBERO_90 with overlays"
+
+  libero_90_minivla_vq_h8_history2:
+    visible_touch_finetuned: 86.3
+    released_checkpoint: 72.2
+    source: "Paper Appendix D.1 (Additional comparison)"
+    eval_condition: "released miniVLA (VQ-h8 + history=2) fine-tuned on contact-overlay LIBERO_90, 10 trials per task, authors' evaluation pipeline"
+
+eval_conditions:
+  real_world: "UFactory xArm7 + 2 RealSense D435 + custom 3x3 magnetic sensors per finger; 4 contact-rich tasks, 30 trials, sub-task scored; pi0.5 LoRA"
+  libero: "not in the ranked block: BC-Transformer / miniVLA with privileged simulated contact overlays, 20 rollouts per task"
+
+tags: [tactile, contact, visual-overlay, input-augmentation, magnetic-sensor, low-cost-hardware, pi0.5, minivla, bc-transformer, lora, libero, real-robot, xarm]

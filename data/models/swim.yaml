@@ -1,0 +1,73 @@
+# Paper: SWIM: Vision-Language-Grounded Soft Whole-Body Interactive Manipulation
+# arXiv: 2609.17035
+
+name: SWIM
+full_name: "SWIM: Vision-Language-Grounded Soft Whole-Body Interactive Manipulation (policy: SWIM-VLA)"
+organization: "Nanyang Technological University / National University of Singapore / Mohamed bin Zayed University of Artificial Intelligence / Institute of Advanced Intelligence and Computing, A*STAR"
+date: "2026-09-15"  # arXiv stamp on the PDF (2609.17035v1, 15 Sep 2026)
+paper_url: https://arxiv.org/abs/2609.17035
+code_url: null  # Not stated in the paper
+venue: "Not stated in the paper"
+open_source: false  # code/weights release not stated in the paper
+model_type: "soft-robot whole-body VLA (LoRA-fine-tuned OpenVLA-OFT with diffusion head) + virtual-rollout open-loop deployment"
+
+architecture:
+  backbone: "OpenVLA-OFT multimodal encoder (top-down RGB 256x256 + language + 2-D tendon-length vector as proprioception)"
+  action_head: "Conditional diffusion action head (noise prediction, 50 training steps, 10 DDIM inference steps) over H=15 two-channel motor-torque command chunks (K=8 executed per query, 10 Hz)"
+  action_head_category: diffusion
+  parameters: "Not stated in the paper"
+  key_innovation: "Visual Soft Proprioception (VSP): training-only 2-layer MLP head supervising 4 ordered body-anchor image coordinates from simulation ground truth (lambda=0.15) so the shared representation retains whole-body geometry; deployment builds the full actuation sequence by iterative virtual rollouts in a MuJoCo scene initialized from the first real image, then executes it open-loop on a compliant tendon-driven spiral soft robot (SpiRob)"
+
+training:
+  base_model: "OpenVLA-OFT"
+  method: "LoRA (rank 32, bf16) joint fine-tuning of one policy on simulated demonstrations across packing, reaching, grasping"
+  optimizer: "AdamW, LR 3e-4 cosine decay, batch 4 per GPU, 20,000 steps"
+  hardware: "4x NVIDIA A100"
+  data: "MuJoCo actuation-space demonstrations: 72 packing, 128 reaching, 592 grasping trajectories (4 per training condition)"
+
+benchmarks:
+  soft_robot_sim_heldout:
+    packing: 100
+    reaching: 96
+    grasping: 88
+    source: "Paper Table III, SWIM-VLA (Ours) row"
+    date_reported: "2026-09-15"
+    eval_condition: "MuJoCo planar SpiRob, held-out conditions: 50 packing, 50 reaching, 100 grasping, one rollout each; grasp targets anchored"
+
+  soft_robot_sim_baselines_ablations:
+    openvla_oft_packing: 90
+    openvla_oft_reaching: 72
+    openvla_oft_grasping: 52
+    wo_vsp_packing: 98
+    wo_vsp_reaching: 90
+    wo_vsp_grasping: 78
+    wo_diffusion_head_packing: 94
+    wo_diffusion_head_reaching: 84
+    wo_diffusion_head_grasping: 69
+    source: "Paper Table III"
+    eval_condition: "OpenVLA-OFT adapted to the same actuation space (L1 objective); ablations share backbone, inputs, data"
+
+  real_world:
+    packing: 100
+    reaching: 80
+    grasping: 75
+    source: "Paper Table IV (20/20, 16/20, 15/20) and Section IV-C"
+    date_reported: "2026-09-15"
+    eval_condition: "Physical planar SpiRob, full SWIM (virtual-rollout command sequence executed open-loop), 20 trials per task"
+
+  real_world_direct_deployment:
+    packing: 75
+    reaching: 40
+    grasping: 25
+    source: "Paper Table IV (15/20, 8/20, 5/20) and Section IV-C"
+    eval_condition: "Same SWIM-VLA checkpoint queried online on physical observations (15-step chunk, first 8 executed)"
+
+  inference_time:
+    ms_per_query_mean: 700
+    source: "Paper Table I"
+
+eval_conditions:
+  soft_robot_sim_heldout: "MuJoCo, held-out conditions, one rollout each"
+  real_world: "planar tendon-driven soft robot, 20 trials per task"
+
+tags: [soft-robot, continuum-robot, whole-body-manipulation, diffusion, openvla-oft, lora, sim-to-real, virtual-rollout, open-loop, proprioception, real-robot]
