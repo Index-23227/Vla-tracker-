@@ -1,0 +1,117 @@
+# Paper: AdvDex: Learning Dexterous Manipulation from Human Demonstrations via Joint-Aligned Actions and Adversarial Learning
+# arXiv: 2608.14028
+
+name: AdvDex
+full_name: "AdvDex: Learning Dexterous Manipulation from Human Demonstrations via Joint-Aligned Actions and Adversarial Learning"
+organization: "Zhejiang University / Shanghai Innovation Institute / Shanghai Jiao Tong University / Fudan University / Paxini Tech"
+date: "2026-08-14"
+paper_url: https://arxiv.org/abs/2608.14028
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Vision-Language Model (SigLIP vision tokenizer) producing a compact cognition token from a single-view image + instruction, following VITRA"
+  action_head: "Diffusion Transformer (DiT) action expert conditioned on cognition token and kinematic state via AdaLN, iteratively denoising joint-aligned action chunks (noise-prediction MSE objective); domain discriminator attached through a Gradient Reversal Layer used only at training time"
+  action_head_category: diffusion
+  action_space: "Joint-Aligned Action Space (JAAS): SE(3) wrist pose + 15 finger joints (three 3-DoF joints per finger); unavailable slots masked"
+  key_innovation: "JAAS canonical action space that functionally aligns 51-DoF MANO human hands, 19-DoF dexterous hands and 7-DoF arm + parallel gripper; domain-adversarial learning (GRL, discriminator on cognition token + state) to suppress embodiment-specific appearance cues; OmniShare glove+tactile human demonstration dataset"
+
+training:
+  dataset: "Pre-training on OmniShare (100k+ human glove trajectories, 500+ tasks, 700+ objects), VITRA-1M internet videos and an Open X-Embodiment subset at 5:4:1; post-training on 1,000 Paxini Tora + DexH13 teleoperation demonstrations (5 tasks)"
+  method: "Two-stage pre-train / post-train; joint loss L = L_MSE (diffusion denoising) + lambda * L_D (domain cross-entropy through GRL), trained end-to-end"
+
+benchmarks:
+  real_world:
+    grasp_single_object: 80.0
+    multi_object_grasp: 70.0
+    pour_water: 55.0
+    push_cube: 90.0
+    stack_bottle: 70.0
+    source: "Paper Table 3 (AdvDex 'Ours', seen tasks, success rate %)"
+    date_reported: "2026-08-14"
+    eval_condition: "Paxini Tora robot with 19-DoF DexH13 hand; post-trained on 1,000 robot demos; 20 trials per task (5 init configs x 4 workspace regions)"
+  real_world_generalization:
+    unseen_objects: 50.0
+    unseen_environment: 60.0
+    source: "Paper Table 3 (AdvDex 'Ours', Unseen columns, success rate %)"
+    date_reported: "2026-08-14"
+    eval_condition: "Same post-trained policy evaluated on unseen objects / unseen environment, 20 trials each"
+  real_world_baselines:
+    pi05_grasp_single_object: 75.0
+    pi05_multi_object_grasp: 60.0
+    pi05_pour_water: 55.0
+    pi05_push_cube: 85.0
+    pi05_stack_bottle: 60.0
+    pi05_unseen_objects: 35.0
+    pi05_unseen_environment: 45.0
+    vitra_grasp_single_object: 70.0
+    vitra_multi_object_grasp: 65.0
+    vitra_pour_water: 40.0
+    vitra_push_cube: 90.0
+    vitra_stack_bottle: 70.0
+    vitra_unseen_objects: 40.0
+    vitra_unseen_environment: 35.0
+    source: "Paper Table 3 (pi0.5 and VITRA post-trained on the same robot demos, action representation and training steps)"
+    date_reported: "2026-08-14"
+  real_world_ablation:
+    wo_pretrain_grasp_single_object: 35.0
+    wo_pretrain_unseen_environment: 0.0
+    wo_omnishare_grasp_single_object: 75.0
+    wo_omnishare_unseen_objects: 25.0
+    wo_omnishare_unseen_environment: 20.0
+    wo_adv_grasp_single_object: 70.0
+    wo_adv_unseen_objects: 15.0
+    wo_adv_unseen_environment: 30.0
+    source: "Paper Table 3 ablation rows (w/o Pre-train, w/o OmniShare, w/o Adv), success rate %"
+    date_reported: "2026-08-14"
+  real_world_human_transfer:
+    box_doll: 60.0
+    press_button: 70.0
+    move_bottle: 45.0
+    tool_use: 30.0
+    source: "Paper Table 4 (AdvDex 'Ours', zero-shot human-to-robot skill transfer, success rate %)"
+    date_reported: "2026-08-14"
+    eval_condition: "Co-trained on 1,000 robot teleop + 1,000 OmniShare human trajectories with mutually exclusive task sets; evaluation tasks appear only in human data"
+  real_world_human_transfer_baselines:
+    pi05_box_doll: 30.0
+    pi05_press_button: 50.0
+    pi05_move_bottle: 30.0
+    pi05_tool_use: 0.0
+    vitra_box_doll: 40.0
+    vitra_press_button: 45.0
+    vitra_move_bottle: 25.0
+    vitra_tool_use: 20.0
+    wo_adv_pretrain_box_doll: 50.0
+    wo_adv_posttrain_box_doll: 25.0
+    source: "Paper Table 4 (baselines and w/o Adv ablations, success rate %)"
+    date_reported: "2026-08-14"
+  hand_action_prediction:
+    omnishare_unseen_dh_o_mm: 3.2
+    omnishare_unseen_mpjpe_mm: 2.8
+    omnishare_unseen_mwte_mm: 2.5
+    hoi4d_dh_o_mm: 10.5
+    hoi4d_mpjpe_mm: 7.2
+    hoi4d_mwte_mm: 6.1
+    source: "Paper Table 2 (AdvDex 'Ours', hand action prediction error in mm, lower is better; VITRA: 20.1/16.2/14.8 and 16.3/13.7/11.5)"
+    date_reported: "2026-08-14"
+    eval_condition: "Pre-trained model, 200 OmniShare-Unseen trajectories (20 novel object categories) and 200 HOI4D trajectories"
+
+eval_conditions:
+  real_world: "Real robot (Paxini Tora + DexH13 19-DoF hand), 5 seen tasks, 20 trials per task"
+  real_world_generalization: "Unseen objects and unseen environment, 20 trials each"
+  real_world_human_transfer: "Tasks demonstrated only by humans (OmniShare), zero-shot transfer to robot"
+  hand_action_prediction: "Offline hand-motion prediction error (mm) on OmniShare-Unseen and HOI4D"
+
+tags:
+  - vla
+  - dexterous_manipulation
+  - human_demonstrations
+  - cross_embodiment
+  - domain_adversarial
+  - gradient_reversal
+  - diffusion_transformer
+  - joint_aligned_action_space
+  - tactile
+  - real-robot

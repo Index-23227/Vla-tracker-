@@ -1,0 +1,78 @@
+name: PACE
+full_name: "PACE: Phase-Progress-Aware Credit for Long-Horizon Embodied Manipulation"
+organization: "Dalian University of Technology / Jilin University"
+date: "2026-08-15"
+paper_url: https://arxiv.org/abs/2608.15026
+code_url: null
+venue: null
+open_source: false
+model_type: "Critic-guided post-training of a flow-matching VLA"
+
+architecture:
+  backbone: "pi0.5-Base (VLM backbone frozen during distillation)"
+  llm: "PaliGemma (inherited from pi0.5)"
+  action_head: "pi0.5 flow-matching action expert, credit-conditioned (g in {none, pos, neg}) with classifier-free-style guidance at inference"
+  action_head_category: flow_matching
+  parameters: "pi0.5 + separate GLC-Critic (SigLIP-SO400M + Gemma-3-270M)"
+  key_innovation: "GLC-Critic: distributional remaining-cost critic whose expectation is residually corrected by phase and intra-phase progress inferred from local temporal windows and motion differences, giving step-level credit. Progressive Policy Distillation routes between positive-only CFG (PR-CFG) at low rollout coverage and full positive/negative conditioning (FACD) above ~50% SR."
+
+training:
+  dataset: "LIBERO-Long 10 tasks (10 expert demos per task + 4 rounds of rollouts); real robot: 100 teleoperated demos per task + human-in-the-loop corrections"
+  method: "Iterative collect-and-update loop: critic trained on accumulated buffer; flow-matching policy distilled with credit-conditioned objectives (PR-CFG / FACD) on each new round"
+  compute: null
+
+inference_hz: null
+
+benchmarks:
+  libero:
+    libero_long: 83.3
+    source: "Paper Table 1 (PACE, mean of 3 training seeds, +-2.5)"
+    date_reported: "2026-08-15"
+    eval_condition: "post-trained pi0.5 from 10 demos/task + 4 rollout rounds (LIBERO-Long only)"
+  libero_long_baselines:
+    sft_openvla: 52.7
+    sft_xr0: 57.2
+    sft_pi05: 63.3
+    recap: 73.8
+    source: "Paper Table 1"
+  libero_long_critic_ablation:
+    raw_critic: 73.8
+    wo_temporal_aggregation: 81.6
+    wo_motion_differences: 80.9
+    wo_phase_head: 81.2
+    wo_progress_head: 82.7
+    full_glc_critic: 83.3
+    source: "Paper Table 2"
+  real_world:
+    table_wiping: 84.7
+    towel_folding: 83.3
+    mug_placement_knob_turning: 77.3
+    task_macro_sr: 81.8
+    source: "Paper Table 4 (task SRs) and Real-Robot Results text (81.8 task-macro SR)"
+    eval_condition: "AgileX PiPER dual-arm, 50 trials per task"
+  real_world_baselines:
+    recap_task_macro_sr: 66.5
+    recap_table_wiping: 62.7
+    recap_towel_folding: 70.7
+    recap_mug_placement_knob_turning: 66.0
+    sft_pi05_table_wiping: 54.7
+    sft_pi05_towel_folding: 51.3
+    sft_pi05_mug_placement_knob_turning: 47.3
+    source: "Paper Table 4 and contributions list (ReCAP 66.5)"
+
+eval_conditions:
+  libero: "10 LIBERO-Long tasks, 20 fixed initial states per task, 3 independently trained checkpoints; ReCAP and PACE share base policy, demos, rollouts, and update budget"
+  real_world: "AgileX PiPER dual-arm platform, 3 tasks, 50 trials per task; PACE reduces average successful-trial time from 76.3 s to 58.7 s vs ReCAP"
+
+tags:
+  - credit_assignment
+  - critic
+  - distributional_value
+  - long_horizon
+  - post_training
+  - classifier_free_guidance
+  - pi0_5
+  - flow_matching
+  - libero
+  - real_world
+  - bimanual

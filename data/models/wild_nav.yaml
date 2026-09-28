@@ -1,0 +1,108 @@
+# Paper: Exposing the Long-tail in Embodied Urban Navigation via Scalable Learning from In-the-Wild Videos
+# arXiv: 2608.16476
+
+name: WILD-Nav
+full_name: "WILD-Nav (Exposing the Long-tail in Embodied Urban Navigation via Scalable Learning from In-the-Wild Videos)"
+organization: "Southern University of Science and Technology / Peng Cheng Laboratory / HKUST"
+date: "2026-08-17"
+paper_url: https://arxiv.org/abs/2608.16476
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3.5VL-4B (visual encoder frozen; five sequential egocentric frames + textual trajectory history and point goal)"
+  llm: "Qwen3.5VL-4B language model"
+  action_head: "Action expert decoding the <PLAN_QUERY> token hidden state (2560-d): linear meta-action classifier (20 classes) + 4-layer MLP (3x512 GELU) trajectory head regressing 5 metric waypoints (MSE); optional autoregressive perception-analysis-planning CoT before the plan token"
+  action_head_category: regression
+  action_space: "5 ground-plane 2D waypoints + discrete meta-action"
+  parameters: "4B"
+  key_innovation: "Automated pipeline converting ~500 h of in-the-wild street-walking videos from 30 cities into 500K+ point-goal navigation samples (LoGeR + Pi3X metric trajectory reconstruction, rule-based meta-actions, Qwen3.6VL-27B structured CoT with privileged verification); long-tail discovery via joint perception-motion rarity + model-dependent ADE/FDE difficulty with privileged reflection for failure attribution"
+
+training:
+  dataset: "In-the-wild street-walking video corpus (80/20 train/test split of the fine-tuning subset); real-world fine-tuning on unified SCAND / SiT / GND data (45,096 samples)"
+  method: "Multi-task supervised learning: CoT language-modeling loss + meta-action cross-entropy + trajectory MSE; vision encoder frozen, action expert uses higher LR than language-model adapters"
+  compute: "NVIDIA V100 32GB GPUs"
+
+benchmarks:
+  wild_video_nav:
+    meta_action_acc: 93.4
+    ade_m: 0.086
+    fde_m: 0.068
+    maoe_deg: 5.32
+    source: "Paper Table 2, Video Test Set, WILD-Nav-think (ADE/FDE in meters, MAOE in degrees; lower is better except Meta)"
+    date_reported: "2026-08-17"
+    eval_condition: "Held-out in-the-wild video test set; reasoning-conditioned variant (CoT then plan)"
+  wild_video_nav_inst:
+    meta_action_acc: 96.5
+    ade_m: 0.094
+    fde_m: 0.071
+    maoe_deg: 5.90
+    source: "Paper Table 2, Video Test Set, WILD-Nav-inst"
+    date_reported: "2026-08-17"
+    eval_condition: "Held-out in-the-wild video test set; instruction-conditioned direct planning variant"
+  wild_video_nav_baselines:
+    urbannav_ade_m: 0.157
+    urbannav_fde_m: 0.136
+    urbannav_maoe_deg: 6.30
+    socialnav_origin_ade_m: 0.906
+    socialnav_origin_fde_m: 1.123
+    socialnav_origin_maoe_deg: 16.53
+    socialnav_ft_ade_m: 0.470
+    socialnav_ft_fde_m: 0.728
+    socialnav_ft_maoe_deg: 12.65
+    source: "Paper Table 2, Video Test Set baselines (UrbanNav and SocialNav fine-tuned on the same data; SocialNav-origin = released weights)"
+    date_reported: "2026-08-17"
+  real_world_nav_transfer:
+    meta_action_acc: 93.3
+    ade_m: 0.619
+    fde_m: 0.834
+    maoe_deg: 7.14
+    source: "Paper Table 2, Real-World Test Set with weights from video dataset, WILD-Nav-think (inst: 93.4 / 0.953 / 1.493 / 7.36; UrbanNav 0.867 / 1.493 / 13.92)"
+    date_reported: "2026-08-17"
+    eval_condition: "Direct transfer (no real-data fine-tuning) to real-robot navigation datasets (SCAND, SiT, GND)"
+  real_world_nav_finetuned:
+    meta_action_acc: 89.13
+    ade_m: 0.206
+    fde_m: 0.127
+    maoe_deg: 4.49
+    source: "Paper Table 2, Real-World Test Set fine-tuned by real data, WILD-Nav-inst (UrbanNav 0.257 / 0.286 / 8.29; SocialNav 2.901 / 4.837 / 16.08)"
+    date_reported: "2026-08-17"
+    eval_condition: "Fine-tuned on real-world training split of unified SCAND/SiT/GND data"
+  wild_longtail_base:
+    test_all_ade_m: 0.094
+    test_all_fde_m: 0.074
+    test_hard_ade_m: 0.286
+    test_hard_fde_m: 0.247
+    test_hard_meta_action_acc: 94.88
+    source: "Paper Table 3, Long-Tail Test Set, WILD-Nav-inst (no incremental fine-tuning)"
+    date_reported: "2026-08-17"
+    eval_condition: "Fixed tail = union of worst 3% ADE and FDE samples of WILD-Nav-inst"
+  wild_longtail_hard_random:
+    test_all_ade_m: 0.093
+    test_all_fde_m: 0.079
+    test_hard_ade_m: 0.217
+    test_hard_fde_m: 0.160
+    test_hard_meta_action_acc: 96.73
+    source: "Paper Table 3, Long-Tail Test Set, WILD-Nav-inst +Hard+Random incremental fine-tuning (+Random: 0.091/0.072/0.277/0.231/95.10; +Hard: 0.121/0.102/0.230/0.165/96.83)"
+    date_reported: "2026-08-17"
+    eval_condition: "Incremental fine-tuning on mined hard examples plus random replay"
+
+eval_conditions:
+  wild_video_nav: "Offline open-loop point-goal trajectory planning on held-out web-video episodes (ADE/FDE m, MAOE deg, meta-action accuracy %)"
+  real_world_nav_transfer: "Offline open-loop evaluation on real-robot navigation datasets, zero-shot from video training"
+  real_world_nav_finetuned: "Offline open-loop evaluation after fine-tuning on real-world training split"
+  wild_longtail_base: "WILD-LongTail benchmark (mined hard set), open-loop"
+
+tags:
+  - vla
+  - navigation
+  - urban_navigation
+  - point_goal
+  - in_the_wild_videos
+  - egocentric_video
+  - chain_of_thought
+  - long_tail
+  - qwen3.5-vl
+  - mlp_regression
