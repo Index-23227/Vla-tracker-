@@ -1,0 +1,96 @@
+name: ForeTime-VLA
+full_name: "ForeTime-VLA: Causal Future-Token Distillation from a World Action Model for Conveyor-Belt Manipulation"
+organization: "Tsinghua University, Shanghai AI Laboratory, Harbin Institute of Technology, DEEP Robotics"
+date: "2026-08-24"
+paper_url: https://arxiv.org/abs/2608.20735
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (dense Gemma-2B VLM + 311M-parameter action expert) plus a 1.251M-parameter causal temporal student (eight-frame history of 26-D state and 12-D visual statistics -> residual MLP)"
+  action_head: "pi0.5 conditional flow-matching action expert (H=20, D=16) with a fast-path 1024-D residual from the predicted future code and time-to-transition added to every suffix token and its adaptive normalization; four future tokens + one phase token appended to the VLM prefix (slow path)"
+  action_head_category: flow_matching
+  parameters: "Gemma-2B VLM + 311M action expert + 1.251M added modules"
+  key_innovation: "Distills a whitened 64-D action-equivalent future code, built offline from a frozen Fast-WAM/Wan2.2 video VAE over current + eight future frames, into a causal eight-frame history encoder that also predicts manipulation phase and normalized time-to-transition. The predictions condition both pi0.5 paths; the WAM teacher and future frames are absent at inference (+2.46-2.93% latency). Full-parameter joint training with L_flow + 0.20 cos + 0.02 Gram geometry + 0.04 phase + 0.04 transition + 0.05 action-reconstruction; recorded action targets never replaced."
+
+benchmarks:
+  real_world:
+    stationary_grasp_success: 81.11
+    moving_slow_grasp_success: 58.89
+    source: "Paper Table IV, ForeTime-VLA rows"
+    eval_condition: "conveyor-belt mobile manipulator, 90 trials per method per task (stationary task and slow-speed moving task)"
+
+  real_world_moving_failure_breakdown:
+    early_failure: 17.78
+    late_failure: 16.67
+    contact_pose_error: 6.67
+    source: "Paper Table IV, moving grasp task, ForeTime-VLA row"
+    eval_condition: "slow-speed moving task, 90 trials; failure-category rates (%)"
+
+  real_world_pi05_baseline:
+    stationary_grasp_success: 65.56
+    moving_slow_grasp_success: 36.67
+    early_failure: 21.11
+    late_failure: 26.67
+    contact_pose_error: 15.56
+    source: "Paper Table IV, pi0.5 rows"
+    eval_condition: "baseline: pi0.5 with same backbone and initialization, current-observation interface, same data split"
+
+  real_world_gr00t_n16_reference:
+    stationary_grasp_success: 46.67
+    moving_slow_grasp_success: 12.22
+    source: "Paper Table IV, GR00T N1.6 rows"
+    eval_condition: "reference: GR00T N1.6-3B trained on the same duplicate-free split"
+
+  real_world_starvla_reference:
+    stationary_grasp_success: 68.89
+    moving_slow_grasp_success: 28.89
+    source: "Paper Table IV, StarVLA rows"
+    eval_condition: "reference: StarVLA QwenGR00T trained on the same duplicate-free split"
+
+  real_world_smolvla_reference:
+    stationary_grasp_success: 63.33
+    moving_slow_grasp_success: 32.22
+    source: "Paper Table IV, SmolVLA rows"
+    eval_condition: "reference: SmolVLA-450M trained on the same duplicate-free split"
+
+  real_world_belt_speed:
+    slow_successes_of_30: 19
+    medium_successes_of_30: 14
+    fast_successes_of_30: 11
+    total_successes_of_90: 44
+    source: "Paper Section V-G text"
+    eval_condition: "belt-speed stress test, 30 trials per speed"
+
+  real_world_belt_speed_pi05_baseline:
+    slow_successes_of_30: 13
+    medium_successes_of_30: 8
+    fast_successes_of_30: 2
+    total_successes_of_90: 23
+    source: "Paper Section V-G text"
+    eval_condition: "baseline: pi0.5 under the same belt-speed stress test"
+
+  offline_action_error_test:
+    mse: 0.244223
+    mae: 0.130593
+    l2: 1.071214
+    source: "Paper Table I, Test split, ForeTime-VLA row"
+    eval_condition: "offline action-chunk reconstruction on 768 matched test windows, unnormalized 16-D action space, lower is better"
+
+  offline_action_error_test_pi05_baseline:
+    mse: 0.248680
+    mae: 0.134119
+    l2: 1.104541
+    source: "Paper Table I, Test split, pi0.5 baseline row"
+    eval_condition: "baseline: pi0.5, 768 matched test windows"
+
+training:
+  datasets: ["Conveyor-belt mobile-manipulator corpus: 458 duplicate-free episodes, 96,512 frames (1.79 h at 15 Hz), split 402/31/25"]
+  method: "Offline: frozen Wan2.2 video VAE features -> non-collapsed action-equivalent adapter -> whitened 64-D teacher codes cached. Policy: all pi0.5 parameters and ForeTime-VLA modules optimized jointly (full-parameter fine-tuning) with the original flow-matching action target plus auxiliary future, geometry, phase, transition and action-reconstruction losses"
+
+eval_conditions:
+  real_world: "closed-loop conveyor-belt grasping: stationary and slow-moving tasks (90 trials each), belt-speed stress test (30 trials per speed)"
+  offline: "768 matched windows per split, MSE/MAE/L2 in unnormalized action space"
+
+tags: [world_action_model, distillation, future_prediction, dynamic_manipulation, conveyor_belt, moving_objects, pi0_5, flow_matching, mobile_manipulation, real_robot]
