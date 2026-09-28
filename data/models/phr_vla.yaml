@@ -93,14 +93,19 @@ benchmarks:
     eval_condition: "ablation: V-JEPA 2 target encoder on Meta-World"
 
   real_world:
-    task_i_clip_release: 93.3
-    task_ii_loose_shaft: 86.7
-    task_iii_slide_pull: 73.3
-    task_iv_twist_pull: 76.7
     total: 82.5
-    source: "Paper Table V, PHR-VLA column (28/30, 26/30, 22/30, 23/30; Total 99/120 = 82.5%)"
+    source: "Paper Table V, PHR-VLA column, Total [%] row (99/120)"
     date_reported: "2026-08-27"
-    eval_condition: "Franka Panda, 4 contact-rich disassembly tasks, 30 trials each; per-task % converted from reported x/30 counts"
+    eval_condition: "Franka Panda, 4 contact-rich disassembly tasks, 30 trials each"
+
+  real_world_per_task_successes_of_30:
+    task_i_clip_release: 28
+    task_ii_loose_shaft: 26
+    task_iii_slide_pull: 22
+    task_iv_twist_pull: 23
+    total_of_120: 99
+    source: "Paper Table V, PHR-VLA column (raw success counts)"
+    eval_condition: "success counts out of 30 trials per task (not percentages)"
 
   real_world_baselines:
     act_total: 35.8
