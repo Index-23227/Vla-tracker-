@@ -1,0 +1,108 @@
+# Paper: TrAct: Bridging Robot Control and Visual Prediction with Visual Tracks
+# arXiv: 2608.24101
+
+name: TrAct
+full_name: "TrAct: Bridging Robot Control and Visual Prediction with Visual Tracks"
+organization: "Stanford University, University of Michigan"
+date: "2026-08-25"
+paper_url: https://arxiv.org/abs/2608.24101
+project_url: https://lol-png.github.io/tract/
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "VLAT (Vision-Language-Action-and-Track) policy built on pi0.5 (PaliGemma VLM + flow-matching action expert); plus track-conditioned world model (Stable Video Diffusion + ControlNet on rendered 2D tracks) and InternVL2-based VLAC reward model for candidate selection"
+  llm: "PaliGemma (pi0.5); InternVL2 (VLAC reward model)"
+  action_head: "pi0.5 flow-matching action head modified to jointly output a 16-step action chunk and 2D point tracks (7 gripper-mesh points per view + 5x5 wrist-view grid points) with a joint flow-matching loss; at inference K=20 (sim) / 16 (real) action-track candidates sampled with temperature-scaled resampling, TWM rolls out video per track, VLAC selects best"
+  action_head_category: flow_matching
+  action_space: continuous
+  key_innovation: "Visual 2D point tracks as the shared, embodiment-agnostic interface between policy and world model: the VLAT policy predicts paired actions and tracks, the world model is conditioned on tracks instead of raw actions (TWM beats action-conditioned AWM on all video metrics), and a VLM reward model selects the action whose predicted track rollout best fits the instruction."
+
+training:
+  pretraining_data: "76K DROID trajectories + 150K EgoDex trajectories (1:2 mix; EgoDex supervises track head only); world models pretrained on 76K DROID"
+  method: "VLAT pretrained 30K steps (batch 64, 4x H100) with L_flow(action) + lambda * L_flow(track); fine-tuned on 2K LIBERO episodes (5K steps) or 400 real Franka demos (50K steps); TWM/AWM fine-tuned 25K steps; VLAC reward model fine-tuned 4-5K steps"
+
+benchmarks:
+  libero:
+    libero_spatial: 100.0
+    libero_object: 99.0
+    libero_goal: 100.0
+    libero_long: 94.0
+    libero_avg: 98.3
+    source: "Paper Table 2 (row TrAct)"
+    date_reported: "2026-08-25"
+    eval_condition: "Fine-tuned on 2K LIBERO episodes; 10 rollout episodes per task (100 per suite), single seed; K=20 world-model-selected candidates"
+
+  libero_baselines:
+    pi05_spatial: 99.0
+    pi05_object: 98.0
+    pi05_goal: 96.0
+    pi05_long: 94.0
+    pi05_avg: 96.8
+    vlat_avg: 98.0
+    vlat_awm_avg: 98.0
+    source: "Paper Table 2 (baseline rows; pi0.5 fine-tuned by authors under the same protocol)"
+    date_reported: "2026-08-25"
+
+  libero_integral:
+    swap: 0.65
+    object: 0.60
+    task: 0.50
+    camera: 0.60
+    robot_init: 0.65
+    cross_embodiment_ur5: 0.50
+    average: 0.55
+    three_seed_mean: 0.547
+    source: "Paper Table 3 (row TrAct) and Table 6 (3-seed mean)"
+    date_reported: "2026-08-25"
+    eval_condition: "Authors' LIBERO-INTEGRAL benchmark: 20 tasks = 10 robustness tasks from LIBERO-PRO (swap/object/task) and LIBERO-Plus (camera/robot init, hardest level) + 10 UR5 cross-embodiment LIBERO-10 variants; success as fraction"
+
+  libero_integral_baselines:
+    pi05_average: 0.27
+    vlat_average: 0.44
+    vlat_awm_average: 0.49
+    vlat_awm_three_seed_mean: 0.490
+    source: "Paper Table 3 and Table 6 (baseline rows)"
+    date_reported: "2026-08-25"
+
+  real_world:
+    green_block_regular_bg: 0.7
+    green_block_different_bg: 0.7
+    pink_noodle_regular_bg: 1.0
+    pink_noodle_different_bg: 0.8
+    hotdog_bun_regular_bg: 0.8
+    hotdog_bun_different_bg: 0.6
+    close_cabinet_regular_bg: 0.8
+    close_cabinet_different_bg: 0.7
+    pour_pasta_regular_bg: 0.8
+    pour_pasta_different_bg: 0.7
+    average: 0.76
+    source: "Paper Table 4 (column TrAct)"
+    date_reported: "2026-08-25"
+    eval_condition: "Franka Panda, fine-tuned on 400 demos of 4 training tasks, evaluated on 5 unseen tasks x 2 backgrounds, 10 episodes each; success as fraction"
+
+  real_world_baselines:
+    pi05_average: 0.49
+    pi05_vlac_average: 0.65
+    vlat_average: 0.55
+    vlat_awm_average: 0.66
+    source: "Paper Table 4 (baseline columns)"
+    date_reported: "2026-08-25"
+
+eval_conditions:
+  libero: "Fine-tuned, 10 episodes per task, single seed"
+  libero_integral: "LIBERO-PRO/Plus robustness + UR5 cross-embodiment (authors' benchmark)"
+  real_world: "Franka Panda, 5 unseen tasks x 2 backgrounds"
+
+tags:
+  - flow_matching
+  - pi0.5
+  - visual-tracks
+  - world-model
+  - video-diffusion
+  - reward-model
+  - action-selection
+  - cross-embodiment
+  - libero
+  - real-world

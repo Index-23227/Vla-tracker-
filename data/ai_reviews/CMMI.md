@@ -95,7 +95,7 @@
 - **VLA backbone (Table 10)**: Qwen2.5-3B 91.8 / LLaVA-7B 92.1 / Janus-1.5B 92.2 — backbone 비의존.
 - **궤적 refinement 목적항 (Table 11)**: 전체 92.2; prior 제거 88.0, detection risk 제거 85.1, semantic risk 제거 85.6, smooth 제거 91.5.
 - **상호작용 방식 (Table 12)**: BEVFusion 90.3 PDMS / 85.7 EPDMS, LiDAR-only 91.0 / 86.4, w/o DCMT 92.0 / 86.9, w/o prompt interaction 90.1 / 86.0, 전체 92.2 / 87.0.
-- **AGOT·DCMT 구성요소 (Table 13)**: L_ot 제거 시 mAP 71.3, PDMS 91.1; L_reg 제거 시 mAP 72.0, PDMS 91.0; L_consist 제거 시 PDMS 91.8; L_unf 제거 시 PDMS 91.7.
+- **AGOT·DCMT 구성요소 (Table 13)**: AGOT의 두 loss 중 하나를 제거한 두 행은 mAP 72.0 / PDMS 91.0, mAP 71.3 / PDMS 91.1 (단, 표의 체크 표시와 본문 서술이 어느 행이 L_reg·L_ot 제거인지에 대해 서로 어긋나고, 본문 기술 감소폭도 PDMS 값과 0.1 차이 남). DCMT: L_consist 제거 시 mAP 73.0 / PDMS 91.8, L_unf 제거 시 mAP 73.2 / PDMS 91.7.
 - **속도–성능 (Figure 7)**: 1-step denoising 90.1 PDMS @ 11.5 samples/s, 5-step 92.23 PDMS @ 3.0 samples/s (WAM-Flow 2.0 samples/s).
 
 ---
