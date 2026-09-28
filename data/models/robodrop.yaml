@@ -1,0 +1,110 @@
+# Paper: RoboDrop: Curating VLA Post-Training Data via Local Gradient Compatibility
+# arXiv: 2609.10021
+
+name: RoboDrop
+full_name: "RoboDrop: Curating VLA Post-Training Data via Local Gradient Compatibility"
+organization: "Tsinghua University / Striding AI"
+date: "2026-09-09"
+paper_url: https://arxiv.org/abs/2609.10021
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5-Base (default); also GR00T and X-VLA for scoring-generality experiments"
+  llm: "PaliGemma-based VLM inside pi0.5"
+  action_head: "pi0.5 flow-matching action expert (unchanged); RoboDrop scores data with CountSketch-compressed (4096-d) action-expert gradients"
+  action_head_category: flow_matching
+  parameters: "pi0.5 (~3B); no new policy parameters"
+  key_innovation: "Data-curation framework for VLA post-training: during a one-epoch warm-up run, each candidate sample's flow-matching gradient is compared (cosine) with a context-conditioned local validation reference built from clean validation samples matched by task semantics (T5 instruction embedding) and visual context (top-10 DINO neighbours, softmax-weighted); references refreshed every M=200 steps. Sample scores are averaged per episode, filtered by fixed ratio or an optional BIC-selected GMM rule, and a fresh pi0.5 is post-trained on the retained episodes."
+
+training:
+  base_model: "pi0.5-Base (open-source)"
+  method: "One-epoch warm-up run for online gradient-compatibility scoring, then episode filtering and full post-training of a fresh copy of the pretrained policy on retained episodes plus clean validation episodes"
+  data: "LIBERO with 10% synthetic action/temporal corruption; Robomimic-MH (300 episodes/task); real-world ARX-arm dataset (4 tasks x 100 teleoperated episodes, 20 non-expert)"
+
+benchmarks:
+  real_world:
+    real_world_avg: 67.5
+    hang_cup: "9/20"
+    tidy_pen: "14/20"
+    stack_cup: "14/20"
+    drawer: "17/20"
+    source: "Paper Table 5, RoboDrop Automatic column (9/20, 14/20, 14/20, 17/20; Average SR 67.5)"
+    date_reported: "2026-09-09"
+    eval_condition: "pi0.5-Base post-trained on RoboDrop-curated data with automatic BIC filtering; ARX-series arms, 4 tasks, 20 rollouts per task"
+
+  real_world_fixed20_curation:
+    unfiltered: 35.0
+    behavior_retrieval: 58.75
+    datamil: 48.75
+    scizor: 45.0
+    qoq: 46.25
+    robodrop: 63.75
+    source: "Paper Table 5, Average SR (%) row, fixed 20% removal group"
+    eval_condition: "fresh pi0.5-Base post-trained on each method's curated data with a common 20% removal budget; 4 tasks x 20 rollouts"
+
+  real_world_robodrop_budget_variants:
+    fixed_10: 50.0
+    fixed_30: 61.25
+    automatic: 67.5
+    source: "Paper Table 5, Average SR (%) row, RoboDrop variants"
+    eval_condition: "RoboDrop with different removal budgets; 4 real tasks x 20 rollouts"
+
+  libero_temporal_corruption_curation:
+    libero_object: 95.0
+    libero_goal: 89.0
+    libero_spatial: 93.5
+    libero_10: 89.0
+    avg: 91.63
+    source: "Paper Table 7, Rollout success, RoboDrop column, Temporal rows (Average 91.63)"
+    eval_condition: "NON-STANDARD: LIBERO with 10% of episodes temporally corrupted (2 s action shift); lowest-scoring 10% removed, fresh pi0.5-Base post-trained. Not comparable to standard LIBERO"
+
+  libero_action_corruption_curation:
+    libero_object: 97.5
+    libero_goal: 95.0
+    libero_spatial: 93.5
+    libero_10: 94.5
+    avg: 95.13
+    source: "Paper Table 7, Rollout success, RoboDrop column, Action rows (Average 95.13)"
+    eval_condition: "NON-STANDARD: LIBERO with 10% of episodes corrupted by Gaussian action noise (0.25 sigma_a); lowest-scoring 10% removed, fresh pi0.5-Base post-trained. Not comparable to standard LIBERO"
+
+  libero_corruption_curation_baselines:
+    temporal_unfiltered: 84.00
+    temporal_random: 83.38
+    temporal_oracle: 95.25
+    action_unfiltered: 91.25
+    action_random: 92.00
+    action_oracle: 96.13
+    source: "Paper Table 7, Average rows (Unfiltered / Random / Oracle)"
+    eval_condition: "pi0.5-Base post-trained on corrupted LIBERO data without filtering, random 10% removal, or oracle removal of corrupted episodes"
+
+  libero10_curation_comparison:
+    length: 81.0
+    behavior_retrieval: 84.8
+    datamil: 88.0
+    scizor: 80.8
+    qoq: 88.0
+    robodrop: 91.8
+    source: "Paper Table 1, Curated success Avg. (T/A) on LIBERO-10"
+    eval_condition: "LIBERO-10 with temporal and action corruption, averaged over the two corruption types"
+
+  robomimic_mh_discrimination:
+    auroc: 88.33
+    best_balanced_accuracy: 81.83
+    source: "Paper Table 2, RoboDrop row"
+    eval_condition: "episode-level discrimination of proficient vs suboptimal demonstrations, 4 Robomimic-MH tasks, pi0.5-Base (data-quality metric, not policy success)"
+
+  real_world_nonexpert_discrimination:
+    auroc: 98.38
+    best_balanced_accuracy: 95.63
+    source: "Paper Table 4, RoboDrop row"
+    eval_condition: "episode-level non-expert identification on 4 real-robot tasks (data-quality metric, not policy success)"
+
+eval_conditions:
+  real_world: "ARX-series arms, 4 tasks (Hang Cup, Tidy Pen, Stack Cup, Drawer), 20 rollouts per task, pi0.5-Base post-trained on curated data"
+  libero_temporal_corruption_curation: "controlled 10% temporal corruption per suite"
+  libero_action_corruption_curation: "controlled 10% action corruption per suite"
+
+tags: [data-curation, data-selection, post-training, gradient-attribution, pi0.5, flow_matching, libero, robomimic, real-robot, bimanual]

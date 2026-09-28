@@ -1,0 +1,136 @@
+# Paper: HuRo: Robotizing Human Videos for Scalable VLA Pretraining
+# arXiv: 2609.10706
+
+name: HuRo
+full_name: "HuRo: Robotizing Human Videos for Scalable VLA Pretraining"
+organization: "RLWRLD / Yonsei University"
+date: "2026-09-09"
+paper_url: https://arxiv.org/abs/2609.10706
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "GR00T-N1.6-3B architecture (VLM backbone initialized from the official GR00T-N1.6-3B checkpoint)"
+  action_head: "DiT flow-matching action head trained from scratch; predicts H=40 action chunk of relative wrist poses (3D translation + 6D rotation) and absolute hand-joint targets for both hands"
+  action_head_category: flow_matching
+  parameters: "~3B"
+  key_innovation: "Robotization pipeline that converts heterogeneous egocentric human videos (Ego4D, EPIC-Kitchens, EgoDex, EgoVerse, Ego10K) into robot-aligned episodes: camera/hand estimation, PyRoKi retargeting of hand motion to robot joints (actions a_t = s_{t+1}), human-arm removal (SAM2 + ProPainter) and Isaac Sim robot overlay. Yields ~630K episodes / 142M frames (~1,317 h) used for end-to-end VLA pretraining with retargeted actions."
+
+training:
+  base_model: "GR00T-N1.6-3B (VLM only; action head from scratch)"
+  method: "Flow-matching pretraining on HuRo robotized episodes (80k steps, global batch 2048, AdamW lr 1e-4, visual encoder jointly fine-tuned), then downstream fine-tuning 30k steps, batch 128, cosine lr 1e-4"
+  data: "HuRo dataset: ~630K robotized episodes, 142.2M frames from five egocentric human-video sources, targeted at the ALLEX bimanual dexterous robot; downstream: 16-43 teleop demos per real task"
+
+benchmarks:
+  real_world:
+    allex_id_avg: 88.4
+    allex_ood_avg: 72.2
+    real_world_avg: 80.3
+    source: "Paper Appendix Table 2, Ours (100% PT) row"
+    date_reported: "2026-09-09"
+    eval_condition: "ALLEX bimanual dexterous robot, 4 real tasks (Apple Pick-and-Place, Cup Stacking, Cup-Noodle Handover, Microwave Loading); completion score %; overall = unweighted mean of ID avg and OOD avg"
+
+  real_world_allex_per_task:
+    apple_pick_place_id: 83.3
+    apple_pick_place_ood: 50.0
+    cup_stacking_id: 87.5
+    cup_stacking_ood: 79.2
+    cup_noodle_handover_id: 94.4
+    cup_noodle_handover_ood: 86.1
+    microwave_loading_ood: 73.3
+    source: "Paper Appendix Table 2, Ours (100% PT) row"
+    eval_condition: "per-task breakdown of the headline 100% PT model; Microwave Loading evaluated OOD only"
+
+  real_world_allex_baselines:
+    pi05_id_avg: 68.5
+    pi05_ood_avg: 28.0
+    pi05_overall: 48.2
+    gr00t_n16_id_avg: 66.7
+    gr00t_n16_ood_avg: 37.4
+    gr00t_n16_overall: 52.0
+    no_pretraining_0pct_id_avg: 68.1
+    no_pretraining_0pct_ood_avg: 34.9
+    no_pretraining_0pct_overall: 51.5
+    source: "Paper Appendix Table 2"
+    eval_condition: "baselines: pi0.5 and GR00T N1.6 fine-tuned from released checkpoints; 0% PT = same architecture without HuRo pretraining"
+
+  real_world_allex_data_scaling:
+    pt10_id_avg: 76.9
+    pt10_ood_avg: 59.5
+    pt10_overall: 68.2
+    pt50_id_avg: 78.2
+    pt50_ood_avg: 69.8
+    pt50_overall: 74.0
+    source: "Paper Appendix Table 2"
+    eval_condition: "ablation: 10% and 50% HuRo pretraining subsets (fixed steps and batch size)"
+
+  real_world_allex_no_overlay:
+    id_avg: 89.4
+    ood_avg: 55.7
+    overall: 72.5
+    source: "Paper Appendix Table 2, Ours (no-overlay) row"
+    eval_condition: "ablation: 100% PT data with original human-video observations (no visual robotization)"
+
+  real_world_allex_egodex_only:
+    id_avg: 63.9
+    ood_avg: 54.2
+    source: "Paper Appendix D.2 text"
+    eval_condition: "ablation: full EgoDex-only subset (78.9M frames) vs Mixed 50% (78.2/69.8)"
+
+  diverse_pick_place_action_supervision:
+    pt_visual_action_id: 61.1
+    pt_visual_action_ood: 50.0
+    source: "Paper Sec. 4.4 text (Fig. 5b)"
+    eval_condition: "Diverse Pick-and-Place, 36 ID / 18 OOD trials; full end-to-end pretraining (No PT and Visual-Only values shown only in figure)"
+
+  diverse_pick_place_robotization_comparison:
+    no_pt_id: 63.9
+    no_pt_ood: 25.0
+    fixed_eef_masquerade_style_id: 75.0
+    fixed_eef_masquerade_style_ood: 50.0
+    fixed_eef_hand_id: 80.6
+    fixed_eef_hand_ood: 61.1
+    huro_eef_hand_id: 86.1
+    huro_eef_hand_ood: 63.9
+    source: "Paper Appendix Table 3"
+    eval_condition: "shared 2.4M-frame EPIC-Kitchens annotations; separate physical environment"
+
+  diverse_pick_place_multi_embodiment:
+    allex_only_id: 86.1
+    allex_only_ood: 63.9
+    allex_openarm_joint_id: 91.7
+    allex_openarm_joint_ood: 77.8
+    source: "Paper Appendix E.3 text"
+    eval_condition: "joint ALLEX+OpenArm robotized pretraining on the same EPIC-Kitchens annotations"
+
+  real_world_human_domain_comparison:
+    no_pt_cup_stacking: 31.9
+    no_pt_cup_noodle_handover: 16.7
+    human_hrdt_cup_stacking: 5.6
+    human_hrdt_cup_noodle_handover: 37.5
+    human_vitra_cup_stacking: 0.0
+    human_vitra_cup_noodle_handover: 9.7
+    huro_100pt_cup_stacking: 70.8
+    huro_100pt_cup_noodle_handover: 66.7
+    source: "Paper Appendix Table 4"
+    eval_condition: "OOD evaluation in a separate environment with unseen background"
+
+  real_world_openarm_transfer:
+    huro_pt_id_avg: 70.8
+    huro_pt_ood_avg: 75.0
+    huro_pt_overall: 72.9
+    no_pt_overall: 49.0
+    human_hrdt_overall: 65.6
+    human_vitra_overall: 22.9
+    visual_only_overall: 43.8
+    no_overlay_overall: 62.5
+    source: "Paper Appendix Table 7"
+    eval_condition: "OpenArm + XHand1 Fruit Pick-and-Place, 36 demos, 8 rollouts per condition; ALLEX-targeted HuRo pretraining transferred"
+
+eval_conditions:
+  real_world: "ALLEX bimanual dexterous robot, 4 tasks, ID (12 rollouts) and OOD (10-24 rollouts) completion scores"
+  pretraining: "HuRo 630K robotized episodes; downstream fine-tuning 30k steps per task suite"
+
+tags: [human-video, robotization, data-scaling, pretraining, gr00t, flow-matching, dexterous, bimanual, humanoid, real-robot, allex, openarm, retargeting]

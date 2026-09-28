@@ -1,0 +1,113 @@
+# Paper: IMLE-VLA: Fast Single-Step Action Generation for Vision-Language-Action Policies
+# arXiv: 2609.10915
+
+name: IMLE-VLA
+full_name: "IMLE-VLA: Fast Single-Step Action Generation for Vision-Language-Action Policies"
+organization: "Simon Fraser University / University of Pennsylvania / Amii"
+date: "2026-09-10"
+paper_url: https://arxiv.org/abs/2609.10915
+code_url: "https://kianhk6.github.io/IMLE-VLA/"
+venue: arXiv
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (PaliGemma-based VLM, ~3B), frozen"
+  action_head: "Single-step conditional generator G_theta(f_VLM(o_t), z) initialized from the pi0.5 action expert; maps Gaussian noise to a full action chunk in one forward pass (replaces 10-step flow-matching Euler integration)"
+  action_head_category: other
+  parameters: "~3B (pi0.5); only the action head is trained"
+  key_innovation: "Conditional Implicit Maximum Likelihood Estimation (cIMLE) objective for the VLA action head: m=2 noise samples per example, nearest-neighbour assignment to the ground-truth chunk, L2 update on the winner only. Mode-covering single-step generation without a teacher; 55 Hz vs 15 Hz for pi0.5 (3.67x), up to 11x action throughput with H=30."
+
+training:
+  base_model: "pi0.5"
+  method: "Fine-tune the action head from the pi0.5 checkpoint with the cIMLE objective (sample factor m=2), VLM backbone frozen"
+  data: "LIBERO (unfiltered) for simulation; DROID for real-world Franka experiments"
+  hardware: "NVIDIA L40S (inference benchmarking); A6000 for real-robot deployment"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.0
+    libero_object: 99.8
+    libero_goal: 98.2
+    libero_long: 96.0
+    libero_avg: 98.0
+    source: "Paper Table II, IMLE-VLA H=10 row"
+    date_reported: "2026-09-10"
+    eval_condition: "Standard LIBERO 4 suites, 50 episodes per task, execution horizon H=10"
+
+  libero_h30:
+    libero_spatial: 97.2
+    libero_object: 99.0
+    libero_goal: 96.2
+    libero_long: 95.8
+    avg: 97.1
+    source: "Paper Table II, IMLE-VLA H=30 row"
+    eval_condition: "execution horizon H=30 (11.0x action throughput vs pi0.5 H=10)"
+
+  libero_baselines:
+    pi05_h10_avg: 97.5
+    pi05_h30_avg: 96.1
+    pi0_avg: 94.2
+    openvla_oft_avg: 94.5
+    cogvla_avg: 97.5
+    smolvla_avg: 87.3
+    shallow_pi05_l9_avg: 96.8
+    shallow_pi05_l6_avg: 94.5
+    source: "Paper Table II"
+    eval_condition: "pi0.5, IMLE-VLA and OpenVLA-OFT measured by the authors; others as reported"
+
+  inference_speed:
+    imle_vla_hz: 55
+    pi05_jax_hz: 15
+    pi05_pytorch_compile_hz: 20
+    pi05_triton_hz: 25
+    imle_vla_h30_action_throughput_hz: 1650
+    pi05_h10_action_throughput_hz: 150
+    source: "Paper Tables I and III"
+    eval_condition: "NVIDIA L40S, forward passes per second averaged over 50 episodes across 10 LIBERO-Long tasks"
+
+  libero_vla_wall_clock:
+    pi05_h10_vla_wc_s: 1.03
+    imle_vla_h10_vla_wc_s: 0.28
+    imle_vla_h30_vla_wc_s: 0.10
+    source: "Paper Table IV"
+    eval_condition: "VLA-only wall-clock per successful LIBERO episode"
+
+  real_world:
+    pineapple_in_bowl_successes_of_20: 19
+    swap_pineapple_cube_successes_of_20: 18
+    pineapple_in_cabinet_successes_of_20: 15
+    pineapple_on_moving_plate_successes_of_20: 16
+    source: "Paper Table V, Ours column"
+    date_reported: "2026-09-10"
+    eval_condition: "Franka Emika Panda, trained on DROID, deployed zero-shot; 20 episodes per task; H=12 at 55 Hz"
+
+  real_world_pi05_baseline:
+    pineapple_in_bowl_successes_of_20: 15
+    swap_pineapple_cube_successes_of_20: 15
+    pineapple_in_cabinet_successes_of_20: 12
+    pineapple_on_moving_plate_successes_of_20: 12
+    source: "Paper Table V, pi0.5 column"
+    eval_condition: "baseline: pi0.5 JAX, H=8 at 15 Hz"
+
+  real_world_efficiency:
+    pineapple_in_bowl_vla_wc_ours_s: 18.56
+    pineapple_in_bowl_vla_wc_pi05_s: 123
+    swap_pineapple_cube_vla_wc_ours_s: 31.1
+    swap_pineapple_cube_vla_wc_pi05_s: 178.3
+    pineapple_in_cabinet_vla_wc_ours_s: 99.4
+    pineapple_in_cabinet_vla_wc_pi05_s: 389.4
+    pineapple_on_moving_plate_vla_wc_ours_s: 16.7
+    pineapple_on_moving_plate_vla_wc_pi05_s: 89.5
+    jerk_ratio_pineapple_in_bowl: 2.7
+    jerk_ratio_swap_pineapple_cube: 2.2
+    jerk_ratio_pineapple_in_cabinet: 3.0
+    jerk_ratio_pineapple_on_moving_plate: 2.7
+    source: "Paper Table V"
+    eval_condition: "VLA-only wall-clock per successful episode; jerk ratio = pi0.5 mean proprioceptive jerk / ours"
+
+eval_conditions:
+  libero: "standard 4 suites, 50 episodes per task, H=10"
+  real_world: "Franka Panda, DROID-trained, 4 tasks x 20 episodes"
+
+tags: [single-step, imle, cimle, fast-inference, action-head, pi0.5, mode-coverage, libero, libero-plus, real-robot, franka, droid]

@@ -1,0 +1,70 @@
+# Paper: ObstaDiff: Generalizable Diffusion Policy Learning via Obstacle-aware Representations
+# arXiv: 2609.10918
+
+name: ObstaDiff
+full_name: "ObstaDiff: Generalizable Diffusion Policy Learning via Obstacle-aware Representations"
+organization: "University of California, Los Angeles"
+date: "2026-09-10"
+paper_url: https://arxiv.org/abs/2609.10918
+code_url: null
+venue: arXiv
+open_source: false
+model_type: visuomotor_policy
+
+architecture:
+  backbone: "Lightweight StructuredObsEncoder: semantic branch (bg/obstacle/target masks) and depth branch, each 4x Conv-GroupNorm-ReLU + spatial softmax (64-D + 32-D keypoint coordinates) concatenated with 7-D EEF pose (103-D per step, 206-D for 2 obs steps); TOB masks from fine-tuned YOLOv8s-Worldv2 + MobileSAM"
+  llm: null
+  action_head: "Conditional diffusion U-Net (DDIM, squared-cosine schedule, epsilon-prediction, K=100 steps) predicting 16-step 7-D Cartesian EEF pose sequences, executing 8; alignment stage only, followed by nearest-neighbour replay of demonstrated interaction trajectories at a target-centred bottleneck"
+  action_head_category: diffusion
+  parameters: "not stated"
+  key_innovation: "Target-obstacle-background (TOB) four-channel observation (three semantic masks + normalized depth) encoded by a structure-aware lightweight encoder instead of a ResNet-18 image backbone, conditioning a diffusion policy for obstacle-aware approach in cluttered greenhouse scenes; manipulation decomposed into learned alignment to a bottleneck pose and replay-based interaction selected by a gated nearest-neighbour switching rule."
+
+training:
+  base_model: null
+  method: "Imitation learning from scratch (diffusion policy), 250 epochs, AdamW lr 1e-4, batch 32, EMA, lowest-validation-loss checkpoint"
+  data: "90 expert alignment demonstrations via Sawyer gravity-compensation teaching (purple pepper, 3 obstacle configurations x 30), plus 26-trajectory interaction replay library"
+
+benchmarks:
+  real_world:
+    tpg_success: 75.00
+    olg_success: 71.43
+    tag_success: 80.00
+    real_world_avg: 75.41
+    source: "Paper Table 1, ObstaDiff row, TSR (%)"
+    date_reported: "2026-09-10"
+    eval_condition: "7-DoF Sawyer with eye-in-hand RealSense D455 in indoor greenhouse; pepper-reaching with plant obstacles; 61 trials (TPG n=20, OLG n=21, TAG n=20, TAG uses unseen green peppers); mean pooled over 61 trials"
+
+  real_world_collision_rate:
+    tpg_ocr: 5.00
+    olg_ocr: 19.05
+    tag_ocr: 0.00
+    mean_ocr: 8.20
+    tct_seconds: 15.57
+    smoothness_1e4: 1.13
+    source: "Paper Table 1, ObstaDiff row, OCR (%), TCT (s), Smooth (1e-4)"
+    eval_condition: "lower is better; TCT and smoothness over successful TPG trials"
+
+  real_world_baselines_tsr:
+    act_rgb: 45.90
+    act_tob: 40.98
+    dp_rgb: 49.18
+    dp_rgbd: 50.82
+    dp_tob: 45.90
+    obstadiff: 75.41
+    source: "Paper Table 1, TSR Mean column"
+    eval_condition: "all methods trained on the same 90 demonstrations with the same switching rule and replay library; 61 real trials each"
+
+  real_world_baselines_ocr:
+    act_rgb: 14.75
+    act_tob: 11.48
+    dp_rgb: 26.23
+    dp_rgbd: 26.23
+    dp_tob: 27.87
+    obstadiff: 8.20
+    source: "Paper Table 1, OCR Mean column"
+    eval_condition: "obstacle collision rate (%), lower is better"
+
+eval_conditions:
+  real_world: "Sawyer + eye-in-hand D455, greenhouse testbed, 3 generalization settings (target pose, obstacle layout, target appearance), 61 trials per method"
+
+tags: [diffusion-policy, imitation-learning, obstacle-avoidance, agriculture, greenhouse, structured-representation, rgb-d, eye-in-hand, sawyer, real-robot, diffusion]

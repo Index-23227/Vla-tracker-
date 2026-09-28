@@ -1,0 +1,138 @@
+# Paper: Frequency-Conditioned Flow Matching for Vision-Language-Action Models
+# arXiv: 2609.10405
+
+name: FreqFM
+full_name: "Frequency-Conditioned Flow Matching for Vision-Language-Action Models"
+organization: "AGIBOT / Xi'an Jiaotong University"
+date: "2026-09-09"
+paper_url: https://arxiv.org/abs/2609.10405
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (primary); also instantiated on pi0 (LeRobot codebase)"
+  llm: "PaliGemma (Gemma-2B) as in pi0 / pi0.5"
+  action_head: "Unmodified flow-matching action expert operating on DCT-II coefficients of the action chunk along the horizon (inverse DCT after ODE integration)"
+  action_head_category: flow_matching
+  parameters: "same as pi0.5 / pi0 plus per-(frequency, dof) learnable log-scales"
+  key_innovation: "Frequency as an explicit conditioning dimension across the whole flow-matching pipeline: (1) spectrum-matched source N(0, diag(P_k,d)) from training-action power spectra, (2) PSD-normalized (rho=0.25) likelihood-based adaptive multi-task weighting per frequency, (3) Spectral Transport-Budgeted CFG that radially clips the CFG residual per frequency into a ball scaled by the reference transport scale (E[u^2] = 2P)."
+
+training:
+  base_model: "pi0.5 (and pi0)"
+  method: "Fine-tuning with frequency-domain flow matching, 20k steps, global batch 64, condition dropout 0.05 for CFG"
+  data: "LIBERO; VLA-Arena; AgiBot Expedition A2 real-robot demonstrations (6 tasks)"
+  hardware: "2x NVIDIA A800"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.6
+    libero_object: 99.4
+    libero_goal: 97.6
+    libero_long: 95.8
+    libero_avg: 97.9
+    libero_plus_camera: 58.8
+    libero_plus_robot: 77.2
+    libero_plus_language: 81.5
+    libero_plus_light: 97.0
+    libero_plus_background: 89.1
+    libero_plus_noise: 53.5
+    libero_plus_layout: 84.4
+    libero_plus_total: 75.8
+    source: "Paper Table 1 and Table 2, FreqFM (pi0.5) rows"
+    date_reported: "2026-09-09"
+    eval_condition: "Standard LIBERO 4 suites, 50 episodes per task; LIBERO-Plus zero-shot from LIBERO-trained checkpoint"
+
+  libero_pi0_variant:
+    libero_spatial: 95.8
+    libero_object: 97.8
+    libero_goal: 95.6
+    libero_long: 95.2
+    avg: 96.1
+    libero_plus_total: 68.2
+    source: "Paper Table 1 and Table 2, FreqFM (pi0) rows"
+    eval_condition: "FreqFM instantiated on pi0"
+
+  libero_baselines:
+    pi05_reproduced_libero_avg: 96.7
+    pi05_reproduced_libero_plus_total: 66.5
+    pi0_reproduced_libero_avg: 95.4
+    pi0_reproduced_libero_plus_total: 62.7
+    source: "Paper Tables 1 and 2 (paired temporal flow-matching baselines, same data/budget)"
+
+  vla_arena:
+    static_obstacles: 99.3
+    cautious_grasp: 46.7
+    hazard_avoidance: 84.7
+    state_preservation: 92.0
+    dynamic_obstacles: 78.7
+    static_distractors: 58.7
+    dynamic_distractors: 93.3
+    preposition_combinations: 25.3
+    task_workflows: 55.3
+    unseen_objects: 63.3
+    long_horizon: 53.3
+    total: 68.2
+    source: "Paper Table 3, FreqFM (pi0.5) row"
+    date_reported: "2026-09-09"
+    eval_condition: "VLA-Arena, 11 tasks, each averaged over levels L0-L2, 10 episodes per instance"
+
+  vla_arena_baselines:
+    pi05_reproduced_total: 64.0
+    freqfm_pi0_total: 57.3
+    pi0_reproduced_total: 54.7
+    source: "Paper Table 3"
+
+  ablation:
+    time_domain_components_libero: 97.0
+    time_domain_components_libero_plus: 69.0
+    wo_matched_source_libero: 97.2
+    wo_matched_source_libero_plus: 71.6
+    wo_adaptive_objective_libero: 97.9
+    wo_adaptive_objective_libero_plus: 72.2
+    wo_transport_budget_libero: 97.8
+    wo_transport_budget_libero_plus: 73.9
+    source: "Paper Table 5"
+    eval_condition: "pi0.5 backbone ablations"
+
+  cfg_budget_jerk:
+    standard_cfg_mean_abs_jerk: 0.442
+    stb_cfg_mean_abs_jerk: 0.193
+    source: "Paper Ablations and Analysis text"
+    eval_condition: "LIBERO executed arm trajectories"
+
+  real_world:
+    folder_filing: 66.7
+    toy_storage: 90.0
+    kitchen_tidy: 60.0
+    table_cleanup: 66.7
+    cup_stacking: 53.3
+    stamp_handover: 70.0
+    real_world_avg: 67.8
+    source: "Paper Table 4, FreqFM SR column"
+    date_reported: "2026-09-09"
+    eval_condition: "AgiBot Expedition A2 humanoid, 6 tasks x 30 trials, full-task success rate"
+
+  real_world_subtask:
+    folder_filing: 77.8
+    toy_storage: 94.2
+    kitchen_tidy: 72.5
+    table_cleanup: 78.3
+    cup_stacking: 71.7
+    stamp_handover: 79.3
+    avg: 79.0
+    source: "Paper Table 4, FreqFM Sub-SR column"
+    eval_condition: "subtask success rate (partial-progress credit)"
+
+  real_world_pi05_baseline:
+    sr_avg: 57.8
+    sub_sr_avg: 70.6
+    source: "Paper Table 4, pi0.5 columns"
+
+eval_conditions:
+  libero: "standard 4 suites; LIBERO-Plus zero-shot"
+  vla_arena: "11 tasks, L0-L2"
+  real_world: "AgiBot Expedition A2, 6 tasks x 30 trials"
+
+tags: [frequency, dct, flow-matching, source-distribution, classifier-free-guidance, pi0.5, pi0, libero, libero-plus, vla-arena, real-robot, agibot, humanoid]

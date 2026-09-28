@@ -1,0 +1,173 @@
+# Paper: UniMPA: A Unified Memory-Prediction-Action Model via Action-Grounded Transition Modeling
+# arXiv: 2609.11875
+
+name: UniMPA
+full_name: "UniMPA: A Unified Memory-Prediction-Action Model via Action-Grounded Transition Modeling"
+organization: "Harbin Institute of Technology (Shenzhen) / Nanyang Technological University (S-Lab)"
+date: "2026-09-10"
+paper_url: https://arxiv.org/abs/2609.11875
+code_url: "https://JiuTian-VL.github.io/UniMPA-page/"
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (PaliGemma-2B VLM + 311M Gemma action expert) extended with an 18-layer World Expert (hidden 1024, 16 zero-initialized transition queries) into a three-stream transformer"
+  llm: "PaliGemma-2B"
+  action_head: "Flow-matching action expert (10 Euler steps) whose Gaussian source is shifted by a retrieved action prototype (Prototype-Biased Flow), conditioned on World-Expert transition tokens"
+  action_head_category: flow_matching
+  parameters: "~2B VLM + 311M action expert + World Expert + memory encoders"
+  key_innovation: "Anticipate-ground-refine process on an action-grounded transition interface: (1) Persistent-Selective Future Prediction (persistent V-JEPA 2 latent targets + Trigger-Gated pixel decoding) shapes World-Expert transition tokens; (2) bidirectional Visual-Action / Action-Visual Memory Banks (stateful Mamba temporal values, retrieval-simulation pretraining, coarse-to-fine temporal retrieval); (3) Prototype-Biased Flow shifts the flow source toward the retrieved action manifold."
+
+training:
+  base_model: "pi0.5"
+  method: "Stage 1: memory-bank pretraining (future reconstruction + retrieval simulation + cross-modal pairing, 10 epochs). Stage 2: memory frozen, policy fine-tuned with L_act + lambda_lat L_lat + lambda_pix L_pix (AdamW lr 5e-5, 20-30k steps) using 25-50% of pi0.5 training epochs"
+  data: "LIBERO, RoboTwin 2.0 (clean), VLABench, real-world demos on GALAXEA R1 Lite and AgileX Cobot Magic (50-100 episodes per task)"
+  hardware: "4-16 NVIDIA Pro6000 GPUs"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.8
+    libero_goal: 98.8
+    libero_long: 96.0
+    libero_avg: 98.6
+    libero_plus_camera: 75.7
+    libero_plus_robot: 73.0
+    libero_plus_language: 84.6
+    libero_plus_light: 96.8
+    libero_plus_background: 94.5
+    libero_plus_noise: 90.9
+    libero_plus_layout: 87.3
+    libero_plus_avg: 85.3
+    libero_plus_spatial: 91.0
+    libero_plus_object: 89.7
+    libero_plus_goal: 84.3
+    libero_plus_long: 76.5
+    source: "Paper Table III (LIBERO) and Tables II / V (LIBERO-Plus), UniMPA rows"
+    date_reported: "2026-09-10"
+    eval_condition: "Standard LIBERO 4 suites (2,000 rollouts), 25% of pi0.5 training epochs; LIBERO-Plus zero-shot, 10,030 rollouts"
+
+  libero_baselines:
+    pi05_libero_avg: 96.9
+    x_vla_libero_avg: 98.1
+    pi05_libero_plus_avg: 73.6
+    cosmos_policy_libero_plus_avg: 79.7
+    futurevla_libero_plus_avg: 79.7
+    source: "Paper Tables II and III (reported values)"
+
+  robotwin_v2_hard_11task:
+    adjust_bottle: 80
+    dump_bin_bigbin: 62
+    grab_roller: 84
+    move_playingcard_away: 46
+    open_laptop: 67
+    place_burger_fries: 40
+    place_empty_cup: 57
+    place_object_scale: 38
+    place_phone_stand: 37
+    shake_bottle_horizontally: 95
+    turn_switch: 34
+    avg: 58.2
+    source: "Paper Table IV, UniMPA row; average from Sec. IV-C3 text"
+    date_reported: "2026-09-10"
+    eval_condition: "RoboTwin 2.0, 11-task subset, trained on Clean, evaluated zero-shot on Randomized (Hard), 100 rollouts per task, 50% of pi0.5 epochs"
+
+  robotwin_v2_hard_44task:
+    avg: 35.84
+    source: "Paper Appendix C text (Table XXI)"
+    eval_condition: "RoboTwin 2.0, 44 tasks, Clean-trained, Randomized (Hard) zero-shot, 100 rollouts per task"
+
+  robotwin_v2_hard_11task_baselines:
+    pi05_place_object_scale: 20
+    pi05_place_phone_stand: 7
+    pi05_move_playingcard_away: 14
+    source: "Paper Table IV, pi0.5 row; text states UniMPA exceeds HALO by 25.7 and pi0.5 by 18.5 points on the 11-task average"
+
+  vlabench:
+    select_painting: 38.0
+    select_book: 59.1
+    select_drink: 51.0
+    select_chemistry_tube: 41.7
+    add_condiment: 52.0
+    insert_flower: 22.0
+    avg: 44.0
+    source: "Paper Table VI, UniMPA row; average from Sec. IV-C4 text"
+    eval_condition: "VLABench 6 tasks; pi0.5 average is 4.3 points lower"
+
+  real_world:
+    tsr: 77.7
+    csr: 86.3
+    source: "Paper Sec. IV-D1 text / Table VII (GALAXEA R1 Lite)"
+    date_reported: "2026-09-10"
+    eval_condition: "GALAXEA R1 Lite, 21 tasks in 7 suites, 25 trials per task; TSR = final-checkpoint success, CSR = cumulative checkpoint success"
+
+  real_world_galaxea_suites_tsr:
+    a_semantic_rearrangement: 80.0
+    b_articulated_container: 84.0
+    c_precision_assembly: 80.0
+    d_deformable_tool: 74.7
+    e_bimanual_coordination: 82.7
+    f_dynamic_reactive: 70.7
+    g_long_horizon_recovery: 72.0
+    source: "Paper Table VII, UniMPA rows, Average TSR"
+    eval_condition: "per-suite breakdown of the GALAXEA evaluation"
+
+  real_world_galaxea_baselines:
+    pi05_tsr: 65.3
+    pi05_csr: 75.6
+    openvla_oft_tsr: 45.7
+    openvla_oft_csr: 58.1
+    source: "Paper Sec. IV-D1 text (reproduced baselines)"
+
+  real_world_agilex:
+    fruit_placement_tsr: 64.0
+    microwave_manipulation_tsr: 80.0
+    block_stacking_tsr: 76.0
+    towel_folding_tsr: 76.0
+    bimanual_transfer_tsr: 80.0
+    conveyor_interception_tsr: 76.0
+    stack_recovery_tsr: 72.0
+    avg_tsr: 74.9
+    avg_csr: 86.4
+    source: "Paper Table VIII, UniMPA row"
+    eval_condition: "AgileX Cobot Magic, 7 tasks x 25 trials"
+
+  real_world_agilex_baselines:
+    pi05_avg_tsr: 62.3
+    pi05_avg_csr: 74.9
+    openvla_oft_avg_tsr: 37.1
+    openvla_oft_avg_csr: 55.2
+    source: "Paper Table VIII (reproduced baselines)"
+
+  ablation_libero_avg:
+    only_latent_prediction: 95.3
+    only_pixel_prediction: 96.9
+    dense_pixel_prediction: 97.3
+    random_gate: 96.0
+    wo_memory: 94.5
+    wo_visual_action_bank: 96.5
+    wo_action_visual_bank: 97.1
+    wo_temporal_modeling: 95.9
+    current_state_reconstruction: 96.1
+    nn_action_copy: 91.3
+    wo_action_proposer: 96.2
+    prior_as_condition_only: 97.0
+    full: 98.6
+    source: "Paper Tables IX-XIV, Avg. column"
+    eval_condition: "component ablations on LIBERO"
+
+  ablation_real_world_agilex_tsr:
+    wo_memory: 61.1
+    only_latent_prediction: 64.6
+    nn_action_copy: 52.0
+    full: 74.9
+    source: "Paper Tables IX, XI, XIV, RW TSR column"
+
+eval_conditions:
+  libero: "standard 4 suites, 25% of pi0.5 training epochs"
+  libero_plus: "zero-shot, 7 perturbations, 10,030 rollouts"
+  robotwin_v2: "Clean-trained, Randomized (Hard) zero-shot, 11-task headline subset and 44-task appendix"
+  real_world: "GALAXEA R1 Lite 21 tasks and AgileX Cobot Magic 7 tasks, 25 trials each"
+
+tags: [memory, future-prediction, world-model, world-expert, retrieval, prototype-biased-flow, v-jepa2, mamba, pi0.5, flow-matching, libero, libero-plus, robotwin_v2, vlabench, real-robot, bimanual]

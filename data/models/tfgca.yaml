@@ -1,0 +1,115 @@
+# Paper: Time-Frequency Geometric Cross-Attention for Chunked Vision-Language-Action Models
+# arXiv: 2609.09925
+
+name: TFGCA
+full_name: "Time-Frequency Geometric Cross-Attention for Chunked Vision-Language-Action Models"
+organization: "Not stated in the paper (no affiliations printed)"
+date: "2026-09-09"
+paper_url: https://arxiv.org/abs/2609.09925
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (lerobot/pi05_base, ~4B)"
+  llm: "PaliGemma (Gemma-2B) as in pi0.5"
+  action_head: "pi0.5 flow-matching action expert with a TFGCA module (~4.23M params) inserted between the transformer's action-token outputs and the linear velocity head"
+  action_head_category: flow_matching
+  parameters: "~4B + 4.23M (TFGCA)"
+  key_innovation: "Drop-in time-frequency geometric cross-attention: hidden action tokens are projected to action space (with an auxiliary alignment loss), decomposed per dimension by a learnable stationary wavelet transform (db2 init) into time-frequency tokens, and each time token cross-attends to them using a learnable blend of dot-product softmax and wedge-product-magnitude softmax (sensitive to near-orthogonal directions). Zero-initialized output projection makes it identity at attachment."
+
+training:
+  base_model: "pi0.5 (lerobot/pi05_base)"
+  method: "Joint fine-tuning of pi0.5 + TFGCA with L = L_FM + lambda * L_align; AdamW lr 2.5e-5 cosine to 2.5e-6, 30k steps, global batch 64, bf16"
+  data: "lerobot/libero; lerobot/robotwin_unified (clean demos only, 30k steps per task); in-house AgiBot A2 data for 3 real tasks"
+  hardware: "2x NVIDIA A800 80GB (~26 h LIBERO, ~28 h RoboTwin per job)"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.5
+    libero_object: 99.4
+    libero_goal: 97.7
+    libero_long: 97.0
+    libero_avg: 98.2
+    libero_plus_camera: 51.5
+    libero_plus_robot: 73.4
+    libero_plus_language: 81.8
+    libero_plus_light: 96.4
+    libero_plus_background: 87.8
+    libero_plus_noise: 52.3
+    libero_plus_layout: 81.7
+    libero_plus_total: 73.0
+    source: "Paper Table 1 (TFGCA full) and Table 2 (TFGCA ours, 30k)"
+    date_reported: "2026-09-09"
+    eval_condition: "Standard LIBERO 4 suites; LIBERO-Plus zero-shot from the LIBERO-trained model"
+
+  libero_ablation:
+    pi05_reported_avg: 96.9
+    pi05_reproduced_avg: 96.7
+    wo_swt_avg: 97.7
+    wo_geometry_avg: 97.8
+    wo_alignment_avg: 97.1
+    source: "Paper Table 1"
+    eval_condition: "ablations trained on the reproduced pi0.5 under the same protocol"
+
+  libero_plus_ablation:
+    pi05_reproduced_total: 66.7
+    wo_swt_total: 72.1
+    wo_geometry_total: 69.7
+    wo_alignment_total: 71.9
+    source: "Paper Table 2"
+    eval_condition: "LIBERO-Plus Total, same protocol"
+
+  robotwin_v2_6task_clean:
+    open_microwave: 88
+    stamp_seal: 19
+    handover_block: 72
+    turn_switch: 54
+    stack_bowls_three: 74
+    click_bell: 83
+    avg: 65.0
+    source: "Paper Table 3, TFGCA (ours) column, clean values"
+    eval_condition: "RoboTwin 2.0 six-task subset, Aloha-AgileX, trained on clean demos 30k steps per task, 100 evaluations each, clean setting"
+
+  robotwin_v2_6task_randomized:
+    open_microwave: 36
+    stamp_seal: 3
+    handover_block: 11
+    turn_switch: 61
+    stack_bowls_three: 59
+    click_bell: 86
+    avg: 42.7
+    source: "Paper Table 3, TFGCA (ours) column, randomized values"
+    eval_condition: "same six tasks, zero-shot under domain randomization (never seen in training)"
+
+  robotwin_v2_6task_pi05_baseline:
+    clean_avg: 61.3
+    randomized_avg: 14.2
+    source: "Paper Table 3, pi0.5 column"
+    eval_condition: "baseline: pi0.5 under identical protocol"
+
+  real_world:
+    soap_into_box_successes_of_20: 6
+    plush_toys_into_basket_successes_of_20: 19
+    pull_a_tissue_successes_of_20: 12
+    real_world_avg: 61.67
+    source: "Paper Table 4, TFGCA column"
+    date_reported: "2026-09-09"
+    eval_condition: "AgiBot A2 real robot, 3 tasks x 20 trials; overall success 37/60"
+
+  real_world_pi05_baseline:
+    soap_into_box_successes_of_20: 4
+    plush_toys_into_basket_successes_of_20: 17
+    pull_a_tissue_successes_of_20: 9
+    overall: 50.00
+    source: "Paper Table 4, pi0.5 column"
+    eval_condition: "baseline: pi0.5, same data and steps"
+
+eval_conditions:
+  libero: "standard 4 suites; chunk/exec length 10; SWT 1 level"
+  libero_plus: "zero-shot from LIBERO checkpoint, 7 perturbation families"
+  robotwin_v2: "6-task subset, clean training only, 100 evals per task, clean and randomized"
+  real_world: "AgiBot A2, 3 tasks x 20 trials"
+
+tags: [wavelet, frequency, geometric-attention, wedge-product, action-chunking, pi0.5, flow-matching, libero, libero-plus, robotwin_v2, real-robot, agibot]
