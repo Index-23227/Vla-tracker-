@@ -17,11 +17,11 @@
 - 정책이 action chunk를 제안 → world model이 미래 8프레임 생성 → reward model이 성공 여부 평가 → HAM이 환각 점수 산출 → Reward-Soft로 보상 조정 → GRPO 업데이트.
 
 ### 2.2 Hallucination-Aware Model (HAM)
-- 조건 프레임과 VLA action을 입력으로 받아 생성 영상 chunk의 환각 정도를 회귀. 관측된 미래 프레임이 필요 없어 상상 rollout 중에도 사용 가능.
-- 학습 타깃은 여러 지표(이미지 품질, DINO 유사도, trajectory 일관성, depth 불일치 등)를 결합한 composite proxy.
+- 입력: 예측된 8프레임 chunk, 조건 action chunk, 현재 관측, rollout 초기 anchor 이미지. Frozen DINOv3 encoder + Context/Action Projector + 4-layer Fusion Transformer(action→visual cross-attn, self-attn, FFN) + learnable query + MLP/sigmoid로 chunk-level 점수 출력, MSE로 학습.
+- 학습 타깃: 성공/실패 궤적의 기록된 action으로 영상을 생성해 실제 관측과 비교, DINOv3 유사도·depth 일관성·optical-flow trajectory 일관성·MUSIQ 품질 4개 지표를 min-max 정규화 후 h* = 1 − 평균(Eq. 1). 관측 미래 프레임은 타깃 구성에만 쓰이고 추론 시에는 불필요.
 
 ### 2.3 Reward-Soft + GRPO
-- 최종 보상 = 원 보상을 환각 점수와 penalty 계수 α로 soft하게 감쇠(Eq. 1). 그룹 단위 reward normalization 후 GRPO loss와 KL 정규화(Eq. 7)로 VLA를 end-to-end 업데이트.
+- Chunk 평균 환각 점수 H로 보상을 R̂ = (1 − α·H)·R 로 감쇠(Eq. 3). 그룹 단위 reward normalization 후 GRPO loss와 KL 정규화(Eq. 7)로 VLA를 end-to-end 업데이트.
 - α가 너무 크면 유용한 가상 경험을 버리고, 너무 작으면 환각 rollout이 정책을 오염.
 
 ## 3. 데이터 전략
@@ -78,7 +78,7 @@
 
 - WMPO/World-Env: world model 기반 GRPO/PPO 후학습이지만 rollout 신뢰도를 명시적으로 모델링하지 않음.
 - WoVR: 환각 문제를 지적하고 PACE 전략을 제안 — HaWMPO는 PACE와 직교하는 reward-level 보정.
-- 실로봇 온라인 RL(예: HIL-SERL, RL-100 계열)과 달리 물리 상호작용을 최소화.
+- 실로봇 온라인 RL 방식과 달리 물리 상호작용 없이 상상 공간에서 정책을 개선.
 
 ## 9. 한계 및 미해결 문제
 
