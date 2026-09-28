@@ -1,0 +1,108 @@
+# Paper: DriftingVLA: Native One-Step Vision-Language-Action Generation via Per-Dimension Temporal Drifting
+# arXiv: 2608.29749
+
+name: DriftingVLA
+full_name: "DriftingVLA: Native One-Step Vision-Language-Action Generation via Per-Dimension Temporal Drifting"
+organization: "University of Science and Technology of China / LYNSENSE"
+date: "2026-08-30"
+paper_url: https://arxiv.org/abs/2608.29749
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (LeRobot implementation) pretrained multimodal VLM backbone"
+  action_head: "Freshly initialized one-step action expert (direct noise-to-action-chunk generator, 1 NFE) trained with a distribution-drifting objective instead of flow matching"
+  action_head_category: other
+  parameters: "pi0.5-scale (~3B)"
+  key_innovation: "Extends Drift-Based Policy (DBP) to pretrained flow VLAs: keep pi0.5 VLM, re-initialize the action expert as a direct conditional generator, and train with Per-Dimension Temporal Drifting (PDTD), which treats each action channel's full H-step trajectory as its own drifting group (channel-specific distance rulers, affinities, attraction/repulsion and force normalization) while the chunk is still generated jointly. G=8 sibling samples share one VLM prefix during training; one forward pass at inference."
+
+training:
+  base_model: "pi0.5"
+  method: "Joint post-training of pretrained VLM + fresh action expert with the PDTD drifting loss (stop-gradient regression targets), G=8 siblings"
+  data: "LIBERO; RoboTwin 2.0; 100 teleoperated demos per real-world task"
+  hardware: "8x NVIDIA A800 80GB, per-GPU batch 4, 50k steps, 3 seeds"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.73
+    libero_object: 99.87
+    libero_goal: 99.33
+    libero_long: 94.33
+    libero_avg: 98.32
+    source: "Paper Table I, DriftingVLA row (mean over 3 seeds)"
+    date_reported: "2026-08-30"
+    eval_condition: "1 NFE; 3 training seeds x 100 episodes per task"
+
+  libero_baselines:
+    pi0_5_10nfe: 97.10
+    pi0_5_1step: 94.02
+    snapflow_1nfe: 97.48
+    meanflowvla_1nfe: 92.85
+    source: "Paper Table I, Overall column"
+    eval_condition: "baselines on the same LeRobot pi0.5 base, matched data/optimization budgets"
+
+  robotwin_v2:
+    robotwin_v2_avg: 81.09
+    source: "Paper Sec. V-B text and Table III(a), PDTD row"
+    date_reported: "2026-08-30"
+    eval_condition: "all 50 tasks, Easy (demo_clean) and Hard (demo_randomized) averaged, 100 episodes per task per level, 3 seeds; 1 NFE"
+
+  robotwin_v2_hard_only:
+    hard: 77.56
+    source: "Paper Sec. V-B text"
+    eval_condition: "domain-randomized Hard split only (Easy-split value appears only in Fig. 4)"
+
+  robotwin_v2_baselines:
+    pi0_5_10nfe_hard: 76.23
+    snapflow_hard: 75.25
+    pi0_5_1step_overall: 63.76
+    pi0_5_1step_hard: 53.29
+    source: "Paper Sec. V-B text"
+    eval_condition: "baselines; per text DriftingVLA exceeds 10-NFE pi0.5 by 1.51 pts and SnapFlow by 2.56 pts overall"
+
+  drifting_geometry_ablation:
+    chunk_wise_libero: 95.28
+    chunk_wise_robotwin2: 74.17
+    step_wise_libero: 93.10
+    step_wise_robotwin2: 70.43
+    pdtd_libero: 98.32
+    pdtd_robotwin2: 81.09
+    source: "Paper Table III(a)"
+    eval_condition: "ablation: action-chunk drifting geometry, 1 NFE"
+
+  vla_adaptation_ablation:
+    warm_start_flow_expert: 93.33
+    expert_only_frozen_vlm: 94.57
+    full_driftingvla: 98.32
+    source: "Paper Table III(b), LIBERO Overall"
+    eval_condition: "ablation: action-expert init and VLM update"
+
+  real_world:
+    t1_cylinder_to_cup: 87.33
+    t2_bottle_in_cup: 92.00
+    t3_block_alignment: 67.33
+    t4_tabletop_cleanup: 75.33
+    t5_liquid_pouring: 72.67
+    t6_block_stacking: 71.33
+    overall: 77.67
+    source: "Paper Table II, DriftingVLA column"
+    date_reported: "2026-08-30"
+    eval_condition: "two UR5 arms (T1-T2 single-arm, T3-T6 bimanual), 100 demos/task, 3 seeds x 50 trials per task"
+
+  real_world_baselines:
+    pi0_5_overall: 74.22
+    snapflow_overall: 69.44
+    meanflowvla_overall: 65.11
+    driftingvla_chunk_overall: 67.78
+    driftingvla_step_overall: 66.11
+    source: "Paper Table II, Overall row"
+    eval_condition: "baselines and geometry variants on the same six real-world tasks"
+
+eval_conditions:
+  libero: "4 suites, 100 episodes/task, 3 seeds, 1 NFE"
+  robotwin_v2: "50 tasks, Easy + Hard, 100 episodes/task/level, 3 seeds"
+  real_world: "dual UR5, 6 tasks, 3 seeds x 50 trials"
+  latency: "67.67 ms vs 227.61 ms per action chunk for 10-NFE pi0.5 (A800, H=50), 3.36x speedup"
+
+tags: [pi0.5, one-step-generation, drifting-models, distribution-drifting, dbp, pdtd, fast-inference, libero, robotwin, bimanual, ur5, real-robot]
