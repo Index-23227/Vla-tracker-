@@ -1,0 +1,134 @@
+# Paper: LayerRoute: Action-Conditioned Mixture-of-Layers Routing for Vision-Language-Action Policies
+# arXiv: 2609.06079
+
+name: LayerRoute
+full_name: "LayerRoute: Action-Conditioned Mixture-of-Layers Routing for Vision-Language-Action Policies"
+organization: "Tsinghua University; MBZUAI; Nanyang Technological University; Zhejiang University; Rutgers University"
+date: "2026-09-05"
+paper_url: https://arxiv.org/abs/2609.06079
+venue: arXiv
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Headline entry = pi0.5 + LayerRoute (PaliGemma VLM + flow-matching action expert). Also instantiated on StarVLA-pi (Qwen3-VL + 36-layer action DiT)"
+  llm: "PaliGemma (pi0.5 variant); Qwen3-VL (StarVLA-pi variant)"
+  action_head: "pi0.5 flow-matching action expert with an added per-layer eight-head action-to-VLM cross-attention adapter reading a routed mixture of cached VLM hidden states, plus Action-State Reread before each FFN"
+  action_head_category: flow_matching
+  parameters: "+3.87% over pi0.5 (+0.31% over StarVLA-pi)"
+  key_innovation: "Layer Mixture Router: at each action layer, pooled current action state queries pooled summaries of cached VLM hidden states from several depths (StarVLA-pi: layers 5/11/17/23/29/35), softmax over depth gives a sample-wise mixture used as cross-attention context. Action-State Reread: a learned per-layer query attends token-wise over the initial, earlier retained and current action states before the FFN. Routing analyses show early action layers favor shallow VLM states and later layers deeper ones; Spatial suites favor shallow, Goal suites deep layers."
+
+training:
+  method: "Joint fine-tuning of pretrained VLM, action module, router and reread modules; pi0.5 path AdamW lr 5e-5, 5K warmup, constant; StarVLA-pi base lr 2.5e-5, action/routing lr 1e-4, cosine; 30K/40K/100K steps on LIBERO/SimplerEnv/RoboCasa-GR1; real robot 20K steps"
+  data: "LIBERO; LeRobot conversions of Bridge and RT-1 (SimplerEnv); RoboCasa-GR1 24-task mixture; 50 demos per real-world task"
+  hardware: "8x NVIDIA H200, global batch 256"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 98.4
+    libero_goal: 99.2
+    libero_long: 96.0
+    libero_avg: 98.2
+    source: "Paper Table 2, pi0.5+LayerRoute row"
+    date_reported: "2026-09-05"
+    eval_condition: "fine-tuned on LIBERO (30K steps); 500 episodes per suite, seed 7; Avg4 = unweighted mean of suites"
+
+  simpler_env:
+    simpler_widowx_put_spoon_on_towel: 59.2
+    simpler_widowx_put_carrot_on_plate: 68.3
+    simpler_widowx_stack_block: 54.2
+    simpler_widowx_put_eggplant_in_basket: 69.2
+    simpler_avg: 62.7
+    source: "Paper Table 3 and Supplementary Table 15, pi0.5+LayerRoute row (WidowX Visual Matching, pooled SR)"
+    date_reported: "2026-09-05"
+    eval_condition: "trained on Bridge + RT-1 LeRobot conversions; 24 episodes per WidowX task, full evaluator repeated 5 times, mean reported"
+
+  simpler_google_robot:
+    visual_matching: 76.1
+    variant_aggregation: 69.3
+    google_robot_avg: 72.7
+    source: "Paper Table 3, pi0.5+LayerRoute row"
+    eval_condition: "Google Robot VM/VA, 5 evaluator repetitions; GR Avg = mean of VM and VA"
+
+  robocasa:
+    robocasa_avg: 42.5
+    source: "Paper Table 4, pi0.5+LayerRoute row (macro-average over 24 RoboCasa-GR1 tasks)"
+    date_reported: "2026-09-05"
+    eval_condition: "RoboCasa-GR1 Tabletop 24-task mixture, 100K steps, 50 rollouts per task"
+
+  starvla_pi_variant:
+    libero_spatial: 98.6
+    libero_object: 99.2
+    libero_goal: 98.4
+    libero_long: 95.6
+    libero_avg4: 98.0
+    simpler_widowx: 63.3
+    simpler_google_vm: 76.8
+    simpler_google_va: 70.6
+    simpler_google_avg: 73.7
+    robocasa_gr1_avg: 45.1
+    source: "Paper Tables 2, 3, 4 (StarVLA-pi+LayerRoute rows)"
+    eval_condition: "Alternative instantiation on StarVLA-pi (Qwen3-VL); not the headline entry"
+
+  matched_baselines:
+    pi05_libero_avg4: 96.9
+    pi05_libero_long: 92.4
+    pi05_simpler_widowx: 57.1
+    pi05_simpler_google_avg: 70.6
+    pi05_robocasa_gr1_avg: 37.0
+    starvla_pi_libero_avg4: 95.7
+    starvla_pi_libero_long: 88.4
+    starvla_pi_simpler_widowx: 60.8
+    starvla_pi_simpler_google_avg: 72.1
+    starvla_pi_robocasa_gr1_avg: 43.9
+    source: "Paper Tables 2, 3, 4 (original static-interface backbones, same protocol)"
+
+  libero_component_ablation:
+    pi05_static_avg4: 96.9
+    pi05_router_only_avg4: 97.3
+    pi05_reread_only_avg4: 95.5
+    pi05_full_avg4: 98.2
+    starvla_static_avg4: 95.7
+    starvla_router_only_avg4: 96.4
+    starvla_reread_only_avg4: 95.9
+    starvla_full_avg4: 98.0
+    source: "Paper Table 6"
+
+  libero_routing_policy_ablation:
+    uniform_route_avg4: 94.2
+    forced_shallow_avg4: 96.3
+    forced_middle_avg4: 95.9
+    forced_deep_avg4: 96.4
+    action_independent_query_avg4: 97.2
+    current_state_route_avg4: 98.0
+    source: "Paper Table 7 (StarVLA-pi)"
+
+  libero_vlm_backbone_sensitivity:
+    qwen3_vl_avg4: 98.0
+    qwen25_vl_avg4: 96.2
+    mimo_embodied_avg4: 98.2
+    cosmos_reason2_2b_avg4: 97.4
+    source: "Paper Table 5 (StarVLA-pi action architecture, LayerRoute interface)"
+
+  real_world:
+    pick_and_place_cube: 80
+    wipe_board: 58
+    clean_table: 32
+    source: "Paper Table 8, pi0.5+LayerRoute row"
+    date_reported: "2026-09-05"
+    eval_condition: "Franka arm, 50 demos per task, 20K-step fine-tune, 50 trials per task, 10 Hz"
+
+  real_world_baselines:
+    pi05_pick_and_place_cube: 72
+    pi05_wipe_board: 54
+    pi05_clean_table: 26
+    source: "Paper Table 8, pi0.5 row"
+
+eval_conditions:
+  libero: "fine-tuned, 50 episodes per task"
+  simpler_env: "WidowX VM, 5 evaluator repetitions"
+  robocasa: "RoboCasa-GR1 24 tasks, 50 rollouts each"
+  real_world: "Franka, 3 tasks x 50 trials"
+
+tags: [layer-routing, mixture-of-layers, representation-access, action-state-reread, pi0.5, starvla, qwen3-vl, flow_matching, libero, simpler_env, robocasa, real-robot, franka]
