@@ -1,0 +1,129 @@
+# Paper: ROS2SmolVLA: Enabling Small Vision-Language-Action Models for Integration into Industrial-Grade Lightweight Robots
+# arXiv: 2608.23320
+
+name: ROS2SmolVLA
+full_name: "ROS2SmolVLA: Enabling Small Vision-Language-Action Models for Integration into Industrial-Grade Lightweight Robots"
+organization: "University of Augsburg (Chair of Mechatronics)"
+date: "2026-08-24"
+paper_url: https://arxiv.org/abs/2608.23320
+code_url: https://github.com/una-auxme/ros2smolvla_docker
+venue: "8th International Conference on Industry of the Future and Smart Manufacturing (Procedia Computer Science)"
+open_source: true
+model_type: "SmolVLA fine-tuned on UR10e teleoperation data, deployed via a ROS 2 interface"
+
+architecture:
+  backbone: "SmolVLA (SmolVLM-2 VLM, 64 visual tokens per frame, layer skipping, interleaved self/cross-attention)"
+  llm: "SmolVLM-2 (inherited from SmolVLA)"
+  action_head: "SmolVLA flow-matching action expert; outputs Cartesian delta end-effector commands published as TwistStamped to a Cartesian Motion Controller"
+  action_head_category: flow_matching
+  parameters: "450M (SmolVLA)"
+  key_innovation: >
+    Open-source ROS 2 bridge (lerobot-ros, lerobot-roscam camera interface, Docker container,
+    Gazebo virtual twin) that lets LeRobot/SmolVLA run on an industrial Universal Robots UR10e with a
+    Robotiq Hand-E gripper and edge/consumer-grade compute; SmolVLA fully fine-tuned
+    (train_expert_only=False) on 349 self-recorded UR10e pick-and-place episodes with recovery episodes.
+
+training:
+  dataset: "349 teleoperated UR10e episodes (5x5 cube-position grid x 5 box positions, multi-color cube episodes, error-recovery episodes); 3 cameras + joint states + Cartesian EE pose; released on Hugging Face"
+  method: "Fine-tune pretrained SmolVLA base via LeRobot with train_expert_only=False, compile_model=True, otherwise defaults; 200,000 steps"
+  compute: "NVIDIA L40S, ~25 h for 200k steps; inference on RTX 4080 16GB workstation, camera aggregation on Jetson AGX Orin"
+
+inference_hz: null
+
+benchmarks:
+  real_world:
+    pick_success_all: 77.72
+    place_success_all: 63.59
+    place_after_successful_pick_all: 81.69
+    source: "Paper Sec. 4.2 overall scores (among all test cases)"
+    date_reported: "2026-08-24"
+    eval_condition: "UR10e cube-into-box pick-and-place, all test cases T1-T9 pooled"
+  real_world_id:
+    pick_success: 78.33
+    place_success: 72.50
+    place_after_successful_pick: 92.47
+    source: "Paper Sec. 4.2 overall scores, ID cases (T1, T3, T4)"
+    eval_condition: "in-distribution cube/box positions, robot configurations, cube colors"
+  real_world_ood:
+    pick_success: 76.56
+    place_success: 46.88
+    place_after_successful_pick: 61.22
+    source: "Paper Sec. 4.2 overall scores, OOD cases (T2, T5, T8, T9)"
+    eval_condition: "OOD cube positions, cube color, box colors and shapes"
+  real_world_box_position:
+    t1_bp1_pick: 90
+    t1_bp1_place: 90
+    t1_bp7_pick: 100
+    t1_bp7_place: 100
+    t1_bp6_pick: 100
+    t1_bp6_place: 40
+    t2_bp5_4_pick: 70
+    t2_bp5_4_place: 60
+    t2_bp5_9_pick: 90
+    t2_bp5_9_place: 70
+    t2_bp5_3_pick: 40
+    t2_bp5_3_place: 20
+    source: "Paper Table 1 left (T1 ID and T2 OOD box/cube positions)"
+  real_world_robot_config:
+    rc1_pick: 70
+    rc1_place: 70
+    rc2_pick: 80
+    rc2_place: 80
+    rc3_pick: 90
+    rc3_place: 80
+    rc4_pick: 80
+    rc4_place: 80
+    rc5_pick: 50
+    rc5_place: 50
+    rc6_pick: 90
+    rc6_place: 90
+    source: "Paper Table 1 middle (T3)"
+  real_world_cube_color:
+    yellow_pick: 50
+    yellow_place: 50
+    blue_pick: 60
+    blue_place: 60
+    gray_pick: 80
+    gray_place: 80
+    orange_ood_pick: 60
+    orange_ood_place: 60
+    source: "Paper Table 1 right (T4 ID colors, T5 OOD orange)"
+  real_world_color_prompt:
+    green_correct_color: 70
+    green_place: 100
+    gray_correct_color: 20
+    gray_place: 90
+    inverted_green_correct_color: 70
+    inverted_green_place: 100
+    inverted_gray_correct_color: 30
+    inverted_gray_place: 90
+    source: "Paper Table 2 (T7)"
+  real_world_ood_box:
+    black_pick: 100
+    black_found_box: 17
+    black_place: 17
+    orange_pick: 100
+    orange_found_box: 100
+    orange_place: 17
+    round_blue_pick: 100
+    round_blue_found_box: 100
+    round_blue_place: 100
+    cardboard_pick: 83
+    cardboard_found_box: 50
+    cardboard_place: 17
+    source: "Paper Table 3 (T8 OOD box color, T9 OOD box shape)"
+
+eval_conditions:
+  real_world: "Universal Robots UR10e + Robotiq Hand-E, 2 Azure Kinect + wrist webcam, prompt 'Pick up the [CC] cube and put it in the [BC] box.', nine test scenarios T1-T9, recovery counted as success"
+
+tags:
+  - smolvla
+  - ros2
+  - industrial
+  - ur10e
+  - lerobot
+  - edge-deployment
+  - flow-matching
+  - pick-and-place
+  - real-robot
+  - open-source

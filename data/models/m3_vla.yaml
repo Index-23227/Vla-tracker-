@@ -1,0 +1,157 @@
+# Paper: Robust Bimanual Vision-Language-Action Models via Embarrassingly Simple Modality Masking
+# arXiv: 2608.22419
+
+name: M3-VLA
+full_name: "Robust Bimanual Vision-Language-Action Models via Embarrassingly Simple Modality Masking (Modality Masking Mechanism, M3)"
+organization: "Southeast University / Shanghai Innovation Institute / Wuhan University / Zhejiang University / USTC / SJTU / CityU Hong Kong"
+date: "2026-08-23"
+paper_url: https://arxiv.org/abs/2608.22419
+code_url: null
+project_url: https://m3vla.github.io
+venue: arXiv
+open_source: false
+model_type: "Query-based VLA (VLA-Adapter style) trained with structured modality masking"
+
+architecture:
+  backbone: "Prismatic VLM with hybrid DINOv2 + SigLIP vision encoder"
+  llm: "Qwen2.5-0.5B"
+  action_head: "VLA-Adapter-style action expert: learnable action queries with per-layer bridge attention, MLP decodes an action chunk in one forward pass under L1 regression (chunk size 25)"
+  action_head_category: regression
+  parameters: "~0.5B (VLA-Adapter scale); no added parameters"
+  key_innovation: >
+    Modality Masking Mechanism (M3), a training-only strategy: additive attention masks stochastically hide
+    (1) both wrist views jointly (egocentric view always kept as spatial anchor), (2) the whole language
+    modality, and (3) a random subset of action queries (at least one kept, remaining queries rescaled by
+    1/(1-p_q)). Masked tokens neither attend nor are attended. No architectural or inference-time change;
+    also transferred to OpenVLA-OFT.
+
+training:
+  dataset: "RoboTwin 2.0, 10 bimanual tasks x 50 clean demos each; real world 3 long-horizon Agilex Cobot tasks x 50 demos"
+  method: "Task-specific fine-tuning with LoRA rank 64, AdamW lr 2e-4, 10k steps, x0.1 decay at 5k; best query-mask ratio 0.1"
+  compute: null
+
+inference_hz: null
+
+benchmarks:
+  robotwin_v2:
+    click_bell: 97
+    grab_roller: 96
+    place_phone_stand: 55
+    place_bread_basket: 22
+    place_a2b_right: 28
+    place_shoe: 63
+    stack_blocks_two: 83
+    handover_block: 74
+    put_bottles_dustbin: 81
+    block_rank_size: 28
+    robotwin_v2_avg: 62.7
+    source: "Paper Table 1 (M3 column, Overall Avg 62.7)"
+    date_reported: "2026-08-23"
+    eval_condition: "RoboTwin 2.0 Clean, 10-task subset, 50 clean demos per task, 100 held-out clean scenes per task"
+  robotwin_v2_clean2rand:
+    click_bell: 16
+    grab_roller: 54
+    place_phone_stand: 12
+    place_bread_basket: 6
+    place_a2b_right: 2
+    place_shoe: 11
+    stack_blocks_two: 4
+    handover_block: 6
+    put_bottles_dustbin: 40
+    block_rank_size: 0
+    avg: 15.1
+    source: "Paper Table 2 (M3 column)"
+    eval_condition: "RoboTwin 2.0 Clean2Rand: trained on clean demos, evaluated on 100 randomized scenes per task"
+  robotwin_v2_baselines_clean:
+    vla_adapter_avg: 41.0
+    rdt_avg: 30.2
+    pi0_avg: 39.5
+    act_avg: 25.9
+    dp_avg: 25.5
+    openvla_oft_avg: 32.2
+    source: "Paper Table 1 and Appendix Table 8 (Overall Avg)"
+  robotwin_v2_baselines_clean2rand:
+    vla_adapter_avg: 3.7
+    rdt_avg: 8.8
+    pi0_avg: 12.9
+    act_avg: 2.9
+    dp_avg: 0.0
+    source: "Paper Table 2 (Overall Avg)"
+  robotwin_v2_m3_openvla_oft:
+    click_bell: 100
+    grab_roller: 97
+    place_phone_stand: 56
+    place_bread_basket: 13
+    place_a2b_right: 10
+    place_shoe: 50
+    stack_blocks_two: 69
+    handover_block: 39
+    put_bottles_dustbin: 75
+    block_rank_size: 26
+    avg: 53.5
+    source: "Paper Appendix Table 8 (OpenVLA-OFT + M3 column)"
+    eval_condition: "RoboTwin 2.0 Clean, M3 applied to OpenVLA-OFT backbone"
+  robotwin_v2_ablation_components:
+    adapter_no_mask: 23.7
+    language_only: 29.0
+    vision_only: 34.0
+    query_only: 33.3
+    vision_language: 36.7
+    vision_query: 60.3
+    full_m3: 64.0
+    token_dropout: 31.8
+    modality_dropout: 24.1
+    visual_aug: 22.3
+    region_aug: 23.0
+    mask_one_wrist: 32.7
+    mask_ego: 37.0
+    source: "Paper Tables 3a and 4 (Avg SR over Place Phone Stand, Place Shoe, Handover Block)"
+  robotwin_v2_ablation_query_mask_ratio:
+    ratio_0_0: 23.7
+    ratio_0_1: 64.0
+    ratio_0_3: 56.0
+    ratio_0_5: 56.7
+    ratio_0_7: 54.0
+    ratio_0_9: 43.7
+    source: "Paper Table 3b (Avg over 3 tasks)"
+  real_world:
+    avg_full_task: 69.4
+    bottle_cleanup: 66.7
+    stack_shelf: 58.3
+    veggie_centering: 83.3
+    source: "Paper Sec. 4.2 text (avg 69.4) and Appendix Table 9 (full-task rows)"
+    date_reported: "2026-08-23"
+    eval_condition: "Agilex Cobot, clean layout, 3 rounds x 16 trials = 48 trials per task"
+  real_world_ood:
+    avg_full_task: 61.1
+    bottle_cleanup: 58.3
+    stack_shelf: 54.2
+    veggie_centering: 70.8
+    source: "Paper Sec. 4.2 text (avg 61.1) and Appendix Table 9 (full-task rows)"
+    eval_condition: "Agilex Cobot, novel distractors near targets, 3 rounds x 8 trials = 24 trials per task"
+  real_world_baselines:
+    adapter_clean_avg: 44.4
+    adapter_ood_avg: 12.5
+    adapter_clean_bottle_cleanup: 41.7
+    adapter_clean_stack_shelf: 27.1
+    adapter_clean_veggie_centering: 64.6
+    adapter_ood_bottle_cleanup: 16.7
+    adapter_ood_stack_shelf: 12.5
+    adapter_ood_veggie_centering: 8.3
+    source: "Paper Sec. 4.2 text and Appendix Table 9"
+
+eval_conditions:
+  robotwin_v2: "RoboTwin 2.0 10-task subset (following SimpleVLA-RL), Clean and Clean2Rand settings, single run per official protocol"
+  real_world: "Agilex Cobot bimanual, 3 long-horizon tasks (>800 control steps), clean and OOD-distractor settings"
+
+tags:
+  - bimanual
+  - modality-masking
+  - training-regularization
+  - query-based
+  - vla-adapter
+  - openvla-oft
+  - regression
+  - robotwin
+  - real-robot
+  - agilex

@@ -1,0 +1,111 @@
+# Paper: PonderPounce: A Pretrained MLLM as an Episode Context Engine for Robot Control
+# arXiv: 2608.24115
+
+name: PonderPounce
+full_name: "PonderPounce: A Pretrained MLLM as an Episode Context Engine for Robot Control"
+organization: "MAUM.AI, Seoul National University, Georgia Institute of Technology"
+date: "2026-08-25"
+paper_url: https://arxiv.org/abs/2608.24115
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Asynchronous dual system. Ponder (System 2) = Qwen3.5-9B MLLM with append-only causal context over instruction, demonstrations and full execution history, emitting K=1 continuous cognition carrier; Pounce (System 1) = pi0.5 action model (3.6B, RoboMME / real robot) or GR00T N1.5 action model (3B, RoboCasa-DC) conditioned on newest cognition + its age"
+  llm: "Qwen3.5-9B (Ponder); PaliGemma (inside pi0.5 Pounce)"
+  action_head: "Flow-matching action head of pi0.5 / GR00T N1.5 with projected cognition + sinusoidal age-encoding prefix; 20-step (RoboMME) / 16-step (RoboCasa-DC) / 30-step (real) action chunks"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "Qwen3.5-9B Ponder + 3.6B pi0.5 Pounce (RoboMME) or 3B GR00T N1.5 Pounce (RoboCasa-DC)"
+  key_innovation: "Reuses a pretrained MLLM's native causal context (KV-cached, 16K tokens) as episode memory instead of a purpose-built memory module; Ponder and Pounce run on independent clocks and are jointly trained end to end (action flow-matching + optional LM-head grounding of transitions, subgoal text and demonstration reasoning) without bridge pretraining; action gradients into Ponder scaled by 0.5."
+
+training:
+  method: "Joint end-to-end fine-tuning of Ponder and Pounce from pretrained checkpoints; L = w1 * L_fm + w2 * L_ground ((1, 0.1) on RoboMME, (1, 0) on RoboCasa-DC); SigLIP frozen, PaliGemma LM and action expert trainable; Ponder fully fine-tuned (no LoRA) on RoboCasa-DC"
+  data: "RoboMME 1,587 episodes (base) or 14,400 episodes (9x); RoboCasa-DC 1,900 cross-embodiment demo-execution pairs; 710 teleoperated ALOHA episodes (real)"
+
+benchmarks:
+  robomme:
+    counting: 74.67
+    permanence: 62.83
+    reference: 72.17
+    imitation: 33.67
+    average: 60.83
+    source: "Paper Table II (row PonderPounce, 1x data)"
+    date_reported: "2026-08-25"
+    eval_condition: "RoboMME 16 tasks, 1x data (1,587 training episodes), 3 evaluations x 50 episodes per task, 1 Hz synchronized with 300 ms simulated delay"
+
+  robomme_9x_data:
+    counting: 81.33
+    permanence: 80.17
+    reference: 92.67
+    imitation: 48.00
+    average: 75.54
+    source: "Paper Table II (row PonderPounce, 9x data)"
+    date_reported: "2026-08-25"
+    eval_condition: "RoboMME with fresh 14,400-episode oracle collection"
+
+  robomme_baselines:
+    pi05_avg: 17.93
+    pi05_past_actions_avg: 19.73
+    sam2act_plus_avg: 21.37
+    memer_avg: 42.38
+    framesamp_modul_avg: 44.51
+    framesamp_modul_9x_avg: 57.88
+    human_avg: 90.50
+    source: "Paper Table II (baseline rows; 1x rows reported by RoboMME, 9x FrameSamp+Modul trained by authors)"
+    date_reported: "2026-08-25"
+
+  robomme_ablation:
+    no_demo_reasoning_avg: 48.21
+    no_lm_head_grounding_avg: 27.96
+    subgoal_text_interface_avg: 59.96
+    current_obs_only_avg: 26.21
+    ponder_qwen35_0_8b_avg: 54.12
+    ponder_9b_random_init_avg: 0.00
+    transition_only_refresh_true_age_avg: 22.42
+    transition_only_refresh_fixed_age_avg: 1.83
+    source: "Paper Tables III, V, VI, VII (1x data)"
+    date_reported: "2026-08-25"
+
+  robocasa_dc:
+    success_rate: 12.5
+    success_rate_std: 0.9
+    cognition_disabled: 8.6
+    seetraceact_baseline: 11.6
+    source: "Paper Table IV"
+    date_reported: "2026-08-25"
+    eval_condition: "RoboCasa-DC Category-Balanced / Cross-Embodiment Demonstration setting, 5 held-out tasks, 5 evaluations x 50 episodes; Pounce = GR00T N1.5; NOT standard RoboCasa"
+
+  real_world:
+    put_fruits: "11/14"
+    track_cube: "10/16"
+    repick_block: "6/14"
+    draw_pattern: "9/15"
+    average: 60.98
+    source: "Paper Table IX (row PonderPounce)"
+    date_reported: "2026-08-25"
+    eval_condition: "Trossen ALOHA Stationary (right arm only), 4 RoboMME-style memory tasks, 710 training episodes, 59 held-out scenes, wall-clock asynchronous execution at 1 Hz on two H100s"
+
+  real_world_baselines:
+    pi05_average: 23.99
+    framesamp_modul_average: 40.67
+    source: "Paper Table IX (baseline rows)"
+    date_reported: "2026-08-25"
+
+eval_conditions:
+  robomme: "16-task memory benchmark, 1x / 9x data"
+  robocasa_dc: "Cross-embodiment demonstration-conditioned, held-out tasks"
+  real_world: "Trossen ALOHA single arm, asynchronous 1 Hz"
+
+tags:
+  - flow_matching
+  - dual-system
+  - asynchronous
+  - episode-memory
+  - long-context
+  - qwen3.5
+  - pi0.5
+  - gr00t
+  - robomme
+  - demonstration-conditioned
+  - real-world

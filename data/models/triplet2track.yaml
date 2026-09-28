@@ -1,0 +1,122 @@
+# Paper: Triplet2Track: A Hierarchical System with Object-Centric Representations for Reliable Long-Horizon Manipulation
+# arXiv: 2608.22800
+
+name: Triplet2Track
+full_name: "Triplet2Track: A Hierarchical System with Object-Centric Representations for Reliable Long-Horizon Manipulation"
+organization: "Shanghai Jiao Tong University; University of Sussex"
+date: "2026-08-24"
+paper_url: https://arxiv.org/abs/2608.22800
+code_url: null
+venue: null
+open_source: false
+model_type: hierarchical
+inference_hz: 15
+
+architecture:
+  backbone: "Grounding-DINO + SAM2 instance perception; ATM-style multimodal masked track predictor; Transformer action policy"
+  llm: "InternVL2.5 (LoRA-tuned relation verifier) + zero-shot GPT-4o next-triplet generator"
+  action_head: >
+    Three-layer Triplet-to-Track System (TTS). Task Planner: a lightweight 4-layer Transformer
+    relation predictor (LTP) over SAM2 instance tokens plus an event-triggered LoRA-tuned InternVL2.5
+    verifier extract instance-grounded (subject, relation, object) triplets; a zero-shot VLM picks the
+    next triplet restricted by a temporal graph mined from human videos. Track Predictor: triplet-
+    transition-conditioned masked track prediction (pretrained on action-free human videos) produces
+    entity-aligned point tracks. Action Policy: Transformer backbone with a learnable action token,
+    fused with the track prior and decoded by an MLP action head trained with L2 action regression
+    (7-D end-effector pose + gripper width).
+  action_head_category: regression
+  action_space: "7-D end-effector pose + scalar gripper width"
+  parameters: "Not stated"
+  key_innovation: >
+    Instance-grounded, visually verifiable triplets as the planning-control interface, compiled into
+    continuous point-track priors for a track-guided BC policy; temporal-graph masking of VLM
+    proposals to suppress planning hallucination; closed-loop guard checking and replanning.
+
+training:
+  data: "Per task: 30 robot demonstrations + 50 human demonstrations; 5 annotated sequences per task for relation predictor / VLM"
+  compute: "2x NVIDIA A100"
+
+benchmarks:
+  real_world:
+    dynamic_scale_balancing_seen: 78.6
+    dynamic_scale_balancing_perturbed: 60.0
+    sequential_stacking_seen: 83.3
+    sequential_stacking_unseen: 66.7
+    diverse_pick_place_seen: 84.6
+    diverse_pick_place_unseen: 70.0
+    diverse_pick_place_perturbed: 80.0
+    real_world_avg: 74.8
+    source: "Paper Table I (TTS row); 74.8 average across seven settings stated in Sec. V-B"
+    date_reported: "2026-08-24"
+    eval_condition: "real 7-DoF Franka, long-horizon tasks, success rate (%)"
+  real_world_baselines:
+    ft_pi05_dsb_seen: 13.3
+    ft_pi05_dsb_perturbed: 0.0
+    ft_pi05_ss_seen: 25.0
+    ft_pi05_ss_unseen: 0.0
+    ft_pi05_dpp_seen: 40.0
+    ft_pi05_dpp_unseen: 16.7
+    ft_pi05_dpp_perturbed: 40.0
+    seedo_dsb_seen: 26.7
+    seedo_dsb_perturbed: 0.0
+    seedo_ss_seen: 41.7
+    seedo_ss_unseen: 40.0
+    seedo_dpp_seen: 50.0
+    seedo_dpp_unseen: 54.5
+    seedo_dpp_perturbed: 0.0
+    seedo_avg: 30.4
+    palo_dsb_seen: 14.3
+    palo_dsb_perturbed: 0.0
+    palo_ss_seen: 16.7
+    palo_ss_unseen: 18.2
+    palo_dpp_seen: 42.9
+    palo_dpp_unseen: 36.4
+    palo_dpp_perturbed: 0.0
+    source: "Paper Table I (FT-Pi0.5, SeeDo, PALO rows); SeeDo 30.4 average stated in Sec. V-B"
+    date_reported: "2026-08-24"
+    eval_condition: "baselines, same real-world settings"
+  real_world_ablation:
+    wo_track_predictor_dpp: 45.5
+    wo_track_predictor_ss: 46.1
+    wo_track_predictor_dsb: 43.8
+    wo_temporal_graph_dpp: 57.1
+    wo_temporal_graph_ss: 25.0
+    wo_temporal_graph_dsb: 0.0
+    wo_relation_predictor_dpp: 75.0
+    wo_relation_predictor_ss: 37.5
+    wo_relation_predictor_dsb: 14.3
+    wo_task_planner_atm_dpp: 7.1
+    wo_task_planner_atm_ss: 0.0
+    wo_task_planner_atm_dsb: 0.0
+    only_action_policy_dpp: 0.0
+    only_action_policy_ss: 0.0
+    only_action_policy_dsb: 0.0
+    source: "Paper Table III (per-family success %, mean; std omitted)"
+    date_reported: "2026-08-24"
+    eval_condition: "component ablations, real robot"
+  relation_predictor_variants:
+    only_ltp_rollout_time_s: 0.0034
+    only_ltp_accuracy: 84.3
+    only_vlm_rollout_time_s: 202.6
+    only_vlm_accuracy: 98.8
+    ltp_plus_vlm_rollout_time_s: 32.2
+    ltp_plus_vlm_accuracy: 98.4
+    source: "Paper Table II (planner variants: rollout time and overall accuracy)"
+    date_reported: "2026-08-24"
+    eval_condition: "relation-predictor branch ablation"
+
+eval_conditions:
+  real_world: "Franka 7-DoF, two RealSense D435i (third-person + wrist); tasks DSB (up to 12 subgoals), SS (up to 11), DPP (up to 9); Seen / Unseen (compositional or cross-category) / Perturbed"
+  notes: "Action-labeled data-size curve (Fig. 6) is figure-only and omitted"
+
+tags:
+  - hierarchical
+  - long-horizon
+  - object-centric
+  - scene-graph
+  - point-tracks
+  - human-video
+  - closed-loop-replanning
+  - internvl
+  - real-robot
+  - franka

@@ -1,0 +1,95 @@
+# Paper: Logic-VLA: A Temporal Logic Conditioned Vision-Language-Action Model
+# arXiv: 2608.20556
+
+name: Logic-VLA
+full_name: "Logic-VLA: A Temporal Logic Conditioned Vision-Language-Action Model"
+organization: "University of Southern California"
+date: "2026-08-20"
+paper_url: https://arxiv.org/abs/2608.20556
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+inference_hz: 10
+
+architecture:
+  backbone: "pi0.5 (2B vision-language backbone + 300M action expert), initialized from the pre-trained pi0.5 checkpoint; STL formulas encoded by a TeLoGraF-style syntax-graph GCN encoder (child-to-parent message passing + mean pooling), projected to N_spec specification tokens appended to the VLM prefix after image and NL tokens"
+  action_head: "pi0.5 conditional flow-matching action expert (unchanged); outputs absolute drone positions, executes 40 actions per query in closed loop"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "2B VLM backbone + 300M action expert (pi0.5) + STL graph encoder"
+  key_innovation: "Formal-requirement-conditioned VLA: a Signal Temporal Logic (STL) specification supplied at inference time is an additional policy input alongside the NL task. STL encoder is pre-trained to regress (tanh-normalized) STL robust semantics from trajectory-formula pairs. Two-stage post-training: (1) STL-conditioned SFT on satisfying demonstrations; (2) trajectory-level Identity Preference Optimization over matched satisfying-violating rollout pairs using flow-matching-loss differences as a surrogate for log-policy ratios (aggregated over temporal windows), plus a one-sided preferred-rollout anchor against the frozen Stage-1 reference."
+
+training:
+  dataset: "3000 collision-free reference drone trajectories in NVIDIA Isaac Sim 5.1 (10 randomized photorealistic warehouse environments x 6 NL navigation tasks, DJI Mavic 2 Pro, egocentric + third-person cameras); 1449 formula-groups from 1224 distinct STL formulas spanning 87 structures -> 8886 satisfying rollouts (D+) and 13494 preference-pair instances (P)"
+  method: "pi0.5 first fine-tuned without STL to obtain the STL-blind base policy; then Stage 1 STL-conditioned SFT (conditional flow matching, STL encoder jointly fine-tuned) and Stage 2 trajectory-level IPO with preferred-rollout anchor. LoRA on 2B VLM (rank 16, alpha 16) and 300M action expert (rank 32, alpha 32); vision encoder and action input/output projections fully fine-tuned."
+
+benchmarks:
+  stl_drone_nav_seen:
+    stl_satisfaction_rate: 82.0
+    robust_semantics_mean: 0.81
+    robust_semantics_std: 1.33
+    robust_semantics_min: -1.62
+    nl_task_success: 89.0
+    source: "Paper Table I (Seen setting, 60 evaluation entries x 10 rollouts)"
+    date_reported: "2026-08-20"
+    eval_condition: "closed-loop quadcopter navigation in Isaac Sim, STL formulas seen during post-training"
+  stl_drone_nav_unseen_parameter:
+    stl_satisfaction_rate: 74.8
+    robust_semantics_mean: 0.89
+    robust_semantics_std: 1.64
+    robust_semantics_min: -3.79
+    nl_task_success: 92.2
+    source: "Paper Table I (Unseen Parameter setting, 99 evaluation entries)"
+    date_reported: "2026-08-20"
+    eval_condition: "seen STL structures with held-out predicate/temporal parameters"
+  stl_drone_nav_unseen_structure:
+    stl_satisfaction_rate: 82.0
+    robust_semantics_mean: 1.24
+    robust_semantics_std: 1.71
+    robust_semantics_min: -2.46
+    nl_task_success: 87.5
+    source: "Paper Table I (Unseen Structure setting, 56 evaluation entries, 3 held-out templates)"
+    date_reported: "2026-08-20"
+    eval_condition: "STL structures held out from post-training and encoder pre-training"
+  stl_drone_nav_baselines_seen:
+    base_stl_blind_stl_sat: 41.3
+    base_stl_blind_nl_task: 90.5
+    stl_sft_stl_sat: 61.7
+    stl_sft_nl_task: 87.2
+    smooth_robust_semantics_1x_stl_sat: 76.2
+    smooth_robust_semantics_1x_nl_task: 68.5
+    smooth_robust_semantics_2x_stl_sat: 78.8
+    smooth_robust_semantics_2x_nl_task: 45.0
+    source: "Paper Table I (Seen setting, baselines)"
+    date_reported: "2026-08-20"
+    eval_condition: "same Seen setting; all baselines initialized from the same STL-blind pi0.5 policy"
+  stl_drone_nav_baselines_unseen_parameter:
+    base_stl_blind_stl_sat: 50.0
+    base_stl_blind_nl_task: 93.9
+    stl_sft_stl_sat: 59.5
+    stl_sft_nl_task: 91.2
+    smooth_robust_semantics_1x_stl_sat: 71.1
+    smooth_robust_semantics_1x_nl_task: 75.9
+    smooth_robust_semantics_2x_stl_sat: 72.1
+    smooth_robust_semantics_2x_nl_task: 47.4
+    source: "Paper Table I (Unseen Parameter setting, baselines)"
+    date_reported: "2026-08-20"
+    eval_condition: "same Unseen Parameter setting"
+  stl_drone_nav_baselines_unseen_structure:
+    base_stl_blind_stl_sat: 56.8
+    base_stl_blind_nl_task: 89.3
+    stl_sft_stl_sat: 64.5
+    stl_sft_nl_task: 85.2
+    smooth_robust_semantics_1x_stl_sat: 77.5
+    smooth_robust_semantics_1x_nl_task: 68.6
+    smooth_robust_semantics_2x_stl_sat: 81.8
+    smooth_robust_semantics_2x_nl_task: 42.0
+    source: "Paper Table I (Unseen Structure setting, baselines)"
+    date_reported: "2026-08-20"
+    eval_condition: "same Unseen Structure setting"
+
+eval_conditions:
+  stl_drone_nav: "post-trained from pi0.5 (LoRA), closed-loop simulated quadcopter navigation (Isaac Sim 5.1), 10 rollouts per entry"
+
+tags: [navigation, aerial, drone, signal_temporal_logic, formal_specification, preference_optimization, ipo, pi0.5, flow_matching, lora, isaac_sim, safety]

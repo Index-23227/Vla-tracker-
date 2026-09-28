@@ -1,0 +1,120 @@
+# Paper: A Collaborative Multi-Modality Interaction for VLA-based End-to-End Autonomous Driving
+# arXiv: 2608.20890
+
+name: CMMI
+full_name: "A Collaborative Multi-Modality Interaction for VLA-based End-to-End Autonomous Driving"
+organization: "National University of Singapore (Show Lab) / Hunan University / The University of Western Australia"
+date: "2026-08-21"
+paper_url: https://arxiv.org/abs/2608.20890
+code_url: https://github.com/S-JingTao/CMMI
+venue: arXiv preprint
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Janus-1.5B VLA backbone (following WAM-Flow); camera + LiDAR inputs; image 384x384 -> 576 visual tokens, 196 LiDAR BEV tokens; Janus tokenizer extended with 20,001 numerically grounded tokens; camera-LiDAR interaction via Affinity-Guided Optimal Transport + Distribution-Consistent Modality Transfer"
+  llm: "Janus-1.5B"
+  action_head: "Discrete Flow Matching (DFM) multi-trajectory planner over numeric waypoint tokens (WAM-Flow-style), 5 candidate trajectories x 8 waypoints, trained with match + diversity + consistency losses; followed by training-free Perception-Oriented Trajectory Refinement (CHOMP-inspired optimization with prior, detection/semantic risk cost maps and smoothness cost)"
+  action_head_category: discrete_diffusion
+  action_space: discrete
+  parameters: "1.5B (Janus-1.5B backbone)"
+  key_innovation: "Optimal-transport-based two-way main-auxiliary modality interaction (camera <-> LiDAR) and distribution-consistent modality transfer inside a VLA driving model, jointly trained for 3D detection, BEV map segmentation and trajectory planning; multi-trajectory DFM planning refined at inference by a perception-derived driving risk cost map without additional policy training."
+
+training:
+  dataset: "nuScenes (perception pretraining), NAVSIM (planning fine-tuning), Bench2Drive, Argoverse 2 Sensor"
+  method: "Two-stage: (1) multi-modal interactive model trained for 3D detection + BEV segmentation (20 epochs perception pretraining on nuScenes); (2) fine-tuned for language-guided trajectory prediction with auxiliary perception supervision; four sequential training phases for planning; AdamW, weight decay 0.01"
+  compute: "8x NVIDIA A6000 48GB"
+
+benchmarks:
+  navsim_v1:
+    navsimv1_pdms: 92.2
+    navsimv1_nc: 99.0
+    navsimv1_dac: 98.5
+    navsimv1_ttc: 98.3
+    navsimv1_comfort: 100
+    navsimv1_ep: 88.6
+    source: "Paper Table 1 (NAVSIM navtest, PDMS)"
+    date_reported: "2026-08-21"
+    eval_condition: "NAVSIM navtest open-loop, camera + LiDAR input"
+  navsim_v2:
+    navsimv2_epdms: 87.0
+    navsimv2_nc: 99.0
+    navsimv2_dac: 98.5
+    navsimv2_ep: 88.6
+    navsimv2_ttc: 98.3
+    navsimv2_ddc: 99.0
+    navsimv2_lk: 97.6
+    navsimv2_ec: 98.7
+    source: "Paper Table 2 (NAVSIM navtest, extended metrics EPDMS)"
+    date_reported: "2026-08-21"
+    eval_condition: "NAVSIM navtest open-loop, EPDMS metrics, camera + LiDAR"
+  bench2drive:
+    driving_score: 77.45
+    route_completion: 88.23
+    infraction_score: 0.90
+    success_rate: 56.00
+    source: "Paper Table 3 (Bench2Drive core metrics)"
+    date_reported: "2026-08-21"
+    eval_condition: "closed-loop CARLA Bench2Drive, camera + LiDAR + language"
+  nuscenes_planning:
+    l2_1s: 0.14
+    l2_2s: 0.27
+    l2_3s: 0.50
+    l2_avg: 0.30
+    collision_1s: 0.03
+    collision_2s: 0.15
+    collision_3s: 0.45
+    collision_avg: 0.21
+    intersection_1s: 0.31
+    intersection_2s: 1.00
+    intersection_3s: 2.54
+    intersection_avg: 1.27
+    source: "Paper Table 4 (nuScenes open-loop planning; L2 in m, collision/intersection in %)"
+    date_reported: "2026-08-21"
+    eval_condition: "nuScenes open-loop planning, with ego status and BEV planner"
+  nuscenes_perception:
+    det_val_map: 73.7
+    det_val_nds: 77.2
+    det_test_map: 74.0
+    det_test_nds: 78.0
+    bev_seg_val_miou: 71.1
+    source: "Paper Tables 5 and 7 (nuScenes 3D detection val/test; BEV map segmentation val mIoU)"
+    date_reported: "2026-08-21"
+    eval_condition: "nuScenes perception, LiDAR + camera"
+  argoverse2_perception:
+    det_map: 43.5
+    bev_seg_miou: 63.8
+    source: "Paper Tables 6 and 8 (Argoverse 2 3D detection mAP; BEV segmentation average IoU)"
+    date_reported: "2026-08-21"
+    eval_condition: "Argoverse 2 Sensor, LiDAR + camera"
+  navsim_v1_baselines:
+    wam_flow_pdms: 90.3
+    goalflow_pdms: 90.3
+    safedrive_pdms: 91.6
+    autovla_pdms: 89.1
+    diffusiondrive_pdms: 88.1
+    source: "Paper Table 1 (baselines)"
+    date_reported: "2026-08-21"
+    eval_condition: "NAVSIM navtest open-loop, PDMS"
+  navsim_v1_backbone_ablation:
+    qwen2_5_3b_pdms: 91.8
+    llava_7b_pdms: 92.1
+    janus_1_5b_pdms: 92.2
+    source: "Paper Table 10 (different VLA foundations on NAVSIM)"
+    date_reported: "2026-08-21"
+    eval_condition: "NAVSIM navtest, PDMS"
+  navsim_v1_refinement_ablation:
+    full_pdms: 92.2
+    without_prior_cost_pdms: 88.0
+    without_detection_risk_cost_pdms: 85.1
+    without_semantic_risk_cost_pdms: 85.6
+    without_smooth_cost_pdms: 91.5
+    source: "Paper Table 11 (Perception-Oriented Trajectory Refinement ablation)"
+    date_reported: "2026-08-21"
+    eval_condition: "NAVSIM navtest, PDMS"
+
+eval_conditions:
+  navsim_v1: "fine-tuned, camera + LiDAR, open-loop NAVSIM navtest"
+  bench2drive: "closed-loop CARLA Bench2Drive"
+
+tags: [autonomous_driving, navsim, bench2drive, nuscenes, lidar, multimodal_fusion, optimal_transport, discrete_flow_matching, janus, multi_trajectory, trajectory_optimization]

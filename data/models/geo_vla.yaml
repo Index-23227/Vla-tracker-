@@ -1,0 +1,75 @@
+# Paper: Geo-VLA: Geometry-Aware Vision-Language-Action Planning via Internalization of Map Semantics
+# arXiv: 2608.21440
+
+name: Geo-VLA
+full_name: "Geo-VLA: Geometry-Aware Vision-Language-Action Planning via Internalization of Map Semantics"
+organization: "University of Science and Technology Beijing"
+date: "2026-08-18"
+paper_url: https://arxiv.org/abs/2608.21440
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Vision-language backbone of the host VLA planner (DynVLA or ReCogDrive), adapted with rank-16 LoRA adapters in the vision encoder and LLM during geometry-aware pretraining; single front-view camera input"
+  action_head: "Host planner's original action decoder, kept unchanged in design and re-fine-tuned on NAVSIM navtrain with the planner's original imitation objective on top of the frozen geometry-adapted backbone (headline result uses the DynVLA decoder)"
+  action_head_category: other
+  action_space: continuous
+  key_innovation: "Plug-and-play training framework that internalizes map semantics into the VLA backbone: Geo-QA (3,000 GPT-5.4-generated QA pairs from NAVSIM front-view frames + offline map annotations; 5 categories: lane structure, road geometry, intersection structure, drivable boundary, road topology) supervises the backbone via symmetric image-text InfoNCE + QA instruction tuning. No HD map, map text or map encoder at inference; static road-structure QA beats equal-scale dynamic-object QA."
+
+training:
+  dataset: "Geo-QA (3,000 samples) for backbone pretraining; NAVSIM v1 navtrain for planning fine-tuning"
+  method: "Stage 1: geometry-aware pretraining (L_con + lambda * L_qa) optimizing LoRA adapters and projection heads with the action decoder fixed; Stage 2: planning fine-tuning of only the action decoder with the adapted backbone frozen, following each baseline's original protocol"
+
+benchmarks:
+  navsim_v1:
+    navsimv1_pdms: 92.1
+    navsimv1_nc: 98.50
+    navsimv1_dac: 98.20
+    navsimv1_ttc: 95.30
+    navsimv1_comfort: 100.00
+    navsimv1_ep: 89.00
+    source: "Paper Table 1 (DynVLA + Geo-VLA), NAVSIM v1 navtest"
+    date_reported: "2026-08-18"
+    eval_condition: "NAVSIM v1 navtest, non-reactive simulation, single front camera, single-trajectory protocol"
+  navsim_v1_recogdrive_host:
+    navsimv1_pdms: 91.2
+    navsimv1_nc: 98.40
+    navsimv1_dac: 98.00
+    navsimv1_ttc: 95.00
+    navsimv1_comfort: 100.00
+    navsimv1_ep: 88.00
+    source: "Paper Table 1 (ReCogDrive + Geo-VLA)"
+    date_reported: "2026-08-18"
+    eval_condition: "same protocol, Geo-VLA applied to ReCogDrive"
+  navsim_v1_baselines:
+    recogdrive_reproduced_pdms: 90.8
+    dynvla_reproduced_pdms: 91.0
+    drivefine_pdms: 91.8
+    last_vla_pdms: 91.3
+    source: "Paper Table 1 (baselines; ReCogDrive and DynVLA are the authors' reproductions)"
+    date_reported: "2026-08-18"
+    eval_condition: "NAVSIM v1 navtest, single-camera VLA planners"
+  navsim_v1_map_encoding_ablation:
+    dynvla_hd_map_encoder_pdms: 92.4
+    dynvla_lane_detection_pdms: 91.7
+    dynvla_geo_qa_pdms: 92.1
+    recogdrive_hd_map_encoder_pdms: 91.9
+    recogdrive_lane_detection_pdms: 91.2
+    recogdrive_geo_qa_pdms: 91.2
+    source: "Paper Table 2 (map encoding approaches)"
+    date_reported: "2026-08-18"
+    eval_condition: "NAVSIM v1 navtest; HD map encoder and lane detection add inference-time inputs/modules"
+  navsim_v1_qa_type_ablation:
+    dynvla_no_qa_pdms: 91.0
+    dynvla_dynamic_qa_pdms: 90.7
+    dynvla_static_qa_pdms: 92.1
+    source: "Paper Table 3 (static vs dynamic QA supervision on DynVLA)"
+    date_reported: "2026-08-18"
+    eval_condition: "NAVSIM v1 navtest, equal-scale QA supervision"
+
+eval_conditions:
+  navsim_v1: "fine-tuned on NAVSIM navtrain, single front camera, open-loop non-reactive navtest"
+
+tags: [autonomous_driving, navsim, map_semantics, geometry, contrastive_learning, instruction_tuning, lora, plug_and_play, dynvla, recogdrive]
