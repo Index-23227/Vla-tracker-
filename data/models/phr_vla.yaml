@@ -1,0 +1,123 @@
+# Paper: PHR-VLA: Planning Horizon Reasoning for Vision-Language-Action Models
+# arXiv: 2608.27609
+
+name: PHR-VLA
+full_name: "PHR-VLA: Planning Horizon Reasoning for Vision-Language-Action Models"
+organization: "Texas A&M University / Purdue University"
+date: "2026-08-27"
+paper_url: https://arxiv.org/abs/2608.27609
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "SmolVLA (0.45B; SmolVLM-2 backbone)"
+  action_head: "SmolVLA flow-matching action expert (unchanged); training-only auxiliary future head on action-token latents"
+  action_head_category: flow_matching
+  parameters: "~0.45B (SmolVLA) + lightweight training-only future head"
+  key_innovation: "Privileged planning-horizon latent-dynamics supervision: a lightweight future head predicts patch-level differences of frozen-encoder (SigLIP or V-JEPA 2) latents of future frames I_{t+1:t+H} from the action-token representation, trained with L = L_VLA + lambda * L_Align (MSE, lambda=0.02). Future head and encoder discarded at inference, so zero added latency."
+
+training:
+  base_model: "SmolVLA"
+  method: "Fine-tuning with auxiliary latent-dynamics alignment loss (wrist-camera, patch-level, dynamics targets by default)"
+  data: "LIBERO; Meta-World; 100 teleoperated demos per real-world disassembly task (10 Hz)"
+  hardware: "single NVIDIA A100"
+
+benchmarks:
+  libero:
+    libero_spatial: 88.7
+    libero_object: 98.0
+    libero_goal: 92.4
+    libero_long: 74.4
+    libero_avg: 88.4
+    source: "Paper Table I, PHR-VLA (ours) row"
+    date_reported: "2026-08-27"
+    eval_condition: "SmolVLA fine-tuned on a single A100 with wrist-camera patch-level latent-dynamics supervision (SigLIP targets), 300 trials per suite"
+
+  libero_smolvla_baseline:
+    libero_spatial: 86.0
+    libero_object: 97.7
+    libero_goal: 86.7
+    libero_long: 66.0
+    avg: 84.1
+    source: "Paper Table I, SmolVLA row"
+    eval_condition: "baseline: SmolVLA fine-tuned under the same single-A100 setting"
+
+  libero_camera_view_ablation:
+    third_person_avg: 86.8
+    multicam_avg: 88.1
+    wrist_avg: 88.4
+    source: "Paper Table III (SigLIP, Patch, y rows, Average column)"
+    eval_condition: "ablation: camera view for auxiliary target"
+
+  libero_target_ablation:
+    wrist_patch_dynamics: 88.4
+    wrist_patch_absolute: 86.7
+    wrist_mean_dynamics: 86.2
+    wrist_mean_absolute: 83.6
+    source: "Paper Table III (SigLIP, Wrist rows, Average column)"
+    eval_condition: "ablation: patch vs mean granularity, latent dynamics (y) vs absolute latent (s)"
+
+  libero_jepa_encoder:
+    wrist_patch_dynamics: 86.2
+    multicam_patch_dynamics: 85.9
+    third_person_patch_dynamics: 83.2
+    source: "Paper Table III (JEPA rows, Patch y, Average column)"
+    eval_condition: "ablation: V-JEPA 2 as frozen target encoder"
+
+  metaworld:
+    metaworld_easy: 85.2
+    metaworld_medium: 55.1
+    metaworld_hard: 45.5
+    metaworld_very_hard: 45.3
+    metaworld_avg: 57.7
+    source: "Paper Table II, PHR-VLA (ours) row"
+    date_reported: "2026-08-27"
+    eval_condition: "third-person camera patch-level supervision (only view available); note Table IV and abstract report the same configuration as 57.8"
+
+  metaworld_smolvla_baseline:
+    easy: 82.0
+    medium: 54.2
+    hard: 43.9
+    very_hard: 46.7
+    avg: 56.7
+    source: "Paper Table II, SmolVLA row"
+    eval_condition: "baseline: SmolVLA fine-tuned under the same single-A100 setting"
+
+  metaworld_jepa_encoder:
+    patch_dynamics_avg: 57.5
+    patch_absolute_avg: 58.7
+    mean_dynamics_avg: 59.8
+    mean_absolute_avg: 59.5
+    source: "Paper Table IV (JEPA rows, Average column)"
+    eval_condition: "ablation: V-JEPA 2 target encoder on Meta-World"
+
+  real_world:
+    total: 82.5
+    source: "Paper Table V, PHR-VLA column, Total [%] row (99/120)"
+    date_reported: "2026-08-27"
+    eval_condition: "Franka Panda, 4 contact-rich disassembly tasks, 30 trials each"
+
+  real_world_per_task_successes_of_30:
+    task_i_clip_release: 28
+    task_ii_loose_shaft: 26
+    task_iii_slide_pull: 22
+    task_iv_twist_pull: 23
+    total_of_120: 99
+    source: "Paper Table V, PHR-VLA column (raw success counts)"
+    eval_condition: "success counts out of 30 trials per task (not percentages)"
+
+  real_world_baselines:
+    act_total: 35.8
+    diffusion_policy_total: 51.7
+    smolvla_total: 63.3
+    phr_vla_jepa_total: 77.5
+    source: "Paper Table V, Total [%] row"
+    eval_condition: "baselines and JEPA-target variant on the same 4 disassembly tasks"
+
+eval_conditions:
+  libero: "fine-tuned SmolVLA, single A100, 300 trials per suite"
+  metaworld: "fine-tuned SmolVLA, 4 difficulty levels"
+  real_world: "Franka Panda, wrist + third-person RGB, 100 demos/task, 30 trials/task"
+
+tags: [smolvla, flow_matching, auxiliary-loss, privileged-information, latent-dynamics, future-prediction, siglip, v-jepa-2, libero, metaworld, disassembly, real-robot]
