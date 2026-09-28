@@ -1,0 +1,289 @@
+# Paper: DeicticVLA: Unifying Instruction Modes Based on Language and Deictic Gestures in a Single VLA
+# arXiv: 2608.28108
+
+name: DeicticVLA
+full_name: "DeicticVLA: Unifying Instruction Modes Based on Language and Deictic Gestures in a Single VLA"
+organization: "The University of Osaka"
+date: "2026-08-28"
+paper_url: https://arxiv.org/abs/2608.28108
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0 (pretrained VLA, all parameters fine-tuned); deictic masks from user clicks grounded by SAM 2 (sam2.1-hiera-tiny, ~30 Hz tracking on RTX 4090) are injected either as RGB visual prompts (VP-BBox red bounding box, VP-Fade gray fade outside mask) or as a separate-channel mask prompt (bias-free patch embedding added to image embeddings before (MP-Early) or after (MP-Late) the visual encoder, Alpha-CLIP style)"
+  action_head: "pi0 flow-matching action expert (unchanged action space and training objective), outputs action chunks"
+  action_head_category: flow_matching
+  action_space: continuous
+  key_innovation: "Instruction canonicalization maps Language Instruction (LI), Vision-Language Instruction (VLI, language + click) and Visual Instruction (VI, click only, fixed prompt 'follow visual instruction') into one text prompt + deictic mask representation so a single fine-tuned VLA supports all three modes; zero mask for LI leaves visual input unchanged. Two-stage training (LI-only first, then joint LI+VLI+VI) with matched total steps; controlled comparison of four mask-conditioning methods."
+
+training:
+  dataset: "Simulation: LIBERO-Object (10 tasks), LIBERO-Spatial (9 of 10 tasks), LIBERO-Goal (6 'put A B' tasks), 50 demos per task, each demo turned into LI/VLI/VI variants with ground-truth instance-segmentation masks. Real world: 360 GELLO teleoperation episodes (~97k timesteps) on UR5e + Robotiq 2F-85 (PickBlock 100, PutBlock 110, OrganizeToy 150)"
+  method: "Full-parameter fine-tuning of pi0. 2S: 30k steps on LI data, then 30k steps on LI+VLI+VI (sim); 15k + 15k steps (real). Ablations: 1S (60k joint) and 2S-NoLI (second stage without LI). AdamW, cosine LR 2.5e-5 -> 2.5e-6, batch 32, EMA 0.99, 2x A100"
+
+benchmarks:
+  libero_deictic_subset_2s_sr:
+    mp_early_li: 93.0
+    mp_early_vli: 96.3
+    mp_early_vi: 96.9
+    mp_early_mean: 95.4
+    mp_late_li: 91.5
+    mp_late_vli: 95.5
+    mp_late_vi: 95.3
+    mp_late_mean: 94.1
+    vp_fade_li: 93.1
+    vp_fade_vli: 96.2
+    vp_fade_vi: 95.6
+    vp_fade_mean: 95.0
+    vp_bbox_li: 94.0
+    vp_bbox_vli: 96.8
+    vp_bbox_vi: 96.1
+    vp_bbox_mean: 95.6
+    source: "Paper Table II (2S, in-distribution SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "custom LIBERO subset (Object 10 + Spatial 9 + Goal 6 tasks), two-stage training, 25 trials per task, GT masks"
+  libero_deictic_subset_1s_sr:
+    mp_early_li: 90.5
+    mp_early_vli: 92.3
+    mp_early_vi: 91.4
+    mp_early_mean: 91.4
+    mp_late_li: 91.8
+    mp_late_vli: 95.2
+    mp_late_vi: 94.1
+    mp_late_mean: 93.7
+    vp_fade_li: 93.6
+    vp_fade_vli: 96.9
+    vp_fade_vi: 96.0
+    vp_fade_mean: 95.5
+    vp_bbox_li: 92.4
+    vp_bbox_vli: 91.9
+    vp_bbox_vi: 94.0
+    vp_bbox_mean: 92.8
+    source: "Paper Table II (1S, in-distribution SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "same subset, single-stage joint training 60k steps"
+  libero_deictic_subset_2s_noli_sr:
+    mp_early_li: 64.6
+    mp_early_vli: 96.9
+    mp_early_vi: 96.2
+    mp_early_mean: 85.9
+    mp_late_li: 63.6
+    mp_late_vli: 96.4
+    mp_late_vi: 95.7
+    mp_late_mean: 85.2
+    vp_fade_li: 69.2
+    vp_fade_vli: 97.0
+    vp_fade_vi: 97.0
+    vp_fade_mean: 87.7
+    vp_bbox_li: 72.1
+    vp_bbox_vli: 96.0
+    vp_bbox_vi: 95.4
+    vp_bbox_mean: 87.8
+    source: "Paper Table II (2S-NoLI, in-distribution SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "same subset, two-stage training without LI data in second stage"
+  libero_deictic_subset_2s_delta_sr_in_distribution:
+    mp_early_vli: 23.1
+    mp_early_vi: 31.7
+    mp_late_vli: 22.3
+    mp_late_vi: 33.4
+    vp_fade_vli: 25.6
+    vp_fade_vi: 35.2
+    vp_bbox_vli: 25.6
+    vp_bbox_vi: 34.0
+    source: "Paper Table II (2S, in-distribution Delta SR = SR with masks - SR with masks disabled)"
+    date_reported: "2026-08-28"
+    eval_condition: "in-distribution, two-stage training"
+  libero_deictic_object_zs_2s_delta_sr:
+    mp_early_vli: 9.1
+    mp_early_vi: 10.0
+    mp_late_vli: 29.2
+    mp_late_vi: 25.2
+    vp_fade_vli: 26.2
+    vp_fade_vi: 24.8
+    vp_bbox_vli: 29.2
+    vp_bbox_vi: 27.8
+    source: "Paper Table II (2S, Object-ZS Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "LIBERO-Object-ZS (shuffled/swapped object layouts, evaluation only), two-stage training"
+  libero_deictic_spatial_zs_2s_delta_sr:
+    mp_early_vli: 3.1
+    mp_early_vi: 4.4
+    mp_late_vli: 0.9
+    mp_late_vi: 1.7
+    vp_fade_vli: 1.3
+    vp_fade_vi: 5.8
+    vp_bbox_vli: 16.0
+    vp_bbox_vi: 11.1
+    source: "Paper Table II (2S, Spatial-ZS Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "LIBERO-Spatial-ZS (all eight bowl positions populated), two-stage training"
+  libero_deictic_subset_1s_delta_sr_in_distribution:
+    mp_early_vli: 19.1
+    mp_early_vi: 24.1
+    mp_late_vli: 21.5
+    mp_late_vi: 31.2
+    vp_fade_vli: 24.6
+    vp_fade_vi: 33.2
+    vp_bbox_vli: 22.1
+    vp_bbox_vi: 28.0
+    source: "Paper Table II (1S, in-distribution Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "in-distribution, single-stage training"
+  libero_deictic_object_zs_1s_delta_sr:
+    mp_early_vli: 3.5
+    mp_early_vi: 3.4
+    mp_late_vli: 7.2
+    mp_late_vi: 8.0
+    vp_fade_vli: 0.7
+    vp_fade_vi: 0.2
+    vp_bbox_vli: 0.9
+    vp_bbox_vi: 1.0
+    source: "Paper Table II (1S, Object-ZS Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "LIBERO-Object-ZS, single-stage training"
+  libero_deictic_spatial_zs_1s_delta_sr:
+    mp_early_vli: 0.2
+    mp_early_vi: 0.9
+    mp_late_vli: 1.3
+    mp_late_vi: -0.5
+    vp_fade_vli: 0.4
+    vp_fade_vi: 0.0
+    vp_bbox_vli: 1.2
+    vp_bbox_vi: 2.2
+    source: "Paper Table II (1S, Spatial-ZS Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "LIBERO-Spatial-ZS, single-stage training"
+  libero_deictic_subset_2s_noli_delta_sr_in_distribution:
+    mp_early_vli: 21.5
+    mp_early_vi: 27.8
+    mp_late_vli: 20.9
+    mp_late_vi: 30.6
+    vp_fade_vli: 25.4
+    vp_fade_vi: 32.9
+    vp_bbox_vli: 22.5
+    vp_bbox_vi: 29.7
+    source: "Paper Table II (2S-NoLI, in-distribution Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "in-distribution, two-stage training without second-stage LI data"
+  libero_deictic_object_zs_2s_noli_delta_sr:
+    mp_early_vli: 16.5
+    mp_early_vi: 17.9
+    mp_late_vli: 9.3
+    mp_late_vi: 10.3
+    vp_fade_vli: 26.5
+    vp_fade_vi: 25.7
+    vp_bbox_vli: 18.8
+    vp_bbox_vi: 19.6
+    source: "Paper Table II (2S-NoLI, Object-ZS Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "LIBERO-Object-ZS, 2S-NoLI"
+  libero_deictic_spatial_zs_2s_noli_delta_sr:
+    mp_early_vli: 0.0
+    mp_early_vi: -0.1
+    mp_late_vli: 0.4
+    mp_late_vi: 0.5
+    vp_fade_vli: -0.5
+    vp_fade_vi: 4.0
+    vp_bbox_vli: 3.5
+    vp_bbox_vi: 3.6
+    source: "Paper Table II (2S-NoLI, Spatial-ZS Delta SR)"
+    date_reported: "2026-08-28"
+    eval_condition: "LIBERO-Spatial-ZS, 2S-NoLI"
+  libero_deictic_mp_inter3_2s_ablation:
+    li: 62.0
+    vli: 41.4
+    vi: 22.0
+    mean: 41.8
+    delta_sr_vli: 1.6
+    delta_sr_vi: -2.7
+    source: "Paper Appendix A Table VI (MP-Inter-3, 2S, in-distribution; exploratory failure case)"
+    date_reported: "2026-08-28"
+    eval_condition: "mask prompt injected at visual-encoder layers {0, 9, 18}, two-stage training"
+  real_world_pickblock_tl1:
+    li_baseline: 70.8
+    li: 29.2
+    vli: 50.0
+    vi: 45.8
+    source: "Paper Table V (PickBlock TL1, n=24)"
+    date_reported: "2026-08-28"
+    eval_condition: "UR5e, in-distribution instruction templates; MP-Late 2S; li_baseline = LI-only pi0 fine-tune 30k steps"
+  real_world_pickblock_tl2:
+    li_baseline: 12.5
+    li: 12.5
+    vli: 62.5
+    vi: 62.5
+    source: "Paper Table V (PickBlock TL2, n=16)"
+    date_reported: "2026-08-28"
+    eval_condition: "unseen combinations of known concepts (reversed ordinal direction)"
+  real_world_pickblock_tl3:
+    li_baseline: 18.8
+    li: 18.8
+    vli: 68.8
+    vi: 93.8
+    source: "Paper Table V (PickBlock TL3, n=16)"
+    date_reported: "2026-08-28"
+    eval_condition: "unseen colors, spatial expressions and ordinal positions"
+  real_world_putblock_tl1:
+    li_baseline: 80.0
+    li: 40.0
+    vli: 73.3
+    vi: 53.3
+    source: "Paper Table V (PutBlock TL1, n=15)"
+    date_reported: "2026-08-28"
+    eval_condition: "in-distribution instruction templates"
+  real_world_putblock_tl2:
+    li_baseline: 6.7
+    li: 26.7
+    vli: 86.7
+    vi: 86.7
+    source: "Paper Table V (PutBlock TL2, n=15)"
+    date_reported: "2026-08-28"
+    eval_condition: "ordinal positions counted from the unseen direction"
+  real_world_putblock_tl3:
+    li_baseline: 30.0
+    li: 20.0
+    vli: 80.0
+    vi: 75.0
+    source: "Paper Table V (PutBlock TL3, n=20)"
+    date_reported: "2026-08-28"
+    eval_condition: "unseen ordinal positions and spatial expressions"
+  real_world_organizetoy_tl1:
+    li_baseline: 67.5
+    li: 62.5
+    vli: 77.5
+    vi: 75.0
+    source: "Paper Table V (OrganizeToy TL1, n=40)"
+    date_reported: "2026-08-28"
+    eval_condition: "seen stuffed toys, standard table surface"
+  real_world_organizetoy_vc_surface:
+    li_baseline: 65.0
+    li: 60.0
+    vli: 87.5
+    vi: 90.0
+    source: "Paper Table V (OrganizeToy VC-Surface, n=40)"
+    date_reported: "2026-08-28"
+    eval_condition: "unseen tablecloth on table surface"
+  real_world_organizetoy_no_instance:
+    li_baseline: 66.7
+    li: 62.5
+    vli: 95.8
+    vi: 95.8
+    source: "Paper Table V (OrganizeToy NO-Instance, n=24)"
+    date_reported: "2026-08-28"
+    eval_condition: "novel instances of seen categories"
+  real_world_organizetoy_no_category:
+    li_baseline: 33.3
+    li: 16.7
+    vli: 100.0
+    vi: 100.0
+    source: "Paper Table V (OrganizeToy NO-Category, n=12)"
+    date_reported: "2026-08-28"
+    eval_condition: "objects from categories unseen in training"
+
+eval_conditions:
+  libero_deictic: "non-standard LIBERO subset (Object 10, Spatial 9, Goal 6 put-A-B tasks) with LI/VLI/VI variants and ground-truth masks; not comparable to standard LIBERO averages"
+  real_world: "UR5e + Robotiq 2F-85 with Fin-ray fingers, overhead + wrist cameras, SAM 2 masks from tablet clicks; MP-Late with two-stage training (15k + 15k steps)"
+
+tags: [pi0, flow_matching, full_finetune, deictic_gesture, visual_prompting, mask_prompting, multimodal_instruction, human_robot_interaction, sam2, libero, real_world, ur5e]

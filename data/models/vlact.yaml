@@ -1,0 +1,176 @@
+# Paper: Beyond Data Scaling: Representation-Centric Continued Pre-training for Vision-Language-Action Models
+# arXiv: 2608.27550
+
+name: VLAct
+full_name: "Beyond Data Scaling: Representation-Centric Continued Pre-training for Vision-Language-Action Models"
+organization: "StarVLA team (advisors: Jiaya Jia, Bei Yu, Hengshuang Zhao, Zhuotao Tian, Shu Liu, Pengguang Chen)"
+date: "2026-08-27"
+paper_url: https://arxiv.org/abs/2608.27550
+code_url: null
+venue: arXiv
+open_source: true
+
+architecture:
+  backbone: "Qwen3-VL-4B, continued pre-trained on open multi-embodiment robot data (StarVLA codebase)"
+  llm: "Qwen3-VL-4B"
+  action_head: "Downstream: freshly initialized task-specific head (default OFT-style parallel continuous regression; GR00T-style and PI flow-matching heads also evaluated). Pre-training: OFT + PI + GR00T heads co-supervised on the shared latent"
+  action_head_category: regression
+  parameters: "~4B (Qwen3-VL-4B backbone) + action head"
+  key_innovation: "Representation-centric VLA continued pre-training: (1) shallow-layer protection (freeze vision encoder + lower half of LLM) and caption-data mixing to preserve the VLM prior; (2) multi-head continuous action co-supervision (L = L_OFT + L_PI + L_GR00T) to avoid head-specific representation collapse; (3) partially unified cross-embodiment action layout (shared gripper dims, masked embodiment-specific arm dims) with wrap-aware loss for periodic joints. Pre-training heads discarded; downstream head re-initialized."
+
+training:
+  base_model: "Qwen3-VL-4B"
+  method: "Continued pre-training (vision encoder + lower half LLM frozen) with multi-head action co-supervision and caption mixing, then full-model downstream fine-tuning with a freshly initialized action head"
+  data: "Open-source robot data: DROID, InternA1, RoboCoin, MolmoAct (Franka single-arm + AgileX bimanual) + captioning data"
+  hardware: "16 GPUs (continued pre-training); real-world fine-tuning 8x H800, 50k steps"
+
+benchmarks:
+  libero:
+    libero_plus_camera: 73.9
+    libero_plus_robot: 68.4
+    libero_plus_language: 81.5
+    libero_plus_light: 96.7
+    libero_plus_background: 96.7
+    libero_plus_noise: 86.0
+    libero_plus_layout: 83.3
+    libero_plus_total: 82.6
+    source: "Paper Table 1 (LIBERO-Plus), VLAct row"
+    date_reported: "2026-08-27"
+    eval_condition: "trained on standard LIBERO, evaluated on LIBERO-Plus perturbed test set; standard 4-suite LIBERO not reported"
+
+  libero_plus_qwen3vl_oft_baseline:
+    camera: 47.0
+    robot: 60.1
+    language: 87.0
+    light: 96.3
+    background: 95.3
+    noise: 73.1
+    layout: 79.2
+    total: 75.0
+    source: "Paper Table 1, Qwen3VL-OFT row (in-house baseline, no continued pre-training)"
+    eval_condition: "baseline: same Qwen3-VL backbone family + OFT head without VLAct pre-training"
+
+  robotwin_v2:
+    robotwin_v2_clean: 92.5
+    robotwin_v2_randomized: 90.8
+    source: "Paper Table 2, VLAct (OFT) row, Data Scaling setting"
+    date_reported: "2026-08-27"
+    eval_condition: "Data Scaling setting: multi-task, 50 clean + 500 randomized demos per task; 50 tasks x 100 episodes; Clean and Random evaluation"
+
+  robotwin_v2_base_setting:
+    clean: 80.5
+    random: 41.5
+    source: "Paper Table 2, VLAct (OFT) row, Base setting"
+    eval_condition: "Base setting: only 50 clean trajectories per task for fine-tuning"
+
+  robotwin_v2_head_variants:
+    gr00t_head_base_clean: 76.0
+    gr00t_head_base_random: 22.9
+    gr00t_head_scaling_clean: 89.6
+    gr00t_head_scaling_random: 87.4
+    pi_head_base_clean: 77.0
+    pi_head_base_random: 23.7
+    pi_head_scaling_clean: 93.0
+    pi_head_scaling_random: 88.8
+    source: "Paper Table 2, VLAct GR00T / PI rows"
+    eval_condition: "same VLAct backbone with alternative downstream heads"
+
+  robotwin_v2_qwen3vl_oft_baseline:
+    base_clean: 61.7
+    base_random: 10.5
+    scaling_clean: 88.2
+    scaling_random: 88.3
+    source: "Paper Table 2, Qwen3VL-OFT row"
+    eval_condition: "baseline: in-house Qwen3VL-OFT without continued pre-training"
+
+  shallow_layer_protection_ablation:
+    update_full_backbone_libero_plus: 78.9
+    update_full_backbone_robotwin2: 77.1
+    freeze_vision_only_libero_plus: 81.3
+    freeze_vision_only_robotwin2: 79.3
+    freeze_vision_and_lower_half_llm_libero_plus: 82.6
+    freeze_vision_and_lower_half_llm_robotwin2: 80.5
+    source: "Paper Appendix Table 6"
+    eval_condition: "ablation of pre-training update strategy; RoboTwin 2.0 column corresponds to the Base/Clean setting"
+
+  vla_arena:
+    safety: 63.2
+    distractor: 64.0
+    extrapolation: 36.9
+    long_horizon: 50.0
+    avg: 54.8
+    source: "Paper Appendix Table 4 (VLA-Arena), VLAct row"
+    date_reported: "2026-08-27"
+    eval_condition: "official suite weighting over 11 task suites, averaged over L0/L1/L2"
+
+  domino:
+    success_rate: 18.50
+    manipulation_score: 34.20
+    source: "Paper Appendix Table 5 (DOMINO), VLAct-OFT row"
+    eval_condition: "one policy on all 35 DOMINO dynamic manipulation tasks, clean dynamic setting"
+
+  robodojo:
+    gen_std_score: 16.33
+    gen_std_sr: 12.00
+    gen_rand_score: 2.74
+    gen_rand_sr: 1.00
+    precision_score: 20.62
+    precision_sr: 15.25
+    long_horizon_score: 20.12
+    long_horizon_sr: 13.67
+    memory_score: 0.66
+    memory_sr: 0.56
+    open_score: 2.37
+    open_sr: 2.25
+    avg_score: 10.66
+    avg_sr: 7.60
+    source: "Paper Table 3 (RoboDojo leaderboard snapshot 2026-08-24), VLAct row"
+    eval_condition: "ARX X5 bimanual (unseen during pre-training), 42 tasks x 50 episodes; ranks 8th/35 by score, 6th/35 by success"
+
+  robocasa_gr1:
+    data_20pct: 49.5
+    data_50pct: 51.0
+    data_100pct: 54.0
+    source: "Paper Sec. 4.4 text (RoboCasa-GR1 results)"
+    eval_condition: "GR-1 humanoid (unseen during pre-training), VLAct-OFT fine-tuned with fraction of downstream trajectories; not standard RoboCasa"
+
+  robocasa_gr1_baselines:
+    qwen3vl_oft_full_data: 48.8
+    gr00t_n1_6_full_data: 47.6
+    pi0_5_full_data: 37.0
+    source: "Paper Sec. 4.4 text"
+    eval_condition: "reported full-data baselines on RoboCasa-GR1"
+
+  real_world:
+    single_arm_short_horizon_id_avg: 92.5
+    novel_object_from_pot: 90.0
+    novel_object_in_cup: 90.0
+    table_cleaning_weighted: 86.6
+    scoop_beans_weighted: 80.0
+    extended_table_cleaning_ood: 82.5
+    full_substitution_table_cleaning_ood: 83.3
+    dual_arm_avg: 72.0
+    source: "Paper Sec. 4.3 text"
+    date_reported: "2026-08-27"
+    eval_condition: "Franka Research 3; one single-arm model and one dual-arm model, 10 trials per task"
+
+  real_world_qwen3vl_oft_baseline:
+    single_arm_short_horizon_id_avg: 77.5
+    novel_object_from_pot: 73.3
+    novel_object_in_cup: 65.0
+    table_cleaning_weighted: 73.3
+    scoop_beans_weighted: 33.3
+    extended_table_cleaning_ood: 47.5
+    full_substitution_table_cleaning_ood: 46.6
+    dual_arm_avg: 44.0
+    source: "Paper Sec. 4.3 text"
+    eval_condition: "baseline: Qwen3VL-4B-OFT without continued pre-training"
+
+eval_conditions:
+  libero: "LIBERO-Plus robustness only (7 perturbation dims), trained on standard LIBERO"
+  robotwin_v2: "50 tasks, 100 episodes/task; headline = Data Scaling multi-task (clean + randomized demos)"
+  robodojo: "official RoboDojo leaderboard, ARX X5 (held-out embodiment)"
+  robocasa_gr1: "RoboCasa GR-1 humanoid tabletop, held-out embodiment"
+  real_world: "Franka Research 3 single-arm and dual-arm, 10 trials/task"
+
+tags: [continued-pretraining, representation-learning, qwen3-vl, starvla, multi-head-supervision, oft, cross-embodiment, unified-action-space, libero-plus, robotwin, vla-arena, domino, robodojo, robocasa-gr1, real-robot, open-data]

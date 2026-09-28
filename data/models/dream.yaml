@@ -1,0 +1,69 @@
+# Paper: DREAM: Deployment-Time Demonstration Generation via Real-to-Sim for Scalable Policy Adaptation
+# arXiv: 2608.29078
+
+name: DREAM
+full_name: "DREAM: Deployment-Time Demonstration Generation via Real-to-Sim for Scalable Policy Adaptation"
+organization: "The University of Tokyo"
+date: "2026-08-29"
+paper_url: https://arxiv.org/abs/2608.29078
+code_url: null
+venue: arXiv preprint
+open_source: false
+
+architecture:
+  backbone: "Pretrained VLAs fine-tuned on DREAM data: pi0.5 (PaliGemma-based) and SmolVLA"
+  action_head: "Unchanged action heads of the fine-tuned VLAs (pi0.5 flow-matching action expert; SmolVLA flow-matching action expert); DREAM contributes the fine-tuning data pipeline, not a new head"
+  action_head_category: flow_matching
+  parameters: "Not reported in paper (unchanged pi0.5 / SmolVLA checkpoints)"
+  key_innovation: "Demonstration-free, teleop-free deployment-time data generation: a short hand-held video of the workspace is reconstructed into a metrically aligned 3D Gaussian Splatting digital twin (robot-appearance-based SIM(3) registration, per-link robot splats, TRELLIS object splats), GPT-4o-mini maps the language instruction into a fixed predicate vocabulary for goals and staged success rubrics, cuTAMP + cuRobo generate feasible source trajectories in IsaacLab, MimicGen-style augmentation multiplies them, and Gaussian-splat rendering produces image-action data used to fine-tune pi0.5 / SmolVLA for the real workspace."
+
+training:
+  method: "Supervised imitation fine-tuning of pi0.5 and SmolVLA from their pretrained initializations on DREAM-generated demonstrations (subsets of 100 / 500 / 1000); Diffusion Policy trained from scratch only for the sim-to-real correlation study"
+  data: "50 TAMP source demonstrations per task augmented to up to 1000 rendered demonstrations (LeRobot format, 640x480 fixed + wrist RGB)"
+  hardware: "NVIDIA GB200 GPUs for policy training; 3 x RTX A6000 (48GB) for reconstruction, generation and rendering"
+  robot: "xArm7 with fixed and wrist Intel RealSense D435i cameras"
+
+benchmarks:
+  real_world:
+    pi05_dream1000_blockintobowl_sr: 93.3
+    pi05_dream1000_fruitpacking_sr: 86.7
+    source: "Paper Sec. IV-C Experiment 2 text (values also plotted in Fig. 5)"
+    date_reported: "2026-08-29"
+    eval_condition: "pi0.5 fine-tuned on 1000 DREAM-generated demos, real xArm7, 15 trials per task under held-out object configurations"
+  real_world_smolvla_dream:
+    smolvla_dream1000_blockintobowl_sr: 80.0
+    smolvla_dream1000_fruitpacking_sr: 6.7
+    source: "Paper Sec. IV-C Experiment 2 text"
+    eval_condition: "SmolVLA fine-tuned on 1000 DREAM-generated demos, real xArm7, 15 trials per task"
+  real_world_teleop_baselines:
+    pi05_teleop100_blockintobowl_sr: 86.7
+    pi05_teleop100_fruitpacking_sr: 80.0
+    smolvla_teleop100_blockintobowl_sr: 73.3
+    smolvla_teleop100_fruitpacking_sr: 26.7
+    source: "Paper Sec. IV-C Experiment 2 text"
+    eval_condition: "Same policies fine-tuned on 100 human-teleoperated real demos, real xArm7, 15 trials per task"
+  sim_to_real_correlation:
+    blockintobowl_pearson_r: 0.98
+    fruitpacking_pearson_r: 0.99
+    blockintobowl_mmrv: 0.000
+    fruitpacking_mmrv: 0.000
+    source: "Paper Sec. IV-B Experiment 1 text (Fig. 4)"
+    eval_condition: "Diffusion Policy / SmolVLA / pi0.5 checkpoints trained on teleop data, evaluated in reconstruction vs real robot"
+  data_generation_cost:
+    blockintobowl_fixed_cost_min: 36
+    fruitpacking_fixed_cost_min: 95
+    blockintobowl_breakeven_demos: 73
+    fruitpacking_breakeven_demos: 168
+    blockintobowl_tamp_50_source_min: 25.8
+    fruitpacking_tamp_50_source_min: 84.6
+    blockintobowl_planner_success: 100
+    fruitpacking_planner_success: 62
+    blockintobowl_augmentation_acceptance: 33.0
+    fruitpacking_augmentation_acceptance: 32.6
+    source: "Paper Sec. IV-C Experiment 2 text"
+    eval_condition: "DREAM generation cost vs teleoperation (wall-clock), per task"
+
+eval_conditions:
+  real_world: "fine-tuned on DREAM synthetic demos only, 2 tabletop tasks on xArm7, 15 trials each"
+
+tags: [real2sim, data_generation, gaussian_splatting, tamp, mimicgen, pi0.5, smolvla, real_world, manipulation, fine_tuning]
