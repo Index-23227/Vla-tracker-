@@ -18,7 +18,7 @@ GRAFT(Grounded Reinforcement Adaptation for Fast Task Learning)는 사전학습 
 
 ## 4. 아키텍처
 
-입력은 side·wrist RGB, 언어, 8차원 adapter 상태이며, H=10 행동 청크(7차원×10: 이동·회전·그리퍼)를 예측한다. 고정된 VLM prefix가 뷰별 토큰 X^v, pooled context c_t, KV 상태를 만든다. 각 뷰에 N_v=8개의 anchor 템플릿이 있고, context로 변조된 query가 자기 뷰 토큰에만 cross-attention해 anchor z^v_i를 만든다(투영은 뷰 간 공유). 전역 context 기반 softmax 게이트로 anchor를 재가중하고 centered-tanh adapter를 거쳐 행동 suffix에 결합한다. 행동 헤드는 노이즈 w 하나로 청크 전체를 한 번에 생성하는 consistency 정책이다(ConRFT, Consistency Policy 계열). 논문은 기반 VLA를 π0 계열 flow-matching 모델로 서술하지만 구체적 체크포인트명은 밝히지 않는다.
+입력은 side·wrist RGB, 언어, 8차원 adapter 상태이며, H=10 행동 청크(7차원×10: 이동·회전·그리퍼)를 예측한다. 고정된 VLM prefix가 뷰별 토큰 X^v, pooled context c_t, KV 상태를 만든다. 각 뷰에 N_v=8개의 anchor 템플릿이 있고, context로 변조된 query가 자기 뷰 토큰에만 cross-attention해 anchor z^v_i를 만든다(투영은 뷰 간 공유). 전역 context 기반 softmax 게이트로 anchor를 재가중하고 centered-tanh adapter를 거쳐 행동 suffix에 결합한다. 행동 헤드는 노이즈 w 하나로 청크 전체를 한 번에 생성하는 consistency 정책이다(ConRFT, Consistency Policy 계열). 기반 VLA는 다단계 flow-matching 행동 생성기를 가진 사전학습 모델(알고리즘 1에서 π₀로 표기)이지만, 구체적인 모델명이나 체크포인트는 밝히지 않는다.
 
 ## 5. 학습 목표
 
