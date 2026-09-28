@@ -7,27 +7,27 @@
 [![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Visit-blue?style=for-the-badge)](https://hyeongjinkim.github.io/Vla-tracker-/)
 <<<<<<< HEAD
 <<<<<<< HEAD
-[![Models](https://img.shields.io/badge/Models-437-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
 =======
-[![Models](https://img.shields.io/badge/Models-437-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-417-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-452-purple?style=flat-square)](data/models/)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
-[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-437-orange?style=flat-square)](data/ai_reviews/)
+[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-452-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
 
 <<<<<<< HEAD
 <<<<<<< HEAD
-**437 VLA models** · **8 benchmarks** · **437 AI paper reviews** · **Auto-updated from arXiv**
+**452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
 =======
-**437 VLA models** · **8 benchmarks** · **437 AI paper reviews** · **Auto-updated from arXiv**
+**452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**417 VLA models** · **8 benchmarks** · **414 AI paper reviews** · **Auto-updated from arXiv**
+**452 VLA models** · **8 benchmarks** · **452 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
@@ -48,7 +48,7 @@ VLA-Tracker solves this by:
 | New paper discovery | Manual updates | **Auto-scanned from arXiv twice weekly** |
 | Data validation | None | **CI checks on every PR** |
 | Interactive exploration | None | **Full React dashboard with filters** |
-| Paper reviews | None | **437 AI-generated seminar-style reviews** |
+| Paper reviews | None | **452 AI-generated seminar-style reviews** |
 | Machine-readable | None | **JSON API + llms.txt for AI agents** |
 
 ---
@@ -73,14 +73,14 @@ VLA-Tracker solves this by:
 | 12 | **LIRA** | **98.88** | Aug 2026 | arXiv | Local cross-layer routing, 0.5B at 186 Hz |
 | 13 | **MPCoT** | **98.85** | Jun 2026 | arXiv | OFT parallel-decoding + multi-path latent CoT |
 
-> Full leaderboard with 210 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 211 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
 | Benchmark | #1 | #2 | #3 |
 |-----------|-----|-----|-----|
 | **CALVIN** (avg len) | MPCoT (4.92) | MMaDA-VLA (4.78) | AVA-VLA (4.77) |
-| **SimplerEnv** (avg) | G0.5 (87.3) | Coarse-to-Control (83.3) | GTA-VLA (81.2) |
+| **SimplerEnv** (avg) | G0.5 (87.3) | INDI (84.7) | Coarse-to-Control (83.3) |
 | **RoboTwin v1** (avg) | Qwen-RobotManip (93.8) | Fast-WAM (91.8) | Qwen-VLA (86.7) |
 | **RoboTwin v2** (avg) | MotuBrain (96.0) | BCP (93.9) | STARRY (93.6) |
 | **RoboCasa** (avg) | Z-1 (80.6) | Xiaomi-Robotics-1 (74.5) | ACE-Ego-0 (72.8) |
@@ -90,7 +90,7 @@ VLA-Tracker solves this by:
 
 ## Paper Reviews
 
-VLA-Tracker includes **437 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
+VLA-Tracker includes **452 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
 
 1. One-line summary
 2. Background & motivation
@@ -102,7 +102,7 @@ VLA-Tracker includes **437 AI-generated seminar-style paper reviews** for every 
 8. Overall assessment with ratings
 9. Expected tough questions for seminars
 
-**437 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
+**452 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
 
 Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-tracker-/) · [Markdown files](data/ai_reviews/)
 
@@ -119,12 +119,12 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
 <<<<<<< HEAD
 <<<<<<< HEAD
-| **YAML** | [data/models/](data/models/) | Individual model files (437 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (437 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (417 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (452 files) |
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 
 ### Quick Start (Python)
@@ -181,14 +181,14 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 | Benchmark | Tasks | Models | Focus | Venue |
 |-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 210 | Manipulation generalization | NeurIPS 2023 |
-| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 47 | Long-horizon, language | RA-L 2022 |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 55 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 70 | Bimanual manipulation | CVPR 2025 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 211 | Manipulation generalization | NeurIPS 2023 |
+| [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 48 | Long-horizon, language | RA-L 2022 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 56 | Sim-to-real transfer | NeurIPS 2024 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 71 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 11 | Diverse manipulation | RA-L 2020 |
-| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 31 | Home robot tasks | RSS 2024 |
+| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 32 | Home robot tasks | RSS 2024 |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | 9 | Multi-task dexterity | CoRL 2020 |
-| [Real-World](data/benchmarks/real_world.yaml) | Per-paper | 101 | Physical robot evaluations | — |
+| [Real-World](data/benchmarks/real_world.yaml) | Per-paper | 111 | Physical robot evaluations | — |
 
 ---
 
@@ -208,15 +208,15 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 ├── data/
 <<<<<<< HEAD
 <<<<<<< HEAD
-│   ├── models/              # 437 model YAML files (source of truth)
+│   ├── models/              # 452 model YAML files (source of truth)
 =======
-│   ├── models/              # 437 model YAML files (source of truth)
+│   ├── models/              # 452 model YAML files (source of truth)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 417 model YAML files (source of truth)
+│   ├── models/              # 452 model YAML files (source of truth)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 │   ├── benchmarks/          # 8 benchmark definitions
-│   ├── ai_reviews/          # 437 AI-generated paper reviews (markdown)
+│   ├── ai_reviews/          # 452 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── paper_reviews.json   # Venue peer-review data (ICLR, NeurIPS, CoLM)
 ├── scripts/
@@ -254,7 +254,7 @@ We also welcome:
 
 - Benchmark numbers are from papers — evaluation conditions vary (fine-tuned vs. zero-shot)
 - Not all models report on all benchmarks (fair comparison is hard)
-- AI reviews are generated by Claude and may contain inaccuracies (437/437 are PDF-verified)
+- AI reviews are generated by Claude and may contain inaccuracies (452/452 are PDF-verified)
 - Real-world performance ≠ benchmark performance
 
 ---
