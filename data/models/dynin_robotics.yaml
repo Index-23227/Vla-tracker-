@@ -1,0 +1,147 @@
+# Paper: Dynin-Robotics: Omnimodal Unified Diffusion Vision-Language-Action Model
+# arXiv: 2609.13053
+
+name: Dynin-Robotics
+full_name: "Dynin-Robotics: Omnimodal Unified Diffusion Vision-Language-Action Model"
+organization: "AIDAS Lab, Seoul National University"
+date: "2026-09-11"
+paper_url: https://arxiv.org/abs/2609.13053
+code_url: https://github.com/AIDASLab/Dynin-Robotics
+venue: arXiv
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Dynin-Omni omnimodal masked-diffusion model (single bidirectional Transformer, shared token embeddings, unified categorical head); frozen text tokenizer and MAGViT-v2 image/video tokenizer"
+  llm: "Dynin-Omni (masked diffusion language model backbone)"
+  action_head: "Shared masked-diffusion prediction head over uniformly binned discrete action tokens (per-dimension uniform bins, 7D EEF interface); block-wise parallel denoising of action chunks; optional goal-state guidance and joint action/next-state denoising"
+  action_head_category: discrete_diffusion
+  parameters: "Not stated in the paper"
+  key_innovation: "One masked-diffusion model trained on four objective-conditioned queries (Policy, action-conditioned World Modeling, Goal-State Prediction, Task Understanding) over a shared trajectory token sequence; inference compositions (goal-guided policy, joint action/next-state denoising, world-model candidate reranking) for test-time scaling; dInfer block-parallel decoding up to 29.2x faster model-side action decoding"
+
+training:
+  method: "Stage 1: continual pretraining from Dynin-Omni on 48 OXE datasets with four objectives (27.6k optimizer updates / 220.8k micro-steps, AdamW peak LR 2e-5). Stage 2: per-domain SFT (Policy-only or four-objective mixture). Optional online PPO stage trains only a lightweight remasking controller with the backbone frozen"
+  data: "Open X-Embodiment 48-dataset mixture (1,332,985 trajectories, 65,217,081 transitions); Stage 2 on LIBERO, VLABench SelectFruit/InsertFlower, real-world Franka data"
+  hardware: "Stage 1 reported as a 32-rank run; profiling on NVIDIA B200"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.9
+    libero_object: 99.8
+    libero_goal: 97.8
+    libero_long: 95.8
+    libero_avg: 98.1
+    libero_plus_camera: 59.8
+    libero_plus_robot: 48.2
+    libero_plus_language: 85.0
+    libero_plus_light: 83.5
+    libero_plus_background: 84.6
+    libero_plus_noise: 78.2
+    libero_plus_layout: 71.8
+    libero_plus_avg: 73.0
+    source: "Paper Table 2 (LIBERO four suites) and Table 3 (zero-shot LIBERO-Plus)"
+    date_reported: "2026-09-11"
+    eval_condition: "LIBERO-trained checkpoint, goal-guided two-stage inference (variant c); LIBERO-Plus evaluated zero-shot with no LIBERO-Plus training"
+
+  real_world:
+    fruit_pnp: 97.5
+    cube_sort: 85.5
+    cube_stack: 62.0
+    color_ordered_stack: 68.5
+    real_world_avg: 78.4
+    source: "Paper Table 5"
+    date_reported: "2026-09-11"
+    eval_condition: "Franka Research 3, one workspace, four conditions; success rate (%)"
+
+  real_world_baselines:
+    pi05_avg: 76.9
+    gr00t_n16_avg: 73.0
+    cosmos_policy_avg: 73.6
+    mimic_video_avg: 71.1
+    source: "Paper Table 5 (Average column)"
+    eval_condition: "Same four Franka Research 3 conditions"
+
+  vlabench_pretraining_ablation:
+    without_oxe_pretraining_id: 3.26
+    without_oxe_pretraining_ood: 0.70
+    with_oxe_pretraining_id: 49.61
+    with_oxe_pretraining_ood: 47.28
+    source: "Paper Table 10"
+    eval_condition: "VLABench SelectFruit + InsertFlower, 70k Stage-2 steps; ID = Track 1, OOD = mean of Tracks 3/4"
+
+  vlabench_objective_ablation:
+    policy_only_id: 47.15
+    policy_only_ood: 33.88
+    plus_world_modeling_id: 46.01
+    plus_world_modeling_ood: 39.54
+    plus_task_understanding_id: 49.38
+    plus_task_understanding_ood: 45.29
+    all_objectives_id: 49.61
+    all_objectives_ood: 47.28
+    source: "Paper Table 11"
+    eval_condition: "Cumulative Stage-2 objective mixtures, inference variant (e), 70k steps"
+
+  vlabench_inference_ablation:
+    a_action_only_id: 45.8
+    a_action_only_ood: 41.4
+    b_joint_denoising_id: 46.4
+    b_joint_denoising_ood: 40.5
+    c_goal_guided_id: 45.6
+    c_goal_guided_ood: 38.2
+    d_wm_filtering_id: 46.3
+    d_wm_filtering_ood: 42.0
+    e_goal_guided_joint_id: 49.6
+    e_goal_guided_joint_ood: 47.3
+    f_goal_guided_wm_filtering_id: 48.9
+    f_goal_guided_wm_filtering_ood: 47.7
+    source: "Paper Table 12"
+    eval_condition: "Same post-trained VLABench checkpoint, six inference compositions"
+
+  vlabench_action_bins:
+    bins_16_id: 27.84
+    bins_16_ood: 25.05
+    bins_32_id: 49.61
+    bins_32_ood: 47.28
+    bins_64_id: 32.90
+    bins_64_ood: 29.86
+    source: "Paper Table 13"
+    eval_condition: "70k-step VLABench Stage-2 protocol, varying active action-bin count"
+
+  libero_goal_decoding:
+    base_success: 97.8
+    base_query_ms: 3795.7
+    dinfer_bl7_success: 97.7
+    dinfer_bl7_query_ms: 383.6
+    dinfer_bl35_success: 97.2
+    dinfer_bl35_query_ms: 130.2
+    source: "Paper Table 14"
+    eval_condition: "LIBERO-Goal only, single B200, batch 1, 5-action chunk"
+
+  droid_prediction_stage1:
+    world_modeling_psnr: 20.79
+    world_modeling_ssim: 0.573
+    world_modeling_lpips: 0.299
+    action_acc_at_0_1: 0.3327
+    action_mae: 0.2109
+    source: "Paper Table 6"
+    eval_condition: "DROID validation set, Stage-1 checkpoint without DROID-specific post-training"
+
+eval_conditions:
+  libero: "standard 4 suites + zero-shot LIBERO-Plus (7 perturbation families)"
+  real_world: "Franka Research 3, four manipulation conditions"
+  vlabench: "SelectFruit and InsertFlower, Tracks 1/3/4"
+
+tags:
+  - vla
+  - unified-model
+  - masked-diffusion
+  - discrete-diffusion
+  - world-model
+  - goal-image-prediction
+  - test-time-scaling
+  - open-x-embodiment
+  - libero
+  - libero-plus
+  - vlabench
+  - real-world
+  - franka

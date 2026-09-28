@@ -1,0 +1,106 @@
+# Paper: DATAFARM: Distribution-Aligned Task and Motion Planning for Fine-Tuning Vision-Language-Action Models
+# arXiv: 2609.12316
+
+name: DATAFARM
+full_name: "DATAFARM: Distribution-Aligned Task and Motion Planning for Fine-Tuning Vision-Language-Action Models"
+organization: "Stanford University; Princeton University"
+date: "2026-09-11"
+paper_url: https://arxiv.org/abs/2609.12316
+code_url: https://prpl-group.com/datafarm/
+venue: arXiv
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "pi0.5-DROID (VLM backbone, 3B per paper Fig. 2)"
+  llm: "inherited from pi0.5-DROID"
+  action_head: "pi0.5 action expert (300M per paper Fig. 2) producing continuous actions, trained with a flow-matching loss; action horizon 16"
+  action_head_category: flow_matching
+  parameters: "3B VLM backbone + 300M action expert (inherited from pi0.5-DROID, per paper Fig. 2)"
+  key_innovation: "Distribution-aligned TAMP data generation: a Gaussian-mixture joint-configuration density and a learned trajectory encoder (with Gaussian latent density) fitted to DROID pretraining trajectories supply costs for IK endpoint selection, path optimization, and retiming inside TiPToP/cuTAMP/cuRobo, so planner-generated demonstrations match the VLA pretraining distribution; the VLA is then fully fine-tuned on these demonstrations"
+
+training:
+  method: "Fine-tuning of pi0.5-DROID on 20 successful DATAFARM demonstrations per target task (separate checkpoint per task); AdamW (beta1 0.9, beta2 0.95), peak LR 2.5e-5 with 1,000 warmup steps and cosine decay to 2.5e-6, grad clip 1.0, EMA 0.99, batch 256, 20,000 steps"
+  data: "Autonomously executed distribution-aligned TAMP demonstrations on a DROID Franka Panda setup; DROID used as the reference (pretraining) distribution"
+  hardware: "Not stated in the paper (acknowledgements mention Google TPU Research Cloud access)"
+
+benchmarks:
+  real_world:
+    geometric_constraints: 65.0
+    multi_step_reasoning: 35.0
+    semantic_reasoning: 70.0
+    real_world_avg: 56.7
+    source: "Paper Table I (DATAFARM row, target-task success) and Sec. V-B text (56.7% average)"
+    date_reported: "2026-09-11"
+    eval_condition: "DROID Franka Panda real robot; task-specific fine-tuning on 20 DATAFARM demos; 20 trials per task; success rate"
+
+  real_world_progress:
+    geometric_constraints: 84.0
+    multi_step_reasoning: 81.0
+    semantic_reasoning: 89.0
+    average: 84.7
+    source: "Paper Table I (DATAFARM row, target-task progress) and Sec. V-B text (84.7% average)"
+    eval_condition: "Task progress (fraction of 7 subgoals completed), same checkpoints as real_world"
+
+  real_world_ood_retention:
+    after_geometric_constraints_finetune: 80.0
+    after_multi_step_reasoning_finetune: 85.0
+    after_semantic_reasoning_finetune: 90.0
+    average: 85.0
+    pretrained_pi05_droid: 90.0
+    source: "Paper Table I (OOD columns) and Sec. V-B text"
+    eval_condition: "Deformable Object Manipulation (cloth folding) success, a task excluded from fine-tuning data"
+
+  real_world_baselines:
+    pi05_droid_geometric: 0.0
+    pi05_droid_multi_step: 0.0
+    pi05_droid_semantic: 5.0
+    pi05_droid_avg: 1.7
+    raw_tamp_geometric: 5.0
+    raw_tamp_multi_step: 5.0
+    raw_tamp_semantic: 15.0
+    raw_tamp_avg: 8.3
+    human_teleop_geometric: 50.0
+    human_teleop_multi_step: 45.0
+    human_teleop_semantic: 90.0
+    human_teleop_avg: 61.7
+    source: "Paper Table I and Sec. V-B text"
+    eval_condition: "Target-task success; baselines fine-tuned from pi0.5-DROID with the same recipe on 20 demos of each source (pi0.5-DROID row is not fine-tuned)"
+
+  real_world_ablation:
+    wo_style_geometric: 10.0
+    wo_style_multi_step: 0.0
+    wo_style_semantic: 35.0
+    wo_style_avg: 15.0
+    wo_timing_geometric: 0.0
+    wo_timing_multi_step: 0.0
+    wo_timing_semantic: 0.0
+    wo_joint_space_geometric: 35.0
+    wo_joint_space_multi_step: 15.0
+    wo_joint_space_semantic: 20.0
+    wo_joint_space_avg: 23.3
+    source: "Paper Table I (ablation rows) and Sec. V-B(c) text"
+    eval_condition: "Target-task success with one alignment component removed"
+
+  real_world_demo_budget:
+    demos_0: 0.0
+    demos_20: 65.0
+    demos_40: 75.0
+    demos_60: 75.0
+    demos_80: 85.0
+    source: "Paper Table II (success rate)"
+    eval_condition: "Geometric Constraints task only; 0 demos = pi0.5-DROID without fine-tuning"
+
+eval_conditions:
+  real_world: "Franka Panda (DROID platform), 3 target tasks, 20 trials each, task-specific fine-tuned checkpoints"
+  real_world_ood_retention: "cloth folding, not in fine-tuning data"
+
+tags:
+  - vla
+  - fine-tuning
+  - data-generation
+  - task-and-motion-planning
+  - pi0.5
+  - droid
+  - franka
+  - real-world
