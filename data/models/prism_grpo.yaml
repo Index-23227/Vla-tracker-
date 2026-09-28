@@ -1,0 +1,111 @@
+# Paper: Prism-GRPO: Faster VLA Policy Optimization via Splitting Same-outcome Groups
+# arXiv: 2608.17423
+
+name: Prism-GRPO
+full_name: "Prism-GRPO: Faster VLA Policy Optimization via Splitting Same-outcome Groups"
+organization: "Purdue University / AWS AI"
+date: "2026-08-18"
+paper_url: https://arxiv.org/abs/2608.17423
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "OpenVLA-OFT (initialized from the released SimpleVLA-RL SFT checkpoint per task)"
+  action_head: >
+    OpenVLA-OFT with a discrete action head: each DoF uniformly quantized into 256 bins, one token per
+    DoF; on RoboTwin ALOHA each action chunk spans 25 steps x 14 action tokens. Policy is post-trained
+    with GRPO/RLOO using reward success + lambda * q(tau).
+  action_head_category: autoregressive
+  action_space: "discrete (256-bin tokens per DoF), 25-step chunks"
+  parameters: "Not stated in paper (inherits OpenVLA-OFT)"
+  key_innovation: >
+    Adds a bounded trajectory-level execution-quality score q in [0,1] (default: peak non-target
+    contact force from the simulator; also contact count, VLM (Qwen3-VL) contact judge, joint-reversal
+    and jerk smoothness) to the binary success reward with 0 < lambda < 1, so every success still
+    outranks every failure while all-success / all-failure GRPO groups get non-zero leave-one-out
+    (RLOO) advantages instead of being discarded by dynamic sampling. Proves the combined reward never
+    raises the expected rollouts per informative group, and that the update is an ascent direction for
+    success under success-quality gradient alignment.
+
+training:
+  method: "Online RL (SimpleVLA-RL recipe: G=8, 512 rollouts/step, lr 5e-6, clip (0.2, 0.28), no KL, temperature 1.6) with lambda=0.2 and RLOO advantages"
+  compute: "8x NVIDIA H100-80GB per task, ~12-16 h per RL run; 5 seeds per configuration"
+
+benchmarks:
+  robotwin_v2_rollout_savings:
+    lift_pot_lambda_0_2: 56
+    lift_pot_lambda_0_5: 49
+    lift_pot_lambda_0_9: 45
+    lift_pot_lambda_1: 25
+    lift_pot_lambda_2: 53
+    move_can_pot_lambda_0_2: 41
+    move_can_pot_lambda_0_5: 48
+    move_can_pot_lambda_0_9: 41
+    move_can_pot_lambda_1: 3
+    source: "Paper Table 1 (Prism-GRPO, CS rows: rollout saving % to match Binary GRPO calibrated success on RoboTwin 2.0)"
+    date_reported: "2026-08-18"
+    eval_condition: "RoboTwin 2.0, OpenVLA-OFT RL from SimpleVLA-RL SFT; % of rollouts saved (not a success rate); lambda=2 on Move Can Pot did not reach target"
+  robotwin_v2_quality_gain:
+    lift_pot_lambda_0_2: 11
+    lift_pot_lambda_0_5: 14
+    lift_pot_lambda_0_9: 15
+    lift_pot_lambda_1: 14
+    lift_pot_lambda_2: 26
+    move_can_pot_lambda_0_2: 7
+    move_can_pot_lambda_0_5: 10
+    move_can_pot_lambda_0_9: 13
+    move_can_pot_lambda_1: 16
+    source: "Paper Table 1 (Prism-GRPO, Q rows: quality gain in points over Binary GRPO at the matched point)"
+    date_reported: "2026-08-18"
+    eval_condition: "RoboTwin 2.0; Max-Force quality gain (points), not a success rate"
+  robotwin_v2_random_quality_baseline:
+    move_can_pot_cs_lambda_0_2: 24
+    move_can_pot_cs_lambda_0_5: 33
+    move_can_pot_q_lambda_0_2: 1
+    move_can_pot_q_lambda_0_5: 0
+    source: "Paper Table 1 (Random quality baseline; all other Random cells did not reach the target)"
+    date_reported: "2026-08-18"
+    eval_condition: "baseline; random scalar replaces q"
+  robotwin_v2_binary_grpo_reproduction:
+    lift_pot_mean_of_seed_max_success: 63.6
+    source: "Paper Appendix E text (Binary GRPO / SimpleVLA-RL reproduction, mean of 5 per-seed peak success rates on Lift Pot; SimpleVLA-RL reports 64.1)"
+    date_reported: "2026-08-18"
+    eval_condition: "baseline reproduction; Prism-GRPO absolute RoboTwin success rates are reported only in figures"
+  real_world:
+    move_can_pot_clean_success: 24
+    source: "Paper Table 2 (Prism-GRPO, Clean Success 6/25 on Piper)"
+    date_reported: "2026-08-18"
+    eval_condition: "zero-shot sim-to-real on AgileX Piper, 25 trials, can placed left of pot"
+  real_world_shove_cheat:
+    prism_grpo: 0
+    binary_grpo: 4
+    rl_zvp: 20
+    source: "Paper Table 2 (Shove-Cheat rate %, 25 trials each; lower is better)"
+    date_reported: "2026-08-18"
+    eval_condition: "real robot Piper; reward-hacking shortcut frequency"
+  real_world_baselines:
+    binary_grpo_clean_success: 16
+    rl_zvp_clean_success: 8
+    source: "Paper Table 2 (Binary GRPO 4/25, RL-ZVP 2/25 clean success)"
+    date_reported: "2026-08-18"
+    eval_condition: "baselines, same protocol"
+
+eval_conditions:
+  robotwin_v2: "RoboTwin 2.0, 4 tasks (Lift Pot, Move Can Pot, Handover Block, Beat Block Hammer); main results as learning curves vs rollouts; text reports 22-56% rollout savings over Binary GRPO"
+  real_world: "AgileX Piper, Move Can Pot, 25 trials per method, checkpoints with ~65% simulated success"
+  notes: "No robotwin_v2 success-rate block: absolute success rates appear only in figures"
+
+tags:
+  - vla
+  - reinforcement-learning
+  - grpo
+  - rloo
+  - reward-shaping
+  - sample-efficiency
+  - openvla-oft
+  - robotwin
+  - reward-hacking
+  - sim2real
+  - real-robot

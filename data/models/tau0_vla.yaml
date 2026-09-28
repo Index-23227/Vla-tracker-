@@ -1,0 +1,186 @@
+# Paper: τ0-VLA: a Hierarchical Robot Foundation Model with World-Model-Guided Test-Time Computation
+# arXiv: 2608.16885
+
+name: τ0-VLA
+full_name: "τ0-VLA: a Hierarchical Robot Foundation Model with World-Model-Guided Test-Time Computation"
+organization: "Agibot Finch / Shanghai Innovation Institute / The Chinese University of Hong Kong"
+date: "2026-08-17"
+paper_url: https://arxiv.org/abs/2608.16885
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: hierarchical_vla
+
+architecture:
+  backbone: "Low-level policy: Qwen3.5-2B vision-language backbone + Mixture-of-Transformers (MoT) action expert; high-level policy: proposal / value / reflective models each fine-tuned from a robot-pretrained Qwen3.5-9B VLM, plus a world model initialized from Step1X-Edit"
+  llm: "Qwen3.5-2B (low-level), Qwen3.5-9B (high-level)"
+  action_head: "MoT action expert (separately parameterized Transformer streams with joint attention to backbone tokens at each full-attention layer) trained with masked conditional flow matching over a unified 40-D state/action space; action horizon H=30, ten uniform Euler steps; runs at ~30 Hz control rate while the high-level policy refreshes the subtask about every 1 s"
+  action_head_category: flow_matching
+  parameters: "Low-level ~2B-scale (Qwen3.5-2B + MoT expert); high-level VLMs 9B-scale; exact totals not reported"
+  key_innovation: "Formulates high-level subtask generation as compute-scalable inference: a memory-augmented proposal model generates the next subtask, and when token confidence is low it triggers world-model-guided beam search (propose with VLM, imagine terminal head-camera image with a world model, score with a VQA-style value model, keep top-B to depth D), after which a reflective model commits to the final subtask (not restricted to the candidate set). Execution memory is trained to self-correct via perturbed (lagging / running-ahead / misrepresenting) memories. The low-level generalist VLA is trained on 40,115 hours of heterogeneous real-world robot data with multimodal co-training in three stages (knowledge-isolated co-training, end-to-end co-training, task-specific adaptation)."
+
+benchmarks:
+  real_world:
+    avg_sr: 45.00
+    avg_progress: 87.85
+    clean_room_sr: "5/10"
+    clean_room_progress: 94.80
+    prepare_ingredients_sr: "4/10"
+    prepare_ingredients_progress: 82.86
+    tomato_egg_stir_fry_sr: "4/10"
+    tomato_egg_stir_fry_progress: 81.82
+    make_milk_tea_sr: "5/10"
+    make_milk_tea_progress: 91.92
+    source: "Paper Table I, row 'τ0-VLA (Hierarchical System, Plan Once)'"
+    date_reported: "2026-08-17"
+    eval_condition: "AGIBOT G1 long-horizon real-robot tasks, 10 trials per task, hierarchical system without beam search (Plan Once)"
+
+  real_world_direct_execution:
+    avg_sr: 27.50
+    avg_progress: 80.10
+    clean_room_sr: "4/10"
+    clean_room_progress: 92.80
+    prepare_ingredients_sr: "2/10"
+    prepare_ingredients_progress: 66.43
+    tomato_egg_stir_fry_sr: "0/10"
+    tomato_egg_stir_fry_progress: 65.00
+    make_milk_tea_sr: "5/10"
+    make_milk_tea_progress: 96.15
+    source: "Paper Table I, row 'τ0-VLA' (direct execution)"
+    eval_condition: "Standalone low-level policy conditioned on the full task instruction, no high-level policy, 10 trials per task"
+
+  real_world_baseline_pi05:
+    avg_sr: 22.50
+    avg_progress: 73.05
+    clean_room_sr: "4/10"
+    clean_room_progress: 86.20
+    prepare_ingredients_sr: "2/10"
+    prepare_ingredients_progress: 73.93
+    tomato_egg_stir_fry_sr: "0/10"
+    tomato_egg_stir_fry_progress: 49.77
+    make_milk_tea_sr: "3/10"
+    make_milk_tea_progress: 82.31
+    source: "Paper Table I, row 'π0.5' (baseline)"
+    eval_condition: "Direct execution baseline, 10 trials per task"
+
+  real_world_baseline_gr00t_n17:
+    avg_sr: 2.50
+    avg_progress: 45.29
+    clean_room_sr: "0/10"
+    clean_room_progress: 59.80
+    prepare_ingredients_sr: "1/10"
+    prepare_ingredients_progress: 68.57
+    tomato_egg_stir_fry_sr: "0/10"
+    tomato_egg_stir_fry_progress: 24.32
+    make_milk_tea_sr: "0/10"
+    make_milk_tea_progress: 28.46
+    source: "Paper Table I, row 'GR00T N1.7' (baseline)"
+    eval_condition: "Direct execution baseline, 10 trials per task"
+
+  real_world_baseline_lingbot_vla:
+    avg_sr: 0.00
+    avg_progress: 44.43
+    clean_room_sr: "0/10"
+    clean_room_progress: 66.60
+    prepare_ingredients_sr: "0/10"
+    prepare_ingredients_progress: 35.00
+    tomato_egg_stir_fry_sr: "0/10"
+    tomato_egg_stir_fry_progress: 12.27
+    make_milk_tea_sr: "0/10"
+    make_milk_tea_progress: 63.85
+    source: "Paper Table I, row 'LingBot-VLA' (baseline)"
+    eval_condition: "Direct execution baseline, 10 trials per task"
+
+  real_world_ttc:
+    make_milk_tea_sr: "7/10"
+    make_milk_tea_progress: 95.38
+    book_organization_sr: "9/10"
+    book_organization_progress: 93.33
+    clean_room_sr: "7/10"
+    clean_room_progress: 97.60
+    source: "Paper Table III, row 'TTC'"
+    eval_condition: "Hierarchical system with world-model-guided test-time computation, low-level policy fixed, 10 trials per task (Book Organization on ARX AC One, shuffled initial arrangements)"
+
+  real_world_ttc_baseline_plan_once:
+    make_milk_tea_sr: "5/10"
+    make_milk_tea_progress: 91.92
+    book_organization_sr: "6/10"
+    book_organization_progress: 66.67
+    clean_room_sr: "5/10"
+    clean_room_progress: 94.80
+    source: "Paper Table III, row 'Plan Once'"
+    eval_condition: "Hierarchical system without test-time search, same low-level policy, 10 trials per task"
+
+  real_world_cross_embodiment:
+    collect_laundry_sr: "10/10"
+    collect_laundry_progress: 97.00
+    tidy_makeup_cotton_pad_sr: "10/10"
+    tidy_makeup_cotton_pad_progress: 95.00
+    tidy_makeup_eyelash_curler_sr: "9/10"
+    tidy_makeup_eyelash_curler_progress: 92.50
+    tidy_makeup_makeup_puff_sr: "10/10"
+    tidy_makeup_makeup_puff_progress: 95.00
+    source: "Paper Table II, row 'τ0-VLA'"
+    eval_condition: "Direct execution of the low-level policy (no high-level policy); Collect Laundry on ARX AC One, Tidy Makeup Table on bimanual Franka Research 3; 10 trials per task or task group"
+
+  real_world_cross_embodiment_baseline_pi05:
+    collect_laundry_sr: "9/10"
+    collect_laundry_progress: 88.00
+    tidy_makeup_cotton_pad_sr: "9/10"
+    tidy_makeup_cotton_pad_progress: 85.00
+    tidy_makeup_eyelash_curler_sr: "8/10"
+    tidy_makeup_eyelash_curler_progress: 85.00
+    tidy_makeup_makeup_puff_sr: "7/10"
+    tidy_makeup_makeup_puff_progress: 73.75
+    source: "Paper Table II, row 'π0.5' (baseline)"
+    eval_condition: "Direct execution baseline, 10 trials per task or task group"
+
+  real_world_cross_embodiment_baseline_gr00t_n17:
+    collect_laundry_sr: "4/10"
+    collect_laundry_progress: 76.00
+    tidy_makeup_cotton_pad_sr: "10/10"
+    tidy_makeup_cotton_pad_progress: 87.50
+    tidy_makeup_eyelash_curler_sr: "8/10"
+    tidy_makeup_eyelash_curler_progress: 77.50
+    tidy_makeup_makeup_puff_sr: "7/10"
+    tidy_makeup_makeup_puff_progress: 52.50
+    source: "Paper Table II, row 'GR00T N1.7' (baseline)"
+    eval_condition: "Direct execution baseline, 10 trials per task or task group"
+
+  real_world_cross_embodiment_baseline_lingbot_vla:
+    collect_laundry_sr: "2/10"
+    collect_laundry_progress: 35.00
+    tidy_makeup_cotton_pad_sr: "9/10"
+    tidy_makeup_cotton_pad_progress: 67.50
+    tidy_makeup_eyelash_curler_sr: "3/10"
+    tidy_makeup_eyelash_curler_progress: 22.50
+    tidy_makeup_makeup_puff_sr: "3/10"
+    tidy_makeup_makeup_puff_progress: 33.75
+    source: "Paper Table II, row 'LingBot-VLA' (baseline)"
+    eval_condition: "Direct execution baseline, 10 trials per task or task group"
+
+  subtask_prediction_ood_ttc:
+    book_organization_ood_accuracy: 74.0
+    source: "Paper Section VI-D text (Open-loop Subtask Prediction)"
+    eval_condition: "Open-loop next-subtask prediction on Book Organization with out-of-domain initial arrangements, TTC, LLM-as-a-judge (GPT-5.4)"
+
+  subtask_prediction_ood_plan_once:
+    book_organization_ood_accuracy: 50.0
+    source: "Paper Section VI-D text (Open-loop Subtask Prediction)"
+    eval_condition: "Same OOD open-loop protocol, Plan Once baseline (single high-level prediction, no search)"
+
+  subtask_prediction_ood_best_of_n:
+    book_organization_ood_accuracy: 57.5
+    source: "Paper Section VI-D text (Open-loop Subtask Prediction)"
+    eval_condition: "Same OOD open-loop protocol, Best-of-N baseline (same world and value models, one-step selection)"
+
+training:
+  datasets: ["40,115 hours of heterogeneous real-world robot data: ~23.4K h internal (21.9K h AGIBOT G1, 585 h AGIBOT G2, 578 h ARX AC One, 347 h Franka) + ~16.7K h public (incl. 9.25K h open-source UMI data)", "multimodal vision-language co-training data", "automatically constructed high-level VQA data with memory-perturbed instances (40.4M clean samples retained)"]
+  method: "Low-level: three stages - knowledge-isolated co-training, end-to-end co-training, task-specific fine-tuning. High-level: proposal, value and reflective models independently fine-tuned from a robot-pretrained Qwen3.5-9B; world model fine-tuned from Step1X-Edit on subtask start/end head-camera frame pairs; value and reflective models trained on offline proposal+world-model rollouts"
+
+eval_conditions:
+  real_world: "Task-specific fine-tuned; AGIBOT G1 long-horizon tasks (Clean Room, Prepare Ingredients, Tomato and Egg Stir Fry, Make Milk Tea), 10 physical trials per task, success rate and milestone progress"
+
+inference_hz: null
+
+tags: [hierarchical, test_time_computation, world_model, beam_search, execution_memory, flow_matching, mixture_of_transformers, cross_embodiment, mobile_manipulation, long_horizon, real_robot, qwen3_5, agibot]

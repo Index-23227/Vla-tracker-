@@ -1,0 +1,78 @@
+name: ART
+full_name: "ART (Agentic Robot with Tool-use): Evolve Vision-Language-Action Model into an Agent with On-the-fly Tool-use"
+organization: "Astribot / Tsinghua University / Juxi Tech / IntelliFusion / CUHK"
+date: "2026-08-14"
+paper_url: https://arxiv.org/abs/2608.14047
+code_url: null
+venue: null
+open_source: false
+model_type: "Tool-augmented autoregressive VLA"
+
+architecture:
+  backbone: "pi0-FAST 3B (PaliGemma VLM)"
+  llm: "PaliGemma (Gemma 2B)"
+  action_head: "FAST DCT-tokenized autoregressive action tokens; LoRA branch generates reasoning + tool-use tokens (last N vocab tokens), masked out during action generation"
+  action_head_category: autoregressive
+  parameters: "3B + LoRA"
+  key_innovation: "Tool-injection fine-tuning: augment action space with language reasoning and discrete tool-activation tokens (10 visual enhancement tools, depth estimation, object detection, camera rotate/zoom, body reset). Dynamically activated LoRA is used only for tool reasoning, so the frozen VLA generates actions from tool-enhanced observations, avoiding catastrophic forgetting."
+
+training:
+  dataset: "AT (Action with Tool) dataset: 30K tool-use trajectories synthesized from LIBERO, Bridge v2, DROID via task degradation + GPT-generated tool chains; Astribot S1 baseline FAST trained on 16k pick-and-place trajectories"
+  method: "LoRA fine-tuning for tool-use reasoning (next-token CE) with frozen VLA backbone; 1 epoch, batch 24, lr 5e-5, 1k warmup"
+  compute: "8x NVIDIA A800"
+
+inference_hz: null
+
+benchmarks:
+  at_libero:
+    vision: 81.0
+    affordance: 62.0
+    embodiment: 82.0
+    average: 75.0
+    source: "Paper Table 1 (ART-FAST, AT LIBERO)"
+    date_reported: "2026-08-14"
+    eval_condition: "LIBERO with injected visual/affordance/embodiment disturbances (non-standard)"
+  at_libero_baselines:
+    openvla_average: 12.0
+    pi0_average: 30.0
+    pi0_fast_average: 39.0
+    source: "Paper Table 1"
+  at_libero_vs_posttrained_fast:
+    fast_posttrained_vision: 71.0
+    fast_posttrained_embodiment: 61.0
+    fast_posttrained_affordance: 65.0
+    source: "Paper Table 3 (FAST fine-tuned on same data without tool reasoning)"
+  at_libero_affordance_vs_ecot:
+    art_with_vision_corruption: 72.0
+    art_without_vision_corruption: 62.0
+    ecot_with_vision_corruption: 12.0
+    ecot_without_vision_corruption: 58.0
+    source: "Paper Table 2"
+  real_world:
+    vision: 70.0
+    affordance: 55.0
+    embodiment: 70.0
+    average: 62.0
+    source: "Paper Table 1 (ART-FAST, AT Astribot S1)"
+    eval_condition: "Astribot S1 dual-arm humanoid, 16 DoF"
+  real_world_baselines:
+    openvla_average: 6.7
+    pi0_average: 37.0
+    pi0_fast_average: 43.0
+    source: "Paper Table 1 (AT Astribot S1)"
+
+eval_conditions:
+  at_libero: "LIBERO scenes with lighting/noise corruption, rephrased spatial instructions requiring affordance reasoning, and camera/initial-state disturbances; not comparable to standard LIBERO"
+  real_world: "Astribot S1 pick-and-place with the same three disturbance categories (e.g., dark scenes, novel viewpoints)"
+
+tags:
+  - tool_use
+  - agentic
+  - lora
+  - pi0_fast
+  - autoregressive
+  - robustness
+  - libero
+  - real_world
+  - humanoid
+  - astribot

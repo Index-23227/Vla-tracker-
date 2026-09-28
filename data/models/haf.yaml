@@ -1,0 +1,105 @@
+name: HAF
+full_name: "HAF: Adapting Generalist VLAs to Humanoid Whole-Body Loco-manipulation via Hierarchical Action Flow and Spectral Latent RL"
+organization: "Peking University; Beijing Innovation Center of Humanoid Robotics; Nankai University; Xi'an Jiaotong University"
+date: "2026-08-17"
+paper_url: https://arxiv.org/abs/2608.16837
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (pretrained generalist flow-matching VLA; VLM expert + shared action expert)"
+  action_head: "Hierarchical action flow: one shared flow-matching action expert run in three sequential stages (locomotion+head -> +waist -> +arms) over nested cumulative action sets, with trainable stage embeddings and cross-stage KV caches of re-encoded clean actions; 10 denoising steps per stage, horizon H=100, first 40 steps executed; optional HAF-Steer SAC actor over top-8 DCT coefficients of the initial flow noise"
+  action_head_category: flow_matching
+  parameters: "pi0.5-scale VLA (parameter count not stated); HAF-Steer trains only a small spectral actor + twin critics with the VLA frozen"
+  key_innovation: "HAF-VLA restructures whole-body humanoid action generation along the kinematic chain: base/head first, then waist, then bimanual arms, each stage conditioned on the vision-language prefix cache and the clean-action KV caches of earlier stages (teacher-forced during training, stage-wise masked flow-matching loss summed over stages). HAF-Steer adapts the frozen flow VLA by numerically reversing the flow to recover demo noise, keeping the first 8 temporal DCT coefficients, BC-initializing a spectral actor and refining it with mixed offline-online SAC + BC regularization."
+
+benchmarks:
+  real_world:
+    laundry_loading: 66.7
+    clothes_retrieval: 53.3
+    table_tidy: 80.0
+    basket_transfer: 63.3
+    toy_storage: 80.0
+    ball_tossing: 56.7
+    box_transfer: 93.3
+    real_world_avg: 70.5
+    source: "Paper Table 1, HAF-VLA column (average normalized task score %, 10 rollouts per task)"
+    eval_condition: "TienKung humanoids, egocentric RGB; HAF-VLA trained from pi0.5 on 120 teleoperated trajectories per task; milestone-based normalized score"
+
+  real_world_pi05_baseline:
+    laundry_loading: 53.3
+    clothes_retrieval: 53.3
+    table_tidy: 70.0
+    basket_transfer: 50.0
+    toy_storage: 53.3
+    ball_tossing: 33.3
+    box_transfer: 60.0
+    real_world_avg: 53.3
+    source: "Paper Table 1, pi0.5 column"
+    eval_condition: "baseline: vanilla single-stage pi0.5 fine-tuned on the same demonstrations"
+
+  real_world_gr00t_n17_baseline:
+    laundry_loading: 40.0
+    clothes_retrieval: 33.3
+    table_tidy: 40.0
+    basket_transfer: 43.3
+    toy_storage: 30.0
+    ball_tossing: 36.7
+    box_transfer: 43.3
+    real_world_avg: 38.1
+    source: "Paper Table 1, GR00T N1.7 column"
+    eval_condition: "baseline: GR00T N1.7, official implementation and hyperparameters"
+
+  real_world_cosmos_policy_baseline:
+    laundry_loading: 0.0
+    clothes_retrieval: 26.7
+    table_tidy: 16.7
+    basket_transfer: 33.3
+    toy_storage: 40.0
+    ball_tossing: 3.3
+    box_transfer: 73.3
+    real_world_avg: 27.6
+    source: "Paper Table 1, Cosmos Policy column"
+    eval_condition: "baseline: Cosmos Policy, official implementation and hyperparameters"
+
+  real_world_act_baseline:
+    laundry_loading: 10.0
+    clothes_retrieval: 23.3
+    table_tidy: 23.3
+    basket_transfer: 16.7
+    toy_storage: 23.3
+    ball_tossing: 30.0
+    box_transfer: 50.0
+    real_world_avg: 25.2
+    source: "Paper Table 1, ACT column"
+    eval_condition: "baseline: ACT, official implementation and hyperparameters"
+
+  real_world_hierarchy_ablation_laundry:
+    haf_vla: 66.7
+    all_joint_denoising: 53.3
+    arm_first_hierarchy: 50.0
+    pi05_30_steps: 20.0
+    source: "Paper Table 2 (Laundry Loading, normalized score %, 30 total denoising steps for every variant)"
+    eval_condition: "ablation of stage design on Laundry Loading, 10 rollouts each"
+
+  real_world_ood_disturbance:
+    laundry_loading_unseen_chair: 40.0
+    clothes_retrieval_20cm_start_shift: 43.3
+    source: "Paper Table 3, HAF-VLA column"
+    eval_condition: "OOD: unseen office chair on navigation path (Laundry Loading); robot start shifted 20 cm backward (Clothes Retrieval); 10 rollouts each"
+
+  real_world_ood_disturbance_pi05_baseline:
+    laundry_loading_unseen_chair: 26.7
+    clothes_retrieval_20cm_start_shift: 36.7
+    source: "Paper Table 3, pi0.5 column"
+    eval_condition: "baseline: vanilla pi0.5 under the same disturbances"
+
+training:
+  datasets: ["120 teleoperated trajectories per task on TienKung 2.0 / 3.0 (IMU head, kinematic master arms, joystick legs/waist)"]
+  method: "HAF-VLA: fine-tune pi0.5 with a stage-wise masked flow-matching loss (three stages, shared action expert, teacher-forced cross-stage caches, trainable stage embeddings). HAF-Steer: frozen VLA; flow reversal + DCT top-8 spectral action space, BC initialization then mixed offline-online SAC with BC regularization on the real robot"
+
+eval_conditions:
+  real_world: "seven real-world humanoid loco-manipulation tasks on TienKung 2.0/3.0; average normalized milestone score over 10 rollouts per task; HAF-Steer results (Figure 8) are reported only in a figure and not recorded here"
+
+tags: [humanoid, whole_body, loco_manipulation, flow_matching, hierarchical_action_generation, latent_rl, sac, noise_steering, dct, pi05, real_robot]

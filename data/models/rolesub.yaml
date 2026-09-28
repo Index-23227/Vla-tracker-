@@ -1,0 +1,90 @@
+name: RoleSub
+full_name: "Role-Conditioned Sub-Token Routing for Efficient Vision-Language-Action Policies"
+organization: "Futurewei Technologies"
+date: "2026-08-19"
+paper_url: https://arxiv.org/abs/2608.18410
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "OpenVLA-OFT-7B (Llama-2-7B with fused SigLIP + DINOv2 visual features, two camera views, 512 visual tokens)"
+  llm: "Llama-2 7B"
+  action_head: "OpenVLA-OFT parallel decoding head with continuous L1-regression action chunks (8-action chunk per control step)"
+  action_head_category: regression
+  parameters: "7.65B total; ~110.8M trainable LoRA (rank 32, all linear layers) + ~4.20M routing heads + ~0.55M latent role estimator; pretrained backbone frozen"
+  key_innovation: "KV compression along the value width of retained tokens instead of removing more tokens. After VLA-ADP-style visual-token pruning, each retained value vector is rotated by a fixed random orthonormal matrix (lossless change of basis), split into S=16 groups of 256 dims, and a router keeps the Top-K groups per token; routing score = token-state head + 0.1 x learned soft latent-role projection (C=6 components) + 0.1 x pooled language-context head, with a role-driven allocator redistributing a per-token-type group budget. Router, role estimator and LoRA adapters are trained jointly with the L1 action loss (straight-through estimator for Top-K). The same routing can compress language values without removing language tokens."
+
+benchmarks:
+  libero:
+    libero_goal: 97.2
+    libero_long: 88.4
+    libero_object: 96.4
+    libero_spatial: 97.8
+    source: "Paper Table 1, RoleSub row, visual keep 32/512, K_vis=1 (3.32% visual KV)"
+    eval_condition: "OpenVLA-OFT-7B + LoRA and routing trained on no-op-filtered LIBERO RLDS data; 32 of 512 visual tokens retained, 1 of 16 value groups per visual token; language/proprio/action values uncompressed; 50 trials per task"
+
+  libero_rolesub_16tok_k1:
+    libero_goal: 95.3
+    libero_long: 83.9
+    libero_object: 96.5
+    libero_spatial: 97.0
+    source: "Paper Table 1, RoleSub row, visual keep 16/512, K_vis=1 (1.66% visual KV)"
+    eval_condition: "same training; 16 of 512 visual tokens retained, K_vis=1"
+
+  libero_rolesub_8tok_k1:
+    libero_goal: 93.5
+    libero_long: 74.2
+    libero_object: 95.5
+    libero_spatial: 95.6
+    source: "Paper Table 1 / Table 2, RoleSub row, visual keep 8/512, K_vis=1 (0.83% visual KV)"
+    eval_condition: "same training; 8 of 512 visual tokens retained, K_vis=1"
+
+  libero_token_only_baseline_32tok_k1:
+    libero_goal: 94.8
+    libero_long: 84.0
+    libero_object: 91.7
+    libero_spatial: 96.8
+    source: "Paper Table 1, trained token-only pruning row matched to visual keep 32/512, K_vis=1 (3.32% visual KV)"
+    eval_condition: "baseline: same LoRA training without sub-token routing; fewer visual tokens with full values at the same visual-KV budget"
+
+  libero_plain_subtoken_baseline_32tok_k1:
+    libero_goal: 94.8
+    libero_long: 85.8
+    libero_object: 96.6
+    libero_spatial: 97.8
+    source: "Paper Table 2, Plain sub-token routing row, visual keep 32/512, K_vis=1"
+    eval_condition: "baseline: trained sub-token routing in native value basis (R=I), no latent-role term, uniform K_vis per token"
+
+  libero_combined_visual_language_32tok:
+    libero_goal: 94.3
+    libero_long: 77.6
+    libero_object: 95.9
+    libero_spatial: 96.4
+    source: "Paper Table 4, Combined column, visual keep 32/512, K_vis=K_lang=1 (11.3% total KV)"
+    eval_condition: "visual K_vis=1 on 32 retained tokens plus language value routing K_lang=1 on all language tokens"
+
+  libero_language_only_klang1:
+    libero_goal: 98.0
+    libero_long: 94.8
+    libero_object: 98.4
+    libero_spatial: 98.0
+    source: "Paper Table 3, K_lang=1 row (language V 6.25%, language KV 53.13%)"
+    eval_condition: "language-only value routing with all language tokens kept; visual, proprio and action-context uncompressed"
+
+  libero_dense_reference:
+    libero_goal: 98.8
+    libero_long: 94.8
+    libero_object: 97.8
+    libero_spatial: 98.2
+    source: "Paper Table 3, Dense row (official OpenVLA-OFT checkpoints re-evaluated)"
+    eval_condition: "baseline: uncompressed official OpenVLA-OFT per-suite checkpoint, same evaluation configuration"
+
+training:
+  datasets: ["LIBERO RLDS (no-op filtered): Spatial 432, Object 454, Goal 428, LIBERO-10 379 episodes"]
+  method: "Frozen OpenVLA-OFT-7B backbone; LoRA (rank 32, scaling 16) + routing heads + latent role estimator trained jointly with the L1 action-chunk loss; AdamW lr 2e-4, effective batch 8, image augmentation"
+
+eval_conditions:
+  libero: "fine-tuned (LoRA + router); four LIBERO suites, 10 tasks x 50 trials each, fixed simulator config and seed"
+
+tags: [kv_compression, sub_token_routing, token_pruning, efficient_inference, lora, openvla_oft, libero, regression]

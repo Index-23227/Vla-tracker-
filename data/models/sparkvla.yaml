@@ -1,0 +1,96 @@
+# Paper: SparkVLA: Stop-Aware Hierarchical VLA with Adaptive Action Chunking for Long-Horizon Manipulation
+# arXiv: 2608.16172
+
+name: SparkVLA
+full_name: "SparkVLA: Stop-Aware Hierarchical VLA with Adaptive Action Chunking for Long-Horizon Manipulation"
+organization: "Beijing Institute of Technology; Tsinghua University"
+date: "2026-08-17"
+paper_url: https://arxiv.org/abs/2608.16172
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Two branches derived from pi0.5 (frozen SigLIP vision encoder)"
+  llm: "pi0.5 VLM backbone (high-level planner branch, LoRA rank 16 on layers 1-8 for the selector)"
+  action_head: "Low-level branch is the full pi0.5 VLA with its flow-matching action expert (H=50 chunks); a stop-aware selector (2-layer, 8-head transformer) on the planner branch ranks Stop against every action-prefix length 1..H"
+  action_head_category: flow_matching
+  action_space: "continuous (action chunks, adaptive executed prefix length)"
+  parameters: "pi0.5 x2"
+  key_innovation: "Unifies subtask termination and execution-horizon selection into one ranking over {Stop, prefix 1..H}, trained from offline ordinal preferences (pairwise ranking + stop-aware auxiliary loss); history-aware subtask anchor from the planner's penultimate layer guides differentiable grid-sample visual-token pruning (32 tokens/camera)."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 97.6
+    libero_goal: 99.2
+    libero_long: 98.0
+    libero_avg: 98.5
+    source: "Paper Table 2 (SparkVLA row)"
+    eval_condition: "4 suites, 40 tasks, 100 episodes each; subtask annotations from LaRA-VLA"
+
+  robocerebra:
+    robocerebra_avg: 47.12
+    dynamic_randomization: 33.13
+    dynamic_observation: 43.87
+    memory_exploration: 60.30
+    memory_execution: 43.58
+    mix: 48.52
+    ideal: 46.38
+    source: "Paper Table 1 (SparkVLA (ours) row)"
+    eval_condition: "60 held-out cases x 10 rollouts (600 episodes); Avg is micro-average over the six conditions"
+
+  robocerebra_executor_variants:
+    sparkvla_openvla_oft_avg: 24.15
+    sparkvla_smolvla_avg: 25.32
+    source: "Paper Table 1 (SparkVLA + OpenVLA-OFT / + SmolVLA rows)"
+    eval_condition: "same RoboCerebra protocol, low-level executor swapped"
+
+  robocerebra_baselines:
+    openvla_oft_avg: 1.68
+    smolvla_avg: 2.80
+    pi05_avg: 12.29
+    hpe_avg: 16.55
+    mem0_avg: 20.29
+    source: "Paper Table 1 (baseline rows)"
+    eval_condition: "same RoboCerebra protocol; HPE from original RoboCerebra paper, Mem-0 reproduced"
+
+  robocerebra_ablation:
+    fixed_chunk_independent_stop: 34.26
+    rlpd_independent_stop: 37.62
+    aqc_independent_stop: 40.92
+    pairwise_ranking_independent_stop: 42.53
+    unified_candidate_set_stop_acc: 96.65
+    no_pruning: 40.03
+    spatial_pruning_only: 43.46
+    raw_anchor_only: 45.18
+    selector_on_executor_backbone: 37.28
+    source: "Paper Tables 3 and 4 (SR %, Stop Acc. %)"
+    eval_condition: "RoboCerebra protocol; one design factor changed per row"
+
+  real_world:
+    shelf_arrangement: 78.0
+    drawer_restocking: 74.0
+    tea_preparation: 56.0
+    real_avg: 69.3
+    source: "Paper Table 5 (SparkVLA row)"
+    eval_condition: "AirbotPlay dual-arm, 2 wrist + 1 head RGB camera; 50 demos per task, 50 rollouts per task; 6/6/12 subtasks"
+
+  real_world_baselines:
+    openvla_oft_avg: 30.0
+    pi05_avg: 48.0
+    source: "Paper Table 5 (baseline rows)"
+    eval_condition: "same real-world protocol"
+
+training:
+  dataset: "RoboCerebra / LIBERO target data; selector: 6,660 demonstration records + 5,630 policy-rollout records (2,034,310 decision samples); real: 50 demos per task"
+  method: "Planner and executor independently fine-tuned from pi0.5; planner supervised for subtask-command generation (2,000 steps); then base branches frozen and selector (LoRA + anchor/pruning/scoring modules) trained 20,000 steps with ranking + stop-aware BCE losses"
+  compute: "4x NVIDIA A100 80GB (selector training)"
+
+eval_conditions:
+  libero: "fine-tuned; 100 episodes per task"
+  robocerebra: "600 episodes over 6 conditions"
+  real_world: "50 rollouts per task, matched initial states"
+
+tags: [hierarchical, long_horizon, adaptive_action_chunking, subtask_termination, pi05, flow_matching, token_pruning, libero, robocerebra, real_robot]

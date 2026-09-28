@@ -1,0 +1,96 @@
+# Paper: EATR-Stereo: Embodiment-Aware Token Routing of Paired Stereo Evidence for Humanoid Vision-Language-Action Control
+# arXiv: 2608.17453
+
+name: EATR-Stereo
+full_name: "EATR-Stereo: Embodiment-Aware Token Routing of Paired Stereo Evidence for Humanoid Vision-Language-Action Control"
+organization: "Harbin Institute of Technology; Honor"
+date: "2026-08-18"
+paper_url: https://arxiv.org/abs/2608.17453
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+inference_hz: 10
+
+architecture:
+  backbone: "GR00T1.7 with frozen Cosmos-2B VLM encoding both stereo views"
+  llm: "Cosmos-2B (frozen)"
+  action_head: "GR00T1.7 flow-matching action expert conditioned on [language tokens; primary-view tokens; routed Cross-View Auxiliary Tokens], predicting 30-step continuous action chunks"
+  action_head_category: flow_matching
+  action_space: "continuous (33-DoF humanoid whole-body commands, 30-step chunks)"
+  parameters: "GR00T1.7"
+  key_innovation: "Keeps the native primary-view token pathway intact and adds a separate primary-aligned Cross-View Auxiliary Token (CVAT) stream built by primary-query cross-attention over the synchronized auxiliary stereo view; a body-segmented proprioceptive router (legs, arms+hands, head, waist, pose; 6-frame history) gates each CVAT token with a scalar before the flow-matching action expert. VLM frozen; CVAT module, segmented state encoder, router and GR00T action expert trained jointly."
+
+benchmarks:
+  real_world:
+    full_task_success: 60.0
+    grasp_success: 100.0
+    stage_success: 80.0
+    id_stage_success: 90.0
+    ood_stage_success: 70.0
+    source: "Paper Table II (EATR-Stereo row, physical humanoid main comparison)"
+    eval_condition: "HONOR Omega 1.0 33-DoF humanoid (37-D state), head-mounted stereo, >100 s search-approach-grasp-place-return task; 20 trials (10 ID + 10 OOD bottle positions), at most two safety interventions per trial; external VLM subtask-completion monitor shared by all methods"
+
+  real_world_baselines:
+    gr00t17_mono_full_task: 35.0
+    gr00t17_mono_grasp: 55.0
+    gr00t_wide_full_task: 20.0
+    gr00t_wide_grasp: 45.0
+    gr00t_two_image_full_task: 35.0
+    gr00t_two_image_grasp: 80.0
+    stereopolicy_full_task: 45.0
+    stereopolicy_grasp: 85.0
+    source: "Paper Table II (baseline rows)"
+    eval_condition: "same humanoid protocol, 20 trials per method, same GR00T1.7 backbone and 1000 demonstrations"
+
+  real_world_ablation:
+    main_xattn_full_task: 25.0
+    cvat_full_task: 55.0
+    cvat_flat_full_task: 55.0
+    stereo_route_full_task: 40.0
+    source: "Paper Sec. IV-D text (component ablations, Fig. 4)"
+    eval_condition: "same humanoid protocol, 20 trials per variant"
+
+  real_world_occlusion:
+    recovery_success: 80.0
+    mean_recovery_time_s: 22.4
+    cvat_recovery_success: 30.0
+    cvat_flat_recovery_success: 60.0
+    cvat_flat_mean_recovery_time_s: 41.7
+    source: "Paper Table IV (severe asymmetric-occlusion recovery)"
+    eval_condition: "bottle fully hidden in primary view, partially visible in auxiliary view; 10 trials, 90 s timeout; time averaged over successful trials"
+
+  real_world_position_semantic:
+    id_grasp: 100.0
+    ood_grasp: 100.0
+    left_right_compliance: 100.0
+    color_compliance: 80.0
+    source: "Paper Table III (EATR-Stereo row)"
+    eval_condition: "10 trials per position split / per instruction type"
+
+  robocasa365:
+    robocasa365_18task_success: 43.33
+    source: "Paper Table I (EATR-Stereo, 156/360)"
+    eval_condition: "Franka arm, 18 RoboCasa365 tasks, 20 trials per task; wrist camera excluded, left/right agent views only; trained from RoboCasa365 demonstrations"
+
+  robocasa365_baselines:
+    cvat: 39.44
+    stereopolicy: 38.06
+    cvat_flat: 37.50
+    qwenpi05: 36.11
+    gr00t17: 35.56
+    gr00t17_mono: 32.78
+    source: "Paper Table I (baseline rows)"
+    eval_condition: "same RoboCasa365 18-task protocol"
+
+training:
+  dataset: "1000 segmented-task humanoid demonstrations (physical); RoboCasa365 demonstrations (simulation)"
+  method: "Flow-matching imitation learning; frozen Cosmos VLM; CVAT module, segmented state encoder, token router and GR00T1.7 action expert jointly optimized"
+  num_trajectories: 1000
+  compute: "60,000 steps, global batch 512, 16x NVIDIA H20 (10.95 h)"
+
+eval_conditions:
+  real_world: "HONOR Omega 1.0 humanoid, 20 trials per configuration, 10 Hz on RTX 4090"
+  robocasa365: "18 tasks x 20 trials, no wrist camera"
+
+tags: [humanoid, stereo_vision, multi_view, token_routing, proprioception, gr00t, flow_matching, long_horizon, real_robot, robocasa365]

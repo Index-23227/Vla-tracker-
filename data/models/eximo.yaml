@@ -1,0 +1,35 @@
+# Paper: Eximo: VLM Guided Exploration of VLA Policies
+# arXiv: 2608.19891
+# NOTE: all quantitative results in the paper are reported in figures only
+# (Figs. 3-8); no numeric success rates appear in text or tables, so no
+# benchmark scores are recorded here.
+
+name: Eximo
+full_name: "Eximo: VLM Guided Exploration of VLA Policies"
+organization: "Google DeepMind"
+date: "2026-08-20"
+paper_url: https://arxiv.org/abs/2608.19891
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Gemini Robotics On-Device (GROD) 3B, PaliGemma-based VLM"
+  llm: "PaliGemma (GROD 3B); Gemini VLM used only as data-collection orchestrator"
+  action_head: "GROD diffusion policy head predicting action chunks, plus a residual policy trained with off-policy RL (MPO) adding delta actions on top of the VLA action"
+  action_head_category: diffusion
+  action_space: "continuous (ALOHA bimanual action chunks + residual correction)"
+  parameters: "3B"
+  key_innovation: "Explore-Imitate-Optimize: a Gemini VLM decomposes long-horizon/reasoning goals into sub-instructions for the VLA to collect success-filtered orchestrated data; GROD is fine-tuned (behaviour cloning) on that data conditioned on the original goal, distilling the orchestrator away; finally a residual policy is trained with off-policy MPO from sparse success reward."
+
+benchmarks: {}
+
+training:
+  dataset: "Success-filtered VLM-orchestrated rollouts on 22 ALOHA simulation tasks (ground-truth success detector)"
+  method: "Supervised fine-tuning of GROD with its original behaviour-cloning objective on orchestrated data, followed by residual off-policy RL (MPO)"
+
+eval_conditions:
+  aloha_sim: "22 ALOHA simulation tasks (dish placement, reasoning, spatial left/right caddy, chained multi-tool); 1000 episodes for orchestration comparison; RL curves averaged over five seeds; results figure-only"
+
+tags: [vlm_orchestration, exploration, distillation, residual_rl, reinforcement_learning, aloha, gemini_robotics, simulation]

@@ -1,0 +1,119 @@
+# Paper: US-VLA: An Ultrasound Vision-Language-Action Model for Embodied Abdominal Scanning
+# arXiv: 2608.16074
+
+name: US-VLA
+full_name: "US-VLA: An Ultrasound Vision-Language-Action Model for Embodied Abdominal Scanning"
+organization: "Ocean University of China / Shandong University / Qilu Second Hospital of Shandong University / Hefei University of Technology"
+date: "2026-08-17"
+paper_url: https://arxiv.org/abs/2608.16074
+code_url: https://github.com/VMVLab/US-VLA
+venue: "ACM MM 2026"
+open_source: true
+model_type: vla
+inference_hz: 15
+
+architecture:
+  backbone: "PaliGemma vision-language model (SigLIP encoder for wrist + side RGB views, language encoder for clinical instructions) + USFM universal ultrasound foundation model as a dedicated ultrasound image encoder"
+  llm: "PaliGemma (Gemma)"
+  action_head: "Ultrasound-Aware Expert Fusion (cross-attention with VL features as queries and USFM ultrasound features as keys/values, residual FFN, projection to D_a=1024), then the last H_act=50 fused tokens pass through an MLP action expert (stacked FC + LayerNorm, residual branch) and a linear policy head that outputs 50-step continuous probe-control commands"
+  action_head_category: regression
+  action_space: "continuous probe motion commands for a UR7e 6-DoF arm (50-step chunk)"
+  parameters: null
+  key_innovation: "First VLA tailored to ultrasound scanning: real-time ultrasound images are encoded by a domain-specific ultrasound foundation model (USFM) instead of the natural-image encoder and injected into the vision-language stream via an ultrasound-aware expert fusion module, so the policy is driven by imaging-derived semantic goals (clinical standard planes). Also contributes US-VLA-Data: 320 sonographer teleoperated trajectories (~80k synchronized timesteps, 8 participants) over 5 liver/kidney standard planes."
+
+training:
+  dataset: "US-VLA-Data: 320 expert trajectories (~80,000 timesteps), 5 standard-plane tasks, 8 participants x 8 start positions; UR7e arm, 2 RealSense D435 RGB cameras, HISENSE HD60 ultrasound; PIKA teleoperation"
+  method: "Supervised imitation training on 64 expert demonstrations per task"
+  optimizer: "AdamW (beta1=0.9, beta2=0.95, eps=1e-8), max LR 5e-5, batch 8, 30,000 steps"
+  compute: "8x NVIDIA RTX 3090"
+
+benchmarks:
+  real_world:
+    task1_aorta_sagittal: 96.7
+    task2_subxiphoid_transverse: 76.7
+    task3_right_subcostal_oblique: 66.7
+    task4_left_kidney_long_axis: 100
+    task5_left_kidney_transverse: 80.0
+    avg: 84.0
+    source: "Paper Table 1 (row US-VLA (Ours), success rates)"
+    date_reported: "2026-08-17"
+    eval_condition: "Autonomous abdominal ultrasound standard-plane acquisition on 3 held-out subjects (BMI 18.1 / 22.9 / 26.0), 10 trials per task per subject; success rate (%)"
+
+  real_world_scanning_timesteps:
+    task1_aorta_sagittal: 733
+    task2_subxiphoid_transverse: 1011
+    task3_right_subcostal_oblique: 882
+    task4_left_kidney_long_axis: 291
+    task5_left_kidney_transverse: 493
+    avg: 682
+    source: "Paper Table 1 (row US-VLA (Ours), scanning timesteps)"
+    date_reported: "2026-08-17"
+    eval_condition: "Timesteps to reach target standard plane at 15 Hz (lower is better), same protocol"
+
+  real_world_baseline_pi0_wo_us:
+    task1_aorta_sagittal: 66.7
+    task2_subxiphoid_transverse: 46.7
+    task3_right_subcostal_oblique: 33.3
+    task4_left_kidney_long_axis: 63.3
+    task5_left_kidney_transverse: 53.3
+    avg: 52.7
+    source: "Paper Table 1 (row pi0-base w/o US)"
+    date_reported: "2026-08-17"
+    eval_condition: "pi0 fine-tuned without ultrasound input, same success-rate protocol"
+
+  real_world_baseline_pi0_w_us:
+    task1_aorta_sagittal: 80.0
+    task2_subxiphoid_transverse: 56.7
+    task3_right_subcostal_oblique: 43.3
+    task4_left_kidney_long_axis: 70.0
+    task5_left_kidney_transverse: 60.0
+    avg: 62.0
+    source: "Paper Table 1 (row pi0-base w/ US)"
+    date_reported: "2026-08-17"
+    eval_condition: "pi0 with ultrasound signal concatenated to state input, same success-rate protocol"
+
+  real_world_baseline_pi05_wo_us:
+    task1_aorta_sagittal: 73.3
+    task2_subxiphoid_transverse: 53.3
+    task3_right_subcostal_oblique: 40.0
+    task4_left_kidney_long_axis: 66.7
+    task5_left_kidney_transverse: 56.7
+    avg: 58.0
+    source: "Paper Table 1 (row pi0.5 w/o US)"
+    date_reported: "2026-08-17"
+    eval_condition: "pi0.5 without ultrasound input, same success-rate protocol"
+
+  real_world_baseline_pi05_w_us:
+    task1_aorta_sagittal: 86.7
+    task2_subxiphoid_transverse: 66.7
+    task3_right_subcostal_oblique: 46.7
+    task4_left_kidney_long_axis: 83.3
+    task5_left_kidney_transverse: 66.7
+    avg: 70.0
+    source: "Paper Table 1 (row pi0.5 w/ US)"
+    date_reported: "2026-08-17"
+    eval_condition: "pi0.5 with ultrasound input, same success-rate protocol"
+
+  real_world_ablation_us_plus_usfm:
+    task1_aorta_sagittal: 90.0
+    task2_subxiphoid_transverse: 70.0
+    task3_right_subcostal_oblique: 53.5
+    task4_left_kidney_long_axis: 90.0
+    task5_left_kidney_transverse: 73.3
+    avg: 75.3
+    source: "Paper Table 2 (row US + USFM, without UAEF)"
+    date_reported: "2026-08-17"
+    eval_condition: "Ablation: ultrasound input with USFM encoder but no ultrasound-aware expert fusion; success rate (%)"
+
+eval_conditions:
+  real_world: "UR7e arm with wrist + side RGB cameras and live ultrasound feed; 3 held-out human subjects with different BMI; 15 Hz closed-loop"
+
+tags:
+  - medical-robotics
+  - ultrasound
+  - paligemma
+  - usfm
+  - real-world
+  - dataset
+  - open-source
+  - acm-mm-2026

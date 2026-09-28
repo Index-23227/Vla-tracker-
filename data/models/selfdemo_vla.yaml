@@ -1,0 +1,185 @@
+# Paper: Fine-Tuning VLAs with Self-Demonstrated Generative Control for Multi-Task Manipulation
+# arXiv: 2608.19490
+# Note: the paper does not name its method; "SelfDemo-VLA" is a tracker label for the
+# "pi0.5 Multi-Task ES+SS" policy (expert-supervised + self-supervised self-demo fine-tuning).
+
+name: SelfDemo-VLA
+full_name: "Fine-Tuning VLAs with Self-Demonstrated Generative Control for Multi-Task Manipulation (pi0.5 Multi-Task ES+SS)"
+organization: "University of Illinois Urbana-Champaign"
+date: "2026-08-19"
+paper_url: https://arxiv.org/abs/2608.19490
+code_url: https://self-supervised-control.pages.dev/
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (openpi release): PaliGemma VLM (SigLIP vision encoder + Gemma) + action expert"
+  llm: "PaliGemma (Gemma 2B)"
+  action_head: "pi0.5 flow-matching action expert predicting absolute joint-angle action chunks (H=50, D=32; 25 actions executed open-loop per query), trained with a dual objective: cross-entropy on re-implemented FAST discrete action tokens (VLM) + alpha-weighted conditional flow-matching loss (action expert)"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "pi0.5 (~3B); full fine-tuning of VLM + action expert"
+  key_innovation: "Self-supervised generative replay for VLA post-training without access to pretraining data: the frozen zero-shot base policy is rolled out online on the target robot on prompts from its pretraining task family, and its own sampled action chunks (mostly failed rollouts) are recorded as self-demonstrations. Joint training L = L_ES + lambda L_SS with a 1:1 mixture of expert teleop data (new tasks) and self-demos distills instruction following and pretrained behaviors (e.g., place, push) while closing the embodiment gap; unsafe self-demos are filtered manually."
+
+training:
+  method: "Full fine-tuning of pi0.5 with FAST+Flow dual objective on 1:1 mixture of expert-supervised (ES) and self-supervised (SS) demonstrations"
+  real_data: "ALOHA-1: 30 expert pick-up demos (~14 min teleop) + 15 self-demos (Benchmark 1); 60 expert gear-insertion demos + 29 self-demos (Benchmark 2)"
+  sim_data: "RoboTwin 2.0 ALOHA-AgileX: stage-1 mid-training on 10 tasks (500 episodes); stage-2 50x2 expert stacking demos + 10 self-demos per stage-1 task"
+  hyperparameters: "Real: 10k iters, batch 64, alpha=8.0 (gear task 16-18k iters, alpha=10.0). Sim stage 2: 6k iters, batch 64, LR 2.5e-5"
+  compute: "1x H200 or 2x H100 for training; RTX 4090 for real-robot inference"
+
+benchmarks:
+  real_world:
+    pick_cube_tes_if_pre_grasp: 100
+    pick_cube_tes_sr: 90
+    pick_novel_tno_if_pre_grasp: 55
+    pick_novel_tno_sr: 55
+    pick_place_tss_if_pre_grasp: 90
+    pick_place_tss_if_post_grasp: 90
+    pick_place_tss_sr: 55
+    laundry_tss_if_pre_grasp: 100
+    laundry_tss_if_post_grasp: 95
+    laundry_tss_partial_sr: 40
+    source: "Paper Table 2 (row pi0.5 Multi-Task ES+SS (Ours))"
+    date_reported: "2026-08-19"
+    eval_condition: "Real ALOHA-1, Benchmark 1 (pick-up / pick-and-place / laundry); single multi-task checkpoint; 20 trials per test set"
+
+  real_world_baseline_multitask_es:
+    pick_cube_tes_if_pre_grasp: 100
+    pick_cube_tes_sr: 65
+    pick_novel_tno_if_pre_grasp: 50
+    pick_novel_tno_sr: 50
+    pick_place_tss_if_pre_grasp: 75
+    pick_place_tss_if_post_grasp: 0
+    pick_place_tss_sr: 0
+    laundry_tss_if_pre_grasp: 100
+    laundry_tss_if_post_grasp: 50
+    laundry_tss_partial_sr: 10
+    source: "Paper Table 2 (row pi0.5 Multi-Task ES)"
+    date_reported: "2026-08-19"
+    eval_condition: "Expert-only full fine-tuning baseline, same protocol"
+
+  real_world_baseline_zero_shot:
+    pick_cube_tes_if_pre_grasp: 80
+    pick_cube_tes_sr: 0
+    pick_novel_tno_if_pre_grasp: 70
+    pick_novel_tno_sr: 0
+    pick_place_tss_if_pre_grasp: 70
+    pick_place_tss_if_post_grasp: 25
+    pick_place_tss_sr: 0
+    laundry_tss_if_pre_grasp: 65
+    laundry_tss_if_post_grasp: 30
+    laundry_tss_partial_sr: 5
+    source: "Paper Table 2 (row pi0.5 Zero-Shot)"
+    date_reported: "2026-08-19"
+    eval_condition: "Zero-shot pi0.5 on ALOHA-1, same protocol"
+
+  real_world_upper_bound_es_all_tasks:
+    pick_cube_tes_if_pre_grasp: 100
+    pick_cube_tes_sr: 95
+    pick_novel_tno_if_pre_grasp: 65
+    pick_novel_tno_sr: 60
+    pick_place_tss_if_pre_grasp: 90
+    pick_place_tss_if_post_grasp: 90
+    pick_place_tss_sr: 65
+    laundry_tss_if_pre_grasp: 100
+    laundry_tss_if_post_grasp: 100
+    laundry_tss_partial_sr: 90
+    source: "Paper Table 6 (row pi0.5 MT ES+ES (all tasks))"
+    date_reported: "2026-08-19"
+    eval_condition: "Upper-bound reference with expert teleop for all tasks (replaces self-demos), 20 trials"
+
+  real_world_gear_insertion:
+    tes_if_pre_grasp: 100
+    tes_if_post_grasp: 90
+    tes_sr: 90
+    tno_novel_colors_if_pre_grasp: 100
+    tno_novel_colors_if_post_grasp: 90
+    tno_novel_colors_sr: 30
+    source: "Paper Table 3 (row pi0.5 Multi-Task ES+SS (Ours))"
+    date_reported: "2026-08-19"
+    eval_condition: "Real ALOHA-1 bimanual caterpillar gear insertion on non-stationary board, 10 trials per test set"
+
+  real_world_gear_insertion_baseline_multitask_es:
+    tes_if_pre_grasp: 100
+    tes_if_post_grasp: 40
+    tes_sr: 30
+    tno_novel_colors_if_pre_grasp: 70
+    tno_novel_colors_if_post_grasp: 40
+    tno_novel_colors_sr: 0
+    source: "Paper Table 3 (row pi0.5 Multi-Task ES)"
+    date_reported: "2026-08-19"
+    eval_condition: "Expert-only fine-tuning baseline, same gear-insertion protocol"
+
+  real_world_heldout_push:
+    if_correct_object: 85
+    push_motion: 70
+    picks_instead: 10
+    sr_push_correct_object: 60
+    source: "Paper Table 7 (row pi0.5 MT ES+SS (Ours))"
+    date_reported: "2026-08-19"
+    eval_condition: "Zero-shot evaluation on held-out 'push objects' skill family absent from both fine-tuning mixtures, 20 trials (picks_instead: lower is better)"
+
+  robotwin2_continual:
+    tss_avg: 70.6
+    tes_avg: 98.0
+    tno_avg: 44.5
+    tnc_avg: 14.0
+    overall_avg: 56.8
+    source: "Paper Table 5 (row Multi-Task ES+SS (Ours))"
+    date_reported: "2026-08-19"
+    eval_condition: "Authors' custom RoboTwin 2.0 continual post-training benchmark (ALOHA-AgileX): TSS = 10 mid-training tasks retained via self-demos, TES = 2 new stacking tasks, TNO = novel objects, TNC = novel compositions; 50 seeds per task. Not the standard RoboTwin 2.0 leaderboard protocol"
+
+  robotwin2_continual_baseline_multitask_es:
+    tss_avg: 16.6
+    tes_avg: 93.0
+    tno_avg: 57.0
+    tnc_avg: 6.7
+    overall_avg: 43.3
+    source: "Paper Table 5 (row Multi-Task ES)"
+    date_reported: "2026-08-19"
+    eval_condition: "Expert-only full fine-tuning baseline, same custom RoboTwin protocol"
+
+  robotwin2_continual_oracle_rehearsal:
+    tss_avg: 85.6
+    tes_avg: 97.0
+    tno_avg: 30.0
+    tnc_avg: 15.3
+    overall_avg: 57.0
+    source: "Paper Table 5 (row Rehearsal, frame sampling (Oracle))"
+    date_reported: "2026-08-19"
+    eval_condition: "Oracle with access to stored mid-training data, same custom RoboTwin protocol"
+
+  robotwin2_continual_tss_per_task:
+    place_dual_shoes: 42
+    beat_block_hammer: 82
+    pick_dual_bottles: 48
+    place_container_plate: 92
+    handover_mic: 62
+    place_empty_cup: 92
+    place_bread_basket: 58
+    lift_pot: 86
+    open_microwave: 66
+    put_bottles_dustbin: 78
+    tss_avg: 70.6
+    source: "Paper Table 11 (row Multi-Task ES+SS (Ours))"
+    date_reported: "2026-08-19"
+    eval_condition: "Per-task retention on the 10 self-supervised (mid-training) RoboTwin tasks after stage-2 post-training, 50 seeds per task"
+
+eval_conditions:
+  real_world: "Stationary ALOHA-1 (ViperX 300 arms), top + two wrist RealSense D435 cameras, 30-50 Hz control; IF = instruction following, SR = success rate"
+  robotwin2_continual: "RoboTwin 2.0 ALOHA-AgileX with customized D435 camera profile; base policy mid-trained on 10 tasks (90.8% avg) before post-training"
+
+tags:
+  - pi0.5
+  - flow-matching
+  - post-training
+  - continual-learning
+  - generative-replay
+  - self-supervision
+  - catastrophic-forgetting
+  - aloha
+  - bimanual
+  - robotwin
+  - real-world

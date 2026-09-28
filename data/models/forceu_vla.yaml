@@ -1,0 +1,118 @@
+# Paper: ForceU-VLA: A Force-Aware Vision-Language-Action Model for Embodied Ultrasound Scanning
+# arXiv: 2608.15009
+
+name: ForceU-VLA
+full_name: "ForceU-VLA: A Force-Aware Vision-Language-Action Model for Embodied Ultrasound Scanning"
+organization: "Ocean University of China / Shandong University / Hefei University of Technology"
+date: "2026-08-15"
+paper_url: https://arxiv.org/abs/2608.15009
+code_url: https://github.com/VMVLab/ForceU-VLA
+venue: "ACM MM 2026"
+open_source: true
+model_type: vla
+inference_hz: 15
+
+architecture:
+  backbone: "pi0.5-based VLA: PaliGemma VLM over language + SigLIP-encoded wrist/side RGB views; USFM ultrasound foundation model for ultrasound images; linear projection of 6-D force/torque to 2048-d tokens"
+  llm: "PaliGemma (Gemma)"
+  action_head: "Flow-matching action expert: velocity field v_t = Linear(F_vl + alpha(F) * F_m), where F_m is the Force-Ultrasound Synergistic Fusion output and alpha(F) the force-driven stage-adaptive weight; ODE integration yields continuous action chunks for the UR7e probe arm"
+  action_head_category: flow_matching
+  action_space: "continuous probe motion action chunks (UR7e 6-DoF arm)"
+  parameters: null
+  key_innovation: "(1) Force-Ultrasound Synergistic Fusion Module (FUSFM): ultrasound tokens query force tokens via cross-attention (zero-initialized output projection) to form force-modulated ultrasound features, which VLM features then query via a second cross-attention + FFN (zero-initialized final projection so the module starts as identity for the pretrained action expert). (2) Stage-Adaptive Modulation Mechanism (SAMM): alpha(F) = alpha_low + (alpha_high - alpha_low) * sigmoid((||f|| - tau)/gamma) with learnable contact threshold tau (init 5 N) and smoothness gamma (init 2), alpha_low=0.1, alpha_high=1, supervised by MSE to binary contact-stage labels (lambda=0.1). (3) ForceU-VLA-Data: 450 sonographer teleoperated trajectories (~100k frames) with vision, ultrasound, 6-axis force and stage labels over 5 liver/kidney standard planes."
+
+training:
+  dataset: "ForceU-VLA-Data: 450 expert trajectories, ~100,000 synchronized timesteps, 10 subjects x 5 tasks x 9 repetitions, 3 body types, 8 start directions; UR7e arm, 2 RealSense D435, HISENSE HD60 ultrasound, Robotiq FT 300-S force sensor, PIKA teleoperation"
+  method: "Fine-tuning with L = L_action (flow matching) + 0.1 * L_stage (MSE)"
+  optimizer: "AdamW, LR 5e-5, batch 8, 30,000 iterations"
+  compute: "8x NVIDIA RTX 3090"
+
+benchmarks:
+  real_world:
+    task1_aorta_sagittal: 97.8
+    task2_subxiphoid_transverse: 86.7
+    task3_right_subcostal_oblique: 84.4
+    task4_left_kidney_long_axis: 97.8
+    task5_left_kidney_transverse: 100.0
+    avg: 93.3
+    source: "Paper Table 2 (full model row: US + FUSFM + SAMM, success rates); average also stated in Sec. 5.2 text"
+    date_reported: "2026-08-15"
+    eval_condition: "Autonomous ultrasound standard-plane acquisition on human subjects, 45 trials per task (15 each for slim / normal / obese BMI); success rate (%)"
+
+  real_world_scanning_timesteps:
+    task1_aorta_sagittal: 329
+    task2_subxiphoid_transverse: 528
+    task3_right_subcostal_oblique: 419
+    task4_left_kidney_long_axis: 237
+    task5_left_kidney_transverse: 243
+    avg: 351.2
+    source: "Paper Table 1 (row ForceU-VLA) and Table 2 (full model)"
+    date_reported: "2026-08-15"
+    eval_condition: "Scanning timesteps to reach target plane at 15 Hz (lower is better), same protocol"
+
+  real_world_baseline_pi05:
+    task1_aorta_sagittal: 80.0
+    task2_subxiphoid_transverse: 66.7
+    task3_right_subcostal_oblique: 62.2
+    task4_left_kidney_long_axis: 68.9
+    task5_left_kidney_transverse: 84.4
+    avg: 72.4
+    source: "Paper Table 2 (baseline row without US / FUSFM / SAMM = pi0.5)"
+    date_reported: "2026-08-15"
+    eval_condition: "pi0.5 fine-tuned on ForceU-VLA-Data without ultrasound or force; success rate (%)"
+
+  real_world_ablation_pi05_w_us:
+    task1_aorta_sagittal: 84.4
+    task2_subxiphoid_transverse: 71.1
+    task3_right_subcostal_oblique: 71.1
+    task4_left_kidney_long_axis: 84.4
+    task5_left_kidney_transverse: 91.1
+    avg: 80.4
+    source: "Paper Table 2 (row US only)"
+    date_reported: "2026-08-15"
+    eval_condition: "pi0.5 + ultrasound input; success rate (%)"
+
+  real_world_ablation_w_us_fusfm:
+    task1_aorta_sagittal: 91.1
+    task2_subxiphoid_transverse: 77.8
+    task3_right_subcostal_oblique: 80.0
+    task4_left_kidney_long_axis: 91.1
+    task5_left_kidney_transverse: 97.8
+    avg: 87.6
+    source: "Paper Table 2 (row US + FUSFM, without SAMM)"
+    date_reported: "2026-08-15"
+    eval_condition: "Ablation without stage-adaptive modulation; success rate (%)"
+
+  real_world_baseline_forcevla:
+    avg: 43.1
+    source: "Paper Sec. 5.2 text (ForceVLA average success rate)"
+    date_reported: "2026-08-15"
+    eval_condition: "ForceVLA (MoE force fusion) fine-tuned on ForceU-VLA-Data; average success rate (%) over 5 tasks"
+
+  real_world_baseline_scanning_timesteps:
+    pi0: 598.2
+    pi0_w_us: 521.0
+    pi0_w_us_f: 492.0
+    pi0_w_us_f_s: 481.6
+    forcevla: 538.4
+    pi05: 499.6
+    pi05_w_us: 422.6
+    pi05_w_us_f: 379.0
+    source: "Paper Table 1 (Average column)"
+    date_reported: "2026-08-15"
+    eval_condition: "Average scanning timesteps over 5 tasks for baselines (lower is better)"
+
+eval_conditions:
+  real_world: "UR7e arm with wrist + side RGB, live ultrasound and 6-axis force; subjects from 3 BMI categories; 15 Hz closed loop"
+
+tags:
+  - medical-robotics
+  - ultrasound
+  - force-aware
+  - pi0.5
+  - flow-matching
+  - usfm
+  - real-world
+  - dataset
+  - open-source
+  - acm-mm-2026

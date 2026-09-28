@@ -1,0 +1,114 @@
+name: StructRL
+full_name: "StructRL: Structured Action-Space Exploration for Flow-Based VLAs"
+organization: "Fudan University / Singapore Management University / Shanghai AI Laboratory"
+date: "2026-08-15"
+paper_url: https://arxiv.org/abs/2608.15139
+code_url: null
+venue: "arXiv 2026"
+open_source: false
+model_type: "RL post-training framework for flow-based VLAs"
+
+architecture:
+  backbone: "Applied to three flow-based VLAs: GR00T N1.5, pi0, pi0.5 (few-shot SFT checkpoints from piRL)"
+  llm: "Inherits host VLA's VLM (PaliGemma for pi0/pi0.5, Eagle for GR00T N1.5)"
+  action_head: "Host flow-matching action decoder run as deterministic ODE + structured action-space noise head (lightweight MLP predicting group-wise scales, AR(1) temporal correlation)"
+  action_head_category: flow_matching
+  parameters: "Host VLA + small MLP noise-scale head"
+  key_innovation: "Identifies Structured Noise Dilution (in-chain noise is filtered by remaining denoising steps). Relocates policy stochasticity to the action space: deterministic ODE decoder, AR(1)-correlated noise with separate position/rotation/gripper scales injected after denoising, and last-step replay so policy-gradient updates reach the flow decoder via the final Euler step without chain-level likelihoods."
+
+training:
+  dataset: "Few-shot SFT checkpoints (from piRL) fine-tuned online in LIBERO, ManiSkill, CALVIN simulation; real-world Franka FR3 tasks initialized from SFT on 10 demos"
+  method: "Online RL: PPO in simulation (action-space likelihood via last-step replay); asynchronous off-policy AWAC with expectile value function and human interventions on the real robot (T=1 ODE step)"
+  compute: "4x NVIDIA A800 GPUs (simulation); 1 rollout GPU + 4 learner GPUs (real robot)"
+
+inference_hz: null
+
+benchmarks:
+  libero:
+    libero_spatial: 99.2
+    libero_object: 100.0
+    libero_goal: 97.6
+    libero_long: 99.0
+    libero_avg: 99.0
+    source: "Paper Table 2 (GR00T N1.5 + StructRL)"
+    date_reported: "2026-08-15"
+    eval_condition: "RL post-trained from few-shot SFT (GR00T N1.5 backbone, PPO)"
+  libero_pi0_variant:
+    libero_spatial: 98.8
+    libero_object: 99.8
+    libero_goal: 98.4
+    libero_long: 91.8
+    libero_avg: 97.2
+    source: "Paper Table 2 (pi0 + StructRL)"
+    eval_condition: "RL post-trained from few-shot SFT (pi0 backbone, PPO)"
+  libero_pi05_variant:
+    libero_spatial: 99.6
+    libero_object: 100.0
+    libero_goal: 98.8
+    libero_long: 90.2
+    libero_avg: 97.2
+    source: "Paper Table 2 (pi0.5 + StructRL)"
+    eval_condition: "RL post-trained from few-shot SFT (pi0.5 backbone, PPO)"
+  libero_baselines_groot:
+    few_shot_sft_avg: 52.5
+    pirl_flow_sde_ppo_avg: 96.5
+    action_space_gaussian_baseline_avg: 95.8
+    source: "Paper Table 2 (GR00T N1.5 rows)"
+  maniskill:
+    ind: 90.9
+    ood_vision: 78.3
+    ood_semantic: 68.4
+    ood_execution: 64.2
+    ood_avg: 70.3
+    source: "Paper Table 3 (pi0.5 + StructRL)"
+    eval_condition: "RL post-trained (pi0.5 backbone, PPO)"
+  maniskill_pi0_variant:
+    ind: 87.8
+    ood_vision: 80.0
+    ood_semantic: 64.2
+    ood_execution: 56.2
+    ood_avg: 66.8
+    source: "Paper Table 3 (pi0 + StructRL)"
+  maniskill_baselines_pi05:
+    sft_ood_avg: 25.9
+    pirl_flow_sde_ppo_ood_avg: 49.3
+    pi_stepnft_ood_avg: 59.5
+    action_space_gaussian_baseline_ood_avg: 65.9
+    source: "Paper Table 3 (pi0.5 rows)"
+  calvin_chaining_pi05:
+    len1: 1.000
+    len2: 0.993
+    len3: 0.968
+    len4: 0.934
+    len5: 0.880
+    avg_len: 4.775
+    source: "Paper Table F1 (pi0.5 + StructRL; CALVIN split not stated)"
+  real_world:
+    pick_banana_sr_60min: 84.0
+    source: "Paper Fig. 4 inline table (FR3, 21/25 trials after 60 min online RL)"
+    eval_condition: "pi0.5 + StructRL-AWAC from 10-demo SFT (0% initial)"
+  real_world_baselines:
+    pick_banana_gaussian_baseline_sr_60min: 56.0
+    source: "Paper Fig. 4 inline table (14/25 trials)"
+
+eval_conditions:
+  libero: "Four LIBERO suites, starting from piRL few-shot SFT checkpoints; online PPO with parallel environments"
+  maniskill: "ManiSkill IND tasks plus OOD Vision (5), Semantic (5), Execution (2); Avg is mean over OOD splits"
+  real_world: "Franka FR3, pick-banana (7-DoF, C=10) and plug-charger-in (6-DoF, C=5); sparse binary rewards, few human interventions; plug-charger-in converges in about 30 min vs about 35 min for Gaussian baseline"
+
+tags:
+  - reinforcement_learning
+  - rl_post_training
+  - flow_matching
+  - structured_exploration
+  - action_space_noise
+  - ppo
+  - awac
+  - pi0
+  - pi0_5
+  - groot_n1_5
+  - libero
+  - maniskill
+  - calvin
+  - real_world
+  - franka
