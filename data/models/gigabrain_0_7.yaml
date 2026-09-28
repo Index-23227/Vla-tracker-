@@ -1,0 +1,122 @@
+# Paper: GigaBrain-0.7: Scaling Embodied Foundation Models to Emergent Capabilities with a Three-System Architecture
+# arXiv: 2608.15875
+
+name: GigaBrain-0.7
+full_name: "GigaBrain-0.7: Scaling Embodied Foundation Models to Emergent Capabilities with a Three-System Architecture"
+organization: "GigaAI (GigaBrain Team)"
+date: "2026-08-16"
+paper_url: https://arxiv.org/abs/2608.15875
+code_url: https://github.com/open-gigaai/giga-brain-0
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "PaliGemma2 (3B) vision-language backbone with Temporal-Spatial Blocks inserted into the visual encoder (short-term visual memory); System 2 (understanding & planning, subtask/CoT prediction) shares the VLM; System 3 = World Value Model extended from GigaWorld-1 (frozen during VLA post-training) that supplies a subgoal image and a value-derived binary advantage condition"
+  llm: "PaliGemma2 (3B)"
+  action_head: "Action Expert (0.5B) coupled to the VLM in a dual-stream Mixture-of-Transformers (joint attention, separate FFNs); conditional flow matching generates continuous action chunks, with a parallel NTP discrete-action pathway used during training; shared expert Transformer with per-embodiment input/output projections, 6D rotations"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~3.5B for System 1 (PaliGemma2 3B + 0.5B Action Expert; Table 4 lists 3.5B total for the PaliGemma2 configuration); System 3 world model not counted"
+  key_innovation: "Three-system embodied foundation model (System 1 action & control, System 2 understanding & planning, System 3 prediction & evaluation via a World Value Model). One-stage pretraining jointly optimizes NTP (VL, subtask, discrete-action) and flow-matching losses on 37,257 hours of embodied trajectories (real robot 55%, UMI 22%, EGO 8%, sim 4%, world-model-generated 11%) spanning 16 robot types plus ~272M VL samples, using Soft Knowledge Insulation (action gradients into the VLM attenuated by alpha_KI in (0,1)). Post-training conditions System 1 on System 3 subgoal images and advantage; experience reinforcement adds offline advantage-weighted RL and online human-in-the-loop actor-critic RL."
+
+training:
+  pretraining_data: "37,256.98 h embodied trajectories (16 robot morphologies) + 271,976,674 VLM image-text/QA samples"
+  method: "One-stage joint VLA pretraining (L_NTP + L_FM) with Soft KI; World Value Model pretraining (robot video pretraining + value learning); world-model-conditioned task-specific post-training; offline RL then online HIL RL"
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_easy: 66.8
+    robotwin_v2_hard: 67.9
+    robotwin_v2_avg: 67.35
+    source: "Paper Table 9 (row GigaBrain-0.7, Co-Train)"
+    date_reported: "2026-08-16"
+    eval_condition: "Official Co-Train protocol: one policy post-trained jointly on all 50 tasks with 50 clean demos per task; Overall = mean of Easy (clean) and Hard (domain-randomized)"
+
+  robotwin_v2_baselines:
+    pi0_single_overall: 31.38
+    xiaomi_robotics_0_cotrain_overall: 40.55
+    x_vla_cotrain_overall: 44.45
+    x_wam_cotrain_overall: 47.90
+    pi05_cotrain_easy: 70.7
+    pi05_cotrain_hard: 46.0
+    pi05_cotrain_overall: 58.35
+    source: "Paper Table 9 (baseline rows)"
+    date_reported: "2026-08-16"
+
+  ebench:
+    success_rate: 33.30
+    score: 46.1
+    source: "Paper Table 10 (row GigaBrain-0.7)"
+    date_reported: "2026-08-16"
+    eval_condition: "EBench leaderboard evaluation (mobile, long-horizon, dexterous/precise manipulation); pi0.5 = 28.08 SR / 42 score"
+
+  robocoliseum:
+    instruction_following: 0.8166
+    spatial_reasoning: 0.4729
+    robustness: 0.6800
+    general_manipulation: 0.6092
+    source: "Paper Table 11 (row GigaBrain-0.7)"
+    date_reported: "2026-08-16"
+    eval_condition: "Reconstruction-based Real2Sim2Real evaluation; pi0.5 = .7460/.3560/.6130/.5820"
+
+  mimo_embodied:
+    spatial_avg: 0.5215
+    affordance_avg: 0.3669
+    overall: 0.4621
+    source: "Paper Table 8 (row GigaBrain-0.7, before MiMo data added to pretraining)"
+    date_reported: "2026-08-16"
+    eval_condition: "Embodied vision-language evaluation over 13 benchmarks (VSI-Bench excluded); final MiMo-enhanced checkpoint reaches 0.5704 overall but is not held-out"
+
+  real_world:
+    piper_language_following_avg: 91.5
+    h01_language_following_avg: 84.2
+    piper_complex_manipulation_avg: 84.9
+    h01_complex_manipulation_avg: 74.1
+    source: "Paper Table 6 and Table 7 (rows GigaBrain-0.7)"
+    date_reported: "2026-08-16"
+    eval_condition: "Task-specific post-training on AgileX PiPER (6 language-following tasks; 5 complex tasks) and Maker H01 humanoid (6 language-following tasks; 7 complex tasks)"
+
+  real_world_baseline_pi05:
+    piper_language_following_avg: 88.8
+    h01_language_following_avg: 75.2
+    piper_complex_manipulation_avg: 76.6
+    h01_complex_manipulation_avg: 45.2
+    source: "Paper Table 6 and Table 7 (rows pi0.5)"
+    date_reported: "2026-08-16"
+
+  real_world_experience_rl:
+    link_installation_sft: 20
+    link_installation_offline_rl: 40
+    link_installation_online_rl: 100
+    gift_box_packing_sft: 80
+    gift_box_packing_offline_rl: 90
+    gift_box_packing_online_rl: 100
+    cable_tie_sft: 0
+    cable_tie_offline_rl: 40
+    cable_tie_online_rl: 100
+    bearing_installation_sft: 20
+    bearing_installation_offline_rl: 60
+    bearing_installation_online_rl: 100
+    source: "Paper Table 12 (success rates at different training stages)"
+    date_reported: "2026-08-16"
+    eval_condition: "Four real-robot tasks (PiPER, PiPER-X, Maker H01); SFT baseline -> offline advantage-weighted RL -> online HIL actor-critic RL; average 30.0 -> 57.5 -> 100 per paper text"
+
+eval_conditions:
+  robotwin_v2: "Co-Train, 50 tasks, 50 clean demos per task, Easy + Hard"
+  ebench: "Official EBench leaderboard"
+  robocoliseum: "Official RoboColiseum Real2Sim2Real evaluation"
+  real_world: "Task-specific post-training on AgileX PiPER / PiPER-X and Maker H01 humanoid"
+
+tags:
+  - flow_matching
+  - mixture-of-transformers
+  - paligemma2
+  - world-model
+  - value-model
+  - cross-embodiment
+  - humanoid
+  - robotwin
+  - real-world
+  - reinforcement-learning
+  - large-scale-pretraining

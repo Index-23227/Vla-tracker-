@@ -1,0 +1,80 @@
+name: Remember-Smarter
+full_name: "Remember Smarter: Visual History Compressor and Hyperbolic Experience Space for Robotic Memory"
+organization: "Xidian University"
+date: "2026-08-15"
+paper_url: https://arxiv.org/abs/2608.15269
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pi0 (PaliGemma VLM with SigLIP encoder + flow-matching action expert), initialized from the official pi0-LIBERO checkpoint via openpi"
+  action_head: "pi0 flow-matching action expert; a residual history cross-attention reader (4 heads, gamma=0.05) injects Mamba visual-history memory into suffix_out before action_out_proj at every flow step; four geodesic experience tokens + a [MEM_QUERY] token are inserted into the VLM prompt"
+  action_head_category: flow_matching
+  parameters: "pi0 backbone (size not stated in paper) + visual Mamba compressor (d=256, state 16) + history reader + P-VAE experience modules"
+  key_innovation: "Two complementary memory branches added to a pretrained VLA. (1) Visual Mamba Compressor: frozen SigLIP patches of 3 views -> adapter -> bidirectional serpentine spatial Mamba + learned-query pooling per frame -> two causal temporal Mamba layers per view (64-frame history at 1 FPS, state-passing TBPTT of 16 in training, fixed-shape recurrent state at inference). (2) Hyperbolic experience space: final-layer hidden states of successful demonstrations embedded by a Poincare VAE, organized by a HypHC-inspired binary tree with Karcher-mean prototypes and entailment-cone calibration; a non-blocking beam search retrieves up to 8 leaves, and 4 points on the geodesic from the query to their lowest common ancestor are decoded into prompt tokens."
+
+benchmarks:
+  libero:
+    libero_long: 94.2
+    libero_avg: 96.2
+    libero_plus_camera: 50.8
+    libero_plus_robot: 45.8
+    libero_plus_language: 65.3
+    libero_plus_light: 92.1
+    libero_plus_background: 94.0
+    libero_plus_noise: 81.2
+    libero_plus_layout: 78.0
+    libero_plus_total: 70.6
+    source: "LIBERO-Plus: Paper Table 1, pi0+RS row (Total over all 10,030 instances). Standard LIBERO: Section 5.3 text (Long 94.2, four-suite overall 96.2, mean of 5 runs); Spatial/Object/Goal appear only in Figure 5 and are omitted"
+    eval_condition: "pi0+RS adapted from the official pi0-LIBERO checkpoint using only original LIBERO demonstrations; LIBERO-Plus evaluated zero-shot (no LIBERO-Plus training), each instance once; standard LIBERO component study trains per suite"
+
+  libero_plus_pi0_baseline:
+    libero_plus_camera: 13.8
+    libero_plus_robot: 6.0
+    libero_plus_language: 58.8
+    libero_plus_light: 85.0
+    libero_plus_background: 81.4
+    libero_plus_noise: 79.0
+    libero_plus_layout: 68.9
+    libero_plus_total: 53.6
+    source: "Paper Table 1, pi0 row"
+    eval_condition: "baseline: official pi0-LIBERO checkpoint without RS"
+
+  libero_standard_ablation_text:
+    pi0_libero_long: 85.2
+    pi0_vmc_libero_long: 92.6
+    source: "Paper Section 5.3 text (component ablation); pi0 single run, pi0+VMC mean of 5 runs"
+    eval_condition: "ablation: base pi0 vs pi0 + visual Mamba compressor only (no experience space) on LIBERO-Long"
+
+  real_world:
+    press_2: 92
+    press_4: 70
+    press_6: 60
+    order: 40
+    occluded_placement: 88
+    chenchen_simple: 60
+    chenchen_hard: 80
+    source: "Paper Table 2, pi0+RS row (strict success %)"
+    eval_condition: "real robot, 10 or 25 trials per condition; trained on Press-2, Order, Occluded placement and Chenchen-simple; Press-4, Press-6 and Chenchen-hard held out"
+
+  real_world_pi0_baseline:
+    press_2: 64
+    press_4: 20
+    press_6: 0
+    order: 20
+    occluded_placement: 72
+    chenchen_simple: 64
+    chenchen_hard: 20
+    source: "Paper Table 2, pi0 row"
+    eval_condition: "baseline: pi0 under the same real-robot protocol"
+
+training:
+  datasets: ["LIBERO original demonstrations", "real-robot demonstrations for Press-2, Order, Occluded placement, Chenchen-simple"]
+  method: "Initialized from released pi0 checkpoint; Stage A 5k steps training RS adapter, visual Mamba compressor and history reader; Stage B 25k steps training RS modules and action-side parameters with the PaliGemma prefix frozen; global batch 32, 4-device FSDP, grouped AdamW, EMA 0.999; P-VAE / hierarchy built from successful episodes after policy training"
+
+eval_conditions:
+  libero: "LIBERO-Plus zero-shot robustness (7 perturbation dimensions, 10,030 instances) plus standard LIBERO four-suite component study"
+  real_world: "strict success: every subgoal in order; wrong object/order, extra press, safety stop, timeout or intervention counts as failure"
+
+tags: [memory, visual_history, mamba, state_space_model, hyperbolic_embedding, experience_retrieval, long_horizon, pi0, flow_matching, libero_plus, real_robot]

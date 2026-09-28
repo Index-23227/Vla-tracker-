@@ -1,0 +1,98 @@
+# Paper: BICPO-VLA: Behavior-Identified Continuation Preference Optimization for Smooth Asynchronous Vision-Language-Action Control
+# arXiv: 2608.13924
+
+name: BICPO-VLA
+full_name: "BICPO-VLA: Behavior-Identified Continuation Preference Optimization for Smooth Asynchronous Vision-Language-Action Control"
+organization: "Beihang University; Beijing Institute of Technology; CASIA; BUPT; Hunan University; Peking University; Tsinghua University"
+date: "2026-08-14"
+paper_url: https://arxiv.org/abs/2608.13924
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "VLM backbone with Vision Mamba / instruction-aware visual routing (visual tokens cross-attend to language before history fusion), causal Mamba history encoder with behavior memory bank and phase-conditioned prior decoder (builds on BehaviorVLA / B-VLA)"
+  action_head: "Handoff-conditioned Haar-structured flow-matching action expert: a one-level orthogonal Haar transform splits each action chunk into a pairwise scaffold C and residual D, generated sequentially (scaffold then residual, shared expert with stage embeddings) and reconstructed exactly; conditioned on a behavior prior and a rolled handoff state from a frozen action-state model"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "Not reported"
+  key_innovation: "Addresses the request-to-handoff gap in asynchronous action chunking. (1) Instruction-grounded behavior identification; (2) Haar scaffold-residual realization with exact reconstruction; (3) BICPO: offline reference-relative Flow-DPO over same-behavior candidate pairs ranked by handoff jump and motion-trend mismatch after rolling known outgoing commands to the handoff state, with the semantic pathway frozen. The continuation DPO objective also transfers to pi0.5 flow matching, Legato and RTC."
+
+training:
+  method: "Imitation learning, continuation warm-up with L_struct, then offline Flow-DPO (L_pref + preferred-energy term + replay); only the continuation projector, W_g and selected expert parameters are updated in DPO"
+
+benchmarks:
+  calvin:
+    calvin_abc_d_task1: 98.9
+    calvin_abc_d_task2: 95.4
+    calvin_abc_d_task3: 91.0
+    calvin_abc_d_task4: 86.0
+    calvin_abc_d_task5: 80.7
+    calvin_abc_d_avg_len: 4.52
+    source: "Paper Table 1 (row Ours)"
+    date_reported: "2026-08-14"
+    eval_condition: "CALVIN ABC->D; strongest baseline B-VLA 4.36"
+
+  calvin_ablation:
+    full: 4.520
+    without_haar: 4.490
+    without_bicpo: 4.480
+    without_instruction_grounding: 4.396
+    instruction_query_fusion: 4.476
+    instruction_memory_fusion: 4.417
+    source: "Paper Table 5 and Table 6 (CALVIN ABC->D Avg. Len)"
+    date_reported: "2026-08-14"
+
+  robotwin_v2:
+    task_group_i_avg: 80.6
+    robotwin_v2_avg: 65.8
+    source: "Paper Table 2 (row BICPO-VLA (Ours))"
+    date_reported: "2026-08-14"
+    eval_condition: "Ten RoboTwin 2.0 Hard (domain-randomized) tasks only, not the full 50-task protocol; Overall = mean over the ten tasks (B-VLA 60.4, pi0.5 51.4)"
+
+  libero:
+    libero_task_success: 99.1
+    source: "Paper Table 3 (row BICPO-VLA (Ours))"
+    date_reported: "2026-08-14"
+    eval_condition: "LIBERO success reported as a single aggregate in the handoff-continuity table; per-suite numbers not given in the main text"
+
+  libero_continuity:
+    bicpo_vla_sr: 99.1
+    bicpo_vla_jump: 2.37
+    bicpo_vla_trend: 6.40
+    bicpo_vla_without_dpo_sr: 98.8
+    bicpo_vla_without_dpo_jump: 3.01
+    bicpo_vla_without_dpo_trend: 8.07
+    pi05_fm_sr: 96.9
+    pi05_fm_with_continuity_dpo_sr: 97.1
+    pi05_fm_with_chosen_only_sft_sr: 49.1
+    legato_with_continuity_dpo_sr: 97.6
+    rtc_with_continuity_dpo_sr: 97.4
+    source: "Paper Table 3 (LIBERO task success and handoff continuity)"
+    date_reported: "2026-08-14"
+
+  real_world:
+    avg: 69.3
+    source: "Paper Section 4.3 text / Figure 4"
+    date_reported: "2026-08-14"
+    eval_condition: "Six limited-data real-world tasks; B-VLA 60.2, pi0.5 47.3, OpenVLA-OFT 33.3"
+
+eval_conditions:
+  calvin: "ABC->D"
+  robotwin_v2: "10 Hard-setting tasks"
+  libero: "Asynchronous execution with inference delay k=3"
+  real_world: "Six limited-data tasks"
+
+tags:
+  - flow_matching
+  - dpo
+  - preference-optimization
+  - asynchronous-execution
+  - action-chunking
+  - haar-wavelet
+  - mamba
+  - calvin
+  - robotwin
+  - libero
+  - real-world

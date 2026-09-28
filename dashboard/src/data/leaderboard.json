@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-28T06:14:30.534767",
-  "num_models": 414,
+  "generated_at": "2026-09-28T06:20:48.511623",
+  "num_models": 436,
   "primary_benchmark": "libero",
   "benchmarks_available": [
     "calvin",
@@ -481,6 +481,115 @@
       "rank": 8
     },
     {
+      "name": "StructRL",
+      "organization": "Fudan University / Singapore Management University / Shanghai AI Laboratory",
+      "date": "2026-08-15",
+      "paper_url": "https://arxiv.org/abs/2608.15139",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "reinforcement_learning",
+        "rl_post_training",
+        "flow_matching",
+        "structured_exploration",
+        "action_space_noise",
+        "ppo",
+        "awac",
+        "pi0",
+        "pi0_5",
+        "groot_n1_5",
+        "libero",
+        "maniskill",
+        "calvin",
+        "real_world",
+        "franka"
+      ],
+      "architecture": {
+        "backbone": "Applied to three flow-based VLAs: GR00T N1.5, pi0, pi0.5 (few-shot SFT checkpoints from piRL)",
+        "llm": "Inherits host VLA's VLM (PaliGemma for pi0/pi0.5, Eagle for GR00T N1.5)",
+        "action_head": "Host flow-matching action decoder run as deterministic ODE + structured action-space noise head (lightweight MLP predicting group-wise scales, AR(1) temporal correlation)",
+        "action_head_category": "flow_matching",
+        "parameters": "Host VLA + small MLP noise-scale head"
+      },
+      "model_type": "RL post-training framework for flow-based VLAs",
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 99.2,
+          "libero_object": 100.0,
+          "libero_goal": 97.6,
+          "libero_long": 99.0,
+          "libero_avg": 99.0
+        },
+        "real_world": {
+          "pick_banana_sr_60min": 84.0
+        },
+        "libero_pi0_variant": {
+          "libero_spatial": 98.8,
+          "libero_object": 99.8,
+          "libero_goal": 98.4,
+          "libero_long": 91.8,
+          "libero_avg": 97.2
+        },
+        "libero_pi05_variant": {
+          "libero_spatial": 99.6,
+          "libero_object": 100.0,
+          "libero_goal": 98.8,
+          "libero_long": 90.2,
+          "libero_avg": 97.2
+        },
+        "libero_baselines_groot": {
+          "few_shot_sft_avg": 52.5,
+          "pirl_flow_sde_ppo_avg": 96.5,
+          "action_space_gaussian_baseline_avg": 95.8
+        },
+        "maniskill": {
+          "ind": 90.9,
+          "ood_vision": 78.3,
+          "ood_semantic": 68.4,
+          "ood_execution": 64.2,
+          "ood_avg": 70.3
+        },
+        "maniskill_pi0_variant": {
+          "ind": 87.8,
+          "ood_vision": 80.0,
+          "ood_semantic": 64.2,
+          "ood_execution": 56.2,
+          "ood_avg": 66.8
+        },
+        "maniskill_baselines_pi05": {
+          "sft_ood_avg": 25.9,
+          "pirl_flow_sde_ppo_ood_avg": 49.3,
+          "pi_stepnft_ood_avg": 59.5,
+          "action_space_gaussian_baseline_ood_avg": 65.9
+        },
+        "calvin_chaining_pi05": {
+          "len1": 1.0,
+          "len2": 0.993,
+          "len3": 0.968,
+          "len4": 0.934,
+          "len5": 0.88,
+          "avg_len": 4.775
+        },
+        "real_world_baselines": {
+          "pick_banana_gaussian_baseline_sr_60min": 56.0
+        }
+      },
+      "eval_conditions": {
+        "libero": "Four LIBERO suites, starting from piRL few-shot SFT checkpoints; online PPO with parallel environments",
+        "real_world": "Franka FR3, pick-banana (7-DoF, C=10) and plug-charger-in (6-DoF, C=5); sparse binary rewards, few human interventions; plug-charger-in converges in about 30 min vs about 35 min for Gaussian baseline",
+        "libero_pi0_variant": "RL post-trained from few-shot SFT (pi0 backbone, PPO)",
+        "libero_pi05_variant": "RL post-trained from few-shot SFT (pi0.5 backbone, PPO)",
+        "maniskill": "ManiSkill IND tasks plus OOD Vision (5), Semantic (5), Execution (2); Avg is mean over OOD splits"
+      },
+      "libero_avg": 98.95,
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 9
+    },
+    {
       "name": "MVUCF",
       "organization": "HKUST (Guangzhou), Zhejiang University, Simon Fraser University, AgiBot, Xi'an Jiaotong University",
       "date": "2026-08-03",
@@ -549,7 +658,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 9
+      "rank": 10
     },
     {
       "name": "G0.5",
@@ -632,7 +741,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 10
+      "rank": 11
     },
     {
       "name": "LIRA",
@@ -701,7 +810,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 11
+      "rank": 12
     },
     {
       "name": "MPCoT",
@@ -758,7 +867,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 12
+      "rank": 13
     },
     {
       "name": "SimpleVLA-RL",
@@ -827,7 +936,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 13
+      "rank": 14
     },
     {
       "name": "ChainVLA",
@@ -882,7 +991,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 14
+      "rank": 15
     },
     {
       "name": "DualCoT-VLA",
@@ -931,7 +1040,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 15
+      "rank": 16
     },
     {
       "name": "FoMoVLA",
@@ -984,7 +1093,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 16
+      "rank": 17
     },
     {
       "name": "SnapFlow",
@@ -1029,7 +1138,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 17
+      "rank": 18
     },
     {
       "name": "StellaVLA",
@@ -1093,7 +1202,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 18
+      "rank": 19
     },
     {
       "name": "TFP",
@@ -1157,7 +1266,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 19
+      "rank": 20
     },
     {
       "name": "BCP",
@@ -1216,7 +1325,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 20
+      "rank": 21
     },
     {
       "name": "PearlVLA",
@@ -1270,7 +1379,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 21
+      "rank": 22
     },
     {
       "name": "GEAR-VLA",
@@ -1335,7 +1444,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 22
+      "rank": 23
     },
     {
       "name": "3DThinkVLA",
@@ -1400,7 +1509,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 23
+      "rank": 24
     },
     {
       "name": "CoRE-VLA",
@@ -1454,7 +1563,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 24
+      "rank": 25
     },
     {
       "name": "Hermite-VLA",
@@ -1510,7 +1619,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 25
+      "rank": 26
     },
     {
       "name": "IntentVLA",
@@ -1586,7 +1695,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 26
+      "rank": 27
     },
     {
       "name": "AttenA+",
@@ -1635,7 +1744,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 27
+      "rank": 28
     },
     {
       "name": "LaWAM",
@@ -1696,7 +1805,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 28
+      "rank": 29
     },
     {
       "name": "DiT4DiT",
@@ -1745,7 +1854,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 29
+      "rank": 30
     },
     {
       "name": "G3T-AML",
@@ -1815,7 +1924,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 30
+      "rank": 31
     },
     {
       "name": "CofactVLA",
@@ -1880,7 +1989,101 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 31
+      "rank": 32
+    },
+    {
+      "name": "SparkVLA",
+      "organization": "Beijing Institute of Technology; Tsinghua University",
+      "date": "2026-08-17",
+      "paper_url": "https://arxiv.org/abs/2608.16172",
+      "code_url": null,
+      "venue": "arXiv",
+      "open_source": false,
+      "tags": [
+        "hierarchical",
+        "long_horizon",
+        "adaptive_action_chunking",
+        "subtask_termination",
+        "pi05",
+        "flow_matching",
+        "token_pruning",
+        "libero",
+        "robocerebra",
+        "real_robot"
+      ],
+      "architecture": {
+        "backbone": "Two branches derived from pi0.5 (frozen SigLIP vision encoder)",
+        "llm": "pi0.5 VLM backbone (high-level planner branch, LoRA rank 16 on layers 1-8 for the selector)",
+        "action_head": "Low-level branch is the full pi0.5 VLA with its flow-matching action expert (H=50 chunks); a stop-aware selector (2-layer, 8-head transformer) on the planner branch ranks Stop against every action-prefix length 1..H",
+        "action_head_category": "flow_matching",
+        "parameters": "pi0.5 x2"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 99.2,
+          "libero_object": 97.6,
+          "libero_goal": 99.2,
+          "libero_long": 98.0,
+          "libero_avg": 98.5
+        },
+        "real_world": {
+          "shelf_arrangement": 78.0,
+          "drawer_restocking": 74.0,
+          "tea_preparation": 56.0,
+          "real_avg": 69.3
+        },
+        "robocerebra": {
+          "robocerebra_avg": 47.12,
+          "dynamic_randomization": 33.13,
+          "dynamic_observation": 43.87,
+          "memory_exploration": 60.3,
+          "memory_execution": 43.58,
+          "mix": 48.52,
+          "ideal": 46.38
+        },
+        "robocerebra_executor_variants": {
+          "sparkvla_openvla_oft_avg": 24.15,
+          "sparkvla_smolvla_avg": 25.32
+        },
+        "robocerebra_baselines": {
+          "openvla_oft_avg": 1.68,
+          "smolvla_avg": 2.8,
+          "pi05_avg": 12.29,
+          "hpe_avg": 16.55,
+          "mem0_avg": 20.29
+        },
+        "robocerebra_ablation": {
+          "fixed_chunk_independent_stop": 34.26,
+          "rlpd_independent_stop": 37.62,
+          "aqc_independent_stop": 40.92,
+          "pairwise_ranking_independent_stop": 42.53,
+          "unified_candidate_set_stop_acc": 96.65,
+          "no_pruning": 40.03,
+          "spatial_pruning_only": 43.46,
+          "raw_anchor_only": 45.18,
+          "selector_on_executor_backbone": 37.28
+        },
+        "real_world_baselines": {
+          "openvla_oft_avg": 30.0,
+          "pi05_avg": 48.0
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned; 100 episodes per task",
+        "real_world": "50 rollouts per task, matched initial states",
+        "robocerebra": "600 episodes over 6 conditions",
+        "robocerebra_executor_variants": "same RoboCerebra protocol, low-level executor swapped",
+        "robocerebra_baselines": "same RoboCerebra protocol; HPE from original RoboCerebra paper, Mem-0 reproduced",
+        "robocerebra_ablation": "RoboCerebra protocol; one design factor changed per row",
+        "real_world_baselines": "same real-world protocol"
+      },
+      "libero_avg": 98.5,
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 33
     },
     {
       "name": "WorldPilot",
@@ -1938,7 +2141,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 32
+      "rank": 34
     },
     {
       "name": "GTA-VLA",
@@ -1992,7 +2195,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 33
+      "rank": 35
     },
     {
       "name": "World-to-Wrist",
@@ -2057,7 +2260,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 34
+      "rank": 36
     },
     {
       "name": "GaussianDream",
@@ -2119,7 +2322,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 35
+      "rank": 37
     },
     {
       "name": "MemoryVLA++",
@@ -2218,7 +2421,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 36
+      "rank": 38
     },
     {
       "name": "PRTS",
@@ -2273,7 +2476,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 37
+      "rank": 39
     },
     {
       "name": "AtVLA",
@@ -2333,7 +2536,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 38
+      "rank": 40
     },
     {
       "name": "LaMP",
@@ -2393,7 +2596,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 39
+      "rank": 41
     },
     {
       "name": "CAC-VLA",
@@ -2454,7 +2657,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 40
+      "rank": 42
     },
     {
       "name": "Drop-Then-Recovery",
@@ -2496,7 +2699,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 41
+      "rank": 43
     },
     {
       "name": "AVA-VLA",
@@ -2555,7 +2758,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 42
+      "rank": 44
     },
     {
       "name": "UniFS",
@@ -2597,7 +2800,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 43
+      "rank": 45
     },
     {
       "name": "LEEVLA",
@@ -2655,7 +2858,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 44
+      "rank": 46
     },
     {
       "name": "S2-VLA",
@@ -2706,7 +2909,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 45
+      "rank": 47
     },
     {
       "name": "WorldTokens",
@@ -2783,7 +2986,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 46
+      "rank": 48
     },
     {
       "name": "RotVLA",
@@ -2835,7 +3038,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 47
+      "rank": 49
     },
     {
       "name": "OneWM-VLA",
@@ -2882,7 +3085,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 48
+      "rank": 50
     },
     {
       "name": "MIRTH",
@@ -2931,7 +3134,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 49
+      "rank": 51
     },
     {
       "name": "ALAM",
@@ -2983,7 +3186,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 50
+      "rank": 52
     },
     {
       "name": "AWU",
@@ -3037,7 +3240,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 51
+      "rank": 53
     },
     {
       "name": "ConsisVLA-4D",
@@ -3080,7 +3283,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 52
+      "rank": 54
     },
     {
       "name": "BehaviorVLA",
@@ -3138,7 +3341,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 53
+      "rank": 55
     },
     {
       "name": "DyPES-VLA",
@@ -3208,7 +3411,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 54
+      "rank": 56
     },
     {
       "name": "Ω-QVLA",
@@ -3255,7 +3458,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 55
+      "rank": 57
     },
     {
       "name": "PCM",
@@ -3297,7 +3500,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 56
+      "rank": 58
     },
     {
       "name": "SkillMemo",
@@ -3368,7 +3571,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 57
+      "rank": 59
     },
     {
       "name": "WorldBagel",
@@ -3427,7 +3630,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 58
+      "rank": 60
     },
     {
       "name": "Afford-VLA",
@@ -3490,7 +3693,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 59
+      "rank": 61
     },
     {
       "name": "MMaDA-VLA",
@@ -3543,7 +3746,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 60
+      "rank": 62
     },
     {
       "name": "Coarse-to-Control",
@@ -3602,7 +3805,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 61
+      "rank": 63
     },
     {
       "name": "Qwen-VLA",
@@ -3670,7 +3873,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 62
+      "rank": 64
     },
     {
       "name": "TAG",
@@ -3721,7 +3924,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 63
+      "rank": 65
     },
     {
       "name": "Agentic-VLA",
@@ -3780,7 +3983,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 64
+      "rank": 66
     },
     {
       "name": "OA-WAM",
@@ -3839,7 +4042,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 65
+      "rank": 67
     },
     {
       "name": "TBD-VLA",
@@ -3907,7 +4110,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 66
+      "rank": 68
     },
     {
       "name": "VLA-IAP",
@@ -3949,7 +4152,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 67
+      "rank": 69
     },
     {
       "name": "X-VLA",
@@ -4016,7 +4219,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 68
+      "rank": 70
     },
     {
       "name": "ZR-0",
@@ -4076,7 +4279,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 69
+      "rank": 71
     },
     {
       "name": "DreamAvoid",
@@ -4138,7 +4341,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 70
+      "rank": 72
     },
     {
       "name": "OneStepVLA",
@@ -4193,7 +4396,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 71
+      "rank": 73
     },
     {
       "name": "TurboVLA",
@@ -4246,7 +4449,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 72
+      "rank": 74
     },
     {
       "name": "AtlasVLA",
@@ -4311,7 +4514,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 73
+      "rank": 75
     },
     {
       "name": "DepthCache",
@@ -4354,7 +4557,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 74
+      "rank": 76
     },
     {
       "name": "Fast-WAM",
@@ -4397,7 +4600,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 75
+      "rank": 77
     },
     {
       "name": "LaMem-VLA",
@@ -4453,7 +4656,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 76
+      "rank": 78
     },
     {
       "name": "OASIS",
@@ -4501,7 +4704,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 77
+      "rank": 79
     },
     {
       "name": "OmniVLA-RL",
@@ -4543,7 +4746,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 78
+      "rank": 80
     },
     {
       "name": "Reflective-VLA",
@@ -4599,7 +4802,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 79
+      "rank": 81
     },
     {
       "name": "CoTinyVLA",
@@ -4650,7 +4853,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 80
+      "rank": 82
     },
     {
       "name": "SLIM-0.5B",
@@ -4730,7 +4933,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 81
+      "rank": 83
     },
     {
       "name": "TriRelVLA",
@@ -4772,7 +4975,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 82
+      "rank": 84
     },
     {
       "name": "VLA-Thinker",
@@ -4832,7 +5035,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 83
+      "rank": 85
     },
     {
       "name": "AnchorRefine",
@@ -4877,7 +5080,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 84
+      "rank": 86
     },
     {
       "name": "FrameSkip",
@@ -4938,7 +5141,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 85
+      "rank": 87
     },
     {
       "name": "VLA-Talker",
@@ -5009,7 +5212,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 86
+      "rank": 88
     },
     {
       "name": "ECHO",
@@ -5060,7 +5263,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 87
+      "rank": 89
     },
     {
       "name": "ActionMap",
@@ -5107,7 +5310,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 88
+      "rank": 90
     },
     {
       "name": "DreamVLA",
@@ -5155,7 +5358,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 89
+      "rank": 91
     },
     {
       "name": "Libra-VLA",
@@ -5198,7 +5401,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 90
+      "rank": 92
     },
     {
       "name": "T2VLA",
@@ -5266,7 +5469,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 91
+      "rank": 93
     },
     {
       "name": "DyGRO-VLA",
@@ -5321,7 +5524,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 92
+      "rank": 94
     },
     {
       "name": "FiberTune",
@@ -5382,7 +5585,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 93
+      "rank": 95
     },
     {
       "name": "PolicyTrim",
@@ -5426,7 +5629,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 94
+      "rank": 96
     },
     {
       "name": "DeepThinkVLA",
@@ -5476,7 +5679,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 95
+      "rank": 97
     },
     {
       "name": "GWM-VLA",
@@ -5540,7 +5743,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 96
+      "rank": 98
     },
     {
       "name": "ELAN4D",
@@ -5590,7 +5793,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 97
+      "rank": 99
     },
     {
       "name": "SignVLA",
@@ -5635,7 +5838,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 98
+      "rank": 100
     },
     {
       "name": "Track4Action",
@@ -5692,7 +5895,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 99
+      "rank": 101
     },
     {
       "name": "TempoVLA",
@@ -5737,7 +5940,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 100
+      "rank": 102
     },
     {
       "name": "Agentic-RL-Execution",
@@ -5782,7 +5985,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 101
+      "rank": 103
     },
     {
       "name": "VisualThink-VLA",
@@ -5860,7 +6063,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 102
+      "rank": 104
     },
     {
       "name": "JEPA-WAM",
@@ -5930,7 +6133,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 103
+      "rank": 105
     },
     {
       "name": "FOCA",
@@ -5997,7 +6200,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 104
+      "rank": 106
     },
     {
       "name": "StableVLA",
@@ -6051,7 +6254,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 105
+      "rank": 107
     },
     {
       "name": "UVT",
@@ -6129,7 +6332,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 106
+      "rank": 108
     },
     {
       "name": "AC-VLA",
@@ -6174,7 +6377,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 107
+      "rank": 109
     },
     {
       "name": "OFlow",
@@ -6232,7 +6435,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 108
+      "rank": 110
     },
     {
       "name": "Anchor-Align VLA",
@@ -6290,7 +6493,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 109
+      "rank": 111
     },
     {
       "name": "AtomicVLA",
@@ -6328,7 +6531,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 110
+      "rank": 112
     },
     {
       "name": "A1",
@@ -6373,7 +6576,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 111
+      "rank": 113
     },
     {
       "name": "MemoryVLA",
@@ -6427,7 +6630,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 112
+      "rank": 114
     },
     {
       "name": "CF-VLA",
@@ -6481,7 +6684,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 113
+      "rank": 115
     },
     {
       "name": "Event-VLA",
@@ -6536,7 +6739,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 114
+      "rank": 116
     },
     {
       "name": "dVLA",
@@ -6581,7 +6784,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 115
+      "rank": 117
     },
     {
       "name": "SAFE-Pruner",
@@ -6628,7 +6831,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 116
+      "rank": 118
     },
     {
       "name": "GST-VLA",
@@ -6666,7 +6869,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 117
+      "rank": 119
     },
     {
       "name": "DD-VLA",
@@ -6709,7 +6912,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 118
+      "rank": 120
     },
     {
       "name": "Mix-QVLA",
@@ -6755,7 +6958,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 119
+      "rank": 121
     },
     {
       "name": "μVLA",
@@ -6804,7 +7007,93 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 120
+      "rank": 122
+    },
+    {
+      "name": "Remember-Smarter",
+      "organization": "Xidian University",
+      "date": "2026-08-15",
+      "paper_url": "https://arxiv.org/abs/2608.15269",
+      "code_url": null,
+      "venue": "arXiv",
+      "open_source": false,
+      "tags": [
+        "memory",
+        "visual_history",
+        "mamba",
+        "state_space_model",
+        "hyperbolic_embedding",
+        "experience_retrieval",
+        "long_horizon",
+        "pi0",
+        "flow_matching",
+        "libero_plus",
+        "real_robot"
+      ],
+      "architecture": {
+        "backbone": "pi0 (PaliGemma VLM with SigLIP encoder + flow-matching action expert), initialized from the official pi0-LIBERO checkpoint via openpi",
+        "llm": null,
+        "action_head": "pi0 flow-matching action expert; a residual history cross-attention reader (4 heads, gamma=0.05) injects Mamba visual-history memory into suffix_out before action_out_proj at every flow step; four geodesic experience tokens + a [MEM_QUERY] token are inserted into the VLM prompt",
+        "action_head_category": "flow_matching",
+        "parameters": "pi0 backbone (size not stated in paper) + visual Mamba compressor (d=256, state 16) + history reader + P-VAE experience modules"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_long": 94.2,
+          "libero_avg": 96.2,
+          "libero_plus_camera": 50.8,
+          "libero_plus_robot": 45.8,
+          "libero_plus_language": 65.3,
+          "libero_plus_light": 92.1,
+          "libero_plus_background": 94.0,
+          "libero_plus_noise": 81.2,
+          "libero_plus_layout": 78.0,
+          "libero_plus_total": 70.6
+        },
+        "real_world": {
+          "press_2": 92,
+          "press_4": 70,
+          "press_6": 60,
+          "order": 40,
+          "occluded_placement": 88,
+          "chenchen_simple": 60,
+          "chenchen_hard": 80
+        },
+        "libero_plus_pi0_baseline": {
+          "libero_plus_camera": 13.8,
+          "libero_plus_robot": 6.0,
+          "libero_plus_language": 58.8,
+          "libero_plus_light": 85.0,
+          "libero_plus_background": 81.4,
+          "libero_plus_noise": 79.0,
+          "libero_plus_layout": 68.9,
+          "libero_plus_total": 53.6
+        },
+        "libero_standard_ablation_text": {
+          "pi0_libero_long": 85.2,
+          "pi0_vmc_libero_long": 92.6
+        },
+        "real_world_pi0_baseline": {
+          "press_2": 64,
+          "press_4": 20,
+          "press_6": 0,
+          "order": 20,
+          "occluded_placement": 72,
+          "chenchen_simple": 64,
+          "chenchen_hard": 20
+        }
+      },
+      "eval_conditions": {
+        "libero": "LIBERO-Plus zero-shot robustness (7 perturbation dimensions, 10,030 instances) plus standard LIBERO four-suite component study",
+        "real_world": "strict success: every subgoal in order; wrong object/order, extra press, safety stop, timeout or intervention counts as failure",
+        "libero_plus_pi0_baseline": "baseline: official pi0-LIBERO checkpoint without RS",
+        "libero_standard_ablation_text": "ablation: base pi0 vs pi0 + visual Mamba compressor only (no experience space) on LIBERO-Long",
+        "real_world_pi0_baseline": "baseline: pi0 under the same real-robot protocol"
+      },
+      "libero_avg": 96.2,
+      "rank": 123
     },
     {
       "name": "GEM",
@@ -6863,7 +7152,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 121
+      "rank": 124
     },
     {
       "name": "DAI-3D",
@@ -6918,7 +7207,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 122
+      "rank": 125
     },
     {
       "name": "Harness-VLA",
@@ -6977,7 +7266,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 123
+      "rank": 126
     },
     {
       "name": "CloudEdgeVLA",
@@ -7045,7 +7334,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 124
+      "rank": 127
     },
     {
       "name": "GridS",
@@ -7099,7 +7388,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 125
+      "rank": 128
     },
     {
       "name": "PointACT",
@@ -7159,7 +7448,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 126
+      "rank": 129
     },
     {
       "name": "LoopVLA",
@@ -7212,7 +7501,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 127
+      "rank": 130
     },
     {
       "name": "AffordanceVLA",
@@ -7278,7 +7567,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 128
+      "rank": 131
     },
     {
       "name": "InstructVLA",
@@ -7330,7 +7619,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 129
+      "rank": 132
     },
     {
       "name": "PAPO-VLA",
@@ -7381,7 +7670,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 130
+      "rank": 133
     },
     {
       "name": "TS-Mask VLA",
@@ -7438,7 +7727,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 131
+      "rank": 134
     },
     {
       "name": "Evo-Depth",
@@ -7486,7 +7775,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 132
+      "rank": 135
     },
     {
       "name": "UniVLA",
@@ -7532,7 +7821,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 133
+      "rank": 136
     },
     {
       "name": "Premover",
@@ -7587,7 +7876,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 134
+      "rank": 137
     },
     {
       "name": "Cross-View Action-Flow Consistency",
@@ -7646,7 +7935,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 135
+      "rank": 138
     },
     {
       "name": "ActQuant",
@@ -7689,7 +7978,100 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 136
+      "rank": 139
+    },
+    {
+      "name": "RoleSub",
+      "organization": "Futurewei Technologies",
+      "date": "2026-08-19",
+      "paper_url": "https://arxiv.org/abs/2608.18410",
+      "code_url": null,
+      "venue": "arXiv",
+      "open_source": false,
+      "tags": [
+        "kv_compression",
+        "sub_token_routing",
+        "token_pruning",
+        "efficient_inference",
+        "lora",
+        "openvla_oft",
+        "libero",
+        "regression"
+      ],
+      "architecture": {
+        "backbone": "OpenVLA-OFT-7B (Llama-2-7B with fused SigLIP + DINOv2 visual features, two camera views, 512 visual tokens)",
+        "llm": "Llama-2 7B",
+        "action_head": "OpenVLA-OFT parallel decoding head with continuous L1-regression action chunks (8-action chunk per control step)",
+        "action_head_category": "regression",
+        "parameters": "7.65B total; ~110.8M trainable LoRA (rank 32, all linear layers) + ~4.20M routing heads + ~0.55M latent role estimator; pretrained backbone frozen"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_goal": 97.2,
+          "libero_long": 88.4,
+          "libero_object": 96.4,
+          "libero_spatial": 97.8
+        },
+        "libero_rolesub_16tok_k1": {
+          "libero_goal": 95.3,
+          "libero_long": 83.9,
+          "libero_object": 96.5,
+          "libero_spatial": 97.0
+        },
+        "libero_rolesub_8tok_k1": {
+          "libero_goal": 93.5,
+          "libero_long": 74.2,
+          "libero_object": 95.5,
+          "libero_spatial": 95.6
+        },
+        "libero_token_only_baseline_32tok_k1": {
+          "libero_goal": 94.8,
+          "libero_long": 84.0,
+          "libero_object": 91.7,
+          "libero_spatial": 96.8
+        },
+        "libero_plain_subtoken_baseline_32tok_k1": {
+          "libero_goal": 94.8,
+          "libero_long": 85.8,
+          "libero_object": 96.6,
+          "libero_spatial": 97.8
+        },
+        "libero_combined_visual_language_32tok": {
+          "libero_goal": 94.3,
+          "libero_long": 77.6,
+          "libero_object": 95.9,
+          "libero_spatial": 96.4
+        },
+        "libero_language_only_klang1": {
+          "libero_goal": 98.0,
+          "libero_long": 94.8,
+          "libero_object": 98.4,
+          "libero_spatial": 98.0
+        },
+        "libero_dense_reference": {
+          "libero_goal": 98.8,
+          "libero_long": 94.8,
+          "libero_object": 97.8,
+          "libero_spatial": 98.2
+        }
+      },
+      "eval_conditions": {
+        "libero": "fine-tuned (LoRA + router); four LIBERO suites, 10 tasks x 50 trials each, fixed simulator config and seed",
+        "libero_rolesub_16tok_k1": "same training; 16 of 512 visual tokens retained, K_vis=1",
+        "libero_rolesub_8tok_k1": "same training; 8 of 512 visual tokens retained, K_vis=1",
+        "libero_token_only_baseline_32tok_k1": "baseline: same LoRA training without sub-token routing; fewer visual tokens with full values at the same visual-KV budget",
+        "libero_plain_subtoken_baseline_32tok_k1": "baseline: trained sub-token routing in native value basis (R=I), no latent-role term, uniform K_vis per token",
+        "libero_combined_visual_language_32tok": "visual K_vis=1 on 32 retained tokens plus language value routing K_lang=1 on all language tokens",
+        "libero_language_only_klang1": "language-only value routing with all language tokens kept; visual, proprio and action-context uncompressed",
+        "libero_dense_reference": "baseline: uncompressed official OpenVLA-OFT per-suite checkpoint, same evaluation configuration"
+      },
+      "libero_avg": 94.95,
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 140
     },
     {
       "name": "StructVLA",
@@ -7732,7 +8114,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 137
+      "rank": 141
     },
     {
       "name": "VLA-AD",
@@ -7781,7 +8163,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 138
+      "rank": 142
     },
     {
       "name": "π₀-EqM",
@@ -7832,7 +8214,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 139
+      "rank": 143
     },
     {
       "name": "CLP",
@@ -7906,7 +8288,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 140
+      "rank": 144
     },
     {
       "name": "GR00T-N1",
@@ -7953,7 +8335,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 141
+      "rank": 145
     },
     {
       "name": "Mind-VLA",
@@ -8010,7 +8392,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 142
+      "rank": 146
     },
     {
       "name": "ActFovea",
@@ -8070,7 +8452,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 143
+      "rank": 147
     },
     {
       "name": "TR-VLA",
@@ -8121,7 +8503,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 144
+      "rank": 148
     },
     {
       "name": "Realtime-VLA-FLASH",
@@ -8166,7 +8548,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 145
+      "rank": 149
     },
     {
       "name": "B2FF",
@@ -8210,7 +8592,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 146
+      "rank": 150
     },
     {
       "name": "HiRoC",
@@ -8255,7 +8637,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 147
+      "rank": 151
     },
     {
       "name": "VLM2VLA-Prune",
@@ -8306,7 +8688,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 148
+      "rank": 152
     },
     {
       "name": "pi*0.6",
@@ -8350,7 +8732,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 149
+      "rank": 153
     },
     {
       "name": "UD-VLA",
@@ -8396,7 +8778,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 150
+      "rank": 154
     },
     {
       "name": "EquiVLA",
@@ -8445,7 +8827,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 151
+      "rank": 155
     },
     {
       "name": "Q-VGM",
@@ -8495,7 +8877,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 152
+      "rank": 156
     },
     {
       "name": "EMS",
@@ -8550,7 +8932,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 153
+      "rank": 157
     },
     {
       "name": "MFLA",
@@ -8601,7 +8983,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 154
+      "rank": 158
     },
     {
       "name": "BlockVLA",
@@ -8654,7 +9036,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 155
+      "rank": 159
     },
     {
       "name": "VLAConf",
@@ -8692,7 +9074,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 156
+      "rank": 160
     },
     {
       "name": "ProgVLA",
@@ -8751,7 +9133,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 157
+      "rank": 161
     },
     {
       "name": "CLAP",
@@ -8799,7 +9181,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 158
+      "rank": 162
     },
     {
       "name": "ECoT",
@@ -8837,7 +9219,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 159
+      "rank": 163
     },
     {
       "name": "LIBERO-Occ",
@@ -8882,7 +9264,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 160
+      "rank": 164
     },
     {
       "name": "TrustVLA",
@@ -8931,7 +9313,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 161
+      "rank": 165
     },
     {
       "name": "XS-VLA",
@@ -8986,7 +9368,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 162
+      "rank": 166
     },
     {
       "name": "RhinoVLA",
@@ -9033,7 +9415,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 163
+      "rank": 167
     },
     {
       "name": "FLARE",
@@ -9079,7 +9461,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 164
+      "rank": 168
     },
     {
       "name": "SemiVLA",
@@ -9144,7 +9526,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 165
+      "rank": 169
     },
     {
       "name": "pi0.5",
@@ -9190,7 +9572,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 166
+      "rank": 170
     },
     {
       "name": "ProbeFlow",
@@ -9233,7 +9615,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 167
+      "rank": 171
     },
     {
       "name": "LARA",
@@ -9285,7 +9667,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 168
+      "rank": 172
     },
     {
       "name": "G3VLA",
@@ -9340,7 +9722,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 169
+      "rank": 173
     },
     {
       "name": "SpatialVLA",
@@ -9387,7 +9769,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 170
+      "rank": 174
     },
     {
       "name": "ReactVLA",
@@ -9432,7 +9814,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 171
+      "rank": 175
     },
     {
       "name": "DexVLA",
@@ -9478,7 +9860,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 172
+      "rank": 176
     },
     {
       "name": "OpenVLA-OFT",
@@ -9525,7 +9907,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 173
+      "rank": 177
     },
     {
       "name": "RoboAlign",
@@ -9580,7 +9962,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 174
+      "rank": 178
     },
     {
       "name": "CoT-VLA",
@@ -9621,7 +10003,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 175
+      "rank": 179
     },
     {
       "name": "pi0-FAST",
@@ -9662,7 +10044,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 176
+      "rank": 180
     },
     {
       "name": "3DVLA-2026",
@@ -9718,7 +10100,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 177
+      "rank": 181
     },
     {
       "name": "CogACT",
@@ -9765,7 +10147,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 178
+      "rank": 182
     },
     {
       "name": "HybridVLA",
@@ -9811,7 +10193,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 179
+      "rank": 183
     },
     {
       "name": "pi0",
@@ -9868,7 +10250,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 180
+      "rank": 184
     },
     {
       "name": "ProgressVLA",
@@ -9922,7 +10304,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 181
+      "rank": 185
     },
     {
       "name": "RDT-1B",
@@ -9975,7 +10357,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 182
+      "rank": 186
     },
     {
       "name": "CT-VAM",
@@ -10027,7 +10409,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 183
+      "rank": 187
     },
     {
       "name": "RoVLA",
@@ -10096,7 +10478,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 184
+      "rank": 188
     },
     {
       "name": "VLA-GSE",
@@ -10146,7 +10528,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 185
+      "rank": 189
     },
     {
       "name": "SyVLA",
@@ -10198,7 +10580,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 186
+      "rank": 190
     },
     {
       "name": "SmoothVLA",
@@ -10244,7 +10626,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 187
+      "rank": 191
     },
     {
       "name": "Reflex",
@@ -10285,7 +10667,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 188
+      "rank": 192
     },
     {
       "name": "SmolVLA",
@@ -10332,7 +10714,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 189
+      "rank": 193
     },
     {
       "name": "SARF",
@@ -10387,7 +10769,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 190
+      "rank": 194
     },
     {
       "name": "OpenVLA",
@@ -10434,7 +10816,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 191
+      "rank": 195
     },
     {
       "name": "ProbeAct",
@@ -10497,7 +10879,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 192
+      "rank": 196
     },
     {
       "name": "CTRL-STEER",
@@ -10561,7 +10943,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 193
+      "rank": 197
     },
     {
       "name": "CrossVLA",
@@ -10611,7 +10993,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 194
+      "rank": 198
     },
     {
       "name": "JEPA-VLA-VICReg",
@@ -10677,7 +11059,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 195
+      "rank": 199
     },
     {
       "name": "RECALL",
@@ -10722,7 +11104,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 196
+      "rank": 200
     },
     {
       "name": "WA-SpecDec",
@@ -11133,7 +11515,119 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 197
+      "rank": 201
+    },
+    {
+      "name": "PhaseLoRA",
+      "organization": "Tsinghua University",
+      "date": "2026-08-15",
+      "paper_url": "https://arxiv.org/abs/2608.15285",
+      "code_url": "https://github.com/Grinffin/PhaseLoRA",
+      "venue": "arXiv preprint",
+      "open_source": true,
+      "tags": [
+        "pi0.5",
+        "peft",
+        "lora",
+        "flow-matching",
+        "libero",
+        "real-world",
+        "manipulation",
+        "open-source"
+      ],
+      "architecture": {
+        "backbone": "pi0.5 (public openpi pi05_base checkpoint); VLM = gemma_2b_lora variant (PaliGemma/SigLIP), action expert = gemma_300m_lora variant",
+        "llm": "Gemma 2B (inside pi0.5)",
+        "action_head": "pi0.5 flow-matching action expert (action chunk dim 32, horizon H=10 on LIBERO, H=50 on real robot). PhaseLoRA replaces the static LoRA update in the action expert with Delta W_t = B_t A, where B_t = B_0 + P_t B_P + E_t B_E + (P_t E_t) B_PE is conditioned on two router-predicted descriptors (fine-control tendency P, event/boundary intensity E); VLM-side LoRA stays standard.",
+        "action_head_category": "flow_matching",
+        "parameters": "pi0.5 backbone largely frozen; trainable PhaseLoRA params = 4.41% of pi0.5 (VLM LoRA rank 48, action-expert LoRA rank 96) plus a GRU router (hidden 128)"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_spatial": 85.3,
+          "libero_object": 88.0,
+          "libero_goal": 64.0,
+          "libero_long": 38.3,
+          "libero_avg": 68.9
+        },
+        "real_world": {
+          "move_ball": 66.7,
+          "remove_cuboid": 70.0,
+          "pick_cube": 90.0,
+          "put_apple": 50.0,
+          "avg": 69.2
+        },
+        "libero_baseline_lora": {
+          "libero_spatial": 60.7,
+          "libero_object": 41.3,
+          "libero_goal": 32.7,
+          "libero_long": 18.7,
+          "libero_avg": 38.3
+        },
+        "libero_baseline_high_rank_lora": {
+          "libero_spatial": 71.0,
+          "libero_object": 73.3,
+          "libero_goal": 55.3,
+          "libero_long": 27.0,
+          "libero_avg": 56.7
+        },
+        "libero_baseline_dora": {
+          "libero_spatial": 72.7,
+          "libero_object": 74.0,
+          "libero_goal": 57.3,
+          "libero_long": 29.7,
+          "libero_avg": 58.4
+        },
+        "libero_baseline_lora_moe": {
+          "libero_spatial": 73.3,
+          "libero_object": 70.7,
+          "libero_goal": 58.0,
+          "libero_long": 31.0,
+          "libero_avg": 58.3
+        },
+        "libero_baseline_lora_sp": {
+          "libero_spatial": 76.3,
+          "libero_object": 72.0,
+          "libero_goal": 56.0,
+          "libero_long": 32.3,
+          "libero_avg": 59.2
+        },
+        "libero_spatial_ablation": {
+          "high_rank_lora": 71.0,
+          "random_descriptors": 66.3,
+          "scalar_gated_update": 73.7,
+          "without_proxy_supervision": 78.7,
+          "p_only": 80.7,
+          "e_only": 81.0,
+          "without_pe_interaction": 82.3,
+          "full_phaselora": 85.3
+        },
+        "real_world_baseline_high_rank_lora": {
+          "move_ball": 60.0,
+          "remove_cuboid": 53.3,
+          "pick_cube": 63.3,
+          "put_apple": 26.7,
+          "avg": 50.8
+        }
+      },
+      "eval_conditions": {
+        "libero": "Suite-specific fine-tuning; two RGB views (base + left wrist), 224x224; replan every 5 steps of a 10-step chunk",
+        "real_world": "Piper arm with wrist + external RGB camera, no proprioception/force; H=50 chunk, replan every 10 steps",
+        "libero_baseline_lora": "Standard LoRA on pi0.5, 2.70% trainable params, same protocol",
+        "libero_baseline_high_rank_lora": "Matched-parameter high-rank LoRA on pi0.5, 4.42% trainable params, same protocol",
+        "libero_baseline_dora": "DoRA on pi0.5, 4.42% trainable params, same protocol",
+        "libero_baseline_lora_moe": "LoRA-MoE on pi0.5, 4.47% trainable params, same protocol",
+        "libero_baseline_lora_sp": "LoRA-SP on pi0.5, 4.42% trainable params, same protocol",
+        "libero_spatial_ablation": "LIBERO-Spatial success rate (%), mean over 3 seeds",
+        "real_world_baseline_high_rank_lora": "Matched-parameter High-rank LoRA on pi0.5, same real-world protocol"
+      },
+      "libero_avg": 68.9,
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 202
     },
     {
       "name": "CR-VLA",
@@ -11195,7 +11689,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 198
+      "rank": 203
     },
     {
       "name": "RedFlow",
@@ -11255,7 +11749,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 199
+      "rank": 204
     },
     {
       "name": "Octo",
@@ -11308,7 +11802,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 200
+      "rank": 205
     },
     {
       "name": "Diffusion Policy",
@@ -11356,7 +11850,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 201
+      "rank": 206
     },
     {
       "name": "PhysVLA",
@@ -11399,7 +11893,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 202
+      "rank": 207
     },
     {
       "name": "NAC",
@@ -11445,7 +11939,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 203
+      "rank": 208
     },
     {
       "name": "Pre-VLA",
@@ -11497,7 +11991,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 204
+      "rank": 209
     },
     {
       "name": "WIZARD",
@@ -11546,7 +12040,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 205
+      "rank": 210
     },
     {
       "name": "3D-VLA",
@@ -11577,7 +12071,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 206
+      "rank": 211
     },
     {
       "name": "3D Diffuser Actor",
@@ -11627,7 +12121,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 207
+      "rank": 212
     },
     {
       "name": "3D HAMSTER",
@@ -11678,7 +12172,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 208
+      "rank": 213
     },
     {
       "name": "ACE-Ego-0",
@@ -11726,7 +12220,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 209
+      "rank": 214
     },
     {
       "name": "Action-ControlNet",
@@ -11763,7 +12257,112 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 210
+      "rank": 215
+    },
+    {
+      "name": "AdvDex",
+      "organization": "Zhejiang University / Shanghai Innovation Institute / Shanghai Jiao Tong University / Fudan University / Paxini Tech",
+      "date": "2026-08-14",
+      "paper_url": "https://arxiv.org/abs/2608.14028",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "vla",
+        "dexterous_manipulation",
+        "human_demonstrations",
+        "cross_embodiment",
+        "domain_adversarial",
+        "gradient_reversal",
+        "diffusion_transformer",
+        "joint_aligned_action_space",
+        "tactile",
+        "real-robot"
+      ],
+      "architecture": {
+        "backbone": "Vision-Language Model (SigLIP vision tokenizer) producing a compact cognition token from a single-view image + instruction, following VITRA",
+        "llm": null,
+        "action_head": "Diffusion Transformer (DiT) action expert conditioned on cognition token and kinematic state via AdaLN, iteratively denoising joint-aligned action chunks (noise-prediction MSE objective); domain discriminator attached through a Gradient Reversal Layer used only at training time",
+        "action_head_category": "diffusion",
+        "parameters": "unknown"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "grasp_single_object": 80.0,
+          "multi_object_grasp": 70.0,
+          "pour_water": 55.0,
+          "push_cube": 90.0,
+          "stack_bottle": 70.0
+        },
+        "real_world_generalization": {
+          "unseen_objects": 50.0,
+          "unseen_environment": 60.0
+        },
+        "real_world_baselines": {
+          "pi05_grasp_single_object": 75.0,
+          "pi05_multi_object_grasp": 60.0,
+          "pi05_pour_water": 55.0,
+          "pi05_push_cube": 85.0,
+          "pi05_stack_bottle": 60.0,
+          "pi05_unseen_objects": 35.0,
+          "pi05_unseen_environment": 45.0,
+          "vitra_grasp_single_object": 70.0,
+          "vitra_multi_object_grasp": 65.0,
+          "vitra_pour_water": 40.0,
+          "vitra_push_cube": 90.0,
+          "vitra_stack_bottle": 70.0,
+          "vitra_unseen_objects": 40.0,
+          "vitra_unseen_environment": 35.0
+        },
+        "real_world_ablation": {
+          "wo_pretrain_grasp_single_object": 35.0,
+          "wo_pretrain_unseen_environment": 0.0,
+          "wo_omnishare_grasp_single_object": 75.0,
+          "wo_omnishare_unseen_objects": 25.0,
+          "wo_omnishare_unseen_environment": 20.0,
+          "wo_adv_grasp_single_object": 70.0,
+          "wo_adv_unseen_objects": 15.0,
+          "wo_adv_unseen_environment": 30.0
+        },
+        "real_world_human_transfer": {
+          "box_doll": 60.0,
+          "press_button": 70.0,
+          "move_bottle": 45.0,
+          "tool_use": 30.0
+        },
+        "real_world_human_transfer_baselines": {
+          "pi05_box_doll": 30.0,
+          "pi05_press_button": 50.0,
+          "pi05_move_bottle": 30.0,
+          "pi05_tool_use": 0.0,
+          "vitra_box_doll": 40.0,
+          "vitra_press_button": 45.0,
+          "vitra_move_bottle": 25.0,
+          "vitra_tool_use": 20.0,
+          "wo_adv_pretrain_box_doll": 50.0,
+          "wo_adv_posttrain_box_doll": 25.0
+        },
+        "hand_action_prediction": {
+          "omnishare_unseen_dh_o_mm": 3.2,
+          "omnishare_unseen_mpjpe_mm": 2.8,
+          "omnishare_unseen_mwte_mm": 2.5,
+          "hoi4d_dh_o_mm": 10.5,
+          "hoi4d_mpjpe_mm": 7.2,
+          "hoi4d_mwte_mm": 6.1
+        }
+      },
+      "eval_conditions": {
+        "real_world": "Real robot (Paxini Tora + DexH13 19-DoF hand), 5 seen tasks, 20 trials per task",
+        "real_world_generalization": "Unseen objects and unseen environment, 20 trials each",
+        "real_world_human_transfer": "Tasks demonstrated only by humans (OmniShare), zero-shot transfer to robot",
+        "hand_action_prediction": "Offline hand-motion prediction error (mm) on OmniShare-Unseen and HOI4D"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 216
     },
     {
       "name": "AffordVLA",
@@ -11810,7 +12409,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 211
+      "rank": 217
     },
     {
       "name": "AnchorVLA",
@@ -11861,7 +12460,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 212
+      "rank": 218
     },
     {
       "name": "AnySlot",
@@ -11908,7 +12507,80 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 213
+      "rank": 219
+    },
+    {
+      "name": "ART",
+      "organization": "Astribot / Tsinghua University / Juxi Tech / IntelliFusion / CUHK",
+      "date": "2026-08-14",
+      "paper_url": "https://arxiv.org/abs/2608.14047",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "tool_use",
+        "agentic",
+        "lora",
+        "pi0_fast",
+        "autoregressive",
+        "robustness",
+        "libero",
+        "real_world",
+        "humanoid",
+        "astribot"
+      ],
+      "architecture": {
+        "backbone": "pi0-FAST 3B (PaliGemma VLM)",
+        "llm": "PaliGemma (Gemma 2B)",
+        "action_head": "FAST DCT-tokenized autoregressive action tokens; LoRA branch generates reasoning + tool-use tokens (last N vocab tokens), masked out during action generation",
+        "action_head_category": "autoregressive",
+        "parameters": "3B + LoRA"
+      },
+      "model_type": "Tool-augmented autoregressive VLA",
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "vision": 70.0,
+          "affordance": 55.0,
+          "embodiment": 70.0,
+          "average": 62.0
+        },
+        "at_libero": {
+          "vision": 81.0,
+          "affordance": 62.0,
+          "embodiment": 82.0,
+          "average": 75.0
+        },
+        "at_libero_baselines": {
+          "openvla_average": 12.0,
+          "pi0_average": 30.0,
+          "pi0_fast_average": 39.0
+        },
+        "at_libero_vs_posttrained_fast": {
+          "fast_posttrained_vision": 71.0,
+          "fast_posttrained_embodiment": 61.0,
+          "fast_posttrained_affordance": 65.0
+        },
+        "at_libero_affordance_vs_ecot": {
+          "art_with_vision_corruption": 72.0,
+          "art_without_vision_corruption": 62.0,
+          "ecot_with_vision_corruption": 12.0,
+          "ecot_without_vision_corruption": 58.0
+        },
+        "real_world_baselines": {
+          "openvla_average": 6.7,
+          "pi0_average": 37.0,
+          "pi0_fast_average": 43.0
+        }
+      },
+      "eval_conditions": {
+        "real_world": "Astribot S1 pick-and-place with the same three disturbance categories (e.g., dark scenes, novel viewpoints)",
+        "at_libero": "LIBERO scenes with lighting/noise corruption, rephrased spatial instructions requiring affordance reasoning, and camera/initial-state disturbances; not comparable to standard LIBERO"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 220
     },
     {
       "name": "Assistron",
@@ -11945,7 +12617,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 214
+      "rank": 221
     },
     {
       "name": "ATHENA",
@@ -11986,7 +12658,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 215
+      "rank": 222
     },
     {
       "name": "AVDC",
@@ -12024,7 +12696,88 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 216
+      "rank": 223
+    },
+    {
+      "name": "BICPO-VLA",
+      "organization": "Beihang University; Beijing Institute of Technology; CASIA; BUPT; Hunan University; Peking University; Tsinghua University",
+      "date": "2026-08-14",
+      "paper_url": "https://arxiv.org/abs/2608.13924",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "flow_matching",
+        "dpo",
+        "preference-optimization",
+        "asynchronous-execution",
+        "action-chunking",
+        "haar-wavelet",
+        "mamba",
+        "calvin",
+        "robotwin",
+        "libero",
+        "real-world"
+      ],
+      "architecture": {
+        "backbone": "VLM backbone with Vision Mamba / instruction-aware visual routing (visual tokens cross-attend to language before history fusion), causal Mamba history encoder with behavior memory bank and phase-conditioned prior decoder (builds on BehaviorVLA / B-VLA)",
+        "llm": null,
+        "action_head": "Handoff-conditioned Haar-structured flow-matching action expert: a one-level orthogonal Haar transform splits each action chunk into a pairwise scaffold C and residual D, generated sequentially (scaffold then residual, shared expert with stage embeddings) and reconstructed exactly; conditioned on a behavior prior and a rolled handoff state from a frozen action-state model",
+        "action_head_category": "flow_matching",
+        "parameters": "Not reported"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_task_success": 99.1
+        },
+        "calvin": {
+          "calvin_abc_d_task1": 98.9,
+          "calvin_abc_d_task2": 95.4,
+          "calvin_abc_d_task3": 91.0,
+          "calvin_abc_d_task4": 86.0,
+          "calvin_abc_d_task5": 80.7,
+          "calvin_abc_d_avg_len": 4.52
+        },
+        "robotwin_v2": {
+          "task_group_i_avg": 80.6,
+          "robotwin_v2_avg": 65.8
+        },
+        "real_world": {
+          "avg": 69.3
+        },
+        "calvin_ablation": {
+          "full": 4.52,
+          "without_haar": 4.49,
+          "without_bicpo": 4.48,
+          "without_instruction_grounding": 4.396,
+          "instruction_query_fusion": 4.476,
+          "instruction_memory_fusion": 4.417
+        },
+        "libero_continuity": {
+          "bicpo_vla_sr": 99.1,
+          "bicpo_vla_jump": 2.37,
+          "bicpo_vla_trend": 6.4,
+          "bicpo_vla_without_dpo_sr": 98.8,
+          "bicpo_vla_without_dpo_jump": 3.01,
+          "bicpo_vla_without_dpo_trend": 8.07,
+          "pi05_fm_sr": 96.9,
+          "pi05_fm_with_continuity_dpo_sr": 97.1,
+          "pi05_fm_with_chosen_only_sft_sr": 49.1,
+          "legato_with_continuity_dpo_sr": 97.6,
+          "rtc_with_continuity_dpo_sr": 97.4
+        }
+      },
+      "eval_conditions": {
+        "libero": "Asynchronous execution with inference delay k=3",
+        "calvin": "ABC->D",
+        "robotwin_v2": "10 Hard-setting tasks",
+        "real_world": "Six limited-data tasks"
+      },
+      "calvin_avg": 4.52,
+      "robotwin_v2_avg": 65.8,
+      "rank": 224
     },
     {
       "name": "BLUE",
@@ -12089,7 +12842,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 217
+      "rank": 225
     },
     {
       "name": "BORA",
@@ -12145,7 +12898,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 218
+      "rank": 226
     },
     {
       "name": "BrainWAM",
@@ -12205,7 +12958,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 219
+      "rank": 227
     },
     {
       "name": "BridgeVLA++",
@@ -12275,7 +13028,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 220
+      "rank": 228
     },
     {
       "name": "CamVLA",
@@ -12325,7 +13078,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 221
+      "rank": 229
     },
     {
       "name": "CAPS",
@@ -12384,7 +13137,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 222
+      "rank": 230
     },
     {
       "name": "CHORUS",
@@ -12431,7 +13184,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 223
+      "rank": 231
     },
     {
       "name": "ChunkFlow",
@@ -12473,7 +13226,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 224
+      "rank": 232
     },
     {
       "name": "CLASP",
@@ -12512,7 +13265,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 225
+      "rank": 233
     },
     {
       "name": "CLEAR",
@@ -12555,7 +13308,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 226
+      "rank": 234
     },
     {
       "name": "COAST",
@@ -12620,7 +13373,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 227
+      "rank": 235
     },
     {
       "name": "ConSFT",
@@ -12675,7 +13428,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 228
+      "rank": 236
     },
     {
       "name": "Cortex",
@@ -12723,7 +13476,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 229
+      "rank": 237
     },
     {
       "name": "CrossFormer",
@@ -12755,7 +13508,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 230
+      "rank": 238
     },
     {
       "name": "CrossTracer",
@@ -12873,7 +13626,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 231
+      "rank": 239
     },
     {
       "name": "D-VLA",
@@ -12917,7 +13670,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 232
+      "rank": 240
     },
     {
       "name": "DA-PTQ",
@@ -12968,7 +13721,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 233
+      "rank": 241
     },
     {
       "name": "DAM-VLA",
@@ -13007,7 +13760,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 234
+      "rank": 242
     },
     {
       "name": "DART",
@@ -13063,7 +13816,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 235
+      "rank": 243
     },
     {
       "name": "DeeR-VLA",
@@ -13096,7 +13849,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 236
+      "rank": 244
     },
     {
       "name": "DEFLECT",
@@ -13144,7 +13897,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 237
+      "rank": 245
     },
     {
       "name": "Dexora",
@@ -13212,7 +13965,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 238
+      "rank": 246
     },
     {
       "name": "DIAL",
@@ -13251,7 +14004,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 239
+      "rank": 247
     },
     {
       "name": "Diffusion-VLA",
@@ -13282,7 +14035,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 240
+      "rank": 248
     },
     {
       "name": "DiMaS",
@@ -13326,7 +14079,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 241
+      "rank": 249
     },
     {
       "name": "DMW",
@@ -13369,7 +14122,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 242
+      "rank": 250
     },
     {
       "name": "DreamTrajectory",
@@ -13461,7 +14214,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 243
+      "rank": 251
     },
     {
       "name": "DreamFly",
@@ -13538,7 +14291,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 244
+      "rank": 252
     },
     {
       "name": "DriveMA",
@@ -13585,7 +14338,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 245
+      "rank": 253
     },
     {
       "name": "DriveStack-VLA",
@@ -13637,7 +14390,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 246
+      "rank": 254
     },
     {
       "name": "DriveTeach-VLA",
@@ -13693,7 +14446,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 247
+      "rank": 255
     },
     {
       "name": "DriveVLA-M0",
@@ -13808,7 +14561,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 248
+      "rank": 256
     },
     {
       "name": "DSWAM",
@@ -13861,7 +14614,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 249
+      "rank": 257
     },
     {
       "name": "DynaWM",
@@ -13899,7 +14652,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 250
+      "rank": 258
     },
     {
       "name": "E0",
@@ -13929,7 +14682,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 251
+      "rank": 259
     },
     {
       "name": "E-VLA",
@@ -13963,7 +14716,99 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 252
+      "rank": 260
+    },
+    {
+      "name": "EATR-Stereo",
+      "organization": "Harbin Institute of Technology; Honor",
+      "date": "2026-08-18",
+      "paper_url": "https://arxiv.org/abs/2608.17453",
+      "code_url": null,
+      "venue": "arXiv",
+      "open_source": false,
+      "tags": [
+        "humanoid",
+        "stereo_vision",
+        "multi_view",
+        "token_routing",
+        "proprioception",
+        "gr00t",
+        "flow_matching",
+        "long_horizon",
+        "real_robot",
+        "robocasa365"
+      ],
+      "architecture": {
+        "backbone": "GR00T1.7 with frozen Cosmos-2B VLM encoding both stereo views",
+        "llm": "Cosmos-2B (frozen)",
+        "action_head": "GR00T1.7 flow-matching action expert conditioned on [language tokens; primary-view tokens; routed Cross-View Auxiliary Tokens], predicting 30-step continuous action chunks",
+        "action_head_category": "flow_matching",
+        "parameters": "GR00T1.7"
+      },
+      "model_type": "vla",
+      "inference_hz": 10,
+      "benchmarks": {
+        "real_world": {
+          "full_task_success": 60.0,
+          "grasp_success": 100.0,
+          "stage_success": 80.0,
+          "id_stage_success": 90.0,
+          "ood_stage_success": 70.0
+        },
+        "real_world_baselines": {
+          "gr00t17_mono_full_task": 35.0,
+          "gr00t17_mono_grasp": 55.0,
+          "gr00t_wide_full_task": 20.0,
+          "gr00t_wide_grasp": 45.0,
+          "gr00t_two_image_full_task": 35.0,
+          "gr00t_two_image_grasp": 80.0,
+          "stereopolicy_full_task": 45.0,
+          "stereopolicy_grasp": 85.0
+        },
+        "real_world_ablation": {
+          "main_xattn_full_task": 25.0,
+          "cvat_full_task": 55.0,
+          "cvat_flat_full_task": 55.0,
+          "stereo_route_full_task": 40.0
+        },
+        "real_world_occlusion": {
+          "recovery_success": 80.0,
+          "mean_recovery_time_s": 22.4,
+          "cvat_recovery_success": 30.0,
+          "cvat_flat_recovery_success": 60.0,
+          "cvat_flat_mean_recovery_time_s": 41.7
+        },
+        "real_world_position_semantic": {
+          "id_grasp": 100.0,
+          "ood_grasp": 100.0,
+          "left_right_compliance": 100.0,
+          "color_compliance": 80.0
+        },
+        "robocasa365": {
+          "robocasa365_18task_success": 43.33
+        },
+        "robocasa365_baselines": {
+          "cvat": 39.44,
+          "stereopolicy": 38.06,
+          "cvat_flat": 37.5,
+          "qwenpi05": 36.11,
+          "gr00t17": 35.56,
+          "gr00t17_mono": 32.78
+        }
+      },
+      "eval_conditions": {
+        "real_world": "HONOR Omega 1.0 humanoid, 20 trials per configuration, 10 Hz on RTX 4090",
+        "real_world_baselines": "same humanoid protocol, 20 trials per method, same GR00T1.7 backbone and 1000 demonstrations",
+        "real_world_ablation": "same humanoid protocol, 20 trials per variant",
+        "real_world_occlusion": "bottle fully hidden in primary view, partially visible in auxiliary view; 10 trials, 90 s timeout; time averaged over successful trials",
+        "real_world_position_semantic": "10 trials per position split / per instruction type",
+        "robocasa365": "18 tasks x 20 trials, no wrist camera",
+        "robocasa365_baselines": "same RoboCasa365 18-task protocol"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 261
     },
     {
       "name": "Ego2Robot",
@@ -14118,7 +14963,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 253
+      "rank": 262
     },
     {
       "name": "ElegantVLA",
@@ -14162,7 +15007,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 254
+      "rank": 263
     },
     {
       "name": "ERVLA",
@@ -14254,7 +15099,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 255
+      "rank": 264
     },
     {
       "name": "EventVLA",
@@ -14298,7 +15143,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 256
+      "rank": 265
     },
     {
       "name": "EvoScene-VLA",
@@ -14341,7 +15186,40 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 257
+      "rank": 266
+    },
+    {
+      "name": "Eximo",
+      "organization": "Google DeepMind",
+      "date": "2026-08-20",
+      "paper_url": "https://arxiv.org/abs/2608.19891",
+      "code_url": null,
+      "venue": "arXiv",
+      "open_source": false,
+      "tags": [
+        "vlm_orchestration",
+        "exploration",
+        "distillation",
+        "residual_rl",
+        "reinforcement_learning",
+        "aloha",
+        "gemini_robotics",
+        "simulation"
+      ],
+      "architecture": {
+        "backbone": "Gemini Robotics On-Device (GROD) 3B, PaliGemma-based VLM",
+        "llm": "PaliGemma (GROD 3B); Gemini VLM used only as data-collection orchestrator",
+        "action_head": "GROD diffusion policy head predicting action chunks, plus a residual policy trained with off-policy RL (MPO) adding delta actions on top of the VLA action",
+        "action_head_category": "diffusion",
+        "parameters": "3B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {},
+      "eval_conditions": {
+        "aloha_sim": "22 ALOHA simulation tasks (dish placement, reasoning, spatial left/right caddy, chained multi-tool); 1000 episodes for orchestration comparison; RL curves averaged over five seeds; results figure-only"
+      },
+      "rank": 267
     },
     {
       "name": "Explicit-Language-Memory-VLA",
@@ -14451,7 +15329,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 258
+      "rank": 268
     },
     {
       "name": "EXPO-FT",
@@ -14484,7 +15362,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 259
+      "rank": 269
     },
     {
       "name": "FabriVLA",
@@ -14528,7 +15406,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 260
+      "rank": 270
     },
     {
       "name": "FACT",
@@ -14634,7 +15512,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 261
+      "rank": 271
     },
     {
       "name": "FALCON",
@@ -14672,7 +15550,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 262
+      "rank": 272
     },
     {
       "name": "Fast-dDrive",
@@ -14723,7 +15601,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 263
+      "rank": 273
     },
     {
       "name": "FineVLA",
@@ -14766,7 +15644,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 264
+      "rank": 274
     },
     {
       "name": "FIRE-VLA",
@@ -14896,7 +15774,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 265
+      "rank": 275
     },
     {
       "name": "FLOWER",
@@ -14927,7 +15805,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 266
+      "rank": 276
     },
     {
       "name": "FORCE",
@@ -14972,7 +15850,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 267
+      "rank": 277
     },
     {
       "name": "Foresight Residual RL",
@@ -15010,7 +15888,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 268
+      "rank": 278
     },
     {
       "name": "FrozenGraft",
@@ -15052,7 +15930,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 269
+      "rank": 279
     },
     {
       "name": "FurnitureVLA",
@@ -15097,7 +15975,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 270
+      "rank": 280
     },
     {
       "name": "Gaze2Act",
@@ -15140,7 +16018,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 271
+      "rank": 281
     },
     {
       "name": "Gemini Robotics",
@@ -15171,7 +16049,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 272
+      "rank": 282
     },
     {
       "name": "GesVLA",
@@ -15216,7 +16094,105 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 273
+      "rank": 283
+    },
+    {
+      "name": "GigaBrain-0.7",
+      "organization": "GigaAI (GigaBrain Team)",
+      "date": "2026-08-16",
+      "paper_url": "https://arxiv.org/abs/2608.15875",
+      "code_url": "https://github.com/open-gigaai/giga-brain-0",
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "flow_matching",
+        "mixture-of-transformers",
+        "paligemma2",
+        "world-model",
+        "value-model",
+        "cross-embodiment",
+        "humanoid",
+        "robotwin",
+        "real-world",
+        "reinforcement-learning",
+        "large-scale-pretraining"
+      ],
+      "architecture": {
+        "backbone": "PaliGemma2 (3B) vision-language backbone with Temporal-Spatial Blocks inserted into the visual encoder (short-term visual memory); System 2 (understanding & planning, subtask/CoT prediction) shares the VLM; System 3 = World Value Model extended from GigaWorld-1 (frozen during VLA post-training) that supplies a subgoal image and a value-derived binary advantage condition",
+        "llm": "PaliGemma2 (3B)",
+        "action_head": "Action Expert (0.5B) coupled to the VLM in a dual-stream Mixture-of-Transformers (joint attention, separate FFNs); conditional flow matching generates continuous action chunks, with a parallel NTP discrete-action pathway used during training; shared expert Transformer with per-embodiment input/output projections, 6D rotations",
+        "action_head_category": "flow_matching",
+        "parameters": "~3.5B for System 1 (PaliGemma2 3B + 0.5B Action Expert; Table 4 lists 3.5B total for the PaliGemma2 configuration); System 3 world model not counted"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "robotwin_v2": {
+          "robotwin_v2_easy": 66.8,
+          "robotwin_v2_hard": 67.9,
+          "robotwin_v2_avg": 67.35
+        },
+        "real_world": {
+          "piper_language_following_avg": 91.5,
+          "h01_language_following_avg": 84.2,
+          "piper_complex_manipulation_avg": 84.9,
+          "h01_complex_manipulation_avg": 74.1
+        },
+        "robotwin_v2_baselines": {
+          "pi0_single_overall": 31.38,
+          "xiaomi_robotics_0_cotrain_overall": 40.55,
+          "x_vla_cotrain_overall": 44.45,
+          "x_wam_cotrain_overall": 47.9,
+          "pi05_cotrain_easy": 70.7,
+          "pi05_cotrain_hard": 46.0,
+          "pi05_cotrain_overall": 58.35
+        },
+        "ebench": {
+          "success_rate": 33.3,
+          "score": 46.1
+        },
+        "robocoliseum": {
+          "instruction_following": 0.8166,
+          "spatial_reasoning": 0.4729,
+          "robustness": 0.68,
+          "general_manipulation": 0.6092
+        },
+        "mimo_embodied": {
+          "spatial_avg": 0.5215,
+          "affordance_avg": 0.3669,
+          "overall": 0.4621
+        },
+        "real_world_baseline_pi05": {
+          "piper_language_following_avg": 88.8,
+          "h01_language_following_avg": 75.2,
+          "piper_complex_manipulation_avg": 76.6,
+          "h01_complex_manipulation_avg": 45.2
+        },
+        "real_world_experience_rl": {
+          "link_installation_sft": 20,
+          "link_installation_offline_rl": 40,
+          "link_installation_online_rl": 100,
+          "gift_box_packing_sft": 80,
+          "gift_box_packing_offline_rl": 90,
+          "gift_box_packing_online_rl": 100,
+          "cable_tie_sft": 0,
+          "cable_tie_offline_rl": 40,
+          "cable_tie_online_rl": 100,
+          "bearing_installation_sft": 20,
+          "bearing_installation_offline_rl": 60,
+          "bearing_installation_online_rl": 100
+        }
+      },
+      "eval_conditions": {
+        "robotwin_v2": "Co-Train, 50 tasks, 50 clean demos per task, Easy + Hard",
+        "real_world": "Task-specific post-training on AgileX PiPER / PiPER-X and Maker H01 humanoid",
+        "ebench": "Official EBench leaderboard",
+        "robocoliseum": "Official RoboColiseum Real2Sim2Real evaluation",
+        "mimo_embodied": "Embodied vision-language evaluation over 13 benchmarks (VSI-Bench excluded); final MiMo-enhanced checkpoint reaches 0.5704 overall but is not held-out",
+        "real_world_experience_rl": "Four real-robot tasks (PiPER, PiPER-X, Maker H01); SFT baseline -> offline advantage-weighted RL -> online HIL actor-critic RL; average 30.0 -> 57.5 -> 100 per paper text"
+      },
+      "robotwin_v2_avg": 67.35,
+      "rank": 284
     },
     {
       "name": "GigaWorld-Policy",
@@ -15254,7 +16230,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 274
+      "rank": 285
     },
     {
       "name": "Goal2Skill",
@@ -15287,7 +16263,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 275
+      "rank": 286
     },
     {
       "name": "GR-Dexter",
@@ -15317,7 +16293,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 276
+      "rank": 287
     },
     {
       "name": "GR-1",
@@ -15361,7 +16337,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 277
+      "rank": 288
     },
     {
       "name": "GR-2",
@@ -15404,7 +16380,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 278
+      "rank": 289
     },
     {
       "name": "GR00T-N1.5",
@@ -15478,7 +16454,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 279
+      "rank": 290
     },
     {
       "name": "GR00T-N1.6",
@@ -15520,7 +16496,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 280
+      "rank": 291
     },
     {
       "name": "Guided-Action-Flow",
@@ -15577,7 +16553,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 281
+      "rank": 292
     },
     {
       "name": "GuidedVLA",
@@ -15630,7 +16606,118 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 282
+      "rank": 293
+    },
+    {
+      "name": "HAF",
+      "organization": "Peking University; Beijing Innovation Center of Humanoid Robotics; Nankai University; Xi'an Jiaotong University",
+      "date": "2026-08-17",
+      "paper_url": "https://arxiv.org/abs/2608.16837",
+      "code_url": null,
+      "venue": "arXiv",
+      "open_source": false,
+      "tags": [
+        "humanoid",
+        "whole_body",
+        "loco_manipulation",
+        "flow_matching",
+        "hierarchical_action_generation",
+        "latent_rl",
+        "sac",
+        "noise_steering",
+        "dct",
+        "pi05",
+        "real_robot"
+      ],
+      "architecture": {
+        "backbone": "pi0.5 (pretrained generalist flow-matching VLA; VLM expert + shared action expert)",
+        "llm": null,
+        "action_head": "Hierarchical action flow: one shared flow-matching action expert run in three sequential stages (locomotion+head -> +waist -> +arms) over nested cumulative action sets, with trainable stage embeddings and cross-stage KV caches of re-encoded clean actions; 10 denoising steps per stage, horizon H=100, first 40 steps executed; optional HAF-Steer SAC actor over top-8 DCT coefficients of the initial flow noise",
+        "action_head_category": "flow_matching",
+        "parameters": "pi0.5-scale VLA (parameter count not stated); HAF-Steer trains only a small spectral actor + twin critics with the VLA frozen"
+      },
+      "model_type": null,
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "laundry_loading": 66.7,
+          "clothes_retrieval": 53.3,
+          "table_tidy": 80.0,
+          "basket_transfer": 63.3,
+          "toy_storage": 80.0,
+          "ball_tossing": 56.7,
+          "box_transfer": 93.3,
+          "real_world_avg": 70.5
+        },
+        "real_world_pi05_baseline": {
+          "laundry_loading": 53.3,
+          "clothes_retrieval": 53.3,
+          "table_tidy": 70.0,
+          "basket_transfer": 50.0,
+          "toy_storage": 53.3,
+          "ball_tossing": 33.3,
+          "box_transfer": 60.0,
+          "real_world_avg": 53.3
+        },
+        "real_world_gr00t_n17_baseline": {
+          "laundry_loading": 40.0,
+          "clothes_retrieval": 33.3,
+          "table_tidy": 40.0,
+          "basket_transfer": 43.3,
+          "toy_storage": 30.0,
+          "ball_tossing": 36.7,
+          "box_transfer": 43.3,
+          "real_world_avg": 38.1
+        },
+        "real_world_cosmos_policy_baseline": {
+          "laundry_loading": 0.0,
+          "clothes_retrieval": 26.7,
+          "table_tidy": 16.7,
+          "basket_transfer": 33.3,
+          "toy_storage": 40.0,
+          "ball_tossing": 3.3,
+          "box_transfer": 73.3,
+          "real_world_avg": 27.6
+        },
+        "real_world_act_baseline": {
+          "laundry_loading": 10.0,
+          "clothes_retrieval": 23.3,
+          "table_tidy": 23.3,
+          "basket_transfer": 16.7,
+          "toy_storage": 23.3,
+          "ball_tossing": 30.0,
+          "box_transfer": 50.0,
+          "real_world_avg": 25.2
+        },
+        "real_world_hierarchy_ablation_laundry": {
+          "haf_vla": 66.7,
+          "all_joint_denoising": 53.3,
+          "arm_first_hierarchy": 50.0,
+          "pi05_30_steps": 20.0
+        },
+        "real_world_ood_disturbance": {
+          "laundry_loading_unseen_chair": 40.0,
+          "clothes_retrieval_20cm_start_shift": 43.3
+        },
+        "real_world_ood_disturbance_pi05_baseline": {
+          "laundry_loading_unseen_chair": 26.7,
+          "clothes_retrieval_20cm_start_shift": 36.7
+        }
+      },
+      "eval_conditions": {
+        "real_world": "seven real-world humanoid loco-manipulation tasks on TienKung 2.0/3.0; average normalized milestone score over 10 rollouts per task; HAF-Steer results (Figure 8) are reported only in a figure and not recorded here",
+        "real_world_pi05_baseline": "baseline: vanilla single-stage pi0.5 fine-tuned on the same demonstrations",
+        "real_world_gr00t_n17_baseline": "baseline: GR00T N1.7, official implementation and hyperparameters",
+        "real_world_cosmos_policy_baseline": "baseline: Cosmos Policy, official implementation and hyperparameters",
+        "real_world_act_baseline": "baseline: ACT, official implementation and hyperparameters",
+        "real_world_hierarchy_ablation_laundry": "ablation of stage design on Laundry Loading, 10 rollouts each",
+        "real_world_ood_disturbance": "OOD: unseen office chair on navigation path (Laundry Loading); robot start shifted 20 cm backward (Clothes Retrieval); 10 rollouts each",
+        "real_world_ood_disturbance_pi05_baseline": "baseline: vanilla pi0.5 under the same disturbances"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 294
     },
     {
       "name": "Hand-in-the-Loop",
@@ -15670,7 +16757,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 283
+      "rank": 295
     },
     {
       "name": "HC-VLA",
@@ -15710,7 +16797,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 284
+      "rank": 296
     },
     {
       "name": "HELM",
@@ -15753,7 +16840,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 285
+      "rank": 297
     },
     {
       "name": "HEX",
@@ -15802,7 +16889,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 286
+      "rank": 298
     },
     {
       "name": "HiMe",
@@ -15850,7 +16937,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 287
+      "rank": 299
     },
     {
       "name": "HiMoE-VLA",
@@ -15881,7 +16968,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 288
+      "rank": 300
     },
     {
       "name": "HiVLA",
@@ -15920,7 +17007,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 289
+      "rank": 301
     },
     {
       "name": "HOIST",
@@ -16012,7 +17099,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 290
+      "rank": 302
     },
     {
       "name": "HPT",
@@ -16043,7 +17130,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 291
+      "rank": 303
     },
     {
       "name": "HSR-SmolVLA",
@@ -16097,7 +17184,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 292
+      "rank": 304
     },
     {
       "name": "Humanoid-VLA",
@@ -16127,7 +17214,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 293
+      "rank": 305
     },
     {
       "name": "Hy-Embodied-0.5-VLA",
@@ -16178,7 +17265,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 294
+      "rank": 306
     },
     {
       "name": "HY-Embodied-0.5",
@@ -16212,7 +17299,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 295
+      "rank": 307
     },
     {
       "name": "HyWorldVLA",
@@ -16253,7 +17340,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 296
+      "rank": 308
     },
     {
       "name": "IDL-VLA",
@@ -16302,7 +17389,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 297
+      "rank": 309
     },
     {
       "name": "InSight",
@@ -16367,7 +17454,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 298
+      "rank": 310
     },
     {
       "name": "InternVLA-A1",
@@ -16397,7 +17484,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 299
+      "rank": 311
     },
     {
       "name": "InternVLA-M1",
@@ -16430,7 +17517,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 300
+      "rank": 312
     },
     {
       "name": "KineVLA",
@@ -16469,7 +17556,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 301
+      "rank": 313
     },
     {
       "name": "LabVLA",
@@ -16527,7 +17614,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 302
+      "rank": 314
     },
     {
       "name": "LeHome-Fold",
@@ -16569,7 +17656,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 303
+      "rank": 315
     },
     {
       "name": "LfH",
@@ -16613,7 +17700,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 304
+      "rank": 316
     },
     {
       "name": "LIFT",
@@ -16656,7 +17743,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 305
+      "rank": 317
     },
     {
       "name": "Lift3D-VLA",
@@ -16699,7 +17786,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 306
+      "rank": 318
     },
     {
       "name": "LingBot-VLA",
@@ -16739,7 +17826,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 307
+      "rank": 319
     },
     {
       "name": "LLARVA",
@@ -16770,7 +17857,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 308
+      "rank": 320
     },
     {
       "name": "LLaVA-VLA",
@@ -16825,7 +17912,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 309
+      "rank": 321
     },
     {
       "name": "LVDrive",
@@ -16862,7 +17949,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 310
+      "rank": 322
     },
     {
       "name": "Mag-VLA",
@@ -16909,7 +17996,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 311
+      "rank": 323
     },
     {
       "name": "MiDAS",
@@ -16966,7 +18053,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 312
+      "rank": 324
     },
     {
       "name": "MindVLA-U1",
@@ -17009,7 +18096,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 313
+      "rank": 325
     },
     {
       "name": "Mobility VLA",
@@ -17039,7 +18126,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 314
+      "rank": 326
     },
     {
       "name": "MotuBrain",
@@ -17077,7 +18164,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 315
+      "rank": 327
     },
     {
       "name": "Motus",
@@ -17120,7 +18207,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 316
+      "rank": 328
     },
     {
       "name": "Moving-Eye",
@@ -17164,7 +18251,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 317
+      "rank": 329
     },
     {
       "name": "MuseVLA",
@@ -17215,7 +18302,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 318
+      "rank": 330
     },
     {
       "name": "NanoVLA",
@@ -17254,7 +18341,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 319
+      "rank": 331
     },
     {
       "name": "NaVILA",
@@ -17285,7 +18372,126 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 320
+      "rank": 332
+    },
+    {
+      "name": "NebulaVLA",
+      "organization": "ZTE Corporation",
+      "date": "2026-08-17",
+      "paper_url": "https://arxiv.org/abs/2608.16503",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "vla",
+        "dual-system",
+        "fast-slow",
+        "asynchronous",
+        "diffusion-transformer",
+        "qwen3-vl",
+        "grpo",
+        "action-smoothness",
+        "cross-embodiment",
+        "libero-plus",
+        "real-robot",
+        "agibot"
+      ],
+      "architecture": {
+        "backbone": "Qwen3-VL (System 2, ~10 Hz) + contrastively fine-tuned DINOv2 visual encoder (System 1, ~20 Hz)",
+        "llm": "Qwen3-VL",
+        "action_head": "Asynchronous dual-frequency fast-slow design. System 2 (Qwen3-VL) emits abstract action guidance through learnable query tokens; System 1 compresses that guidance with a Q-Former together with high-frequency DINOv2 visual tokens, robot state and action history, and generates the action chunk with a Diffusion Transformer (DiT) denoiser. Guide Action conditions each new chunk on the previous chunk's not-yet-executed actions and re-imposes them after every denoising step with a binary mask (outpainting-style), so the loss is computed only on the newly generated region.\n",
+        "action_head_category": "diffusion",
+        "parameters": "Not stated"
+      },
+      "model_type": "vla",
+      "inference_hz": 20,
+      "benchmarks": {
+        "libero": {
+          "libero_plus_camera": 91.0,
+          "libero_plus_robot": 58.5,
+          "libero_plus_language": 85.2,
+          "libero_plus_light": 95.9,
+          "libero_plus_background": 95.9,
+          "libero_plus_noise": 96.9,
+          "libero_plus_layout": 81.8,
+          "libero_plus_avg": 85.5
+        },
+        "real_world": {
+          "pick_and_place": 92.08,
+          "packaging_line_feeding": 92.5
+        },
+        "libero_plus_baselines": {
+          "internvla_m1_total": 81.3,
+          "openvla_oft_plus_total": 79.6,
+          "gr00t_n1_5_total": 59.0,
+          "pi05_total": 58.0
+        },
+        "libero_plus_ablation_wo_sft_wo_rl": {
+          "libero_plus_camera": 93.5,
+          "libero_plus_robot": 57.9,
+          "libero_plus_language": 80.5,
+          "libero_plus_light": 97.8,
+          "libero_plus_background": 94.9,
+          "libero_plus_noise": 92.6,
+          "libero_plus_layout": 73.0,
+          "libero_plus_total": 83.8
+        },
+        "libero_plus_ablation_wo_rl": {
+          "libero_plus_camera": 87.8,
+          "libero_plus_robot": 56.3,
+          "libero_plus_language": 82.8,
+          "libero_plus_light": 93.3,
+          "libero_plus_background": 93.2,
+          "libero_plus_noise": 94.2,
+          "libero_plus_layout": 79.2,
+          "libero_plus_total": 83.0
+        },
+        "real_world_latency": {
+          "nebulavla_heter_latency_ms": 42,
+          "nebulavla_homo_latency_ms": 115,
+          "internvla_m1_latency_ms": 81
+        },
+        "real_world_baselines": {
+          "internvla_m1_pick_and_place": 77.91,
+          "internvla_m1_feeding": 72.5,
+          "nebulavla_homo_pick_and_place": 87.14,
+          "nebulavla_homo_feeding": 90.0
+        },
+        "real_world_jerk_guide_action": {
+          "joint7": 5.27,
+          "joint8": 5.08,
+          "joint9": 5.47,
+          "joint10": 5.59,
+          "joint11": 8.43,
+          "joint12": 2.91,
+          "joint13": 1.85
+        },
+        "real_world_jerk_native_async": {
+          "joint7": 6.18,
+          "joint8": 6.47,
+          "joint9": 6.55,
+          "joint10": 7.66,
+          "joint11": 9.69,
+          "joint12": 4.95,
+          "joint13": 3.37
+        }
+      },
+      "eval_conditions": {
+        "libero": "LIBERO-Plus only (7 perturbation dimensions); no standard LIBERO results",
+        "real_world": "AgiBot A2 dual-arm; Task 1 Pick-and-Place, Task 2 Packaging Line Material Feeding; compared with InternVLA-M1",
+        "libero_plus_baselines": "baselines; official LIBERO-Plus numbers or LeRobot reproductions",
+        "libero_plus_ablation_wo_sft_wo_rl": "ablation; System 2 loads open-source pretrained weights, no GESTURE-7 SFT or RL",
+        "libero_plus_ablation_wo_rl": "ablation; GESTURE-7 S2 SFT without S2 GRPO RL",
+        "real_world_latency": "average step inference latency on RTX 4070",
+        "real_world_baselines": "real robot AgiBot A2; baseline and homogeneous-frequency variant",
+        "real_world_jerk_guide_action": "Guide Action enabled; right-arm joints 7-13",
+        "real_world_jerk_native_async": "naive asynchronous chunk switching baseline",
+        "notes": "Paper states Guide Action reduces jerk by 25.6% on average and ~2.7x faster action generation; LIBERO-Plus per-suite scores are figure-only and omitted"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 333
     },
     {
       "name": "NORA",
@@ -17316,7 +18522,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 321
+      "rank": 334
     },
     {
       "name": "ω-0",
@@ -17363,7 +18569,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 322
+      "rank": 335
     },
     {
       "name": "OneVLA",
@@ -17403,7 +18609,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 323
+      "rank": 336
     },
     {
       "name": "OpenEAI-VLA",
@@ -17462,7 +18668,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 324
+      "rank": 337
     },
     {
       "name": "OpenHLM",
@@ -17518,7 +18724,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 325
+      "rank": 338
     },
     {
       "name": "OpenSPM",
@@ -17560,7 +18766,142 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 326
+      "rank": 339
+    },
+    {
+      "name": "OrthoSkillVLA",
+      "organization": "Southeast University",
+      "date": "2026-08-20",
+      "paper_url": "https://arxiv.org/abs/2608.19589",
+      "code_url": "https://github.com/Jiaqi-Wangx/OrthoSkillVLA",
+      "venue": "arXiv preprint",
+      "open_source": true,
+      "tags": [
+        "flow_matching",
+        "x-vla",
+        "continual-learning",
+        "lora",
+        "orthogonal-subspace",
+        "mixture-of-experts",
+        "libero",
+        "real-world",
+        "dexterous-hand",
+        "open-source"
+      ],
+      "architecture": {
+        "backbone": "X-VLA pretrained model (0.9B) with a LIBERO domain soft prompt added and warmed up; VLM and ActionHead adapted with orthogonal LoRA (rank 64)",
+        "llm": null,
+        "action_head": "X-VLA flow-matching ActionHead predicting velocity fields; the final velocity decoder is replaced by a Feature-Aware MoE decoder with one compact expert per skill and a training-free projection router based on gradient-informed skill bases",
+        "action_head_category": "flow_matching",
+        "parameters": "0.9B base model; per-skill decoder state ~0.0046% of base"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "final_avg": 86.25
+        },
+        "libero_skill_incremental": {
+          "fwt": 0.94,
+          "nbt": 0.13,
+          "auc": 0.88,
+          "final_sr": 83.5
+        },
+        "libero_skill_incremental_baselines": {
+          "seqlora_final_sr": 32.44,
+          "inclora_final_sr": 34.11,
+          "ewc_final_sr": 25.17,
+          "olora_final_sr": 30.5,
+          "keeplora_final_sr": 56.61,
+          "keeplora_nbt": 0.46
+        },
+        "libero_skill_incremental_ablation": {
+          "unified_frozen_final_sr": 56.61,
+          "separated_frozen_final_sr": 60.44,
+          "unified_moe_final_sr": 67.94,
+          "separated_moe_final_sr": 83.5,
+          "lora_rank_32_final_sr": 79.5,
+          "lora_rank_96_final_sr": 74.06
+        }
+      },
+      "eval_conditions": {
+        "real_world": "4 sequential skills, 7-DoF xArm with 6-DoF Inspire hand, wrist camera",
+        "libero_skill_incremental": "Replay-free continual skill learning, 3 skill orderings"
+      },
+      "rank": 340
+    },
+    {
+      "name": "PACE",
+      "organization": "Dalian University of Technology / Jilin University",
+      "date": "2026-08-15",
+      "paper_url": "https://arxiv.org/abs/2608.15026",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "credit_assignment",
+        "critic",
+        "distributional_value",
+        "long_horizon",
+        "post_training",
+        "classifier_free_guidance",
+        "pi0_5",
+        "flow_matching",
+        "libero",
+        "real_world",
+        "bimanual"
+      ],
+      "architecture": {
+        "backbone": "pi0.5-Base (VLM backbone frozen during distillation)",
+        "llm": "PaliGemma (inherited from pi0.5)",
+        "action_head": "pi0.5 flow-matching action expert, credit-conditioned (g in {none, pos, neg}) with classifier-free-style guidance at inference",
+        "action_head_category": "flow_matching",
+        "parameters": "pi0.5 + separate GLC-Critic (SigLIP-SO400M + Gemma-3-270M)"
+      },
+      "model_type": "Critic-guided post-training of a flow-matching VLA",
+      "inference_hz": null,
+      "benchmarks": {
+        "libero": {
+          "libero_long": 83.3
+        },
+        "real_world": {
+          "table_wiping": 84.7,
+          "towel_folding": 83.3,
+          "mug_placement_knob_turning": 77.3,
+          "task_macro_sr": 81.8
+        },
+        "libero_long_baselines": {
+          "sft_openvla": 52.7,
+          "sft_xr0": 57.2,
+          "sft_pi05": 63.3,
+          "recap": 73.8
+        },
+        "libero_long_critic_ablation": {
+          "raw_critic": 73.8,
+          "wo_temporal_aggregation": 81.6,
+          "wo_motion_differences": 80.9,
+          "wo_phase_head": 81.2,
+          "wo_progress_head": 82.7,
+          "full_glc_critic": 83.3
+        },
+        "real_world_baselines": {
+          "recap_task_macro_sr": 66.5,
+          "recap_table_wiping": 62.7,
+          "recap_towel_folding": 70.7,
+          "recap_mug_placement_knob_turning": 66.0,
+          "sft_pi05_table_wiping": 54.7,
+          "sft_pi05_towel_folding": 51.3,
+          "sft_pi05_mug_placement_knob_turning": 47.3
+        }
+      },
+      "eval_conditions": {
+        "libero": "10 LIBERO-Long tasks, 20 fixed initial states per task, 3 independently trained checkpoints; ReCAP and PACE share base policy, demos, rollouts, and update budget",
+        "real_world": "AgileX PiPER dual-arm platform, 3 tasks, 50 trials per task; PACE reduces average successful-trial time from 76.3 s to 58.7 s vs ReCAP"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 341
     },
     {
       "name": "PaCo-VLA",
@@ -17613,7 +18954,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 327
+      "rank": 342
     },
     {
       "name": "PanoVLA",
@@ -17686,7 +19027,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 328
+      "rank": 343
     },
     {
       "name": "ParaVLA",
@@ -17732,7 +19073,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 329
+      "rank": 344
     },
     {
       "name": "Phone2Act",
@@ -17766,7 +19107,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 330
+      "rank": 345
     },
     {
       "name": "PhysBrain",
@@ -17802,7 +19143,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 331
+      "rank": 346
     },
     {
       "name": "PixelPilot",
@@ -17855,7 +19196,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 332
+      "rank": 347
     },
     {
       "name": "PrimitiveVLA",
@@ -17897,7 +19238,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 333
+      "rank": 348
     },
     {
       "name": "PrimSubVLA",
@@ -17960,7 +19301,98 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 334
+      "rank": 349
+    },
+    {
+      "name": "Prism-GRPO",
+      "organization": "Purdue University / AWS AI",
+      "date": "2026-08-18",
+      "paper_url": "https://arxiv.org/abs/2608.17423",
+      "code_url": null,
+      "venue": null,
+      "open_source": false,
+      "tags": [
+        "vla",
+        "reinforcement-learning",
+        "grpo",
+        "rloo",
+        "reward-shaping",
+        "sample-efficiency",
+        "openvla-oft",
+        "robotwin",
+        "reward-hacking",
+        "sim2real",
+        "real-robot"
+      ],
+      "architecture": {
+        "backbone": "OpenVLA-OFT (initialized from the released SimpleVLA-RL SFT checkpoint per task)",
+        "llm": null,
+        "action_head": "OpenVLA-OFT with a discrete action head: each DoF uniformly quantized into 256 bins, one token per DoF; on RoboTwin ALOHA each action chunk spans 25 steps x 14 action tokens. Policy is post-trained with GRPO/RLOO using reward success + lambda * q(tau).\n",
+        "action_head_category": "autoregressive",
+        "parameters": "Not stated in paper (inherits OpenVLA-OFT)"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "move_can_pot_clean_success": 24
+        },
+        "robotwin_v2_rollout_savings": {
+          "lift_pot_lambda_0_2": 56,
+          "lift_pot_lambda_0_5": 49,
+          "lift_pot_lambda_0_9": 45,
+          "lift_pot_lambda_1": 25,
+          "lift_pot_lambda_2": 53,
+          "move_can_pot_lambda_0_2": 41,
+          "move_can_pot_lambda_0_5": 48,
+          "move_can_pot_lambda_0_9": 41,
+          "move_can_pot_lambda_1": 3
+        },
+        "robotwin_v2_quality_gain": {
+          "lift_pot_lambda_0_2": 11,
+          "lift_pot_lambda_0_5": 14,
+          "lift_pot_lambda_0_9": 15,
+          "lift_pot_lambda_1": 14,
+          "lift_pot_lambda_2": 26,
+          "move_can_pot_lambda_0_2": 7,
+          "move_can_pot_lambda_0_5": 10,
+          "move_can_pot_lambda_0_9": 13,
+          "move_can_pot_lambda_1": 16
+        },
+        "robotwin_v2_random_quality_baseline": {
+          "move_can_pot_cs_lambda_0_2": 24,
+          "move_can_pot_cs_lambda_0_5": 33,
+          "move_can_pot_q_lambda_0_2": 1,
+          "move_can_pot_q_lambda_0_5": 0
+        },
+        "robotwin_v2_binary_grpo_reproduction": {
+          "lift_pot_mean_of_seed_max_success": 63.6
+        },
+        "real_world_shove_cheat": {
+          "prism_grpo": 0,
+          "binary_grpo": 4,
+          "rl_zvp": 20
+        },
+        "real_world_baselines": {
+          "binary_grpo_clean_success": 16,
+          "rl_zvp_clean_success": 8
+        }
+      },
+      "eval_conditions": {
+        "real_world": "AgileX Piper, Move Can Pot, 25 trials per method, checkpoints with ~65% simulated success",
+        "robotwin_v2_rollout_savings": "RoboTwin 2.0, OpenVLA-OFT RL from SimpleVLA-RL SFT; % of rollouts saved (not a success rate); lambda=2 on Move Can Pot did not reach target",
+        "robotwin_v2_quality_gain": "RoboTwin 2.0; Max-Force quality gain (points), not a success rate",
+        "robotwin_v2_random_quality_baseline": "baseline; random scalar replaces q",
+        "robotwin_v2_binary_grpo_reproduction": "baseline reproduction; Prism-GRPO absolute RoboTwin success rates are reported only in figures",
+        "real_world_shove_cheat": "real robot Piper; reward-hacking shortcut frequency",
+        "real_world_baselines": "baselines, same protocol",
+        "robotwin_v2": "RoboTwin 2.0, 4 tasks (Lift Pot, Move Can Pot, Handover Block, Beat Block Hammer); main results as learning curves vs rollouts; text reports 22-56% rollout savings over Binary GRPO",
+        "notes": "No robotwin_v2 success-rate block: absolute success rates appear only in figures"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 350
     },
     {
       "name": "ProGAL-VLA",
@@ -18006,7 +19438,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 335
+      "rank": 351
     },
     {
       "name": "QPILOTS",
@@ -18089,7 +19521,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 336
+      "rank": 352
     },
     {
       "name": "ReCAP",
@@ -18159,7 +19591,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 337
+      "rank": 353
     },
     {
       "name": "RecoverFly",
@@ -18296,7 +19728,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 338
+      "rank": 354
     },
     {
       "name": "ReCoVLA",
@@ -18347,7 +19779,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 339
+      "rank": 355
     },
     {
       "name": "ReferTrack",
@@ -18405,7 +19837,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 340
+      "rank": 356
     },
     {
       "name": "ReFineVLA",
@@ -18461,7 +19893,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 341
+      "rank": 357
     },
     {
       "name": "ResTacVLA",
@@ -18501,7 +19933,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 342
+      "rank": 358
     },
     {
       "name": "ReTouch",
@@ -18565,7 +19997,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 343
+      "rank": 359
     },
     {
       "name": "Retrieve-then-Steer",
@@ -18616,7 +20048,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 344
+      "rank": 360
     },
     {
       "name": "RL-VLA-Bootstrapping",
@@ -18674,7 +20106,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 345
+      "rank": 361
     },
     {
       "name": "ROAD-VLA",
@@ -18705,7 +20137,79 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 346
+      "rank": 362
+    },
+    {
+      "name": "Robo-Dopamine 2.0",
+      "organization": "Peking University (State Key Lab of Multimedia Information Processing); EvoPhys AI; BUPT; Tencent; Renmin University of China; Sun Yat-sen University",
+      "date": "2026-08-16",
+      "paper_url": "https://arxiv.org/abs/2608.15680",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "reward-model",
+        "process-reward",
+        "reinforcement-learning",
+        "grpo",
+        "openvla-oft",
+        "qwen3-vl",
+        "robotwin",
+        "real-world",
+        "ood-robustness"
+      ],
+      "architecture": {
+        "backbone": "Reward model: Qwen3-VL-8B General Reward Model (pairwise signed-progress GRM). RL-trained policies: task-specific OpenVLA-OFT SFT checkpoints (RoboTwin 2.0, LoRA-tuned with GRPO in RLinf) and ConRFT (frozen Octo-Small backbone + consistency-policy head) on dual Franka arms",
+        "llm": "Qwen3-VL-8B (reward model); LLaMA-2 7B inside OpenVLA-OFT (simulation policy)",
+        "action_head": "Simulation policy: OpenVLA-OFT continuous action-chunk head (14-D actions, 25-action chunks). Real-world policy: ConRFT consistency-policy action head. Both are optimized with potential-based shaping from the frozen Robo-Dopamine 2.0 reward model",
+        "action_head_category": "regression",
+        "parameters": "Reward model 8B (Qwen3-VL-8B); OpenVLA-OFT policy ~7B with LoRA"
+      },
+      "model_type": "process reward model + RL post-trained VLA policies",
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "inserts_out_of_80": 71,
+          "full_sequences_out_of_20": 15
+        },
+        "robotwin_v2_rl_3task": {
+          "place_empty_cup": 96.2,
+          "place_container_plate": 94.6,
+          "handover_block": 69.7,
+          "three_task_avg": 86.8
+        },
+        "robotwin_v2_rl_3task_baselines": {
+          "rlinf_sparse_1000ep_avg": 85.8,
+          "c00_controlled_avg": 72.2,
+          "c01_history_only_avg": 75.1,
+          "c10_ood_only_avg": 80.6
+        },
+        "real_world_baselines": {
+          "event_sparse_inserts_out_of_80": 48,
+          "event_sparse_full_out_of_20": 8,
+          "c00_inserts_out_of_80": 46,
+          "c00_full_out_of_20": 7,
+          "c01_inserts_out_of_80": 67,
+          "c01_full_out_of_20": 13,
+          "c10_inserts_out_of_80": 50,
+          "c10_full_out_of_20": 9
+        },
+        "reward_voc": {
+          "in_distribution": 0.991,
+          "temporal": 0.994,
+          "ood_negative": 0.994,
+          "ood_robust": 0.958,
+          "ood_temporal": 0.991,
+          "average": 0.986
+        }
+      },
+      "eval_conditions": {
+        "real_world": "Dual Franka, multi-view RGB, repeated insertion task",
+        "robotwin_v2_rl_3task": "RoboTwin 2.0 place_empty_cup, place_container_plate, handover_block; deterministic 128-episode evaluations",
+        "robotwin_v2_rl_3task_baselines": "Same 3 tasks; RLinf Sparse uses terminal success reward for 1,000 epochs, C00-C10 are reward-model ablations for 300 epochs",
+        "reward_voc": "Trajectory-level visual order consistency of the reward model across five benchmark families (GRM-8B-Pro static baseline avg 0.958)"
+      },
+      "rank": 363
     },
     {
       "name": "RoboDual",
@@ -18735,7 +20239,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 347
+      "rank": 364
     },
     {
       "name": "RoboMamba",
@@ -18765,7 +20269,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 348
+      "rank": 365
     },
     {
       "name": "RoboVLM",
@@ -18804,7 +20308,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 349
+      "rank": 366
     },
     {
       "name": "ROVE",
@@ -18862,7 +20366,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 350
+      "rank": 367
     },
     {
       "name": "RT-2-X",
@@ -18902,7 +20406,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 351
+      "rank": 368
     },
     {
       "name": "SA-VLA",
@@ -18948,7 +20452,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 352
+      "rank": 369
     },
     {
       "name": "SALT",
@@ -19010,7 +20514,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 353
+      "rank": 370
     },
     {
       "name": "SAM2Act",
@@ -19052,7 +20556,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 354
+      "rank": 371
     },
     {
       "name": "SAMoE-VLA",
@@ -19088,7 +20592,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 355
+      "rank": 372
     },
     {
       "name": "SAPS",
@@ -19187,7 +20691,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 356
+      "rank": 373
     },
     {
       "name": "SceneDiver",
@@ -19257,7 +20761,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 357
+      "rank": 374
     },
     {
       "name": "SEAM",
@@ -19311,7 +20815,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 358
+      "rank": 375
     },
     {
       "name": "SeeLikeARobot",
@@ -19357,7 +20861,161 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 359
+      "rank": 376
+    },
+    {
+      "name": "SelfDemo-VLA",
+      "organization": "University of Illinois Urbana-Champaign",
+      "date": "2026-08-19",
+      "paper_url": "https://arxiv.org/abs/2608.19490",
+      "code_url": "https://self-supervised-control.pages.dev/",
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "pi0.5",
+        "flow-matching",
+        "post-training",
+        "continual-learning",
+        "generative-replay",
+        "self-supervision",
+        "catastrophic-forgetting",
+        "aloha",
+        "bimanual",
+        "robotwin",
+        "real-world"
+      ],
+      "architecture": {
+        "backbone": "pi0.5 (openpi release): PaliGemma VLM (SigLIP vision encoder + Gemma) + action expert",
+        "llm": "PaliGemma (Gemma 2B)",
+        "action_head": "pi0.5 flow-matching action expert predicting absolute joint-angle action chunks (H=50, D=32; 25 actions executed open-loop per query), trained with a dual objective: cross-entropy on re-implemented FAST discrete action tokens (VLM) + alpha-weighted conditional flow-matching loss (action expert)",
+        "action_head_category": "flow_matching",
+        "parameters": "pi0.5 (~3B); full fine-tuning of VLM + action expert"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "pick_cube_tes_if_pre_grasp": 100,
+          "pick_cube_tes_sr": 90,
+          "pick_novel_tno_if_pre_grasp": 55,
+          "pick_novel_tno_sr": 55,
+          "pick_place_tss_if_pre_grasp": 90,
+          "pick_place_tss_if_post_grasp": 90,
+          "pick_place_tss_sr": 55,
+          "laundry_tss_if_pre_grasp": 100,
+          "laundry_tss_if_post_grasp": 95,
+          "laundry_tss_partial_sr": 40
+        },
+        "real_world_baseline_multitask_es": {
+          "pick_cube_tes_if_pre_grasp": 100,
+          "pick_cube_tes_sr": 65,
+          "pick_novel_tno_if_pre_grasp": 50,
+          "pick_novel_tno_sr": 50,
+          "pick_place_tss_if_pre_grasp": 75,
+          "pick_place_tss_if_post_grasp": 0,
+          "pick_place_tss_sr": 0,
+          "laundry_tss_if_pre_grasp": 100,
+          "laundry_tss_if_post_grasp": 50,
+          "laundry_tss_partial_sr": 10
+        },
+        "real_world_baseline_zero_shot": {
+          "pick_cube_tes_if_pre_grasp": 80,
+          "pick_cube_tes_sr": 0,
+          "pick_novel_tno_if_pre_grasp": 70,
+          "pick_novel_tno_sr": 0,
+          "pick_place_tss_if_pre_grasp": 70,
+          "pick_place_tss_if_post_grasp": 25,
+          "pick_place_tss_sr": 0,
+          "laundry_tss_if_pre_grasp": 65,
+          "laundry_tss_if_post_grasp": 30,
+          "laundry_tss_partial_sr": 5
+        },
+        "real_world_upper_bound_es_all_tasks": {
+          "pick_cube_tes_if_pre_grasp": 100,
+          "pick_cube_tes_sr": 95,
+          "pick_novel_tno_if_pre_grasp": 65,
+          "pick_novel_tno_sr": 60,
+          "pick_place_tss_if_pre_grasp": 90,
+          "pick_place_tss_if_post_grasp": 90,
+          "pick_place_tss_sr": 65,
+          "laundry_tss_if_pre_grasp": 100,
+          "laundry_tss_if_post_grasp": 100,
+          "laundry_tss_partial_sr": 90
+        },
+        "real_world_gear_insertion": {
+          "tes_if_pre_grasp": 100,
+          "tes_if_post_grasp": 90,
+          "tes_sr": 90,
+          "tno_novel_colors_if_pre_grasp": 100,
+          "tno_novel_colors_if_post_grasp": 90,
+          "tno_novel_colors_sr": 30
+        },
+        "real_world_gear_insertion_baseline_multitask_es": {
+          "tes_if_pre_grasp": 100,
+          "tes_if_post_grasp": 40,
+          "tes_sr": 30,
+          "tno_novel_colors_if_pre_grasp": 70,
+          "tno_novel_colors_if_post_grasp": 40,
+          "tno_novel_colors_sr": 0
+        },
+        "real_world_heldout_push": {
+          "if_correct_object": 85,
+          "push_motion": 70,
+          "picks_instead": 10,
+          "sr_push_correct_object": 60
+        },
+        "robotwin2_continual": {
+          "tss_avg": 70.6,
+          "tes_avg": 98.0,
+          "tno_avg": 44.5,
+          "tnc_avg": 14.0,
+          "overall_avg": 56.8
+        },
+        "robotwin2_continual_baseline_multitask_es": {
+          "tss_avg": 16.6,
+          "tes_avg": 93.0,
+          "tno_avg": 57.0,
+          "tnc_avg": 6.7,
+          "overall_avg": 43.3
+        },
+        "robotwin2_continual_oracle_rehearsal": {
+          "tss_avg": 85.6,
+          "tes_avg": 97.0,
+          "tno_avg": 30.0,
+          "tnc_avg": 15.3,
+          "overall_avg": 57.0
+        },
+        "robotwin2_continual_tss_per_task": {
+          "place_dual_shoes": 42,
+          "beat_block_hammer": 82,
+          "pick_dual_bottles": 48,
+          "place_container_plate": 92,
+          "handover_mic": 62,
+          "place_empty_cup": 92,
+          "place_bread_basket": 58,
+          "lift_pot": 86,
+          "open_microwave": 66,
+          "put_bottles_dustbin": 78,
+          "tss_avg": 70.6
+        }
+      },
+      "eval_conditions": {
+        "real_world": "Stationary ALOHA-1 (ViperX 300 arms), top + two wrist RealSense D435 cameras, 30-50 Hz control; IF = instruction following, SR = success rate",
+        "real_world_baseline_multitask_es": "Expert-only full fine-tuning baseline, same protocol",
+        "real_world_baseline_zero_shot": "Zero-shot pi0.5 on ALOHA-1, same protocol",
+        "real_world_upper_bound_es_all_tasks": "Upper-bound reference with expert teleop for all tasks (replaces self-demos), 20 trials",
+        "real_world_gear_insertion": "Real ALOHA-1 bimanual caterpillar gear insertion on non-stationary board, 10 trials per test set",
+        "real_world_gear_insertion_baseline_multitask_es": "Expert-only fine-tuning baseline, same gear-insertion protocol",
+        "real_world_heldout_push": "Zero-shot evaluation on held-out 'push objects' skill family absent from both fine-tuning mixtures, 20 trials (picks_instead: lower is better)",
+        "robotwin2_continual": "RoboTwin 2.0 ALOHA-AgileX with customized D435 camera profile; base policy mid-trained on 10 tasks (90.8% avg) before post-training",
+        "robotwin2_continual_baseline_multitask_es": "Expert-only full fine-tuning baseline, same custom RoboTwin protocol",
+        "robotwin2_continual_oracle_rehearsal": "Oracle with access to stored mid-training data, same custom RoboTwin protocol",
+        "robotwin2_continual_tss_per_task": "Per-task retention on the 10 self-supervised (mid-training) RoboTwin tasks after stage-2 post-training, 50 seeds per task"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 377
     },
     {
       "name": "Semantic-3DGS-VLA",
@@ -19581,7 +21239,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 360
+      "rank": 378
     },
     {
       "name": "Sentinel-VLA",
@@ -19628,7 +21286,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 361
+      "rank": 379
     },
     {
       "name": "SiMDex",
@@ -19697,7 +21355,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 362
+      "rank": 380
     },
     {
       "name": "SOMA",
@@ -19761,7 +21419,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 363
+      "rank": 381
     },
     {
       "name": "SpaceVLA",
@@ -19818,7 +21476,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 364
+      "rank": 382
     },
     {
       "name": "SPARK",
@@ -19887,7 +21545,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 365
+      "rank": 383
     },
     {
       "name": "SpikeVLA",
@@ -19924,7 +21582,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 366
+      "rank": 384
     },
     {
       "name": "SSAA",
@@ -19968,7 +21626,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 367
+      "rank": 385
     },
     {
       "name": "StableIDM",
@@ -20017,7 +21675,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 368
+      "rank": 386
     },
     {
       "name": "STARRY",
@@ -20057,7 +21715,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 369
+      "rank": 387
     },
     {
       "name": "StereoPolicy",
@@ -20127,7 +21785,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 370
+      "rank": 388
     },
     {
       "name": "SuSIE",
@@ -20158,7 +21816,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 371
+      "rank": 389
     },
     {
       "name": "Tabero",
@@ -20208,7 +21866,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 372
+      "rank": 390
     },
     {
       "name": "TacCoRL",
@@ -20248,7 +21906,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 373
+      "rank": 391
     },
     {
       "name": "TacVLA",
@@ -20283,7 +21941,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 374
+      "rank": 392
     },
     {
       "name": "TAP",
@@ -20333,7 +21991,145 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 375
+      "rank": 393
+    },
+    {
+      "name": "τ0-VLA",
+      "organization": "Agibot Finch / Shanghai Innovation Institute / The Chinese University of Hong Kong",
+      "date": "2026-08-17",
+      "paper_url": "https://arxiv.org/abs/2608.16885",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "hierarchical",
+        "test_time_computation",
+        "world_model",
+        "beam_search",
+        "execution_memory",
+        "flow_matching",
+        "mixture_of_transformers",
+        "cross_embodiment",
+        "mobile_manipulation",
+        "long_horizon",
+        "real_robot",
+        "qwen3_5",
+        "agibot"
+      ],
+      "architecture": {
+        "backbone": "Low-level policy: Qwen3.5-2B vision-language backbone + Mixture-of-Transformers (MoT) action expert; high-level policy: proposal / value / reflective models each fine-tuned from a robot-pretrained Qwen3.5-9B VLM, plus a world model initialized from Step1X-Edit",
+        "llm": "Qwen3.5-2B (low-level), Qwen3.5-9B (high-level)",
+        "action_head": "MoT action expert (separately parameterized Transformer streams with joint attention to backbone tokens at each full-attention layer) trained with masked conditional flow matching over a unified 40-D state/action space; action horizon H=30, ten uniform Euler steps; runs at ~30 Hz control rate while the high-level policy refreshes the subtask about every 1 s",
+        "action_head_category": "flow_matching",
+        "parameters": "Low-level ~2B-scale (Qwen3.5-2B + MoT expert); high-level VLMs 9B-scale; exact totals not reported"
+      },
+      "model_type": "hierarchical_vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "real_world": {
+          "avg_sr": 45.0,
+          "avg_progress": 87.85,
+          "clean_room_progress": 94.8,
+          "prepare_ingredients_progress": 82.86,
+          "tomato_egg_stir_fry_progress": 81.82,
+          "make_milk_tea_progress": 91.92
+        },
+        "real_world_direct_execution": {
+          "avg_sr": 27.5,
+          "avg_progress": 80.1,
+          "clean_room_progress": 92.8,
+          "prepare_ingredients_progress": 66.43,
+          "tomato_egg_stir_fry_progress": 65.0,
+          "make_milk_tea_progress": 96.15
+        },
+        "real_world_baseline_pi05": {
+          "avg_sr": 22.5,
+          "avg_progress": 73.05,
+          "clean_room_progress": 86.2,
+          "prepare_ingredients_progress": 73.93,
+          "tomato_egg_stir_fry_progress": 49.77,
+          "make_milk_tea_progress": 82.31
+        },
+        "real_world_baseline_gr00t_n17": {
+          "avg_sr": 2.5,
+          "avg_progress": 45.29,
+          "clean_room_progress": 59.8,
+          "prepare_ingredients_progress": 68.57,
+          "tomato_egg_stir_fry_progress": 24.32,
+          "make_milk_tea_progress": 28.46
+        },
+        "real_world_baseline_lingbot_vla": {
+          "avg_sr": 0.0,
+          "avg_progress": 44.43,
+          "clean_room_progress": 66.6,
+          "prepare_ingredients_progress": 35.0,
+          "tomato_egg_stir_fry_progress": 12.27,
+          "make_milk_tea_progress": 63.85
+        },
+        "real_world_ttc": {
+          "make_milk_tea_progress": 95.38,
+          "book_organization_progress": 93.33,
+          "clean_room_progress": 97.6
+        },
+        "real_world_ttc_baseline_plan_once": {
+          "make_milk_tea_progress": 91.92,
+          "book_organization_progress": 66.67,
+          "clean_room_progress": 94.8
+        },
+        "real_world_cross_embodiment": {
+          "collect_laundry_progress": 97.0,
+          "tidy_makeup_cotton_pad_progress": 95.0,
+          "tidy_makeup_eyelash_curler_progress": 92.5,
+          "tidy_makeup_makeup_puff_progress": 95.0
+        },
+        "real_world_cross_embodiment_baseline_pi05": {
+          "collect_laundry_progress": 88.0,
+          "tidy_makeup_cotton_pad_progress": 85.0,
+          "tidy_makeup_eyelash_curler_progress": 85.0,
+          "tidy_makeup_makeup_puff_progress": 73.75
+        },
+        "real_world_cross_embodiment_baseline_gr00t_n17": {
+          "collect_laundry_progress": 76.0,
+          "tidy_makeup_cotton_pad_progress": 87.5,
+          "tidy_makeup_eyelash_curler_progress": 77.5,
+          "tidy_makeup_makeup_puff_progress": 52.5
+        },
+        "real_world_cross_embodiment_baseline_lingbot_vla": {
+          "collect_laundry_progress": 35.0,
+          "tidy_makeup_cotton_pad_progress": 67.5,
+          "tidy_makeup_eyelash_curler_progress": 22.5,
+          "tidy_makeup_makeup_puff_progress": 33.75
+        },
+        "subtask_prediction_ood_ttc": {
+          "book_organization_ood_accuracy": 74.0
+        },
+        "subtask_prediction_ood_plan_once": {
+          "book_organization_ood_accuracy": 50.0
+        },
+        "subtask_prediction_ood_best_of_n": {
+          "book_organization_ood_accuracy": 57.5
+        }
+      },
+      "eval_conditions": {
+        "real_world": "Task-specific fine-tuned; AGIBOT G1 long-horizon tasks (Clean Room, Prepare Ingredients, Tomato and Egg Stir Fry, Make Milk Tea), 10 physical trials per task, success rate and milestone progress",
+        "real_world_direct_execution": "Standalone low-level policy conditioned on the full task instruction, no high-level policy, 10 trials per task",
+        "real_world_baseline_pi05": "Direct execution baseline, 10 trials per task",
+        "real_world_baseline_gr00t_n17": "Direct execution baseline, 10 trials per task",
+        "real_world_baseline_lingbot_vla": "Direct execution baseline, 10 trials per task",
+        "real_world_ttc": "Hierarchical system with world-model-guided test-time computation, low-level policy fixed, 10 trials per task (Book Organization on ARX AC One, shuffled initial arrangements)",
+        "real_world_ttc_baseline_plan_once": "Hierarchical system without test-time search, same low-level policy, 10 trials per task",
+        "real_world_cross_embodiment": "Direct execution of the low-level policy (no high-level policy); Collect Laundry on ARX AC One, Tidy Makeup Table on bimanual Franka Research 3; 10 trials per task or task group",
+        "real_world_cross_embodiment_baseline_pi05": "Direct execution baseline, 10 trials per task or task group",
+        "real_world_cross_embodiment_baseline_gr00t_n17": "Direct execution baseline, 10 trials per task or task group",
+        "real_world_cross_embodiment_baseline_lingbot_vla": "Direct execution baseline, 10 trials per task or task group",
+        "subtask_prediction_ood_ttc": "Open-loop next-subtask prediction on Book Organization with out-of-domain initial arrangements, TTC, LLM-as-a-judge (GPT-5.4)",
+        "subtask_prediction_ood_plan_once": "Same OOD open-loop protocol, Plan Once baseline (single high-level prediction, no search)",
+        "subtask_prediction_ood_best_of_n": "Same OOD open-loop protocol, Best-of-N baseline (same world and value models, one-step selection)"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 394
     },
     {
       "name": "TCAM",
@@ -20387,7 +22183,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 376
+      "rank": 395
     },
     {
       "name": "TEMPO",
@@ -20436,7 +22232,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 377
+      "rank": 396
     },
     {
       "name": "Temporal-GRPO",
@@ -20485,7 +22281,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 378
+      "rank": 397
     },
     {
       "name": "TinyVLA",
@@ -20517,7 +22313,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 379
+      "rank": 398
     },
     {
       "name": "TraceVLA",
@@ -20556,7 +22352,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 380
+      "rank": 399
     },
     {
       "name": "TTT-VLA",
@@ -20617,7 +22413,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 381
+      "rank": 400
     },
     {
       "name": "TwinBrainVLA",
@@ -20655,7 +22451,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 382
+      "rank": 401
     },
     {
       "name": "UniDex",
@@ -20696,7 +22492,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 383
+      "rank": 402
     },
     {
       "name": "UniDriveVLA",
@@ -20732,7 +22528,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 384
+      "rank": 403
     },
     {
       "name": "UniPi",
@@ -20762,7 +22558,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 385
+      "rank": 404
     },
     {
       "name": "UniT",
@@ -20808,7 +22604,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 386
+      "rank": 405
     },
     {
       "name": "UP-VLA",
@@ -20841,7 +22637,103 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 387
+      "rank": 406
+    },
+    {
+      "name": "US-VLA",
+      "organization": "Ocean University of China / Shandong University / Qilu Second Hospital of Shandong University / Hefei University of Technology",
+      "date": "2026-08-17",
+      "paper_url": "https://arxiv.org/abs/2608.16074",
+      "code_url": "https://github.com/VMVLab/US-VLA",
+      "venue": "ACM MM 2026",
+      "open_source": true,
+      "tags": [
+        "medical-robotics",
+        "ultrasound",
+        "paligemma",
+        "usfm",
+        "real-world",
+        "dataset",
+        "open-source",
+        "acm-mm-2026"
+      ],
+      "architecture": {
+        "backbone": "PaliGemma vision-language model (SigLIP encoder for wrist + side RGB views, language encoder for clinical instructions) + USFM universal ultrasound foundation model as a dedicated ultrasound image encoder",
+        "llm": "PaliGemma (Gemma)",
+        "action_head": "Ultrasound-Aware Expert Fusion (cross-attention with VL features as queries and USFM ultrasound features as keys/values, residual FFN, projection to D_a=1024), then the last H_act=50 fused tokens pass through an MLP action expert (stacked FC + LayerNorm, residual branch) and a linear policy head that outputs 50-step continuous probe-control commands",
+        "action_head_category": "regression",
+        "parameters": null
+      },
+      "model_type": "vla",
+      "inference_hz": 15,
+      "benchmarks": {
+        "real_world": {
+          "task1_aorta_sagittal": 96.7,
+          "task2_subxiphoid_transverse": 76.7,
+          "task3_right_subcostal_oblique": 66.7,
+          "task4_left_kidney_long_axis": 100,
+          "task5_left_kidney_transverse": 80.0,
+          "avg": 84.0
+        },
+        "real_world_scanning_timesteps": {
+          "task1_aorta_sagittal": 733,
+          "task2_subxiphoid_transverse": 1011,
+          "task3_right_subcostal_oblique": 882,
+          "task4_left_kidney_long_axis": 291,
+          "task5_left_kidney_transverse": 493,
+          "avg": 682
+        },
+        "real_world_baseline_pi0_wo_us": {
+          "task1_aorta_sagittal": 66.7,
+          "task2_subxiphoid_transverse": 46.7,
+          "task3_right_subcostal_oblique": 33.3,
+          "task4_left_kidney_long_axis": 63.3,
+          "task5_left_kidney_transverse": 53.3,
+          "avg": 52.7
+        },
+        "real_world_baseline_pi0_w_us": {
+          "task1_aorta_sagittal": 80.0,
+          "task2_subxiphoid_transverse": 56.7,
+          "task3_right_subcostal_oblique": 43.3,
+          "task4_left_kidney_long_axis": 70.0,
+          "task5_left_kidney_transverse": 60.0,
+          "avg": 62.0
+        },
+        "real_world_baseline_pi05_wo_us": {
+          "task1_aorta_sagittal": 73.3,
+          "task2_subxiphoid_transverse": 53.3,
+          "task3_right_subcostal_oblique": 40.0,
+          "task4_left_kidney_long_axis": 66.7,
+          "task5_left_kidney_transverse": 56.7,
+          "avg": 58.0
+        },
+        "real_world_baseline_pi05_w_us": {
+          "task1_aorta_sagittal": 86.7,
+          "task2_subxiphoid_transverse": 66.7,
+          "task3_right_subcostal_oblique": 46.7,
+          "task4_left_kidney_long_axis": 83.3,
+          "task5_left_kidney_transverse": 66.7,
+          "avg": 70.0
+        },
+        "real_world_ablation_us_plus_usfm": {
+          "task1_aorta_sagittal": 90.0,
+          "task2_subxiphoid_transverse": 70.0,
+          "task3_right_subcostal_oblique": 53.5,
+          "task4_left_kidney_long_axis": 90.0,
+          "task5_left_kidney_transverse": 73.3,
+          "avg": 75.3
+        }
+      },
+      "eval_conditions": {
+        "real_world": "UR7e arm with wrist + side RGB cameras and live ultrasound feed; 3 held-out human subjects with different BMI; 15 Hz closed-loop",
+        "real_world_scanning_timesteps": "Timesteps to reach target standard plane at 15 Hz (lower is better), same protocol",
+        "real_world_baseline_pi0_wo_us": "pi0 fine-tuned without ultrasound input, same success-rate protocol",
+        "real_world_baseline_pi0_w_us": "pi0 with ultrasound signal concatenated to state input, same success-rate protocol",
+        "real_world_baseline_pi05_wo_us": "pi0.5 without ultrasound input, same success-rate protocol",
+        "real_world_baseline_pi05_w_us": "pi0.5 with ultrasound input, same success-rate protocol",
+        "real_world_ablation_us_plus_usfm": "Ablation: ultrasound input with USFM encoder but no ultrasound-aware expert fusion; success rate (%)"
+      },
+      "rank": 407
     },
     {
       "name": "V2V-VLA",
@@ -20909,7 +22801,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 388
+      "rank": 408
     },
     {
       "name": "ValueFormer",
@@ -21035,7 +22927,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 389
+      "rank": 409
     },
     {
       "name": "VANE",
@@ -21091,7 +22983,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 390
+      "rank": 410
     },
     {
       "name": "VIA",
@@ -21130,7 +23022,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 391
+      "rank": 411
     },
     {
       "name": "VILAS",
@@ -21160,7 +23052,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 392
+      "rank": 412
     },
     {
       "name": "VISTA",
@@ -21215,7 +23107,78 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 393
+      "rank": 413
+    },
+    {
+      "name": "ViTaR",
+      "organization": "Beijing Institute of Technology",
+      "date": "2026-08-16",
+      "paper_url": "https://arxiv.org/abs/2608.15816",
+      "code_url": null,
+      "venue": "arXiv",
+      "open_source": false,
+      "tags": [
+        "tactile",
+        "visuo_tactile",
+        "residual_policy",
+        "contact_rich",
+        "preference_learning",
+        "openvla_oft",
+        "univtac",
+        "real_robot"
+      ],
+      "architecture": {
+        "backbone": "OpenVLA-OFT (fine-tuned by the authors on UniVTAC demos, then frozen)",
+        "llm": "OpenVLA-OFT language backbone (unchanged)",
+        "action_head": "Frozen OpenVLA-OFT action chunk plus a learned bounded residual: RAM selector MLP picks 'keep base' or one of a small set of 7D delta directions, and a tactile-conditioned MLP predicts a sigmoid gain applied uniformly over the chunk",
+        "action_head_category": "regression",
+        "parameters": null
+      },
+      "model_type": "vla",
+      "inference_hz": 10,
+      "benchmarks": {
+        "real_world": {
+          "insert_hole": 40.0,
+          "lift_bottle": 65.0,
+          "wiping_the_board": 40.0,
+          "real_avg": 48.3
+        },
+        "univtac": {
+          "lift_bottle": 88.0,
+          "pull_out_key": 55.0,
+          "lift_can": 44.0,
+          "put_bottle": 35.0,
+          "insert_hdmi": 38.0,
+          "insert_tube": 69.0,
+          "grasp_classify": 100.0,
+          "univtac_avg": 61.3
+        },
+        "univtac_baselines": {
+          "act_avg": 32.6,
+          "vital_avg": 42.7,
+          "act_univtac_avg": 51.4,
+          "tactile_vla_avg": 40.0,
+          "pi05_avg": 48.3,
+          "openvla_oft_ref_avg": 30.7
+        },
+        "univtac_ablation": {
+          "ppo_option": 36.0,
+          "sac_residual": 32.0,
+          "without_contact_descriptor": 41.0,
+          "without_tactile_summary": 46.0,
+          "without_both": 36.0,
+          "fixed_scale": 45.0,
+          "egm_raw_score": 38.0,
+          "ram_egm_greedy": 36.0
+        }
+      },
+      "eval_conditions": {
+        "real_world": "20 trials per task",
+        "univtac": "100 episodes per task",
+        "univtac_baselines": "same UniVTAC 7-task protocol",
+        "univtac_ablation": "same frozen OpenVLA-OFT reference, residual coordinates and safety limits"
+      },
+      "rank": 414
     },
     {
       "name": "VLA-RL",
@@ -21247,7 +23210,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 394
+      "rank": 415
     },
     {
       "name": "VLA-ATTC",
@@ -21285,7 +23248,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 395
+      "rank": 416
     },
     {
       "name": "VLA-Pro",
@@ -21339,7 +23302,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 396
+      "rank": 417
     },
     {
       "name": "VLAs-as-Tools",
@@ -21388,7 +23351,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 397
+      "rank": 418
     },
     {
       "name": "Vlaser",
@@ -21438,7 +23401,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 398
+      "rank": 419
     },
     {
       "name": "VLGA",
@@ -21481,7 +23444,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 399
+      "rank": 420
     },
     {
       "name": "VP-VLA",
@@ -21535,7 +23498,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 400
+      "rank": 421
     },
     {
       "name": "w2VLA",
@@ -21593,7 +23556,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 401
+      "rank": 422
     },
     {
       "name": "WALL-WM",
@@ -21642,7 +23605,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 402
+      "rank": 423
     },
     {
       "name": "WAM-Diff2",
@@ -21703,7 +23666,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 403
+      "rank": 424
     },
     {
       "name": "WCM",
@@ -21780,7 +23743,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 404
+      "rank": 425
     },
     {
       "name": "WCog-VLA",
@@ -21833,7 +23796,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 405
+      "rank": 426
     },
     {
       "name": "WeaveLA",
@@ -21871,7 +23834,100 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 406
+      "rank": 427
+    },
+    {
+      "name": "WILD-Nav",
+      "organization": "Southern University of Science and Technology / Peng Cheng Laboratory / HKUST",
+      "date": "2026-08-17",
+      "paper_url": "https://arxiv.org/abs/2608.16476",
+      "code_url": null,
+      "venue": "arXiv preprint",
+      "open_source": false,
+      "tags": [
+        "vla",
+        "navigation",
+        "urban_navigation",
+        "point_goal",
+        "in_the_wild_videos",
+        "egocentric_video",
+        "chain_of_thought",
+        "long_tail",
+        "qwen3.5-vl",
+        "mlp_regression"
+      ],
+      "architecture": {
+        "backbone": "Qwen3.5VL-4B (visual encoder frozen; five sequential egocentric frames + textual trajectory history and point goal)",
+        "llm": "Qwen3.5VL-4B language model",
+        "action_head": "Action expert decoding the <PLAN_QUERY> token hidden state (2560-d): linear meta-action classifier (20 classes) + 4-layer MLP (3x512 GELU) trajectory head regressing 5 metric waypoints (MSE); optional autoregressive perception-analysis-planning CoT before the plan token",
+        "action_head_category": "regression",
+        "parameters": "4B"
+      },
+      "model_type": "vla",
+      "inference_hz": null,
+      "benchmarks": {
+        "wild_video_nav": {
+          "meta_action_acc": 93.4,
+          "ade_m": 0.086,
+          "fde_m": 0.068,
+          "maoe_deg": 5.32
+        },
+        "wild_video_nav_inst": {
+          "meta_action_acc": 96.5,
+          "ade_m": 0.094,
+          "fde_m": 0.071,
+          "maoe_deg": 5.9
+        },
+        "wild_video_nav_baselines": {
+          "urbannav_ade_m": 0.157,
+          "urbannav_fde_m": 0.136,
+          "urbannav_maoe_deg": 6.3,
+          "socialnav_origin_ade_m": 0.906,
+          "socialnav_origin_fde_m": 1.123,
+          "socialnav_origin_maoe_deg": 16.53,
+          "socialnav_ft_ade_m": 0.47,
+          "socialnav_ft_fde_m": 0.728,
+          "socialnav_ft_maoe_deg": 12.65
+        },
+        "real_world_nav_transfer": {
+          "meta_action_acc": 93.3,
+          "ade_m": 0.619,
+          "fde_m": 0.834,
+          "maoe_deg": 7.14
+        },
+        "real_world_nav_finetuned": {
+          "meta_action_acc": 89.13,
+          "ade_m": 0.206,
+          "fde_m": 0.127,
+          "maoe_deg": 4.49
+        },
+        "wild_longtail_base": {
+          "test_all_ade_m": 0.094,
+          "test_all_fde_m": 0.074,
+          "test_hard_ade_m": 0.286,
+          "test_hard_fde_m": 0.247,
+          "test_hard_meta_action_acc": 94.88
+        },
+        "wild_longtail_hard_random": {
+          "test_all_ade_m": 0.093,
+          "test_all_fde_m": 0.079,
+          "test_hard_ade_m": 0.217,
+          "test_hard_fde_m": 0.16,
+          "test_hard_meta_action_acc": 96.73
+        }
+      },
+      "eval_conditions": {
+        "wild_video_nav": "Offline open-loop point-goal trajectory planning on held-out web-video episodes (ADE/FDE m, MAOE deg, meta-action accuracy %)",
+        "wild_video_nav_inst": "Held-out in-the-wild video test set; instruction-conditioned direct planning variant",
+        "real_world_nav_transfer": "Offline open-loop evaluation on real-robot navigation datasets, zero-shot from video training",
+        "real_world_nav_finetuned": "Offline open-loop evaluation after fine-tuning on real-world training split",
+        "wild_longtail_base": "WILD-LongTail benchmark (mined hard set), open-loop",
+        "wild_longtail_hard_random": "Incremental fine-tuning on mined hard examples plus random replay"
+      },
+      "ai_review": {
+        "verified": true
+      },
+      "rank": 428
     },
     {
       "name": "WNM-3D",
@@ -22015,7 +24071,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 407
+      "rank": 429
     },
     {
       "name": "X-DiffVLA",
@@ -22056,7 +24112,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 408
+      "rank": 430
     },
     {
       "name": "X-Foresight",
@@ -22097,7 +24153,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 409
+      "rank": 431
     },
     {
       "name": "X-Mind",
@@ -22133,7 +24189,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 410
+      "rank": 432
     },
     {
       "name": "X-Tokenizer",
@@ -22178,7 +24234,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 411
+      "rank": 433
     },
     {
       "name": "XCoT-VLA",
@@ -22332,7 +24388,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 412
+      "rank": 434
     },
     {
       "name": "Xiaomi-Robotics-1",
@@ -22395,7 +24451,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 413
+      "rank": 435
     },
     {
       "name": "Z-1",
@@ -22442,7 +24498,7 @@
       "ai_review": {
         "verified": true
       },
-      "rank": 414
+      "rank": 436
     }
   ]
 }

@@ -1,0 +1,75 @@
+# Paper: OrthoSkillVLA: Continual Skill Learning via Gradient-Informed Skill Subspace Adaptation
+# arXiv: 2608.19589
+
+name: OrthoSkillVLA
+full_name: "OrthoSkillVLA: Continual Skill Learning via Gradient-Informed Skill Subspace Adaptation"
+organization: "Southeast University"
+date: "2026-08-20"
+paper_url: https://arxiv.org/abs/2608.19589
+code_url: https://github.com/Jiaqi-Wangx/OrthoSkillVLA
+venue: arXiv preprint
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "X-VLA pretrained model (0.9B) with a LIBERO domain soft prompt added and warmed up; VLM and ActionHead adapted with orthogonal LoRA (rank 64)"
+  action_head: "X-VLA flow-matching ActionHead predicting velocity fields; the final velocity decoder is replaced by a Feature-Aware MoE decoder with one compact expert per skill and a training-free projection router based on gradient-informed skill bases"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "0.9B base model; per-skill decoder state ~0.0046% of base"
+  key_innovation: "Replay-free continual skill learning for pretrained flow-matching VLAs: gradient-informed skill subspaces, with LoRA updates injected into the orthogonal complement of previously occupied directions using module-specific energy budgets (epsilon_VLM = 0.99, epsilon_Head = 0.9999), plus a Feature-Aware MoE velocity decoder with training-free feature-affinity routing."
+
+training:
+  method: "Sequential per-skill orthogonal LoRA fine-tuning (rank 64), AdamW, peak LR 5e-5, cosine schedule, batch 16, bf16, 15 epochs (~35-40k steps) per skill"
+
+benchmarks:
+  libero_skill_incremental:
+    fwt: 0.94
+    nbt: 0.13
+    auc: 0.88
+    final_sr: 83.50
+    source: "Paper Table 1 (row OrthoSkillVLA)"
+    date_reported: "2026-08-20"
+    eval_condition: "Custom skill-incremental protocol from LIBERO-100 (OpenClose 4 tasks, PickPlace 4, Turn 2), mean over 3 skill orderings, 50 rollouts per task; not a standard LIBERO suite. Std: FWT 0.03, NBT 0.06, AUC 0.01, Final SR 1.42"
+
+  libero_skill_incremental_baselines:
+    seqlora_final_sr: 32.44
+    inclora_final_sr: 34.11
+    ewc_final_sr: 25.17
+    olora_final_sr: 30.50
+    keeplora_final_sr: 56.61
+    keeplora_nbt: 0.46
+    source: "Paper Table 1 (baseline rows)"
+    date_reported: "2026-08-20"
+
+  libero_skill_incremental_ablation:
+    unified_frozen_final_sr: 56.61
+    separated_frozen_final_sr: 60.44
+    unified_moe_final_sr: 67.94
+    separated_moe_final_sr: 83.50
+    lora_rank_32_final_sr: 79.50
+    lora_rank_96_final_sr: 74.06
+    source: "Paper Table 3 and Table 9"
+    date_reported: "2026-08-20"
+
+  real_world:
+    final_avg: 86.25
+    source: "Paper Table 2 and Section 5.2 text"
+    date_reported: "2026-08-20"
+    eval_condition: "Continual learning of Flip, Pick, Push, Press on xArm + Inspire dexterous hand, 50 demos per skill, 20 trials per skill; final phase successes 16/16/17/20 of 20 (KeepLoRA 11/12/15/19); paper states OrthoSkillVLA outperforms KeepLoRA by 15.0%"
+
+eval_conditions:
+  libero_skill_incremental: "Replay-free continual skill learning, 3 skill orderings"
+  real_world: "4 sequential skills, 7-DoF xArm with 6-DoF Inspire hand, wrist camera"
+
+tags:
+  - flow_matching
+  - x-vla
+  - continual-learning
+  - lora
+  - orthogonal-subspace
+  - mixture-of-experts
+  - libero
+  - real-world
+  - dexterous-hand
+  - open-source

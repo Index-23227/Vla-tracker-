@@ -1,0 +1,90 @@
+# Paper: Robo-Dopamine 2.0: History-Conditioned and OOD-Aware Process Reward Modeling for Robotic Manipulation
+# arXiv: 2608.15680
+
+name: Robo-Dopamine 2.0
+full_name: "Robo-Dopamine 2.0: History-Conditioned and OOD-Aware Process Reward Modeling for Robotic Manipulation"
+organization: "Peking University (State Key Lab of Multimedia Information Processing); EvoPhys AI; BUPT; Tencent; Renmin University of China; Sun Yat-sen University"
+date: "2026-08-16"
+paper_url: https://arxiv.org/abs/2608.15680
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: "process reward model + RL post-trained VLA policies"
+
+architecture:
+  backbone: "Reward model: Qwen3-VL-8B General Reward Model (pairwise signed-progress GRM). RL-trained policies: task-specific OpenVLA-OFT SFT checkpoints (RoboTwin 2.0, LoRA-tuned with GRPO in RLinf) and ConRFT (frozen Octo-Small backbone + consistency-policy head) on dual Franka arms"
+  llm: "Qwen3-VL-8B (reward model); LLaMA-2 7B inside OpenVLA-OFT (simulation policy)"
+  action_head: "Simulation policy: OpenVLA-OFT continuous action-chunk head (14-D actions, 25-action chunks). Real-world policy: ConRFT consistency-policy action head. Both are optimized with potential-based shaping from the frozen Robo-Dopamine 2.0 reward model"
+  action_head_category: regression
+  action_space: continuous
+  parameters: "Reward model 8B (Qwen3-VL-8B); OpenVLA-OFT policy ~7B with LoRA"
+  key_innovation: "History-conditioned pairwise process reward model: (1) source-aligned successful-reference panels for synthetic OOD queries and observed rollout-history panels for online queries while keeping the queried endpoints; (2) OOD-aware signed progress space with positive, robustness-preserving and negative branches; (3) Signed-Hop curriculum (large-Hop before small/zero-Hop pairs) with 25% transition-aware replay under a 400K pair budget. The frozen reward model provides potential-based shaping r + gamma*Phi(s_t+1) - Phi(s_t) for GRPO (RoboTwin) and ConRFT (real robot) policy RL."
+
+training:
+  reward_model: "Qwen3-VL-8B fine-tuned on 400K signed pairs in two 200K stages plus QA200K auxiliary mix; ~20 h on 8x H100"
+  policy_rl_sim: "OpenVLA-OFT task-specific SFT checkpoints, GRPO in RLinf, 128 parallel envs, groups of 8, 300 epochs (sparse baseline 1,000 epochs), LoRA BF16 + FSDP"
+  policy_rl_real: "ConRFT on dual Franka arms, 200 online episodes (Event Sparse baseline 300), single RTX 4090"
+
+benchmarks:
+  robotwin_v2_rl_3task:
+    place_empty_cup: 96.2
+    place_container_plate: 94.6
+    handover_block: 69.7
+    three_task_avg: 86.8
+    source: "Paper Table 3 (row C11 Full)"
+    date_reported: "2026-08-16"
+    eval_condition: "Task-specific OpenVLA-OFT policies RL-trained with GRPO for 300 epochs using Robo-Dopamine 2.0 shaping (OOD supervision + rollout history); only 3 RoboTwin 2.0 tasks, not the standard 50-task protocol"
+
+  robotwin_v2_rl_3task_baselines:
+    rlinf_sparse_1000ep_avg: 85.8
+    c00_controlled_avg: 72.2
+    c01_history_only_avg: 75.1
+    c10_ood_only_avg: 80.6
+    source: "Paper Table 3 (rows RLinf Sparse, C00, C01, C10)"
+    date_reported: "2026-08-16"
+    eval_condition: "Same 3 tasks; RLinf Sparse uses terminal success reward for 1,000 epochs, C00-C10 are reward-model ablations for 300 epochs"
+
+  real_world:
+    inserts_out_of_80: 71
+    full_sequences_out_of_20: 15
+    source: "Paper Table 4 (row C11 Full)"
+    date_reported: "2026-08-16"
+    eval_condition: "Repeated Insert Square (K=4 consecutive insertions) with ConRFT on dual Franka arms, 200 online episodes, 20 evaluation trials"
+
+  real_world_baselines:
+    event_sparse_inserts_out_of_80: 48
+    event_sparse_full_out_of_20: 8
+    c00_inserts_out_of_80: 46
+    c00_full_out_of_20: 7
+    c01_inserts_out_of_80: 67
+    c01_full_out_of_20: 13
+    c10_inserts_out_of_80: 50
+    c10_full_out_of_20: 9
+    source: "Paper Table 4 (rows Event Sparse, C00, C01, C10)"
+    date_reported: "2026-08-16"
+
+  reward_voc:
+    in_distribution: 0.991
+    temporal: 0.994
+    ood_negative: 0.994
+    ood_robust: 0.958
+    ood_temporal: 0.991
+    average: 0.986
+    source: "Paper Table 1 (row Robo-Dopamine 2.0 panel)"
+    date_reported: "2026-08-16"
+    eval_condition: "Trajectory-level visual order consistency of the reward model across five benchmark families (GRM-8B-Pro static baseline avg 0.958)"
+
+eval_conditions:
+  robotwin_v2_rl_3task: "RoboTwin 2.0 place_empty_cup, place_container_plate, handover_block; deterministic 128-episode evaluations"
+  real_world: "Dual Franka, multi-view RGB, repeated insertion task"
+
+tags:
+  - reward-model
+  - process-reward
+  - reinforcement-learning
+  - grpo
+  - openvla-oft
+  - qwen3-vl
+  - robotwin
+  - real-world
+  - ood-robustness

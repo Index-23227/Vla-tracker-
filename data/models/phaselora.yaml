@@ -1,0 +1,135 @@
+# Paper: PhaseLoRA: Control-Regime-Conditioned Low-Rank Adaptation for Continuous-Action Vision-Language-Action Policies
+# arXiv: 2608.15285
+
+name: PhaseLoRA
+full_name: "PhaseLoRA: Control-Regime-Conditioned Low-Rank Adaptation for Continuous-Action Vision-Language-Action Policies"
+organization: "Tsinghua University"
+date: "2026-08-15"
+paper_url: https://arxiv.org/abs/2608.15285
+code_url: https://github.com/Grinffin/PhaseLoRA
+venue: arXiv preprint
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (public openpi pi05_base checkpoint); VLM = gemma_2b_lora variant (PaliGemma/SigLIP), action expert = gemma_300m_lora variant"
+  llm: "Gemma 2B (inside pi0.5)"
+  action_head: "pi0.5 flow-matching action expert (action chunk dim 32, horizon H=10 on LIBERO, H=50 on real robot). PhaseLoRA replaces the static LoRA update in the action expert with Delta W_t = B_t A, where B_t = B_0 + P_t B_P + E_t B_E + (P_t E_t) B_PE is conditioned on two router-predicted descriptors (fine-control tendency P, event/boundary intensity E); VLM-side LoRA stays standard."
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "pi0.5 backbone largely frozen; trainable PhaseLoRA params = 4.41% of pi0.5 (VLM LoRA rank 48, action-expert LoRA rank 96) plus a GRU router (hidden 128)"
+  key_innovation: "Within-trajectory, control-regime-conditioned PEFT: a lightweight GRU router predicts fine-control tendency P_t and event/boundary intensity E_t at every action-chunk query from a visual-language prefix summary and 30 steps of action/gripper history; these descriptors modulate the LoRA left factor so the low-rank update direction (not only its scale) varies over the rollout while staying rank <= r. Router is weakly supervised by offline proxy targets from trajectory statistics (sigmoid of MAD-normalized motion magnitude and action jerk) with Huber + BCE losses; no manual phase labels."
+
+training:
+  method: "PEFT fine-tuning of pi0.5 per LIBERO suite; joint loss = flow-matching policy loss + 0.5 Huber(P) + 0.2 BCE(E) + 1e-5 Frobenius regularizer on B_P, B_E, B_PE"
+  optimizer: "AdamW, weight decay 1e-10, grad clip 1.0, LR warmup 10k steps to 5e-5 then constant, batch 32, 30k steps, bf16"
+  compute: "Single RTX 5090 per run, ~24 GPU-hours per suite run; ~2160 GPU-hours for all reported LIBERO runs"
+  real_world_data: "AgileX Piper arm, 4 tabletop tasks x 100 demonstrations, LeRobot framework"
+
+benchmarks:
+  libero:
+    libero_spatial: 85.3
+    libero_object: 88.0
+    libero_goal: 64.0
+    libero_long: 38.3
+    libero_avg: 68.9
+    source: "Paper Table 1 (row Ours)"
+    date_reported: "2026-08-15"
+    eval_condition: "Suite-specific PEFT on pi0.5 (4.41% trainable params); mean over 3 seeds, 10 trials per task per seed; std 1.2/2.0/2.0/3.2, avg std 2.4"
+
+  libero_baseline_lora:
+    libero_spatial: 60.7
+    libero_object: 41.3
+    libero_goal: 32.7
+    libero_long: 18.7
+    libero_avg: 38.3
+    source: "Paper Table 1 (row LoRA)"
+    date_reported: "2026-08-15"
+    eval_condition: "Standard LoRA on pi0.5, 2.70% trainable params, same protocol"
+
+  libero_baseline_high_rank_lora:
+    libero_spatial: 71.0
+    libero_object: 73.3
+    libero_goal: 55.3
+    libero_long: 27.0
+    libero_avg: 56.7
+    source: "Paper Table 1 (row High-rank LoRA)"
+    date_reported: "2026-08-15"
+    eval_condition: "Matched-parameter high-rank LoRA on pi0.5, 4.42% trainable params, same protocol"
+
+  libero_baseline_dora:
+    libero_spatial: 72.7
+    libero_object: 74.0
+    libero_goal: 57.3
+    libero_long: 29.7
+    libero_avg: 58.4
+    source: "Paper Table 1 (row DoRA)"
+    date_reported: "2026-08-15"
+    eval_condition: "DoRA on pi0.5, 4.42% trainable params, same protocol"
+
+  libero_baseline_lora_moe:
+    libero_spatial: 73.3
+    libero_object: 70.7
+    libero_goal: 58.0
+    libero_long: 31.0
+    libero_avg: 58.3
+    source: "Paper Table 1 (row LoRA-MoE)"
+    date_reported: "2026-08-15"
+    eval_condition: "LoRA-MoE on pi0.5, 4.47% trainable params, same protocol"
+
+  libero_baseline_lora_sp:
+    libero_spatial: 76.3
+    libero_object: 72.0
+    libero_goal: 56.0
+    libero_long: 32.3
+    libero_avg: 59.2
+    source: "Paper Table 1 (row LoRA-SP)"
+    date_reported: "2026-08-15"
+    eval_condition: "LoRA-SP on pi0.5, 4.42% trainable params, same protocol"
+
+  libero_spatial_ablation:
+    high_rank_lora: 71.0
+    random_descriptors: 66.3
+    scalar_gated_update: 73.7
+    without_proxy_supervision: 78.7
+    p_only: 80.7
+    e_only: 81.0
+    without_pe_interaction: 82.3
+    full_phaselora: 85.3
+    source: "Paper Table 3 (ablations on LIBERO-Spatial)"
+    date_reported: "2026-08-15"
+    eval_condition: "LIBERO-Spatial success rate (%), mean over 3 seeds"
+
+  real_world:
+    move_ball: 66.7
+    remove_cuboid: 70.0
+    pick_cube: 90.0
+    put_apple: 50.0
+    avg: 69.2
+    source: "Paper Table 2 (row Ours)"
+    date_reported: "2026-08-15"
+    eval_condition: "AgileX Piper arm, 4 tabletop tasks, 100 demos per task, 10 trials x 3 seeds per task; std 4.8/8.2/8.2/8.2, avg std 3.1"
+
+  real_world_baseline_high_rank_lora:
+    move_ball: 60.0
+    remove_cuboid: 53.3
+    pick_cube: 63.3
+    put_apple: 26.7
+    avg: 50.8
+    source: "Paper Table 2 (row High-rank LoRA)"
+    date_reported: "2026-08-15"
+    eval_condition: "Matched-parameter High-rank LoRA on pi0.5, same real-world protocol"
+
+eval_conditions:
+  libero: "Suite-specific fine-tuning; two RGB views (base + left wrist), 224x224; replan every 5 steps of a 10-step chunk"
+  real_world: "Piper arm with wrist + external RGB camera, no proprioception/force; H=50 chunk, replan every 10 steps"
+
+tags:
+  - pi0.5
+  - peft
+  - lora
+  - flow-matching
+  - libero
+  - real-world
+  - manipulation
+  - open-source

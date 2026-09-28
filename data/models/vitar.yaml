@@ -1,0 +1,77 @@
+# Paper: ViTaR: Visuo-Tactile Residual Adaptation for Foundation VLA Manipulation
+# arXiv: 2608.15816
+
+name: ViTaR
+full_name: "ViTaR: Visuo-Tactile Residual Adaptation for Foundation VLA Manipulation"
+organization: "Beijing Institute of Technology"
+date: "2026-08-16"
+paper_url: https://arxiv.org/abs/2608.15816
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+inference_hz: 10
+
+architecture:
+  backbone: "OpenVLA-OFT (fine-tuned by the authors on UniVTAC demos, then frozen)"
+  llm: "OpenVLA-OFT language backbone (unchanged)"
+  action_head: "Frozen OpenVLA-OFT action chunk plus a learned bounded residual: RAM selector MLP picks 'keep base' or one of a small set of 7D delta directions, and a tactile-conditioned MLP predicts a sigmoid gain applied uniformly over the chunk"
+  action_head_category: regression
+  action_space: "continuous (7D end-effector deltas, H-step chunks)"
+  parameters: null
+  key_innovation: "Tactile as an execution modulator rather than an action-generating input: Effect-Guided Modeling learns within-state residual rankings from restored short-horizon branch rollouts with a weighted Bradley-Terry objective; Residual Action Modulation distils this into a discrete residual choice plus continuous tactile-scaled gain, leaving the base VLA untouched."
+
+benchmarks:
+  univtac:
+    lift_bottle: 88.0
+    pull_out_key: 55.0
+    lift_can: 44.0
+    put_bottle: 35.0
+    insert_hdmi: 38.0
+    insert_tube: 69.0
+    grasp_classify: 100.0
+    univtac_avg: 61.3
+    source: "Paper Table 1 (ViTaR (ours) row)"
+    eval_condition: "UniVTAC simulation, 7 contact-rich tasks, 100 episodes per task; on top of frozen OpenVLA-OFT fine-tuned on 50 trajectories per task"
+
+  univtac_baselines:
+    act_avg: 32.6
+    vital_avg: 42.7
+    act_univtac_avg: 51.4
+    tactile_vla_avg: 40.0
+    pi05_avg: 48.3
+    openvla_oft_ref_avg: 30.7
+    source: "Paper Table 1 (baseline rows; ACT/VITaL/ACT+UniVTAC imported from UniVTAC report)"
+    eval_condition: "same UniVTAC 7-task protocol"
+
+  univtac_ablation:
+    ppo_option: 36.0
+    sac_residual: 32.0
+    without_contact_descriptor: 41.0
+    without_tactile_summary: 46.0
+    without_both: 36.0
+    fixed_scale: 45.0
+    egm_raw_score: 38.0
+    ram_egm_greedy: 36.0
+    source: "Paper Tables 2, 3, 4 and 5 (Avg. %)"
+    eval_condition: "same frozen OpenVLA-OFT reference, residual coordinates and safety limits"
+
+  real_world:
+    insert_hole: 40.0
+    lift_bottle: 65.0
+    wiping_the_board: 40.0
+    real_avg: 48.3
+    source: "Paper Results text, 'Physical-Robot Success Rates' paragraph"
+    eval_condition: "RealMan RM-65B 6-DoF arm, custom gripper with 9DTact tactile sensors; 20 trials per task"
+
+training:
+  dataset: "UniVTAC OFT demonstrations (50 trajectories/task, 350 total); 20 restored branch groups per task (100 rollouts, 160 preference pairs per task)"
+  method: "OFT fine-tuning of OpenVLA-OFT, then frozen; EGM (weighted Bradley-Terry + adaptability BCE) trained and frozen; RAM selector (cross-entropy) and gain model (weighted BCE) trained with AdamW, 120 epochs"
+  num_trajectories: 350
+  compute: "8x NVIDIA RTX 4090"
+
+eval_conditions:
+  univtac: "100 episodes per task"
+  real_world: "20 trials per task"
+
+tags: [tactile, visuo_tactile, residual_policy, contact_rich, preference_learning, openvla_oft, univtac, real_robot]
