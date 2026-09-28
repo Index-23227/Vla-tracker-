@@ -1,0 +1,43 @@
+name: XR-2
+full_name: "Scaling Bimanual Household Manipulation from 1,500 hours of Demonstrations to On-Policy Corrections"
+organization: "PrimeBot Research Institute (Swancor Advanced Materials Co., Ltd.); Peking University; Crobotia"
+date: "2026-09-03"
+paper_url: https://arxiv.org/abs/2609.03591
+code_url: https://huggingface.co/datasets/challenge-2026/challenge_data
+venue: "IROS 2026 workshop (submitted)"
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct vision-language backbone in a Mixture-of-Transformers design (5B total)"
+  llm: "Qwen3-VL-4B-Instruct"
+  action_head: "Flow-matching action diffusion transformer expert: 18 blocks, hidden 1024, 8 heads with 4 grouped KV heads, bidirectional self-attention + depth-aligned cross-attention (block i attends to the i-th exposed backbone layer) + SwiGLU, adaLN-zero timestep conditioning; action-prefix conditioning for asynchronous execution; 5 Euler steps; 50x25 action chunk (22 joint targets + 3 wheel velocities)"
+  action_head_category: flow_matching
+  parameters: "5B total"
+  key_innovation: "Releases 1,500 hours of bimanual household data (531.7 h / 32,518 real-robot teleoperation trajectories on the X2W mobile dual-arm robot + ~1,000 h in-the-wild UMI) and trains XR-2 with full-parameter two-stage training: expert-demonstration flow matching, then DAgger post-training on human-intervention corrections mixed 1:1 by trajectory count with a failure-weighted per-sub-task allocation (w_min=0.05, alpha=1)."
+
+benchmarks:
+  real_world:
+    clothes_folding_after_3_dagger_rounds: 93
+    source: "Paper Section IV-C text / Fig. 5(b) (success after third DAgger iteration)"
+    eval_condition: "X2W mobile bimanual robot, clothes folding with slight generalization (material size/color, initial robot pose); initialized from checkpoint trained on 18,695 expert trajectories over 10 sub-tasks; number of trials not reported"
+  real_world_dagger_rounds:
+    expert_only_start: 58
+    dagger_round_1: 74
+    dagger_round_2: 82
+    dagger_round_3: 93
+    source: "Paper Section IV-C text (clothes folding, 2.5 epochs of post-training per iteration)"
+  real_world_expert_data_scaling:
+    hours_30: 34
+    hours_120: 84
+    hours_160: 82
+    source: "Paper Section IV-B text (clothes folding success vs effective expert data hours; 160 h = 8,000 trajectories)"
+
+training:
+  datasets: ["PrimeBot real-robot teleoperation (32,518 trajectories, 57.4M frames, 531.7 h; folding station, laundry washer, sofa, laundry basket; 11 atomic skills)", "UMI in-the-wild bimanual garment manipulation (~1,000 h, 200+ households, 5,000 garments)", "Online DAgger human-correction trajectories"]
+  method: "Full-parameter training. Stage 1: conditional flow matching (t ~ Beta(1.0,1.5)) on expert demos. Stage 2: DAgger post-training initialized from Stage 1, DAgger:expert = 1:1 by trajectory count, DAgger budget per sub-task w_i = w_min + (1 - N w_min)(1 - s_i + eps)^alpha / sum_j(1 - s_j + eps)^alpha. Deployed at 10 Hz async inference on an RTX 4090, 30 Hz commands, 1000 Hz whole-body controller."
+
+eval_conditions:
+  real_world: "X2W mobile bimanual robot, clothes folding"
+
+tags: [flow_matching, qwen3-vl, bimanual, mobile_manipulation, household, dataset, umi, dagger, data_scaling, deformable, real_world]

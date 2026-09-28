@@ -1,0 +1,88 @@
+name: WISE
+full_name: "WISE: World-model-guided Imagination Scheduling for Efficient Post-training of Vision-Language-Action Models"
+organization: "Tsinghua University; Beijing Academy of Artificial Intelligence (BAAI)"
+date: "2026-09-03"
+paper_url: https://arxiv.org/abs/2609.03681
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (headline) and pi0, task-specifically fine-tuned then post-trained with WISE; VLA backbone frozen during WISE"
+  llm: "PaliGemma (pi0 / pi0.5 VLM backbone)"
+  action_head: "pi0/pi0.5 flow-matching action expert; only action-head parameters are updated by WISE (advantage-weighted flow-matching loss plus reference regularizer)"
+  action_head_category: flow_matching
+  parameters: "not reported (pi0 / pi0.5 base)"
+  key_innovation: "World-model-guided RL post-training that schedules imagination: a DINOv2-based scheduler selects interaction-relevant states; at those states M candidate action chunks are rolled out for a bounded number of chunks in a frozen action-conditioned multi-view Open-Sora-based world model (DROID-pretrained, task-adapted); a DINOv2 reward model scores imagined futures via progress, confidence and completion; reliability-filtered groups give GRPO-style relative advantages applied only to the real-context first action chunk. ~80% fewer imagined states / ~77% less GPU time than full imagination."
+
+benchmarks:
+  mimicgen:
+    stack: 88.5
+    coffee: 46.8
+    square: 50.0
+    threading: 53.1
+    mug_cleanup: 62.5
+    mimicgen_avg: 60.2
+    source: "Paper Table 1 (pi0.5 + WISE)"
+    eval_condition: "Five MimicGen D0 tasks; per-task fine-tuned pi0.5 (300 demos) then WISE post-training; 96 episodes per task with identical evaluation seeds"
+  mimicgen_pi0_variant:
+    stack: 84.4
+    coffee: 56.3
+    square: 36.5
+    threading: 68.8
+    mug_cleanup: 51.6
+    avg: 59.5
+    source: "Paper Table 1 (pi0 + WISE)"
+  mimicgen_baselines:
+    pi0_avg: 49.7
+    pi0_grpo_avg: 51.5
+    pi0_dsrl_avg: 50.0
+    pi0_dpo_avg: 53.8
+    pi0_5_avg: 52.3
+    source: "Paper Table 1 (base policies and post-training baselines, 5-task average)"
+  mimicgen_scheduling_ablation:
+    full_imagination_avg: 60.4
+    full_imagination_gpu_hours: 11.45
+    uniform_avg: 61.1
+    random_avg: 59.1
+    wise_avg: 68.3
+    wise_gpu_hours: 2.61
+    source: "Paper Table 3 (pi0 backbone, Stack/Threading/Mug Cleanup average)"
+  real_world:
+    avg_standard: 77.5
+    source: "Paper Table 4 (pi0.5 + WISE, standard setting, 4-task average)"
+    eval_condition: "Galaxea R1 Lite; Pick & Place, Two-Cube Stacking, Open, Open & Close; 100 demos/task; 20 trials per task"
+  real_world_generalization:
+    avg_generalization: 71.3
+    source: "Paper Table 4 (pi0.5 + WISE, generalization setting = average of height, lighting, distractor and language variations)"
+  real_world_per_task:
+    pick_place_std: 100.0
+    pick_place_gen: 95.0
+    two_cube_stacking_std: 80.0
+    two_cube_stacking_gen: 65.0
+    open_std: 80.0
+    open_gen: 75.0
+    open_close_std: 50.0
+    open_close_gen: 50.0
+    source: "Paper Table 4 (pi0.5 + WISE)"
+  real_world_baselines:
+    pi0_std: 60.0
+    pi0_gen: 42.5
+    pi0_dpo_std: 55.0
+    pi0_dpo_gen: 45.0
+    pi0_wise_std: 77.5
+    pi0_wise_gen: 68.8
+    pi0_5_std: 61.3
+    pi0_5_gen: 50.0
+    source: "Paper Table 4 (4-task averages)"
+
+training:
+  datasets: ["DROID (world-model pre-training)", "MimicGen D0 tasks (300 demos/task)", "Real-world Galaxea R1 Lite teleoperation (100 demos/task)"]
+  method: "Per-task SFT of pi0/pi0.5, then WISE post-training: scheduler-selected contexts, M candidate chunks per context, bounded world-model rollouts (each imagined twice), reward R = G - 0.2 B + 2.0 T, reliability filter (reward separation >= 0.02, ranking consistency >= 0.5, WM variation <= 0.2), group-normalized advantages; 256 rollouts per update; world model and VLA backbone frozen, action head trained."
+
+eval_conditions:
+  mimicgen: "task-specific SFT + WISE post-training, 96 episodes/task"
+  real_world: "Galaxea R1 Lite, 20 trials per task"
+
+tags: [flow_matching, pi0.5, pi0, reinforcement_learning, grpo, world_model, imagination, post_training, reward_model, mimicgen, real_world]
