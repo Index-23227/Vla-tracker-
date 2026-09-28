@@ -1,0 +1,116 @@
+name: GIFT-Feature
+full_name: "GIFT: Guided Intermediate Feature Training via Action-Oriented Structural Supervision for Robotic Manipulation"
+organization: "Institute of Automation, Chinese Academy of Sciences; University of Chinese Academy of Sciences; Tsinghua University; Fudan University; National University of Singapore"
+date: "2026-09-03"
+paper_url: https://arxiv.org/abs/2609.04193
+code_url: https://openphoenix-team.github.io/GIFT-pages
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Headline entry = GIFT-WAM-IDM: Fast-WAM-IDM world-action model (pretrained video diffusion transformer + action diffusion transformer, Mixture-of-Transformers). Paper also instantiates GIFT-VLA (StarVLA-OFT, Qwen3-VL-4B-Instruct) and GIFT-WAM-Fast (Fast-WAM)."
+  llm: "None for the headline WAM variant (GIFT-VLA variant uses Qwen3-VL-4B-Instruct)"
+  action_head: "Inverse-dynamics action diffusion expert: first denoises a future visual trajectory (2 steps), then denoises a 32-step action chunk (2 steps) with frozen future-video features as key-value context; trained with flow matching"
+  action_head_category: flow_matching
+  parameters: "6B (GIFT-WAM-IDM / GIFT-WAM-Fast); 4B (GIFT-VLA)"
+  key_innovation: "Training-time structured supervision of intermediate visual tokens with three complementary objectives: geometry alignment to a frozen VGGT teacher (angular + log-scale loss on shallow layer 6), object-centric 20-D affordance prediction (entity role, anchor-relative object pose, object-relative end-effector pose, closure), and instruction-conditioned goal-region mask reconstruction (BCE + Dice). Default no-injection design: auxiliary predictions are not fed to the action generator; teacher and heads are dropped at inference."
+
+benchmarks:
+  libero:
+    libero_spatial: 99.0
+    libero_object: 100.0
+    libero_goal: 98.6
+    libero_long: 96.4
+    libero_avg: 98.5
+    libero_plus_camera: 78.7
+    libero_plus_robot: 80.5
+    libero_plus_language: 90.2
+    libero_plus_light: 99.0
+    libero_plus_background: 89.2
+    libero_plus_noise: 97.2
+    libero_plus_layout: 83.3
+    libero_plus_avg: 87.8
+    source: "Paper Table 1 (LIBERO, GIFT-WAM-IDM) and Table 2 (LIBERO-Plus zero-shot, GIFT-WAM-IDM)"
+    eval_condition: "Trained on standard LIBERO only (50 epochs, 64 GPUs); LIBERO 50 rollouts/task; LIBERO-Plus full evaluation set, zero-shot (no LIBERO-Plus fine-tuning)"
+  robocasa:
+    robocasa_avg: 82.3
+    source: "Paper Table 3 (RoboCasa GR1 Tabletop 24 tasks, GIFT-WAM-IDM)"
+    eval_condition: "fine-tuned on RoboCasa GR1 Tabletop (1,000 demos/task), 50 rollouts per task"
+  robocasa_gr1_breakdown:
+    articulated_6_tasks: 84.3
+    pick_and_place_18_tasks: 81.7
+    source: "Paper Table 3 (GIFT-WAM-IDM group-wise success)"
+    eval_condition: "Same RoboCasa GR1 run as the headline; task-group breakdown"
+  gift_vla_variant:
+    libero_spatial: 99.0
+    libero_object: 99.2
+    libero_goal: 98.4
+    libero_long: 94.8
+    libero_total: 97.9
+    libero_plus_total: 79.6
+    robocasa_gr1_avg: 61.4
+    source: "Paper Tables 1, 2, 3 (GIFT-VLA, StarVLA-OFT + Qwen3-VL-4B, 4B)"
+    eval_condition: "Alternative instantiation; not the headline entry"
+  gift_wam_fast_variant:
+    libero_spatial: 97.8
+    libero_object: 99.6
+    libero_goal: 98.6
+    libero_long: 94.8
+    libero_total: 97.7
+    libero_plus_total: 72.6
+    robocasa_gr1_avg: 83.6
+    source: "Paper Tables 1, 2, 3 (GIFT-WAM-Fast, 6B)"
+    eval_condition: "Alternative instantiation; not the headline entry"
+  matched_baselines:
+    fast_wam_idm_libero_total: 98.0
+    fast_wam_idm_libero_plus_total: 82.6
+    fast_wam_idm_robocasa_avg: 73.9
+    fast_wam_libero_total: 97.6
+    fast_wam_libero_plus_total: 60.0
+    fast_wam_robocasa_avg: 74.6
+    starvla_oft_libero_total: 96.6
+    starvla_oft_libero_plus_total: 75.0
+    starvla_oft_robocasa_avg: 48.8
+    source: "Paper Tables 1, 2, 3 (matched baselines)"
+  libero_plus_injection_ablation:
+    gift_vla_with_inject: 76.7
+    gift_vla_without_inject: 79.6
+    gift_wam_fast_with_inject: 72.3
+    gift_wam_fast_without_inject: 72.6
+    gift_wam_idm_with_inject: 87.6
+    gift_wam_idm_without_inject: 87.8
+    source: "Paper Table 5 (LIBERO-Plus total)"
+  real_world:
+    avg: 87.5
+    source: "Paper Table 8 (GIFT-WAM-IDM, original settings, 4-task average)"
+    eval_condition: "xArm7 (Tasks 1-2) and ARX X5 dual-arm (Tasks 3-4), 100 demos/task, 10 trials per task"
+  real_world_per_task:
+    task1_color_conditioned_placement: "9/10"
+    task2_layer_conditioned_placement: "8/10"
+    task3_articulated_cabinet: "10/10"
+    task4_bimanual_test_tube_insertion: "8/10"
+    source: "Paper Table 8 (GIFT-WAM-IDM, original settings)"
+    eval_condition: "xArm7 (Tasks 1-2) and ARX X5 dual-arm (Tasks 3-4), 100 demos/task, 10 trials per task"
+  real_world_baselines:
+    fast_wam_idm_avg: 52.5
+    gift_vla_avg: 57.5
+    starvla_oft_avg: 35.0
+    source: "Paper Table 8 (original settings)"
+  real_world_perturbation:
+    task2_level1: "7/10"
+    task2_level2: "7/10"
+    task4_level1: "8/10"
+    task4_level2: "5/10"
+    source: "Paper Table 9 (GIFT-WAM-IDM; Level1/2 = lighting / +background for Task 2, novel background objects / +15-20 deg rotation for Task 4)"
+
+training:
+  datasets: ["LIBERO (4 suites)", "RoboCasa GR1 Tabletop (24 tasks, 1,000 demos/task)", "Real-world: 400 teleoperated demos (4 tasks x 100) on xArm7 and ARX X5"]
+  method: "Benchmark-specific post-training (no extra pre-training) with L_native + 1.0*L_geo + 0.5*L_aff + 1.0*L_goal. Geometry targets from frozen VGGT, affordance targets from simulator poses (real: Grounding DINO + SAM2 + Orient Anything V2), goal masks from simulator segmentation. WAM variants: AdamW lr 1e-4, 64 GPUs; GIFT-VLA: 32 GPUs, 60k steps."
+
+eval_conditions:
+  libero: "trained on LIBERO; LIBERO-Plus zero-shot"
+  robocasa: "fine-tuned (GR1 Tabletop 24 tasks)"
+  real_world: "xArm7 + ARX X5, 10 trials/task"
+
+tags: [flow_matching, world_action_model, inverse_dynamics, auxiliary_supervision, vggt, affordance, libero, libero_plus, robocasa, real_world, bimanual]
