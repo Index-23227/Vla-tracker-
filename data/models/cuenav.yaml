@@ -1,0 +1,69 @@
+# Paper: Seeing What Matters: Visual Cue Guided Video Planning for Generalizable Robot Navigation
+# arXiv: 2609.16737
+
+name: CueNav
+full_name: "Seeing What Matters: Visual Cue Guided Video Planning for Generalizable Robot Navigation"
+organization: "Technical University of Munich (MIRMI) / MIT CSAIL / Orebro University (AASS)"
+date: "2026-09-16"
+paper_url: https://arxiv.org/abs/2609.16737
+code_url: "https://cuenav.github.io"
+venue: arXiv
+open_source: true
+model_type: navigation
+
+architecture:
+  backbone: "Wan2.2-5B video diffusion transformer (TI2V backbone adapted to video-to-video prediction), LoRA-post-trained as an action-free video planner; VAE frozen; 192x128 at 10 Hz, N=21 context frames, M=16 predicted frames"
+  action_head: "Embodiment-specific flow-based Inverse-Dynamics Model: shared convolutional encoder over dense flow fields (AllTracker) + spatiotemporal Transformer with 3D RoPE + FFN regressing q=15 continuous velocity commands (p=1 padding flow fields); trained with MSE"
+  action_head_category: inverse_dynamics
+  parameters: "~5B video planner (Wan2.2-5B) + IDM (IDM size not stated in the paper)"
+  key_innovation: "Visual cues rendered into the observation guide the video planner: a Bird's-Eye-View map (robot + goal, path unspecified) for global task context, and a partially visible robot body for embodiment context; one shared video planner is deployed across robots via per-embodiment flow-based IDMs"
+
+training:
+  base_model: "Wan2.2-5B"
+  method: "Action-free LoRA post-training of the video DiT with a diffusion-forcing autoregressive objective on navigation videos (loss only on future frames); separate IDM per platform trained with MSE on paired flow fields and robot actions"
+  data: "~2 hours of navigation data per platform (Clearpath Husky A300, Unitree Go2) in indoor/outdoor industrial surroundings; DeepMind Lab: 300 successful goal-reaching trajectories in 3x3 mazes"
+  hardware: "Post-training on a single AMD MI300X GPU; onboard inference on NVIDIA Jetson Thor (~4 s per visual plan + IDM)"
+
+benchmarks:
+  real_world:
+    success_rate: 0.933
+    spl: 0.913
+    navigation_error_m: 0.84
+    trajectory_length_m: 3.02
+    source: "Paper Table I, CueNav row"
+    date_reported: "2026-09-16"
+    eval_condition: "Zero-shot semantic-conditioned goal navigation, Clearpath Husky A300, 3 unseen semantic targets x 10 runs = 30 trials; success = stop within 1.5 m of target center; SR/SPL are fractions (0-1)"
+
+  real_world_semantic_nav_baselines:
+    streamvln_sr: 0.467
+    streamvln_spl: 0.418
+    streamvln_ne_m: 1.88
+    internvla_n1_sr: 0.733
+    internvla_n1_spl: 0.665
+    internvla_n1_ne_m: 1.22
+    cuenav_wo_body_sr: 0.900
+    cuenav_wo_body_spl: 0.833
+    cuenav_wo_body_ne_m: 0.70
+    cuenav_wo_idm_sr: 0.667
+    cuenav_wo_idm_spl: 0.615
+    cuenav_wo_idm_ne_m: 1.25
+    source: "Paper Table I"
+    eval_condition: "StreamVLN and InternVLA-N1 evaluated with released checkpoints; w/o IDM replaces the IDM with MASt3R camera-trajectory recovery + heuristic controller"
+
+  real_world_narrow_track:
+    track_1_5m_completion_rate: 100
+    track_1_0m_completion_rate: 70
+    source: "Paper Sec. IV-C text (Fig. 7)"
+    eval_condition: "Husky A300 (0.7 m wide) traversing box-built narrow tracks not seen in post-training, 10 runs per width; comparison-method values shown only in Fig. 7"
+
+  deepmind_lab_maze:
+    maze_6x6_success: 55
+    maze_6x6_success_wo_map: 30
+    source: "Paper Sec. IV-D text (Fig. 9)"
+    eval_condition: "DeepMind Lab mazes, planner post-trained on 3x3 mazes only, 20 random episodes per maze size, zero-shot on 6x6; w/o map = egocentric view without BEV cue; other maze sizes shown only in Fig. 9"
+
+eval_conditions:
+  real_world: "Husky A300 zero-shot semantic goal navigation, 30 trials"
+  deepmind_lab_maze: "3x3-trained, evaluated up to 6x6, 20 episodes per size"
+
+tags: [navigation, video-planning, video-model, wan2.2, inverse-dynamics, optical-flow, lora, bev-map, embodiment-aware, cross-embodiment, quadruped, wheeled-robot, real-robot, deepmind-lab]
