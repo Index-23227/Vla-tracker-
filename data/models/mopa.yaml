@@ -1,0 +1,114 @@
+# Paper: MoPA: Coordinated Mobile Manipulation via Subsystem-Specific Perception Alignment
+# arXiv: 2609.12081
+
+name: MoPA
+full_name: "MoPA: Coordinated Mobile Manipulation via Subsystem-Specific Perception Alignment"
+organization: "THU / Xspark AI / HKUST (GZ) / HKU"
+date: "2026-09-14"
+paper_url: https://arxiv.org/abs/2609.12081
+code_url: "https://MoPA-policy.github.io"
+venue: arXiv
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL (model size not stated in the paper) encoding head- and wrist-camera RGB + language; two mutually masked learned query banks (Manip Query, Mobile Query; 8 queries per bank) appended to the VLM token sequence"
+  action_head: "Joint action head: structured Mixture-of-Transformers decoder with separate Manipulation and Mobility expert streams; each query bank attends only to its matched action stream while the two action streams exchange information every layer; coupled conditional flow matching jointly generates both action chunks (4 Euler steps)"
+  action_head_category: flow_matching
+  parameters: "Not stated in the paper"
+  key_innovation: "Dual Perceptual Streams (subsystem-specific perception extracted from a shared vision-language context via isolated query banks) + Perception2Action Adaptation (query states updated jointly with their matched action tokens in every MoT layer) + coupled, branch-normalized conditional flow matching for synchronous base/arm action generation"
+
+training:
+  base_model: "Qwen3-VL"
+  method: "End-to-end training of VLM backbone, query banks and joint action head with branch-normalized coupled flow matching; AdamW, cosine decay, batch 64, 100k steps (simulation) / 50k steps (real, single multi-task policy)"
+  data: "ManiSkill-HAB: 1,000 successful demonstrations per skill, one policy per suite; real world: 200 demonstrations per task (4 tasks)"
+  hardware: "Not stated in the paper"
+
+benchmarks:
+  maniskill_hab_settable:
+    pick_apple: 84.3
+    pick_bowl: 89.0
+    place_apple: 72.7
+    place_bowl: 83.7
+    open_fridge: 98.3
+    open_drawer: 94.0
+    close_drawer: 96.3
+    mean: 88.3
+    source: "Paper Table I, MoPA (Ours) row"
+    date_reported: "2026-09-14"
+    eval_condition: "ManiSkill-HAB SetTable, Fetch mobile manipulator, head+wrist RGB; 3 runs x 100 held-out episodes per skill, max 200 steps; mean = macro-average of 7 skill success rates; H=4 chunk, 11-D whole-body action"
+
+  maniskill_hab_tidyhouse:
+    pick: 73.9
+    place: 70.4
+    mean: 72.2
+    source: "Paper Table II, MoPA (Ours) row"
+    date_reported: "2026-09-14"
+    eval_condition: "ManiSkill-HAB TidyHouse, 18 pick/place skills over nine object categories; same protocol as SetTable"
+
+  maniskill_hab_preparegroceries:
+    pick: 66.6
+    place: 69.0
+    mean: 67.8
+    source: "Paper Table II, MoPA (Ours) row"
+    date_reported: "2026-09-14"
+    eval_condition: "ManiSkill-HAB PrepareGroceries, 18 pick/place skills; same protocol as SetTable"
+
+  maniskill_hab_settable_baselines:
+    dp3_mean: 21.6
+    act_mean: 23.6
+    dp_mean: 28.8
+    rdt_1b_mean: 42.9
+    ac_dit_mean: 55.6
+    pi0_mean: 59.1
+    anchorvla_mean: 64.0
+    pi05_mean: 68.9
+    mobilewam_mean: 73.0
+    geohat_mean: 79.3
+    incom_mean: 83.8
+    source: "Paper Table I, Mean column"
+    eval_condition: "baselines as listed; DP3, AC-DiT, GeoHAT, InCoM use depth input"
+
+  maniskill_hab_tidyhouse_preparegroceries_baselines:
+    act_tidyhouse_mean: 16.9
+    dp_tidyhouse_mean: 15.2
+    dp3_tidyhouse_mean: 30.5
+    dspv2_tidyhouse_mean: 21.7
+    incom_tidyhouse_mean: 47.8
+    geohat_tidyhouse_mean: 51.8
+    pi05_tidyhouse_mean: 55.2
+    act_preparegroceries_mean: 14.8
+    dp_preparegroceries_mean: 9.1
+    dp3_preparegroceries_mean: 15.7
+    dspv2_preparegroceries_mean: 16.9
+    incom_preparegroceries_mean: 40.5
+    geohat_preparegroceries_mean: 40.2
+    pi05_preparegroceries_mean: 60.7
+    source: "Paper Table II, Mean columns"
+    eval_condition: "baselines as listed"
+
+  maniskill_hab_settable_ablation:
+    direct_vlm_conditioning: 58.4
+    shared_query: 74.7
+    wo_joint_attention: 70.3
+    wo_corresponding_query_access: 66.3
+    queries_per_bank_4: 74.6
+    queries_per_bank_16: 82.5
+    queries_per_bank_8_full: 88.3
+    source: "Paper Table III"
+    eval_condition: "SetTable average success rate; same backbone and training/evaluation protocol"
+
+  real_world:
+    fruit_collection: 85.0
+    color_matched_sorting: 90.0
+    cross_table_fruit_transfer: 75.0
+    microwave_object_retrieval: 55.0
+    avg: 76.3
+    source: "Paper Sec. IV-D text (Fig. 3c)"
+    date_reported: "2026-09-14"
+    eval_condition: "HexFellow Trigger-A3 omnidirectional base + IOTA lift + two AgileX PiPER-X arms, 3 RGB-D cameras; single multi-task policy, 200 demos per task, 20 trials per task, full-task success; 17-D whole-body action. Paper states avg exceeds strongest baseline pi0.5 by 12.5 points; baseline per-task values are shown only in the figure"
+
+eval_conditions:
+  maniskill_hab: "SetTable / TidyHouse / PrepareGroceries, one policy per suite, 3x100 episodes per skill"
+  real_world: "4 mobile-manipulation tasks, 20 trials each"
+
+tags: [mobile-manipulation, whole-body, mixture-of-transformers, query-banks, flow-matching, qwen3-vl, maniskill-hab, real-robot, bimanual, coupled-flow-matching]

@@ -1,0 +1,145 @@
+# Paper: What Makes an Efficient VLA? Navigating Action-Head Design, Scaling, and Latency
+# arXiv: 2609.13984
+
+name: EffVLA
+full_name: "What Makes an Efficient VLA? Navigating Action-Head Design, Scaling, and Latency"
+organization: "CASIA / UCAS / AI Lab, The Yangtze River Delta / Li Auto Inc. / BUPT / UCL / University of Edinburgh"
+date: "2026-09-23"  # arXiv stamp on the PDF (2609.13984v2, 23 Sep 2026); v1 date not stated in the paper
+paper_url: https://arxiv.org/abs/2609.13984
+code_url: https://github.com/MindVLA-Team/EFFVLA
+venue: "Not stated in the paper"
+open_source: true  # code URL given in the paper; weight release not stated
+model_type: vla
+
+architecture:
+  backbone: "SigLIP2-So400m vision encoder (256 px) + Qwen2.5-3B language backbone"
+  llm: "Qwen2.5-3B"
+  action_head: "4-layer transformer-block stack reading the language backbone's KV cache (KV-share), initialized by copying the last 4 transformer layers of Qwen2.5-3B (VLM-INIT); single-pass L1 regression of an 8-step action chunk"
+  action_head_category: regression
+  parameters: "~3.75B total (action head ~0.35B)"
+  key_innovation: "Recipe distilled from a controlled, latency-paired sweep of 63 trained cells: (1) initialize the action head from the backbone's last layers and keep it simple (single-pass L1; flow matching, extra passes and heavier decoders stop paying once VLM-INIT is used), (2) spend scaling budget on the action head, (3) stop at ~3.75B where returns saturate. 39.2 ms per chunk on RTX 5090 (bf16, torch.compile)"
+
+training:
+  base_model: "Public SigLIP2-So400m and Qwen2.5-3B checkpoints"
+  method: "Stage A: action-head pretraining on DROID with backbones frozen; Stage B: full-VLA fine-tuning on LIBERO for 100k steps with all modules unfrozen. Real robot: Stage A on the SO-ARM101 community corpus, Stage B on merged teleop demos of 5 tasks"
+  data: "DROID (Stage A), LIBERO (Stage B); SO-ARM101 community corpus + own teleop demos for the real robot"
+
+inference_hz: null
+
+benchmarks:
+  libero:
+    libero_spatial: 98.6
+    libero_object: 99.2
+    libero_goal: 99.0
+    libero_long: 96.0
+    libero_avg: 98.2
+    libero_plus_background: 96.7
+    libero_plus_robot: 69.8
+    libero_plus_camera: 68.3
+    libero_plus_language: 87.5
+    libero_plus_noise: 66.1
+    libero_plus_layout: 84.8
+    libero_plus_light: 97.4
+    libero_plus_avg: 79.8
+    source: "Paper Table 4, EFFVLA (ours) row (standard LIBERO + LIBERO-Plus per axis); LIBERO-Plus mean from Table 1 / Appendix Table 5"
+    date_reported: "2026-09-23"
+    eval_condition: "DROID action-head pretraining then LIBERO fine-tuning (100k steps). LIBERO-Plus zero-shot, ~1000 rollouts per cell; the paper's LIBERO-Plus score (79.8) is its four-suite mean, not a weighted all-episode total"
+
+  libero_plus_per_suite:
+    spatial: 84.4
+    object: 84.5
+    goal: 75.5
+    long: 74.7
+    avg: 79.8
+    source: "Paper Appendix Table 5, EFFVLA l/l/l row"
+    eval_condition: "LIBERO-Plus success rate broken down by the four task suites"
+
+  libero_baselines_from_abot_m0:
+    abot_m0_libero_avg: 98.6
+    openvla_oft_libero_avg: 97.1
+    ript_vla_libero_avg: 97.5
+    pi0_libero_avg: 94.4
+    pi0_fast_libero_avg: 85.5
+    openvla_libero_avg: 76.5
+    source: "Paper Table 4 (baseline scores copied from Yang et al. ABot-M0 Tables 3-4)"
+
+  libero_plus_action_head_substrates:
+    fast_ar: 57.7
+    oft_mlp: 79.0
+    oft_tf_random_init: 72.7
+    oft_tf_random_init_4pass: 74.8
+    effvla_vlm_init: 79.8
+    effvla_vlm_init_4pass: 79.6
+    pi0_flow_matching: 77.4
+    pi0_flow_matching_vlm_init: 75.2
+    source: "Paper Table 1 (LIBERO-Plus mean, V=L=A=l)"
+    eval_condition: "controlled ablation: same SigLIP2 + Qwen2.5-3B backbone and pipeline, only the action head varies"
+
+  latency_rtx5090_ms_per_chunk:
+    effvla: 39.2
+    oft_mlp: 40.1
+    oft_tf_random_init: 39.9
+    pi0_flow_matching: 53.7
+    source: "Paper Appendix Table 10 (and Figure 1c)"
+    eval_condition: "RTX 5090, bf16, batch 1, chunk size 8, torch.compile, mean of 100 runs"
+
+  libero_plus_deviation_costs:
+    action_head_s: 70.4
+    action_head_m: 78.0
+    language_backbone_s: 78.1
+    vision_encoder_s: 76.4
+    action_head_g: 78.3
+    language_backbone_g_7b: 77.8
+    vision_encoder_g_1b: 78.9
+    source: "Paper Appendix Tables 5 and 10 (EFFVLA module-scale sweep)"
+    eval_condition: "EFFVLA with one module shrunk (s, m) or enlarged (g), others at l"
+
+  libero_plus_seed_check:
+    effvla_mean: 79.0
+    effvla_sd: 1.2
+    oft_mean: 77.9
+    oft_sd: 1.5
+    source: "Paper Appendix Table 13 (five training seeds)"
+
+  libero_plus_no_droid_pretraining:
+    oft_lll_with_stage_a: 79.0
+    oft_lll_without_stage_a: 76.9
+    pi0_lll_with_stage_a: 77.4
+    pi0_lll_without_stage_a: 55.8
+    source: "Paper Appendix Table 9"
+    eval_condition: "effect of removing DROID action-head pretraining (Stage A)"
+
+  simpler_env:
+    simpler_widowx_stack_block: 37.5
+    simpler_widowx_put_carrot_on_plate: 50.0
+    simpler_widowx_put_spoon_on_towel: 75.0
+    simpler_widowx_put_eggplant_in_basket: 83.3
+    simpler_avg: 61.5
+    source: "Paper Appendix Table 12, EFFVLA row"
+    date_reported: "2026-09-23"
+    eval_condition: "SimplerEnv Bridge (WidowX), 4 tasks, 24 trials per task (96 per model); training data for this replication not detailed in the paper"
+
+  simpler_env_substrate_baselines:
+    oft_mlp_overall: 59.4
+    tf_random_init_overall: 54.2
+    pi0_flow_matching_overall: 60.5
+    source: "Paper Appendix Table 12"
+    eval_condition: "same substrates, same benchmark protocol"
+
+  real_world:
+    one_object_cube_successes_of_10: 10
+    one_object_marker_successes_of_10: 9
+    two_objects_eraser_cube_successes_of_10: 9
+    two_objects_marker_cube_successes_of_10: 7
+    three_objects_successes_of_10: 5
+    total_successes_of_50: 40
+    source: "Paper Appendix Table 15"
+    date_reported: "2026-09-23"
+    eval_condition: "SO-ARM101 6-DOF arm, 5 language-specified sorting tasks, 10 trials each, one multi-task model; feasibility result, no on-hardware baselines"
+
+eval_conditions:
+  libero: "standard 4 suites + LIBERO-Plus 7 perturbation axes (zero-shot), DROID-pretrained head then LIBERO fine-tuning"
+  simpler_env: "Bridge WidowX, 4 tasks x 24 trials"
+  real_world: "SO-ARM101, 5 sorting tasks x 10 trials"
+
+tags: [efficient, latency, action-head, vlm-init, l1-regression, design-study, scaling, qwen2.5, siglip2, kv-share, libero, libero-plus, simplerenv, real-robot, so-arm101]
