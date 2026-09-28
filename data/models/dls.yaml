@@ -1,0 +1,95 @@
+# Paper: Where Success Breaks: Failure-Boundary Learning for Robust Vision-Language-Action Models
+# arXiv: 2609.06114
+
+name: DLS
+full_name: "DLS: Discover-Localize-Shape Failure-Boundary Learning for Robust Vision-Language-Action Models"
+organization: "Showlab, National University of Singapore"
+date: "2026-09-05"
+paper_url: https://arxiv.org/abs/2609.06114
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (also pi0) flow-matching VLA, post-trained"
+  action_head: "Flow-matching action expert (pi0 / pi0.5), action chunk H=8; post-trained with critic-free Directional Boundary Shaping in the velocity field (Flow-SDE sampler for exploration)"
+  action_head_category: flow_matching
+  key_innovation: "Failure-Boundary Learning: real-grounded prior from Sim-Real co-training (50 real demos + 1,000 MimicGen twin demos), on-policy digital-twin rollouts, Semantic Progress Localization using privileged simulator predicates to assign phase-level credit (failure locus gets zero), and push-pull Directional Boundary Shaping with a Softplus ranking on mirrored-branch Mahalanobis errors, anchored by real-data SFT; no action likelihoods or critics."
+
+training:
+  base_model: "pi0.5 and pi0"
+  method: "Stage 1: Sim-Real co-training (alpha=0.5, lr 2.5e-5); Stage 2: online RL-style boundary shaping in 128 parallel ManiSkill digital twins (lr 8e-6, beta=1.0, eta=0.1) with L_DBS + lambda * L_SFT(real), EMA old-policy sync"
+  data: "50 real teleoperated demos per task + 1,000 MimicGen simulated trajectories from 5 seeds per task"
+  hardware: "4x NVIDIA H200"
+
+benchmarks:
+  real_world:
+    pick_place: 90.0
+    sweep: 73.3
+    plugin: 90.0
+    avg: 84.4
+    source: "Paper Table 1, pi0.5 DLS (ours) row, ID. columns"
+    date_reported: "2026-09-05"
+    eval_condition: "Franka Research 3, single front RGB camera, in-distribution (980 Lux, standard initial position), 30 rollouts per task, 50 real demos"
+
+  real_world_unseen:
+    pick_place: 80.0
+    sweep: 66.7
+    plugin: 70.0
+    avg: 72.2
+    source: "Paper Table 1, pi0.5 DLS (ours) row, Unseen. columns"
+    eval_condition: "unseen: altered tablecloth/background, 560 Lux single-side light, randomized object positions, 30 rollouts per task"
+
+  real_world_pi0:
+    pick_place: 83.3
+    sweep: 70.0
+    plugin: 83.3
+    avg: 78.9
+    source: "Paper Table 1, pi0 DLS (ours) row, ID. columns"
+    eval_condition: "DLS on pi0 backbone, in-distribution"
+
+  real_world_pi0_unseen:
+    pick_place: 80.0
+    sweep: 63.3
+    plugin: 70.0
+    avg: 71.1
+    source: "Paper Table 1, pi0 DLS (ours) row, Unseen. columns"
+    eval_condition: "DLS on pi0 backbone, unseen conditions"
+
+  real_world_baselines_pi05:
+    real_only_n50_avg: 67.8
+    real_only_n100_avg: 78.9
+    sim_real_sft_avg: 56.7
+    grpo_avg: 74.4
+    ppo_avg: 81.1
+    source: "Paper Table 1, pi0.5 baseline rows, Avg. ID. column"
+    eval_condition: "baselines on pi0.5, in-distribution"
+
+  real_world_baselines_pi05_unseen:
+    real_only_n50_avg: 52.2
+    real_only_n100_avg: 54.4
+    sim_real_sft_avg: 41.1
+    grpo_avg: 64.4
+    ppo_avg: 67.8
+    source: "Paper Table 1, pi0.5 baseline rows, Avg. Unseen. column"
+    eval_condition: "baselines on pi0.5, unseen conditions"
+
+  real_world_reward_ablation_unseen:
+    step_count_penalty_pick_place: 60.0
+    distance_potential_pick_place: 66.7
+    spl_pick_place: 80.0
+    step_count_penalty_sweep: 53.3
+    distance_potential_sweep: 50.0
+    spl_sweep: 66.7
+    step_count_penalty_plugin: 56.7
+    distance_potential_plugin: 63.3
+    spl_plugin: 70.0
+    source: "Paper Table 2 (Unseen SR, mean over 3 seeds, pi0.5)"
+    eval_condition: "ablation: SPL vs alternative progress-aware rewards"
+
+eval_conditions:
+  real_world: "Franka Research 3, 10 Hz, 30 rollouts per task, in-distribution"
+  real_world_unseen: "Franka Research 3, unseen visual/position conditions"
+
+tags: [flow_matching, pi0.5, pi0, rl-post-training, digital-twin, sim-real-cotraining, maniskill, mimicgen, progress-reward, critic-free, real-robot, franka]

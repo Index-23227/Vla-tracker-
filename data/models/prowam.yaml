@@ -1,0 +1,133 @@
+# Paper: Learning to Use Imagination: Progress-Conditioned Future Utilization for World Action Models
+# arXiv: 2609.06578
+
+name: ProWAM
+full_name: "ProWAM: Progress-Conditioned World Action Model (Learning to Use Imagination: Progress-Conditioned Future Utilization for World Action Models)"
+organization: "Harbin Institute of Technology (Shenzhen) / Great Bay University / UESTC"
+date: "2026-09-06"
+paper_url: https://arxiv.org/abs/2609.06578
+code_url: https://github.com/JiuTian-VL/ProWAM
+venue: "IEEE TPAMI (submitted; arXiv preprint)"
+open_source: true
+model_type: world_action_model
+
+architecture:
+  backbone: "Joint World Action Model following Fast-WAM: pretrained Wan2.2-5B video DiT + text encoder + video VAE, Mixture-of-Transformers with shared video-action attention"
+  action_head: "1B flow-matching action expert DiT (hidden dim 1024, action horizon 32); action-to-future attention path modulated by HPIM (inter-progress global gate + intra-progress future-latent relevance) conditioned on progress tokens from SS-DTPE"
+  action_head_category: flow_matching
+  parameters: "~5B video DiT (Wan2.2-5B) + 1B action expert + small SS-DTPE progress encoder"
+  key_innovation: "Execution progress as an explicit intermediate representation: a Self-Supervised Dual-Temporal Progress Encoder (short-term action-observation encoder + Mamba long-term aggregator + Progress Attention, trained with semantic progress alignment and temporal structure objectives) drives Hierarchical Progress-Conditioned Imagination Modulation that gates and re-weights how action tokens attend to imagined future video latents."
+
+training:
+  base_model: "Wan2.2-5B (video DiT, text encoder, VAE) with Fast-WAM-style joint WAM"
+  method: "Two stages: (1) SS-DTPE trained alone, 5 epochs on 4x H100; (2) SS-DTPE frozen, joint WAM + HPIM trained 10 epochs on 8x H100 with L_act + L_vid + 0.05 * L_gate (weak keyframe labels from gripper/contact anchors)"
+  data: "Benchmark demonstrations (LIBERO 50 demos/task; RoboTwin 2.0 2,500 clean + 25,000 randomized; VLABench; RoboEval; Mikasa-Robo 250/task); real world 150-200 demos per task"
+  hardware: "NVIDIA H100"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 100.0
+    libero_goal: 98.8
+    libero_long: 97.8
+    libero_avg: 99.1
+    source: "Paper Table 1, ProWAM (Ours) row"
+    date_reported: "2026-09-06"
+    eval_condition: "Standard four LIBERO suites, 2000 trials across 40 tasks, no embodied pre-training beyond Wan2.2 video prior"
+
+  libero_ablation_components:
+    baseline_long: 94.8
+    ss_dtpe_only_long: 96.2
+    hpim_only_long: 96.6
+    full_long: 97.8
+    source: "Paper Table 8, LIBERO Long column"
+    eval_condition: "ablation: SS-DTPE / HPIM removed (baseline = Fast-WAM-style joint WAM)"
+
+  libero_ablation_progress_source:
+    time_only_long: 95.2
+    ss_dtpe_long: 97.8
+    source: "Paper Table 14, LIBERO Long column"
+    eval_condition: "ablation: normalized time as progress vs SS-DTPE"
+
+  robotwin_v2:
+    robotwin_v2_clean: 93.9
+    robotwin_v2_randomized: 92.8
+    robotwin_v2_avg: 93.4
+    source: "Paper Table 2, ProWAM (Ours) row"
+    date_reported: "2026-09-06"
+    eval_condition: "Standard multi-task protocol (2,500 clean + 25,000 randomized demos), 50+ tasks, 100 trials per task, no embodied pre-training"
+
+  robotwin_v2_baselines:
+    fast_wam_avg: 91.9
+    flowwam_avg: 92.5
+    lingbot_va_avg: 92.2
+    motus_avg: 87.8
+    pi05_avg: 79.8
+    source: "Paper Table 2, baseline rows (Avg. column)"
+    eval_condition: "baselines as reported in Table 2"
+
+  vlabench:
+    success_rate: 68.4
+    intention_score: 85.4
+    progress_score: 81.2
+    source: "Paper Table 3, ProWAM (Ours) row"
+    date_reported: "2026-09-06"
+    eval_condition: "Ten tasks, 50 episodes per task"
+
+  roboeval:
+    success_rate: 0.375
+    task_progression: 0.494
+    source: "Paper Table 4, ProWAM (Ours) row"
+    date_reported: "2026-09-06"
+    eval_condition: "Eight bimanual task families, 30 task variations, 100 episodes per task-variation pair; values as fractions"
+
+  mikasa_robo:
+    shell_game_touch: 94
+    intercept_medium: 68
+    remember_color_3: 48
+    remember_color_5: 24
+    remember_color_9: 20
+    avg: 50.8
+    source: "Paper Table 5, ProWAM (Ours) row"
+    date_reported: "2026-09-06"
+    eval_condition: "Five memory-dependent tasks, 250 demos per task, 100 evaluation episodes per task"
+
+  real_world:
+    galaxea_long_horizon_avg: 72
+    source: "Paper Table 6, Galaxea R1 Lite platform, ProWAM row, Avg. column"
+    date_reported: "2026-09-06"
+    eval_condition: "Galaxea R1 Lite, 8 progress-aware long-horizon tasks, 50 trials each, full-task success"
+
+  real_world_agilex_long_horizon:
+    avg: 71
+    source: "Paper Table 6, AgileX Cobot Magic platform, ProWAM row, Avg. column"
+    eval_condition: "AgileX Cobot Magic, 8 long-horizon tasks, 50 trials each"
+
+  real_world_generalization_galaxea:
+    avg: 69
+    source: "Paper Table 7, Galaxea R1 Lite platform, ProWAM row, Avg. column"
+    eval_condition: "Galaxea R1 Lite, 4 tasks with lighting/scene/object variations, 50 trials each"
+
+  real_world_generalization_agilex:
+    avg: 68
+    source: "Paper Table 7, AgileX Cobot Magic platform, ProWAM row, Avg. column"
+    eval_condition: "AgileX Cobot Magic, 4 tasks with lighting/scene/object variations, 50 trials each"
+
+  real_world_baselines_galaxea_long_horizon:
+    openvla_avg: 40
+    openvla_oft_avg: 49
+    pi05_avg: 64
+    dreamvla_avg: 46
+    fast_wam_avg: 56
+    source: "Paper Table 6, Galaxea R1 Lite platform, baseline rows (reproduced), Avg. column"
+    eval_condition: "baselines reproduced under the same training and deployment settings"
+
+eval_conditions:
+  libero: "fine-tuned, four suites, 2000 trials"
+  robotwin_v2: "multi-task, clean + randomized, 100 trials per task"
+  vlabench: "10 tasks x 50 episodes"
+  roboeval: "8 task families, 30 variations, 100 episodes each"
+  mikasa_robo: "5 tasks x 100 episodes"
+  real_world: "Galaxea R1 Lite and AgileX Cobot Magic, 150-200 demos/task, 50 trials/task"
+
+tags: [world-action-model, flow_matching, video-diffusion, wan2.2, progress-estimation, mamba, attention-modulation, libero, robotwin, vlabench, roboeval, mikasa-robo, bimanual, real-robot]

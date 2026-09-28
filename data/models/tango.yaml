@@ -1,0 +1,103 @@
+# Paper: TANGO: Humanoid Navigation in Cluttered Environments with a Whole-Body Vision-Language-Action Model
+# arXiv: 2609.09158
+
+name: TANGO
+full_name: "TANGO: Humanoid Navigation in Cluttered Environments with a Whole-Body Vision-Language-Action Model"
+organization: "UC Berkeley / Peking University / Tsinghua University / HKU / Princeton University"
+date: "2026-09-08"
+paper_url: https://arxiv.org/abs/2609.09158
+project_url: https://tango-vla.github.io
+code_url: null
+venue: arXiv
+open_source: false
+model_type: navigation_vla
+
+architecture:
+  backbone: "Qwen2.5-VL-7B (system-2), warm-started from InternVLA-N1 weights, with BATS history token sampling"
+  llm: "Qwen2.5-VL-7B"
+  action_head: "Flow-matching MM-DiT action expert (system-1) with training-time real-time chunking, predicting 29-DoF whole-body joint angles + base 6D rotation (+ planar deltas); outputs tracked by off-the-shelf SONIC whole-body tracker (system-0)"
+  action_head_category: flow_matching
+  parameters: "~7B VLM + MM-DiT action expert"
+  key_innovation: "First whole-body vision-language navigation VLA that directly predicts 29-DoF joint-space humanoid actions, trained purely on simulated data from the Plan-Edit-Track pipeline (A* planning, SONIC gait synthesis, potential-field obstacle-aware motion editing, tracker feasibility filter), deployed zero-shot on Unitree G1."
+
+training:
+  base_model: "InternVLA-N1 (Qwen2.5-VL-7B)"
+  method: "End-to-end joint training of VL backbone and action expert for one epoch, lr 1e-5, L = L_CE (VideoQA co-training) + 20 * L_FM"
+  data: "64,633 simulated whole-body traversal trajectories from VLNVerse and SAGE-3D (original + obstacle-augmented), 211 RTX PRO 6000 GPU-hours to generate; plus VideoQA"
+  hardware: "RTX PRO 6000 server for inference; Jetson Orin NX onboard for tracker"
+
+inference_hz: 2
+
+benchmarks:
+  vlnverse_val_unseen:
+    ne: 3.72
+    osr: 71.07
+    sr: 52.89
+    spl: 40.18
+    source: "Paper Table 1, Ours row, Val Unseen columns"
+    date_reported: "2026-09-08"
+    eval_condition: "VLNVerse fine-grained val-unseen split (825 trajectories), trained on 3,963 VLNVerse-train trajectories; TANGO with physical low-level control while baselines use teleportation"
+
+  vlnverse_val_seen:
+    ne: 3.90
+    osr: 70.31
+    sr: 54.69
+    spl: 40.18
+    source: "Paper Table 1, Ours row, Val Seen columns"
+    date_reported: "2026-09-08"
+    eval_condition: "VLNVerse fine-grained val-seen split (423 trajectories)"
+
+  vlnverse_baselines_unseen:
+    internvla_n1_sr: 45.56
+    internvla_n1_spl: 34.98
+    uni_navid_sr: 45.00
+    uni_navid_spl: 39.42
+    rdp_sr: 48.60
+    rdp_spl: 42.72
+    source: "Paper Table 1, Val Unseen columns"
+    eval_condition: "baselines in teleportation setting"
+
+  vlnverse_augmented_cluttered:
+    ne: 4.01
+    sr: 43.75
+    spl: 31.83
+    collision_rate: 9.90
+    source: "Paper Table 2, Ours row"
+    date_reported: "2026-09-08"
+    eval_condition: "Obstacle-augmented VLNVerse-unseen scenes, physical execution"
+
+  vlnverse_augmented_cluttered_baselines:
+    internvla_n1_humanoidpf_sr: 41.88
+    internvla_n1_humanoidpf_spl: 29.49
+    internvla_n1_humanoidpf_collision_rate: 15.81
+    internvla_n1_unitree_wbc_sr: 35.00
+    source: "Paper Table 2, fine-tuned InternVLA-N1 rows"
+    eval_condition: "modular baselines (HumanoidPF uses additional LiDAR)"
+
+  vlnverse_augmented_ablation:
+    wo_rtc_sr: 10.94
+    wo_motion_editing_sr: 36.25
+    scalebfm_tracker_sr: 40.94
+    source: "Paper Table 5"
+    eval_condition: "ablation on augmented VLNVerse-unseen"
+
+  real_world_successes_of_15:
+    short_horizon_2d: 12
+    long_horizon_2d: 8
+    cluttered_3d: 10
+    source: "Paper Table 3, Ours row (SR as successful trials out of 15)"
+    date_reported: "2026-09-08"
+    eval_condition: "Unitree G1 zero-shot sim-to-real, 3 scenes x 5 trials per setting; counts, not percentages"
+
+  real_world_mean_collisions_per_trial:
+    short_horizon_2d: 0.40
+    long_horizon_2d: 1.07
+    cluttered_3d: 0.73
+    source: "Paper Table 3, Ours row, Coll. columns"
+    eval_condition: "mean collisions per trial (lower is better)"
+
+eval_conditions:
+  vlnverse: "IsaacSim photorealistic indoor scenes, physical whole-body execution via MuJoCo + SONIC"
+  real_world: "Unitree G1, zero-shot, 15 trials per setting"
+
+tags: [humanoid, navigation, vln, whole-body-control, flow_matching, qwen2.5-vl, internvla-n1, real-time-chunking, sim-to-real, unitree-g1, synthetic-data]

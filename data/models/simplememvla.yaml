@@ -1,0 +1,142 @@
+# Paper: SimpleMemVLA: A Simple but Effective Native-Video Memory for Vision-Language-Action Models
+# arXiv: 2609.05533
+
+name: SimpleMemVLA
+full_name: "SimpleMemVLA: A Simple but Effective Native-Video Memory for Vision-Language-Action Models"
+organization: "HUST; Renmin University of China; Tsinghua University; Peking University; ModelBest (OpenBMB); BAAI; Zhongguancun Academy"
+date: "2026-09-02"
+paper_url: https://arxiv.org/abs/2609.05533
+code_url: https://github.com/OpenBMB/SimpleMemVLA
+venue: arXiv preprint
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Qwen3.5-4B VLM (native video interface with plaintext timestamps); head-camera history enters as timestamped video, current wrist views as images"
+  llm: "Qwen3.5-4B"
+  action_head: "DiT-style flow-matching action expert conditioned only on the hidden states + token embeddings of a backbone-generated one-sentence sub-task span, plus a single proprioception token; few Euler steps; action chunk H=16-30"
+  action_head_category: flow_matching
+  parameters: "Qwen3.5-4B backbone + DiT flow-matching expert (expert size not stated)"
+  key_innovation: >
+    No dedicated memory module: sampled visual history (e.g. 60 s at 2 fps = 120 frames, ~5.6k tokens)
+    is fed intact to the VLM through its native video channel with plaintext timestamps, avoiding
+    "write-time commitment" of retrieval / compression / recurrent memories. The backbone generates a
+    sub-task sentence whose contextual hidden states are the only path from history to the action
+    expert. Streaming prefix prefill of the shared history during chunk execution cuts decision
+    latency from 1.02 s to 0.68 s (single-frame model ~0.65 s) on one H100.
+
+training:
+  method: "Joint loss L = lambda_sub * CE(sub-task span, teacher-forced VLM-annotated sub-task labels) + lambda_act * flow-matching action loss; one model per simulation suite"
+  optimizer: "AdamW, LR 1e-5 (backbone) / 5e-5 (action head), cosine decay, gradient clipping"
+  hardware: "128 H100 GPUs; 14-28 h wall-clock per suite (Table 8)"
+  real_robot_data: "180 demos (Cover Blocks) and 308 demos (Put Back Block) on a dual-arm Piper robot"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.2
+    libero_object: 98.8
+    libero_goal: 98.0
+    libero_long: 95.0
+    libero_avg: 97.5
+    libero_plus_camera: 76.9
+    libero_plus_robot: 68.4
+    libero_plus_language: 68.6
+    libero_plus_light: 96.4
+    libero_plus_background: 96.8
+    libero_plus_noise: 74.2
+    libero_plus_layout: 78.0
+    libero_plus_total: 78.4
+    source: "Paper Table 5 (LIBERO, 500 trials per suite) and Table 6 (LIBERO-Plus zero-shot transfer, 10,030 tasks)"
+    date_reported: "2026-09-02"
+    eval_condition: "fine-tuned on standard LIBERO (one model for 4 suites); LIBERO-Plus zero-shot with the same model"
+  rmbench:
+    rmbench_observe_pickup: 65
+    rmbench_rearrange: 100
+    rmbench_put_back: 100
+    rmbench_swap_blocks: 100
+    rmbench_swap_towers: 93
+    rmbench_single_memory_avg: 91.6
+    rmbench_battery: 90
+    rmbench_rank: 100
+    rmbench_cover: 98
+    rmbench_press: 100
+    rmbench_place_mat: 100
+    rmbench_multi_memory_avg: 97.0
+    rmbench_overall: 94.0
+    source: "Paper Table 1 (RMBench, single multi-task checkpoint, 100 seeds per task; averages over nine tasks exclude Place-Mat)"
+    date_reported: "2026-09-02"
+    eval_condition: "single multi-task model, streaming deployment"
+  robomme:
+    robomme_counting: 91.5
+    robomme_permanence: 96.0
+    robomme_reference: 82.5
+    robomme_imitation: 83.0
+    robomme_avg: 88.3
+    source: "Paper Table 2 (RoboMME category-level success, average over 16 tasks)"
+    date_reported: "2026-09-02"
+    eval_condition: "single model for the suite, 50 episodes per task"
+  robomme_memory_interface_ablation:
+    retrieval_avg: 31.5
+    token_compression_avg: 22.6
+    recurrent_state_avg: 20.6
+    native_context_avg: 88.3
+    source: "Paper Table 2 (controlled variants on the same SimpleMemVLA stack)"
+    eval_condition: "same backbone, data, sub-task supervision and action head; only memory interface differs"
+  mikasa_robo:
+    shell_game: 99
+    intercept: 83
+    remember_color_3: 71
+    remember_color_5: 58
+    remember_color_9: 59
+    mikasa_avg: 74.0
+    source: "Paper Table 3 (MIKASA-Robo five tasks)"
+    date_reported: "2026-09-02"
+    eval_condition: "single model for the suite"
+  robomemarena:
+    transferring_tsr: 35.8
+    transferring_csr: 37.4
+    occlusion_tsr: 64.3
+    occlusion_csr: 76.8
+    counting_tsr: 71.4
+    counting_csr: 79.3
+    sequence_tsr: 75.5
+    sequence_csr: 81.1
+    avg_tsr: 63.6
+    avg_csr: 72.1
+    source: "Paper Table 4 (RoboMemArena, 26 tasks, official protocol)"
+    date_reported: "2026-09-02"
+    eval_condition: "single model for the suite"
+  real_world:
+    cover_blocks_success: 58.3
+    put_back_block_success: 70.0
+    source: "Paper Table 7 (dual-arm Piper; Cover Blocks 35/60, Put Back Block 28/40)"
+    date_reported: "2026-09-02"
+    eval_condition: "fine-tuned on 180 / 308 real demos; 10 trials per initial configuration"
+
+inference_latency_note: "decision latency 0.68 s with streaming prefill (1.02 s full recompute) on one H100, 60 s history"
+
+eval_conditions:
+  libero: "fine-tuned on LIBERO 4 suites; LIBERO-Plus zero-shot"
+  rmbench: "single multi-task checkpoint; Aloha-AgileX bimanual, 14-D actions"
+  robomme: "single-arm Panda, 60 s window at 2 fps"
+  mikasa_robo: "single-arm Panda, 3 s window at 20 fps"
+  robomemarena: "single-arm Franka, 126 s window at 1 fps"
+  real_world: "dual-arm Piper robot, 60 s history at 2 fps, 25 Hz control"
+
+tags:
+  - vla
+  - memory
+  - long-horizon
+  - video-context
+  - flow-matching
+  - qwen3.5
+  - 4B
+  - libero
+  - libero-plus
+  - rmbench
+  - robomme
+  - mikasa-robo
+  - robomemarena
+  - real-robot
+  - bimanual
+  - open-source

@@ -1,0 +1,111 @@
+# Paper: WorldAgen: Unified State-Action Prediction with Test-Time World Model Training
+# arXiv: 2609.08162
+
+name: WorldAgen
+full_name: "WorldAgen: Unified State-Action Prediction with Test-Time World Model Training"
+organization: "Northwestern University"
+date: "2026-09-08"
+paper_url: https://arxiv.org/abs/2609.08162
+code_url: https://worldagen.github.io
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "GR-1/Seer-style GPT video policy with a Qwen3 Transformer backbone (24 layers, 12 heads); MAE-pretrained ViT-B visual encoder on static + wrist RGB, Perceiver Resampler token compression, CLIP ViT-B/32 text encoder, MLP state/action embeddings"
+  llm: "Qwen3 architecture (configured as 24-layer / 12-head, trained as policy backbone)"
+  action_head: "Agent (policy) head: MLP decoder from action placeholder tokens to 7-D action chunks (separate linear layers for 6-D arm and gripper; gripper thresholded at 0.5). World-model head: ViT decoder predicting future image patches. Paper describes the action loss as cross-entropy."
+  action_head_category: regression
+  parameters: "370M total, 120M trainable"
+  key_innovation: "Single Transformer with a task-conditioned agent head and a task-agnostic world-model head, separated by a Mixed Unidirectional Attention Mask (local mask blocks action leakage; global mask hides the instruction from the world head). At deployment, two-stage Test-Time Training: random exploratory rollouts relabeled with a 'no-lang' token, then LoRA updates of the shared backbone using only the observation-prediction loss (policy head frozen)."
+
+training:
+  method: "Joint pretraining with L = L_a + lambda * L_o (teacher forcing); test-time LoRA adaptation (rank 128 on CALVIN, 64 on LIBERO; single-epoch single-step, AdamW lr 0.005) on ~204 (CALVIN) or 6x6 per scene (LIBERO) exploratory samples"
+  data: "CALVIN and LIBERO demonstrations"
+  hardware: "Pretraining on 4x H100 (~60 h CALVIN, ~5 h LIBERO); TTT on one RTX 4090 (~8 min/task CALVIN, ~2 min/scene LIBERO)"
+
+benchmarks:
+  calvin_split_unspecified:
+    task_1: 96.6
+    task_2: 88.5
+    task_3: 78.5
+    task_4: 68.7
+    task_5: 60.5
+    avg_len: 3.93
+    source: "Paper Table 1, WorldAgen-TTT row"
+    date_reported: "2026-09-08"
+    eval_condition: "CALVIN 5-chain evaluation with test-time training; train/test split (ABC->D vs ABCD->D) not stated in the paper, kept out of the canonical calvin block"
+
+  calvin_no_ttt:
+    task_1: 96.3
+    task_2: 87.7
+    task_3: 76.8
+    task_4: 67.3
+    task_5: 59.1
+    avg_len: 3.87
+    source: "Paper Table 1, WorldAgen row"
+    eval_condition: "variant: pretrained model without test-time training; same unspecified split"
+
+  calvin_baselines:
+    seer_large_avg_len: 3.83
+    seer_avg_len: 3.64
+    clover_avg_len: 3.53
+    diffuser_actor_3d_avg_len: 3.27
+    gr1_avg_len: 3.06
+    source: "Paper Table 1"
+    eval_condition: "baselines as listed in the same table"
+
+  libero:
+    libero_spatial: 93.0
+    libero_object: 79.5
+    libero_goal: 91.0
+    libero_long: 79.0
+    source: "Paper Appendix Table 11 (LIBERO subsets)"
+    date_reported: "2026-09-08"
+    eval_condition: "Standard four LIBERO suites; paper reports no 4-suite average. Table 11 does not say whether TTT is applied; its LIBERO-10 value (79.0) equals WorldAgen-TTT in Table 2"
+
+  libero_long_comparison:
+    worldagen_ttt: 79.0
+    worldagen_no_ttt: 75.5
+    seer: 78.7
+    mpi: 77.3
+    mvp: 68.2
+    openvla: 54.0
+    mt_act: 41.0
+    source: "Paper Table 2 (LIBERO-10 average success)"
+    eval_condition: "LIBERO-10 (LIBERO-Long) only; TTT per test scene"
+
+  ablation_world_modeling:
+    calvin_without_world_modeling_avg_len: 2.96
+    calvin_with_world_modeling_avg_len: 3.87
+    libero_without_world_modeling: 46.5
+    libero_with_world_modeling: 75.5
+    source: "Paper Table 3 (text quotes 78.0% for LIBERO with world modeling; table value used)"
+
+  ablation_ttt_method_calvin:
+    no_ttt: 3.87
+    lora_ttt: 3.93
+    full_finetune_ttt: 3.85
+    source: "Paper Appendix Table 8 (CALVIN avg len)"
+
+  ablation_noise:
+    calvin_no_ttt: 3.87
+    calvin_ttt_no_noise: 3.93
+    calvin_ttt_gaussian_noise: 3.90
+    libero_no_ttt: 75.5
+    libero_ttt_no_noise: 79.0
+    libero_ttt_gaussian_noise: 78.0
+    source: "Paper Table 6 (Gaussian observation noise std 0.1)"
+
+  ablation_backbone:
+    gpt2_calvin_avg_len: 3.32
+    gpt2_libero_10: 75.0
+    qwen3_calvin_avg_len: 3.87
+    qwen3_libero_10: 75.5
+    source: "Paper Appendix Table 10"
+
+eval_conditions:
+  calvin: "5-chain avg length; split not stated in paper; headline with TTT"
+  libero: "four suites from Appendix Table 11; LIBERO-10 main comparison with TTT"
+
+tags: [world-model, test-time-training, lora, joint-state-action-prediction, attention-mask, qwen3, gr1-style, calvin, libero]

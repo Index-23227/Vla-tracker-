@@ -1,0 +1,106 @@
+# Paper: ContextFlow: In-Context Flow Matching for Robot Manipulation
+# arXiv: 2609.06852
+
+name: ContextFlow
+full_name: "ContextFlow: In-Context Flow Matching for Robot Manipulation"
+organization: "KAUST / UC Berkeley"
+date: "2026-09-06"
+paper_url: https://arxiv.org/abs/2609.06852
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pi0-initialized SigLIP vision encoder + small Gemma-style context expert (randomly initialized) + pi0 action expert"
+  action_head: "Conditional flow-matching action expert (pi0-initialized, LoRA r=32) that attends to context-expert tokens and denoises an action chunk in K=10 Euler steps; block-wise causal mask lets context tokens be cached"
+  action_head_category: flow_matching
+  parameters: "not reported (context/action experts are 'significantly smaller' than Gemma)"
+  key_innovation: "In-context imitation learning in a flow-matching VLA: in-context demonstrations (8 image frames, 128 proprio states, 128 actions) are condensed by perceiver-style multimodal context compressors (32 learnable queries per modality) into compact tokens for a context expert; the action expert generates continuous action chunks conditioned on these, adapting to unseen task configurations without any gradient updates at test time."
+
+training:
+  base_model: "pi0 (SigLIP + action expert weights)"
+  method: "LoRA (rank 32, alpha 32) on action expert; full fine-tune of vision encoder and context expert; conditional flow-matching loss with s ~ Beta(1.5, 1)"
+  config: "20K iterations, batch 32, cosine LR peak 2.5e-5 / min 2.5e-6, 1000 warm-up steps"
+  data: "LIBERO seen tasks (8/10 per Spatial and Object suite) plus LIBERO-Goal and LIBERO-10 demos; ALOHA real-world dataset of 1,318 trajectories over 25 task configurations"
+
+benchmarks:
+  libero_incontext_unseen:
+    libero_spatial_s1: 86.0
+    libero_spatial_s2: 42.0
+    libero_spatial_avg: 64.0
+    libero_object_o1: 76.0
+    libero_object_o2: 90.0
+    libero_object_avg: 83.0
+    avg: 73.5
+    source: "Paper Table 1, ContextFlow (Ours) row"
+    date_reported: "2026-09-06"
+    eval_condition: "non-standard: trained on 8 seen tasks per suite, evaluated on 2 held-out unseen task configurations per suite (LIBERO-Spatial, LIBERO-Object) with one in-context demonstration and no fine-tuning; 50 trials per task"
+
+  libero_incontext_unseen_baselines:
+    openvla_oft_avg: 40.0
+    pi0_avg: 44.5
+    pi0_ft_1demo_avg: 72.5
+    icrt_avg: 38.5
+    contextar_avg: 53.5
+    contextflow_plain_avg: 64.0
+    source: "Paper Table 1, Avg. column"
+    eval_condition: "same unseen-configuration split; pi0 FT = fine-tuned with 1 demo of the unseen task"
+
+  libero_incontext_compressor_ablation:
+    no_compressor: 64.0
+    image_compressor_only: 68.0
+    image_and_state_action_compressors: 73.5
+    source: "Paper Table 2, Avg. column"
+    eval_condition: "ablation: context compressors"
+
+  libero_incontext_modality_ablation:
+    without_state_action: 29.0
+    without_image: 45.0
+    without_text: 64.5
+    full: 73.5
+    source: "Paper Table 3, Avg. column"
+    eval_condition: "ablation: remove one in-context modality"
+
+  libero_incontext_action_head_ablation:
+    mlp_l1_20k: 58.0
+    diffusion_100k: 33.5
+    flow_matching_20k: 73.5
+    source: "Paper Table 5, Avg. column"
+    eval_condition: "ablation: action head type"
+
+  libero_incontext_expanded_data:
+    spatial: 55.0
+    object: 85.0
+    goal: 29.0
+    libero_10: 3.0
+    avg: 43.0
+    baseline_4suites_avg: 36.8
+    source: "Paper Table 7, '4 suites + LIBERO-90' row (baseline = '4 suites' row)"
+    eval_condition: "training adds LIBERO-90; 2 unseen tasks per suite across all four suites"
+
+  real_world_successes_of_10:
+    pick_place_pear_left: 2
+    pick_place_orange_left: 5
+    pick_place_banana_right: 4
+    pick_place_kiwi_right: 4
+    uncap_red_pen_left: 4
+    put_red_egg_in_box: 6
+    source: "Paper Table 8, ContextFlow row (success counts out of 10)"
+    date_reported: "2026-09-06"
+    eval_condition: "ALOHA, unseen task configurations, 10 trials each; counts not percentages"
+
+  real_world_icrt_successes_of_10:
+    pick_place_pear_left: 2
+    pick_place_orange_left: 0
+    pick_place_banana_right: 0
+    pick_place_kiwi_right: 0
+    uncap_red_pen_left: 0
+    put_red_egg_in_box: 0
+    source: "Paper Table 8, ICRT row"
+    eval_condition: "baseline: ICRT on the same ALOHA unseen configurations"
+
+eval_conditions:
+  libero_incontext_unseen: "8 seen / 2 unseen task split per suite; in-context demonstration from unseen task; no test-time fine-tuning"
+  real_world: "ALOHA bimanual platform, 1 high + 2 wrist cameras, 10 trials per unseen configuration"
+
+tags: [in-context-learning, flow_matching, pi0, perceiver, context-compressor, few-shot, libero, aloha, bimanual, real-robot]

@@ -1,0 +1,63 @@
+# Paper: Reasoning Without Inference Cost: Latent Semantic Scaffolding for Robot VLA Policies
+# arXiv: 2609.04893
+
+name: LSS
+full_name: "LSS: Latent Semantic Scaffolding (Reasoning Without Inference Cost: Latent Semantic Scaffolding for Robot VLA Policies)"
+organization: "The Chinese University of Hong Kong (CLOVER Lab)"
+date: "2026-09-04"
+paper_url: https://arxiv.org/abs/2609.04893
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "H-RDT: DINO + SigLIP vision encoders, frozen T5-XXL command encoder, 2B diffusion-transformer backbone"
+  action_head: "H-RDT flow-matching action head (16 action tokens); training-only LSAHead (2-layer MLP 2176->4096) aligns action tokens to T5 embeddings of reasoning text, discarded at inference"
+  action_head_category: flow_matching
+  parameters: "~2B (H-RDT); LSAHead is training-only"
+  key_innovation: "Training-time auxiliary cosine alignment of action-token representations to physical-reasoning rationale embeddings (Gemini-generated, T5-encoded), with Dense LSS aligning each token to its own manipulation-phase rationale; zero inference overhead since the head and reasoning encoder are dropped."
+
+training:
+  base_model: "H-RDT"
+  method: "Three stages: (i) EgoDex human pretrain, (ii) LSS human pretrain with L_flow + 0.1 * L_LSS on 500 Apple-Vision-Pro adjust_bottle episodes, (iii) robot finetune (50 episodes, 22,000 steps)"
+  data: "500 human adjust_bottle teleoperation episodes (48-D hand action); RoboTwin 2.0 aloha-agilex 50 episodes per task"
+
+benchmarks:
+  robotwin_v2_subset:
+    adjust_bottle: 90
+    shake_bottle: 54
+    move_can_pot: 26
+    source: "Paper Table II, R4 (Dense LSS) column"
+    date_reported: "2026-09-04"
+    eval_condition: "RoboTwin 2.0 aloha-agilex, 3 single tasks only (adjust_bottle in-distribution, shake_bottle and move_can_pot held out from alignment), 50-episode / 22k-step finetune, 100 rollouts; not the standard full RoboTwin 2.0 average"
+
+  robotwin_v2_subset_pooled_lss:
+    adjust_bottle: 85
+    shake_bottle: 39
+    move_can_pot: 19
+    source: "Paper Table II, R3 (Pooled LSS) column"
+    eval_condition: "Pooled (episode-level) alignment variant"
+
+  robotwin_v2_subset_baselines:
+    h_rdt_adjust_bottle: 70
+    h_rdt_shake_bottle: 34
+    h_rdt_move_can_pot: 9.1
+    avp_no_lss_adjust_bottle: 79
+    avp_no_lss_shake_bottle: 45
+    avp_no_lss_move_can_pot: 20
+    source: "Paper Table II, R1 (H-RDT baseline) and R2 (+human data, no LSS) columns"
+    eval_condition: "baselines reproduced under identical Stage-3 protocol"
+
+  adjust_bottle_ablation_ladder:
+    reasoning_as_language_input: 71
+    reasoning_token_prediction_loss: 74
+    lss_to_trivial_instruction_text: 58
+    frozen_backbone_at_finetune: 0
+    source: "Paper Table I (Runs C, D, trivial target, F)"
+    eval_condition: "ablation on adjust_bottle, demo_randomized, 100 rollouts"
+
+eval_conditions:
+  robotwin_v2_subset: "RoboTwin 2.0 aloha-agilex 14-DOF, 3 tasks, 100 rollouts each"
+
+tags: [h-rdt, flow_matching, diffusion-transformer, auxiliary-loss, representation-alignment, reasoning, human-demonstrations, egodex, apple-vision-pro, robotwin, bimanual]

@@ -1,0 +1,80 @@
+# Paper: CR-VLA-Force: Learning Control-aware Compliance VLA Model for Robust Contact-rich Robotic Manipulation
+# arXiv: 2609.05832
+# Note: unrelated to CR-VLA (Continuous Reasoning, arXiv 2606.00229). The paper body calls the method "CC-VLA".
+
+name: CR-VLA-Force
+full_name: "CR-VLA-Force (CC-VLA): Learning Control-aware Compliance VLA Model for Robust Contact-rich Robotic Manipulation"
+organization: "Huawei (CloudRobo) / South China University of Technology / Ola Dimensions / The Hong Kong Polytechnic University"
+date: "2026-09-05"
+paper_url: https://arxiv.org/abs/2609.05832
+code_url: null
+venue: "arXiv (CloudRobo Technical Report)"
+open_source: false
+
+architecture:
+  backbone: "pi0 (PaliGemma VLM + flow-based action expert)"
+  action_head: "pi0 flow-matching action expert predicting action chunks (H=40) of TCP pose, gripper width and feedforward F/T; cross-modal fusion expert (sparse MoE, 4 experts) added as residual branch; executed by a VLA-guided adaptive compliance controller at 500 Hz"
+  action_head_category: flow_matching
+  parameters: "pi0-scale + historical force-sequence encoder + 4-expert sparse MoE fusion expert"
+  key_innovation: "Control-aware slow-fast hierarchy: a force-aware pi0 predicts both desired pose and feedforward force; a historical force-sequence encoder (patch MLP + learnable force token cross-attention) and a MoE cross-modal fusion expert are trained in a second stage as residual refinement on top of a stage-1 vision-language fine-tune; a heuristic (Rprop-style) variable-stiffness admittance controller tracks the predicted force/pose. Data collected via shared teleoperation with compensated virtual impedance."
+
+training:
+  base_model: "pi0"
+  method: "Two-stage: (I) fine-tune pi0 with block-wise attention masks on vision/language/proprio; (II) add cross-modal fusion expert (MoE) as residual branch and optimize with flow-matching loss"
+  data: "Real-world UR5e demos: 50 per task for button-pressing, window-opening, board-wiping; 100 for plug-insertion"
+  hardware: "UR5e + wrist RealSense D435 + side camera + 6-DoF F/T sensor; inference 1 Hz, action horizon 40, force sampled every 0.1 s, control 500 Hz"
+
+benchmarks:
+  real_world:
+    avg_success_six_conditions: 89.2
+    source: "Paper Section 4.2 text (average over PB-base, PB-OOD, PI-base, PI-pro, OW-base, WB conditions; per-task values shown only in Fig. 6)"
+    date_reported: "2026-09-05"
+    eval_condition: "UR5e contact-rich tasks (button press, plug insertion, window opening, board wiping), 24-25 trials per condition"
+
+  real_world_baselines:
+    diffusion_policy_avg: 31.3
+    pi0_avg: 47.3
+    pi05_avg: 44.7
+    pi0_with_force_state_avg: 60.2
+    forcevla_avg: 73.2
+    source: "Paper Section 4.2 text"
+    eval_condition: "baselines, same six conditions"
+
+  real_world_force_tracking_error:
+    cc_vla_wb_base: 5.52
+    cc_vla_wb_ood: 8.78
+    dp_wb_base: 83.83
+    dp_wb_ood: 79.33
+    pi0_wb_ood: 81.20
+    pi05_wb_base: 76.12
+    pi05_wb_ood: 82.19
+    pi0_with_force_wb_base: 28.10
+    pi0_with_force_wb_ood: 38.15
+    forcevla_wb_base: 35.57
+    forcevla_wb_ood: 52.33
+    source: "Paper Table 1 (percent relative Z-force tracking error vs 40 N demo; lower is better; pi0 WB-Base = NA)"
+    eval_condition: "board-wiping, WB-OOD = board 6 cm lower than demonstrations"
+
+  real_world_controller_ablation:
+    without_vg_acc: 17.73
+    fixed_low_stiffness: 7.92
+    fixed_high_stiffness: 13.30
+    variable_stiffness_full: 5.52
+    source: "Paper Table 2 (percent force tracking error, WB-Base; lower is better)"
+    eval_condition: "ablation: VLA-guided adaptive compliance controller and stiffness law"
+
+  real_world_module_ablation:
+    pi_base_with_multistage_training: 76
+    pi_base_multistage_gain: 8
+    pb_base_multistage_gain: 12
+    pb_false_press_rate_without_multistage: 28
+    pb_false_press_rate_with_multistage: 8
+    pi_pro_without_force_history_encoder: 72
+    pi_pro_with_force_history_encoder: 92
+    source: "Paper Section 4.3 (2) Ablation study text"
+    eval_condition: "ablation: multi-stage training and historical force-sequence encoder"
+
+eval_conditions:
+  real_world: "UR5e with F/T sensor, 4 contact-rich tasks, 6 conditions incl. partial-OOD height shift and proximal-start plug insertion, 24-25 trials each"
+
+tags: [force-aware, contact-rich, compliance-control, impedance-control, mixture-of-experts, pi0, flow_matching, slow-fast, teleoperation, real-robot, ur5e, huawei]

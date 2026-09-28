@@ -1,0 +1,109 @@
+# Paper: A4A: Cross-Embodiment Transfer of Action-Oriented 4D Affordances from Human Demonstrations
+# arXiv: 2609.05892
+
+name: A4A
+full_name: "A4A: Cross-Embodiment Transfer of Action-Oriented 4D Affordances from Human Demonstrations"
+organization: "Shanghai Jiao Tong University / Rutgers University / Nanyang Technological University / HKUST (GZ) / Shanghai AI Laboratory"
+date: "2026-09-05"
+paper_url: https://arxiv.org/abs/2609.05892
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Paradigm-agnostic pretraining applied to Octo, OpenVLA, OpenVLA-OFT, pi0, pi0.5; own RLBench policy uses a Qwen3.5-4B causal Transformer (hidden width 2048) as the shared latent module"
+  action_head: "Native action head of each base policy (autoregressive tokens / L1 regression / DDPM diffusion / flow matching); RLBench policy uses a two-layer MLP action head after replacing the two-layer point projector with a proprioceptive projector"
+  action_head_category: other
+  parameters: "Qwen3.5-4B (RLBench policy); base-policy sizes otherwise"
+  key_innovation: "Action-oriented 4D affordances: language-conditioned future 3D trajectories of interaction-relevant points (object/tool/contact part) extracted from >80K human interaction clips (HOI4D, EPIC-KITCHENS, ~30K in-house RGB-D). Stage I pretrains the policy's own prediction module to predict constant-velocity-residual point trajectories with the base policy's native objective; Stage II swaps point projector/head for state projector/action head (P_Q->P_S, H_Q->H_A) and fine-tunes on robot demos."
+
+training:
+  method: "Stage I: interaction-centric 4D affordance pretraining with native objective family; Stage II: embodiment-specific robot fine-tuning restoring native state/action interfaces"
+  data: ">80K human interaction clips (HOI4D, EPIC-KITCHENS, ~30K in-house RealSense RGB-D clips; GroundingDINO + SAM2 + CoTracker3 + LingBot-Depth); LIBERO-Object 500 demos; RLBench 100 demos/variation; 100 teleop demos per real-world skill"
+  hardware: "8x NVIDIA A800"
+
+benchmarks:
+  rlbench_4task:
+    meat_off_grill: 88.0
+    sweep_to_dustpan: 60.0
+    turn_tap: 68.0
+    slide_block_to_target: 28.0
+    average: 61.0
+    source: "Paper Table 2 (Ours w/ pretrain row)"
+    date_reported: "2026-09-05"
+    eval_condition: "Qwen3.5-4B A4A RGB-only policy, 4 RLBench tasks (subset, not standard 18-task), 100 demos/variation, 25 rollouts/task"
+
+  rlbench_4task_baselines:
+    ours_wo_pretrain_avg: 39.0
+    arm4r_avg: 41.0
+    manigaussian_avg: 51.0
+    c2farm_bc_avg: 26.0
+    image_bc_vit_avg: 4.0
+    source: "Paper Table 2 (Avg. column)"
+    eval_condition: "same 4 tasks; ManiGaussian/C2FARM/Image-BC quoted from prior work, ARM4R fine-tuned from released stage-one weights"
+
+  rlbench_4task_arm4r_controlled:
+    arm4r_original_pretrain_avg: 41.0
+    arm4r_4d_affordance_pretrain_avg: 60.0
+    arm4r_original_turn_tap: 28.0
+    arm4r_4d_affordance_turn_tap: 60.0
+    source: "Paper Sec. 4.2 text (architecture-controlled comparison, Figure 4)"
+    eval_condition: "same ARM4R architecture, demos and fine-tuning; only stage-one pretraining data differs"
+
+  libero_object_only_a4a:
+    octo_a4a: 57.2
+    openvla_a4a: 76.4
+    openvla_oft_a4a: 98.6
+    pi0_a4a: 87.8
+    pi05_a4a: 96.0
+    source: "Paper Table 1 (A4A columns, Average row)"
+    date_reported: "2026-09-05"
+    eval_condition: "LIBERO-Object suite only (10 tasks), 50 demos/task, 50 episodes/task from official initial states; one A4A-pretrained variant per base policy"
+
+  libero_object_only_base:
+    octo: 28.2
+    openvla: 66.4
+    openvla_oft: 98.0
+    pi0: 77.8
+    pi05: 94.0
+    source: "Paper Table 1 (Base columns, Average row)"
+    eval_condition: "baseline: same base policies without A4A pretraining (OpenVLA/OFT official LIBERO checkpoints, pi0/pi0.5 LeRobot ports, Octo fine-tuned by authors)"
+
+  real_world:
+    average: 81.7
+    source: "Paper Table 3 (pi0.5 + A4A row, Avg. column)"
+    date_reported: "2026-09-05"
+    eval_condition: "pi0.5 + A4A (best real-world variant); AgileX Piper arm; 6 skills (open microwave, cup on mug, cut peach, open pot, pour rice, pour water), 100 teleop demos/skill, 10 rollouts/skill"
+
+  real_world_other_bases_a4a:
+    openvla_oft_a4a_avg: 80.0
+    openvla_a4a_avg: 68.3
+    octo_a4a_avg: 60.0
+    source: "Paper Table 3 (+A4A rows, Avg. column)"
+    eval_condition: "variants: A4A applied to other base policies, same real-world protocol"
+
+  real_world_baselines:
+    pi05_avg: 70.0
+    openvla_oft_avg: 71.7
+    openvla_avg: 48.3
+    octo_avg: 36.7
+    source: "Paper Table 3 (base policy rows, Avg. column)"
+    eval_condition: "baseline: same policies without A4A initialization, identical demos and protocol"
+
+  real_world_pi05_a4a_successes_of_10:
+    microwave: 9
+    cup: 9
+    peach: 9
+    pot: 7
+    rice: 8
+    water: 7
+    source: "Paper Table 3 (pi0.5 + A4A row)"
+    eval_condition: "success counts out of 10 trials per skill (not percentages)"
+
+eval_conditions:
+  rlbench_4task: "4-task subset, 25 rollouts/task, context length 16"
+  libero_object_only: "LIBERO-Object only, 50 rollouts/task, max 280 steps"
+  real_world: "AgileX Piper, head + wrist RealSense D435, 10 rollouts/skill"
+
+tags: [affordance, 4d-affordance, human-video, cross-embodiment, pretraining, point-tracking, octo, openvla, openvla-oft, pi0, pi0.5, qwen3.5, rlbench, libero-object, real-robot]
