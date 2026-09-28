@@ -1,0 +1,199 @@
+# Paper: LM-X: Explainable Vision-Language-Action Modeling via Progress, Event, and Uncertainty Prediction
+# arXiv: 2608.25757
+
+name: LM-X
+full_name: "LM-X: Explainable Vision-Language-Action Modeling via Progress, Event, and Uncertainty Prediction"
+organization: "Humanoid Robot (Shanghai) Co., Ltd.; E-surfing Digital Life Technology Co., Ltd., China Telecom"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.25757
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Cosmos-Reason2-2B vision-language backbone (Qwen-VL front end); hidden tokens from the 16th layer form the shared representation"
+  llm: "Cosmos-Reason2-2B"
+  action_head: "Three-stage predictive hierarchy: 2-layer Transformer RTG (return-to-go) expert over 128 ordered bins; 32-layer DiT event expert (flow matching) predicting the 60-step event-to-go action chunk up to the next semantic event; 32-layer DiT action expert (flow matching, H=30) conditioned on VL tokens, proprioception, RTG and event hidden state, with mean-velocity and heteroscedastic log-variance projections propagated to action-space variance"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "~6B total"
+  key_innovation: "Jointly pretrains action generation with three directly supervised explanatory signals (RTG progress/state quality, ETG next-event action chunk, native heteroscedastic action-flow uncertainty) that are emitted online and condition control, rather than being attached post hoc; pretraining data include >1,000 hours of failed rollouts to supervise regression-aware progress."
+
+training:
+  pretraining_data: ">20,000 hours of heterogeneous real-robot trajectories (15+ embodiments incl. 10+ humanoids), including >1,000 hours of failed policy rollouts; OXE and AgiBot World sampled with 10% probability"
+  method: "Pretraining from Cosmos-Reason2-2B with L = 0.1*L_RTG + L_event + L_action-U for two epochs (~700k steps, global batch 3,072, 64 B200 GPUs, ~20 days); failure minibatches update only the RTG branch; 20% event-embedding dropout; task-specific post-training (full model) on successful episodes"
+
+benchmarks:
+  # Randomized-hard split only; no Easy+Hard average is reported, so this is
+  # kept out of benchmarks.robotwin_v2 and not ranked against overall averages.
+  robotwin_v2_hard_only:
+    robotwin_v2_hard: 74.1
+    source: "Paper Table 2 / Table 11 (row Average over all 50 tasks, LM-X)"
+    date_reported: "2026-08-26"
+    eval_condition: "All 50 RoboTwin2.0 tasks on Aloha-AgileX, randomized-hard split only; post-trained with 50 randomized-hard demos per task; 100 trials per task; no simulation data in pretraining"
+
+  robotwin_v2_per_task:
+    adjust_bottle: 100.0
+    beat_block_hammer: 25.0
+    blocks_ranking_rgb: 93.0
+    blocks_ranking_size: 82.0
+    click_alarmclock: 100.0
+    click_bell: 99.0
+    dump_bin_bigbin: 85.0
+    grab_roller: 100.0
+    handover_block: 0.0
+    handover_mic: 87.0
+    hanging_mug: 33.0
+    lift_pot: 84.0
+    move_can_pot: 86.0
+    move_pillbottle_pad: 90.0
+    move_playingcard_away: 19.0
+    move_stapler_pad: 54.0
+    open_laptop: 96.0
+    open_microwave: 55.0
+    pick_diverse_bottles: 85.0
+    pick_dual_bottles: 96.0
+    place_a2b_left: 50.0
+    place_a2b_right: 46.0
+    place_bread_basket: 91.0
+    place_bread_skillet: 83.0
+    place_burger_fries: 98.0
+    place_can_basket: 35.0
+    place_cans_plasticbox: 74.0
+    place_container_plate: 97.0
+    place_dual_shoes: 74.0
+    place_empty_cup: 98.0
+    place_fan: 18.0
+    place_mouse_pad: 53.0
+    place_object_basket: 59.0
+    place_object_scale: 58.0
+    place_object_stand: 83.0
+    place_phone_stand: 41.0
+    place_shoe: 96.0
+    press_stapler: 94.0
+    put_bottles_dustbin: 64.0
+    put_object_cabinet: 74.0
+    rotate_qrcode: 93.0
+    scan_object: 67.0
+    shake_bottle: 100.0
+    shake_bottle_horizontally: 100.0
+    stack_blocks_three: 68.0
+    stack_blocks_two: 97.0
+    stack_bowls_three: 75.0
+    stack_bowls_two: 97.0
+    stamp_seal: 74.0
+    turn_switch: 79.0
+    source: "Paper Appendix Table 11 (LM-X column)"
+    date_reported: "2026-08-26"
+    eval_condition: "per-task breakdown of the randomized-hard 50-task result"
+
+  robotwin_v2_baseline_gr00t_n17:
+    robotwin_v2_hard: 55.4
+    source: "Paper Table 2 / Table 11 (row Average over all 50 tasks, GR00T N1.7)"
+    date_reported: "2026-08-26"
+    eval_condition: "baseline: public GR00T N1.7 checkpoint post-trained with the same 50 randomized-hard demos per task"
+
+  robotwin_v2_gate_ablation:
+    backbone_avg: 63.6
+    lm_rtg_avg: 68.8
+    lm_event_avg: 64.0
+    lm_u_avg: 65.2
+    posthoc_heads_avg: 72.8
+    lm_x_avg: 79.6
+    lm_x_handover_microphone: 88
+    lm_x_lift_pot: 92
+    lm_x_open_microwave: 62
+    lm_x_rank_rgb_blocks: 90
+    lm_x_hit_block_with_hammer: 66
+    source: "Paper Table 1 (controlled component-attribution gate)"
+    date_reported: "2026-08-26"
+    eval_condition: "Gate-scale study before full pretraining: pretrain on 45 RoboTwin2.0 tasks, post-train and evaluate on 5 held-out tasks (50 clean + 200 randomized demos, 50 randomized test trials); macro success %"
+
+  robotwin_v2_event_conditioning_ablation:
+    with_events_handover_microphone: 88
+    with_events_lift_pot: 80
+    with_events_open_microwave: 2
+    with_events_rank_blocks: 90
+    with_events_hit_block_with_hammer: 66
+    without_events_handover_microphone: 88
+    without_events_lift_pot: 92
+    without_events_open_microwave: 62
+    without_events_rank_blocks: 78
+    without_events_hit_block_with_hammer: 60
+    source: "Paper Appendix Table 10 (post-training ablation of event conditioning)"
+    date_reported: "2026-08-26"
+    eval_condition: "five held-out gate tasks, success %; event embedding input to the action expert on vs. off during post-training"
+
+  real_world:
+    tape_roll_pick_and_place: 65
+    precision_part_insertion: 80
+    tableware_organization: 90
+    cloth_folding: 80
+    battery_insertion: 40
+    water_bottle_placement_dual_arm: 90
+    water_bottle_placement_single_arm: 70
+    real_world_avg: 73.5
+    source: "Paper Table 3 (LM-X column)"
+    date_reported: "2026-08-26"
+    eval_condition: "Seven tasks on four embodiments (AgileX-Aloha, Astribot S1, Tianji-Marvin, Loong S1 unseen in pretraining); 500-1,200 post-training episodes per task; 20 trials per task"
+
+  real_world_baseline_gr00t_n17:
+    tape_roll_pick_and_place: 75
+    precision_part_insertion: 20
+    tableware_organization: 20
+    cloth_folding: 60
+    battery_insertion: 35
+    water_bottle_placement_dual_arm: 75
+    water_bottle_placement_single_arm: 70
+    real_world_avg: 50.7
+    source: "Paper Table 3 (GR00T N1.7 column)"
+    date_reported: "2026-08-26"
+    eval_condition: "baseline: official checkpoint adapted with the same downstream data"
+
+  real_world_baseline_pi05:
+    tape_roll_pick_and_place: 45
+    precision_part_insertion: 0
+    tableware_organization: 15
+    cloth_folding: 30
+    battery_insertion: 50
+    water_bottle_placement_dual_arm: 40
+    water_bottle_placement_single_arm: 75
+    real_world_avg: 36.4
+    source: "Paper Table 3 (pi0.5 column)"
+    date_reported: "2026-08-26"
+    eval_condition: "baseline: official checkpoint adapted with the same downstream data"
+
+  real_world_signal_quality:
+    rtg_spearman_wo_pretraining: 0.71
+    rtg_spearman_w_pretraining: 0.91
+    rtg_mse_wo_pretraining: 0.100
+    rtg_mse_w_pretraining: 0.050
+    etg_next_event_mse_wo_pretraining: 0.884
+    etg_next_event_mse_w_pretraining: 0.520
+    action_error_auprc_wo_pretraining: 0.49
+    action_error_auprc_w_pretraining: 0.59
+    failure_lead_time_s_wo_pretraining: 0.93
+    failure_lead_time_s_w_pretraining: 1.54
+    source: "Paper Tables 4, 5, 6 (Average rows)"
+    date_reported: "2026-08-26"
+    eval_condition: "held-out 50 episodes per real-world task; same architecture trained from scratch on post-training data vs. initialized from the pretrained checkpoint; lead time at 10% false-alarm rate"
+
+eval_conditions:
+  robotwin_v2: "50 tasks, randomized-hard split, 50 demos per task, 100 trials per task (not the Easy+Hard overall protocol)"
+  real_world: "7 tasks on 4 embodiments, 20 trials each"
+
+tags:
+  - flow_matching
+  - diffusion-transformer
+  - explainability
+  - uncertainty
+  - progress-estimation
+  - return-to-go
+  - subgoal-prediction
+  - cosmos-reason
+  - cross-embodiment
+  - humanoid
+  - large-scale-pretraining
+  - robotwin
+  - real-world

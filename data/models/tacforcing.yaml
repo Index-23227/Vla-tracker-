@@ -1,0 +1,148 @@
+# Paper: TacForcing: Streaming Action Generation with Execution-Time Tactile Feedback
+# arXiv: 2608.25798
+
+name: TacForcing
+full_name: "TacForcing: Streaming Action Generation with Execution-Time Tactile Feedback"
+organization: "Shanghai Jiao Tong University (SJTU) with SCUT, ECUST, ECNU, PolyU, CCUT, UESTC, HUST"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.25798
+code_url: null
+venue: arXiv preprint
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (simulation) / GR00T N1.7 (real world) VLM; task context (vision, language, proprioception) encoded once per chunk and reused during streaming generation"
+  llm: "pi0.5 VLM (simulation) / GR00T N1.7 VLM (real world)"
+  action_head: "Streaming Action Expert replacing the standard flow-matching action expert: block-wise flow scheduling (chunk split into K blocks of B=5 actions, each block with its own flow time, completed blocks dispatched sequentially while unfinished blocks keep intermediate states); tactile tokens from a shared tactile encoder (initialized from FTP-1) refreshed after each executed block; Execution-Aware Tactile Attention (EATA) mask lets the latest tactile tokens condition only the next block to execute"
+  action_head_category: flow_matching
+  action_space: continuous
+  parameters: "not stated (initialized from pi0.5 in simulation and GR00T N1.7 in the real world)"
+  key_innovation: "Streams action generation during execution so tactile feedback acquired mid-chunk conditions the remaining actions of the same chunk without a separate high-frequency reactive controller; EATA restricts each tactile update to the block executed next, and training uses block-wise intermediate states with the matching tactile observation and mask."
+
+training:
+  datasets: ["UniVTAC simulation: 50 demonstrations per task", "Real world: 100 demonstrations per task (dual RealMan RM75 arms + Sharpa Wave dexterous hands with fingertip tactile sensors, Manus Pro glove teleoperation)"]
+  method: "Fine-tune pi0.5 (sim, 15k steps, batch 256, lr 5e-5, H=50, K=10) or GR00T N1.7 (real, 30k steps, batch 256, lr 6e-5, H=40, K=8) with a block-wise flow-matching loss over unfinished actions only, sampling a generation progress p and using the tactile observation and EATA mask of the corresponding execution stage"
+
+benchmarks:
+  univtac:
+    lift_bottle: 90
+    pull_out_key: 48
+    lift_can: 63
+    put_bottle_in_shelf: 43
+    insert_hole: 69
+    insert_tube: 79
+    univtac_avg: 65
+    source: "Paper Table 1 (row TacForcing (Ours))"
+    date_reported: "2026-08-26"
+    eval_condition: "Six UniVTAC contact-rich simulation tasks, success rate %, 100 rollouts per task; initialized from pi0.5"
+
+  univtac_baseline_pi05:
+    lift_bottle: 88
+    pull_out_key: 43
+    lift_can: 46
+    put_bottle_in_shelf: 43
+    insert_hole: 39
+    insert_tube: 48
+    univtac_avg: 51
+    source: "Paper Table 1 (row pi0.5)"
+    date_reported: "2026-08-26"
+    eval_condition: "baseline: vision-only pi0.5 trained with official implementation"
+
+  univtac_baseline_univtac_act:
+    lift_bottle: 59
+    pull_out_key: 41
+    lift_can: 24
+    put_bottle_in_shelf: 6
+    insert_hole: 36
+    insert_tube: 58
+    univtac_avg: 37
+    source: "Paper Table 1 (row UniVTAC-ACT)"
+    date_reported: "2026-08-26"
+    eval_condition: "baseline: released checkpoint"
+
+  univtac_baseline_rdp:
+    lift_bottle: 84
+    pull_out_key: 18
+    lift_can: 12
+    put_bottle_in_shelf: 41
+    insert_hole: 23
+    insert_tube: 75
+    univtac_avg: 42
+    source: "Paper Table 1 (row RDP)"
+    date_reported: "2026-08-26"
+    eval_condition: "baseline: Reactive Diffusion Policy trained with official implementation"
+
+  univtac_baseline_ftp1:
+    lift_bottle: 89
+    pull_out_key: 35
+    lift_can: 66
+    put_bottle_in_shelf: 23
+    insert_hole: 62
+    insert_tube: 76
+    univtac_avg: 59
+    source: "Paper Table 1 (row FTP-1)"
+    date_reported: "2026-08-26"
+    eval_condition: "baseline: released checkpoint"
+
+  real_world:
+    stand_bottle: 81
+    transfer_liquid: 50
+    wipe_board: 75
+    real_world_avg: 69
+    source: "Paper Table 2 (row TacForcing; matches the 69% real-world average reported for Figure 3)"
+    date_reported: "2026-08-26"
+    eval_condition: "Three real-world contact-rich dexterous tasks, 16 trials per task; initialized from GR00T N1.7; real-world baseline per-task numbers appear only in Figure 3 and are not recorded"
+
+  univtac_ablation_3task:
+    base_pull_out_key: 43
+    base_lift_can: 46
+    base_insert_hole: 39
+    base_avg: 43
+    fixed_tactile_pull_out_key: 39
+    fixed_tactile_lift_can: 53
+    fixed_tactile_insert_hole: 34
+    fixed_tactile_avg: 42
+    wo_eata_pull_out_key: 39
+    wo_eata_lift_can: 55
+    wo_eata_insert_hole: 58
+    wo_eata_avg: 51
+    tacforcing_pull_out_key: 48
+    tacforcing_lift_can: 63
+    tacforcing_insert_hole: 69
+    tacforcing_avg: 60
+    source: "Paper Table 2 (Simulation columns and Sim. Avg.)"
+    date_reported: "2026-08-26"
+    eval_condition: "ablation on three UniVTAC tasks: Base (standard expert, no tactile), Fixed Tactile (single initial tactile observation), TacForcing w/o EATA, full TacForcing"
+
+  real_world_ablation:
+    base_stand_bottle: 56
+    base_transfer_liquid: 19
+    base_wipe_board: 50
+    base_avg: 42
+    fixed_tactile_stand_bottle: 50
+    fixed_tactile_transfer_liquid: 13
+    fixed_tactile_wipe_board: 31
+    fixed_tactile_avg: 31
+    wo_eata_stand_bottle: 69
+    wo_eata_transfer_liquid: 31
+    wo_eata_wipe_board: 44
+    wo_eata_avg: 48
+    source: "Paper Table 2 (Real World columns and Real Avg.)"
+    date_reported: "2026-08-26"
+    eval_condition: "ablation on the three real-world tasks (full TacForcing row = real_world block)"
+
+eval_conditions:
+  univtac: "Six UniVTAC simulation tasks, 100 rollouts each, success rate %"
+  real_world: "Stand Bottle, Transfer Liquid, Wipe Board on dual RealMan RM75 + Sharpa Wave hands, 16 trials each"
+
+tags:
+  - flow_matching
+  - tactile
+  - streaming-generation
+  - diffusion-forcing
+  - contact-rich
+  - dexterous-hand
+  - pi05
+  - gr00t
+  - real-world
