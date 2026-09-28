@@ -39,7 +39,7 @@ LIT는 VLA/WAM의 액션 전문가(action expert)가 학습 분포 안에서만 
 | ImageWAM | Baseline | 98.40 | 100.00 | 97.60 | 96.40 | 98.10 |
 | ImageWAM | LIT | 99.60 | 99.20 | 99.20 | 95.60 | **98.40** |
 
-개별 suite에서는 소폭 하락도 있지만(MolmoAct2 Object −1.6, ImageWAM Long −0.8) 네 구조 모두 평균은 떨어지지 않았다.
+개별 suite에서는 소폭 하락도 있지만(MolmoAct2 Object 97.80→96.20, ImageWAM Long 96.40→95.60) 네 구조 모두 평균은 떨어지지 않았다.
 
 ## 7. 주요 결과 — LIBERO-Plus 제로샷 (Table II, 10,030 인스턴스)
 
