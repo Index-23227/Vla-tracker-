@@ -1,0 +1,123 @@
+# Paper: Continuous Actions from Discrete Minds: Latent-Aligned Planning for End-to-End Autonomous Driving
+# arXiv: 2609.04070
+
+name: LaPla
+full_name: "Continuous Actions from Discrete Minds: Latent-Aligned Planning for End-to-End Autonomous Driving"
+organization: "The Hong Kong University of Science and Technology (Guangzhou) / Huawei Central Media Technology Institute"
+date: "2026-09-03"
+paper_url: https://arxiv.org/abs/2609.04070
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Emu3-8B causal transformer (LoRA-adapted), Emu3 visual tokenizer for 4 camera views (front, front-left, front-right, back)"
+  llm: "Emu3-8B"
+  action_head: "Learnable action queries processed in one forward pass; shared MLP projects hidden states into the continuous latent space of a frozen pretrained residual VQ-VAE (4 layers, codebooks {64,64,128,128}); frozen decoder outputs displacement/heading, cumulatively summed into waypoints; supervised by Smooth-L1 (Best-of-N with learned perturbation bases)"
+  action_head_category: regression
+  parameters: "~8B (Emu3-8B) + LoRA adapters, projection heads, frozen RVQ-VAE"
+  key_innovation: "Latent-aligned planning: instead of discrete action-token lookup (quantization error) or diffusion heads (latency), the VLA regresses continuous latents directly into the input space of a frozen, kinematically pretrained residual VQ-VAE decoder, which acts as a kinematic gradient preconditioner. Asymmetric action representation: history actions are quantized via the frozen RVQ encoder, future actions predicted as continuous latents. Auxiliary multi-round VQA loss."
+
+training:
+  method: "Stage 1: pretrain residual VQ-VAE on trajectory data (reconstruction + commitment, EMA codebooks), then freeze. Stage 2: LoRA fine-tuning of Emu3 with L = L_plan (Best-of-N Smooth-L1) + lambda * L_vqa; trainable = LoRA, action queries, history projector, perturbation bases/scales, future latent projection head"
+  data: "nuScenes (~30K frames, split following AutoVLA) with OmniDrive VQA annotations; 20K AlpaSim frames for additional closed-loop fine-tuning"
+  hardware: "Huawei Ascend 910B3 NPUs (training); 4x RTX 4090 for AlpaSim"
+
+benchmarks:
+  nuscenes_stp3:
+    l2_1s: 0.29
+    l2_2s: 0.37
+    l2_3s: 0.52
+    l2_avg: 0.39
+    collision_1s: 0.21
+    collision_2s: 0.27
+    collision_3s: 0.43
+    collision_avg: 0.30
+    source: "Paper Table I, LaPla (ours) row, ST-P3 metrics"
+    date_reported: "2026-09-03"
+    eval_condition: "nuScenes open-loop, ST-P3 cumulative-average metrics (L2 in m, collision in %), Best-of-N (N=20) with oracle selector following AutoVLA"
+
+  nuscenes_uniad:
+    l2_1s: 0.35
+    l2_2s: 0.49
+    l2_3s: 0.98
+    l2_avg: 0.60
+    collision_1s: 0.27
+    collision_2s: 0.39
+    collision_3s: 0.90
+    collision_avg: 0.52
+    source: "Paper Table I, LaPla (ours) row, UniAD metrics"
+    date_reported: "2026-09-03"
+    eval_condition: "nuScenes open-loop, UniAD per-timestep metrics (L2 in m, collision in %), Best-of-N (N=20) with oracle selector"
+
+  alpasim_closed_loop:
+    fault_collision: 11.67
+    off_road: 0.00
+    route_completion: 71.67
+    success_rate: 61.67
+    fps: 1.582
+    source: "Paper Table IV, LaPla (Ours) row"
+    date_reported: "2026-09-03"
+    eval_condition: "NVIDIA AlpaSim closed-loop, 60 scenarios (~20 s at 10 FPS), deterministic (no perturbation / BoN); FC and OR lower is better"
+
+  alpasim_closed_loop_baselines:
+    autovla_action_only_fc: 5.00
+    autovla_action_only_rc: 33.33
+    autovla_action_only_sr: 28.33
+    autovla_action_only_fps: 0.532
+    autovla_cot_official_fc: 1.67
+    autovla_cot_official_rc: 15.00
+    autovla_cot_official_sr: 15.00
+    autovla_cot_official_fps: 0.215
+    source: "Paper Table IV, AutoVLA rows"
+    eval_condition: "baselines reproduced locally on AlpaSim (CoT variant with official checkpoint)"
+
+  nuscenes_uniad_baselines:
+    opendrivevla_7b_l2_avg: 0.66
+    opendrivevla_3b_l2_avg: 0.67
+    autovla_cot_l2_avg: 0.70
+    autovla_action_only_l2_avg: 0.71
+    uniad_l2_avg: 1.03
+    genad_l2_avg: 0.91
+    opendrivevla_7b_collision_avg: 0.25
+    autovla_cot_collision_avg: 0.31
+    source: "Paper Table I, UniAD metrics Avg. columns (baseline values quoted from prior works)"
+    eval_condition: "baselines: nuScenes open-loop, UniAD metrics"
+
+  nuscenes_stp3_baselines:
+    emma_l2_avg: 0.32
+    omnidrive_l2_avg: 0.33
+    opendrivevla_7b_l2_avg: 0.33
+    autovla_cot_l2_avg: 0.40
+    drivepi_ego_l2_avg: 0.40
+    vad_l2_avg: 0.37
+    source: "Paper Table I, ST-P3 metrics L2 Avg. column (baseline values quoted from prior works)"
+    eval_condition: "baselines: nuScenes open-loop, ST-P3 metrics"
+
+  nuscenes_uniad_ablation:
+    m1_mlp_head_l2_avg: 1.81
+    m1_mlp_head_collision_avg: 1.48
+    m2_latent_trainable_decoder_l2_avg: 1.13
+    m2_latent_trainable_decoder_collision_avg: 1.04
+    m3_full_l2_avg: 0.60
+    m3_full_collision_avg: 0.52
+    m3_no_vqa_l2_avg: 0.63
+    m3_no_vqa_collision_avg: 0.50
+    source: "Paper Table II, UniAD metrics Avg. columns"
+    eval_condition: "ablation: latent action / frozen decoder / VQA auxiliary task"
+
+  action_tokenizer_reconstruction:
+    kdisk_384_ade_m: 0.1068
+    vq_384_ade_m: 0.1227
+    resvq_no_hist_64_64_128_128_ade_m: 0.0097
+    resvq_hist_64_64_128_128_ade_m: 0.0038
+    resvq_hist_64_64_128_128_fde_m: 0.0046
+    source: "Paper Table III"
+    eval_condition: "action quantization reconstruction error (ADE/FDE in m) by codebook method and size"
+
+eval_conditions:
+  nuscenes: "open-loop planning, 3 s horizon, ST-P3 and UniAD metric protocols; BoN N=20 with oracle selector (not in VLA-Tracker's standard benchmark set)"
+  alpasim: "closed-loop NVIDIA AlpaSim, 60 scenarios, deterministic single trajectory (not in VLA-Tracker's standard benchmark set)"
+
+tags: [autonomous-driving, emu3, lora, residual-vq-vae, latent-action, frozen-decoder, parallel-decoding, vqa, nuscenes, alpasim, closed-loop, regression]

@@ -1,0 +1,81 @@
+name: MINERVA
+full_name: "MINERVA: How Small Can a Manipulation Policy Be and Still Solve LIBERO?"
+organization: "Matsuo-Iwasawa Lab, The University of Tokyo"
+date: "2026-09-03"
+paper_url: https://arxiv.org/abs/2609.03715
+code_url: https://github.com/k1000dai/MINERVA
+venue: null
+open_source: true
+model_type: visuomotor_policy
+
+architecture:
+  backbone: "From-scratch shared CNN (four stride-2 stages of depthwise-separable residual blocks, FiLM-modulated by task embedding) + spatial-softmax keypoints over agent-view and wrist views; 2-layer MLP for 8-D proprioception; 2 observation steps"
+  llm: "None (language replaced by a 40-entry learned task-ID embedding)"
+  action_head: "4-layer DiT-style flow-matching action-chunk head (H=16) with token-mixing MLP instead of self-attention and shared AdaLN-Zero modulation; 10 Euler steps, initial-noise temperature 0.85; ACT-style temporal ensembling, replanning every step. A one-pass L1-regression head variant is also released."
+  action_head_category: flow_matching
+  parameters: "0.54M (MINERVA-0.5M headline); family 0.54M / 0.99M / 4.89M / 9.66M"
+  key_innovation: "Measures an empirical capacity floor for standard LIBERO: a language-free, from-scratch 0.54M-parameter policy reaches 95.05% on the four suites; performance saturates near 1M and collapses below 0.25M. Seed-replicated ablations show only chunk length and vision allocation exceed a +/-1-point seed band; flow matching shows no detectable advantage over L1 regression. Velocity distillation from larger teachers for smaller models."
+
+benchmarks:
+  libero:
+    libero_spatial: 94.4
+    libero_object: 99.6
+    libero_goal: 96.4
+    libero_long: 89.8
+    libero_avg: 95.05
+    source: "Paper Table I (MINERVA-0.5M, 0.54M params, flow-matching head)"
+    eval_condition: "Trained from scratch on lerobot/libero (all 40 tasks pooled), task-ID conditioning instead of language; 2,000 rollouts (50 episodes/task), fixed seed, single training run"
+  libero_model_family:
+    minerva_0_5m_l1_head_avg: 95.75
+    minerva_1m_avg: 96.75
+    minerva_5m_avg: 97.15
+    minerva_10m_avg: 97.45
+    minerva_0_24m_avg: 88.6
+    minerva_0_09m_avg: 68.3
+    source: "Paper Table I (0.5M+L1, 1M, 5M, 10M rows) and Section V-B text (0.24M, 0.09M)"
+    eval_condition: "Same protocol as headline; 2,000 rollouts each"
+  libero_1m_per_suite:
+    libero_spatial: 97.0
+    libero_object: 99.8
+    libero_goal: 97.4
+    libero_long: 92.8
+    source: "Paper Table I (MINERVA-1M, 0.99M)"
+  libero_seed_ablation_1m:
+    baseline_chunk16_flow_matching: "95.63 +/- 1.08"
+    chunk_8: "92.47 +/- 0.84"
+    chunk_32: "93.43 +/- 0.71"
+    vision_starved_0_13m: "94.22 +/- 0.20"
+    l1_regression: "95.97 +/- 0.80"
+    source: "Paper Table II (top, three training seeds, 2,000 rollouts each)"
+  libero_plus_stratified_sample:
+    language: 96.7
+    new_objects: 69.7
+    sensor_noise: 68.5
+    robot_init: 57.1
+    object_layout: 50.0
+    camera: 11.5
+    background: 9.3
+    light: 1.1
+    average: 46.7
+    source: "Paper Table IV (MINERVA-0.5M)"
+    eval_condition: "Stratified sample of LIBERO-Plus, 2 episodes/variant (not the full evaluation set); rephrased instructions mapped to base-task IDs"
+  libero_90:
+    avg_89_tasks: 94.6
+    source: "Paper Section V-H text (1M architecture, 0.995M params)"
+    eval_condition: "Trained on LIBERO-90 (3,959 demos; 89 tasks with demos), single seed, 10 episodes/task, no distillation"
+  inference_latency:
+    gpu_ms_per_chunk: 8.2
+    cpu_ms_per_chunk: 8.9
+    l1_head_gpu_ms_per_chunk: 2.2
+    l1_head_cpu_ms_per_chunk: 5.1
+    vram_gb: 0.03
+    source: "Paper Table III (MINERVA-0.5M; RTX 5080 laptop GPU / 8 CPU threads, batch 1)"
+
+training:
+  datasets: ["lerobot/libero (1,693 demonstrations, 273k frames, 40 tasks pooled)", "LIBERO-90 (3,959 demonstrations) for extension"]
+  method: "Conditional flow matching (Beta-tilted noise levels) with velocity distillation from a larger frozen teacher for smaller models (lambda=1); training-only episode-progress auxiliary head; 90-120k steps, batch 128, AdamW lr 1e-4 cosine; long-suite episodes loss-upweighted 3x for sub-1M models; ~2 h on a single GH200 or RTX 5080."
+
+eval_conditions:
+  libero: "trained from scratch, task-ID conditioning (no language encoder)"
+
+tags: [flow_matching, tiny_policy, from_scratch, task_id_conditioning, no_language, distillation, cpu_inference, libero, libero_plus, libero_90, efficiency]

@@ -1,0 +1,148 @@
+# Paper: Sensing Which Modality Matters: Evidence-Gated Regularization for Robust VLA Policies
+# arXiv: 2609.03142
+
+name: EGR
+full_name: "Sensing Which Modality Matters: Evidence-Gated Regularization for Robust VLA Policies"
+organization: "University of North Carolina at Chapel Hill / Mitsubishi Electric Research Laboratories (MERL)"
+date: "2026-09-02"
+paper_url: https://arxiv.org/abs/2609.03142
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (PaliGemma 2B VLM + 300M Gemma action expert), architecture unchanged"
+  action_head: "pi0.5 flow-matching action expert (unchanged; action horizon 32)"
+  action_head_category: flow_matching
+  parameters: "~2.3B (pi0.5); only LoRA adapters trained"
+  key_innovation: "Evidence-Gated Regularization: a per-frame, per-sensor task-relevance evidence score E_{t,m} (camera = visible focal/interaction-object area from segmentation; tactile = contact indicator or task-feature similarity) gates two consistency losses on the flow-matching velocity: invariance to corruption of low-evidence sensors (L_inv, hinge below tau_low=0.2) and single-sensor sufficiency for high-evidence sensors (L_suff, hinge above tau_high=0.5). L = L_flow + 0.2*L_inv + 0.1*L_suff, with an unbiased importance-sampled estimator (2 extra forward passes per step). Training-only, zero inference overhead."
+
+training:
+  base_model: "pi0.5 checkpoint from OpenPI Comet (BEHAVIOR Challenge 2025 2nd place), pre-trained on 12 BEHAVIOR-1K tasks"
+  method: "LoRA fine-tuning (gemma_2b_lora + gemma_300m_lora) with flow-matching loss plus evidence-gated invariance and sufficiency losses; random-erasing corruption operator during training"
+  data: "BEHAVIOR-1K demonstrations (11 usable challenge tasks); real-robot demos on bi-manual Kinova and MELFA ASSISTA + GelSight platforms"
+  hardware: "2x NVIDIA B200 (FSDP), batch 288, 50k steps, peak LR 2.5e-5"
+
+benchmarks:
+  behavior1k_man_full:
+    sr: 16.39
+    ec: 50.00
+    ee_min_dist_m: 0.257
+    source: "Paper Table 2 / Table 11, EGR row, MAN Full"
+    date_reported: "2026-09-02"
+    eval_condition: "BEHAVIOR-1K modality-entanglement benchmark, 36 MAN segments x 20 rollouts, all sensors clean"
+
+  behavior1k_man_nouseless:
+    sr: 16.53
+    ec: 53.89
+    ee_min_dist_m: 0.246
+    source: "Paper Table 2 / Table 11, EGR row, MAN NoUseless"
+    eval_condition: "36 MAN segments x 20 rollouts, useless wrist camera corrupted (center erasure)"
+
+  behavior1k_man_usefulonly:
+    sr: 6.11
+    ec: 30.14
+    ee_min_dist_m: 0.366
+    source: "Paper Table 2 / Table 11, EGR row, MAN UsefulOnly"
+    eval_condition: "36 MAN segments x 20 rollouts, all sensors except one useful sensor corrupted"
+
+  behavior1k_nav_full:
+    sr: 40.91
+    source: "Paper Table 2 / Table 10, EGR row, NAV Full"
+    eval_condition: "11 NAV segments x 20 rollouts, all sensors clean"
+
+  behavior1k_nav_singleuseful:
+    sr: 37.27
+    source: "Paper Table 2 / Table 10, EGR row, NAV SingleUseful"
+    eval_condition: "11 NAV segments x 20 rollouts, both wrist cameras corrupted, head camera intact"
+
+  behavior1k_man_full_baselines:
+    vanilla_pi05_sr: 12.50
+    moddrop_sr: 7.50
+    vanilla_pi05_ec: 52.78
+    moddrop_ec: 40.97
+    source: "Paper Table 2 / Table 11, vanilla pi0.5 and ModDrop rows, MAN Full"
+    eval_condition: "baselines: same architecture and data, MAN Full"
+
+  behavior1k_man_nouseless_baselines:
+    vanilla_pi05_sr: 9.44
+    moddrop_sr: 6.81
+    vanilla_pi05_ec: 47.22
+    moddrop_ec: 38.89
+    source: "Paper Table 2 / Table 11, vanilla pi0.5 and ModDrop rows, MAN NoUseless"
+    eval_condition: "baselines: MAN NoUseless"
+
+  behavior1k_man_usefulonly_baselines:
+    vanilla_pi05_sr: 2.78
+    moddrop_sr: 2.78
+    vanilla_pi05_ec: 22.78
+    moddrop_ec: 22.36
+    source: "Paper Table 2 / Table 11, vanilla pi0.5 and ModDrop rows, MAN UsefulOnly"
+    eval_condition: "baselines: MAN UsefulOnly"
+
+  behavior1k_nav_full_baselines:
+    vanilla_pi05_sr: 42.27
+    moddrop_sr: 40.00
+    source: "Paper Table 2 / Table 10, NAV Full"
+    eval_condition: "baselines: NAV Full"
+
+  behavior1k_nav_singleuseful_baselines:
+    vanilla_pi05_sr: 15.45
+    moddrop_sr: 15.45
+    source: "Paper Table 2 / Table 10, NAV SingleUseful"
+    eval_condition: "baselines: NAV SingleUseful"
+
+  behavior1k_action_deviation_ratio_pct:
+    egr_nav_singleuseful: 15.8
+    egr_man_nouseless: 5.1
+    egr_man_usefulonly: 121.8
+    vanilla_nav_singleuseful: 31.4
+    vanilla_man_nouseless: 12.7
+    vanilla_man_usefulonly: 158.5
+    moddrop_nav_singleuseful: 37.4
+    moddrop_man_nouseless: 10.9
+    moddrop_man_usefulonly: 137.7
+    source: "Paper Table 1 (Suite 1, inference-only), Ratio columns"
+    eval_condition: "percentage increase of per-frame action MSE under corruption relative to full inputs; lower is better (diagnostic, not success rate)"
+
+  real_world:
+    bimanual_clean_sr: 80.0
+    source: "Paper Sec. 4.5.1 text and Table 12 (EGR, Clean, 32/40)"
+    date_reported: "2026-09-02"
+    eval_condition: "bi-manual Kinova platform (two arms, three RGB cameras), 4 tasks x 10 trials, clean inputs"
+
+  real_world_bimanual_corruptions:
+    nouseless_sr: 90.0
+    usefulonly_sr: 72.5
+    realdistractor_sr: 85.0
+    source: "Paper Sec. 4.5.1 text (averaged across 4 tasks); pooled 36/40, 29/40, 34/40 in Table 12"
+    eval_condition: "bi-manual Kinova platform, 4 tasks x 10 trials per corruption condition"
+
+  real_world_bimanual_baseline:
+    clean_sr: 70.0
+    nouseless_sr: 52.5
+    usefulonly_sr: 25.0
+    realdistractor_sr: 30.0
+    source: "Paper Sec. 4.5.1 text; pooled 28/40, 21/40, 10/40, 12/40 in Table 12"
+    eval_condition: "baseline: vanilla pi0.5 on the bi-manual platform"
+
+  real_world_tactile:
+    clean_sr: 85.0
+    singleuseful_sr: 90.0
+    realdistractor_sr: 70.0
+    source: "Paper Sec. 4.5.2 text; pooled 17/20, 18/20, 14/20 in Table 13"
+    eval_condition: "MELFA ASSISTA arm + 1 RGB + 2 GelSight, 2 tactile feature-localization tasks x 10 trials"
+
+  real_world_tactile_baseline:
+    clean_sr: 90.0
+    singleuseful_sr: 40.0
+    realdistractor_sr: 55.0
+    source: "Paper Sec. 4.5.2 text; pooled 18/20, 8/20, 11/20 in Table 13"
+    eval_condition: "baseline: vanilla pi0.5 on the vision-tactile platform"
+
+eval_conditions:
+  behavior1k: "LoRA fine-tuned pi0.5 on BEHAVIOR-1K; custom 47-segment modality-entanglement benchmark (11 NAV + 36 MAN), 20 rollouts per segment; center-erasure corruption at deployment"
+  real_world: "bi-manual Kinova (3 RGB cams) and MELFA ASSISTA with GelSight tactile; 10 trials per task per condition; physical distractors for RealDistractor"
+
+tags: [pi0.5, flow_matching, lora, regularization, multimodal-robustness, modality-entanglement, tactile, gelsight, behavior-1k, bimanual, real-robot, training-only]

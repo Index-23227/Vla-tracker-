@@ -1,0 +1,76 @@
+name: FWBC-VLA
+full_name: "FWBC-VLA: Force-Aware Whole-Body Compensation for Contact-Rich Loco-Manipulation"
+organization: "Zhejiang University; Shanghai Artificial Intelligence Laboratory; Tsinghua University; Zhongguancun Academy; Deep Robotics; Zhejiang University of Science and Technology"
+date: "2026-09-03"
+paper_url: https://arxiv.org/abs/2609.03889
+code_url: https://ytydt-reuz.github.io/FWBC-VLA/
+venue: null
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (PaliGemma VLM + Gemma action expert), fully fine-tuned"
+  llm: "PaliGemma (Gemma) from pi0.5"
+  action_head: "pi0.5 Gemma action expert (flow matching); force tokens (GRU-encoded 13-sample HSR-Force contact-descriptor history) fused into the final action hidden states via gated cross-attention before the output projection; outputs arm, gripper and nominal base actions (16-D), plus a separate MLP compensation generator producing bounded base-velocity residuals for the WBC"
+  action_head_category: flow_matching
+  parameters: "not reported (pi0.5-based)"
+  key_innovation: "Sensorless force awareness for a wheeled-legged quadruped with arm: HSR-Force (dual LSTM free-motion torque experts with a fixed residual gate at 200 Hz) estimates joint-space interaction residuals; a 2-channel contact descriptor (strength + trend) is tokenized and injected into the VLA action expert, while Jacobian-projected body-frame load proxies drive a bounded compensation generator that corrects base commands sent to the whole-body controller."
+
+benchmarks:
+  real_world:
+    whiteboard_wiping_final_success: 64
+    door_opening_final_success: 52
+    source: "Paper Table 2 (stage S5 = final-stage success, 25 trials/task)"
+    eval_condition: "DeepRobotics M20S wheeled-legged quadruped + CM1 6-DoF arm; fully fine-tuned 50K steps on WL&Arm dataset; no F/T sensor (estimated force)"
+  real_world_stage_breakdown:
+    whiteboard_s1_approach: 88
+    whiteboard_s2_pick: 84
+    whiteboard_s3_wiping: 76
+    whiteboard_s4_place: 64
+    whiteboard_s5_leave: 64
+    door_s1_approach: 92
+    door_s2_grasp: 84
+    door_s3_manipulate: 64
+    door_s4_push: 52
+    door_s5_cross: 52
+    source: "Paper Table 2 (FWBC-VLA stage success rates, %)"
+  real_world_baselines_final_stage:
+    openvla_whiteboard: 0
+    openvla_door: 0
+    starvla_whiteboard: 0
+    starvla_door: 0
+    openpi_0_5_whiteboard: 12
+    openpi_0_5_door: 0
+    groot_n1_6_whiteboard: 0
+    groot_n1_6_door: 0
+    acp_whiteboard: 20
+    acp_door: 4
+    forcevla_whiteboard: 24
+    forcevla_door: 12
+    fwbc_gt_whiteboard: 60
+    fwbc_gt_door: 48
+    source: "Paper Table 2 (S5; ACP, ForceVLA and FWBC-GT use real F/T sensor force)"
+  component_ablation:
+    wo_force_avg: 12.0
+    fi_only_avg: 35.0
+    fwbc_vla_handle_press: 60
+    fwbc_vla_push_wo_closer: 72
+    fwbc_vla_push_w_closer: 52
+    fwbc_vla_board_cleaned: 76
+    fwbc_vla_avg: 65
+    note: "Table 3 prints Avg 65 for the full model, while Section 5.3 text states 59.5%; values here are as printed in Table 3"
+    source: "Paper Table 3 (contact-stage success rates, FI = force interface, BC = body compensation)"
+  force_estimation:
+    hsr_force_zero_load_force_mae_n: 0.15
+    hsr_force_touch_auc: 0.97
+    hsr_force_door_phase_auc: 0.85
+    source: "Paper Table 1 (sensorless force estimator comparison)"
+
+training:
+  datasets: ["WL&Arm Dataset (>5,000 teleoperation episodes; bottle pick-and-place 41%, whiteboard wiping 25%, door opening 21%; 200-Hz joint data, 15-Hz demos)"]
+  method: "Pico-based hybrid position-force VR teleoperation for data collection; HSR-Force trained on free-motion windows; pi0.5 fully fine-tuned (50K steps) with force-token cross-attention in the action expert; compensation generator trained with L1 on executed-minus-nominal base command residuals."
+
+eval_conditions:
+  real_world: "wheeled-legged quadruped loco-manipulation, 25 trials/task, staged success"
+
+tags: [flow_matching, pi0.5, force_aware, sensorless_force_estimation, whole_body_control, loco_manipulation, quadruped, contact_rich, real_world]

@@ -1,0 +1,175 @@
+# Paper: HINT: Human-Intent Inception for Long-Horizon Robot Manipulation
+# arXiv: 2609.02653
+
+name: HINT
+full_name: "HINT: Human-Intent Inception for Long-Horizon Robot Manipulation"
+organization: "Zhejiang University / Shanghai Jiao Tong University / Noematrix / EndlessAI"
+date: "2026-09-02"
+paper_url: https://arxiv.org/abs/2609.02653
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (main) or Wall-OSS-0.5 action policy, fine-tuned on highlighted observations; Qwen3-VL Task Manager; Grounding DINO / Qwen semantic grounder; SAM2 tracker; ResNet-18 + GRU Pattern Router"
+  action_head: "Backbone's native action expert (pi0.5 flow matching), with a parameter-free token-level attention prior added to visual-encoder and action-to-vision attention logits"
+  action_head_category: flow_matching
+  parameters: "pi0.5 backbone (no extra trainable parameters in the action model) + lightweight Pattern Router"
+  key_innovation: "Agentic intent injection: a Pattern Router classifies four manipulation patterns (free move, pre-contact, transport contact, dexterous contact) to decide which camera views to route and when to re-reason; a VLM Task Manager resolves the subtask and target only at pattern transitions; SAM2 tracks the committed target between transitions; the target is injected into the policy via pixel-level mask highlighting (opacity 0.32) and a head-shared additive attention bias from fractional patch coverage, used identically at training and deployment."
+
+training:
+  base_model: "pi0.5 (pi05_base) and Wall-OSS-0.5"
+  method: "Action-policy fine-tuning on observations rendered with ground-truth target highlighting and attention priors (train-test symmetric); Pattern Router trained jointly on pattern annotations from all three tasks (CE + 0.5 * progress MSE)"
+  data: "Teleoperated demos on dual AgileX PiPER arms at 30 Hz: 50 (fruit-vegetable sorting), 80 (word spelling), 150 (peg-in-hole)"
+  hyperparameters: "pi0.5: AdamW, LR 2e-5 -> 2e-7 cosine, 5k warm-up, EMA 0.999, batch 32, 50k/80k/80k steps (sort/spell/peg)"
+
+benchmarks:
+  real_world:
+    sorting_full_sr: 60.0
+    spelling_full_sr: 86.7
+    peg_in_hole_full_sr: 40.0
+    source: "Paper Table I, pi0.5 + HINT row, Full SR columns"
+    date_reported: "2026-09-02"
+    eval_condition: "in-distribution, dual AgileX PiPER arms, 20 trials (sorting, peg) / 15 trials (spelling); 0.5 partial credit for spelling and peg-in-hole"
+
+  real_world_id_intent_subtask:
+    sorting_is: 91.2
+    sorting_sub_sr: 91.2
+    spelling_is: 97.9
+    spelling_sub_sr: 95.7
+    peg_in_hole_is: 100.0
+    peg_in_hole_sub_sr: 67.5
+    source: "Paper Table I, pi0.5 + HINT row, IS and Sub. SR columns"
+    eval_condition: "in-distribution, Intention Score and Subtask Success Rate"
+
+  real_world_ood:
+    sorting_is: 82.6
+    sorting_sub_sr: 80.4
+    sorting_full_sr: 30.0
+    spelling_is: 95.5
+    spelling_sub_sr: 87.5
+    spelling_full_sr: 30.0
+    peg_in_hole_is: 90.0
+    peg_in_hole_sub_sr: 55.0
+    peg_in_hole_full_sr: 30.0
+    source: "Paper Table II, pi0.5 + HINT row"
+    eval_condition: "semantic-compositional OOD (novel objects, layouts, colors, words, spatial instructions), 10 trials per task"
+
+  real_world_wall_oss_hint_id:
+    sorting_is: 85.8
+    sorting_sub_sr: 85.8
+    sorting_full_sr: 40.0
+    spelling_is: 83.0
+    spelling_sub_sr: 80.9
+    spelling_full_sr: 40.0
+    peg_in_hole_is: 86.7
+    peg_in_hole_sub_sr: 47.5
+    peg_in_hole_full_sr: 10.0
+    source: "Paper Table I, Wall-OSS-0.5 + HINT row"
+    eval_condition: "variant: HINT on Wall-OSS-0.5 backbone, in-distribution"
+
+  real_world_wall_oss_hint_ood:
+    sorting_is: 73.9
+    sorting_sub_sr: 65.2
+    sorting_full_sr: 20.0
+    spelling_is: 81.8
+    spelling_sub_sr: 72.7
+    spelling_full_sr: 20.0
+    peg_in_hole_is: 83.3
+    peg_in_hole_sub_sr: 30.0
+    peg_in_hole_full_sr: 10.0
+    source: "Paper Table II, Wall-OSS-0.5 + HINT row"
+    eval_condition: "variant: HINT on Wall-OSS-0.5 backbone, OOD, 10 trials per task"
+
+  real_world_baseline_pi05_id:
+    sorting_is: 52.2
+    sorting_sub_sr: 52.2
+    sorting_full_sr: 10.0
+    spelling_is: 44.7
+    spelling_sub_sr: 42.6
+    spelling_full_sr: 13.3
+    peg_in_hole_is: 35.0
+    peg_in_hole_sub_sr: 27.5
+    peg_in_hole_full_sr: 5.0
+    source: "Paper Table I, pi0.5 row"
+    eval_condition: "baseline: pi0.5 fine-tuned on same demos without HINT, in-distribution"
+
+  real_world_baseline_pi05_ood:
+    sorting_is: 56.5
+    sorting_sub_sr: 52.2
+    sorting_full_sr: 0.0
+    spelling_is: 40.9
+    spelling_sub_sr: 36.4
+    spelling_full_sr: 0.0
+    peg_in_hole_is: 26.7
+    peg_in_hole_sub_sr: 20.0
+    peg_in_hole_full_sr: 0.0
+    source: "Paper Table II, pi0.5 row"
+    eval_condition: "baseline: pi0.5 without HINT, OOD"
+
+  real_world_baseline_wall_oss_id:
+    sorting_is: 53.1
+    sorting_sub_sr: 53.1
+    sorting_full_sr: 0.0
+    spelling_is: 44.7
+    spelling_sub_sr: 36.2
+    spelling_full_sr: 13.3
+    peg_in_hole_is: 65.0
+    peg_in_hole_sub_sr: 25.0
+    peg_in_hole_full_sr: 5.0
+    source: "Paper Table I, Wall-OSS-0.5 row"
+    eval_condition: "baseline: Wall-OSS-0.5 without HINT, in-distribution"
+
+  real_world_baseline_wall_oss_ood:
+    sorting_is: 47.8
+    sorting_sub_sr: 37.0
+    sorting_full_sr: 0.0
+    spelling_is: 36.4
+    spelling_sub_sr: 31.8
+    spelling_full_sr: 0.0
+    peg_in_hole_is: 50.0
+    peg_in_hole_sub_sr: 25.0
+    peg_in_hole_full_sr: 10.0
+    source: "Paper Table II, Wall-OSS-0.5 row"
+    eval_condition: "baseline: Wall-OSS-0.5 without HINT, OOD"
+
+  real_world_injection_ablation:
+    hint_full_is: 95.5
+    hint_full_sub_sr: 87.5
+    hint_full_full_sr: 30.0
+    wo_highlighting_is: 59.1
+    wo_highlighting_sub_sr: 58.0
+    wo_highlighting_full_sr: 10.0
+    wo_attention_is: 88.6
+    wo_attention_sub_sr: 73.9
+    wo_attention_full_sr: 10.0
+    source: "Paper Table IV (OOD word spelling, pi0.5 base)"
+    eval_condition: "ablation: semantic-guidance pathways on OOD word spelling, 10 trials"
+
+  pattern_router_reliability:
+    pattern_sr_id_mean: 94.7
+    pattern_sr_ood_mean: 91.1
+    peg_pattern_sr_id: 90.6
+    peg_pattern_sr_ood: 86.1
+    correct_switches: 251
+    total_switches: 260
+    source: "Paper Sec. IV-B (Q3) text describing Fig. 7"
+    eval_condition: "Pattern Router prediction success (180 trials per task-condition) and subtask-switch counts"
+
+  latency_ms:
+    base_policy_pi05: 185
+    pattern_router: 14
+    sam2_tracker: 43
+    grounding_dino: 227
+    qwen_grounder: 431
+    reasoning_frame_dino: 426
+    reasoning_frame_qwen: 630
+    tracking_frame: 242
+    source: "Paper Table III"
+    eval_condition: "per-frame inference time on 2x RTX 3090 workstation"
+
+eval_conditions:
+  real_world: "dual AgileX PiPER arms, global + two wrist cameras; three long-horizon tasks (fruit-vegetable sorting, word spelling, peg-in-hole insertion); ID and semantic-compositional OOD"
+
+tags: [pi0.5, wall-oss, flow_matching, agentic, visual-prompting, attention-prior, sam2, grounding-dino, qwen3-vl, long-horizon, bimanual, real-robot, intent-grounding]

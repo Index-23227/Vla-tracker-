@@ -1,0 +1,109 @@
+# Paper: Towards Zero-Shot Transfer Across Embodiments For Driving VLAs
+# arXiv: 2609.02341
+
+name: BEV-Forcing
+full_name: "Towards Zero-Shot Transfer Across Embodiments For Driving VLAs (BEV-Forcing)"
+organization: "Mines Paris - PSL / Stellantis"
+date: "2026-09-02"
+paper_url: https://arxiv.org/abs/2609.02341
+code_url: https://github.com/caiocj1/ad-vla
+venue: arXiv preprint
+open_source: true
+model_type: driving_vla
+
+architecture:
+  backbone: "Qwen 3.5 2B VLM, LoRA (rank 16) fine-tuned"
+  action_head: "Text-token trajectory output: future waypoints at 1 Hz as 2D coordinate pairs, parsed and resampled with cubic splines (next-token prediction)"
+  action_head_category: autoregressive
+  parameters: "2B"
+  key_innovation: "BEV-Forcing auxiliary objective: a low-capacity cross-attention BEV head reads last-layer image hidden states of the VLM and is supervised (weighted BCE) with vehicle occupancy maps produced by a SimpleBEV teacher, instilling a camera-rig-invariant ground-plane spatial interface; the head is dropped at inference (no extra cost). Studied jointly with multi-dataset (multi-camera-rig) training and nuScenes-QA co-training for zero-shot cross-embodiment transfer."
+
+benchmarks:
+  kitscenes_longtail_zero_shot:
+    mms: 5.15
+    l2_mean: 2.48
+    source: "Paper Table 1 (KITScenes LongTail test split, Ours [W+N] +BEV task)"
+    date_reported: "2026-09-02"
+    eval_condition: "zero-shot, trained on WOD-E2E + NAVSIM with BEV-Forcing"
+  kitscenes_longtail_baselines:
+    ours_no_bev_mms: 4.62
+    ours_no_bev_l2_mean: 2.63
+    gemini_3_pro_mms: 4.61
+    gemini_3_pro_l2_mean: 2.99
+    alpamayo_1_5_based_mms: 4.31
+    alpamayo_1_5_based_l2_mean: 3.17
+    vla_kinematics_based_mms: 4.31
+    vla_kinematics_based_l2_mean: 3.57
+    dmad_mms: 3.51
+    dmad_l2_mean: 10.04
+    uniad_mms: 3.24
+    uniad_l2_mean: 10.90
+    source: "Paper Table 1 (KITScenes LongTail test split, baselines)"
+    eval_condition: "zero/few-shot on KITScenes LongTail test split"
+  wod_e2e_test_single_rig:
+    rfs: 7.902
+    ade: 2.891
+    source: "Paper Table 2 (WOD-E2E test, Ours [W] +BEV task)"
+    eval_condition: "trained on WOD-E2E only, with BEV-Forcing"
+  wod_e2e_test_multi_rig:
+    rfs: 7.902
+    ade: 2.938
+    source: "Paper Table 2 (WOD-E2E test, Ours [W+N+nSQA] +BEV task)"
+    eval_condition: "trained on WOD-E2E + NAVSIM + nuScenes-QA, with BEV-Forcing"
+  wod_e2e_test_baselines:
+    ours_w_no_bev_rfs: 7.873
+    ours_w_no_bev_ade: 2.898
+    ours_w_n_nsqa_no_bev_rfs: 7.939
+    ours_w_n_nsqa_no_bev_ade: 2.833
+    irl_vla_rfs: 7.890
+    irl_vla_ade: 2.823
+    poutine_sft_only_rfs: 7.909
+    poutine_sft_only_ade: 2.941
+    poutine_rfs: 7.986
+    poutine_ade: 2.742
+    ntr_rfs: 8.046
+    ntr_ade: 2.638
+    drivema_2b_rfs: 8.075
+    drivema_2b_ade: 2.662
+    source: "Paper Table 2 (WOD-E2E test split, no-BEV ablations and prior methods)"
+    eval_condition: "WOD-E2E test split"
+  bev_head_capacity_ablation:
+    cross_attention_wod_e2e_ade: 2.376
+    cross_attention_wod_e2e_fde: 5.806
+    cross_attention_phai_1k_ade: 1.725
+    cross_attention_phai_1k_fde: 5.073
+    full_transformer_wod_e2e_ade: 2.441
+    full_transformer_wod_e2e_fde: 5.959
+    full_transformer_phai_1k_ade: 1.805
+    full_transformer_phai_1k_fde: 5.308
+    source: "Paper Table 3 (BEV head capacity ablation, trained on WOD-E2E + NAVSIM, smaller runs)"
+    eval_condition: "WOD-E2E validation (in-dataset) and Physical AI 1k validation (zero-shot)"
+  bev_vs_spatial_forcing_ablation:
+    bev_forcing_wod_e2e_ade: 2.319
+    bev_forcing_wod_e2e_fde: 5.687
+    bev_forcing_phai_1k_ade: 1.783
+    bev_forcing_phai_1k_fde: 5.192
+    spatial_forcing_wod_e2e_ade: 2.341
+    spatial_forcing_wod_e2e_fde: 5.766
+    spatial_forcing_phai_1k_ade: 1.818
+    spatial_forcing_phai_1k_fde: 5.264
+    source: "Paper Table 4 (BEV-Forcing vs Spatial Forcing, trained on WOD-E2E + NAVSIM + nuScenes-QA)"
+    eval_condition: "WOD-E2E validation (in-dataset) and Physical AI 1k validation (zero-shot)"
+
+training:
+  method: "LoRA SFT with L = L_NTP + lambda * L_BEV; optional nuScenes-QA VQA co-training"
+  lora_rank: 16
+  learning_rate: 1.0e-4
+  schedule: "cosine decay"
+  epochs: 1
+  batch_size: 64
+  data: "WOD-E2E, NAVSIM, nuScenes (planning); nuScenes-QA (VQA); Physical AI subset for zero-shot eval"
+  bev_teacher: "SimpleBEV occupancy maps"
+  hardware: "4 x NVIDIA A100 GPUs"
+
+eval_conditions:
+  kitscenes_longtail_zero_shot: "zero-shot transfer to unseen camera rig (KITScenes LongTail test)"
+  wod_e2e_test_single_rig: "in-dataset, WOD-E2E test"
+  wod_e2e_test_multi_rig: "in-dataset, WOD-E2E test"
+
+tags: [autonomous_driving, cross_embodiment, zero_shot, bev, auxiliary_loss, lora, qwen3_5, waymo, navsim, autoregressive]
