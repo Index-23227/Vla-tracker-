@@ -1,0 +1,145 @@
+# Paper: NebulaVLA: A Dual-Frequency Vision-Language-Action Model With Guide Action for Robotic Manipulation
+# arXiv: 2608.16503
+
+name: NebulaVLA
+full_name: "NebulaVLA: A Dual-Frequency Vision-Language-Action Model With Guide Action for Robotic Manipulation"
+organization: "ZTE Corporation"
+date: "2026-08-17"
+paper_url: https://arxiv.org/abs/2608.16503
+code_url: null
+venue: null
+open_source: false
+model_type: vla
+inference_hz: 20
+
+architecture:
+  backbone: "Qwen3-VL (System 2, ~10 Hz) + contrastively fine-tuned DINOv2 visual encoder (System 1, ~20 Hz)"
+  llm: "Qwen3-VL"
+  action_head: >
+    Asynchronous dual-frequency fast-slow design. System 2 (Qwen3-VL) emits abstract action guidance
+    through learnable query tokens; System 1 compresses that guidance with a Q-Former together with
+    high-frequency DINOv2 visual tokens, robot state and action history, and generates the action
+    chunk with a Diffusion Transformer (DiT) denoiser. Guide Action conditions each new chunk on the
+    previous chunk's not-yet-executed actions and re-imposes them after every denoising step with a
+    binary mask (outpainting-style), so the loss is computed only on the newly generated region.
+  action_head_category: diffusion
+  action_space: "continuous end-effector actions; System 2 reasons in GESTURE-7 ([x,y,z,roll,pitch,yaw,gesture keyword])"
+  parameters: "Not stated"
+  key_innovation: >
+    (1) Heterogeneous dual-frequency architecture (S2 ~10 Hz / S1 ~20 Hz) enabling distributed
+    deployment; (2) GESTURE-7, a language-keyword end-effector representation shared across grippers
+    and dexterous hands; (3) three-stage training: S2 SFT on GESTURE-7 grounding/trajectory/CoT tasks,
+    S2 GRPO RL with GESTURE-7 distance, keypoint, waypoint (DTW) and format rewards, then joint S1+S2
+    SFT with frozen visual encoders; (4) Guide Action mask-based chunk stitching for smoothness.
+
+training:
+  stages: "Stage 1 S2 SFT (5 tasks) -> Stage 2 S2 GRPO RL -> Stage 3 joint S2+S1 SFT (visual encoders frozen)"
+  compute: "Single node, 8x H800, batch size 96 (real-world training)"
+
+benchmarks:
+  libero:
+    libero_plus_camera: 91.0
+    libero_plus_robot: 58.5
+    libero_plus_language: 85.2
+    libero_plus_light: 95.9
+    libero_plus_background: 95.9
+    libero_plus_noise: 96.9
+    libero_plus_layout: 81.8
+    libero_plus_avg: 85.5
+    source: "Paper Table 2 (NebulaVLA(ALL) row, LIBERO-Plus 7 perturbation dimensions + Total); overall 85.5 also stated in Sec. 4.2"
+    date_reported: "2026-08-17"
+    eval_condition: "LIBERO-Plus only; standard LIBERO suites not reported; full three-stage training"
+  libero_plus_baselines:
+    internvla_m1_total: 81.3
+    openvla_oft_plus_total: 79.6
+    gr00t_n1_5_total: 59.0
+    pi05_total: 58.0
+    source: "Paper Sec. 4.2 text (LIBERO-Plus overall success rates of baselines)"
+    date_reported: "2026-08-17"
+    eval_condition: "baselines; official LIBERO-Plus numbers or LeRobot reproductions"
+  libero_plus_ablation_wo_sft_wo_rl:
+    libero_plus_camera: 93.5
+    libero_plus_robot: 57.9
+    libero_plus_language: 80.5
+    libero_plus_light: 97.8
+    libero_plus_background: 94.9
+    libero_plus_noise: 92.6
+    libero_plus_layout: 73.0
+    libero_plus_total: 83.8
+    source: "Paper Table 2 (w/o SFT, w/o RL row)"
+    date_reported: "2026-08-17"
+    eval_condition: "ablation; System 2 loads open-source pretrained weights, no GESTURE-7 SFT or RL"
+  libero_plus_ablation_wo_rl:
+    libero_plus_camera: 87.8
+    libero_plus_robot: 56.3
+    libero_plus_language: 82.8
+    libero_plus_light: 93.3
+    libero_plus_background: 93.2
+    libero_plus_noise: 94.2
+    libero_plus_layout: 79.2
+    libero_plus_total: 83.0
+    source: "Paper Table 2 (w/o RL row)"
+    date_reported: "2026-08-17"
+    eval_condition: "ablation; GESTURE-7 S2 SFT without S2 GRPO RL"
+  real_world:
+    pick_and_place: 92.08
+    packaging_line_feeding: 92.5
+    source: "Paper Table 1 (NebulaVLA-Heter column, AgiBot A2)"
+    date_reported: "2026-08-17"
+    eval_condition: "real robot AgiBot A2, stereo RGB, policy on RTX 4070; heterogeneous-frequency variant"
+  real_world_latency:
+    nebulavla_heter_latency_ms: 42
+    nebulavla_homo_latency_ms: 115
+    internvla_m1_latency_ms: 81
+    source: "Paper Table 1 (Avg. Inference Latency (ms))"
+    date_reported: "2026-08-17"
+    eval_condition: "average step inference latency on RTX 4070"
+  real_world_baselines:
+    internvla_m1_pick_and_place: 77.91
+    internvla_m1_feeding: 72.5
+    nebulavla_homo_pick_and_place: 87.14
+    nebulavla_homo_feeding: 90.0
+    source: "Paper Table 1 (InternVLA-M1 and NebulaVLA-Homo columns)"
+    date_reported: "2026-08-17"
+    eval_condition: "real robot AgiBot A2; baseline and homogeneous-frequency variant"
+  real_world_jerk_guide_action:
+    joint7: 5.27
+    joint8: 5.08
+    joint9: 5.47
+    joint10: 5.59
+    joint11: 8.43
+    joint12: 2.91
+    joint13: 1.85
+    source: "Paper Table 3 (Guide Action row; mean jerk x1e-3, 10 real-world trials; lower is better)"
+    date_reported: "2026-08-17"
+    eval_condition: "Guide Action enabled; right-arm joints 7-13"
+  real_world_jerk_native_async:
+    joint7: 6.18
+    joint8: 6.47
+    joint9: 6.55
+    joint10: 7.66
+    joint11: 9.69
+    joint12: 4.95
+    joint13: 3.37
+    source: "Paper Table 3 (Native Async row; mean jerk x1e-3, 10 real-world trials; lower is better)"
+    date_reported: "2026-08-17"
+    eval_condition: "naive asynchronous chunk switching baseline"
+
+eval_conditions:
+  libero: "LIBERO-Plus only (7 perturbation dimensions); no standard LIBERO results"
+  real_world: "AgiBot A2 dual-arm; Task 1 Pick-and-Place, Task 2 Packaging Line Material Feeding; compared with InternVLA-M1"
+  notes: "Paper states Guide Action reduces jerk by 25.6% on average and ~2.7x faster action generation; LIBERO-Plus per-suite scores are figure-only and omitted"
+
+tags:
+  - vla
+  - dual-system
+  - fast-slow
+  - asynchronous
+  - diffusion-transformer
+  - qwen3-vl
+  - grpo
+  - action-smoothness
+  - cross-embodiment
+  - libero-plus
+  - real-robot
+  - agibot
