@@ -1,0 +1,41 @@
+# Paper: Towards Neuro-Symbolic Procedural Reasoning for Long-Horizon Vision-Language-Action Manipulation
+# arXiv: 2609.05369
+# Note: the paper does not name its method; tracker name is descriptive.
+
+name: NeuroSymbolic-Procedural-VLA
+full_name: "Towards Neuro-Symbolic Procedural Reasoning for Long-Horizon Vision-Language-Action Manipulation"
+organization: "Fraunhofer IPK / Technische Universitaet Berlin"
+date: "2026-09-04"
+paper_url: https://arxiv.org/abs/2609.05369
+code_url: null
+venue: arXiv
+open_source: false
+model_type: "Neuro-symbolic pipeline (task graph + procedural memory + VLM reasoner) over a saliency-guided fine-tuned VLA executor"
+
+architecture:
+  backbone: "pi0.5 (fine-tuned executor); VLM reasoner for subgoal choice/verification"
+  action_head: "pi0.5 flow-matching action expert (action chunks), conditioned on base + wrist views, robot state and dispatched subgoal"
+  action_head_category: flow_matching
+  key_innovation: "Sparse procedural saliency (one annotated pseudo-gaze trajectory per subgoal, transferred via DINOv2 correspondence + Lucas-Kanade) used either as an RGB ring prompt (prompt-as-input) or as a KL attention-regularization target during fine-tuning (prompt-as-supervision, clean images at inference); task graph and append-only event memory dispatch subgoals."
+
+training:
+  base_model: "pi0.5"
+  method: "Fine-tuning on teleoperation data; variant A with visual-prompt ring overlay, variant B with L = L_act + lambda * KL(G_t || S_t) attention regularization"
+  data: "231 teleoperated episodes of a seven-step surgical-instrument-handling procedure (fixed-base + wrist cameras)"
+
+benchmarks:
+  real_world_instrument_handling_successes:
+    regularization_all_of_25: 25
+    regularization_container_of_10: 10
+    visual_prompting_all_of_25: 25
+    visual_prompting_container_of_10: 10
+    prompt_finetuned_no_cue_all_of_25: 20
+    prompt_finetuned_no_cue_container_of_10: 5
+    source: "Paper Table 1"
+    date_reported: "2026-09-04"
+    eval_condition: "real robot, 5 scored subgoals x 5 trials per condition (success counts, not percentages); container = two spatially ambiguous routing subgoals; end-to-end graph pipeline not yet evaluated"
+
+eval_conditions:
+  real_world: "initial grounding study only: 5 subgoals, 5 trials each, 3 conditions (75 trials total)"
+
+tags: [pi0.5, neuro-symbolic, task-graph, procedural-memory, long-horizon, gaze, saliency, visual-prompting, attention-regularization, surgical-instruments, real-robot, workshop]

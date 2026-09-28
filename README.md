@@ -11,27 +11,27 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-[![Models](https://img.shields.io/badge/Models-485-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-506-purple?style=flat-square)](data/models/)
 =======
-[![Models](https://img.shields.io/badge/Models-485-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-506-purple?style=flat-square)](data/models/)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-485-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-506-purple?style=flat-square)](data/models/)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-485-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-506-purple?style=flat-square)](data/models/)
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-485-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-506-purple?style=flat-square)](data/models/)
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-485-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-506-purple?style=flat-square)](data/models/)
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-418-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-506-purple?style=flat-square)](data/models/)
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
-[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-485-orange?style=flat-square)](data/ai_reviews/)
+[![AI Reviews](https://img.shields.io/badge/Paper_Reviews-506-orange?style=flat-square)](data/ai_reviews/)
 [![Auto-Track](https://img.shields.io/badge/Auto--Scan-arXiv_weekly-red?style=flat-square)](.github/workflows/auto-track.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-brightgreen?style=flat-square)](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt)
@@ -42,24 +42,24 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-**485 VLA models** · **8 benchmarks** · **485 AI paper reviews** · **Auto-updated from arXiv**
+**506 VLA models** · **8 benchmarks** · **506 AI paper reviews** · **Auto-updated from arXiv**
 =======
-**485 VLA models** · **8 benchmarks** · **485 AI paper reviews** · **Auto-updated from arXiv**
+**506 VLA models** · **8 benchmarks** · **506 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**485 VLA models** · **8 benchmarks** · **485 AI paper reviews** · **Auto-updated from arXiv**
+**506 VLA models** · **8 benchmarks** · **506 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**485 VLA models** · **8 benchmarks** · **485 AI paper reviews** · **Auto-updated from arXiv**
+**506 VLA models** · **8 benchmarks** · **506 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**485 VLA models** · **8 benchmarks** · **485 AI paper reviews** · **Auto-updated from arXiv**
+**506 VLA models** · **8 benchmarks** · **506 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**485 VLA models** · **8 benchmarks** · **485 AI paper reviews** · **Auto-updated from arXiv**
+**506 VLA models** · **8 benchmarks** · **506 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**418 VLA models** · **8 benchmarks** · **414 AI paper reviews** · **Auto-updated from arXiv**
+**506 VLA models** · **8 benchmarks** · **506 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
@@ -80,7 +80,7 @@ VLA-Tracker solves this by:
 | New paper discovery | Manual updates | **Auto-scanned from arXiv twice weekly** |
 | Data validation | None | **CI checks on every PR** |
 | Interactive exploration | None | **Full React dashboard with filters** |
-| Paper reviews | None | **485 AI-generated seminar-style reviews** |
+| Paper reviews | None | **506 AI-generated seminar-style reviews** |
 | Machine-readable | None | **JSON API + llms.txt for AI agents** |
 
 ---
@@ -98,14 +98,14 @@ VLA-Tracker solves this by:
 | 5 | **Qwen-RobotManip** | **99.2** | Jun 2026 | arXiv | Qwen3.5-4B + flow-matching DiT (RoboChallenge #1) |
 | 6 | **SAM3D-VLA** | **99.1** | Jul 2026 | arXiv | SAM-3D promptable 3D grounding + flow matching |
 | 7 | **PriorVLA** | **99.05** | May 2026 | — | Dual-expert flow matching (pi0.5 backbone) |
-| 8 | **DLAM** | **99.03** | Jul 2026 | arXiv | Discrete latent action modeling |
-| 9 | PLD | 99.0 | Oct 2025 | ICLR 2026 | Residual RL |
-| 10 | **StructRL** | **98.95** | Aug 2026 | arXiv | Structured-exploration RL post-training (GR00T N1.5 base) |
-| 11 | **MVUCF** | **98.92** | Aug 2026 | arXiv | Multi-view uncertainty-calibrated fusion |
-| 12 | **G0.5** | **98.9** | Aug 2026 | arXiv | Single autoregressive stream (Qwen3.5-2B, Galaxea) |
-| 13 | **LIRA** | **98.88** | Aug 2026 | arXiv | Local cross-layer routing, 0.5B at 186 Hz |
+| 8 | **ProWAM** | **99.05** | Sep 2026 | arXiv | Wan2.2-5B joint world-action model + 1B flow-matching expert |
+| 9 | **DLAM** | **99.03** | Jul 2026 | arXiv | Discrete latent action modeling |
+| 10 | PLD | 99.0 | Oct 2025 | ICLR 2026 | Residual RL |
+| 11 | **StructRL** | **98.95** | Aug 2026 | arXiv | Structured-exploration RL post-training (GR00T N1.5 base) |
+| 12 | **MVUCF** | **98.92** | Aug 2026 | arXiv | Multi-view uncertainty-calibrated fusion |
+| 13 | **G0.5** | **98.9** | Aug 2026 | arXiv | Single autoregressive stream (Qwen3.5-2B, Galaxea) |
 
-> Full leaderboard with 227 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
+> Full leaderboard with 234 LIBERO models → [Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) or [JSON](data/leaderboard.json)
 
 ### Other Benchmarks (Top 3)
 
@@ -122,7 +122,7 @@ VLA-Tracker solves this by:
 
 ## Paper Reviews
 
-VLA-Tracker includes **485 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
+VLA-Tracker includes **506 AI-generated seminar-style paper reviews** for every tracked model. Each review covers:
 
 1. One-line summary
 2. Background & motivation
@@ -134,7 +134,7 @@ VLA-Tracker includes **485 AI-generated seminar-style paper reviews** for every 
 8. Overall assessment with ratings
 9. Expected tough questions for seminars
 
-**485 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
+**506 reviews are PDF-verified** — numbers cross-checked against actual paper tables.
 
 Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-tracker-/) · [Markdown files](data/ai_reviews/)
 
@@ -147,7 +147,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | Format | URL | Description |
 |--------|-----|-------------|
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
-| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (10700+ lines) |
+| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (11500+ lines) |
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -155,24 +155,24 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-| **YAML** | [data/models/](data/models/) | Individual model files (485 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (506 files) |
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (485 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (506 files) |
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (485 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (506 files) |
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (485 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (506 files) |
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (485 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (506 files) |
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (485 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (506 files) |
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (418 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (506 files) |
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 
 ### Quick Start (Python)
@@ -229,14 +229,14 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 
 | Benchmark | Tasks | Models | Focus | Venue |
 |-----------|-------|--------|-------|-------|
-| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 227 | Manipulation generalization | NeurIPS 2023 |
+| [LIBERO](data/benchmarks/libero.yaml) | 4 suites | 234 | Manipulation generalization | NeurIPS 2023 |
 | [CALVIN](data/benchmarks/calvin.yaml) | ABC→D | 49 | Long-horizon, language | RA-L 2022 |
-| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 56 | Sim-to-real transfer | NeurIPS 2024 |
-| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 78 | Bimanual manipulation | CVPR 2025 |
+| [SimplerEnv](data/benchmarks/simpler_env.yaml) | 5 tasks | 58 | Sim-to-real transfer | NeurIPS 2024 |
+| [RoboTwin v1/v2](data/benchmarks/robotwin.yaml) | 50+ tasks | 81 | Bimanual manipulation | CVPR 2025 |
 | [RLBench](data/benchmarks/rlbench.yaml) | 18 tasks | 11 | Diverse manipulation | RA-L 2020 |
-| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 34 | Home robot tasks | RSS 2024 |
+| [RoboCasa](data/benchmarks/robocasa.yaml) | Various | 35 | Home robot tasks | RSS 2024 |
 | [Meta-World](data/benchmarks/metaworld.yaml) | ML-10/45 | 11 | Multi-task dexterity | CoRL 2020 |
-| [Real-World](data/benchmarks/real_world.yaml) | Per-paper | 135 | Physical robot evaluations | — |
+| [Real-World](data/benchmarks/real_world.yaml) | Per-paper | 149 | Physical robot evaluations | — |
 
 ---
 
@@ -260,27 +260,27 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-│   ├── models/              # 485 model YAML files (source of truth)
+│   ├── models/              # 506 model YAML files (source of truth)
 =======
-│   ├── models/              # 485 model YAML files (source of truth)
+│   ├── models/              # 506 model YAML files (source of truth)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 485 model YAML files (source of truth)
+│   ├── models/              # 506 model YAML files (source of truth)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 485 model YAML files (source of truth)
+│   ├── models/              # 506 model YAML files (source of truth)
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 485 model YAML files (source of truth)
+│   ├── models/              # 506 model YAML files (source of truth)
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 485 model YAML files (source of truth)
+│   ├── models/              # 506 model YAML files (source of truth)
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 418 model YAML files (source of truth)
+│   ├── models/              # 506 model YAML files (source of truth)
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 │   ├── benchmarks/          # 8 benchmark definitions
-│   ├── ai_reviews/          # 485 AI-generated paper reviews (markdown)
+│   ├── ai_reviews/          # 506 AI-generated paper reviews (markdown)
 │   ├── leaderboard.json     # Auto-generated unified leaderboard
 │   └── paper_reviews.json   # Venue peer-review data (ICLR, NeurIPS, CoLM)
 ├── scripts/
@@ -318,7 +318,7 @@ We also welcome:
 
 - Benchmark numbers are from papers — evaluation conditions vary (fine-tuned vs. zero-shot)
 - Not all models report on all benchmarks (fair comparison is hard)
-- AI reviews are generated by Claude and may contain inaccuracies (485/485 are PDF-verified)
+- AI reviews are generated by Claude and may contain inaccuracies (506/506 are PDF-verified)
 - Real-world performance ≠ benchmark performance
 
 ---

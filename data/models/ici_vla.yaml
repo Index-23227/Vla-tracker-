@@ -1,0 +1,88 @@
+# Paper: ICI-VLA: In-Context Imitation with Spatiotemporally Aligned Demonstrations for Vision-Language-Action Models
+# arXiv: 2609.07581
+
+name: ICI-VLA
+full_name: "ICI-VLA: In-Context Imitation with Spatiotemporally Aligned Demonstrations for Vision-Language-Action Models"
+organization: "Wuhan University"
+date: "2026-09-07"
+paper_url: https://arxiv.org/abs/2609.07581
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-4B (VLA-0-style zero-modification text-action policy, no action-specific head); retriever RD-Encoder = Qwen3-VL-Embedding-2B"
+  llm: "Qwen3-VL-4B"
+  action_head: "Native text generation: continuous actions and proprioception written as numerical text, 25-step action chunk decoded autoregressively, conditioned on 3 retrieved micro-demonstrations in the prompt"
+  action_head_category: autoregressive
+  parameters: "4B policy + 2B retriever"
+  key_innovation: "Few-shot in-context imitation with a fixed policy at test time: long trajectories are decomposed (by Qwen3-VL) into ~139,659 semantically labeled micro-demonstrations; an RD-Encoder is trained by iterative contrastive mining (semantic hard-filtering + DTW-ranked end-effector trajectories as positives, phase-misaligned hard negatives) for phase-aware retrieval; Target Action Masking corrupts target action tokens during policy fine-tuning to discourage copying the retrieved action prefix."
+
+training:
+  method: "Offline full-parameter fine-tuning of both retriever (InfoNCE, tau 0.07, batch 128, 5 mining cycles) and Qwen3-VL-4B policy (AdamW, peak lr 2e-5, wd 0.01, warmup + cosine) with Target Action Masking; no gradient updates at inference"
+  data: "~11,200 long-horizon trajectories from LIBERO, RoboTwin 2.0 and ~1,000 physical dual-arm Aloha demos -> ~139,659 micro-demonstrations"
+  hardware: "8x NVIDIA A100 80GB"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.5
+    libero_object: 98.7
+    libero_goal: 98.0
+    libero_long: 96.8
+    libero_avg: 97.7
+    source: "Paper Table 1, ICI-VLA row"
+    date_reported: "2026-09-07"
+    eval_condition: "Four LIBERO suites; 10 initialized rollouts per task (fewer than the usual 50); 3 retrieved demonstrations; fixed parameters at test time"
+
+  robotwin_v2:
+    robotwin_v2_easy: 72.4
+    robotwin_v2_hard: 46.3
+    robotwin_v2_avg: 60.4
+    source: "Paper Table 1, ICI-VLA row"
+    date_reported: "2026-09-07"
+    eval_condition: "RoboTwin 2.0 Easy/Hard, 10 rollouts per task; number of tasks not stated (baselines are the official RoboTwin 2.0 figures). Paper's Avg is not the simple mean of Easy and Hard"
+
+  libero_robotwin_baselines:
+    vla0_libero_avg: 94.5
+    vla0_robotwin_v2_avg: 34.6
+    vla0_naive_icl_libero_avg: 71.5
+    vla0_naive_icl_robotwin_v2_avg: 10.7
+    openvla_oft_libero_avg: 96.4
+    openvla_oft_robotwin_v2_avg: 41.1
+    pi0_libero_avg: 93.4
+    pi0_robotwin_v2_avg: 32.5
+    source: "Paper Table 1"
+    eval_condition: "baselines as reported; external entries follow their own published protocols"
+
+  ablation_components:
+    naive_icl_no_masking_libero_avg: 71.5
+    no_dtw_libero_avg: 92.5
+    no_semantic_libero_avg: 88.4
+    full_libero_avg: 97.7
+    naive_icl_no_masking_robotwin_v2_avg: 10.7
+    no_dtw_robotwin_v2_avg: 31.4
+    no_semantic_robotwin_v2_avg: 38.1
+    full_robotwin_v2_avg: 60.4
+    source: "Paper Table 2"
+
+  real_world:
+    single_arm_grasp: 89.6
+    dual_arm_grasp: 76.8
+    drawer_placement: 81.2
+    object_sorting: 85.2
+    real_world_avg: 83.2
+    source: "Paper Table 3, ICI-VLA row"
+    date_reported: "2026-09-07"
+    eval_condition: "Dual-arm Aloha, 250 rollouts per task (1,000 total), objects/layouts/instructions disjoint from training and library; 95% Wilson CI 80.8-85.4"
+
+  real_world_baselines:
+    pi0_avg: 66.4
+    vla0_avg: 63.0
+    source: "Paper Table 3"
+
+eval_conditions:
+  libero: "10 rollouts/task, 3-shot retrieved context, no test-time gradient updates"
+  robotwin_v2: "Easy/Hard, 10 rollouts/task, task count not stated"
+  real_world: "dual-arm Aloha, 4 tasks x 250 rollouts"
+
+tags: [in-context-learning, retrieval, text-action, vla-0, qwen3-vl, dtw, contrastive, target-action-masking, libero, robotwin_v2, real-robot, aloha, bimanual]

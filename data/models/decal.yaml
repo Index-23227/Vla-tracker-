@@ -1,0 +1,144 @@
+# Paper: DeCAL: Towards Physically-Grounded Dexterous Vision-Language-Action Models via Contact-Aware Latent Co-Imagination
+# arXiv: 2609.09119
+
+name: DeCAL
+full_name: "DeCAL: Towards Physically-Grounded Dexterous Vision-Language-Action Models via Contact-Aware Latent Co-Imagination"
+organization: "Peking University / Beijing Academy of Artificial Intelligence (BAAI)"
+date: "2026-09-08"
+paper_url: https://arxiv.org/abs/2609.09119
+code_url: null
+venue: arXiv
+open_source: false
+model_type: "Visuo-tactile dexterous VLA with Mixture-of-Transformers (understanding / generation / action experts)"
+inference_hz: 30
+
+architecture:
+  backbone: "Qwen3-VL understanding expert; Qwen3 generation and action experts (MoT, initialized from InternVLA-A1-3B)"
+  action_head: "Factorized Flow Matching action expert (separate noise/tokens for arm and hand actions, jointly processed), action chunk length 50"
+  action_head_category: flow_matching
+  parameters: "~3B (initialized from InternVLA-A1-3B)"
+  key_innovation: "Adaptive Visuo-Tactile Fusion (per-block tactile cross-attention gated by a global contact token) + Visuo-Tactile Latent Co-Imagination (generation expert jointly predicts future Cosmos-VAE visual latents and tactile latents decoded to raw tactile image / deform map / 6-DoF force) + Factorized Flow Matching for arm-hand decoupling; blockwise understanding -> generation -> action attention."
+
+training:
+  base_model: "InternVLA-A1-3B"
+  method: "Full training from pretrained weights with L = lambda_v L_visual + lambda_t L_tactile + L_action; AdamW 5e-5, 100k steps"
+  data: "100 teleoperated demos per task (MetaGlove Pro + VIVE trackers), 6 contact-rich dexterous tasks"
+  hardware: "8x NVIDIA H100 (training); single RTX 4090 inference, 0.27 s per action chunk"
+
+benchmarks:
+  real_world:
+    wipe_vase: 100.0
+    erase_whiteboard: 80.0
+    assemble_parts: 65.0
+    twist_cap: 80.0
+    pipetting: 60.0
+    screw_light_bulb: 40.0
+    success_rate_avg: 71.0
+    source: "Paper Table 1, DeCAL (Ours) SR columns; average 71% stated in Abstract"
+    date_reported: "2026-09-08"
+    eval_condition: "dual UR5 + two 22-DoF SharpaWave hands with fingertip visuo-tactile sensors, 20 trials per task"
+
+  real_world_progress_rate:
+    wipe_vase: 100.0
+    erase_whiteboard: 86.7
+    assemble_parts: 85.0
+    twist_cap: 93.3
+    pipetting: 86.3
+    screw_light_bulb: 48.8
+    psr_avg: 83.4
+    source: "Paper Table 1, DeCAL (Ours) PSR columns; average 83.4% stated in Abstract"
+    eval_condition: "progress success rate (average stage completion ratio), 20 trials per task"
+
+  real_world_baselines_sr:
+    gr00t_n16_wipe_vase: 30.0
+    gr00t_n16_erase_whiteboard: 50.0
+    gr00t_n16_assemble_parts: 30.0
+    gr00t_n16_twist_cap: 10.0
+    gr00t_n16_pipetting: 60.0
+    gr00t_n16_screw_light_bulb: 10.0
+    internvla_a1_wipe_vase: 65.0
+    internvla_a1_erase_whiteboard: 50.0
+    internvla_a1_assemble_parts: 15.0
+    internvla_a1_twist_cap: 5.0
+    internvla_a1_pipetting: 35.0
+    internvla_a1_screw_light_bulb: 30.0
+    vitacformer_wipe_vase: 80.0
+    vitacformer_erase_whiteboard: 45.0
+    vitacformer_assemble_parts: 15.0
+    vitacformer_twist_cap: 65.0
+    vitacformer_pipetting: 55.0
+    vitacformer_screw_light_bulb: 25.0
+    deco_wipe_vase: 90.0
+    deco_erase_whiteboard: 60.0
+    deco_assemble_parts: 35.0
+    deco_twist_cap: 70.0
+    deco_pipetting: 45.0
+    deco_screw_light_bulb: 35.0
+    internvla_a1t_wipe_vase: 75.0
+    internvla_a1t_erase_whiteboard: 45.0
+    internvla_a1t_assemble_parts: 45.0
+    internvla_a1t_twist_cap: 25.0
+    internvla_a1t_pipetting: 20.0
+    internvla_a1t_screw_light_bulb: 25.0
+    source: "Paper Table 1, baseline SR columns"
+    eval_condition: "baselines on the same 6 tasks, 20 trials each (InternVLA-A1t = naive tactile injection into VLM)"
+
+  real_world_stagewise_avg:
+    decal: 0.91
+    gr00t_n16: 0.69
+    internvla_a1: 0.68
+    vitacformer: 0.79
+    deco: 0.78
+    internvla_a1t: 0.64
+    source: "Paper Table 5 (Appendix E.2), Avg column"
+    eval_condition: "average stage-wise success rate (fraction) across all stages of 6 in-domain tasks"
+
+  real_world_ood_twist_cap:
+    unseen_background: 0.60
+    cluttered: 0.70
+    unseen_lighting: 0.65
+    unseen_object: 0.75
+    stagewise_avg: 0.81
+    source: "Paper Table 6 (Appendix E.3), Ours row, final stage S3 per scenario and Avg column"
+    eval_condition: "OOD generalization on Twist Cap, final-stage success (fraction); note Fig. 9 plots unseen lighting as 70%"
+
+  real_world_ood_baselines_twist_cap:
+    vitacformer_unseen_background: 0.25
+    vitacformer_cluttered: 0.40
+    vitacformer_unseen_lighting: 0.25
+    vitacformer_unseen_object: 0.45
+    deco_unseen_background: 0.50
+    deco_cluttered: 0.65
+    deco_unseen_lighting: 0.55
+    deco_unseen_object: 0.35
+    source: "Paper Table 6 (Appendix E.3), final stage S3 per scenario"
+    eval_condition: "OOD baselines on Twist Cap, final-stage success (fraction)"
+
+  real_world_ablation:
+    full_assemble_parts: 65.0
+    full_twist_cap: 80.0
+    wo_factorized_fm_assemble_parts: 25.0
+    wo_factorized_fm_twist_cap: 35.0
+    wo_vis_and_tac_gen_assemble_parts: 20.0
+    wo_vis_and_tac_gen_twist_cap: 30.0
+    wo_vis_gen_assemble_parts: 35.0
+    wo_vis_gen_twist_cap: 45.0
+    wo_tac_gen_assemble_parts: 55.0
+    wo_tac_gen_twist_cap: 60.0
+    wo_tac_gating_assemble_parts: 50.0
+    wo_tac_gating_twist_cap: 70.0
+    source: "Paper Table 2"
+    eval_condition: "ablation: component removal, SR (%) on Assemble Parts and Twist Cap"
+
+  visual_generation:
+    assemble_parts_cos: 0.946
+    assemble_parts_lpips: 0.222
+    twist_cap_cos: 0.927
+    twist_cap_lpips: 0.245
+    source: "Paper Table 3, DeCAL (Ours) row"
+    eval_condition: "future-frame generation quality on validation set (Cosmos feature cosine up, LPIPS down)"
+
+eval_conditions:
+  real_world: "bimanual UR5 + SharpaWave dexterous hands, 3 RGB cameras + fingertip visuo-tactile sensors, 100 demos/task, 20 trials/task"
+
+tags: [dexterous, tactile, visuo-tactile, mixture-of-transformers, world-model, future-prediction, flow_matching, bimanual, qwen3-vl, internvla-a1, contact-rich, real-robot]

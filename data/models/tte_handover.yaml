@@ -1,0 +1,73 @@
+# Paper: Temporal Tactile Encoding and Compliance for Intent-Aware Robot-to-Human Bimanual Handover
+# arXiv: 2609.05282
+
+name: TTE-Handover
+full_name: "Temporal Tactile Encoding and Compliance for Intent-Aware Robot-to-Human Bimanual Handover"
+organization: "Istituto Italiano di Tecnologia / Universita di Genova"
+date: "2026-09-04"
+paper_url: https://arxiv.org/abs/2609.05282
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+inference_hz: 10
+
+architecture:
+  backbone: "NVIDIA Isaac GR00T-N1.5-3B (post-trained from released checkpoint)"
+  action_head: "GR00T N1.5 flow-matching DiT action head outputting 16-step chunks of Cartesian targets for both hands and head (first 8 executed)"
+  action_head_category: flow_matching
+  parameters: "3B"
+  key_innovation: "Temporal Tactile Encoding (TTE): a frozen, separately trained autoencoder compresses a 64-step (~0.9 s) window of 3-axis fingertip forces (2 hands x 4 fingers, from Xela taxels via per-finger regressors) into a 24-D embedding fed as state to GR00T, trained with reconstruction + force-direction + delta-direction cosine losses; combined with a low-level admittance-style compliance controller on the humanoid ergoCub for intent-aware release."
+
+training:
+  base_model: "GR00T-N1.5-3B"
+  method: "Post-training on teleoperated demonstrations (RGB + TTE tactile + proprioception), 100k-step budget for Stage-1 ablation policies"
+  data: "8 demonstrators x 50 demos (25 with compliance, 25 without), ~50k frames per condition, Meta Quest 3 teleoperation, LeRobot format"
+
+benchmarks:
+  real_world:
+    success: 93
+    success_timing_tr_2_8s: 92
+    source: "Paper Table I (P1 compliance+TTE column, objective metrics)"
+    date_reported: "2026-09-04"
+    eval_condition: "ergoCub humanoid bimanual robot-to-human package handover; 10 naive participants x 10 trials (5 release-expected, 5 hold-expected); success = expected release/hold outcome"
+
+  real_world_interaction_metrics:
+    release_delay_median_s: 1.70
+    peak_pull_force_n: 4.07
+    satisfaction_likert_1_7: 6.2
+    preferred_overall_of_10: 9
+    rated_safest_of_10: 10
+    source: "Paper Table I (P1 compliance+TTE column)"
+    eval_condition: "units: seconds, Newtons, Likert 1-7, participant counts out of 10 (not percentages)"
+
+  real_world_ablation_p2_compliance_only:
+    success: 54
+    success_timing_tr_2_8s: 45
+    release_delay_median_s: 2.35
+    peak_pull_force_n: 4.67
+    satisfaction_likert_1_7: 3.3
+    source: "Paper Table I (P2 compliance column)"
+    eval_condition: "ablation: no tactile input, compliance on"
+
+  real_world_ablation_p3_tte_only:
+    success: 82
+    success_timing_tr_2_8s: 80
+    release_delay_median_s: 2.00
+    peak_pull_force_n: 4.74
+    satisfaction_likert_1_7: 4.7
+    source: "Paper Table I (P3 TTE column)"
+    eval_condition: "ablation: TTE tactile input, compliance off (trained on separate no-compliance dataset)"
+
+  offline_tactile_representation_ablation:
+    a1_instantaneous_threshold_crossings: 51
+    a2_tte_threshold_crossings: 3
+    a1_sustained_false_openings: 4
+    a2_sustained_false_openings: 0
+    source: "Paper Sec. IV-A text (Stage 1, Challenging Test Set)"
+    eval_condition: "open-loop on held-out 10-episode / 3,776-frame Challenging Test Set; counts of predicted hand opening crossing 0.35 m threshold and false openings >1.5 s during hold"
+
+eval_conditions:
+  real_world: "ergoCub humanoid, egocentric RGB + Xela fingertip tactile + proprioception, 10 participants x 10 trials per policy, counterbalanced"
+
+tags: [gr00t-n1.5, tactile, visuo-tactile, handover, human-robot-interaction, compliance-control, humanoid, bimanual, ergocub, flow-matching, real-robot]

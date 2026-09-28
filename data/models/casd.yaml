@@ -1,0 +1,177 @@
+# Paper: CASD: Chunk-Aligned Semantic Distillation for Multi-Stage Robot Manipulation
+# arXiv: 2609.08638
+
+name: CASD
+full_name: "CASD: Chunk-Aligned Semantic Distillation for Multi-Stage Robot Manipulation"
+organization: "Ant Group"
+date: "2026-09-08"
+paper_url: https://arxiv.org/abs/2609.08638
+code_url: null
+venue: arXiv
+open_source: false
+model_type: world_action_model
+
+architecture:
+  backbone: "Fast-WAM (Wan2.2-TI2V-5B video-action world action model; Uncond / Joint / IDM variants); cross-backbone integration into DreamZero (Wan2.1-I2V-14B)"
+  action_head: "Fast-WAM action expert trained with action flow matching (unchanged objective L_dyn + L_act), conditioned on 4 predicted CASD semantic tokens through zero-initialized rank-192 cross-attention adapters in every video and action block"
+  action_head_category: flow_matching
+  parameters: "~5B (Wan2.2-TI2V-5B based Fast-WAM) + small CASD generator (hidden width 128) + rank-192 adapters"
+  key_innovation: "Chunk-aligned semantic teacher: an offline VLM (GPT-5.4) segments demonstrations into free-form stages; each stage's UMT5 slot embeddings are mixed by their occupancy within the H=32 future action chunk (including boundary-crossing chunks) and randomly projected to 4x128 tokens. A CASD generator is distilled (Stage A, direct regression + hardest-negative ranking) to predict this target from current frame, robot state and instruction, then frozen and used to condition the WAM policy during Stage-B training and deployment - no online VLM calls or reasoning-trace decoding."
+
+training:
+  base_model: "Fast-WAM (Uncond / Joint / IDM); DreamZero for MolmoSpaces"
+  method: "Stage A: train CASD generator only (10k steps, batch 128, lr 1e-4, cosine) against fixed occupancy-weighted teacher; Stage B: freeze generator, train WAM policy + adapters with original video-dynamics + action flow-matching losses"
+  data: "LIBERO training demonstrations (1,712 annotated episodes, 9,507 phase-start queries); RoboTwin 2.0; DROID for DreamZero integration"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.8
+    libero_goal: 98.2
+    libero_long: 97.8
+    libero_avg: 98.9
+    libero_plus_camera: 50.3
+    libero_plus_robot: 77.0
+    libero_plus_language: 90.6
+    libero_plus_light: 92.8
+    libero_plus_background: 67.1
+    libero_plus_noise: 62.8
+    libero_plus_layout: 81.2
+    libero_plus_total: 73.9
+    source: "Paper Table 2 (Fast-WAM-IDM+CASD row) and Table 3 (LIBERO-Plus, Fast-WAM-IDM+CASD row; total = pooled micro-rate over 10,030 variants)"
+    date_reported: "2026-09-08"
+    eval_condition: "Fast-WAM-IDM + CASD, trained on LIBERO 4 suites; LIBERO-Plus 7 perturbation categories, pooled over 10,030 variants (7,417 successes, Table S5)"
+
+  robotwin_v2:
+    robotwin_v2_clean: 92.6
+    robotwin_v2_randomized: 92.2
+    robotwin_v2_avg: 92.4
+    source: "Paper Table 4 (Fast-WAM-IDM+CASD row)"
+    date_reported: "2026-09-08"
+    eval_condition: "Fast-WAM-IDM + CASD, mean over 50 bimanual tasks, Clean (Easy) and domain-randomized (Hard); replan_steps=28"
+
+  robotwin_v2_joint_casd:
+    clean: 92.7
+    randomized: 93.3
+    average: 93.0
+    source: "Paper Table 4 (Fast-WAM-Joint+CASD row)"
+    eval_condition: "variant: Fast-WAM-Joint + CASD (best RoboTwin 2.0 variant in paper)"
+
+  robotwin_v2_uncond_casd:
+    clean: 90.5
+    randomized: 91.4
+    average: 90.9
+    source: "Paper Table 4 (Fast-WAM+CASD row, Uncond variant)"
+    eval_condition: "variant: Fast-WAM-Uncond + CASD"
+
+  robotwin_v2_baselines:
+    fast_wam_uncond_avg: 91.8
+    fast_wam_joint_avg: 90.6
+    fast_wam_idm_avg: 91.3
+    lingbot_va_avg: 92.2
+    qwen_robotmanip_scratch_avg: 88.6
+    motus_avg: 87.8
+    pi05_avg: 79.8
+    source: "Paper Table 4 (external/published rows, Average column)"
+    eval_condition: "published references, not re-run under matched training"
+
+  libero_joint_casd:
+    spatial: 99.4
+    object: 99.0
+    goal: 98.6
+    long: 98.0
+    avg: 98.8
+    source: "Paper Table 2 (Fast-WAM-Joint+CASD row)"
+    eval_condition: "variant: Fast-WAM-Joint + CASD"
+
+  libero_uncond_casd:
+    spatial: 97.6
+    object: 94.8
+    goal: 92.6
+    long: 92.8
+    avg: 94.5
+    source: "Paper Table 2 (Fast-WAM+CASD row, Uncond variant)"
+    eval_condition: "variant: Fast-WAM-Uncond + CASD (declines vs published 97.6 reference)"
+
+  libero_baselines:
+    fast_wam_uncond_avg: 97.6
+    fast_wam_joint_avg: 98.5
+    fast_wam_idm_avg: 98.0
+    lingbot_va_avg: 98.5
+    qwen_robotmanip_scratch_avg: 98.2
+    motus_avg: 97.7
+    gr00t_n17_avg: 97.0
+    pi05_avg: 96.9
+    source: "Paper Table 2 (published reference rows, Avg. column)"
+    eval_condition: "published references, not re-run under matched training"
+
+  libero_plus_joint_casd:
+    camera: 46.0
+    robot_init: 70.7
+    language: 94.5
+    light: 94.5
+    background: 62.3
+    noise: 60.3
+    layout: 81.3
+    pooled: 72.2
+    source: "Paper Table 3 (Fast-WAM-Joint+CASD row)"
+    eval_condition: "variant: Fast-WAM-Joint + CASD, pooled over 10,030 variants"
+
+  libero_plus_uncond_casd:
+    camera: 28.8
+    robot_init: 49.9
+    language: 75.2
+    light: 83.8
+    background: 54.5
+    noise: 51.0
+    layout: 64.8
+    pooled: 57.2
+    source: "Paper Table 3 (Fast-WAM+CASD row, Uncond variant)"
+    eval_condition: "variant: Fast-WAM-Uncond + CASD, pooled over 10,030 variants"
+
+  libero_plus_baselines:
+    fast_wam_uncond_pooled: 49.7
+    fast_wam_joint_pooled: 68.1
+    fast_wam_idm_pooled: 71.4
+    openvla_oft_m_pooled: 67.9
+    ript_vla_pooled: 68.4
+    pi0_fast_pooled: 61.6
+    pi0_pooled: 53.6
+    source: "Paper Table 3 (Pooled column; Fast-WAM rows are RIFT-reported checkpoints)"
+    eval_condition: "cross-report references; checkpoints and recipes differ"
+
+  molmospaces_dreamzero_casd:
+    pick: 59.7
+    pick_and_place: 36.1
+    open: 35.1
+    close: 60.8
+    average: 47.9
+    source: "Paper Table 5 (DreamZero+CASD row)"
+    date_reported: "2026-09-08"
+    eval_condition: "DreamZero (Wan2.1-I2V-14B) + CASD trained on DROID; four Franka/DROID manipulation categories of MolmoSpaces-Bench, navigation excluded"
+
+  molmospaces_baselines:
+    dreamzero_average: 40.7
+    psi_r2_average: 46.5
+    prts_droid_average: 42.5
+    molmoact2_droid_average: 38.7
+    pi05_droid_average: 34.5
+    source: "Paper Table 5 (official leaderboard snapshot rows, Avg. column)"
+    eval_condition: "official MolmoSpaces leaderboard snapshot 2026-09-02, not re-evaluated"
+
+  teacher_matching_recall_at_1:
+    pure: 0.430
+    mixed: 0.765
+    mixed_2: 0.761
+    mixed_3_plus: 0.790
+    pure_chance: 0.185
+    mixed_chance: 0.174
+    source: "Paper Table 1 / Table S4"
+    eval_condition: "episode-local Recall@1 of frozen CASD generator vs fixed teacher on 9,507 annotated LIBERO training phase-start queries ([0,1] scale)"
+
+eval_conditions:
+  libero: "Fast-WAM-IDM+CASD; LIBERO 4 suites; LIBERO-Plus 7 shift categories pooled over 10,030 variants"
+  robotwin_v2: "Fast-WAM-IDM+CASD; 50 tasks, Clean and Randomized, equal-weight average"
+  molmospaces: "DreamZero+CASD; Pick, Pick-and-Place, Open, Close"
+
+tags: [world-action-model, fast-wam, dreamzero, flow-matching, semantic-distillation, privileged-information, stage-segmentation, action-chunking, vlm-annotation, libero, libero-plus, robotwin-v2, molmospaces]

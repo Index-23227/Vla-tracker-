@@ -1,0 +1,112 @@
+# Paper: 3DWay: Generalizing Robot Manipulation via 3D Consistent Waypoints
+# arXiv: 2609.08224
+
+name: 3DWay
+full_name: "3DWay: Generalizing Robot Manipulation via 3D Consistent Waypoints"
+organization: "Tsinghua University / ETH Zurich / UC Berkeley"
+date: "2026-09-08"
+paper_url: https://arxiv.org/abs/2609.08224
+code_url: https://github.com/ziqin-h/3DWay
+venue: arXiv
+open_source: false  # code "will be released"
+
+architecture:
+  backbone: "NVILA (2B / 8B / 15B; 15B default) fine-tuned as multi-view 2D waypoint generator"
+  llm: "NVILA"
+  action_head: "Autoregressive text output of multi-view-consistent 2D waypoints + gripper tokens, triangulated to 3D TCP waypoints; executed either directly (top-down grasp + waypoint motion planning, '3DWay-TD') or fed as a local waypoint window into a fine-tuned pi0 flow-matching policy ('3DWay-augmented pi0')"
+  action_head_category: autoregressive
+  parameters: "2B-15B (waypoint VLM); pi0 for the augmented variant"
+  key_innovation: "Reformulates 3D waypoint prediction as generating multi-view-consistent 2D waypoints in text with a VLM, then triangulating with known camera intrinsics/extrinsics, avoiding depth ambiguity of 2D / 2.5D trajectories; adaptive waypoint-guided integration concatenates a distance-selected window (N=2) of 3D waypoints with the robot state for pi0 fine-tuning."
+
+training:
+  base_model: "NVILA; pi0 for integration"
+  method: "Full-parameter VLM fine-tune: 1 epoch RoboPoint, then 10 epochs on processed multi-view waypoint data (cross-entropy, AdamW lr 1e-5, batch 256, 8x A100); pi0 in-distribution fine-tune with 3DWay window as extra state"
+  data: "RoboPoint; RLBench + DROID + RH20T (~290 tasks, 134k trajectories) simplified with RDP and projected to 2 views"
+
+benchmarks:
+  rlbench_10task_rotation_invariant:
+    seen: 84.8
+    unseen: 64.0
+    source: "Paper Table 1 (left), 3DWay-TD row"
+    date_reported: "2026-09-08"
+    eval_condition: "non-standard: 10 rotation-invariant RLBench tasks, 3 runs x 25 rollouts; unseen = test-task demos excluded from training; direct top-down execution"
+
+  rlbench_10task_baselines:
+    openvla_oft_seen: 8.8
+    pi0_seen: 39.6
+    pi0_unseen: 12.0
+    pi05_seen: 61.5
+    pi05_unseen: 18.8
+    source: "Paper Table 1 (left)"
+    eval_condition: "foundation VLAs fine-tuned on the same RLBench tasks"
+
+  vlabench:
+    in_distribution: 49.0
+    cross_category: 44.2
+    common_sense: 23.4
+    semantic_instruction: 24.3
+    unseen_texture: 47.4
+    avg: 37.7
+    source: "Paper Table 1 (right), 3DWay-TD row"
+    date_reported: "2026-09-08"
+    eval_condition: "VLABench official protocol, 5 Select-* tasks x 500 demos, 50 trials per setting"
+
+  vlabench_baselines:
+    openvla_oft_avg: 0.4
+    pi0_avg: 25.9
+    pi05_avg: 31.3
+    source: "Paper Table 1 (right), Avg. column"
+    eval_condition: "baselines on VLABench"
+
+  rlbench_5task_fewshot_pi0_augmented:
+    t01_lamp_on: 73.3
+    t02_play_jenga: 58.7
+    t03_knife_on_board: 26.7
+    t04_phone_on_base: 28.0
+    t05_take_off_scales: 44.0
+    avg: 46.1
+    source: "Paper Table 2, '3DWay-augmented (few-shot)' row"
+    date_reported: "2026-09-08"
+    eval_condition: "pi0 fine-tuned with 3DWay guidance, 10 demos per task"
+
+  rlbench_5task_fewshot_baselines:
+    pi0_standard_10demos_avg: 17.6
+    pi0_3dway_zero_shot_generator_10demos_avg: 38.1
+    pi0_standard_30demos_avg: 31.2
+    pi0_standard_50demos_avg: 46.7
+    source: "Paper Table 2, Avg. column"
+    eval_condition: "standard pi0 fine-tune and zero-shot-generator variant"
+
+  rlbench_unseen_ablation:
+    nvila_15b: 64.0
+    nvila_8b: 62.8
+    nvila_2b: 50.1
+    small_extrinsic_shift: 61.6
+    large_extrinsic_shift: 58.4
+    no_multiview_consistency: 22.0
+    source: "Paper Table 3"
+    eval_condition: "ablation on the 10-task unseen RLBench setting (3DWay-TD)"
+
+  real_world:
+    pi0_3dway_augmented_basic_avg: 65.8
+    pi0_standard_basic_avg: 21.7
+    pi0_standard_visual_generalization_avg: 6.7
+    pi0_standard_semantic_avg: 2.5
+    source: "Paper Section 4.3 text (per-task bars only in Fig. 5)"
+    date_reported: "2026-09-08"
+    eval_condition: "AgileX PIPER arm, 5 basic tasks with 20 demos each, 24 rollouts per task; 3DWay-augmented variant exceeds 50% on both extended-task sets per text"
+
+  real_world_3dway_td_embodiments:
+    piper_2ext_avg: 43.9
+    kuka_2ext_avg: 45.0
+    kuka_wrist_front_avg: 45.5
+    kuka_wrist_left_avg: 44.7
+    source: "Paper Table 4, Avg. column"
+    eval_condition: "3DWay-TD direct execution across robots and camera configurations (base/visual/semantic averaged)"
+
+eval_conditions:
+  rlbench: "custom 10-task rotation-invariant subset (not the standard 18-task RLBench multi-task protocol)"
+  vlabench: "official VLABench generalization dimensions"
+  real_world: "AgileX PIPER and KUKA iiwa14, 2 calibrated cameras"
+
+tags: [waypoints, 3d-reasoning, multi-view, triangulation, intermediate-representation, nvila, pi0, rlbench, vlabench, real-robot, generalization]

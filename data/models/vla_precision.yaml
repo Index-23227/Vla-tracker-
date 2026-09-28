@@ -1,0 +1,92 @@
+# Paper: VLA-Precision: Asymmetric Co-Bootstrapping for Efficient Real-World Online RL of Vision-Language-Action Models
+# arXiv: 2609.04355
+
+name: VLA-Precision
+full_name: "VLA-Precision: Asymmetric Co-Bootstrapping for Efficient Real-World Online RL of Vision-Language-Action Models"
+organization: "University of Science and Technology of China / Beihang University / Zhongguancun Academy / Hefei SpinX Technology"
+date: "2026-09-03"
+paper_url: https://arxiv.org/abs/2609.04355
+code_url: null
+venue: arXiv
+open_source: false
+model_type: "Real-world online RL post-training of a large VLA (pi0.5)"
+
+architecture:
+  backbone: "pi0.5 (frozen VLM prefix during Stage II online RL)"
+  action_head: "pi0.5 flow-based action expert; Stage II optimizes only LoRA parameters in the action expert; ensemble of K task-specific critics with value-advantage (Q = V + A) decomposition"
+  action_head_category: flow_matching
+  key_innovation: "Asymmetric Co-Bootstrapping (ACoB): intervention-guided flow-matching behavior cloning on the fast timescale plus progressive critic calibration (ensemble TD + state-matched local preference ranking of human correction over overwritten proposal), yielding pessimistic relative advantages for reference-regularized policy improvement; ACoB-Stream actor-learner system with frozen-prefix KV reuse, disk-backed sliding-window sampling, objective-aligned context retrieval and trainable-subspace policy sync (up to 10.95x throughput)."
+
+training:
+  base_model: "pi0.5"
+  method: "Stage I full-parameter imitation learning on 60-120 demos/task (5k-15k steps); Stage II real-world online RL (ACoB) with human interventions, LoRA on action expert, frozen task-finetuned reference"
+  data: "Task demonstrations + online real-world experience with human corrections, 9 chemistry-lab tasks"
+  hardware: "4x NVIDIA A800 GPUs"
+  online_training_time: "45.8 min/task on average"
+
+benchmarks:
+  real_world:
+    success_rate_avg: 98.3
+    source: "Paper Table I, Average row, Ours success-rate column"
+    date_reported: "2026-09-03"
+    eval_condition: "9 high-precision chemistry manipulation tasks on 4 platforms (UR5e-gripper, UR5e-LinkerHand L20, dual UR5e, Franka FR3), 20 trials per task (177/180), object and arm poses randomized"
+
+  real_world_per_task:
+    tube_rack_loading: 100
+    vial_transfer_2ml: 100
+    cuvette_transfer: 90
+    rubber_stopper_insertion: 100
+    alcohol_lamp_extinguishing: 100
+    pipette_tip_attachment: 100
+    bulb_dropper_transfer: 100
+    pipette_transfer_and_ejection: 100
+    tube_brushing: 95
+    source: "Paper Table I, Ours success-rate column"
+    eval_condition: "per-task success rate (%), 20 trials each"
+
+  real_world_episode_time:
+    avg_episode_time_s: 27.6
+    avg_training_time_min: 45.8
+    source: "Paper Table I, Average row (Ours episode time and training time)"
+    eval_condition: "mean successful-episode time in seconds and online training minutes per task"
+
+  real_world_baselines:
+    hil_serl_avg: 2.8
+    conrft_avg: 7.8
+    robo_dopamine_avg: 10.0
+    pi0_sft_avg: 59.4
+    pi05_sft_avg: 67.8
+    source: "Paper Table I, Average row, success-rate columns"
+    eval_condition: "baselines on the same 9 tasks; pi0/pi0.5 fine-tuned with 120-200 demos and 25k-30k SFT steps, no online RL"
+
+  real_world_offline_test_5tasks:
+    vla_precision_successes_of_100: 99
+    pi05_successes_of_100: 61
+    pi0_successes_of_100: 50
+    vla_precision_mean_time_s: 26.65
+    pi05_mean_time_s: 29.32
+    pi0_mean_time_s: 32.05
+    source: "Paper Sec. IV-B 'Offline VLA Test Performance' text (Fig. 8)"
+    eval_condition: "5 representative tasks, 20 trials per method-task pair"
+
+  real_world_acob_ablation_4tasks:
+    full_acob: 96.25
+    wo_critic_preference: 26.25
+    wo_actor_bc: 20.00
+    wo_relative_advantage: 8.75
+    source: "Paper Sec. IV-D 'Overall Results' text (Fig. 10)"
+    eval_condition: "ablation: final autonomous success rate (%) averaged over 4 representative tasks at shared per-task horizons"
+
+  acob_stream_throughput:
+    cta_cycles_150min: 15666
+    cta_per_s: 1.7407
+    mean_cta_cycle_s: 0.574
+    speedup_vs_no_kv_cache: 10.95
+    speedup_vs_cpu_dynamic_ram: 1.09
+    source: "Paper Sec. IV-C text (Fig. 9)"
+    eval_condition: "system efficiency: critic-to-actor update cycles over 150 min effective learner time"
+
+eval_conditions:
+  real_world: "9 chemistry-lab precision tasks, 4 robot platforms, 20 trials/task, randomized object and arm poses"
+
+tags: [pi0.5, real-world-rl, online-rl, human-in-the-loop, actor-critic, lora, flow_matching, high-precision, chemistry-lab, dexterous-hand, bimanual, real-robot]

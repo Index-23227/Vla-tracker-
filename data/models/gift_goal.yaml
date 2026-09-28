@@ -1,0 +1,123 @@
+# Paper: GIFT: Goal-Injected Fine-Tuning for Efficient Manipulation Policy Adaptation
+# arXiv: 2609.07006
+# Named GIFT-Goal to distinguish from GIFT-Feature (arXiv 2609.04193).
+
+name: GIFT-Goal
+full_name: "GIFT: Goal-Injected Fine-Tuning for Efficient Manipulation Policy Adaptation"
+organization: "Nanjing University of Aeronautics and Astronautics"
+date: "2026-09-07"
+paper_url: https://arxiv.org/abs/2609.07006
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Plug-in fine-tuning over pretrained VLAs: OpenVLA, CogACT (Prismatic VLM), SpatialVLA (PaliGemma2), pi0.5 (real robot). Headline SIMPLER entry = CogACT+GIFT (7B + 72M); LIBERO entry = OpenVLA+GIFT (7B + 72M)"
+  action_head: "Base model's own action head (CogACT diffusion head / OpenVLA autoregressive tokens / SpatialVLA / pi0.5 flow expert), fine-tuned; goal image from a LoRA-tuned FLUX.1-Fill-dev editor is encoded, contrasted with the observation (F_goal - F_obs), projected and added to observation tokens through a zero-initialized convolution"
+  action_head_category: other
+  parameters: "Base + 10M to 72M extra (e.g., CogACT 7B+72M, 150M trainable; OpenVLA 7B+72M, 200M trainable)"
+  key_innovation: "ControlNet-style zero-conv goal injection: goal-observation semantic contrast F_delta = F_g - F_t is added to observation embeddings via ZeroConv, so the pretrained policy is undisturbed at init; only goal projector, zero conv and action head are trained for one epoch. Goal image produced once per episode by an in-context side-by-side editing prompt on FLUX.1-Fill-dev with observation-structure latent injection (alpha 0.5, first 25% of 20 denoising steps). action_head_category=other because results span heads of different families."
+
+training:
+  method: "Single-epoch fine-tuning of goal projector + zero conv + action head (rest frozen), batch 256, lr 1e-5, FSDP; real robot: pi0.5 LoRA fine-tune (30k steps) then GIFT stage one epoch"
+  data: "Fractal (Google Robot), BridgeData V2 (WidowX), LIBERO; real: 2 tasks x 30 demos on Synria Alicia-D"
+  hardware: "4x NVIDIA L20 (sim); 1x L20 (real)"
+
+benchmarks:
+  simpler_env:
+    simpler_widowx_put_spoon_on_towel: 80.6
+    simpler_widowx_put_carrot_on_plate: 63.9
+    simpler_widowx_stack_block: 43.1
+    simpler_widowx_put_eggplant_in_basket: 83.3
+    simpler_avg: 67.7
+    source: "Paper Table 2, CogACT+GIFT row (WidowX Visual Matching)"
+    date_reported: "2026-09-07"
+    eval_condition: "CogACT+GIFT fine-tuned 1 epoch on BridgeData V2; each task evaluated 3 times"
+
+  simpler_google_visual_matching:
+    pick_coke_can: 91.0
+    move_near: 89.9
+    open_close_drawer: 78.6
+    open_top_drawer_place_apple: 62.6
+    avg: 80.5
+    source: "Paper Table 1, CogACT+GIFT row (Visual Matching)"
+    eval_condition: "Google Robot, CogACT+GIFT fine-tuned 1 epoch on Fractal"
+
+  simpler_google_variant_aggregation:
+    pick_coke_can: 87.6
+    move_near: 86.9
+    open_close_drawer: 64.7
+    open_top_drawer_place_apple: 59.7
+    avg: 74.7
+    source: "Paper Table 1, CogACT+GIFT row (Variant Aggregation)"
+    eval_condition: "Google Robot, CogACT+GIFT fine-tuned 1 epoch on Fractal"
+
+  simpler_other_bases:
+    openvla_gift_google_vm_avg: 45.1
+    openvla_gift_google_va_avg: 48.0
+    openvla_gift_widowx_avg: 10.4
+    spatialvla_gift_google_vm_avg: 62.9
+    spatialvla_gift_google_va_avg: 57.5
+    spatialvla_gift_widowx_avg: 43.4
+    source: "Paper Tables 1 and 2 (OpenVLA+GIFT, SpatialVLA+GIFT rows)"
+    eval_condition: "variants: GIFT on other base VLAs"
+
+  simpler_baselines:
+    cogact_google_vm_avg: 74.5
+    cogact_google_va_avg: 61.3
+    cogact_widowx_avg: 51.3
+    openvla_google_vm_avg: 34.3
+    openvla_google_va_avg: 39.3
+    openvla_widowx_avg: 4.2
+    spatialvla_google_vm_avg: 52.5
+    spatialvla_google_va_avg: 50.3
+    spatialvla_widowx_avg: 33.3
+    source: "Paper Tables 1 and 2 (base models)"
+
+  libero:
+    libero_spatial: 89.5
+    libero_object: 90.6
+    libero_goal: 88.6
+    libero_long: 56.0
+    libero_avg: 81.2
+    source: "Paper Table 3, OpenVLA+GIFT row"
+    date_reported: "2026-09-07"
+    eval_condition: "OpenVLA+GIFT fine-tuned 1 epoch on LIBERO (only base evaluated on LIBERO); standard four suites"
+
+  libero_baselines:
+    openvla_libero_avg: 76.5
+    octo_base_libero_avg: 75.1
+    tracevla_libero_avg: 74.8
+    diffusion_policy_libero_avg: 72.4
+    source: "Paper Table 3"
+
+  goal_quality_ablation_libero:
+    long_degraded_goal: 24.0
+    long_susie_goal: 20.9
+    long_turbo_goal: 55.7
+    long_gift_editor_goal: 56.0
+    long_ground_truth_goal: 56.5
+    source: "Paper Table 4 (LIBERO-Long row, OpenVLA policy, injection module fixed)"
+
+  real_world:
+    task1_pick_up_obj: 71.7
+    task2_put_obj_into_basket: 43.3
+    task1_ood_dim_lighting: 51.7
+    task2_ood_dim_lighting: 36.7
+    source: "Paper Section 4.2 text (Real-World) / Figure 4, pi0.5+GIFT"
+    date_reported: "2026-09-07"
+    eval_condition: "6-DoF Synria Alicia-D + gripper, wrist + third-view D405, 30 demos/task, 30 trials per task per setting"
+
+  real_world_baselines:
+    pi05_task1: 56.7
+    pi05_task2: 36.7
+    pi05_task1_ood: 33.3
+    pi05_task2_ood: 23.3
+    source: "Paper Section 4.2 text (Real-World), pi0.5 LoRA fine-tuned"
+
+eval_conditions:
+  simpler_env: "WidowX VM, CogACT+GIFT, 1-epoch fine-tune"
+  libero: "OpenVLA+GIFT, 1-epoch fine-tune"
+  real_world: "pi0.5+GIFT, 30 trials per task, ID and dim-lighting OOD"
+
+tags: [goal-image, image-editing, zero-convolution, controlnet-style, plug-in, efficient-fine-tuning, cogact, openvla, spatialvla, pi0.5, flux, simpler_env, libero, real-robot]

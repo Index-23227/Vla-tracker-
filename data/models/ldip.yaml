@@ -1,0 +1,132 @@
+# Paper: Large Discrete Policy: Advancing Explicit Behavior Modeling with Stochastic Iterative Scoring
+# arXiv: 2609.07049
+
+name: LDiP
+full_name: "Large Discrete Policy: Advancing Explicit Behavior Modeling with Stochastic Iterative Scoring"
+organization: "Fudan University / NVIDIA"
+date: "2026-09-07"
+paper_url: https://arxiv.org/abs/2609.07049
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "LDiP-VLA: Qwen3-VL-2B (frozen, two-system design following GR00T-N1) feeding a separate action decoder; end-to-end planning variants use ResNet34 / ViT-L / V2-99 image backbones"
+  action_head: "Fully discrete scorer: K-Means action vocabulary (16,384 4-s trajectories for driving; 6,666-16,384 chunks for manipulation) tokenized by a 1D-conv tokenizer, cross-attention-only Transformer decoder + MLP scoring heads; iterative TopK pruning (16,384 -> 512 -> 16 -> argmax) with Gumbel score perturbation"
+  action_head_category: other
+  parameters: "Qwen3-VL-2B + action decoder (LDiP-VLA)"
+  key_innovation: "Stochastic iterative scoring over a fixed, physically plausible action vocabulary: candidates are re-scored and pruned over several stages by a weight-shared decoder, and exploration is injected by Gumbel noise on scores (not on actions) during training; soft-label cross-entropy imitation (Hydra-MDP style) plus driving-metric heads."
+
+training:
+  method: "Imitation learning with distance-based soft-label cross-entropy at every scoring stage; driving adds BCE heads for PDM sub-metrics"
+  data: "NAVSIM navtrain (103K scenes); Robomimic Lift/Can/ToolHang and PushT"
+  hardware: "8x A100, 8 epochs (VLA); 24x A100, 20 epochs (end-to-end planning)"
+
+benchmarks:
+  navsim_v1:
+    nc: 99.0
+    dac: 98.1
+    ttc: 98.6
+    comfort: 98.2
+    ep: 88.8
+    pdms: 92.1
+    source: "Paper Table 2 (LDiP-VLA (Ours) row)"
+    date_reported: "2026-09-07"
+    eval_condition: "LDiP-VLA with Qwen3-VL-2B, two-system variant, NAVSIM navtest v1 PDMS"
+
+  navsim_v1_vla_baselines:
+    drivefine_pdms: 91.8
+    spanvla_pdms: 90.3
+    adathinkdrive_pdms: 90.3
+    drivevla_w0_pdms: 90.2
+    recogdrive_pdms: 89.6
+    autovla_pdms: 89.1
+    source: "Paper Table 2 (baseline rows, PDMS column)"
+    eval_condition: "NAVSIM v1 VLA baselines as listed by the paper"
+
+  navsim_v1_vla_architecture_ablation:
+    action_group_token_pdms: 87.9
+    action_group_token_sis_pdms: 88.8
+    implicit_action_token_pdms: 89.4
+    implicit_action_token_sis_pdms: 90.6
+    two_system_pdms: 90.8
+    two_system_sis_pdms: 92.1
+    source: "Paper Table 6 (PDMS column)"
+    eval_condition: "ablation: three VLA designs with/without stochastic iterative scoring (SIS)"
+
+  navsim_v2_e2e_vitl:
+    nc: 98.7
+    dac: 99.1
+    ddc: 99.7
+    tlc: 99.8
+    ep: 90.3
+    ttc: 98.0
+    lk: 97.9
+    hc: 98.2
+    ec: 80.7
+    epdms: 88.1
+    source: "Paper Table 1 (ViT-L, LDiP (Ours) row)"
+    date_reported: "2026-09-07"
+    eval_condition: "non-VLA end-to-end planning variant, ViT-L backbone, NAVSIM navtest v2 EPDMS"
+
+  navsim_v2_e2e_other_backbones:
+    resnet34_epdms: 84.7
+    v2_99_epdms: 87.8
+    source: "Paper Table 1 (ResNet34 and V2-99 LDiP rows)"
+    eval_condition: "non-VLA end-to-end planning variants"
+
+  navsim_v2_component_ablation:
+    hydra_mdp_v16384_epdms: 86.2
+    iterative_scoring_epdms: 86.7
+    improved_tokenizer_decoder_epdms: 87.1
+    stochastic_scoring_epdms: 87.8
+    noise_injection_top8_epdms: 87.2
+    source: "Paper Table 5 (EPDMS column)"
+    eval_condition: "ablation on V2-99 backbone, cumulative additions"
+
+  hugsim_zero_shot:
+    overall_rc: 44.7
+    overall_hd_score: 36.7
+    easy_hd_score: 82.0
+    medium_hd_score: 40.7
+    hard_hd_score: 20.6
+    extreme_hd_score: 10.6
+    source: "Paper Table 3 (LDiP (Ours) with tuned controller row)"
+    date_reported: "2026-09-07"
+    eval_condition: "zero-shot closed-loop HUGSIM (345 3DGS scenarios), controller tuned for closed-loop; non-controller variant overall RC 43.0 / HD-Score 28.6"
+
+  robomimic_pusht:
+    lift: 0.99
+    can: 0.94
+    toolhang: 0.52
+    pusht: 0.76
+    source: "Paper Table 4 (LDiP (Ours) column)"
+    date_reported: "2026-09-07"
+    eval_condition: "visual Robomimic + PushT following Diffusion Policy protocol; averaged success over last 10 checkpoints ([0,1] scale)"
+
+  robomimic_pusht_baselines:
+    diffusion_policy_lift: 1.00
+    diffusion_policy_can: 0.98
+    diffusion_policy_toolhang: 0.47
+    diffusion_policy_pusht: 0.66
+    source: "Paper Table 4 (Transformer Diffusion Policy column)"
+    eval_condition: "baseline: Transformer-based Diffusion Policy, same protocol"
+
+  robomimic_manipulation_ablation_epoch50:
+    one_shot_toolhang: 0.54
+    one_shot_pusht: 0.67
+    iterative_toolhang: 0.56
+    iterative_pusht: 0.69
+    stochastic_iterative_toolhang: 0.60
+    stochastic_iterative_pusht: 0.78
+    source: "Paper Table 7"
+    eval_condition: "ablation at epoch 50"
+
+eval_conditions:
+  navsim_v1: "LDiP-VLA, Qwen3-VL-2B, navtest v1"
+  navsim_v2: "end-to-end LDiP (non-VLA), navtest v2 EPDMS"
+  hugsim: "zero-shot closed-loop"
+  robomimic: "Diffusion Policy protocol, horizon 16, 2 obs steps, 8 executed steps"
+
+tags: [driving, autonomous-driving, navsim, hugsim, discrete-policy, trajectory-scoring, action-vocabulary, gumbel, qwen3-vl, robomimic, pusht, vla]

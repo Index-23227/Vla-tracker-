@@ -1,0 +1,146 @@
+# Paper: MobileVLA-R1 2.0: RL-Enhanced Reasoning for Mobile Robot Control
+# arXiv: 2609.06251
+# Journal extension of MobileVLA-R1 (ECCV 2026); tracked as a separate model.
+
+name: MobileVLA-R1 2.0
+full_name: "MobileVLA-R1 2.0: RL-Enhanced Reasoning for Mobile Robot Control"
+organization: "Peking University / South China University of Technology / National University of Singapore"
+date: "2026-09-05"
+paper_url: https://arxiv.org/abs/2609.06251
+code_url: https://github.com/AIGeeksGroup/MobileVLA-R1-2.0
+venue: "Submitted to IEEE TPAMI"
+open_source: true
+model_type: navigation
+
+architecture:
+  backbone: "LLaVA-style VLA initialized from NaVILA (LLaMA3-8B); RGB encoder + DepthAnything V2 depth encoder + Point Transformer V3 point-cloud encoder (frozen)"
+  llm: "LLaMA3-8B (NaVILA)"
+  action_head: "Reasoning-conditioned action decoder: two learnable queries (locomotion, behavior) cross-attend (1 layer, 8 heads, d=4096) over observation + generated CoT hidden states; regression head for (Vx, Vy, omega) and softmax head over discrete behavior primitives alpha; executed by robot-specific low-level controllers"
+  action_head_category: regression
+  parameters: "~8B"
+  key_innovation: "System-2 -> System-1 -> System-0 interface: the VLA generates <think>/<answer> CoT, and a learnable reasoning-conditioned decoder maps observation + reasoning hidden states to task-level locomotion/behavior targets (replacing the deterministic text parsing of MobileVLA-R1). Training = multi-granularity CoT SFT (episode/step/navigation, 134K samples from MobileVLA-CoT) followed by offline GRPO with movement (cosine), behavior (exact match) and format rewards, decoder frozen during GRPO."
+
+training:
+  base_model: "NaVILA"
+  method: "SFT with LoRA (r=16, alpha=32) + joint decoder training, then offline GRPO (N=8 samples, 1K steps, lr 1e-6, KL beta 0.04)"
+  data: "MobileVLA-CoT (18K episode / 78K step / 38K nav CoT samples) built from R2R, RxR and QUARD with Gemini-2.5-Flash; no Unitree G1 data"
+  hardware: "SFT 4x H20; GRPO 1x H20"
+
+benchmarks:
+  vln_ce_r2r_val_unseen:
+    ne: 3.86
+    os: 71.2
+    sr: 69.8
+    spl: 66.9
+    source: "Paper Table 2, MobileVLA-R1 2.0 (Ours) row"
+    date_reported: "2026-09-05"
+    eval_condition: "R2R-CE val-unseen, single-view RGB + depth, no panorama/odometry"
+
+  vln_ce_rxr_val_unseen:
+    ne: 3.71
+    sr: 73.1
+    spl: 68.5
+    ndtw: 77.6
+    source: "Paper Table 2, MobileVLA-R1 2.0 (Ours) row"
+    date_reported: "2026-09-05"
+    eval_condition: "RxR-CE val-unseen, single-view RGB + depth"
+
+  vln_ce_baselines:
+    mobilevla_r1_r2r_sr: 68.3
+    mobilevla_r1_r2r_spl: 65.2
+    mobilevla_r1_rxr_sr: 71.5
+    mobilevla_r1_rxr_spl: 66.8
+    correctnav_r2r_sr: 65.1
+    correctnav_rxr_sr: 69.3
+    navila_r2r_sr: 54.0
+    navila_rxr_sr: 49.3
+    streamvln_r2r_sr: 56.9
+    source: "Paper Table 2"
+    eval_condition: "baselines on R2R-CE / RxR-CE val-unseen"
+
+  quard:
+    distinguish: 0.95
+    go_to: 0.92
+    go_avoid: 0.77
+    go_through: 0.72
+    crawl: 0.66
+    unload: 0.56
+    average: 0.76
+    source: "Paper Table 3, MobileVLA-R1 2.0 (Ours) row (success rates as fractions)"
+    date_reported: "2026-09-05"
+    eval_condition: "QUARD official protocol, 25 episodes per task"
+
+  quard_baselines:
+    mobilevla_r1_average: 0.70
+    more_average: 0.60
+    quart_average: 0.44
+    source: "Paper Table 3, Average column"
+    eval_condition: "baselines on QUARD"
+
+  real_world_go2:
+    workspace_simple_sr: 0.95
+    workspace_complex_sr: 0.94
+    corridor_simple_sr: 1.00
+    corridor_complex_sr: 0.91
+    outdoor_simple_sr: 1.00
+    outdoor_complex_sr: 0.98
+    workspace_simple_ne: 0.96
+    workspace_complex_ne: 1.12
+    corridor_simple_ne: 0.90
+    corridor_complex_ne: 1.11
+    source: "Paper Table 4, MobileVLA-R1 2.0 (Ours) row"
+    date_reported: "2026-09-05"
+    eval_condition: "Unitree Go2 closed-loop, 160 episodes, remote H20 inference, 205-245 ms end-to-end latency"
+
+  real_world:
+    tabletop_full: 67.5
+    shelf_cabinet_full: 57.5
+    cluttered_full: 45.0
+    full_avg: 56.7
+    source: "Paper Table 6, MobileVLA-R1 2.0 (Ours) row, Full columns"
+    date_reported: "2026-09-05"
+    eval_condition: "Unitree G1 humanoid mobile manipulation, 120 episodes (3 scenarios x 4 tasks x 10 trials), no G1-specific training; manipulation primitives executed by fixed controller routines"
+
+  real_world_g1_nav_manip:
+    tabletop_nav: 85.0
+    tabletop_manip: 79.4
+    shelf_cabinet_nav: 77.5
+    shelf_cabinet_manip: 74.2
+    cluttered_nav: 70.0
+    cluttered_manip: 64.3
+    source: "Paper Table 6, Nav. and Manip. columns"
+    eval_condition: "Manip. is conditioned on successful navigation"
+
+  real_world_g1_baselines:
+    mobilevla_r1_full_avg: 46.7
+    navila_full_avg: 37.5
+    source: "Paper Table 6, Full Avg. column"
+    eval_condition: "baselines with identical sensing and low-level controllers"
+
+  vln_ce_decoder_grpo_ablation:
+    sft_parsing_r2r_sr: 58.0
+    sft_decoder_r2r_sr: 63.1
+    grpo_parsing_r2r_sr: 68.3
+    grpo_decoder_r2r_sr: 69.8
+    sft_parsing_rxr_sr: 61.4
+    sft_decoder_rxr_sr: 66.0
+    grpo_parsing_rxr_sr: 71.5
+    grpo_decoder_rxr_sr: 73.1
+    source: "Paper Table 9"
+    eval_condition: "ablation: action decoder x GRPO"
+
+  vln_ce_cot_granularity_ablation:
+    no_cot_sr: 64.0
+    episode_level_sr: 65.5
+    step_level_sr: 66.0
+    navigation_level_sr: 66.7
+    multi_granularity_sr: 68.3
+    source: "Paper Table 10 (R2R-CE val-unseen SR, deterministic parsing)"
+    eval_condition: "ablation: reasoning supervision granularity"
+
+eval_conditions:
+  vln_ce: "R2R-CE / RxR-CE val-unseen, standard VLN-CE protocol"
+  quard: "official QUARD protocol, 6 tasks x 25 episodes"
+  real_world: "Unitree Go2 (navigation) and Unitree G1 (mobile manipulation, zero G1 training data)"
+
+tags: [navigation, vln_ce, quadruped, humanoid, mobile-manipulation, chain_of_thought, grpo, reinforcement-learning, navila, llama3, unitree-go2, unitree-g1, quard, real-robot]

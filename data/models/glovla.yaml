@@ -1,0 +1,130 @@
+# Paper: GloVLA: Let Geometry Move and Local VLA Interact for Robust Object-Centric Manipulation in Unstructured Environments
+# arXiv: 2609.06256
+
+name: GloVLA
+full_name: "GloVLA: Let Geometry Move and Local VLA Interact for Robust Object-Centric Manipulation in Unstructured Environments"
+organization: "VinRobotics; Austrian Institute of Technology; Hanoi University of Science and Technology; VinUniversity; DFKI; University of Stuttgart; University of Arkansas"
+date: "2026-09-05"
+paper_url: https://arxiv.org/abs/2609.06256
+code_url: https://glovla-project.github.io/
+venue: arXiv preprint (submitted to IEEE)
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Model-agnostic; instantiated with pi0, pi0.5, GR00T N1.6 and GR00T N1.7 (GR00T N1.6 used for the robustness / real-robot study)"
+  action_head: "Backbone's native action head (GR00T N1.6 flow-matching DiT in the main study) inside two local policies (grasp, place), combined with a proportional Cartesian transport controller that moves the end-effector to object-centric handoff positions"
+  action_head_category: hybrid
+  action_space: "LIBERO 7-D OSC pose; chunks at backbone-native horizon (50 for GR00T N1.6, 40 for N1.7, 10 for pi0/pi0.5), 8 actions executed per query"
+  key_innovation: >
+    Factorizes object-centric pick-and-place into geometric transport and local VLA interaction.
+    Sphere-conditioned demo extraction carves grasp and place clips (within radius r_o / r_b of the
+    object / basket centre) out of the same source demos; two local policies are fine-tuned
+    separately on these clips with fixed phase instructions. At run time a clipped P-controller drives
+    the end-effector to a handoff position (object centre + fixed offset), then the local VLA takes
+    over. Object centres come from simulator state in sim and SAM 3 segmentation on the real robot.
+
+training:
+  method: "Two independently fine-tuned local policies (grasp / place) on extracted demo clips, no extra demonstrations; FullVLA baseline trained on complete trajectories from the same demos"
+  optimizer: "Adam, LR 1e-4"
+  hardware: "8x NVIDIA A100 80GB (training); RTX 5090 (evaluation)"
+
+benchmarks:
+  libero_object_only:
+    libero_object: 98.4
+    fullvla_libero_object: 88.8
+    source: "Paper Table I (LIBERO-Object only, GR00T N1.6 backbone, 50 episodes per task)"
+    date_reported: "2026-09-05"
+    eval_condition: "fine-tuned local policies, simulator object centres; LIBERO-Object suite only"
+  libero_object_backbones:
+    pi0_glovla: 98.6
+    pi0_fullvla: 87.4
+    pi05_glovla: 99.6
+    pi05_fullvla: 97.8
+    gr00t_n16_glovla: 98.4
+    gr00t_n16_fullvla: 88.8
+    gr00t_n17_glovla: 99.6
+    gr00t_n17_fullvla: 96.4
+    source: "Paper Table I (LIBERO-Object averages per backbone)"
+    date_reported: "2026-09-05"
+    eval_condition: "LIBERO-Object only; FullVLA = same backbone trained on full trajectories"
+  libero_plus_object_only:
+    libero_plus_total: 88.2
+    libero_plus_camera: 77.3
+    libero_plus_robot: 70.6
+    libero_plus_language: 100.0
+    libero_plus_light: 100.0
+    libero_plus_background: 99.6
+    libero_plus_noise: 92.4
+    libero_plus_layout: 85.9
+    source: "Paper Table IV (LIBERO-Plus Object suite only, GR00T N1.6 backbone; GR00T N1.6 FullVLA 76.6)"
+    date_reported: "2026-09-05"
+    eval_condition: "LIBERO-Plus Object suite only, episode-weighted average"
+  libero_challenge:
+    all_scenes: 88.5
+    easy: 93.8
+    medium: 86.5
+    hard: 74.9
+    clutter: 94.5
+    distraction: 91.7
+    obstruction: 96.2
+    visual_shift: 90.3
+    illumination: 96.2
+    source: "Paper Table II (LIBERO-Challenge, 50 scenes x 50 episodes, GR00T N1.6)"
+    date_reported: "2026-09-05"
+    eval_condition: "paper's own LIBERO-Object-derived stress benchmark"
+  libero_challenge_fullvla_baseline:
+    all_scenes: 20.8
+    easy: 31.4
+    medium: 8.3
+    hard: 1.5
+    source: "Paper Table II (FullVLA GR00T N1.6 baseline)"
+    eval_condition: "full-trajectory GR00T N1.6"
+  libero_challenge_data_efficiency:
+    unstructured_avg_10_demos: 45.1
+    unstructured_avg_30_demos: 99.5
+    unstructured_avg_50_demos: 99.9
+    fullvla_unstructured_avg_10_demos: 9.1
+    fullvla_unstructured_avg_30_demos: 19.9
+    fullvla_unstructured_avg_50_demos: 48.5
+    source: "Paper Table V (LIBERO-Challenge Task 1, matched source-demo budgets)"
+    eval_condition: "Task 1 (Alphabet Soup) only"
+  real_world:
+    overall_success: 90.0
+    tabletop_clean: 95.0
+    medium_perturbation: 80.0
+    hard_perturbation: 70.0
+    source: "Paper Table VI (UR10e, 90 trials total)"
+    date_reported: "2026-09-05"
+    eval_condition: "UR10e, SAM 3 object localization"
+  real_world_fullvla_baseline:
+    overall_success: 35.6
+    tabletop_clean: 90.0
+    medium_perturbation: 10.0
+    hard_perturbation: 0.0
+    source: "Paper Table VI (FullVLA baseline)"
+    eval_condition: "UR10e, full-trajectory VLA"
+  real_world_inference_time:
+    glovla_inference_time_s: 28.2
+    fullvla_inference_time_s: 60.1
+    source: "Paper Table VI (mean inference time per episode, seconds)"
+    eval_condition: "UR10e"
+
+eval_conditions:
+  libero_object_only: "LIBERO-Object only, fine-tuned local grasp/place policies, simulator-provided object centres"
+  libero_plus_object_only: "LIBERO-Plus Object suite only"
+  libero_challenge: "paper-introduced 50-scene perturbation benchmark"
+  real_world: "UR10e with SAM 3 localization"
+
+tags:
+  - vla
+  - hybrid
+  - motion-planning
+  - object-centric
+  - robustness
+  - gr00t
+  - pi0
+  - libero
+  - libero-plus
+  - real-robot
+  - ur10e
