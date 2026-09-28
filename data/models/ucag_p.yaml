@@ -1,0 +1,90 @@
+name: UCAG-P
+full_name: "One Policy, Many Embodiments: Unified Camera-Centric Action Geometry Pre-training for Heterogeneous Embodied Manipulation"
+organization: "Xiaomi Embodied Intelligence Team; University of Macau"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.26058
+code_url: "https://public-bots.github.io/UCAG-P"
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct with learnable action-query tokens"
+  action_head: "Two-part head: (1) shared camera-centric motion head (2560->5120 projection + two residual MLP blocks) predicting a 30-step x 30-dim camera-frame anchor motion chunk (wrist/EE p0, grasp-center p1, rotation, gripper, camera motion); (2) geometry-conditioned action translator (2-layer, 8-head Transformer encoder fusing motion, camera-to-base pose, Jacobian and 8-query attention-pooled VLM features) outputting a 30-step x 80-dim sparse qpos command chunk; both trained with masked L1"
+  action_head_category: regression
+  parameters: "~4B (Qwen3-VL-4B backbone) + motion head + translator"
+  key_innovation: "Camera-centric unified action space: robot arms, humanoids and human hands are all expressed as camera-frame anchor motion (p0 wrist/EE, p1 grasp center), letting 2.34K hours of egocentric human video supervise the same target as robot data without retargeting; a geometry-conditioned translator maps the shared motion to embodiment-specific commands. One checkpoint is evaluated on LIBERO, RoboTwin 2.0 and RoboCasa GR-1 without benchmark-specific fine-tuning."
+
+benchmarks:
+  libero:
+    libero_spatial: 98.8
+    libero_object: 98.6
+    libero_goal: 99.2
+    libero_long: 96.4
+    libero_avg: 98.25
+    libero_plus_camera: 51.2
+    libero_plus_robot: 92.8
+    libero_plus_language: 83.5
+    libero_plus_light: 98.9
+    libero_plus_background: 98.0
+    libero_plus_noise: 75.2
+    libero_plus_layout: 74.3
+    libero_plus_avg: 82.0
+    source: "Paper Table B.3 (four standard suites; Table 3 rounds avg to 98.3) and Table 4 (LIBERO-Plus seven perturbations)"
+    eval_condition: "single unified generalist checkpoint, no LIBERO-specific fine-tuning; LIBERO-Plus zero-shot"
+
+  robotwin_v2:
+    robotwin_v2_clean: 88.66
+    robotwin_v2_randomized: 89.20
+    source: "Paper Table B.5 average row (50 tasks, 100 episodes each); Table 3 reports Easy 88.7 / Hard 89.2"
+    eval_condition: "single unified checkpoint, ALOHA embodiment, Clean (Easy) and Randomized (Hard) settings"
+
+  robocasa:
+    robocasa_gr1_tabletop_avg: 62.0
+    robocasa_avg: 62.0
+    source: "Paper Table 3 and Table B.4 (24 RoboCasa GR-1 tasks, average)"
+    eval_condition: "single unified checkpoint, GR-1 humanoid arms+hands+waist commands"
+
+  robotwin_v2_cross_embodiment_arx:
+    arx_success: 35.0
+    source: "Paper Table B.1"
+    eval_condition: "zero-shot: ALOHA replaced by ARX in RoboTwin with fixed scenes, layouts, seeds and camera extrinsics; initial EE poses aligned by IK"
+
+  robocasa_gr1_action_head_ablation:
+    wo_vlm_features: 58.3
+    attend_pooled_vlm_features: 62.0
+    source: "Paper Table B.2"
+    eval_condition: "RoboCasa GR-1 success rate; ablation of pooled VLM feature conditioning in the action translator"
+
+  real_world:
+    bread_grasping: 60
+    drawer_opening: 90
+    bowl_stacking: 75
+    source: "Paper Section 5.2 text (Figure 7)"
+    eval_condition: "Piper robots, UCAG-P initialization + SFT with 100 demos per task, 20 closed-loop trials; bread grasping uses human-hand demos (human-to-robot transfer); bowl stacking is bimanual"
+
+  real_world_pi05_baseline:
+    bread_grasping: 20
+    drawer_opening: 85
+    bowl_stacking: 65
+    source: "Paper Section 5.2 text (Figure 7)"
+    eval_condition: "baseline: pi0.5 on the same Piper platform, matched demos, schedule, observations and controller"
+
+  unified_benchmark_baselines_qwen_vla_instruct:
+    libero: 97.9
+    robotwin_easy: 86.1
+    robotwin_hard: 87.2
+    robocasa_gr1: 56.7
+    source: "Paper Table 3, Qwen-VLA-Instruct row (generalist baseline, reported results)"
+    eval_condition: "baseline: generalist Qwen-VLA-Instruct"
+
+training:
+  datasets: ["RoboChallenge", "RoboCoin-Piper", "DROID", "RoboCasa GR-1", "LIBERO", "RoboTwin 2.0 ALOHA", "InternData-A1 (MultiRobot, Franka)", "VITRA", "EgoDex", "EgoVerse", "ShareRobot / RefSpatial-v2 / RoboVQA / RoboAfford (VL, Stage 1)"]
+  method: "Three stages: (1) camera-centric specialization of VLM + motion head, 200K steps on 128 H20; (2) geometry-conditioned translator on ground-truth trajectories, 10K steps on 8 H20; (3) joint robot-human training of motion head + translator, 10K steps on 64 H20. AdamW, lr 1e-5 backbone / 1e-4 action modules. Embodied corpus: 1,020,672 episodes, 6,373.586 h (4.03K h robot+sim, 2.34K h human)."
+
+eval_conditions:
+  libero: "single generalist checkpoint, no benchmark-specific fine-tuning"
+  robotwin_v2: "single generalist checkpoint, 50 tasks, Clean/Randomized"
+  robocasa: "RoboCasa GR-1 24 tabletop tasks"
+  real_world: "Piper robots, SFT from UCAG-P init with 100 demos per task, 20 trials"
+
+tags: [cross_embodiment, camera_centric_action, human_video, egocentric, qwen3_vl, generalist, libero, libero_plus, robotwin, robocasa, humanoid, bimanual, real_robot]

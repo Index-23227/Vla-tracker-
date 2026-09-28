@@ -1,0 +1,73 @@
+# Paper: GRAFT: Grounded and Efficient Online Reinforcement Adaptation for Fine-Grained Robot Manipulation
+# arXiv: 2608.27079
+# NOTE: distinct from FrozenGraft (data/models/frozen_graft.yaml).
+
+name: GRAFT
+full_name: "GRAFT: Grounded and Efficient Online Reinforcement Adaptation for Fine-Grained Robot Manipulation"
+organization: "Suzhou Institute for Advanced Research, University of Science and Technology of China (USTC)"
+date: "2026-08-27"
+paper_url: https://arxiv.org/abs/2608.27079
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pretrained flow-matching VLA with frozen VLM prefix (side + wrist RGB, language, 8-D adapter state); specific base checkpoint not named"
+  action_head: "single-step consistency action head (replacing iterative flow matching) predicting a 10-step action chunk in one forward pass, conditioned on view-specialized visual anchors"
+  action_head_category: diffusion
+  parameters: "8 anchor templates per view (side, wrist) + trainable action/critic pathways; total count not stated"
+  key_innovation: "Online RL adaptation of a pretrained VLA for fine-grained biomedical lab manipulation. View-specific visual anchors (8 per camera) read frozen visual tokens via cross-attention and are supervised during training only by identity-free multi-region FreeDice loss over offline proposal masks (plus redundancy penalty), so no proposals are needed at deployment. Learner reuses cached frozen-prefix KV states across replay updates and uses a single-step consistency policy; actor-learner loop with twin critics and BC + Q-maximization actor loss over balanced demo/online replay."
+
+benchmarks:
+  real_world:
+    petri_dish_delidding_successes_of_10: 9
+    centrifuge_tube_loading_successes_of_10: 9
+    precision_liquid_transfer_successes_of_10: 8
+    pipette_tip_attachment_successes_of_10: 7
+    average: 82.5
+    source: "Paper Table I, GRAFT row (9/10, 9/10, 8/10, 7/10, 33/40)"
+    eval_condition: "JAKA arm, 10 demos + 45 min online adaptation per task; rolling success over final 10 online episodes per task"
+
+  real_world_graft_union_ablation:
+    petri_dish_delidding_successes_of_10: 7
+    centrifuge_tube_loading_successes_of_10: 2
+    precision_liquid_transfer_successes_of_10: 8
+    pipette_tip_attachment_successes_of_10: 6
+    average: 57.5
+    source: "Paper Table I, GRAFT-Union row"
+    eval_condition: "ablation: proposal-union supervision instead of identity-free multi-region FreeDice"
+
+  real_world_rl_cp_baseline:
+    petri_dish_delidding_successes_of_10: 3
+    centrifuge_tube_loading_successes_of_10: 3
+    precision_liquid_transfer_successes_of_10: 9
+    pipette_tip_attachment_successes_of_10: 5
+    average: 50.0
+    source: "Paper Table I, RL-CP row"
+    eval_condition: "baseline: online RL with single-step consistency head, no anchors"
+
+  real_world_rl_fm_baseline:
+    petri_dish_delidding_successes_of_10: 2
+    centrifuge_tube_loading_successes_of_10: 0
+    precision_liquid_transfer_successes_of_10: 0
+    pipette_tip_attachment_successes_of_10: 2
+    average: 10.0
+    source: "Paper Table I, RL-FM row"
+    eval_condition: "baseline: online RL with native multi-step flow-matching generator"
+
+  learner_update_efficiency:
+    rl_cp_kv_cache_steps_per_s: 21.96
+    rl_cp_no_cache_steps_per_s: 2.21
+    rl_fm_kv_cache_steps_per_s: 6.30
+    rl_fm_no_cache_steps_per_s: 1.99
+    source: "Paper Table II"
+    eval_condition: "offline learner throughput on Centrifuge Tube Loading, 10 demos, 946 replay chunks, 1,000 learner steps"
+
+training:
+  method: "Online actor-learner RL: twin critics (gamma 0.98), actor loss 0.5*BC + 1.0*Q-maximization over equal demo/online replay batches; FreeDice grounding update every 10 iterations on proposal-valid demo windows; frozen VLM prefix, trainable anchors/action head/critics"
+  data: "10 teleoperated demonstrations per task + 45 minutes of online interaction (human interventions allowed, added to demo buffer)"
+
+eval_conditions:
+  real_world: "4 biomedical lab tasks on JAKA arm, objects perturbed +/-30 mm, final-10-episode rolling success of the online trace (not a separate frozen-policy evaluation)"
+
+tags: [online-rl, real-world-rl, visual-grounding, consistency-policy, kv-cache, laboratory-automation, biomedical, fine-grained-manipulation, real-robot]

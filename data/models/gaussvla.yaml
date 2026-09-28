@@ -1,0 +1,120 @@
+# Paper: GaussVLA: Geometry-Aware Spatial Reasoning for Vision-Language-Action Model
+# arXiv: 2608.24959
+
+name: GaussVLA
+full_name: "GaussVLA: Geometry-Aware Spatial Reasoning for Vision-Language-Action Model"
+organization: "Yeungnam University / Kyungpook National University"
+date: "2026-08-25"
+paper_url: https://arxiv.org/abs/2608.24959
+code_url: null
+venue: "BMVC 2026"
+open_source: false
+
+architecture:
+  backbone: "Frozen SigLIP-SO400M/14 (256 patches) + frozen Depth-Anything-V2 ViT-L + frozen CLIP text encoder; trainable Mamba policy backbone (5 blocks, d_b=512, intermediate 1024)"
+  action_head: "Flow-matching action decoder (two cross-attention blocks, 4 heads) predicting 7-DoF chunks of H=10 with 10 Euler steps; action-token states attend to context states and DA-CoT tokens"
+  action_head_category: flow_matching
+  parameters: "200M total / 179M trainable, excluding frozen SigLIP, Depth-Anything-V2 and CLIP (paper text and Table 4; Table 1 lists '1B' in its parameter column)"
+  key_innovation: "Gaussian Spatial Tokenizer (GST) back-projects each SigLIP patch with affine-corrected monocular depth and predicts a residual 3D mean, log-scale and opacity per patch, encodes means with 3D Fourier features, and pools 256 patches into 128 tokens per camera with opacity-biased (log alpha) cross-attention. Depth-Aware Chain-of-Thought (DA-CoT) uses 4 learnable queries that cross-attend to GST tokens under language and flow-time conditioning (non-autoregressive), supervised by an auxiliary velocity-prediction loss. Losses: flow matching + opacity-weighted depth consistency + DA-CoT velocity loss. 12.97 ms/step on an RTX Pro 6000 Blackwell."
+
+training:
+  method: "Trained from scratch for GST, DA-CoT, Mamba backbone and action decoder (all encoders frozen); AdamW lr 2.5e-5, wd 1e-4, batch 256, BF16, cosine schedule, flow time ~ Beta(1.5,1.0), lambda_GST 0.05, lambda_CoT 0.10 with 5-epoch warm-up"
+  data: "LIBERO, Meta-World, CALVIN ABCD->D 10% subset demos; 50 teleoperated demos per SO-101 real task"
+
+benchmarks:
+  libero:
+    libero_spatial: 100.0
+    libero_object: 95.8
+    libero_goal: 95.3
+    libero_long: 83.0
+    libero_avg: 93.5
+    libero_pro_avg: 33.3
+    source: "Paper Table 1 (LIBERO); LIBERO-PRO from Table 4, Full GaussVLA row (Table 3 reports the same as normalized 0.33)"
+    date_reported: "2026-08-25"
+    eval_condition: "trained on LIBERO, 40 rollouts per task; LIBERO-PRO evaluated under 5 perturbation types"
+
+  libero_pro_per_perturbation:
+    goal_obj: 0.81
+    goal_pos: 0.00
+    goal_sem: 0.70
+    goal_task: 0.00
+    goal_env: 0.00
+    spatial_obj: 0.93
+    spatial_pos: 0.00
+    spatial_sem: 0.73
+    spatial_task: 0.00
+    spatial_env: 0.27
+    long_obj: 0.83
+    long_pos: 0.00
+    long_sem: 0.67
+    long_task: 0.00
+    long_env: 0.00
+    object_obj: 0.92
+    object_pos: 0.00
+    object_sem: 0.63
+    object_task: 0.00
+    object_env: 0.17
+    avg_sr: 0.33
+    source: "Paper Table 3, GaussVLA row (normalized success rate, 0-1 scale)"
+    eval_condition: "LIBERO-PRO breakdown; OpenVLA 0.52, pi0.5 0.53, pi0 0.44 in the same table"
+
+  metaworld:
+    metaworld_easy: 92.7
+    metaworld_medium: 47.9
+    metaworld_hard: 37.3
+    metaworld_very_hard: 41.6
+    metaworld_avg: 54.9
+    source: "Paper Table 2 (Meta-World panel), GaussVLA row"
+    date_reported: "2026-08-25"
+    eval_condition: "difficulty-stratified Meta-World splits (Easy/Mid/Hard/Very Hard)"
+
+  calvin_abcd_d_10pct:
+    task_1: 0.637
+    task_2: 0.367
+    task_3: 0.291
+    task_4: 0.179
+    task_5: 0.000
+    avg_len: 1.474
+    source: "Paper Table 2 (CALVIN panel) and Table 13 (H=10 default)"
+    date_reported: "2026-08-25"
+    eval_condition: "CALVIN ABCD->D trained on the 10% data subset; NOT the standard ABC->D split"
+
+  calvin_abcd_d_10pct_horizon_ablation:
+    h20_avg_len: 1.65
+    h50_avg_len: 1.32
+    source: "Paper Table 13"
+    eval_condition: "ablation: action-chunk horizon H=20 and H=50"
+
+  real_world:
+    multitask_avg: 58.8
+    pick_place_id: 81.0
+    pick_place_ood: 46.7
+    source: "Paper Sec. 4.3 text (per-task breakdown is figure-only in Fig. 4 and omitted)"
+    date_reported: "2026-08-25"
+    eval_condition: "single SO-101 6-DoF arm, RealSense camera, 15 Hz control; OOD = camera shifted +/-5 cm and +/-10 deg"
+
+  real_world_baselines:
+    spatialvla_multitask_avg: 46.3
+    act_multitask_avg: 35.7
+    source: "Paper Sec. 4.3 text"
+    eval_condition: "baselines on the same SO-101 multi-task setting"
+
+  libero_component_ablation:
+    vanilla_libero: 78.1
+    vanilla_libero_pro: 11.2
+    gst_only_libero: 90.5
+    gst_only_libero_pro: 29.0
+    dacot_only_libero: 82.1
+    dacot_only_libero_pro: 16.7
+    full_libero: 93.5
+    full_libero_pro: 33.3
+    source: "Paper Table 4"
+    eval_condition: "ablation: GST / DA-CoT removed"
+
+eval_conditions:
+  libero: "Standard LIBERO 4 suites, 40 rollouts per task"
+  calvin: "ABCD->D with 10% training subset only; not comparable to ABC->D leaderboard"
+  metaworld: "Easy / Mid / Hard / Very Hard splits"
+  real_world: "SO-101 arm, 50 demos per task; inference on a GeForce 1080 Ti"
+
+tags: [mamba, state-space-model, gaussian-tokens, 3d-gaussian, depth-anything-v2, siglip, chain-of-thought, spatial-reasoning, flow_matching, lightweight, libero, libero-pro, metaworld, calvin, so101, real-robot, BMVC-2026]

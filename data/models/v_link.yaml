@@ -1,0 +1,112 @@
+# Paper: V-Link: Recovering Lost Visual Representations in Action DiT for Vision-Language-Action Models
+# arXiv: 2608.25308
+
+name: V-Link
+full_name: "V-Link: Recovering Lost Visual Representations in Action DiT for Vision-Language-Action Models"
+organization: "AGIBOT / Zhejiang University / HKUST (Guangzhou) / Simon Fraser University"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.25308
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "GR00T N1.6 3B (Qwen-based VLM + 32-layer AlternateVLDiT action expert); pretrained language and vision backbones frozen, VLM adapted with rank-128 LoRA"
+  action_head: "GR00T N1.6 Action DiT (flow matching) with extra injection at the image cross-attention layers (l = 4k+2): parallel cross-attention to VLM image tokens and learnable Semantic Queries fused via a gated residual projection, followed by a dedicated cross-attention to Spatial Queries for geometric conditioning"
+  action_head_category: flow_matching
+  parameters: "~3B (GR00T N1.6 3B) + learnable query tokens + two ~2.3M-param training-only depth/segmentation heads (removed at inference)"
+  key_innovation: "Diagnoses a VL-to-A 'visual representation accessibility' bottleneck in dual-system VLAs (frozen-feature probes: depth MAE 0.015 on VLM features vs 0.071 on GR00T Action DiT features; seg mIoU 0.665 vs 0.290). Fixes it by appending learnable Spatial and Semantic Query tokens to the VLM input under a tailored causal mask, supervising them with training-only depth (smooth-L1 + abs-rel + top-k hard-patch) and segmentation (CE + Dice) heads, and injecting them asymmetrically into the Action DiT. Adds only 1.58 ms latency (43.21 -> 44.79 ms)."
+
+training:
+  base_model: "GR00T N1.6 3B"
+  method: "Fine-tuning with L = L_flow + 0.1 L_depth + 0.002 L_seg; warm-up of VLM LoRA + queries + heads, then joint optimization; AdamW lr 1e-4, cosine decay, BF16, DeepSpeed ZeRO-2"
+  data: "LIBERO standard demos (80k steps, batch 160, 2x5x5 query tokens, 16-step chunks); RoboTwin 2.0 6 tasks x 50 demos (120k steps, batch 128, 3x5x5 queries, 15-step chunks); 100 teleoperated demos per AGIBOT A3 Ultra task. Depth/segmentation GT used only in training (real robot: Lingbot-Depth completion + GroundingDINO/SAM3 pseudo-labels)"
+  hardware: "4x NVIDIA H100"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.5
+    libero_object: 100.0
+    libero_goal: 99.8
+    libero_long: 98.0
+    libero_avg: 99.3
+    libero_plus_camera: 42.8
+    libero_plus_robot: 59.1
+    libero_plus_language: 82.8
+    libero_plus_light: 95.7
+    libero_plus_background: 94.9
+    libero_plus_noise: 87.8
+    libero_plus_layout: 74.4
+    libero_plus_avg: 75.0
+    source: "Paper Table I (LIBERO), Table II (LIBERO-Plus, Total column)"
+    date_reported: "2026-08-26"
+    eval_condition: "fine-tuned on standard LIBERO only; LIBERO-Plus evaluated zero-shot without further fine-tuning; 50 trials per task"
+
+  libero_gr00t_n1_6_baseline:
+    libero_spatial: 99.3
+    libero_object: 99.2
+    libero_goal: 98.4
+    libero_long: 92.9
+    libero_avg: 97.4
+    libero_plus_total: 43.8
+    source: "Paper Table I and Table II, GR00T-N1.6 (Base) rows"
+    eval_condition: "baseline: GR00T N1.6 fine-tuned under the same protocol"
+
+  robotwin_v2:
+    move_pillbottle_pad: 74
+    move_stapler_pad: 22
+    place_bread_skillet: 55
+    place_phone_stand: 60
+    press_stapler: 97
+    turn_switch: 33
+    robotwin_v2_avg: 56.8
+    source: "Paper Table III, V-Link row"
+    date_reported: "2026-08-26"
+    eval_condition: "6-task SUBSET of RoboTwin 2.0 (not the full suite), 50 demos/task jointly trained, 100 trials/task"
+
+  robotwin_v2_gr00t_n1_6_baseline:
+    move_pillbottle_pad: 58
+    move_stapler_pad: 7
+    place_bread_skillet: 23
+    place_phone_stand: 54
+    press_stapler: 80
+    turn_switch: 6
+    avg: 38.0
+    source: "Paper Table III, GR00T N1.6 (Base) row"
+    eval_condition: "baseline: GR00T N1.6"
+
+  robotwin_v2_query_ablation:
+    gr00t_n1_6: 38.0
+    spatial_query_only: 51.2
+    semantic_query_only: 47.8
+    both_queries: 56.8
+    source: "Paper Table IV (Average column)"
+    eval_condition: "ablation on the 6-task RoboTwin 2.0 subset"
+
+  robotwin_v2_supervision_injection_ablation:
+    without_task_head: 40.3
+    without_injection: 39.8
+    full: 56.8
+    source: "Paper Tables V and VI (Average column)"
+    eval_condition: "ablation: remove depth/seg supervision vs remove query injection into Action DiT"
+
+  real_world:
+    power_on: 98
+    power_off: 94
+    source: "Paper Sec. IV-E text and Fig. 8 caption"
+    date_reported: "2026-08-26"
+    eval_condition: "AGIBOT A3 Ultra humanoid (10-DoF hand), autonomous power-on / power-off, 50 consecutive trials per task"
+
+  real_world_gr00t_n1_6_baseline:
+    power_on: 78
+    power_off: 70
+    source: "Paper Sec. IV-E text and Fig. 8 caption"
+    eval_condition: "baseline: GR00T N1.6"
+
+eval_conditions:
+  libero: "Standard LIBERO 4 suites, 50 trials/task; LIBERO-Plus zero-shot robustness (7 perturbation dimensions)"
+  robotwin_v2: "Six self-selected RoboTwin 2.0 tasks (move / place / contact); average not comparable to full-suite averages"
+  real_world: "AGIBOT A3 Ultra humanoid, 2 tasks, 100 demos/task, 50 trials/task"
+  latency: "44.79 ms vs 43.21 ms for GR00T N1.6 (single H100, torch.compile, 4 denoising steps, 3 views)"
+
+tags: [gr00t-n1.6, action-dit, flow_matching, spatial-query, semantic-query, depth-supervision, segmentation-supervision, representation-recovery, lora, libero, libero-plus, robotwin, humanoid, agibot, real-robot]

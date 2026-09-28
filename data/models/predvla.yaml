@@ -1,0 +1,140 @@
+# Paper: PredVLA: Predictive Sensorimotor Modeling for Sub-Million-Parameter Robot Manipulation
+# (arXiv listing title: "PredVLA: A Sub-Million-Parameter Predictive-Coding Policy for Robot Manipulation")
+# arXiv: 2608.26673
+
+name: PredVLA
+full_name: "PredVLA: Predictive Sensorimotor Modeling for Sub-Million-Parameter Robot Manipulation"
+organization: "Sony Computer Science Laboratories, Tokyo"
+date: "2026-08-27"
+paper_url: https://arxiv.org/abs/2608.26673
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "frozen front end: all-MiniLM-L6-v2 sentence encoder (384->64 PCA) + ImageNet ResNet18 per camera (512->96 PCA, agentview + eye-in-hand) + raw 9-D proprioception; trainable hierarchical predictive-coding RNN (PV-RNN-style modules T/V/A_top/A_bottom, multiple timescales)"
+  action_head: "2-layer MLP decoding a 5-component diagonal Gaussian mixture over 7-D end-effector action from the A_bottom module; mean of highest-weight component executed"
+  action_head_category: regression
+  parameters: "675,732 trainable controller parameters (0.68M); frozen encoders not counted"
+  key_innovation: "Predictive-coding policy in which observations never enter the recurrent dynamics directly: hierarchical multi-timescale recurrent modules predict visual features and proprioception, and deterministic posterior free variables over a 40-step window are optimized online (10 Adam steps per control step) to minimize visual/proprioceptive prediction error plus a prior complexity term; the inferred latent trajectory is decoded into action. Setting n_itr=0 gives an exact open-loop counterpart. No robot-data pretraining."
+
+benchmarks:
+  libero:
+    libero_spatial: 83.19
+    libero_goal: 88.40
+    libero_object: 89.24
+    libero_long: 40.57
+    libero_avg: 75.35
+    libero_3suite_avg: 86.94
+    source: "Paper Table 3 (mean over 14 seeds, 50 rollouts/task)"
+    eval_condition: "trained from scratch per suite on 50 official demos/task (no robot-data pretraining), 0.68M trainable params, 600-step cap"
+    date_reported: "2026-08-27"
+
+  libero_bc_transformer_baseline:
+    libero_spatial: 24.89
+    libero_goal: 30.83
+    libero_object: 15.49
+    libero_long: 7.71
+    libero_avg: 19.73
+    source: "Paper Table 4, B1 BC-Transformer (646,628 params)"
+    eval_condition: "baseline: parameter-matched causal Transformer BC, same frozen front end and GMM head"
+
+  libero_bc_rnn_baseline:
+    libero_spatial: 15.89
+    libero_goal: 16.94
+    libero_object: 2.20
+    libero_long: 6.00
+    libero_avg: 10.26
+    source: "Paper Table 4, B2 BC-RNN (LSTM, 674,276 params)"
+    eval_condition: "baseline: parameter-matched LSTM BC"
+
+  libero_bc_tf_chunk8_baseline:
+    libero_spatial: 21.11
+    libero_goal: 32.57
+    libero_object: 12.83
+    libero_long: 0.29
+    libero_avg: 16.70
+    source: "Paper Table 4, B3 BC-TF chunk8 (772,558 params)"
+    eval_condition: "baseline: action-chunking Transformer, chunk length 8, ACT-style temporal ensembling"
+
+  libero_bc_tf_chunk16_baseline:
+    libero_spatial: 3.77
+    libero_goal: 9.40
+    libero_object: 0.31
+    libero_long: 0.29
+    libero_avg: 3.44
+    source: "Paper Table 4, B4 BC-TF chunk16 (916,478 params)"
+    eval_condition: "baseline: action-chunking Transformer, chunk length 16"
+
+  libero_open_loop_no_error_regression:
+    libero_spatial: 73.79
+    libero_goal: 78.50
+    libero_object: 78.14
+    libero_long: 28.00
+    source: "Paper Table 6, A6 (n_itr = 0)"
+    eval_condition: "ablation: same checkpoints with online error regression disabled (exact open loop), 7 seeds x 20 rollouts/task"
+
+  libero_ablation_no_temporal_hierarchy:
+    libero_spatial: 61.57
+    libero_goal: 71.07
+    libero_object: 61.29
+    source: "Paper Table 6, A1"
+    eval_condition: "ablation: tau set to its mean, retrained, 7 seeds x 20 rollouts/task"
+
+  libero_ablation_no_visual_to_action_bottleneck:
+    libero_spatial: 56.00
+    libero_goal: 72.00
+    libero_object: 90.36
+    source: "Paper Table 6, A2"
+    eval_condition: "ablation: remove V->A bottleneck, retrained"
+
+  libero_ablation_no_efference_copy:
+    libero_spatial: 73.71
+    libero_goal: 76.21
+    libero_object: 87.00
+    source: "Paper Table 6, A3"
+    eval_condition: "ablation: remove A->V efference copy, retrained"
+
+  libero_ablation_no_visual_error_in_er:
+    libero_spatial: 76.71
+    libero_goal: 83.07
+    libero_object: 87.36
+    source: "Paper Table 6, A4 (lambda_v = 0)"
+    eval_condition: "inference-time ablation: visual prediction error removed from error regression"
+
+  libero_ablation_no_proprio_error_in_er:
+    libero_spatial: 77.43
+    libero_goal: 86.64
+    libero_object: 76.14
+    source: "Paper Table 6, A5 (lambda_q = 0)"
+    eval_condition: "inference-time ablation: proprioceptive prediction error removed from error regression"
+
+  libero_ladder_3suite:
+    l0_intact: 86.09
+    l1_no_online_error_regression: 77.26
+    l2_no_predictive_coding_inference: 63.92
+    l3_no_prediction_pathway: 11.56
+    l4_no_temporal_hierarchy: 10.33
+    l5_lstm_cell: 14.52
+    l6_bc_rnn: 11.68
+    l2b_direct_visual_input: 48.60
+    source: "Paper Table 5, three-suite mean (Spatial/Goal/Object), 7 seeds"
+    eval_condition: "mechanism-by-mechanism ladder from PredVLA to BC-RNN, parameter-matched within 1% (L2b +7.3%)"
+
+  inference_latency:
+    control_latency_ms_per_step: 46
+    control_rate_hz: 21.6
+    source: "Paper Section 5.1 text"
+    eval_condition: "end-to-end incl. frozen front end and online error regression, RTX 5090"
+
+training:
+  method: "Trained from scratch per LIBERO suite: L = visual prediction error + proprioceptive prediction error + action NLL (GMM) + complexity; posterior free variables per demo/time step learned jointly then discarded"
+  steps: 30000
+  batch_size: 32
+  optimizer: "Adam, network LR 6e-5 (constant), posterior LR 1e-2, weight decay 1e-4"
+  online_inference: "Adam, window 40, 10 iterations, step size 0.05, w_ER 1.0"
+
+eval_conditions:
+  libero: "per-suite training on official demos, 50 rollouts/task, 14 seeds (7,000 episodes per suite); frozen generic encoders, no robot-data pretraining"
+
+tags: [predictive-coding, recurrent, compact, sub-million-parameters, free-energy, test-time-inference, gaussian-mixture, libero, from-scratch]

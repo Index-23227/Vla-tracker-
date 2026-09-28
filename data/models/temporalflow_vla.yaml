@@ -1,0 +1,131 @@
+name: TemporalFlow-VLA
+full_name: "TemporalFlow-VLA: Learning Physically Grounded Execution History for Long-Horizon Robot Manipulation"
+organization: "HKUST (Guangzhou); Zhejiang University; Simon Fraser University; AgiBot"
+date: "2026-08-27"
+paper_url: https://arxiv.org/abs/2608.26821
+code_url: null
+venue: arXiv
+open_source: false
+
+architecture:
+  backbone: "pi0.5 (VLM prefix + action expert) with a parallel temporal pathway over head-camera frames at t-15, t-8, t"
+  action_head: "pi0.5 flow-matching action expert (16-step chunks); historical information enters only through two flow-supervised temporal query tokens Q8 and Q15 via joint masked self-attention (action tokens cannot see historical patches)"
+  action_head_category: flow_matching
+  parameters: "pi0.5 scale (not stated) + temporal queries, frame-identity embeddings and two training-only FiLM+MLP flow decoders"
+  key_innovation: "Kinematics-grounded robot-surface temporal flow: recorded joint states, URDF geometry and camera calibration render a dense 16x16x2 robot-surface flow target (offline, training only) that supervises two hierarchical, chunk-aligned temporal queries (Q8 recent half-chunk, Q15 full previous chunk, Q8 -> Q15). Loss = L_action + 1.0 * L_temp (masked Huber). No flow estimation or geometry at deployment; asynchronous historical-feature cache keeps latency at single-frame level."
+
+benchmarks:
+  libero:
+    libero_spatial: 97.60
+    libero_object: 99.40
+    libero_goal: 96.93
+    libero_long: 96.60
+    libero_avg: 97.63
+    source: "Paper Table II (Ours row, mean over seeds 0, 2, 5)"
+    eval_condition: "fine-tuned from pi0.5, joint training on 4 suites for 30k steps; 500 rollouts per suite per seed; SD: spatial 0.20, object 0.20, goal 0.61, long 0.87, avg 0.26"
+
+  robotwin_v2_12tasks:
+    clean_avg: 85.5
+    randomized_avg: 84.2
+    clean_h1_avg: 84.0
+    clean_h2_avg: 83.5
+    clean_h3_avg: 89.0
+    randomized_h1_avg: 84.3
+    randomized_h2_avg: 80.8
+    randomized_h3_avg: 87.5
+    source: "Paper Table I (Ours columns, horizon-group and overall averages)"
+    eval_condition: "RoboTwin 2.0 12-task subset grouped by horizon (LingBot-VA grouping); jointly trained 60k steps on 50 clean + 500 randomized demos per task; 100 rollouts per task per setting; NOT the full 50-task RoboTwin 2.0 suite"
+
+  robotwin_v2_12tasks_per_task_clean:
+    place_shoe: 97
+    place_phone_stand: 79
+    lift_pot: 98
+    move_stapler_pad: 62
+    stack_blocks_two: 100
+    place_burger_fries: 95
+    hanging_mug: 39
+    handover_mic: 100
+    stack_blocks_three: 97
+    put_bottles_dustbin: 91
+    blocks_ranking_size: 71
+    blocks_ranking_rgb: 97
+    source: "Paper Table I (Ours, Clean column)"
+    eval_condition: "Clean setting, 100 rollouts per task"
+
+  robotwin_v2_12tasks_per_task_randomized:
+    place_shoe: 95
+    place_phone_stand: 82
+    lift_pot: 98
+    move_stapler_pad: 62
+    stack_blocks_two: 100
+    place_burger_fries: 91
+    hanging_mug: 33
+    handover_mic: 99
+    stack_blocks_three: 95
+    put_bottles_dustbin: 86
+    blocks_ranking_size: 71
+    blocks_ranking_rgb: 98
+    source: "Paper Table I (Ours, Rand. column)"
+    eval_condition: "Randomized setting, 100 rollouts per task"
+
+  robotwin_v2_12tasks_baselines:
+    pi0_clean: 63.5
+    pi0_randomized: 55.3
+    pi05_clean: 79.0
+    pi05_randomized: 72.3
+    xvla_reeval_clean: 66.7
+    xvla_reeval_randomized: 67.3
+    gigaworld_clean: 77.8
+    gigaworld_randomized: 76.2
+    source: "Paper Table I, Overall Average row (baseline values taken from LingBot-VA and GigaWorld-Policy reports)"
+    eval_condition: "baselines on the same 12-task subset, reported results"
+
+  robotwin_v2_12tasks_ablation_clean:
+    pi05: 79.0
+    multi_frame: 79.8
+    two_queries_wo_flow: 83.2
+    q8_only: 84.8
+    q15_only: 83.9
+    full: 85.5
+    source: "Paper Table III (Clean, Avg. column)"
+    eval_condition: "online RoboTwin ablation of history representation, Clean setting"
+
+  robotwin_v2_12tasks_ablation_randomized:
+    pi05: 72.3
+    multi_frame: 81.5
+    two_queries_wo_flow: 83.6
+    q8_only: 84.0
+    q15_only: 83.0
+    full: 84.2
+    source: "Paper Table III (Randomized, Avg. column)"
+    eval_condition: "online RoboTwin ablation of history representation, Randomized setting"
+
+  real_world:
+    three_cup_stacking: 77.8
+    two_bottle_packing: 97.8
+    source: "Paper Section IV-E text (Figure 8), 45-trial means"
+    eval_condition: "AgiBot A3, head+chest RGB, 280 demos per task, 60k steps; 3 rounds x 15 trials per task"
+
+  real_world_baseline:
+    three_cup_stacking: 57.8
+    two_bottle_packing: 86.7
+    source: "Paper Section IV-E text (Figure 8), 45-trial means"
+    eval_condition: "baseline policy (unnamed in text; same data and training setting)"
+
+  inference_latency_libero_long:
+    without_cache_ms: 68.10
+    with_cache_ms: 62.78
+    saved_per_replan_ms: 5.32
+    source: "Paper Section IV-D text"
+    eval_condition: "RTX 4090, server-side policy sampling over first 15 replans of matched successful LIBERO-Long rollouts"
+
+training:
+  datasets: ["LIBERO (4 suites)", "RoboTwin 2.0 (12 tasks, 50 clean + 500 randomized demos each)", "AgiBot A3 real-robot demos (280 per task)"]
+  method: "Fine-tune pi0.5 with an added temporal module; L = L_action (flow matching) + 1.0 * L_temp (masked Huber on robot-surface flow for t-8 and t-15 intervals). 8x H100, per-GPU batch 32; ~20% extra training wall-clock vs baseline."
+
+eval_conditions:
+  libero: "fine-tuned, mean over 3 seeds"
+  robotwin_v2_12tasks: "12-task subset of RoboTwin 2.0, Clean and Randomized"
+  real_world: "AgiBot A3, two three-stage tasks, 45 trials each"
+
+tags: [flow_matching, pi05, temporal_memory, execution_history, long_horizon, robot_flow_supervision, libero, robotwin, real_robot, agibot]

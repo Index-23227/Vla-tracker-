@@ -1,0 +1,98 @@
+name: RA-VLA
+full_name: "RA-VLA: Retrieval-Augmented VLA for Test-Time Adaptation"
+organization: "POSTECH (Department of Computer Science and Engineering; Graduate School of Artificial Intelligence)"
+date: "2026-08-26"
+paper_url: https://arxiv.org/abs/2608.25585
+code_url: null
+venue: ICML 2026
+open_source: false
+
+architecture:
+  backbone: "GR00T N1.5 (frozen Eagle 2 VLM backbone for observation/segment encoding)"
+  action_head: "GR00T N1.5 flow-matching Diffusion Transformer action head with pairwise grounding: each of 8 cross-attention layers attends to current observation features concatenated with one retrieved expert segment (most relevant segments assigned to highest layers); initial noisy action chunk initialized with the mean action chunk of retrieved segments; horizon 16, 4 denoising steps"
+  action_head_category: flow_matching
+  parameters: "GR00T N1.5 scale (not stated) + 2-layer Transformer retrieval encoder (hidden 512, 8 heads, intermediate 1024)"
+  key_innovation: "In-context imitation learning VLA: (1) action-aware retriever trained with a contrastive behavioral alignment loss on DTW-aligned segment pairs, so retrieval matches behavior instead of visual appearance; (2) policy fine-tuned with a contextual adherence loss (margin between MSE with irrelevant vs. retrieved context) to break behavioral inertia; (3) each retrieved segment is pre-encoded and cached independently, keeping latency near-constant in the number of segments. Unseen tasks are handled at test time without weight updates."
+
+benchmarks:
+  libero_novel_task_icl:
+    libero_spatial: 0.320
+    libero_object: 0.556
+    libero_goal: 0.532
+    libero_long: 0.130
+    average: 0.3845
+    unit: "success rate as fraction (0-1), as reported"
+    source: "Paper Table 1, RA-VLA row (action-aware retriever)"
+    eval_condition: "leave-one-suite-out: trained on three LIBERO suites, evaluated on the fully unseen fourth suite with 3 expert demos per held-out task in the buffer; 50 trials per task; NOT the standard LIBERO protocol"
+
+  libero_novel_task_icl_baselines:
+    vanilla_vla_average: 0.0170
+    raea_siglip2_average: 0.0450
+    ricl_g_siglip2_average: 0.0885
+    ricl_r_siglip2_average: 0.0465
+    raea_action_aware_average: 0.1235
+    ricl_g_action_aware_average: 0.1295
+    ricl_r_action_aware_average: 0.2085
+    unit: "success rate as fraction (0-1), as reported"
+    source: "Paper Table 1, Average column of baseline rows"
+    eval_condition: "baselines on the same GR00T N1.5 backbone, same leave-one-suite-out protocol"
+
+  real_world_ur5e_novel_task:
+    stack_box_pick_box: 0.750
+    stack_box_success: 0.417
+    throw_trash_pick_trash: 0.917
+    throw_trash_success: 0.750
+    close_drawer_touch_drawer: 0.750
+    close_drawer_success: 0.667
+    press_pedal_touch_pedal: 0.583
+    press_pedal_success: 0.417
+    average: 0.5625
+    unit: "success rate as fraction (0-1), as reported"
+    source: "Paper Table 2, RA-VLA row"
+    eval_condition: "UR5e + Robotiq 2F-85, leave-one-task-out over 4 tasks (LIBERO data as auxiliary training source); 4 expert demos per held-out task in the buffer; 12 trials per task"
+
+  real_world_ur5e_novel_task_baselines:
+    vanilla_vla_average: 0.0833
+    raea_average: 0.1250
+    ricl_r_average: 0.3542
+    unit: "success rate as fraction (0-1), as reported"
+    source: "Paper Table 2, Average column of baseline rows"
+    eval_condition: "baselines with the action-aware retriever, same protocol"
+
+  libero_goal_contextual_sensitivity_ablation:
+    ra_vla_s_ctx: 0.3639
+    ra_vla_success: 0.532
+    ra_vla_wo_adherence_loss_s_ctx: 0.0353
+    ra_vla_wo_adherence_loss_success: 0.098
+    raft_s_ctx: 0.0247
+    raft_success: 0.104
+    ricl_r_s_ctx: 0.0788
+    ricl_r_success: 0.206
+    source: "Paper Table 3 (Relative Contextual Sensitivity averaged over 1,000 samples; LIBERO-Goal success as fraction)"
+    eval_condition: "held-out LIBERO-Goal suite; ablation of the contextual adherence loss"
+
+  libero_goal_buffer_size_ablation:
+    n_1: 0.482
+    n_2: 0.518
+    n_3: 0.532
+    n_4: 0.552
+    source: "Paper Table 4, row N (number of demos in buffer)"
+    eval_condition: "held-out LIBERO-Goal suite; success rate fraction"
+
+  libero_goal_retrieval_size_ablation:
+    k_1: 0.532
+    k_2: 0.540
+    k_3: 0.548
+    k_4: 0.546
+    source: "Paper Table 4, row K (number of retrieved segments)"
+    eval_condition: "held-out LIBERO-Goal suite; success rate fraction"
+
+training:
+  datasets: ["LIBERO (three of four suites per fold)", "UR5e GELLO teleoperation demos (30 per task, 4 tasks)"]
+  method: "Train the retrieval encoder with a behavioral-alignment contrastive loss (DTW positives, tau=0.01), and fine-tune the GR00T N1.5 policy with L_rel + 0.1 * L_adhere (margin m=0.01); VLM backbone frozen and segment features cached offline. Single NVIDIA A100 for training and inference."
+
+eval_conditions:
+  libero_novel_task_icl: "test-time adaptation to an entirely unseen LIBERO suite via retrieved in-context demos; not comparable to standard LIBERO fine-tuned scores"
+  real_world_ur5e_novel_task: "UR5e, 4 daily tasks, leave-one-out, 12 trials per held-out task"
+
+tags: [in_context_imitation_learning, retrieval_augmented, test_time_adaptation, gr00t_n1_5, flow_matching, contrastive_learning, libero, real_robot, ur5e]
