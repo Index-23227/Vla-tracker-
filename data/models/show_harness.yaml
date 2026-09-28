@@ -1,0 +1,84 @@
+# Paper: Show-Harness: Just a VLM Agent Can Play Robots
+# arXiv: 2609.10522
+
+name: Show-Harness
+full_name: "Show-Harness: Just a VLM Agent Can Play Robots"
+organization: "Show Lab, National University of Singapore"
+date: "2026-09-09"
+paper_url: https://arxiv.org/abs/2609.10522
+code_url: https://showlab.github.io/Show-Harness
+venue: arXiv
+open_source: true
+model_type: vla
+
+architecture:
+  backbone: "Qwen3.5-2B VLM (FT mode, default); vision encoder and projector frozen, rank-64 LoRA on all LM linear layers (~3% params). ZS mode uses Gemini-3.1 Pro without fine-tuning"
+  llm: "Qwen3.5-2B"
+  action_head: "No action head: predicts discrete semantic action units (e.g. MV_FWD, MV_UP, GRASP, RELEASE, ROTATE_CW) as native vocabulary tokens; an embodiment-specific deterministic interpreter grounds each unit into a bounded step (2 cm / 4 cm translation)"
+  action_head_category: autoregressive
+  parameters: "2B (LoRA ~3% trainable)"
+  key_innovation: "Embodied harness with a compact discrete semantic action interface shared by frontier VLMs (zero-shot) and small fine-tuned VLMs; GUMI GUI-based manipulation interface for teleop-free demonstration collection by humans or computer-use agents; plugins for multi-view perception, adaptive step, planning, failure recovery"
+
+training:
+  method: "LoRA SFT with token-level cross-entropy on semantic action units; 40 epochs, lr 1e-4 cosine, warmup 0.1, bf16, 256x256 views, effective batch 32; <2 h on one H200"
+  data: "164 real-robot GUMI episodes (7.8K steps: 101 Franka, 63 AgileX single-arm); 230 simulated episodes (ManiSkill 100, RoboLab 130) for sim-to-real"
+
+benchmarks:
+  real_world:
+    block_to_plate_successes_of_10: 10
+    banana_to_plate_successes_of_10: 10
+    tennis_to_plate_successes_of_10: 8
+    teddy_to_plate_unseen_successes_of_10: 8
+    chess_to_plate_unseen_successes_of_10: 9
+    block_to_bowl_successes_of_10: 10
+    banana_to_bowl_successes_of_10: 7
+    tennis_to_bowl_successes_of_10: 8
+    teddy_to_bowl_unseen_successes_of_10: 7
+    chess_to_bowl_unseen_successes_of_10: 9
+    real_world_avg: 86.0
+    source: "Paper Table 2, Cross-Task, FT (Qwen3.5-2B) column (per-task successes out of 10; Average (%) row)"
+    date_reported: "2026-09-09"
+    eval_condition: "Franka, 10 object-receptacle tasks, 10 trials per task; teddy and chess unseen in fine-tuning"
+
+  real_world_cross_environment:
+    background_successes_of_20: 18
+    lighting_successes_of_20: 19
+    viewpoint_successes_of_20: 19
+    distractors_successes_of_20: 19
+    sim_to_real_successes_of_20: 13
+    avg: 88.0
+    source: "Paper Table 2, Cross-Environment, FT column (successes out of 20; Average (%) row)"
+    eval_condition: "2 tasks (Block or Banana to Plate), 20 trials per shift; sim-to-real trained only on simulated GUMI demos"
+
+  real_world_cross_embodiment:
+    franka_7dof_successes_of_50: 45
+    agilex_6dof_successes_of_50: 42
+    avg: 87.0
+    source: "Paper Table 2, Cross-Embodiment, FT column (successes out of 50; Average (%) row)"
+    eval_condition: "5 Plate tasks, 10 trials per task on each arm; co-trained on both embodiments"
+
+  real_world_zero_shot_mode:
+    cross_task_avg: 89.0
+    cross_environment_avg: 100.0
+    cross_embodiment_avg: 93.0
+    source: "Paper Table 2, ZS column (Gemini-3.1 Pro, medium thinking, no fine-tuning)"
+    eval_condition: "Show-Harness zero-shot mode; not the trained policy"
+
+  real_world_baselines:
+    pi05_cross_task_avg: 39.0
+    gr00t_cross_task_avg: 35.0
+    harness_vla_cross_task_avg: 50.0
+    goal_vla_cross_task_avg: 13.0
+    capx_cross_task_avg: 44.0
+    rats_cross_task_avg: 57.0
+    pi05_cross_environment_avg: 40.0
+    gr00t_cross_environment_avg: 34.0
+    pi05_cross_embodiment_avg: 41.0
+    gr00t_cross_embodiment_avg: 36.0
+    source: "Paper Table 2"
+    eval_condition: "pi0.5 and GR00T fine-tuned on continuous EE trajectories converted from the same demonstrations"
+
+eval_conditions:
+  real_world: "Franka Research 3 (ext D435 + wrist D405) and AgileX dual-arm rig; 50-step cap; timeouts count as failures"
+
+tags: [vlm-agent, semantic-action, discrete-actions, lora, qwen3.5, gemini, zero-shot, gumi, teleoperation-free, real-robot, franka, agilex, cross-embodiment, sim-to-real, open-source]

@@ -1,0 +1,88 @@
+# Paper: HaWMPO: Hallucination-Aware World Model-based Policy Optimization for Generalist Robot Policy
+# arXiv: 2609.09941
+
+name: HaWMPO
+full_name: "HaWMPO: Hallucination-Aware World Model-based Policy Optimization for Generalist Robot Policy"
+organization: "Joy Future Academy, JD; Jilin University"
+date: "2026-09-09"
+paper_url: https://arxiv.org/abs/2609.09941
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "OpenVLA-OFT (one-shot SFT initial policy)"
+  llm: "Inherited from OpenVLA-OFT (not restated in paper)"
+  action_head: "Inherited OpenVLA-OFT continuous action-chunk head (not modified; paper does not detail it)"
+  action_head_category: regression
+  parameters: "OpenVLA-OFT policy; world model Wan2.2-TI2V-5B (frozen during RL)"
+  key_innovation: "World-model RL post-training of a VLA where an action-conditioned Hallucination-Aware Model (HAM) scores reliability of imagined rollouts; scores modulate GRPO rewards via a Reward-Soft mechanism (penalty alpha) to suppress unreliable action chunks"
+
+training:
+  method: "One-shot SFT (one expert trajectory per task) then GRPO in an action-conditioned world-model imagination space (200 RL steps), with learned reward model and HAM-modulated rewards"
+  world_model: "Action-conditioned Wan2.2-TI2V-5B (from WoVR), 5 conditioning frames, 8-step action chunk -> 8 predicted frames, 256x256"
+  optimizer: "Adam, backbone lr 2e-5, value lr 3e-3, weight decay 0.01, grad clip 1.0"
+  hardware: "8x NVIDIA H200"
+
+benchmarks:
+  libero_oneshot_3suite:
+    libero_spatial: 77.2
+    libero_goal: 61.6
+    libero_object: 52.2
+    avg: 63.7
+    source: "Paper Table 1, HaWMPO row"
+    date_reported: "2026-09-09"
+    eval_condition: "Non-standard protocol: one-shot SFT OpenVLA-OFT + 200 world-model RL steps; only 3 LIBERO suites (no Long); alpha selected per suite"
+
+  libero_oneshot_3suite_baselines:
+    openvla_oft_base_spatial: 61.5
+    openvla_oft_base_goal: 48.2
+    openvla_oft_base_object: 36.3
+    openvla_oft_base_avg: 48.7
+    wmpo_spatial: 67.8
+    wmpo_goal: 54.6
+    wmpo_object: 48.0
+    wmpo_avg: 56.8
+    wovr_repro_spatial: 69.2
+    wovr_repro_goal: 64.0
+    wovr_repro_object: 49.6
+    wovr_repro_avg: 60.9
+    source: "Paper Table 1"
+    eval_condition: "WoVR* reproduced without PACE, world model trained once"
+
+  libero_oneshot_ham_ablation_200steps:
+    spatial_without_ham: 69.2
+    spatial_with_ham: 77.2
+    object_without_ham: 49.6
+    object_with_ham: 52.2
+    goal_without_ham: 64.0
+    goal_with_ham: 61.6
+    source: "Paper Table 4 (200 steps, unified alpha 0.3)"
+
+  real_world:
+    tissue_to_box: 85
+    headphone_on_stand: 75
+    real_world_avg: 80.0
+    source: "Paper Table 2 and Appendix A.4 (17/20, 15/20)"
+    date_reported: "2026-09-09"
+    eval_condition: "Unitree G1 humanoid, 2 tasks, 20 trials per task"
+
+  real_world_baselines:
+    base_vla_tissue_to_box: 75
+    base_vla_headphone_on_stand: 60
+    base_vla_avg: 67.5
+    wovr_tissue_to_box: 80
+    wovr_headphone_on_stand: 65
+    wovr_avg: 72.5
+    source: "Paper Table 2 and Appendix A.4"
+
+  ham_hallucination_detection:
+    auroc: 0.9375
+    ap: 0.8952
+    source: "Paper Table 3 (50 human-annotated LIBERO chunks)"
+
+eval_conditions:
+  libero_oneshot_3suite: "one-shot SFT then world-model GRPO; Spatial/Goal/Object only"
+  real_world: "G1 robot, 20 trials per task"
+
+tags: [reinforcement-learning, grpo, world-model, hallucination, rl-post-training, openvla-oft, libero, humanoid, g1, real-robot]

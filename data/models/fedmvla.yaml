@@ -1,0 +1,63 @@
+# Paper: Modality-Decoupled Federated Learning for Privacy-Preserving Embodied Intelligence in 6G
+# arXiv: 2609.09591
+
+name: FedMVLA
+full_name: "FedMVLA: Modality-Decoupled Federated Learning for Privacy-Preserving Embodied Intelligence in 6G"
+organization: "HKUST (Guangzhou); Shanghai Jiao Tong University; Eastern Institute of Technology, Ningbo; ITMO University; University of Hong Kong; SUTD; MBZUAI"
+date: "2026-09-09"
+paper_url: https://arxiv.org/abs/2609.09591
+venue: arXiv (eess.SP)
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "OpenVLA-inspired: SigLIP vision encoder (400M, LoRA rank 16, 4.0M trainable) + LLaMA-2 7B language backbone (LoRA rank 8, 4.2M trainable)"
+  llm: "LLaMA-2 7B"
+  action_head: "Separately trained diffusion-based action head (50M params; only conditioning and output layers, 0.3M, trained in FL); action chunk length 16"
+  action_head_category: diffusion
+  parameters: "~7.5B total; 8.5M trainable per round (34 MB FP32 monolithic upload)"
+  key_innovation: "Modality-decoupled federated fine-tuning of a VLA: modality-aware aggregation (MAFA, different aggregation topologies per vision/language/action pathway), modality-aware differential-privacy budget allocation (MAPA, driven by measured per-modality perturbation tolerance), modality-aware compression (MACO: top-k vision sparsification, 4-bit language quantization, FP32 action), and modality-sliced 6G transport (action on URLLC slice, vision/language on eMBB)"
+
+training:
+  method: "Federated LoRA fine-tuning; 16 clients, 100 federated rounds, 5 local epochs per round; optional record-level DP with RDP accounting"
+  data: "16 clients x 500 locally collected trajectories, strongly non-IID (non-overlapping object categories, distinct textures); 4 embodiments (Franka Panda, Sawyer, UR5e, Jaco) and 4 task families (pick-and-place, bin packing, stacking, drawer)"
+  wireless_substrate: "3GPP TR 38.901 InF-SL at 7 GHz, block Rayleigh fading, 23 dBm uplink, HARQ; 5 MHz URLLC slice for action, 100 MHz eMBB slice for vision/language"
+
+benchmarks:
+  fl_manipulation_sim:
+    task_success: 84.8
+    source: "Paper Sec. IV-B text (Fig. 3a canonical operating point)"
+    date_reported: "2026-09-09"
+    eval_condition: "Simulated federated manipulation, 16 clients / 2 cells, 10 dB average uplink SNR, jammer off, no DP; 50 rollouts per client, 3 seeds"
+
+  fl_manipulation_sim_baselines:
+    fedavg_task_success: 62.6
+    fedvla_task_success: 74.6
+    fedmvla_task_success: 84.8
+    source: "Paper Sec. IV-B text (Fig. 3a)"
+    eval_condition: "same backbone, data partitions, local budget, rounds and paired channel traces; FedProx / SCAFFOLD / FedVLN-P values only in figure (not recorded)"
+
+  fl_ablation_drop_pp:
+    mafa_replaced_by_global_avg: 4.4
+    maco_replaced_by_uniform_compression: 5.3
+    sliced_replaced_by_monolithic_transport: 3.2
+    source: "Paper Sec. IV-B text (success-rate drop in percentage points at canonical point)"
+
+  fl_privacy_eps0_5:
+    mapa_task_success: 72.7
+    uniform_dp_task_success: 35.6
+    sensitivity_only_task_success: 58.1
+    source: "Paper Sec. IV-C text (Fig. 4b, record-level DP, delta 1e-5, epsilon 0.5)"
+
+  fl_communication:
+    per_client_uplink_payload_mb: 1.5
+    fedavg_uplink_payload_mb: 34
+    payload_reduction_pct: 95.6
+    p95_round_critical_uplink_s: 1.5
+    fedavg_p95_round_critical_uplink_s: 136
+    source: "Paper Sec. IV-D text"
+
+eval_conditions:
+  fl_manipulation_sim: "simulated federated robotic manipulation over 3GPP-based wireless substrate (custom setup, not a standard benchmark)"
+
+tags: [federated-learning, privacy, differential-privacy, 6g, wireless, lora, openvla, diffusion, multi-embodiment, simulation]

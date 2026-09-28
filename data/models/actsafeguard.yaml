@@ -1,0 +1,115 @@
+# Paper: ActSafeGuard: Differentiable and Training-Aligned Constraint Enforcement for Flow-Matching Policies
+# arXiv: 2609.11697
+
+name: ActSafeGuard
+full_name: "ActSafeGuard: Differentiable and Training-Aligned Constraint Enforcement for Flow-Matching Policies"
+organization: "Shanghai Jiao Tong University / Shanghai Innovation Institute"
+date: "2026-09-10"
+paper_url: https://arxiv.org/abs/2609.11697
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "pi0.5 (primary); also instantiated on Fast-WAM (Wan2.2-TI2V-5B video branch + 30-layer action-DiT, ~6.02B)"
+  action_head: "pi0.5 flow-matching action expert reparameterized as an N-step discrete flow (N=10), with a parameter-free ray-scaling safety operator applied to every discrete update in both training and inference"
+  action_head_category: flow_matching
+  parameters: "pi0.5 backbone size; ActSafeGuard adds no learnable parameters"
+  key_innovation: "Training-aligned hard-constraint enforcement: each discrete flow step Delta = s * v/N, with s = min(1, alpha) from ray shooting to the nearest facet of a state-dependent convex polytope A(o_t)x <= b(o_t). The operator is differentiable; its Jacobian acts as an oblique projection giving boundary-sliding gradients, so the policy is fine-tuned end-to-end through the safeguard and guarantees 100% step safety rate."
+
+training:
+  base_model: "pi0.5 (also Fast-WAM)"
+  method: "Full-parameter fine-tuning (VLM + action expert) with discrete-time flow-matching loss computed through the ActSafeGuard operator; pi0.5: 50k steps, batch 32, peak lr 2.5e-5, 4x H100; Fast-WAM: 200k steps, 8x H200"
+  data: "RoboTwin 2.0: 300 successful trajectories per task (4 tasks); real robot: 50 teleop demos per task"
+  hardware: "4x H100 (pi0.5), 8x H200 (Fast-WAM)"
+
+benchmarks:
+  robotwin_v2_constrained_poscons:
+    lift_pot: 100
+    place_shoe: 90
+    hanging_mug: 34
+    place_empty_cup: 97
+    mean_sr: 80.25
+    step_safety_rate: 100
+    source: "Paper Table 1, pi0.5 ActSafeGuard row, Static Constraints"
+    date_reported: "2026-09-10"
+    eval_condition: "RoboTwin 2.0 ALOHA-AgileX, 4-task subset, static joint-position constraints (PosCons) on 12 arm joints, 100 episodes per task"
+
+  robotwin_v2_constrained_posvel:
+    lift_pot: 100
+    place_shoe: 98
+    hanging_mug: 31
+    place_empty_cup: 97
+    mean_sr: 81.50
+    step_safety_rate: 100
+    source: "Paper Table 1, pi0.5 ActSafeGuard row, Dynamic Constraints"
+    eval_condition: "same 4 tasks, position + state-dependent velocity constraints (PosCons + VelCons)"
+
+  robotwin_v2_constrained_pi05_baselines:
+    unconstrained_mean_sr: 75.25
+    projection_poscons_mean_sr: 74.75
+    truncation_poscons_mean_sr: 77.25
+    gaugeflow_poscons_mean_sr: 75.00
+    projection_posvel_mean_sr: 76.25
+    truncation_posvel_mean_sr: 76.75
+    unconstrained_poscons_mean_ssr: 51.42
+    unconstrained_posvel_mean_ssr: 48.09
+    source: "Paper Tables 1 and 2 (pi0.5 backbone)"
+    eval_condition: "baselines: unconstrained pi0.5, inference-time projection, post-hoc truncation, GaugeFlow (PosCons only)"
+
+  robotwin_v2_constrained_fastwam_poscons:
+    lift_pot: 100
+    place_shoe: 90
+    hanging_mug: 45
+    place_empty_cup: 93
+    mean_sr: 82.00
+    source: "Paper Table 1, Fast-WAM ActSafeGuard row, Static Constraints"
+    eval_condition: "Fast-WAM backbone variant, PosCons"
+
+  robotwin_v2_constrained_fastwam_posvel:
+    lift_pot: 97
+    place_shoe: 95
+    hanging_mug: 45
+    place_empty_cup: 95
+    mean_sr: 83.00
+    source: "Paper Table 1, Fast-WAM ActSafeGuard row, Dynamic Constraints"
+    eval_condition: "Fast-WAM backbone variant, PosCons + VelCons"
+
+  robotwin_v2_constrained_fastwam_baselines:
+    unconstrained_mean_sr: 83.25
+    projection_poscons_mean_sr: 76.25
+    truncation_poscons_mean_sr: 79.50
+    gaugeflow_poscons_mean_sr: 77.25
+    projection_posvel_mean_sr: 75.50
+    truncation_posvel_mean_sr: 81.75
+    unconstrained_poscons_mean_ssr: 22.99
+    unconstrained_posvel_mean_ssr: 20.01
+    source: "Paper Tables 1 and 2 (Fast-WAM backbone)"
+
+  differentiability_ablation:
+    place_shoe_posvel_sr: 98.0
+    place_shoe_posvel_stop_grad_sr: 3.0
+    place_empty_cup_poscons_sr: 97.0
+    place_empty_cup_poscons_stop_grad_sr: 95.0
+    source: "Paper Table 3"
+    eval_condition: "ablation: stop-gradient on the safety scaling factor during training (pi0.5)"
+
+  real_world:
+    pick_green_cube_successes_of_5: 5
+    guide_the_ball_successes_of_5: 5
+    source: "Paper Real-Robot Deployment section text"
+    date_reported: "2026-09-10"
+    eval_condition: "AgileX ALOHA, pi0.5 fine-tuned on 50 demos per task, 5 rollouts per task; joint-limit box (pick green cube) and non-convex L-shaped EEF corridor (guide the ball)"
+
+  real_world_baseline:
+    pick_green_cube_successes_of_5: 5
+    guide_the_ball_successes_of_5: 4
+    source: "Paper Real-Robot Deployment section text"
+    eval_condition: "baseline: unconstrained pi0.5 (violates corridor in guide the ball)"
+
+eval_conditions:
+  robotwin_v2: "4-task subset (lift pot, place shoe, hanging mug, place empty cup), constraint-augmented, 100 episodes per task; not the standard RoboTwin 2.0 protocol"
+  real_world: "AgileX ALOHA, 2 tasks x 5 rollouts"
+
+tags: [safety, hard-constraints, differentiable-layer, flow-matching, pi0.5, fast-wam, world-action-model, robotwin_v2, real-robot, aloha, bimanual]

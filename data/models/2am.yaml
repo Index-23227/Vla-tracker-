@@ -1,0 +1,64 @@
+# Paper: 2AM: Grounding Agent-Side Memory as Guidance for Steerable Action Models in Long-Horizon Manipulation
+# arXiv: 2609.11308
+
+name: 2AM
+full_name: "2AM: Grounding Agent-Side Memory as Guidance for Steerable Action Models in Long-Horizon Manipulation"
+organization: "KU Leuven; Meituan; Flanders Make"
+date: "2026-09-10"
+paper_url: https://arxiv.org/abs/2609.11308
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Action Model: Qwen3-VL-4B + flow-matching Action Expert; Agent: multimodal Qwen3.8-27B holding all task memory"
+  llm: "Qwen3-VL-4B"
+  action_head: "Flow-matching Action Expert producing 16-step action chunks (next-frame absolute EE pose + gripper), conditioned on subtask language + optional 2D grasp/place/move hints, dual RGB and robot state; episodically stateless"
+  action_head_category: flow_matching
+  parameters: "4B Action Model (+ 27B Agent, not trained)"
+  key_innovation: "Agent-side memory with a compositional steering contract (subtask language + normalized 2D grasp, place and move hints); Action Model trained on hint labels recovered from demonstrations without a model teacher, with constrained condition dropout, Gaussian spatial noise and future-window (10-20 step) temporal jitter to tolerate imperfect Agent outputs"
+
+training:
+  method: "Flow-matching imitation on LIBERO-Mem demonstrations augmented with structured steering labels; constrained hint dropout (nonempty), coordinate noise, temporal jitter"
+  data: "LIBERO-Mem demonstrations; privileged annotations used only to construct training targets"
+
+benchmarks:
+  libero_mem:
+    strict_success: 11.83
+    relaxed_success: 63.00
+    completion: 76.29
+    source: "Paper Table 3, 2AM (Ours) row"
+    date_reported: "2026-09-10"
+    eval_condition: "LIBERO-Mem 10 tasks; RGB-only (agent-view + wrist) and robot state; no depth, segmentation, oracle subgoals or completion predicates"
+
+  libero_mem_task_completion:
+    t1_bowl_lift_return: 97.50
+    t2_bottle_lift_return: 100.00
+    t3_bowl_lift_return_x3: 95.56
+    t4_bottle_lift_return_x3: 86.11
+    t5_bowl_lift_return_x5: 96.83
+    t6_bowl_lift_return_x7: 95.95
+    t7_swap_two_bowls: 42.22
+    t8_rotate_three_bowls: 41.25
+    t9_center_occupied_basket: 59.58
+    t10_center_empty_basket: 47.92
+    source: "Paper Table 2, 2AM Completion column"
+
+  libero_mem_baselines:
+    slotssm_best_published_completion: 14.80
+    pi0_reproduced_strict_success: 12.25
+    pi0_reproduced_relaxed_success: 37.42
+    pi0_reproduced_completion: 70.79
+    source: "Paper Table 3"
+    eval_condition: "pi0 reproduction uses same Qwen3-VL-4B backbone, dual RGB, 16-step chunks"
+
+  libero_mem_interface_ablation:
+    language_only_strict_success: 7.25
+    language_only_relaxed_success: 19.42
+    language_only_completion: 53.72
+    source: "Paper Table 3, Language-only subtask row (same Agent and Action Model, 2D hints removed)"
+
+eval_conditions:
+  libero_mem: "strict SR counts overshoot as failure; relaxed SR ignores later overshoot; completion = fraction of ordered subgoals"
+
+tags: [agentic-vla, memory, long-horizon, steerable-policy, flow-matching, qwen3-vl, hierarchical, libero-mem, simulation]
