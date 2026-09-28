@@ -1,0 +1,110 @@
+# Paper: Aligning Multi-Trajectory Supervision with Policy Optimization for VLA Driving
+# arXiv: 2608.30122
+
+name: AMPT
+full_name: "AMPT: Aligned Multi-Trajectory Policy Training (Aligning Multi-Trajectory Supervision with Policy Optimization for VLA Driving)"
+organization: "Wuhan University / Dongfeng Research & Development Institute"
+date: "2026-08-31"
+paper_url: https://arxiv.org/abs/2608.30122
+code_url: null
+venue: "arXiv preprint (AAAI 2027 template)"
+open_source: false
+
+architecture:
+  backbone: "InternVL3-2B VLM (reused from ReCogDrive)"
+  llm: "InternVL3-2B"
+  action_head: "Conditional diffusion planner (reused from ReCogDrive) that models the continuous future ego trajectory pi_theta(tau|o) conditioned on VLM latent features; single-trajectory inference without a test-time scorer or reranker"
+  action_head_category: diffusion
+  parameters: "Not reported in paper (InternVL3-2B backbone + diffusion planner)"
+  key_innovation: "Identifies a supervision-optimization mismatch in multi-trajectory IL -> GRPO driving pipelines (high-scoring extra trajectories improve the IL checkpoint but degrade after GRPO). Three stages: (1) PC-MTS keeps scene-wise Pareto-front candidates only if they are close to rollouts of a frozen GT-only policy and locally feasible; (2) FF-PGRPO feasibility-first Pareto credit assignment with safe-reference recovery for fully infeasible groups; (3) APR adaptive Pareto-guided refinement that re-evaluates a multi-source teacher pool against the latest policy each round and distills verified local improvements with policy retention."
+
+training:
+  pipeline: "GT-only diffusion IL (200 epochs) -> PC-MTS fine-tuning of a copy of the frozen GT-only policy -> FF-PGRPO (16 rollouts per scene, 10 epochs) -> 3 rounds of APR advantage-weighted distillation"
+  hardware: "8 x NVIDIA A800 GPUs"
+  dataset: "NAVSIM logged demonstrations plus multi-source candidate trajectory pool"
+
+benchmarks:
+  navsim_v1:
+    nc: 98.5
+    dac: 98.0
+    ttc: 96.0
+    comfort: 100
+    ep: 86.7
+    pdms: 91.4
+    source: "Paper Table 1 (NAVSIM v1, single-trajectory planning, AMPT row)"
+    date_reported: "2026-08-31"
+    eval_condition: "NAVSIM v1, single-trajectory inference"
+  navsim_v2:
+    nc: 98.4
+    dac: 97.7
+    ddc: 99.0
+    tlc: 99.7
+    ttc: 97.7
+    ep: 89.4
+    lk: 91.7
+    hc: 97.1
+    ec: 87.7
+    epdms: 89.1
+    source: "Paper Table 3 (NAVSIM v2, single-trajectory planning, AMPT row)"
+    date_reported: "2026-08-31"
+    eval_condition: "NAVSIM v2 EPDMS, single-trajectory inference"
+  navsim_v1_baselines:
+    diffusiondrivev2_pdms: 91.2
+    recogdrive_pdms: 90.8
+    curious_vla_pdms: 90.3
+    drivevla_w0_pdms: 90.2
+    autovla_pdms: 89.1
+    source: "Paper Table 1 (NAVSIM v1 baseline rows)"
+    eval_condition: "NAVSIM v1, single-trajectory, numbers as listed by the paper"
+  navsim_v2_baselines:
+    drive_jepa_epdms: 87.8
+    drivevla_w0_epdms: 86.1
+    diffusiondrivev2_epdms: 85.5
+    curious_vla_epdms: 85.3
+    recogdrive_epdms: 83.6
+    source: "Paper Table 3 (NAVSIM v2 baseline rows)"
+    eval_condition: "NAVSIM v2 EPDMS, single-trajectory, numbers as listed by the paper"
+  navsim_v1_stage_ablation:
+    none_pdms: 86.5
+    pc_mts_only_pdms: 86.9
+    ff_pgrpo_only_pdms: 91.0
+    pc_mts_ff_pgrpo_pdms: 91.1
+    pc_mts_ff_pgrpo_apr_pdms: 91.4
+    none_dac: 94.7
+    ff_pgrpo_only_dac: 98.0
+    none_ep: 80.9
+    ff_pgrpo_only_ep: 85.93
+    source: "Paper Table 4 (ablation of PC-MTS, FF-PGRPO, APR on NAVSIM v1)"
+    eval_condition: "NAVSIM v1 PDMS, stage ablation"
+  navsim_v1_trajectory_set_ablation:
+    gt_il_pdms: 86.4
+    gt_grpo_pdms: 90.3
+    score_il_pdms: 87.2
+    score_grpo_pdms: 85.8
+    pareto_il_pdms: 87.5
+    pareto_grpo_pdms: 86.7
+    pc_mts_il_pdms: 86.9
+    pc_mts_grpo_pdms: 91.1
+    source: "Paper Table 2 (effect of trajectory-set construction; each IL checkpoint followed by the same scalar GRPO)"
+    eval_condition: "NAVSIM v1 PDMS, IL checkpoint vs after original scalar GRPO"
+  navsim_v1_apr_rounds:
+    round0_pdms: 91.10
+    round1_pdms: 91.21
+    round2_pdms: 91.37
+    round3_pdms: 91.45
+    source: "Paper Table 5 (performance across iterative APR refinement rounds)"
+    eval_condition: "NAVSIM v1 PDMS, round 0 = PC-MTS + FF-PGRPO before APR"
+  navsim_failure_recovery:
+    failed_scenes_total: 658
+    ampt_recovered: 440
+    grpo_baseline_recovered: 367
+    ampt_recovery_rate: 66.9
+    grpo_baseline_recovery_rate: 55.8
+    source: "Paper text, Failure recovery paragraph (658 initial failures of ReCogDrive IL policy)"
+    eval_condition: "NAVSIM scenes with PDMS 0 in all 5 sampling rounds under the ReCogDrive IL policy"
+
+eval_conditions:
+  navsim_v1: "open-loop NAVSIM v1, single-trajectory inference"
+  navsim_v2: "open-loop NAVSIM v2 EPDMS, single-trajectory inference"
+
+tags: [autonomous_driving, navsim, diffusion_planner, grpo, rl, pareto, multi_trajectory, internvl3]

@@ -1,0 +1,143 @@
+# Paper: Temporal Forcing: 4D Representation Alignment for Vision-Language-Action Models
+# arXiv: 2608.30643
+
+name: Temporal Forcing
+full_name: "Temporal Forcing: 4D Representation Alignment for Vision-Language-Action Models"
+organization: "Nanjing University / Institute of Automation, Chinese Academy of Sciences / University of Chinese Academy of Sciences"
+date: "2026-08-31"
+paper_url: https://arxiv.org/abs/2608.30643
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "StarVLA QwenOFT base model: Qwen3-VL-4B vision-language backbone"
+  llm: "Qwen3-VL-4B"
+  action_head: "MLP action head regressing an action chunk with L1 loss (OFT recipe); LIBERO 7-dim x 8 steps, RoboTwin 14-dim x 16 steps"
+  action_head_category: regression
+  history_module: "History Pathway: K=7 strictly past frames per camera encoded by frozen DINOv2 ViT-L/14 + Q-Former into 2 gist tokens each, two-layer causal temporal transformer, 16 learned output queries, injected via one zero-initialized tanh-gated cross-attention block at the first decoder layer"
+  key_innovation: >
+    Extends framewise 3D representation alignment (Spatial Forcing) to 4D. A lightweight history pathway summarizes a
+    bounded observation history into temporally aware latents, which are aligned with Causal Geometric Features from a
+    pretrained 4D foundation model (StreamVGGT, processing a long causal context) via state, change and readout cosine
+    terms (L_temp), while current-frame backbone features (VLA layer 24) are aligned to temporally contextualized Dense
+    Geometric Features (StreamVGGT layer 21, L_cur). StreamVGGT and all alignment heads are training-only; inference
+    keeps only the base VLA plus the history pathway (45 ms vs 58 ms per chunk on RTX 5090).
+
+training:
+  method: "L = L_act (L1) + 0.5 L_cur + 0.5 L_temp, with L_temp = (L_state + 4 L_change + L_read)/6; 4D targets precomputed offline at stride-4 anchors"
+  optimizer: "lr 1e-5 backbone, 1e-4 action head and new modules, 2.5e-5 remaining; grad clip 1.0"
+  budget: "LIBERO main: 50k steps, global batch 128, 8x A100 (single model trained jointly on four suites). RoboTwin: 10k steps, batch 64, 4x A800. Real robot: 8k steps, batch 48"
+  training_data: "LIBERO four suites (primary + wrist); RoboTwin 2.0 50 clean demos per task for 12 tasks (head camera only for history/alignment); 100 real-robot demonstrations on UR3"
+
+benchmarks:
+  libero:
+    libero_spatial: 99.6
+    libero_object: 99.8
+    libero_goal: 98.4
+    libero_long: 97.2
+    libero_avg: 98.8
+    libero_plus_camera: 47.2
+    libero_plus_robot: 63.7
+    libero_plus_language: 88.7
+    libero_plus_light: 96.3
+    libero_plus_background: 97.4
+    libero_plus_noise: 81.3
+    libero_plus_layout: 81.6
+    libero_plus_total: 77.8
+    source: "Paper Table 1 (Temporal Forcing row) and Supplementary Table 6(a) (LIBERO-Plus, Temporal Forcing row)"
+    date_reported: "2026-08-31"
+    eval_condition: "single model trained jointly on all four suites from the base recipe for 50k steps; 500 trials per suite. LIBERO-Plus is zero-shot (trained on standard LIBERO only); Total is pooled over 10,030 perturbed tasks, not the unweighted mean of dimensions"
+
+  robotwin_v2_12task_easy:
+    click_bell: 100
+    place_burger_fries: 92
+    place_cans_plasticbox: 88
+    stack_blocks_two: 86
+    handover_mic: 79
+    place_bread_skillet: 59
+    place_bread_basket: 58
+    blocks_ranking_rgb: 57
+    handover_block: 44
+    stack_blocks_three: 40
+    blocks_ranking_size: 29
+    place_dual_shoes: 22
+    average: 62.8
+    source: "Paper Supplementary Table 5 (Ours column) and Sec. 4.2"
+    date_reported: "2026-08-31"
+    eval_condition: "12-task RoboTwin 2.0 subset (not the standard 50-task protocol), easy/clean configuration, 50 clean demos per task, 100 trials per task; unweighted mean over the 12 tasks"
+
+  robotwin_v2_12task_baselines:
+    starvla_oft_base_average: 53.5
+    pi0_average: 36.8
+    dp3_average: 39.0
+    starvla_oft_handover_block: 0
+    starvla_oft_handover_mic: 39
+    source: "Paper Supplementary Table 5 (published baseline results)"
+    eval_condition: "same 12-task subset, easy/clean configuration"
+
+  libero_base_starvla_oft:
+    libero_spatial: 97.8
+    libero_object: 98.6
+    libero_goal: 96.2
+    libero_long: 93.8
+    libero_avg: 96.6
+    libero_plus_total: 75.0
+    source: "Paper Table 1 and Supplementary Table 6(a) (StarVLA-OFT row)"
+    eval_condition: "same base model (Qwen3-VL-OFT) without history pathway or alignment"
+
+  libero_component_ablation:
+    base_model_avg: 90.7
+    target_4d_only_avg: 90.5
+    history_only_avg: 88.2
+    without_l_temp_avg: 83.7
+    without_l_cur_avg: 90.8
+    target_3d_only_avg: 87.7
+    alignment_3d_avg: 85.0
+    temporal_forcing_avg: 93.6
+    temporal_forcing_long: 83.8
+    base_model_long: 76.2
+    source: "Paper Table 2 (component study, rows 1-8)"
+    eval_condition: "compute-constrained protocol: 10k steps from scratch, global batch 64, 4x A800; closing the history gate at inference costs 5.4 points (Goal and Long -7.8 each)"
+
+  real_world:
+    sequential_full_task: 43.3
+    sequential_s1_box_successes: 27
+    sequential_s1_2_drawer_successes: 20
+    sequential_s1_3_full_successes: 13
+    isolated_total_successes: 78
+    source: "Paper Table 3 (Temporal Forcing row) and Sec. 4.4"
+    date_reported: "2026-08-31"
+    eval_condition: "UR3 at 10 Hz, static RealSense D435 + wrist fisheye; hidden-placement task with two identical blocks; sequential protocol 30 trials (cumulative stage completion), isolated protocol 3 stages x 30 trials (out of 90)"
+
+  real_world_baselines:
+    starvla_oft_full_task: 20.0
+    starvla_oft_s1_3_successes: 6
+    starvla_oft_isolated_total_successes: 75
+    pi0_s1_3_successes: 4
+    openvla_s1_3_successes: 0
+    source: "Paper Table 3 (StarVLA-OFT, pi0, OpenVLA rows)"
+    eval_condition: "same 100 demonstrations and protocols; counts out of 30 sequential / 90 isolated trials"
+
+eval_conditions:
+  libero: "Standard 4-suite LIBERO, single jointly trained model, 50 trials per task; plus zero-shot LIBERO-Plus"
+  robotwin_v2_12task_easy: "12 selected multi-object / multi-stage bimanual tasks, easy (clean), 100 trials per task"
+  real_world: "UR3 single long-horizon hidden-placement task; base model 45 ms vs ours 58 ms per chunk on RTX 5090"
+
+tags:
+  - vla
+  - representation-alignment
+  - 4d-alignment
+  - history
+  - memory
+  - streamvggt
+  - qwen3-vl
+  - starvla
+  - oft
+  - regression
+  - long-horizon
+  - libero
+  - libero-plus
+  - robotwin
+  - real-world

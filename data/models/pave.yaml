@@ -1,0 +1,154 @@
+# Paper: PAVE: Predictive Alignment and Value-Guided Evolution for World-Action Policies
+# (v3 PDF title: "PAVE: Separates Prediction from Preference in World-Action Policies")
+# arXiv: 2608.30378
+
+name: PAVE
+full_name: "PAVE: Predictive Alignment and Value-Guided Evolution for World-Action Policies"
+organization: "East China Normal University / EBKernel Technologies (Lab for Brain-Inspired Embodied Intelligence) / Shanghai Artificial Intelligence Laboratory"
+date: "2026-08-31"
+paper_url: https://arxiv.org/abs/2608.30378
+code_url: null
+venue: arXiv
+open_source: false
+model_type: latent_world_action_model
+
+architecture:
+  backbone: "Frozen V-JEPA 2.1 ViT-L/16 visual encoder (384^2 inputs, 576x1024 tokens per view) with a frozen projector to width 896"
+  llm: "Qwen2.5-0.5B causal backbone (width 896), adapted only through LoRA (rank 32, alpha 64, dropout 0.1); 64 action placeholders"
+  action_head: "16-layer DiT flow-matching velocity decoder conditioned on action-position states, proprioception and 32 learnable future-query tokens; action chunk H=20, 4 Euler steps at inference, deployed with the positive quality condition"
+  action_head_category: flow_matching
+  parameters: "1.29B online parameters (Table 5); offline critic fusion alone 3,934,720 trainable params (frozen encoders excluded)"
+  key_innovation: >
+    Separates the supervision roles of mixed-quality rollout experience inside one shared world-action actor.
+    (1) Trajectory-relative predictive alignment: besides a local joint current-future V-JEPA target (offset 31),
+    horizon-conditioned predictors align visual-position states with joint embeddings at fixed fractions
+    {0.25, 0.5, 0.75, 1.0} of the remaining recorded trajectory, so supervision is broad early and fine near termination;
+    all valid transitions (from successes and failures) supervise prediction. (2) An offline dual-head critic
+    (frozen V-JEPA 2.1 + Gemma-2-2B, shared fusion MLP) jointly learns a 201-bin distributional return and an
+    action-conditioned future-latent prediction. (3) Episode-excluded (2-fold cross-fitted) N-step advantages label
+    the top 30% of chunks per task positive, the rest negative; both conditions train the actor (condition dropout 0.3)
+    and deployment selects positive. Critic, target encoder and predictive heads are removed at deployment.
+
+training:
+  method: "Actor loss L_FM + 0.5 L_local + 0.5 L_MH (Eq. 7); base actor 60,000 updates on demonstrations, then 3 evolution rounds of 30,000 actor updates each, with 8,000 updates per fold-specific critic per round; demonstrations sampled 3x as often as evolution data"
+  batch_size: "actor 128; pooled-critic 240"
+  training_data: "LIBERO 50 demos/task (four suites, two views, 7-D actions); RoboTwin 2.0 Clean-20 task manifest from JEPA-WAM, 50 demos/task (three views, 14-D); simulation evolution adds 96 rollouts per training group per seed per round (288 cumulative); S1 real robot 120 demos/task + 3 x 50 physical rollouts per task"
+  compute: "31.20 actor GPU-hours + 8.40 critic GPU-hours per simulation evolution round on NVIDIA H200 (excluding collection)"
+
+benchmarks:
+  libero:
+    libero_spatial: 98.6
+    libero_object: 99.5
+    libero_goal: 98.9
+    libero_long: 98.5
+    libero_avg: 98.9
+    libero_plus_camera: 86.0
+    libero_plus_robot: 71.0
+    libero_plus_language: 80.5
+    libero_plus_light: 97.4
+    libero_plus_background: 97.4
+    libero_plus_noise: 91.2
+    libero_plus_layout: 85.7
+    libero_plus_avg: 87.0
+    source: "Paper Table 1 (LIBERO, PAVE row) and Table 2 (LIBERO-Plus, PAVE row); mean over 5 training seeds"
+    date_reported: "2026-08-31"
+    eval_condition: "No large-scale robot-policy pretraining; trained on clean LIBERO demos plus 3 rounds of clean-training rollouts (288 cumulative per group per seed); LIBERO-Plus is zero-shot, no LIBERO-Plus experience used in training or selection. Std: LIBERO avg 0.2, LIBERO-Plus avg 0.7"
+
+  robotwin_v2_jepawam_20task:
+    clean: 86.8
+    random: 45.2
+    source: "Paper Table 3 (PAVE row; JEPA-WAM 20-task RoboTwin 2.0 manifest)"
+    date_reported: "2026-08-31"
+    eval_condition: "20-task subset (JEPA-WAM's two groups of ten), Clean-trained, evaluated under Clean and joint Random randomization; 5 seeds (std 1.3 / 0.7). Not the standard 50-task RoboTwin 2.0 protocol"
+
+  real_world:
+    s1_tabletop_organization: 85.7
+    s1_beaker_pouring: 92.0
+    source: "Paper Table 4 (PAVE rows, mean over 3 training seeds)"
+    date_reported: "2026-08-31"
+    eval_condition: "S1 robot platform, three RGB views, 14-D actions; 120 demos + 3 physical evolution rounds of 50 rollouts per task; 100 trials per seed and task (std 3.5 / 2.0)"
+
+  real_world_local_qc_baseline:
+    s1_tabletop_organization: 80.0
+    s1_beaker_pouring: 84.7
+    source: "Paper Table 4 (Local+QC rows)"
+    eval_condition: "matched control: same demos, cumulative rollouts, initialization and update budget, without trajectory-relative targets"
+
+  libero_local_qc_baseline:
+    libero_spatial: 97.0
+    libero_object: 99.4
+    libero_goal: 97.4
+    libero_long: 96.2
+    libero_avg: 97.5
+    libero_plus_avg: 82.0
+    robotwin_v2_20task_clean: 82.5
+    robotwin_v2_20task_random: 40.7
+    source: "Paper Tables 1-3 (Local prediction + quality conditioning row)"
+    eval_condition: "matched control sharing PAVE's rollout pool, initialization and actor-update budget, omitting trajectory-relative targets"
+
+  libero_jepa_wam_demo_only_baseline:
+    libero_spatial: 95.5
+    libero_object: 99.3
+    libero_goal: 97.1
+    libero_long: 94.5
+    libero_avg: 96.6
+    libero_plus_avg: 79.0
+    robotwin_v2_20task_clean: 79.6
+    robotwin_v2_20task_random: 36.7
+    source: "Paper Tables 1-3 (JEPA-WAM demo-only controlled row)"
+    eval_condition: "local reproduction of JEPA-WAM with PAVE's actor interface and clean demonstrations only"
+
+  evolution_rounds_ablation:
+    base_actor_libero_plus: 81.2
+    round1_libero_plus: 83.6
+    round2_libero_plus: 85.9
+    round3_libero_plus: 87.0
+    base_actor_robotwin_random: 39.0
+    round1_robotwin_random: 40.8
+    round2_robotwin_random: 42.2
+    round3_robotwin_random: 45.2
+    source: "Paper Table 10 (policy-evolution ablation, JEPA-assisted critic)"
+    eval_condition: "96 new episodes per training group per seed per round; RoboTwin = JEPA-WAM 20-task Random"
+
+  critic_ablation:
+    recap_value_function_libero_plus: 84.7
+    recap_value_function_robotwin_random: 43.1
+    pave_lambda_j_0_libero_plus: 85.5
+    pave_lambda_j_0_robotwin_random: 44.3
+    pave_full_libero_plus: 87.0
+    pave_full_robotwin_random: 45.2
+    source: "Paper Table 18 (critic ablation with fixed actor backbone)"
+    eval_condition: "same actor backbone, pool, and budgets; lambda_J = 0 removes only the critic's future-latent loss"
+
+  inference_latency:
+    online_params_b: 1.29
+    p50_latency_ms: 63.60
+    p95_latency_ms: 71.00
+    gpu_memory_gb: 10.60
+    source: "Paper Table 5 (PAVE row)"
+    eval_condition: "two LIBERO views, H=20, four flow steps, batch size 1, NVIDIA H200"
+
+eval_conditions:
+  libero: "Standard 4-suite LIBERO success rate plus zero-shot LIBERO-Plus (7 perturbation categories); mean of 5 independent training seeds"
+  robotwin_v2_jepawam_20task: "JEPA-WAM's 20-task Clean-trained manifest, Clean and joint Random evaluation"
+  real_world: "S1 robot, tabletop organization and beaker pouring, 3 seeds x 100 trials per task"
+
+tags:
+  - vla
+  - world-action-model
+  - jepa
+  - v-jepa2
+  - qwen2.5
+  - lora
+  - flow-matching
+  - dit-action-expert
+  - advantage-conditioning
+  - offline-critic
+  - policy-evolution
+  - post-training
+  - mixed-quality-data
+  - libero
+  - libero-plus
+  - robotwin
+  - bimanual
+  - real-world

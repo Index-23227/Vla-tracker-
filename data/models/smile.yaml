@@ -1,0 +1,153 @@
+# Paper: SMILE: Smooth Motion for Improved Long-Horizon VLA Execution
+# arXiv: 2608.29432
+
+name: SMILE
+full_name: "SMILE: Smooth Motion for Improved Long-Horizon VLA Execution"
+organization: "Stony Brook University / Salesforce AI Research"
+date: "2026-08-29"
+paper_url: https://arxiv.org/abs/2608.29432
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla_action_interface
+
+architecture:
+  backbone: "Architecture-preserving: retains each base policy's VLA backbone, conditioning pathway and main denoising block unchanged. Instantiated on SmolVLA (0.4B), Evo-1 (0.8B), VPP (1.8B) and DAWN (1.2B)"
+  action_head: "B-spline coefficient heads replacing the raw-action input projection and output heads of the base denoising action expert; the expert denoises K=8 cubic (P=3) B-spline coefficients for translation (Kx3), rotation (Kx3) and gripper (Kx1), decoded by a fixed basis into an F-step smooth native action sequence (finite differences for translation, SO(3) relative rotations, clipped absolute gripper)"
+  action_head_category: other
+  parameters: "Same scale as each base model: SMILE-SmolVLA 0.4B, SMILE-Evo1 0.8B, SMILE-DAWN 1.2B, SMILE-VPP 1.8B"
+  key_innovation: >
+    Replaces raw per-step action denoising with coefficient-space denoising: targets are least-squares projections of
+    cumulative translation/rotation and absolute gripper trajectories onto a fixed B-spline basis, and the base model's
+    own flow-matching (velocity) or diffusion (noise) objective is applied to the normalized coefficients with equal
+    per-modality weights. Because decoded actions are coupled across time, intra-chunk jitter and outliers are
+    suppressed, allowing a longer fixed execution horizon H (more actions per model call) with higher success and
+    lower amortized latency per action, without changing model scale.
+
+training:
+  method: "Fine-tune each base action expert with its native denoising objective on B-spline coefficient targets (lambda_tr = lambda_rot = lambda_grip = 1); only the action-side input projection and output heads are replaced"
+  training_data: "Same expert trajectories as each baseline (LIBERO for SmolVLA/Evo1, CALVIN ABC for VPP/DAWN); real world: 1,000 xArm7 episodes across 12 tasks, each matched pair initialized from the same official pretrained checkpoint with an identical fine-tuning budget"
+
+benchmarks:
+  libero:
+    libero_spatial: 97.2
+    libero_object: 99.6
+    libero_goal: 96.8
+    libero_long: 98.2
+    libero_avg: 98.0
+    source: "Paper Table I (SMILE-Evo1 (Ours) row)"
+    date_reported: "2026-08-29"
+    eval_condition: "SMILE applied to Evo-1 (0.8B), execution horizon H=16, 2,000 episodes (50 per task); amortized latency 8.0 ms/action"
+
+  calvin:
+    calvin_abc_d_1: 96.2
+    calvin_abc_d_2: 92.5
+    calvin_abc_d_3: 88.5
+    calvin_abc_d_4: 84.6
+    calvin_abc_d_5: 79.8
+    calvin_abc_d_avg_len: 4.42
+    source: "Paper Table II (SMILE-VPP (Ours) row); per-subtask rates reported as fractions (0.962 ...) and written here as percentages"
+    date_reported: "2026-08-29"
+    eval_condition: "SMILE applied to VPP (1.8B), standard CALVIN ABC->D, execution horizon H=15; amortized latency 13.0 ms/action. NOTE: different base model from the LIBERO block (SMILE-Evo1)"
+
+  libero_smile_smolvla:
+    libero_spatial: 84.8
+    libero_object: 95.0
+    libero_goal: 86.8
+    libero_long: 63.6
+    libero_all: 82.6
+    execution_horizon: 10
+    inference_ms_per_action: 24.2
+    source: "Paper Table I (SMILE-SmolVLA (Ours) row)"
+    eval_condition: "SMILE applied to SmolVLA (0.4B), H=10"
+
+  libero_raw_baselines:
+    smolvla_all: 74.0
+    smolvla_long: 42.8
+    smolvla_execution_horizon: 1
+    smolvla_inference_ms_per_action: 243.9
+    evo1_spatial: 88.4
+    evo1_object: 94.2
+    evo1_goal: 98.2
+    evo1_long: 89.8
+    evo1_all: 92.7
+    evo1_execution_horizon: 14
+    evo1_inference_ms_per_action: 8.5
+    source: "Paper Table I (SmolVLA and Evo1 raw-action rows)"
+    eval_condition: "official raw-action baselines at their default execution horizons"
+
+  calvin_smile_dawn:
+    calvin_abc_d_1: 97.2
+    calvin_abc_d_2: 90.4
+    calvin_abc_d_3: 82.7
+    calvin_abc_d_4: 76.9
+    calvin_abc_d_5: 71.1
+    calvin_abc_d_avg_len: 4.18
+    execution_horizon: 15
+    inference_ms_per_action: 22.7
+    source: "Paper Table II (SMILE-DAWN (Ours) row); fractions written as percentages"
+    eval_condition: "SMILE applied to DAWN (1.2B), CALVIN ABC->D"
+
+  calvin_raw_baselines:
+    vpp_avg_len: 4.33
+    vpp_execution_horizon: 10
+    vpp_inference_ms_per_action: 19.1
+    dawn_avg_len: 4.10
+    dawn_execution_horizon: 10
+    dawn_inference_ms_per_action: 32.0
+    dreamvla_avg_len: 4.44
+    dreamvla_inference_ms_per_action: 193.2
+    source: "Paper Table II (VPP, DAWN, DreamVLA rows)"
+    eval_condition: "CALVIN ABC->D baselines"
+
+  real_world_plain:
+    smile_evo1_sr: 78.3
+    evo1_sr: 26.7
+    smile_vpp_sr: 98.3
+    vpp_sr: 82.5
+    smile_evo1_drop_rate: 0.0
+    evo1_drop_rate: 10.0
+    smile_vpp_hit_rate: 0.0
+    vpp_hit_rate: 6.7
+    source: "Paper Table III (Plain setting, All objects columns)"
+    eval_condition: "xArm7 lift-and-place, 6 objects x 20 episodes, 4 separated distractors; Evo1 H=6 vs SMILE-Evo1 H=16, VPP H=10 vs SMILE-VPP H=15"
+
+  real_world_cluttered:
+    smile_evo1_sr: 56.7
+    evo1_sr: 8.3
+    smile_vpp_sr: 88.3
+    vpp_sr: 70.8
+    smile_evo1_hit_rate: 22.5
+    evo1_hit_rate: 45.0
+    smile_vpp_hit_rate: 11.7
+    vpp_hit_rate: 25.0
+    source: "Paper Table III (Cluttered setting, All objects columns)"
+    eval_condition: "xArm7 lift-and-place, 3 distractors tightly around target, 6 objects x 20 episodes"
+
+  libero_spline_ablation:
+    k6_p3: 80.05
+    k8_p3: 82.55
+    k10_p3: 80.75
+    k8_p5: 81.90
+    k8_p7: 81.75
+    source: "Paper Table IV (SMILE-SmolVLA spline ablations)"
+    eval_condition: "LIBERO success (%) vs control points K and spline degree P"
+
+eval_conditions:
+  libero: "Standard 4-suite LIBERO, 50 episodes per task. Headline row = SMILE-Evo1 (H=16)."
+  calvin: "Standard ABC->D. Headline row = SMILE-VPP (H=15)."
+  real_world: "xArm7, third-person + wrist RGB, 12 object-setting tasks, 20 episodes each"
+
+tags:
+  - vla
+  - action-representation
+  - b-spline
+  - action-chunking
+  - smooth-actions
+  - plug-in
+  - efficiency
+  - flow-matching
+  - diffusion
+  - libero
+  - calvin
+  - real-world

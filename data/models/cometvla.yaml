@@ -1,0 +1,210 @@
+# Paper: CometVLA: Co-Training on an Embodied Data Pyramid towards Physical Understanding
+# arXiv: 2608.30289
+
+name: CometVLA
+full_name: "CometVLA: Co-Training on an Embodied Data Pyramid towards Physical Understanding"
+organization: "JD Explore Academy / The Chinese University of Hong Kong, Shenzhen / Shenzhen Institute of Artificial Intelligence and Robotics for Society / South China University of Technology / Sun Yat-sen University"
+date: "2026-08-31"
+paper_url: https://arxiv.org/abs/2608.30289
+code_url: null
+venue: arXiv
+open_source: false
+model_type: vla
+
+architecture:
+  backbone: "Qwen3-VL-4B-Instruct vision-language backbone (2560-d), jointly trained autoregressively on language and discrete FAST action tokens"
+  llm: "Qwen3-VL-4B"
+  action_head: "DiT-B flow-matching action expert (Beta-sampled timesteps, velocity regression) conditioned on VLM embeddings, a single learnable 1024-d Global Action Prior (GAP) token and robot state tokens; stop-gradient barrier (knowledge insulation) keeps L_fm from updating the backbone"
+  action_head_category: flow_matching
+  action_space: "Bimanual format, action space padded to 32 dimensions"
+  key_innovation: >
+    (1) CometData / CometBench: ~1M embodied physical-commonsense VQA pairs (>1.8M images; 5 domains, 16 generator
+    categories) harvested from the same robot data used for policy training (teleoperation, simulation, egocentric),
+    via a physics middleware that selects keyframes by Hamiltonian jump, gripper step and power anomaly scores; a
+    2,000-question held-out CometBench judged by an LLM. (2) Global Action Prior (GAP) token: a globally shared
+    learnable token inserted in the backbone sequence that is the sole communication interface to the diffusion
+    action expert, crossing the stop-gradient boundary in attention only. (3) Single-stage co-pre-training over the
+    embodied data pyramid (VQA, egocentric video, simulation, teleoperation).
+
+training:
+  method: "Two stages. Co-pre-training: L_total = L_AR + L_fast + L_fm with knowledge insulation, VLA loss weight 1.0 / VLM 0.1, 100k steps, lr 3e-5 cosine, 5k warmup, AdamW. Post-training: full fine-tuning (no frozen modules) on RoboTwin or task-specific real-robot data"
+  batch_size: "pre-training per-device 4 (VLM data) + 8 (VLA data); post-training per-device 16"
+  compute: "4 nodes x 8 H200 GPUs"
+  training_data: "AgiBot-World-Beta, InternData-A1, EgoLive, EgoDex, general VQA (Cambrian) and CometData; post-training on RoboTwin 2.0 or AgiBot G1 teleoperation data"
+
+benchmarks:
+  robotwin_v2:
+    robotwin_v2_easy: 89.24
+    robotwin_v2_hard: 88.38
+    # No robotwin_v2_avg: the paper reports Easy and Hard as separate rows with no
+    # combined figure; the leaderboard derives the mean of the two settings.
+    source: "Paper Table 2 (CometVLA column) and Appendix Table A3 (Average row, full 50 tasks)"
+    date_reported: "2026-08-31"
+    eval_condition: "full 50-task RoboTwin 2.0; Easy = clean split, Hard = randomized split; model post-trained on RoboTwin from the co-pre-trained checkpoint"
+
+  robotwin_v2_baselines:
+    pi0_easy: 46.42
+    pi0_hard: 16.34
+    pi05_easy: 62.86
+    pi05_hard: 60.30
+    rdt_easy: 34.50
+    rdt_hard: 13.72
+    x_vla_easy: 70.00
+    x_vla_hard: 39.00
+    motus_easy: 88.66
+    motus_hard: 87.02
+    jepa_vla_easy: 73.50
+    jepa_vla_hard: 17.70
+    halo_easy: 80.50
+    halo_hard: 26.40
+    lingbot_vla_easy: 86.50
+    lingbot_vla_hard: 85.34
+    source: "Paper Table 2 (baseline methods; values reported with single-decimal precision are zero-padded in the paper)"
+    eval_condition: "RoboTwin 2.0 Easy / Hard as listed in the paper's comparison table"
+
+  robotwin_v2_ablation:
+    without_physical_vqa_easy: 83.54
+    without_physical_vqa_hard: 83.46
+    without_gap_easy: 86.38
+    without_gap_hard: 85.12
+    full_easy: 89.24
+    full_hard: 88.38
+    source: "Paper Table 2 (w/o phys. VQA, w/o GAP, CometVLA columns)"
+    eval_condition: "same configuration; w/o phys. VQA replaces CometData with the same amount of generic VQA during pre-training; w/o GAP removes the Global Action Prior token"
+
+  robotwin_v2_per_task_easy:
+    adjust_bottle: 100
+    beat_block_hammer: 100
+    blocks_ranking_rgb: 100
+    blocks_ranking_size: 96
+    click_alarmclock: 71
+    click_bell: 94
+    dump_bin_bigbin: 98
+    grab_roller: 99
+    handover_block: 83
+    handover_mic: 99
+    hanging_mug: 53
+    lift_pot: 100
+    move_can_pot: 55
+    move_pillbottle_pad: 90
+    move_playingcard_away: 97
+    move_stapler_pad: 91
+    open_laptop: 100
+    open_microwave: 92
+    pick_diverse_bottles: 91
+    pick_dual_bottles: 85
+    place_a2b_left: 85
+    place_a2b_right: 79
+    place_bread_basket: 97
+    place_bread_skillet: 100
+    place_burger_fries: 96
+    place_can_basket: 84
+    place_cans_plasticbox: 99
+    place_container_plate: 93
+    place_dual_shoes: 94
+    place_empty_cup: 99
+    place_fan: 82
+    place_mouse_pad: 78
+    place_object_basket: 85
+    place_object_scale: 96
+    place_object_stand: 94
+    place_phone_stand: 86
+    place_shoe: 97
+    press_stapler: 95
+    put_bottles_dustbin: 99
+    put_object_cabinet: 71
+    rotate_qrcode: 83
+    scan_object: 80
+    shake_bottle: 92
+    shake_bottle_horizontally: 98
+    stack_blocks_three: 96
+    stack_blocks_two: 97
+    stack_bowls_three: 72
+    stack_bowls_two: 83
+    stamp_seal: 87
+    turn_switch: 71
+    source: "Paper Appendix Table A3 (Easy (Clean) column)"
+    eval_condition: "per-task success rate (%), full 50 tasks, clean split"
+
+  robotwin_v2_per_task_hard:
+    adjust_bottle: 95
+    beat_block_hammer: 96
+    blocks_ranking_rgb: 97
+    blocks_ranking_size: 79
+    click_alarmclock: 71
+    click_bell: 100
+    dump_bin_bigbin: 80
+    grab_roller: 100
+    handover_block: 52
+    handover_mic: 97
+    hanging_mug: 54
+    lift_pot: 100
+    move_can_pot: 97
+    move_pillbottle_pad: 95
+    move_playingcard_away: 92
+    move_stapler_pad: 93
+    open_laptop: 98
+    open_microwave: 81
+    pick_diverse_bottles: 65
+    pick_dual_bottles: 72
+    place_a2b_left: 97
+    place_a2b_right: 86
+    place_bread_basket: 98
+    place_bread_skillet: 89
+    place_burger_fries: 96
+    place_can_basket: 51
+    place_cans_plasticbox: 98
+    place_container_plate: 100
+    place_dual_shoes: 98
+    place_empty_cup: 100
+    place_fan: 95
+    place_mouse_pad: 82
+    place_object_basket: 89
+    place_object_scale: 83
+    place_object_stand: 74
+    place_phone_stand: 98
+    place_shoe: 84
+    press_stapler: 98
+    put_bottles_dustbin: 91
+    put_object_cabinet: 74
+    rotate_qrcode: 89
+    scan_object: 80
+    shake_bottle: 100
+    shake_bottle_horizontally: 100
+    stack_blocks_three: 97
+    stack_blocks_two: 94
+    stack_bowls_three: 86
+    stack_bowls_two: 93
+    stamp_seal: 95
+    turn_switch: 90
+    source: "Paper Appendix Table A3 (Hard (Randomized) column)"
+    eval_condition: "per-task success rate (%), full 50 tasks, randomized split"
+
+  real_world:
+    bb_cream: 75.00
+    liquid_foundation: 31.25
+    lotion: 37.50
+    makeup_sponge: 93.75
+    serum: 43.75
+    source: "Paper Table 1 (success rate of real-robot experiment)"
+    date_reported: "2026-08-31"
+    eval_condition: "AgiBot G1 dual-arm robot, dressing-table organization (pick object and place into a storage-box compartment), fine-tuned on task-specific teleoperation data, 16 trials per task"
+
+eval_conditions:
+  robotwin_v2: "Full 50-task RoboTwin 2.0, clean (Easy) and randomized (Hard) splits"
+  real_world: "AgiBot G1, 5 cosmetic-organization tasks, 16 trials each; inference on remote H200 server over WebSocket"
+
+tags:
+  - vla
+  - co-training
+  - embodied-vqa
+  - physical-commonsense
+  - knowledge-insulation
+  - qwen3-vl
+  - fast-tokenizer
+  - flow-matching
+  - dit-action-expert
+  - egocentric-video
+  - bimanual
+  - robotwin
+  - real-world
