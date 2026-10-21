@@ -13,30 +13,30 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 91ede0b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-[![Models](https://img.shields.io/badge/Models-534-purple?style=flat-square)](data/models/)
+[![Models](https://img.shields.io/badge/Models-539-purple?style=flat-square)](data/models/)
 >>>>>>> 56487bd (feat: auto-detect new VLA papers from arXiv scan)
 [![Benchmarks](https://img.shields.io/badge/Benchmarks-8-green?style=flat-square)](data/benchmarks/)
 [![AI Reviews](https://img.shields.io/badge/Paper_Reviews-534-orange?style=flat-square)](data/ai_reviews/)
@@ -52,30 +52,30 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 91ede0b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-**534 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
+**539 VLA models** · **8 benchmarks** · **534 AI paper reviews** · **Auto-updated from arXiv**
 >>>>>>> 56487bd (feat: auto-detect new VLA papers from arXiv scan)
 
 [Live Dashboard](https://hyeongjinkim.github.io/Vla-tracker-/) · [API (JSON)](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) · [llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) · [Paper Reviews](#paper-reviews)
@@ -163,7 +163,7 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 | Format | URL | Description |
 |--------|-----|-------------|
 | **llms.txt** | [/llms.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms.txt) | Concise overview for AI agents ([standard](https://llmstxt.org/)) |
-| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (11900+ lines) |
+| **llms-full.txt** | [/llms-full.txt](https://hyeongjinkim.github.io/Vla-tracker-/llms-full.txt) | Complete model database (12300+ lines) |
 | **JSON API** | [/leaderboard.json](https://hyeongjinkim.github.io/Vla-tracker-/leaderboard.json) | Structured JSON with all scores + AI reviews |
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -173,30 +173,30 @@ Browse reviews: [Dashboard Reviews Tab](https://hyeongjinkim.github.io/Vla-track
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 91ede0b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-| **YAML** | [data/models/](data/models/) | Individual model files (534 files) |
+| **YAML** | [data/models/](data/models/) | Individual model files (539 files) |
 >>>>>>> 56487bd (feat: auto-detect new VLA papers from arXiv scan)
 
 ### Quick Start (Python)
@@ -286,30 +286,30 @@ Or visit the **[live dashboard](https://hyeongjinkim.github.io/Vla-tracker-/)**.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 71a939b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 2e9c54f (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 1740dcb (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 5a3f57e (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 519db4c (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 0cda731 (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 91ede0b (feat: auto-detect new VLA papers from arXiv scan)
 =======
-│   ├── models/              # 534 model YAML files (source of truth)
+│   ├── models/              # 539 model YAML files (source of truth)
 >>>>>>> 56487bd (feat: auto-detect new VLA papers from arXiv scan)
 │   ├── benchmarks/          # 8 benchmark definitions
 │   ├── ai_reviews/          # 534 AI-generated paper reviews (markdown)
